@@ -12,7 +12,7 @@
 #include <ShapeChain.hh>
 #include <Ellipse.hh>
 #include <findtransform.hh>
-
+#include <iostream>
 #ifdef TEXT_DEBUG
 #define   RING_TAG_DEBUG
 #endif
@@ -22,7 +22,7 @@
 #undef   DRAW_FIELD_DEBUG
 #endif
 
-#define Ellipse LinearEllipse
+//#define Ellipse LinearEllipse
 
 /**
  * The number of readings to make from a tag.  We then look for pairs
@@ -263,7 +263,6 @@ public:
       float normal[3];
       GetNormalVector(correcttrans,normal);
 
-
 #ifdef RING_TAG_DEBUG
       PROGRESS("Found a concentric inner circle with matching contour");
 #endif
@@ -326,6 +325,8 @@ public:
 #ifdef RING_TAG_DEBUG
 	    PROGRESS("Ellipse position is "<<projected1[0]<<","<<projected1[1]);
 #endif
+	    std::cout << "Normal vector is "<<normal[0]<<" "<<normal[1]<<" "<< normal[2] << std::endl;
+
 	    LocatedObject* lobj = node->GetLocatedObject();
 	    for(int i=0;i<16;i++) {
 	      lobj->transform[i] = correcttrans[i];

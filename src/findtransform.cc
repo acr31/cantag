@@ -134,7 +134,6 @@ void ApplyTransform(const float transform[16], float* points, int numpoints) {
 
 
 void GetNormalVector(const float transform[16], float normal[3]) {
-
   // project (0,0,0) and (0,0,1).  Take the difference between them and normalize it
 
   float proj0x = transform[3];
@@ -147,15 +146,43 @@ void GetNormalVector(const float transform[16], float normal[3]) {
   float proj1z = transform[10] + transform[11];
   float proj1h = transform[14] + transform[15];
 
+  float proj2x = transform[0] + transform[3];
+  float proj2y = transform[4] + transform[7];
+  float proj2z = transform[8] + transform[11];
+  float proj2h = transform[12] + transform[15];
+
+  float proj3x = transform[1] + transform[3];
+  float proj3y = transform[5] + transform[7];
+  float proj3z = transform[9] + transform[11];
+  float proj3h = transform[13] + transform[15];
+
+  float v1x = proj2x/proj2h - proj0x/proj0h;
+  float v1y = proj2y/proj2h - proj0y/proj0h;
+  float v1z = proj2z/proj2h - proj0z/proj0h;
+
+  float v2x = proj3x/proj2h - proj0x/proj0h;
+  float v2y = proj3y/proj2h - proj0y/proj0h;
+  float v2z = proj3z/proj2h - proj0z/proj0h;
+
+  /*
+
   normal[0] = proj1x/proj1h - proj0x/proj0h;
   normal[1] = proj1y/proj1h - proj0y/proj0h;
   normal[2] = proj1z/proj1h - proj0z/proj0h;
+
+  */
   
-  float modulus = sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
+  // normal vector is the cross product
+  normal[0] = v1y * v2z - v1z * v2y;
+  normal[1] = v1z * v2x - v1x * v2z;
+  normal[2] = v1x * v2y - v1y * v2x;
+
+
+  //  float modulus = sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
   
-  normal[0]/=modulus;
-  normal[1]/=modulus;
-  normal[2]/=modulus;
+  //  normal[0]/=modulus;
+  //  normal[1]/=modulus;
+  //  normal[2]/=modulus;
 
 #ifdef APPLY_TRANSFORM_DEBUG
   PROGRESS("Found normal vector ("<<normal[0]<<","<<normal[1]<<","<<normal[2]<<")");

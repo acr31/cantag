@@ -95,6 +95,14 @@ float Template::Correlate(Image* image, const QuadTangle2D* q) const {
   }
   cvReleaseImage(&d);
 
+  return Correlate(readvalues);
+}
+
+float Template::Correlate(const Template& t) const {
+  return Correlate(t.m_values);
+}
+
+float Template::Correlate(const float* readvalues) const {
   float sigma;
   float mean;
   calculate_mean_sigma(readvalues,&sigma,&mean);
