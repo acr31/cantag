@@ -102,6 +102,20 @@ void ApplyTransform3D(const float transform[16], float* points, int numpoints) {
   }
 }
 
+void ApplyCameraTransform(const float transform[16], float* point) {
+  float x = point[0];
+  float y = point[1];
+  float z = point[2];
+  point[0] = transform[0]*x + transform[1]*y + transform[2]*z + transform[3];
+  point[1] = transform[4]*x + transform[5]*y + transform[6]*z + transform[7];
+  point[2] = transform[8]*x + transform[9]*y + transform[10]*z + transform[11];
+  float projH = transform[12]*x + transform[13]*y + transform[14]*z + transform[15];
+  
+  point[0] /= projH;
+  point[1] /= projH;
+  point[2] /= projH;
+}
+
 void GetLocation(const float transform[16], float location[3], float tag_size) {
   location[0] = tag_size*transform[3]/transform[15];
   location[1] = tag_size*transform[7]/transform[15];
