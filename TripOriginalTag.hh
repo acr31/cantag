@@ -8,8 +8,8 @@
 #include "Tag.hh"
 #include "concentricellipse.hh"
 
-//#define IMAGEDEBUG
-//#define TEXTDEBUG
+#define IMAGEDEBUG
+#define TEXTDEBUG
 
 #ifdef TEXTDEBUG
 #include <iostream>
@@ -295,7 +295,6 @@ public:
     bool search = 0;
     bool secondtry =0;
     int sync_try;
-#define IMAGEDEBUG
 #ifdef IMAGEDEBUG
     IplImage* debug3Clone = cvCloneImage(image);
 #endif
@@ -447,7 +446,7 @@ private:
   static inline double Radius(double ring) {
     /* The width of each data ring (w) is:
      
-    (TAG_SIZE_SCALE - DATA_RING_OFFSET)/RING_COUNT
+    (TAG_SIZE_SCALE - DATA_RING_OFFSET - 1)/RING_COUNT
   
     So the position to poll is the distance to the edge of the bullseye + the white ring around the bullseye + ring*width 
     */
@@ -491,7 +490,7 @@ private:
     CvPoint p;
     p.x=(int)ix;
     p.y=(int)iy;
-    cvLine(debug,p,p,CV_RGB(255,255,0),5,8);
+    cvLine(debug,p,p,CV_RGB(255,255,0),1,8);
 #endif
     return ((uchar*)(image->imageData + image->widthStep*(int)iy))[(int)ix] < (uchar)(128);	  
   }

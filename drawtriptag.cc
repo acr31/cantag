@@ -16,9 +16,14 @@ main(int argc, char* argv[]) {
   int width = atoi(argv[1]);
   long long value = atoll(argv[2]);
 
+  double imagewidth = width;
+  if (width < 300) {
+    imagewidth = 300;
+  }
+
   CvSize size;
-  size.width=width;
-  size.height=width;
+  size.width=imagewidth;
+  size.height=imagewidth;
 
   IplImage *image = cvCreateImage(size, IPL_DEPTH_8U,1);
   for(int i=0;i<image->height;i++) {
@@ -28,8 +33,8 @@ main(int argc, char* argv[]) {
   }
 
   CvPoint2D32f p;
-  p.x=width/2;
-  p.y=width/2;
+  p.x=imagewidth/2;
+  p.y=imagewidth/2;
 
   double r = width / TripOriginalTag<>::TagRadius();
 
