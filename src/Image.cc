@@ -15,7 +15,6 @@ extern "C" {
 #if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(HAVELIB_MAGICK)
 #include <Magick++.h>
 #endif
-#include <iostream>
 
 namespace Total {
   Image::Image(int width, int height) : m_width(width),m_height(height), m_contents(new unsigned char[width*height]), m_free_contents(true), m_width_step(m_width), m_binary(false) {
