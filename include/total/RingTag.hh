@@ -74,7 +74,7 @@ namespace Total {
     virtual bool CheckDecode(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, const Camera& camera, const Image& image) const;
 
     virtual int PayloadRotation(float angle) const {
-      int sectors = (int)(angle/2/PI * SECTOR_COUNT);
+      int sectors = (int)round(angle/PI/2 * SECTOR_COUNT);
       return sectors * RING_COUNT;
     }
  
@@ -601,7 +601,7 @@ namespace Total {
 #ifdef RING_TAG_DEBUG
 #ifdef TEXT_DEBUG
       float temp[2] = {0,0};
-      ApplyTransform(correcttrans,temp[0],temp[1],temp,temp+1);
+      ApplyTransform(finaltrans,temp[0],temp[1],temp,temp+1);
       camera.NPCFToImage(temp,1);
       PROGRESS("Found code " << *read_code << " at " << temp[0] << "," << temp[1]);
 #endif
