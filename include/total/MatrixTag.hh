@@ -216,13 +216,13 @@ template<int SIZE> LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* MatrixTag<SIZE>::Deco
   Image debug0(image);
   debug0.ConvertScale(-1,255);
   debug0.ConvertScale(0.5,128);
-  for(int i=0;i<SIZE+2;i++) {
-    float pts[] = { 0,
+  for(int i=-SIZE-2;i<=SIZE+2;i+=2) {
+    float pts[] = { -1,
 		    (float)i/(float)(SIZE+2),
 		    1,
 		    (float)i/(float)(SIZE+2),
 		    (float)i/(float)(SIZE+2),
-		    0,
+		    -1,
 		    (float)i/(float)(SIZE+2),
 		    1 };
     ApplyTransform(transform,pts,4);
