@@ -5,12 +5,14 @@
 #ifndef ELLIPSE_GUARD
 #define ELLIPSE_GUARD
 
-#include <tripover/Config.hh>
-#include <tripover/Image.hh>
-#include <tripover/Socket.hh>
-#include <tripover/Camera.hh>
+#include <total/Config.hh>
+#include <total/Image.hh>
+#include <total/Socket.hh>
+#include <total/Camera.hh>
 
 #include <vector>
+
+namespace Total {
 /**
  * A class to represent ellipses in the image and fit one to a set of points.
  *
@@ -201,6 +203,9 @@ public:
 protected:
   virtual bool FitEllipse(const std::vector<float>& points);   
 };
+}
 #else
-class Ellipse;
+namespace Total {
+  class Ellipse;
+}
 #endif//ELLIPSE_GUARD

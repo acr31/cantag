@@ -5,7 +5,7 @@
 #ifndef GL_IMAGE_SOURCE_GUARD
 #define GL_IMAGE_SOURCE_GUARD
 
-#include <tripover/Config.hh>
+#include <total/Config.hh>
 
 #ifndef HAVE_GL_GL_H
 #error "This version has been configured without OpenGL support"
@@ -31,11 +31,11 @@
 #error "libGLU.so is required for this component"
 #endif
 
-#include <tripover/ImageSource.hh>
-#include <tripover/Image.hh>
-#include <tripover/Tag.hh>
-#include <tripover/CyclicBitSet.hh>
-#include <tripover/Camera.hh>
+#include <total/ImageSource.hh>
+#include <total/Image.hh>
+#include <total/Tag.hh>
+#include <total/CyclicBitSet.hh>
+#include <total/Camera.hh>
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -45,158 +45,160 @@
 
 #define GLIMAGESOURCE_DEBUG
 
-/**
- * An image source that synthesizes the view based on an OpenGL
- * rendering of the tag.
- */
-template<class TAG>
-class GLImageSource : public ImageSource {
-private:
-  int m_width;
-  int m_height;
-  unsigned char* m_buffer;
-  float m_fov;
-  Image m_glimage;
-  OSMesaContext m_ctx;
-  GLubyte* m_tmap;
-  GLuint m_textureid;
-
-
-  typedef typename TAG::TagShapeType TagShapeType;  // we have to do this to convince the compiler to parse our code before it instantiates the templates
-
-public:
-  /**
-   * Create the image source.  It will create images of the given
-   * size, with a single tag carrying the given code.
-   */
-  GLImageSource(int width, int height, float fov, CyclicBitSet<TAG::TagPayloadSize>& code, const TAG& t);
-  virtual ~GLImageSource();
-
+namespace TOTAL {
 
   /**
-   * Set the parameters for this camera to correspond to the opengl configuration
+   * An image source that synthesizes the view based on an OpenGL
+   * rendering of the tag.
    */
-  void SetCameraParameters(Camera& cam);
+  template<class TAG>
+  class GLImageSource : public ImageSource {
+  private:
+    int m_width;
+    int m_height;
+    unsigned char* m_buffer;
+    float m_fov;
+    Image m_glimage;
+    OSMesaContext m_ctx;
+    GLubyte* m_tmap;
+    GLuint m_textureid;
+
+
+    typedef typename TAG::TagShapeType TagShapeType;  // we have to do this to convince the compiler to parse our code before it instantiates the templates
+
+  public:
+    /**
+     * Create the image source.  It will create images of the given
+     * size, with a single tag carrying the given code.
+     */
+    GLImageSource(int width, int height, float fov, CyclicBitSet<TAG::TagPayloadSize>& code, const TAG& t);
+    virtual ~GLImageSource();
+
+
+    /**
+     * Set the parameters for this camera to correspond to the opengl configuration
+     */
+    void SetCameraParameters(Camera& cam);
   
-  Image* Next();
+    Image* Next();
 
-  /**
-   * Update the buffer to contain a tag with the given rotations about
-   * the x,y, and z axes and the given central point.
-   *
-   * \todo find some way of incorporating the lighting and occlusion
-   * options.
-   */
-  Image* Next(float n_x, float n_y, float n_z, float centre_x, float centre_y, float centre_z);
+    /**
+     * Update the buffer to contain a tag with the given rotations about
+     * the x,y, and z axes and the given central point.
+     *
+     * \todo find some way of incorporating the lighting and occlusion
+     * options.
+     */
+    Image* Next(float n_x, float n_y, float n_z, float centre_x, float centre_y, float centre_z);
   
-};
-
-template<class TAG> void GLImageSource<TAG>::SetCameraParameters(Camera& cam) {
-  // focal length
-
-  // if we point the camera at a tag of size 1 and we want it to
-  // appear as size 1 we must place it at a particular distance
-  // determined by the field of view
-
-  // tan(fov/2) = (size/2)/distance
-
-  // d = 0.5/tan(fov/2)
-
-  // however, we'd actually like the system to report the distance as 1
-  // so set the focal length to d
-
-  float invd = tan(m_fov/2/180*M_PI)*2;
-
-  cam.SetIntrinsic(m_height/invd,m_height/invd,m_width/2,m_height/2,0);
-
-  
-  // we want the tag to have size 1 at distance 1 in the camera co-ordinates.  However its actual size will be
-  // 2*tan(fov/2) - therefore we need to translate the camera so its z-origin is at 2*tan(fov/2) so that when we do a perspective 
-
-  float extrinsic[] = {
-    1,0,0,0,
-    0,1,0,0,
-    0,0,1,0,
-    0,0,0,1
   };
 
-  cam.SetExtrinsic(extrinsic);
-}
+  template<class TAG> void GLImageSource<TAG>::SetCameraParameters(Camera& cam) {
+    // focal length
 
+    // if we point the camera at a tag of size 1 and we want it to
+    // appear as size 1 we must place it at a particular distance
+    // determined by the field of view
 
-template<class TAG> GLImageSource<TAG>::GLImageSource(int width, int height, float fov, CyclicBitSet<TAG::TagPayloadSize>& code, const TAG& t) : 
-  m_width(width),
-  m_height(height),
-  m_fov(fov),
-  m_glimage(width,height)
-{
-  m_ctx = OSMesaCreateContext( GL_RGB, NULL );
-  m_buffer = (unsigned char*)malloc(m_width*m_height*3);     
-  OSMesaMakeCurrent( m_ctx, m_buffer, GL_UNSIGNED_BYTE, m_width,m_height);
-  Image source(512,512);
-  t.Draw2D(source,code);
+    // tan(fov/2) = (size/2)/distance
 
-  m_tmap = new GLubyte[source.GetHeight()*source.GetWidth()*4];
+    // d = 0.5/tan(fov/2)
 
-  int pos=0;
-  for(int i=0;i<source.GetHeight();i++) {
-    for(int j=0;j<source.GetWidth();j++) {
-      m_tmap[pos++] = (GLubyte)source.Sample(i,j);
-      m_tmap[pos++] = (GLubyte)source.Sample(i,j);
-      m_tmap[pos++] = (GLubyte)source.Sample(i,j);
-      m_tmap[pos++] = (GLubyte)255;	
-    }
+    // however, we'd actually like the system to report the distance as 1
+    // so set the focal length to d
+
+    float invd = tan(m_fov/2/180*M_PI)*2;
+
+    cam.SetIntrinsic(m_height/invd,m_height/invd,m_width/2,m_height/2,0);
+
+  
+    // we want the tag to have size 1 at distance 1 in the camera co-ordinates.  However its actual size will be
+    // 2*tan(fov/2) - therefore we need to translate the camera so its z-origin is at 2*tan(fov/2) so that when we do a perspective 
+
+    float extrinsic[] = {
+      1,0,0,0,
+      0,1,0,0,
+      0,0,1,0,
+      0,0,0,1
+    };
+
+    cam.SetExtrinsic(extrinsic);
   }
+
+
+  template<class TAG> GLImageSource<TAG>::GLImageSource(int width, int height, float fov, CyclicBitSet<TAG::TagPayloadSize>& code, const TAG& t) : 
+    m_width(width),
+    m_height(height),
+    m_fov(fov),
+    m_glimage(width,height)
+  {
+    m_ctx = OSMesaCreateContext( GL_RGB, NULL );
+    m_buffer = (unsigned char*)malloc(m_width*m_height*3);     
+    OSMesaMakeCurrent( m_ctx, m_buffer, GL_UNSIGNED_BYTE, m_width,m_height);
+    Image source(512,512);
+    t.Draw2D(source,code);
+
+    m_tmap = new GLubyte[source.GetHeight()*source.GetWidth()*4];
+
+    int pos=0;
+    for(int i=0;i<source.GetHeight();i++) {
+      for(int j=0;j<source.GetWidth();j++) {
+	m_tmap[pos++] = (GLubyte)source.Sample(i,j);
+	m_tmap[pos++] = (GLubyte)source.Sample(i,j);
+	m_tmap[pos++] = (GLubyte)source.Sample(i,j);
+	m_tmap[pos++] = (GLubyte)255;	
+      }
+    }
      
-  // indicate that our data does not have each row of texels aligned
-  // on a word boundary
-  glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+    // indicate that our data does not have each row of texels aligned
+    // on a word boundary
+    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
      
-  // create an unused name for this texture and store it in textureid
-  glGenTextures(1,&m_textureid);
+    // create an unused name for this texture and store it in textureid
+    glGenTextures(1,&m_textureid);
      
-  // create a new texture object (this textureid is guarenteed to be
-  // new) and assign it this textureid.  Set the dimensionality to 2D.
-  glBindTexture(GL_TEXTURE_2D,m_textureid);
+    // create a new texture object (this textureid is guarenteed to be
+    // new) and assign it this textureid.  Set the dimensionality to 2D.
+    glBindTexture(GL_TEXTURE_2D,m_textureid);
      
-  // set our texture to repeat in both S and T directions
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set our texture to repeat in both S and T directions
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
      
-  // which texel to use when magnifying or minifying this texture
-  // GL_LINEAR which use a weighted sum of 2x2 array of nearest texels
-  // - slower but smoother 
-  // GL_NEAREST just uses the texel which is closest to the centre
-  // co-ordinates of the pixel - quicker
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // which texel to use when magnifying or minifying this texture
+    // GL_LINEAR which use a weighted sum of 2x2 array of nearest texels
+    // - slower but smoother 
+    // GL_NEAREST just uses the texel which is closest to the centre
+    // co-ordinates of the pixel - quicker
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
      
-  // create our 2D texture, with only 1 resolution (no minimapping),
-  // we'd like OpenGL to store it as an RGBA texture (though its free
-  // to do what it likes), of width SIZE and height SIZE, the size of
-  // the border is 0, the texture information is RGBA format, with
-  // unsigned bytes, and held in tmap
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, source.GetHeight(),source.GetWidth(),
-	       0, GL_RGBA, GL_UNSIGNED_BYTE, m_tmap);    
+    // create our 2D texture, with only 1 resolution (no minimapping),
+    // we'd like OpenGL to store it as an RGBA texture (though its free
+    // to do what it likes), of width SIZE and height SIZE, the size of
+    // the border is 0, the texture information is RGBA format, with
+    // unsigned bytes, and held in tmap
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, source.GetHeight(),source.GetWidth(),
+		 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tmap);    
      
     
-};
+  };
 
-template<class TAG> GLImageSource<TAG>::~GLImageSource() {
-  GLuint ids[] = {m_textureid};
-  glDeleteTextures(1,ids);
-  delete[] m_tmap;
-  OSMesaDestroyContext(m_ctx);
-  free(m_buffer);
-};
+  template<class TAG> GLImageSource<TAG>::~GLImageSource() {
+    GLuint ids[] = {m_textureid};
+    glDeleteTextures(1,ids);
+    delete[] m_tmap;
+    OSMesaDestroyContext(m_ctx);
+    free(m_buffer);
+  };
 
-template<class TAG> Image* GLImageSource<TAG>::Next() {
-  return Next(0,0,-1,0,0,2);
-};
+  template<class TAG> Image* GLImageSource<TAG>::Next() {
+    return Next(0,0,-1,0,0,2);
+  };
 
 
-template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz, 
-						    float centre_x, float centre_y, float centre_z) {
+  template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz, 
+						      float centre_x, float centre_y, float centre_z) {
 
     glClearColor(1.0,1.0,1.0,0.0);
     glShadeModel(GL_SMOOTH);
@@ -208,12 +210,12 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz
     gluPerspective((GLfloat)m_fov, (GLfloat)m_width/(GLfloat)m_height,0,100.0);
     gluLookAt(-centre_x,-centre_y,-centre_z,-centre_x,-centre_y,-centre_z+1,0.0,-1.0,0.0);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-//     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-//     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-//     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-//     glEnable(GL_POINT_SMOOTH);
-//     glEnable(GL_LINE_SMOOTH);
-//     glEnable(GL_POLYGON_SMOOTH); 
+    //     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    //     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    //     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    //     glEnable(GL_POINT_SMOOTH);
+    //     glEnable(GL_LINE_SMOOTH);
+    //     glEnable(GL_POLYGON_SMOOTH); 
     
     // select the modelview matrix - transforms object co-ordinates to eye co-ordinates
     glMatrixMode(GL_MODELVIEW);
@@ -318,15 +320,15 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz
     
     // add some occlusion
     /*
-    glLoadIdentity();
-    glBegin(GL_QUADS);
-    glColor3f(1.0,1.0,1.0);
-    glVertex3f(0.5, -1, 1.0); 
-    glVertex3f(0.3, -1, 1.0);
-    glVertex3f(0.3, 1,1.0);
-    glVertex3f(0.5, 1,1.0);
-    glEnd();
-    glFlush();
+      glLoadIdentity();
+      glBegin(GL_QUADS);
+      glColor3f(1.0,1.0,1.0);
+      glVertex3f(0.5, -1, 1.0); 
+      glVertex3f(0.3, -1, 1.0);
+      glVertex3f(0.3, 1,1.0);
+      glVertex3f(0.5, 1,1.0);
+      glEnd();
+      glFlush();
     */
     int pointer = 0;
     for(int i=m_height-1;i>=0;i--) {
@@ -338,6 +340,6 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz
       }
     }
     return &m_glimage;
-};
-
+  };
+}
 #endif//GL_IMAGE_SOURCE_GUARD

@@ -1,2 +1,2 @@
-SUBDIRS = tripover
-include_HEADERS = Tripover.hh
+SUBDIRS = total
+include_HEADERS = Total.hh

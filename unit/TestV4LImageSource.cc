@@ -2,8 +2,9 @@
  * $Header$
  */
 
+#include <total/V4LImageSource.hh>
+
 #include <boost/test/unit_test.hpp>
-#include <tripover/V4LImageSource.hh>
 #include <ctime>
 #include <iostream>
 

@@ -5,7 +5,7 @@
 #ifndef GLOUTPUT_MECHANISM_GUARD
 #define GLOUTPUT_MECHANISM_GUARD
 
-#include <tripover/Config.hh>
+#include <total/Config.hh>
 
 #ifndef HAVE_GL_GL_H
 #error "This version has been configured without OpenGL support"
@@ -15,41 +15,43 @@
 # error "This version has been configured without OpenGL support"
 #endif
 
-#include <tripover/ContourTree.hh>
-#include <tripover/ShapeTree.hh>
-#include <tripover/WorldState.hh>
+#include <total/ContourTree.hh>
+#include <total/ShapeTree.hh>
+#include <total/WorldState.hh>
 #include <iostream>
 
 #include <GL/glx.h>
 
-class GLOutputMechanism {
-private:
-  Display *m_display;
-  XVisualInfo* m_visual;
-  GLXContext m_context;
-  Colormap m_colormap;
-  Window m_window;
-  bool displayListInited;
+namespace Total {
+
+  class GLOutputMechanism {
+  private:
+    Display *m_display;
+    XVisualInfo* m_visual;
+    GLXContext m_context;
+    Colormap m_colormap;
+    Window m_window;
+    bool displayListInited;
   
-public:
-  GLOutputMechanism(int argc, char* argv[],int width,int height);
-  ~GLOutputMechanism();
-  inline void FromImageSource(const Image& image) {};
-  inline void FromThreshold(const Image& image) {};
-  inline void FromContourTree(const ContourTree& contours) {}
-  inline void FromRemoveIntrinsic(const ContourTree& contours) {};
-  template<class S> inline void FromShapeTree(const ShapeTree<S>& shapes) {};
-  template<int PAYLOADSIZE> void FromTag(const WorldState<PAYLOADSIZE>& world);
-  inline void Flush() {};
+  public:
+    GLOutputMechanism(int argc, char* argv[],int width,int height);
+    ~GLOutputMechanism();
+    inline void FromImageSource(const Image& image) {};
+    inline void FromThreshold(const Image& image) {};
+    inline void FromContourTree(const ContourTree& contours) {}
+    inline void FromRemoveIntrinsic(const ContourTree& contours) {};
+    template<class S> inline void FromShapeTree(const ShapeTree<S>& shapes) {};
+    template<int PAYLOADSIZE> void FromTag(const WorldState<PAYLOADSIZE>& world);
+    inline void Flush() {};
 
-private:
-  void Draw(int mode);
-};
+  private:
+    void Draw(int mode);
+  };
 
-/**
- * \todo currently broken
- */
-template<int PAYLOAD_SIZE> void GLOutputMechanism::FromTag(const WorldState<PAYLOAD_SIZE>& world) { 
+  /**
+   * \todo currently broken
+   */
+  template<int PAYLOAD_SIZE> void GLOutputMechanism::FromTag(const WorldState<PAYLOAD_SIZE>& world) { 
     glMatrixMode(GL_MODELVIEW);
     /* reset modelview matrix to the identity matrix */
     glLoadIdentity();
@@ -101,7 +103,7 @@ template<int PAYLOAD_SIZE> void GLOutputMechanism::FromTag(const WorldState<PAYL
       }
     }
     Draw(2);
+  }
 }
-
 
 #endif//GLOUTPUT_MECHANISM_GUARD

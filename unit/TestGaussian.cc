@@ -1,6 +1,11 @@
+/**
+ * $Header$
+ */
+
+#include <total/gaussianelimination.hh>
+
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
-#include <tripover/gaussianelimination.hh>
 #include <cmath>
 #include <iostream>
 #define MAX_ERROR 0.001

@@ -2,12 +2,14 @@
  * $Header$
  */
 
+#include <total/Ellipse.hh>
+
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
-#include <tripover/Ellipse.hh>
 #include <iostream>
 
 using boost::unit_test_framework::test_suite;
+using namespace total;
 
 boost::mt19937 rng;
 boost::uniform_int<> numbersource(0,500);

@@ -8,14 +8,12 @@
 #ifndef GF4_CODER_GUARD
 #define GF4_CODER_GUARD
 
-#include "Config.hh"
-#include "Coder.hh"
-#include "GF4Poly.hh"
+#include <total/Config.hh>
+#include <total/Coder.hh>
+#include <total/GF4Poly.hh>
 #include <cmath>
 
-#undef FILENAME
-#define FILENAME "GF4Coder.hh"
-
+namespace Total {
 class GF4Coder : public Coder {
 private:
   int m_symbol_range;
@@ -35,5 +33,5 @@ public:
   virtual unsigned long long Encode(unsigned long long value);
   virtual unsigned long long Decode(unsigned long long value);
 };
-
+}
 #endif//GF4_CODER_GUARD

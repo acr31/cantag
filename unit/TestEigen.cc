@@ -2,12 +2,13 @@
  * $Header$
  */
 
+#include <total/polysolve.hh>
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
-#include <tripover/polysolve.hh>
 #include <iostream>
 
 using boost::unit_test_framework::test_suite;
+using namespace total;
  
 boost::mt19937 rng;
 boost::uniform_real<> numbersource(0,10);

@@ -5,9 +5,11 @@
 #ifndef CRC_CODER_GUARD
 #define CRC_CODER_GUARD
 
-#include <tripover/Config.hh>
-#include <tripover/Coder.hh>
+#include <total/Config.hh>
+#include <total/Coder.hh>
 #include <boost/crc.hpp>
+
+namespace Total {
 
 /**
  * A CRC based coding scheme.  The generator polynomials used are:
@@ -103,4 +105,5 @@ struct CRCCoder4
   typedef CRCCoder<PAYLOAD_SIZE,4,0xF,0x0,0x0,false,false> Type;
 };
 
+}
 #endif//CRC_CODER_GUARD

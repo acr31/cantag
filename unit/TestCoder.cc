@@ -2,19 +2,19 @@
  * $Header$
  */
 
+#include <total/Coder.hh>
+#include <total/TripOriginalCoder.hh>
+#include <total/ParityCoder.hh>
+#include <total/SymbolChunkCoder.hh>
+#include <total/SCCCoder.hh>
+#include <total/CyclicBitSet.hh>
+
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
-
-#include <tripover/Coder.hh>
-#include <tripover/TripOriginalCoder.hh>
-#include <tripover/ParityCoder.hh>
-#include <tripover/SymbolChunkCoder.hh>
-#include <tripover/SCCCoder.hh>
-
-#include <tripover/CyclicBitSet.hh>
 #include <iostream>
 
 using boost::unit_test_framework::test_suite;
+using namespace total;
 
 template<int PAYLOAD_SIZE> void tryrotations(const CyclicBitSet<PAYLOAD_SIZE>& test_value,
 					     const CyclicBitSet<PAYLOAD_SIZE>& target_code,

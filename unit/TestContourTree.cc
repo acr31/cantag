@@ -2,16 +2,18 @@
  * $Header$
  */
 
+#include <total/ContourTree.hh>
+#include <total/Image.hh>
+
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
-#include <tripover/ContourTree.hh>
-#include <tripover/Image.hh>
 
 #define IMAGE_WIDTH 1000
 #define IMAGE_HEIGHT 600
 
 using boost::unit_test_framework::test_suite;
- 
+using namespace total;
+
 boost::mt19937 rng;
 boost::uniform_int<> widthsource(0,IMAGE_WIDTH);
 boost::uniform_int<> heightsource(0,IMAGE_HEIGHT);

@@ -2,10 +2,11 @@
  * $Header$
  */
 
+#include <total/Socket.hh>
+#include <total/Image.hh>
+
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
-#include <tripover/Socket.hh>
-#include <tripover/Image.hh>
 #include <iostream>
 #define PORT 56789
 
