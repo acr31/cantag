@@ -4,9 +4,10 @@
 
 #include <Config.hh>
 #include <gaussianelimination.hh>
-#include <iostream>
+#include <cmath>
 
 #ifdef TEXT_DEBUG
+# include <iostream>
 # undef GAUSSIAN_DEBUG
 #endif
 
@@ -91,6 +92,7 @@ static inline void subtract_row(double** vals, int size, int r1, int r2, double 
   }
 }
 
+#ifdef GAUSSIAN_DEBUG
 /**
  * Print out the row major matrix.
  */
@@ -104,7 +106,7 @@ static void print(double** vals, int rows,int cols) {
   }
   std::cout << std::endl;
 }
-
+#endif
 
 void solve_simultaneous(double* X, double** A, double* R, int size) {
 

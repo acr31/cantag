@@ -243,6 +243,7 @@ template<int RINGS,int SECTORS,int ERRORS, int START> int SCCCoder<RINGS,SECTORS
   }
 
   /* these three things do the error correct */
+  /*
   int S[SECTORS];              // Will store the syndromes after calling getsyndrom
   getsyndrome(S,R);
   int omega[SECTORS];          // Will store error evaluator after berlekamp
@@ -255,7 +256,7 @@ template<int RINGS,int SECTORS,int ERRORS, int START> int SCCCoder<RINGS,SECTORS
       return -1;
 #endif
     }
-    
+  */
   int alpha;
 
   // this returns the amount of rotation required to read the

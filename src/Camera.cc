@@ -92,7 +92,7 @@ void Camera::ImageToNPCF(float* points, int numpoints) const {
     // 2) remove the x and y scaling
     points[i] /= m_intrinsic[0];
     points[i+1] /= m_intrinsic[4];
-
+    /*
     for(int j=0;j<0;j++) {
       double x = points[i];
       double y = points[i+1];
@@ -114,6 +114,7 @@ void Camera::ImageToNPCF(float* points, int numpoints) const {
       points[i] = xd1;
       points[i+1] = xd2;
     }
+    */
   }
 }
 
