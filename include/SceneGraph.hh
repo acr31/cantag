@@ -31,10 +31,10 @@
 
 struct ContourStatistics {
   int length;
-  int minx;
-  int maxx;
-  int miny;
-  int maxy;
+  int min_x;
+  int max_x;
+  int min_y;
+  int max_y;
   bool convex;
 };
 
@@ -104,7 +104,7 @@ private:
 		    int start_x,  int start_y, // the start position (must lie on contour)
 		    float* points_buffer,  // the buffer to store the points
 		    const int maxcount, // maximum number of points to return (buffer size must be twice this)
-		    ContourStatistics* statistics,   // contour statistics structure (can be NULL)
+		    ContourStatistics& statistics,   // contour statistics structure (can be NULL)
 		    int position,  // the position in the 8-connected region to start searching from
 		    int nbd  // the NBD to mark this contour with
 		    );
@@ -180,18 +180,19 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	  const unsigned char next = image.SampleNoCheck(raster_x+1,raster_y);
 	  int contour_length;
 	  bordertype_t border_type;
+	  ContourStatistics st;
 	  if (current_not_visited && !previous) { // the previous pixel is a 0-element
 #ifdef SCENE_GRAPH_DEBUG
 	    PROGRESS("Found start point for outer border at " <<raster_x << "," << raster_y);
 #endif	    
 	    border_type = OUTER_BORDER;
-	    contour_length = FollowContour(image, raster_x, raster_y, points_buffer, MAXLENGTH, NULL,0, NBD);
+	    contour_length = FollowContour(image, raster_x, raster_y, points_buffer, MAXLENGTH, st,0, NBD);
 	  }
 	  else if (!current_exit_pixel && !next) { // the next element is a 0-element 
 #ifdef SCENE_GRAPH_DEBUG
 	    PROGRESS("Found start point for hole border " <<raster_x << "," << raster_y);
 #endif	    
-	    contour_length = FollowContour(image,raster_x,raster_y,points_buffer,MAXLENGTH,NULL,4,NBD);
+	    contour_length = FollowContour(image,raster_x,raster_y,points_buffer,MAXLENGTH,st,4,NBD);
 	    border_type = HOLE_BORDER;
 	    if (!current_not_visited) {
 	      LNBD = current_nbd;
@@ -233,34 +234,43 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	    PROGRESS("parent_id is " << parent_id);
 #endif
 	    	    
-	    // now attempt to fit a shape to this border
-	    
-	    // if we succeed then create a new scene graph node and insert
-	    // it into the node_hash for this NBD also add this new scene
-	    // graph node as a child of its parent SceneGraphNode which
-	    // will be pointed to by its parent contour ID below
-	    
-	    // if we fail then insert another entry in the node_hash for
-	    // the parent SceneGraphNode using this NBD
-	    camera.ImageToNPCF(points_buffer,contour_length);
-	    SceneGraphNode<S,PAYLOAD_SIZE>* next_node = new SceneGraphNode<S,PAYLOAD_SIZE>(points_buffer,contour_length);
-	    if (next_node->GetShapes().IsChainFitted()) {
-#ifdef SCENE_GRAPH_DEBUG
-	      PROGRESS("Shape matches!");
-#endif
-	      node_hash[parent_id].node->AddChild(next_node);
-	      node_hash[NBD] = Contour(parent_id,next_node,border_type);					
+	    // filter this contour
 
-	      NBD++;
-	      NBD &= 127;
-	      if (NBD==0) { NBD++; }	      
+	    if ((contour_length > 40) &&
+		(st.length > 40) &&
+		(st.max_x - st.min_x > 20) &&
+		(st.max_y - st.min_y > 20)) {
+	      // now attempt to fit a shape to this border
+	      
+	      // if we succeed then create a new scene graph node and insert
+	      // it into the node_hash for this NBD also add this new scene
+	      // graph node as a child of its parent SceneGraphNode which
+	      // will be pointed to by its parent contour ID below
+	      
+	      // if we fail then insert another entry in the node_hash for
+	      // the parent SceneGraphNode using this NBD
+	      camera.ImageToNPCF(points_buffer,contour_length);
+	      SceneGraphNode<S,PAYLOAD_SIZE>* next_node = new SceneGraphNode<S,PAYLOAD_SIZE>(points_buffer,contour_length);
+	      if (next_node->GetShapes().IsChainFitted()) {
+#ifdef SCENE_GRAPH_DEBUG
+		PROGRESS("Shape matches!");
+#endif
+		node_hash[parent_id].node->AddChild(next_node);
+		node_hash[NBD] = Contour(parent_id,next_node,border_type);					
+		
+		NBD++;
+		NBD &= 127;
+		if (NBD==0) { NBD++; }	      
+	      }
+	      else {
+		delete next_node;
+		node_hash[NBD] = Contour(parent_id,node_hash[parent_id].node,border_type);
+	      }	    
 	    }
 	    else {
-	      delete next_node;
 	      node_hash[NBD] = Contour(parent_id,node_hash[parent_id].node,border_type);
-	    }	    
+	    }
 	  }
-	  
 	  if (!current_not_visited) {
 #ifdef SCENE_GRAPH_DEBUG
 	    PROGRESS("Current node has been visited, setting LNBD to "<< (int)current_id);
@@ -269,7 +279,7 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	  }
 	}  
       }
-	
+      
     }
 #ifdef IMAGE_DEBUG
       debug0.Save("debug-contours.bmp");
@@ -277,7 +287,7 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
       
 }
   
-template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour(Image& image, int start_x, int start_y, float* points_buffer, const int maxcount, ContourStatistics* statistics, int position, const int nbd) {
+template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour(Image& image, int start_x, int start_y, float* points_buffer, const int maxcount, ContourStatistics& statistics, int position, const int nbd) {
 #ifdef SCENE_GRAPH_DEBUG
   PROGRESS("Following contour");
 #endif	 
@@ -295,12 +305,12 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
     points_buffer[1] = start_y;
     int pointer = 2;  // our index into the points buffer
 
-    int length = 0; // the contour length
-    int min_x = start_x; // bounding box
-    int max_x = start_x; // bounding box
-    int min_y = start_y; // bounding box
-    int max_y = start_y; // bounding box
-    bool convex = true; // true if this contour is convex
+    statistics.length = 0; // the contour length
+    statistics.min_x = start_x; // bounding box
+    statistics.max_x = start_x; // bounding box
+    statistics.min_y = start_y; // bounding box
+    statistics.max_y = start_y; // bounding box
+    statistics.convex = true; // true if this contour is convex
 
     while(pointer < maxcount*2) {
       // work out the pixel co-ordinates for the position of interest
@@ -334,12 +344,12 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
 	points_buffer[pointer++] = start_y = sample_y;
       
 	// update the length
-	length+= (position%2 == 0 ? 32 : 45);
+	statistics.length += (position%2 == 0 ? 32 : 45);
 	// update the bounding box
-	if (start_x < min_x) { min_x = start_x; }
-	else if (start_x > max_x) { max_x = start_x; }
-	if (start_y < min_y) { min_y = start_y; }
-	else if (start_y > max_y) { max_y = start_y; }
+	if (start_x < statistics.min_x) { statistics.min_x = start_x; }
+	else if (start_x > statistics.max_x) { statistics.max_x = start_x; }
+	if (start_y < statistics.min_y) { statistics.min_y = start_y; }
+	else if (start_y > statistics.max_y) { statistics.max_y = start_y; }
 
 	//      if (previous_position != position) {
 	// we've made a turn
@@ -392,7 +402,7 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
     PROGRESS("Returning contour of length " << (pointer-4)/2);
 #endif	 
 
-
+    statistics.length >>= 5;
     return (pointer-4)/2;
 }
 
