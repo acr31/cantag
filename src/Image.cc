@@ -7,6 +7,7 @@
 # include <boost/random.hpp>
 #endif
 
+#include <iostream>
 //Image::Image() : m_from_header(false), m_free_contents(false), m_image(NULL) {};
 
 
@@ -278,7 +279,6 @@ void Image::ConvertScale(float scalefactor, int offset) {
 }
 
 void Image::DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigned int thickness) {
-  colour = COLOUR_BLACK;
   if (x1 < x0 || (x0 == x1 && y1 < y0)) {
     DrawLine(x1,y1,x0,y0,colour,thickness);
   }
@@ -367,20 +367,50 @@ void Image::DrawPolygon(float* points, int numpoints, unsigned char colour, unsi
 }
 
 
-/**
- * \todo currently unfilled
- */
 void Image::DrawFilledPolygon(int* points, int numpoints, unsigned char colour) {
   DrawPolygon(points,numpoints,colour,1);
+  int cx = 0, cy=0;
+  for (int i=0;i<2*numpoints;i+=2) {
+    cx+=points[i];
+    cy+=points[i+1];
+  }
+  cx /= numpoints;
+  cy /= numpoints;
+
+  SeedFill(cx,cy,colour);
 }
 
 
-/**
- * \todo currently unfilled
- */
 void Image::DrawFilledPolygon(float* points, int numpoints, unsigned char colour) {
   DrawPolygon(points,numpoints,colour,1);
+  float cx = 0, cy=0;
+  for (int i=0;i<2*numpoints;i+=2) {
+    cx+=points[i];
+    cy+=points[i+1];
+  }
+  cx /= numpoints;
+  cy /= numpoints;
+
+  SeedFill(Round(cx),Round(cy),colour);
 }
+
+
+/*
+ * Recursive fill.  OK, so it's not pretty, but
+ * we don't need high performance and it works fine!
+ */
+void Image::SeedFill(int x, int y,unsigned char colour) {
+  if (x<0 || y<0 || x >=m_width || y >= m_height) return;
+  if (Sample(x,y)==colour) return;
+  else {
+    DrawPixel(x,y,colour);
+    SeedFill(x+1,y,colour);
+    SeedFill(x-1,y,colour);
+    SeedFill(x,y+1,colour);
+    SeedFill(x,y-1,colour);
+  }
+}
+
 
 /**
  * \todo only does pnm
