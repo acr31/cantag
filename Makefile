@@ -5,22 +5,25 @@ CPPFLAGS=`params --opencv-cxx-flags`
 FLAGS=-g -o3
 
 
-all: tripover DrawTripOriginal
+all: tripover drawtriptag
 
 
 tripover: tripover.o Tag.o concentricellipse.o
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $^ ${OPENCVLINK}
 
+tripover_clean:
+	-rm -f tripover tripover.o Tag.o concentricellipse.o
 
-DrawTripOriginal: DrawTripOriginal.o concentricellipse.o Tag.o
+drawtriptag: drawtriptag.o concentricellipse.o Tag.o
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $^ ${OPENCVLINK}
 
+drawtriptag_clean:
+	-rm -f drawtriptag drawtriptag.o Tag.o concentricellipse.o
 
 %.o: %.cc
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVINC} -o $@ -c $<
 
-clean:
-	-rm -f TripOriginalTag.o tripover.o tripover DrawTripOriginal.o DrawTripOriginal Tag.o
+clean: tripover_clean drawtriptag_clean
 
 depend:
 	makedepend -Y. ${CPPFLAGS} *.cc 2>/dev/null
