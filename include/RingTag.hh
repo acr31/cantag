@@ -1,6 +1,5 @@
 /**
  * $Header$
- *
  */
 
 #ifndef RING_TAG_GUARD
@@ -14,10 +13,16 @@
 #include <Ellipse.hh>
 #include <findtransform.hh>
 
-#undef RING_TAG_DEBUG
-#undef RING_TAG_IMAGE_DEBUG
-#undef DRAW_FIELD_DEBUG
-//#define Ellipse LinearEllipse
+#ifdef TEXT_DEBUG
+#define   RING_TAG_DEBUG
+#endif
+
+#ifdef IMAGE_DEBUG
+#define  RING_TAG_IMAGE_DEBUG
+#undef   DRAW_FIELD_DEBUG
+#endif
+
+#define Ellipse LinearEllipse
 
 /**
  * The number of readings to make from a tag.  We then look for pairs
@@ -343,16 +348,15 @@ public:
 #ifdef RING_TAG_IMAGE_DEBUG
       draw_read(image,camera,correcttrans,0);
 #endif
-      //      exit(0);
-      node->SetInspected();
-      node->GetLocatedObject()->is_valid = false;
-      return;
     }
     else {
 #ifdef RING_TAG_DEBUG
       PROGRESS("Failed to find a valid transformation");
 #endif
     }
+
+    node->SetInspected();
+    node->GetLocatedObject()->is_valid = false;
   };  
 
 private:

@@ -7,7 +7,7 @@
 #include <gaussianelimination.hh>
 #include <eigenvv.hh>
 #include <cmath>
-
+#include <iostream>
 #undef ELLIPSE_DEBUG
 #undef ELLIPSE_DEBUG_DUMP_POINTS
 #undef CIRCLE_TRANSFORM_DEBUG
@@ -56,10 +56,8 @@ void Ellipse::FitEllipse(float* points, int numpoints) {
 
 #ifdef ELLIPSE_DEBUG_DUMP_POINTS
   for(int i=0;i<numpoints*2;i+=2) {
-    std::cout << points[i] << " " << points[i+1] << " ; ";
+    PROGRESS(points[i] << " " << points[i+1] <<";");
   }
-  std::cout << std::endl;
-  std::cout << std::endl;
 #endif
 
   double d1[numpoints*3];
@@ -473,7 +471,6 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
 
 
 static void print(const char* label, double* array, int rows, int cols) {
-  std::cout << "-----------------------------------" << std::endl;
   std::cout << label << "= [ ";
   for(int i=0;i<rows;i++) {
     for(int j=0;j<cols;j++) {

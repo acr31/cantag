@@ -8,7 +8,7 @@
 #include <cmath>
 
 #include <eigenvv.hh>
-
+#include <opencv/cv.h>
 #undef EIGEN_DEBUG
 
 #ifdef EIGEN_DEBUG

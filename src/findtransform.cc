@@ -5,8 +5,9 @@
 #include <findtransform.hh>
 #include <eigenvv.hh>
 #include <gaussianelimination.hh>
+#include <cmath>
 
-#define SQUARE_TRANSFORM_DEBUG
+#undef SQUARE_TRANSFORM_DEBUG
 #undef APPLY_TRANSFORM_DEBUG
 
 void GetTransform(const QuadTangle& quad, float transform[16]) {

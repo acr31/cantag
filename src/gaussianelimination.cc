@@ -4,7 +4,7 @@
 
 #include <Config.hh>
 #include <gaussianelimination.hh>
-
+#include <iostream>
 #undef GAUSSIAN_DEBUG
 
 /**
