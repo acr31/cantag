@@ -8,11 +8,11 @@ FLAGS=-g -o3
 all: tripover DrawTripOriginal
 
 
-tripover: tripover.o Tag.o TripOriginalTag.o concentricellipse.o
+tripover: tripover.o Tag.o concentricellipse.o
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $^ ${OPENCVLINK}
 
 
-DrawTripOriginal: DrawTripOriginal.o TripOriginalTag.o concentricellipse.o Tag.o
+DrawTripOriginal: DrawTripOriginal.o concentricellipse.o Tag.o
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $^ ${OPENCVLINK}
 
 
@@ -20,7 +20,7 @@ DrawTripOriginal: DrawTripOriginal.o TripOriginalTag.o concentricellipse.o Tag.o
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVINC} -o $@ -c $<
 
 clean:
-	-rm -f TripOriginalTag.o tripover.o tripover DrawTripOriginal.o DrawTripOriginal
+	-rm -f TripOriginalTag.o tripover.o tripover DrawTripOriginal.o DrawTripOriginal Tag.o
 
 depend:
 	makedepend ${OPENCVINC} ${CPPFLAGS} *.cc
