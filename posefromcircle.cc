@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/21 13:41:36  acr31
+ * added pose from circle to triptest - (pose from circle is unstable at the moment)
+ *
  * Revision 1.2  2004/01/21 11:55:09  acr31
  * added keywords for substitution
  *
@@ -12,46 +15,41 @@
 #undef FILENAME
 #define FILENAME "posefromcircle.cc"
 
-void
-PoseFromCircle(const CvBox2D &ellipse, double radius, CvPoint3D32f* unit_normal, CvPoint3D32f* centre) {
-
-#ifdef DEBUG
-  std::cout << "Angle: " <<ellipse.angle << std::endl;
-  std::cout << "Centre: " <<ellipse.center.x << " " << ellipse.center.y << std::endl;
-  std::cout << "Axes: " <<ellipse.size.width << " " << ellipse.size.height << std::endl;
-#endif
+Location3D*
+PoseFromCircle(const Location2D *l, double radius) {
+  PROGRESS("Angle: " << l->m_angle_radians);
+  PROGRESS("Centre: " <<l->m_x << " " << l->m_y);
+  PROGRESS("Axes: " << l->m_width << " " << l->m_height);
  
-  double sintheta = sin(ellipse.angle/180*CV_PI);
-  double costheta = cos(ellipse.angle/180*CV_PI);
-  double x0 = ellipse.center.x;
-  double y0 = ellipse.center.y;
-  double asq = ellipse.size.width * ellipse.size.width;
-  double bsq = ellipse.size.height *ellipse.size.height;;
+  float sintheta = sin(l->m_angle_radians);
+  float costheta = cos(l->m_angle_radians);
+  float x0 = l->m_x;
+  float y0 = l->m_y;
+  float asq = l->m_width * l->m_width * 0.25;
+  float bsq = l->m_height * l->m_height *0.25;
 
-  double sinthetasq = sintheta*sintheta;
-  double costhetasq = costheta*costheta;
+  float sinthetasq = sintheta*sintheta;
+  float costhetasq = costheta*costheta;
   
-  double x0sq = x0*x0;
-  double y0sq = y0*y0;
+  float x0sq = x0*x0;
+  float y0sq = y0*y0;
 
-  double coeffa = 1/asq*sinthetasq + 1/bsq*costhetasq;
-  double coeffb = 2/asq*sintheta*costheta - 2/bsq*sintheta*costheta;
-  double coeffc = 1/asq*costhetasq + 1/bsq*sinthetasq;
-  double coeffd = -2/asq*sinthetasq*x0 - 2/asq*sintheta*costheta*y0 + 2/bsq*sintheta*costheta*y0 - 2/bsq*costhetasq*x0;
-  double coeffe = -2/asq*sintheta*x0*costheta - 2/asq*costhetasq*y0 - 2/bsq*sinthetasq*y0 + 2/bsq*sintheta*x0*costheta;
-  double coefff = 1/asq*sinthetasq*x0sq + 2/asq*sintheta*x0*costheta*y0 + 1/asq*costhetasq*y0sq + 1/bsq*sinthetasq*y0sq - 2/bsq*sintheta*x0*costheta*y0 + 1/bsq*costhetasq*x0sq-1;
+  float coeffa = 1/asq*sinthetasq + 1/bsq*costhetasq;
+  float coeffb = 2/asq*sintheta*costheta - 2/bsq*sintheta*costheta;
+  float coeffc = 1/asq*costhetasq + 1/bsq*sinthetasq;
+  float coeffd = -2/asq*sinthetasq*x0 - 2/asq*sintheta*costheta*y0 + 2/bsq*sintheta*costheta*y0 - 2/bsq*costhetasq*x0;
+  float coeffe = -2/asq*sintheta*x0*costheta - 2/asq*costhetasq*y0 - 2/bsq*sinthetasq*y0 + 2/bsq*sintheta*x0*costheta;
+  float coefff = 1/asq*sinthetasq*x0sq + 2/asq*sintheta*x0*costheta*y0 + 1/asq*costhetasq*y0sq + 1/bsq*sinthetasq*y0sq - 2/bsq*sintheta*x0*costheta*y0 + 1/bsq*costhetasq*x0sq-1;
                                                                                      
+  PROGRESS("CoeffA: " << coeffa);
+  PROGRESS("CoeffB: " << coeffb);
+  PROGRESS("CoeffC: " << coeffc);
+  PROGRESS("CoeffD: " << coeffd);
+  PROGRESS("CoeffE: " << coeffe);
+  PROGRESS("CoeffF: " << coefff);
 
-#ifdef DEBUG
-  std::cout << "CoeffA: " << coeffa << std::endl;
-  std::cout << "CoeffB: " << coeffb << std::endl;
-  std::cout << "CoeffC: " << coeffc << std::endl;
-  std::cout << "CoeffD: " << coeffd << std::endl;
-  std::cout << "CoeffE: " << coeffe << std::endl;
-  std::cout << "CoeffF: " << coefff << std::endl;
-#endif
 
-  double Cvals[] = {coeffa, coeffb/2, coeffd/2,
+  float Cvals[] = {coeffa, coeffb/2, coeffd/2,
 		   coeffb/2, coeffc, coeffe/2, 
 		   coeffd/2, coeffe/2, coefff};
   
@@ -59,8 +57,8 @@ PoseFromCircle(const CvBox2D &ellipse, double radius, CvPoint3D32f* unit_normal,
   CvMat eigvect;
   CvMat eigval;
 
-  double eigvects[9];
-  double eigvals[3];
+  float eigvects[9];
+  float eigvals[3];
 
   cvInitMatHeader(&C,3,3,CV_64F,Cvals);
   cvInitMatHeader(&eigvect,3,3,CV_64F,eigvects);
@@ -68,13 +66,13 @@ PoseFromCircle(const CvBox2D &ellipse, double radius, CvPoint3D32f* unit_normal,
   
   cvEigenVV(&C,&eigvect,&eigval,pow(10,-15));
 
-#ifdef DEBUG
-  std::cout << "Eigen Vectors: " << eigvects[0] << " " << eigvects[1] << " " << eigvects[2] << std::endl;
-  std::cout << "               " << eigvects[3] << " " << eigvects[4] << " " << eigvects[5] << std::endl;
-  std::cout << "               " << eigvects[6] << " " << eigvects[7] << " " << eigvects[8] << std::endl;
 
-  std::cout << "Eigen Values:  " << eigvals[0] << " " << eigvals[1] << " " << eigvals[2] << std::endl;
-#endif
+  PROGRESS("Eigen Vectors: " << eigvects[0] << " " << eigvects[1] << " " << eigvects[2]);
+  PROGRESS("               " << eigvects[3] << " " << eigvects[4] << " " << eigvects[5]);
+  PROGRESS("               " << eigvects[6] << " " << eigvects[7] << " " << eigvects[8]);
+
+  PROGRESS("Eigen Values:  " << eigvals[0] << " " << eigvals[1] << " " << eigvals[2]);
+
 
   /* 
      eigvect = ( <- e3 -> )
@@ -98,19 +96,19 @@ PoseFromCircle(const CvBox2D &ellipse, double radius, CvPoint3D32f* unit_normal,
     ( 6 7 8 )       ( 8 5 2 )
   */
   
-  double dete1 = sqrt(eigvects[6]*eigvects[6] + 
+  float dete1 = sqrt(eigvects[6]*eigvects[6] + 
 		      eigvects[7]*eigvects[7] + 
 		      eigvects[8]*eigvects[8]);
 
-  double dete2 = sqrt(eigvects[3]*eigvects[3] + 
+  float dete2 = sqrt(eigvects[3]*eigvects[3] + 
 		      eigvects[4]*eigvects[4] +
 		      eigvects[5]*eigvects[5]);
 
-  double dete3 = sqrt(eigvects[0]*eigvects[0] +
+  float dete3 = sqrt(eigvects[0]*eigvects[0] +
 		      eigvects[1]*eigvects[1] +
 		      eigvects[2]*eigvects[2]);
 
-  double t = eigvects[0];
+  float t = eigvects[0];
   eigvects[0] = eigvects[6]/dete1;
   eigvects[6] = eigvects[8]/dete1;
   eigvects[8] = eigvects[2]/dete3;
@@ -122,16 +120,16 @@ PoseFromCircle(const CvBox2D &ellipse, double radius, CvPoint3D32f* unit_normal,
   eigvects[5] = t/dete3;
   eigvects[4]/=dete2;
 
-#ifdef DEBUG
-  std::cout << "Rotation 1   : " << eigvects[0] << " " << eigvects[1] << " " << eigvects[2] << std::endl;
-  std::cout << "               " << eigvects[3] << " " << eigvects[4] << " " << eigvects[5] << std::endl;
-  std::cout << "               " << eigvects[6] << " " << eigvects[7] << " " << eigvects[8] << std::endl;
-#endif
+
+  PROGRESS("Rotation 1   : " << eigvects[0] << " " << eigvects[1] << " " << eigvects[2]);
+  PROGRESS("               " << eigvects[3] << " " << eigvects[4] << " " << eigvects[5]);
+  PROGRESS("               " << eigvects[6] << " " << eigvects[7] << " " << eigvects[8]);
+
 
 
   /* the second transformation  - remember eigenvalues are in reverse order*/
-  double cc = ( eigvals[0] - eigvals[1] ) / ( eigvals[0] - eigvals[2]);
-  double s  = ( eigvals[1] - eigvals[2] ) / ( eigvals[0] - eigvals[2]);
+  float cc = ( eigvals[0] - eigvals[1] ) / ( eigvals[0] - eigvals[2]);
+  float s  = ( eigvals[1] - eigvals[2] ) / ( eigvals[0] - eigvals[2]);
   if (fabs(cc) < 0.0001) {
     cc = 0;
   }
@@ -143,53 +141,52 @@ PoseFromCircle(const CvBox2D &ellipse, double radius, CvPoint3D32f* unit_normal,
   s = sqrt(s);
 
 
-  double R2vals[] = { cc,0,s,
+  float R2vals[] = { cc,0,s,
 		      0 ,1,0,
 		      -s,0,cc};
   CvMat R2;
 
   cvInitMatHeader(&R2,3,3,CV_64F,R2vals);
 
-#ifdef DEBUG
-  std::cout << "Rotation 2   : " << R2vals[0] << " " << R2vals[1] << " " << R2vals[2] << std::endl;
-  std::cout << "               " << R2vals[3] << " " << R2vals[4] << " " << R2vals[5] << std::endl;
-  std::cout << "               " << R2vals[6] << " " << R2vals[7] << " " << R2vals[8] << std::endl;
-#endif
+
+  PROGRESS("Rotation 2   : " << R2vals[0] << " " << R2vals[1] << " " << R2vals[2]);
+  PROGRESS("               " << R2vals[3] << " " << R2vals[4] << " " << R2vals[5]);
+  PROGRESS("               " << R2vals[6] << " " << R2vals[7] << " " << R2vals[8]);
+
 
   /* remember eigenvalues are in reverse order */
-  double dist = -eigvals[1]*eigvals[1]*radius/eigvals[2]/eigvals[0];
+  float dist = -eigvals[1]*eigvals[1]*radius/eigvals[2]/eigvals[0];
   if (fabs(dist) < 0.0001) { dist = 0.0; }
   dist = sqrt(dist);
 
-  double alpha = (eigvals[0]-eigvals[1])*(eigvals[1]-eigvals[2])*dist*dist / eigvals[1]/eigvals[1];
+  float alpha = (eigvals[0]-eigvals[1])*(eigvals[1]-eigvals[2])*dist*dist / eigvals[1]/eigvals[1];
   if (fabs(alpha) < 0.0001) { alpha = 0.0; }
   alpha = sqrt(alpha);
   
   cvMatMulAdd(&eigvect,&R2,NULL,&C);
 
-#ifdef DEBUG
-  std::cout << "Dist:  " << dist << std::endl;
-  std::cout << "Alpha: " << alpha << std::endl;
 
-  std::cout << "Combined     : " << Cvals[0] << " " << Cvals[1] << " " << Cvals[2] << std::endl;
-  std::cout << "               " << Cvals[3] << " " << Cvals[4] << " " << Cvals[5] << std::endl;
-  std::cout << "               " << Cvals[6] << " " << Cvals[7] << " " << Cvals[8] << std::endl;
-#endif
+  PROGRESS("Dist:  " << dist);
+  PROGRESS("Alpha: " << alpha);
 
-  double pvals[] = { alpha,0,dist };
+  PROGRESS("Combined     : " << Cvals[0] << " " << Cvals[1] << " " << Cvals[2]);
+  PROGRESS("               " << Cvals[3] << " " << Cvals[4] << " " << Cvals[5]);
+  PROGRESS("               " << Cvals[6] << " " << Cvals[7] << " " << Cvals[8]);
+
+
+  float pvals[] = { alpha,0,dist };
   CvMat p;
   cvInitMatHeader(&p,3,1,CV_64F,pvals);
 
   cvMatMulAdd(&C,&p,NULL,&p);
-  centre->x = pvals[0];
-  centre->y = pvals[1];
-  centre->z = pvals[2];
+  float sx = pvals[0];
+  float sy = pvals[1];
+  float sz = pvals[2];
 
   pvals[0] = 0;
   pvals[1] = 0;
   pvals[2] = 1;
   cvMatMulAdd(&C,&p,NULL,&p);
-  unit_normal->x = pvals[0];
-  unit_normal->y = pvals[1];
-  unit_normal->z = pvals[2];
+
+  return new Location3D(sx,sy,sz,pvals[0],pvals[1],pvals[2]);
 }

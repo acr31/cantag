@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/21 13:41:36  acr31
+ * added pose from circle to triptest - (pose from circle is unstable at the moment)
+ *
  * Revision 1.3  2004/01/21 12:01:41  acr31
  * moved Location2DChain definition to Location2D.hh and added a destructor
  *
@@ -76,10 +79,10 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 	  if (compare(newbox,(*i)->current,maxXDiff,maxYDiff,maxRatioDiff)) {
 	    PROGRESS("Found concentric partner");
 	    Location2DChain *toadd = *i;
-	    while(toadd->next != NULL) {
-	      toadd = toadd->next;
+	    while(toadd->nextchain != NULL) {
+	      toadd = toadd->nextchain;
 	    }
-	    toadd->next = new Location2DChain(newbox);
+	    toadd->nextchain = new Location2DChain(newbox);
 	    newbox = NULL;
 	  }
 	}
@@ -95,7 +98,7 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 #ifdef IMAGE_DEBUG
   for(std::vector<Location2DChain*>::const_iterator i = results->begin();i!=results->end();i++) {
     Location2DChain *tocheck = *i;
-    if (tocheck->next != NULL) {
+    if (tocheck->nextchain != NULL) {
       do {
 	cvEllipse(debug2,
 		  cvPoint((int)tocheck->current->m_x,(int)tocheck->current->m_y),
@@ -105,7 +108,7 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 		  360,
 		  0,
 		  3);		  
-	tocheck = tocheck->next;
+	tocheck = tocheck->nextchain;
       } while (tocheck !=NULL);
     }
   }

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.7  2004/01/21 13:41:36  acr31
+ * added pose from circle to triptest - (pose from circle is unstable at the moment)
+ *
  * Revision 1.6  2004/01/21 11:55:08  acr31
  * added keywords for substitution
  *
@@ -17,8 +20,8 @@
 
 class Tag {
 public:
-  virtual void Draw2D(Image *image, Location2D *location, unsigned long code, int black, int white)= 0;
-  virtual unsigned long Decode(Image *image, Location2D *location) =0;
+  virtual void Draw2D(Image *image, const Location2D *location, unsigned long code, int black, int white)= 0;
+  virtual unsigned long Decode(Image *image, const Location2D *location) =0;
 };
 
 #endif//TAG_GUARD

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/21 13:41:37  acr31
+ * added pose from circle to triptest - (pose from circle is unstable at the moment)
+ *
  * Revision 1.2  2004/01/21 11:55:10  acr31
  * added keywords for substitution
  *
@@ -18,7 +21,9 @@
 #include "GrayScaleFileImageSource.hh"
 #include "adaptivethreshold.hh"
 #include "findellipses.hh"
-
+#include "posefromcircle.hh"
+#include "Location2D.hh"
+#include "Location3D.hh"
 
 #undef FILENAME
 #define FILENAME "drawtriptag.cc"
@@ -84,8 +89,13 @@ main(int argc, char* argv[]) {
   FindEllipses(buf,10,1000,4,4,0.01,0.001,&ellipses);
 
   for(std::vector<Location2DChain*>::const_iterator step = ellipses.begin();step!=ellipses.end();step++) {
-    if ((*step)->next != NULL) {
-      std::cout << t.Decode(buf, (*step)->current ) << std::endl;
+    if ((*step)->nextchain != NULL) {
+      std::cout << "Tag:" << t.Decode(buf, (*step)->current ) << std::endl;
+      std::cout << *((*step)->current) << std::endl;
+      Location3D *r=  PoseFromCircle((*step)->current,1.0);
+      std::cout << *r << std::endl;
+      delete(r);
+      
     }
   }
 }

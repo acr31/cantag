@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/21 13:41:35  acr31
+ * added pose from circle to triptest - (pose from circle is unstable at the moment)
+ *
  * Revision 1.3  2004/01/21 12:01:41  acr31
  * moved Location2DChain definition to Location2D.hh and added a destructor
  *
@@ -11,6 +14,8 @@
  */
 #ifndef LOCATION_2D_GUARD
 #define LOCATION_2D_GUARD
+
+#include <ostream>
 
 #include "Config.hh"
 
@@ -28,10 +33,12 @@ public:
 class Location2DChain {
 public:
   Location2D* current;
-  Location2DChain* next;
+  Location2DChain* nextchain;
 
   Location2DChain(Location2D* current);
   ~Location2DChain();
 };
+
+std::ostream& operator<<(std::ostream& s, const Location2D& z);
 
 #endif//LOCATION_2D_GUARD

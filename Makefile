@@ -7,7 +7,7 @@ FLAGS=-g -o3
 
 all: triptest2  drawtriptag 
 
-triptest2: triptest2.o Coder.o ellipsetoxy.o Location2D.o GrayScaleFileImageSource.o adaptivethreshold.o findellipses.o
+triptest2: triptest2.o Coder.o ellipsetoxy.o Location2D.o GrayScaleFileImageSource.o adaptivethreshold.o findellipses.o posefromcircle.o Location3D.o
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $^ ${OPENCVLINK}
 
 drawtriptag: Location2D.o Coder.o ellipsetoxy.o drawtriptag.o 
