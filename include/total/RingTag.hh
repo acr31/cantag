@@ -225,9 +225,9 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
   PROGRESS("DecodeNode called");
 #endif
 
-  if (node->children.size() == 0) {
+  if (node->children.size() != 1) {
 #ifdef RING_TAG_DEBUG
-    PROGRESS("This node has no children.  Skipping it");
+    PROGRESS("This node has " << node->children.size() << " children.  Skipping it");
 #endif
     return NULL;
   }
