@@ -5,7 +5,7 @@ CPPFLAGS=`params --opencv-cxx-flags`
 FLAGS=-g -o3 
 
 
-triptest3: triptest3.o Coder.o Rectangle2D.o GF4Coder.o GF4Poly.o CRCCoder.o
+triptest3: triptest3.o Coder.o Rectangle2D.o GF4Coder.o GF4Poly.o CRCCoder.o GrayScaleFileImageSource.o adaptivethreshold.o findrectangles.o Exception.o
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $^ ${OPENCVLINK}
 
 all: triptest2  drawtriptag 
@@ -22,7 +22,7 @@ drawtriptag: Ellipse2D.o Coder.o ellipsetoxy.o drawtriptag.o GF4Coder.o GF4Poly.
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVINC} -o $@ -c $<
 
 clean:
-	-rm -f *.o triptest2 drawtriptag debug*.jpg
+	-rm -f *.o triptest3 triptest2 drawtriptag debug*.jpg
 
 depend:
 	makedepend -Y. ${CPPFLAGS} *.cc 2>/dev/null
@@ -38,9 +38,9 @@ drawtriptag.o: Exception.hh RingTag.hh Tag.hh ellipsetoxy.hh Ellipse2D.hh
 drawtriptag.o: GF4Coder.hh GF4Poly.hh
 Ellipse2D.o: Ellipse2D.hh Config.hh
 ellipsetoxy.o: ellipsetoxy.hh Config.hh Drawing.hh
+Exception.o: Exception.hh Config.hh
 findellipses.o: findellipses.hh Config.hh Ellipse2D.hh Drawing.hh
 findrectangles.o: findrectangles.hh Config.hh Rectangle2D.hh Drawing.hh
-GF4Code.o: GF4Code.h
 GF4Coder.o: GF4Coder.hh Config.hh Coder.hh Exception.hh GF4Poly.hh
 GF4Poly.o: GF4Poly.hh
 GrayScaleFileImageSource.o: GrayScaleFileImageSource.hh Drawing.hh Config.hh
