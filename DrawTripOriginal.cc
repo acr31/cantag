@@ -31,7 +31,8 @@ main(int argc, char* argv[]) {
   p.x=width/2;
   p.y=width/2;
 
-  double r = width / 4;
+  double r = width / 2 / TripOriginalTag::radii_outer[RING_COUNT-1];
+
   CvSize2D32f s;
   s.width=r;
   s.height=r;
@@ -40,15 +41,12 @@ main(int argc, char* argv[]) {
   CvBox2D box;
   box.center=p;
   box.size=s;
-  box.angle=0.0;
+  box.angle=10.0;
   
   TripOriginalTag t(box,value);
   t.Synthesize(image,255,0);
 
   cvSaveImage(argv[3],image);
-
-  std::cout << "Done.  Tag written to "<<argv[3]<<std::endl;
-
   cvReleaseImage(&image);
 }
 

@@ -61,7 +61,7 @@ const double TripOriginalTag::sync_angles[] = {0,
 
 const double TripOriginalTag::radii_outer[] = {1.4,2};
 const double TripOriginalTag::radii_centre[] = {1.2,1.8};
-const double TripOriginalTag::radii_inner[] = {1.1,1.5};
+const double TripOriginalTag::radii_inner[] = {1.1,1.4};
 
 void TripOriginalTag::Process(IplImage *image, 
 			      std::vector<Tag*> *result) 
@@ -205,10 +205,10 @@ void TripOriginalTag::Process(IplImage *image,
 	  }
 
 	  if (sector < CHECKSUM_COUNT + 1) {
-	    target_checksum += sector_value * pow((1<<RING_COUNT)-1,sector-1);
+	    target_checksum += sector_value * (unsigned long)pow((1<<RING_COUNT)-1,sector-1);
 	  }
 	  else {
-	    code += sector_value * pow((1<<RING_COUNT)-1,sector-CHECKSUM_COUNT-1);
+	    code += sector_value * (unsigned long)pow((1<<RING_COUNT)-1,sector-CHECKSUM_COUNT-1);
 	    checksum += sector_value;
 	  }
 	}
@@ -221,11 +221,19 @@ void TripOriginalTag::Process(IplImage *image,
 
 
       if (success) {
+	checksum = checksum % (int)pow((1<<RING_COUNT)-1,CHECKSUM_COUNT);
+	
 	PROGRESS("Code is " << code);
 	PROGRESS("Target checksum is " << target_checksum);
-	PROGRESS("Checksum is " << (checksum % (int)pow((1<<RING_COUNT)-1,CHECKSUM_COUNT)));
+	PROGRESS("Checksum is " << checksum);
 	
-	result->push_back(new TripOriginalTag(*i,code));
+	if (checksum == target_checksum) {
+	  PROGRESS("Accepting checksum");
+	  result->push_back(new TripOriginalTag(*i,code));
+	}
+	else {
+	  PROGRESS("Checksum did not match - refusing tag");
+	}
       }
     }
   cvReleaseImage(&gray);
@@ -241,9 +249,38 @@ void TripOriginalTag::Show(IplImage *image) {
   cvEllipseBox(image,m_ellipse,CV_RGB(255,255,0),2);
 }
 
+void TripOriginalTag::PlotSegment(IplImage *image,
+				  int sector, int ring,
+				  int value) {
+  // convert angles to degrees
+  double a1 = sector_angles[(sector+1) % SECTOR_COUNT]/M_PI*180;
+  double a2 = sector_angles[sector]/M_PI*180;
+  
+  // remove negatives
+  if (a1<0) a1+=360;
+  if (a2<0) a2+=360;
+  
+  a1=360-a1;
+  a2=360-a2;
+  
+  // if a2 < a1 then we have wrapped around so add 360 to a2
+  if (a2<a1) a2+=360;
+  
+  cvEllipse(image,
+	    cvPointFrom32f(m_ellipse.center),
+	    cvSize(cvRound( m_ellipse.size.width*radii_outer[ring]/2),
+		   cvRound( m_ellipse.size.height*radii_outer[ring]/2)),
+	    m_ellipse.angle,
+	    a1,
+	    a2,
+	    value,
+	    -1);
+}
+
 void TripOriginalTag::Synthesize(IplImage *image, int white, int black) {
   
   for(int i=RING_COUNT-1;i>=0;i--) {
+    // Draw a white filled circle to cover this ring
     cvEllipse(image,
 	      cvPointFrom32f(m_ellipse.center),
 	      cvSize(cvRound(m_ellipse.size.width*radii_outer[i]/2),
@@ -257,33 +294,39 @@ void TripOriginalTag::Synthesize(IplImage *image, int white, int black) {
     unsigned long code = m_code;
     int base = (1<<RING_COUNT)-1;
 
-    for(int j=SECTOR_COUNT-1;j>=0;j--) {
-      double pwr = pow(base,j);
-      int value = ( (int)(trunc(code/pwr)) & (1<<i)) ? black : white;
-      code = code % (int)(trunc(pwr));
+    unsigned long checksum = 0;
+
+    // For each data sector
+    for(int j=SECTOR_COUNT-1;j>CHECKSUM_COUNT;j--) {
+
+      // Work out the current digit for this sector (need to offset
+      // the sector number by the checksum and sync sectors
+      double pwr = pow(base,j-CHECKSUM_COUNT-1);
+      int value = (int)(trunc(code/pwr));
       
-      // convert angles to degrees
-      double a1 = sector_angles[j]/M_PI*180;
-      double a2 = sector_angles[(j+1) % SECTOR_COUNT]/M_PI*180;
+      int colour = (value & (1<<i)) ? black : white;
 
-      // remove negatives
-      if (a1<0) a1+=360;
-      if (a2<0) a2+=360;
+      code = code % (int)(trunc(pwr));
+      checksum += value;
 
-      // if a2 < a1 then we have wrapped around so add 360 to a2
-      if (a2<a1) a2+=360;
+      PlotSegment(image,j,i,colour);
+    }
+    
+    checksum = checksum % (int)pow(base,CHECKSUM_COUNT);
 
-      cvEllipse(image,
-		cvPointFrom32f(m_ellipse.center),
-		cvSize(cvRound( m_ellipse.size.width*radii_outer[i]/2),
-		       cvRound( m_ellipse.size.height*radii_outer[i]/2)),
-		m_ellipse.angle,
-		a1,
-		a2,
-		value,
-		-1);
+    // Now draw the checksum       
+    for(int j=CHECKSUM_COUNT;j>0;j--) {
+      // offset for the sync sector
+      double pwr = pow(base,j-1);
+      int value = (int)(trunc(checksum/pwr));
+      int colour = (value & (1<<i)) ? black : white;
+      checksum = checksum % (int)trunc(pwr);
+      PlotSegment(image,j,i,colour);
     }
 
+    PlotSegment(image,0,i,black);
+
+    // White out all of the tag inside this ring ready for drawing again
     cvEllipse(image,
 	      cvPointFrom32f(m_ellipse.center),
 	      cvSize(cvRound( m_ellipse.size.width*radii_inner[i]/2),
@@ -294,5 +337,27 @@ void TripOriginalTag::Synthesize(IplImage *image, int white, int black) {
 	      white,
 	      -1);
   }
+
+  // Now draw the central bullseye
+  cvEllipse(image,
+	    cvPointFrom32f(m_ellipse.center),
+	    cvSize(cvRound( m_ellipse.size.width/2),
+		   cvRound( m_ellipse.size.height/2)),
+	    m_ellipse.angle,
+	    0,
+	    360,
+	    black,
+	    -1);
+
+  cvEllipse(image,
+	    cvPointFrom32f(m_ellipse.center),
+	    cvSize(cvRound( m_ellipse.size.width*0.6/2),
+		   cvRound( m_ellipse.size.height*0.6/2)),
+	    m_ellipse.angle,
+	    0,
+	    360,
+	    white,
+	    -1);
+
 }
 

@@ -40,7 +40,7 @@
 #define CHECKSUM_COUNT 2
 
 class TripOriginalTag : virtual Tag {
-private:
+public:
   /* The angle of each sector - there should be SECTOR_COUNT of
      these */
   static const double sector_angles[]; 
@@ -55,7 +55,6 @@ private:
   static const double radii_centre[];
   static const double radii_inner[];
 
-public:
   TripOriginalTag(CvBox2D ellipse, long code);
   static void Process(IplImage *image,std::vector<Tag*> *result);
   virtual std::ostream& Print(std::ostream& s) const;
@@ -65,6 +64,8 @@ public:
 private:
   CvBox2D m_ellipse;
   unsigned long m_code;
+  void PlotSegment(IplImage *image, int sector,int ring, int colour);
+
 };
 
 
