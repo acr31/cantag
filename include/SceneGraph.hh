@@ -164,8 +164,8 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	const unsigned char current = image.SampleNoCheck(raster_x,raster_y);
 	const bool current_pixel = current & 0x1;
 	const unsigned char current_id = current >> 2;
-	const bool current_not_visited = !(current & ~0x1);  // this will be true if this is an element that has not been visited before
-
+	const bool current_not_visited = current_id==0;  // this will be true if this is an element that has not been visited before
+	const bool current_exit_pixel = current & 0x2;
 	if (current_pixel) { // the current pixel is a 1-element (possibly visited before)
 	  const unsigned char previous = image.SampleNoCheck(raster_x-1,raster_y);
 	  const unsigned char next = image.SampleNoCheck(raster_x+1,raster_y);
@@ -173,15 +173,15 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	  bordertype_t border_type;
 	  if (current_not_visited && !(previous & 0x1)) { // the previous pixel is a 0-element
 #ifdef SCENE_GRAPH_DEBUG
-	    PROGRESS("Found start point for outer border");
+	    PROGRESS("Found start point for outer border at " <<raster_x << "," << raster_y);
 #endif	    
 	    NBD++;
 	    border_type = OUTER_BORDER;
 	    contour_length = FollowContour(image, raster_x, raster_y, points_buffer, MAXLENGTH, NULL,0, NBD);
 	  }
-	  else if (!(next& 0x1)) { // the next element is a 0-element 
+	  else if (!current_exit_pixel && !(next& 0x1)) { // the next element is a 0-element 
 #ifdef SCENE_GRAPH_DEBUG
-	    PROGRESS("Found start point for hole border");
+	    PROGRESS("Found start point for hole border " <<raster_x << "," << raster_y);
 #endif	    
 	    NBD++;
 	    contour_length = FollowContour(image,raster_x,raster_y,points_buffer,MAXLENGTH,NULL,4,NBD);
@@ -198,7 +198,7 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	  debug0.DrawPolygon(points_buffer,contour_length,0,1);
 	  debug0.Save("countours.bmp");    
 	  image.Save("tracked.bmp");
-	  exit(-1);
+	  //	  exit(-1);
 #endif
 
 	  // now decide the parent of this border
@@ -241,12 +241,15 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	  camera.ImageToNPCF(points_buffer,contour_length);
 	  SceneGraphNode<S,PAYLOAD_SIZE>* next_node = new SceneGraphNode<S,PAYLOAD_SIZE>(points_buffer,contour_length);
 	  if (next_node->GetShapes().IsChainFitted()) {
+#ifdef SCENE_GRAPH_DEBUG
+	    PROGRESS("Shape matches!");
+#endif
 	    node_hash[parent_id].node->AddChild(next_node);
-	    node_hash[NBD>>1] = Contour(parent_id,next_node,border_type);					
+	    node_hash[NBD] = Contour(parent_id,next_node,border_type);					
 	  }
 	  else {
 	    delete next_node;
-	    node_hash[NBD>>1] = Contour(parent_id,node_hash[parent_id].node,border_type);
+	    node_hash[NBD] = Contour(parent_id,node_hash[parent_id].node,border_type);
 	  }
 	}
 	
@@ -289,7 +292,7 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
     bool convex = true; // true if this contour is convex
 
     while(pointer < maxcount*2) {
-      // work out the pixel co-oridinates for the position of interest
+      // work out the pixel co-ordinates for the position of interest
       int sample_x = start_x+offset_x[position];
       int sample_y = start_y+offset_y[position];
       unsigned char sample = image.Sample(sample_x,sample_y);
@@ -305,14 +308,13 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
 	}
 	// 2) else if sample_x,sample_y is unmarked write
 	// (NBD,l,1-element).
-	else if (!(sample & ~0x2)) {
+	else if (!(sample>>2)) {
 	  value = nbd << 2 | 0x1;
 	}
 	else {
 	  value = sample;
 	}
-	value=127;
-	image.DrawPixel(sample_x,sample_y,sample);
+	image.DrawPixel(start_x,start_y,value);
 
 	// store this point in the pixel chain and update the start position
 	points_buffer[pointer++] = start_x = sample_x;
@@ -320,7 +322,6 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
       
 	// update the length
 	length+= (position%2 == 0 ? 32 : 45);
-
 	// update the bounding box
 	if (start_x < min_x) { min_x = start_x; }
 	else if (start_x > max_x) { max_x = start_x; }

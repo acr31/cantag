@@ -195,6 +195,7 @@ bool Ellipse::FitEllipse(const float* points, int numpoints) {
      
 #ifdef ELLIPSE_DEBUG
       PROGRESS("Fitted ellipse: a="<<m_a<<","<<m_b<<","<<m_c<<","<<m_d<<","<<m_e<<","<<m_f);
+      PROGRESS("MAXFITERROR is " << MAXFITERROR);
 #endif      
 
       return (GetError(points,numpoints) < MAXFITERROR);
