@@ -47,7 +47,6 @@ depend:
 
 # DO NOT DELETE THIS LINE
 
-3DLocation.o: 3DLocation.hh Config.hh
 adaptivethreshold.o: adaptivethreshold.hh Drawing.hh Config.hh
 Coder.o: Coder.hh Exception.hh Config.hh
 concentricellipse.o: concentricellipse.hh

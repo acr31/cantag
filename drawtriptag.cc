@@ -41,9 +41,9 @@ main(int argc, char* argv[]) {
 	       imagewidth/2,
 	       width,
 	       width,
-	       PI);
+	       0.4);
   
-  TripOuterTag<TripOriginalCoder<2,16,2>,2,16,24,2,10> t;
+  TripOuterTag<TripOriginalCoder<2,16,2>,2,16,24,2> t;
 
   t.Draw2D(image,&l,value, 0, 255);
 

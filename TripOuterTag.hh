@@ -12,6 +12,23 @@
 
 #undef FILENAME
 #define FILENAME "TripOuterTag.hh"
+
+/*
+ * RING_COUNT, SECTOR_COUNT, SYNC_COUNT, CHECKSUM_COUNT
+ *
+ * BULLSEYE_OUTER_RADIUS  bo
+ * BULLSEYE_INNER_RADIUS  bi
+ * 
+ * DATA_OUTER_RADIUS      do
+ * DATA_INNER_RADIUS      di
+ *
+ * di < do < bi < bo  - outer bullseye - if di=0 need different ring width
+ * bi < bo < di < do  - inner bullseye - bi can't be 0
+ * bi < di < do < bo  - spread bullseye - data is drawn over bullseye ring
+ * di < bi < bo < do  - middle bullseye 
+ */
+
+#define INNER_BULLSEYE_WIDTH 0.8
 /**
  * A circular tag with the same encoding as a trip tag but the bullseye is outside the data
  *
@@ -39,26 +56,27 @@ public:
     
     DrawFilledEllipse(image, l->m_x, l->m_y, l->m_width, l->m_height,l->m_angle_radians, black);
 
-    DrawFilledEllipse(image, l->m_x, l->m_y, l->m_width*0.6, l->m_height*0.6,l->m_angle_radians,white);
+    DrawFilledEllipse(image, l->m_x, l->m_y, l->m_width*INNER_BULLSEYE_WIDTH, l->m_height*INNER_BULLSEYE_WIDTH,l->m_angle_radians,white);
 
     // the width of each data ring
     // 1-1/DATA_RING_OFFSET gives the outer radius of the outer ring
     // We then have to fit RING_COUNT rings in that range
     // So each ring is (1-1/DATA_RING_OFFSET)/RING_COUNT wide
-
-    float ring_width = (0.6-1/(float)DATA_RING_OFFSET)/(float)(RING_COUNT+1);
+ 
+    float ring_width = INNER_BULLSEYE_WIDTH-1/(float)DATA_RING_OFFSET;;
+    //float ring_width = (INNER_BULLSEYE_WIDTH-1/(float)DATA_RING_OFFSET)/(float)RING_COUNT;
     PROGRESS("Ring width is "<<ring_width);
     for(int i=RING_COUNT-1;i>=0;i--) {
       m_coder.Set(code);
       for(int j=0;j<SECTOR_COUNT;j++) {
 	unsigned int value = m_coder.NextChunk();
 	int colour = ((value & (1<<i)) == (1<<i)) ? black : white;
-
+	float scale_factor = sqrt(((float)(i+1))/RING_COUNT);
 	DrawFilledEllipse(image,
 			  l->m_x,
 			  l->m_y,
-			  l->m_width*ring_width*(float)(i+1),
-			  l->m_height*ring_width*(float)(i+1),
+			  l->m_width*ring_width*scale_factor,
+			  l->m_height*ring_width*scale_factor,
 			  l->m_angle_radians,
 			  (float)j*2*PI/SECTOR_COUNT,
 			  ((float)j+1)*2*PI/SECTOR_COUNT,
@@ -82,7 +100,8 @@ public:
 
     float sync_step = 2*PI/SYNC_COUNT;
     float sector_step = 2*PI/SECTOR_COUNT;
-    float ring_width = (0.6-1/(float)DATA_RING_OFFSET)/(float)(RING_COUNT+1);
+    //    float ring_width = (INNER_BULLSEYE_WIDTH-1/(float)DATA_RING_OFFSET)/(float)(RING_COUNT+1);
+    float ring_width = (INNER_BULLSEYE_WIDTH-1/(float)DATA_RING_OFFSET);
 
     
 #ifdef IMAGE_DEBUG
@@ -97,7 +116,13 @@ public:
 	// read a chunk by sampling each ring and shifting and adding
 	unsigned int chunk =0;
 	for(int k=RING_COUNT-1;k>=0;k--) {
-	  float sample_width = ring_width*k + ring_width/2;
+	  float sample_width;
+	  if (k == 0) {
+	    sample_width = ring_width / sqrt(RING_COUNT) * (float)SECTOR_COUNT/(float)(SECTOR_COUNT+PI);
+	  }
+	  else {
+	    sample_width = ring_width * (sqrt(((float)k)/RING_COUNT) + sqrt((float)(k+1)/RING_COUNT)) / 2;
+	  }
 	  chunk = chunk << 1;
 	  int x;
 	  int y;
