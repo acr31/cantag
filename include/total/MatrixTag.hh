@@ -128,20 +128,20 @@ template<int SIZE> void MatrixTag<SIZE>::Draw2D(Image& image, CyclicBitSet<SIZE*
 #endif
   int x0 = 0;
   int y0 = 0;
-  int x1 = image.GetWidth();
+  int x1 = image.GetWidth()-1;
   int y1 = 0;
-  int x2 = image.GetWidth();
-  int y2 = image.GetHeight();
+  int x2 = image.GetWidth()-1;
+  int y2 = image.GetHeight()-1;
   int x3 = 0;
-  int y3 = image.GetHeight();
+  int y3 = image.GetHeight()-1;
 
-  int size = (image.GetWidth() < image.GetHeight() ? image.GetWidth() : image.GetHeight())/2;
+  int size = (image.GetWidth() < image.GetHeight() ? image.GetWidth()-1 : image.GetHeight()-1)/2;
 
   image.DrawFilledQuadTangle(x0, y0,
 			     x1, y1,
 			     x2, y2,
 			     x3, y3,COLOUR_BLACK);
-			  
+
   // now draw the code
   EncodePayload(tag_data);
   float projX0, projY0;
