@@ -10,7 +10,7 @@
 #include <SceneGraphNode.hh>
 #include <map>
 
-#define SCENE_GRAPH_DEBUG
+#undef SCENE_GRAPH_DEBUG
 
 
 #define MAXLENGTH 10000
@@ -136,356 +136,292 @@ template<class S,int PAYLOAD_SIZE> SceneGraph<S,PAYLOAD_SIZE>::~SceneGraph() {
 }
 
 template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image& image, const Camera& camera) {
-#ifdef SCENE_GRAPH_DEBUG
-  PROGRESS("Updating Scene Graph");
-#endif
-      // a lookup from contour IDs to the shape assigned to them
-    std::map<int,Contour> node_hash;
-    
-    delete m_root;
-    m_root = new SceneGraphNode<S,PAYLOAD_SIZE>();
 
-    // the outer border (the frame of the image) is considered to have
-    // id 1 and be of type HOLE_BORDER
-    node_hash[1] = Contour(1,m_root,HOLE_BORDER);
+  unsigned char* data_pointer = image.GetDataPointer();
+  int image_width = image.GetWidth();
+  int image_height = image.GetHeight();
+  int image_width_1 = image_width-1;
 
-    // we mark the contours in the image with the following coding
-    // bit 1 = set if this is an exit pixel (corresponds to -NBD in the paper)
-    // bit 2-8 = NBD
+  // our frame border is a hole border.  We write zero's around the
+  // edge of the image to make sure that our border follower never
+  // goes out of range
+  for(int i=0;i<image_width;++i) {
+    *data_pointer = 0;
+    data_pointer++;
+  }
+  for(int i=0;i<image_height-2;++i) {
+    *data_pointer = 0;
+    data_pointer+=image_width_1;
+    *data_pointer = 0;
+    ++data_pointer;
+  }
+  for(int i=0;i<image_width;++i) {
+    *data_pointer = 0;
+    ++data_pointer;
+  }  
 
 #ifdef IMAGE_DEBUG
-    Image debug0(image);
-    debug0.ConvertScale(0.5,128);
+  image.Save("debug-scenegraph-borders.bmp");
+  Image debug(image.GetWidth(),image.GetHeight());
 #endif
 
-    float points_buffer[MAXLENGTH*2];
+  std::map<int,Contour> node_hash;
+  delete m_root;
+  m_root = new SceneGraphNode<S,PAYLOAD_SIZE>();
+  node_hash[1] = Contour(m_root,HOLE_BORDER);
 
-    int NBD = 2;  // the next border ID to issue is stored in NBD
-
-    unsigned char* data_pointer = image.GetDataPointer();
-    int image_width = image.GetWidth();
-
-    for(int raster_y=0;raster_y < image.GetHeight(); ++raster_y) {
-      int LNBD = 1; // we've just "seen" the frame border so set the last seen border id to match
-      data_pointer++;
-      for(int raster_x=1;raster_x < image.GetWidth()-1;++raster_x) {
-	
-	// the sampled value with either be:
-	//  0  => 0-element
-	//  1  => 1-element that we havn't visited before
-	//  >1 => 1-element that we have visited before.  In this case the low bit will be set if this is an exit pixel and the remaining bits encode the NBD
-
-	const int current = *data_pointer;
-	const int current_nbd = current >> 1;
-	const bool current_not_visited = current_nbd == 0;  // this will be true if this is an element that has not been visited before
-	const bool current_exit_pixel = current_nbd && (current & 0x1);
-
-	if (current) { // the current pixel is a 1-element (possibly visited before)
+  float points_buffer[MAXLENGTH*2];
+  data_pointer = image.GetDataPointer();
+  int NBD = 2;
+  for(int raster_y=0;raster_y < image_height; ++raster_y) {
+    int LNBD = 1; // we've just "seen" the frame border so set the last seen border id to match
+    ++data_pointer; // exclude the first pixel on the line
+    for(int raster_x=1;raster_x < image_width_1;++raster_x, ++data_pointer) {
+      if (*data_pointer) {  // this pixel is a 1-element or it has been visited before
+	const int cNBD = *data_pointer>>1;
+	int contour_length;
+	bordertype_t border_type;
+	ContourStatistics contour_statistics;;
+	if (!cNBD && !(*(data_pointer-1))) { // this pixel has not been seen before and the previous pixel is a 0-element
+	  border_type = OUTER_BORDER;	  
 #ifdef SCENE_GRAPH_DEBUG
-	  PROGRESS("Pixel value is " << (int)current);
+	  PROGRESS("Found outer border.  Following from " << raster_x << "," << raster_y);
 #endif
-	  const int previous = *(data_pointer-1);
-	  const int next = *(data_pointer+1);
-	  int contour_length;
-	  bordertype_t border_type;
-	  ContourStatistics st;
-	  if (current_not_visited && !previous) { // the previous pixel is a 0-element
+	  contour_length = FollowContour(image, data_pointer, raster_x, raster_y, points_buffer, MAXLENGTH, contour_statistics,0, NBD);
+	} 
+	else if ((*data_pointer & 0x1) && !(*(data_pointer+1))) { // this pixel has not been seen before or it is not an exit pixel, and the next pixel is a 0-element
+	  border_type = HOLE_BORDER;
 #ifdef SCENE_GRAPH_DEBUG
-	    PROGRESS("Found start point for outer border at " <<raster_x << "," << raster_y);
-#endif	    
-	    border_type = OUTER_BORDER;
-	    contour_length = FollowContour(image, data_pointer, raster_x, raster_y, points_buffer, MAXLENGTH, st,0, NBD);
-	  }
-	  else if ((!current_exit_pixel || current_not_visited) && !next) { // the next element is a 0-element 
-#ifdef SCENE_GRAPH_DEBUG
-	    PROGRESS("Found start point for hole border " <<raster_x << "," << raster_y);
-#endif	    
-	    contour_length = FollowContour(image,data_pointer, raster_x,raster_y,points_buffer,MAXLENGTH,st,4,NBD);
-	    border_type = HOLE_BORDER;
-	    if (!current_not_visited) {
-	      LNBD = current_nbd;
-	    }
-	  }
-	  else {  // otherwise we just carry on looking
-	    contour_length =0;
-	  }
-	  
-	  if (contour_length > 0) {
-	    
-	    // now decide the parent of this border
-	    
-	    // NewBorder    LNBDType   Parent
-	    // OUTER        OUTER      Parent of LNBD
-	    // OUTER        HOLE       LNBD
-	    // HOLE         OUTER      LNBD
-	    // HOLE         HOLE       Parent of LNBD
-	    
-#ifdef SCENE_GRAPH_DEBUG
-	    PROGRESS("LNBD is " << LNBD);
-	    PROGRESS("OuterBorder(LNBD) " << node_hash[LNBD].bordertype);
-	    PROGRESS("NBD  is " << NBD);
-	    PROGRESS("OuterBorder(NBD) " << border_type);
+	  PROGRESS("Found hole border.  Following from " << raster_x << "," << raster_y);
 #endif
-	    
-	    int parent_id;
-	    if ( border_type ^ node_hash[LNBD].bordertype ) {
-	      parent_id = LNBD;
-	    }
-	    else {
-	      parent_id = node_hash[LNBD].parent_id;
-	    }
-	    
+	  contour_length = FollowContour(image, data_pointer, raster_x, raster_y, points_buffer, MAXLENGTH, contour_statistics,4, NBD);
+	}
+	else if (cNBD && (*data_pointer & 0x1)) { // this pixel has been seen before and it is not an exit pixel
 #ifdef SCENE_GRAPH_DEBUG
-	    PROGRESS("parent_id is " << parent_id);
+	  PROGRESS("Updating LNBD to " << cNBD);
 #endif
-	    	    
-	    // filter this contour
+	  LNBD = cNBD;
+	  continue;
+	}
+	else {
+	  continue;
+	}
 
-	    if ((contour_length > 40) &&
-		(st.length > 40) &&
-		(st.max_x - st.min_x > 20) &&
-		(st.max_y - st.min_y > 20)) {
-#ifdef SCENE_GRAPH_DEBUG
-	      PROGRESS("Contour is a valid candidate for matching");
-#endif
+	// now decide the parent of this border
+	    
+	// NewBorder    LNBDType   Parent
+	// --------------------------------------
+	// OUTER        OUTER      Parent of LNBD
+	// OUTER        HOLE       LNBD
+	// HOLE         OUTER      LNBD
+	// HOLE         HOLE       Parent of LNBD
+
+	const int parentNBD = border_type == node_hash[LNBD].bordertype ?  node_hash[LNBD].parent_id : LNBD;
 #ifdef IMAGE_DEBUG
-	      debug0.DrawPolygon(points_buffer,contour_length,0,1);
-	    //	    debug0.Save("temp.bmp");
-	    //	    exit(-1);
+	debug.DrawPolygon(points_buffer,contour_length,0,1);
 #endif
-
-	      // now attempt to fit a shape to this border
-	      
-	      // if we succeed then create a new scene graph node and insert
-	      // it into the node_hash for this NBD also add this new scene
-	      // graph node as a child of its parent SceneGraphNode which
-	      // will be pointed to by its parent contour ID below
-	      
-	      // if we fail then insert another entry in the node_hash for
-	      // the parent SceneGraphNode using this NBD
-	      camera.ImageToNPCF(points_buffer,contour_length);
-	      SceneGraphNode<S,PAYLOAD_SIZE>* next_node = new SceneGraphNode<S,PAYLOAD_SIZE>(points_buffer,contour_length);
-	      if (next_node->GetShapes().IsChainFitted()) {
-#ifdef SCENE_GRAPH_DEBUG
-		PROGRESS("Shape matches!");
-#endif
-		node_hash[parent_id].node->AddChild(next_node);
-		node_hash[NBD] = Contour(parent_id,next_node,border_type);					
-		
-		++NBD;
-		NBD &= 127;
-		if (NBD==0) { ++NBD; }	      
-	      }
-	      else {
-		delete next_node;
-		node_hash[NBD] = Contour(parent_id,node_hash[parent_id].node,border_type);
-	      }	    
-	    }
-	    else {
-	      node_hash[NBD] = Contour(parent_id,node_hash[parent_id].node,border_type);
-	    }
+	SceneGraphNode<S,PAYLOAD_SIZE>* next_node;
+	if (contour_length > 10) {
+	  camera.ImageToNPCF(points_buffer,contour_length);
+	  next_node = new SceneGraphNode<S,PAYLOAD_SIZE>(points_buffer,contour_length);
+	  if (next_node->GetShapes().IsChainFitted()) {
+	    node_hash[parentNBD].node->AddChild(next_node);
 	  }
-
-	  int new_nbd = (*data_pointer)>>1;
-	  if (new_nbd) {
-#ifdef SCENE_GRAPH_DEBUG
-	    PROGRESS("Current node has been visited, setting LNBD to "<< (int)current_nbd);
-#endif
-	    LNBD = new_nbd;
+	  else {
+	    delete next_node;
+	    next_node = node_hash[parentNBD].node;
 	  }
-	}  
-	data_pointer++;
+	}
+	else {
+	  next_node = node_hash[parentNBD].node;
+	}
+	node_hash[NBD] = Contour(parentNBD,next_node,border_type);
+
+	NBD = (NBD + 1) & 0x7F;
+	if (NBD==0) { ++NBD; }	 
+
       }
-      data_pointer++;
-    }
-#ifdef IMAGE_DEBUG
-      debug0.Save("debug-contours.bmp");
-#endif
-      
-}
-  
-template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour(Image& image, unsigned char* data_pointer, int start_x, int start_y, float* points_buffer, const int maxcount, ContourStatistics& statistics, int position, const int nbd) {
-#ifdef SCENE_GRAPH_DEBUG
-  PROGRESS("Following contour");
-#endif	 
+      else { // this is a 0-element
 
-  //  points_buffer[0] = start_x;
-  //  points_buffer[1] = start_y;
-  int pointer = -1;  // our index into the points buffer
+      }
+    }
+    ++data_pointer; // exclude the last pixel on the line
+  }
+
+#ifdef IMAGE_DEBUG
+  debug.Save("debug-scenegraph-contours.bmp");
+#endif
+}
+
+
+template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour(Image& image, unsigned char* data_pointer, int start_x, int start_y, float* points_buffer, const int maxcount, ContourStatistics& statistics, int start_position, const int nbd) {
   int image_width = image.GetWidth();
 
-  // first scan around clockwise from the requested position looking for a 1-element
-  const int offset_clockwise[] = { -1,-image_width-1,-image_width,1-image_width,1,1+image_width,image_width,image_width-1};
-  bool found = false;
-  uchar* sample_pointer;
-  for(int i=0;i<8;i++) {
-    sample_pointer = data_pointer + offset_clockwise[position];
-    if (*sample_pointer) {
-      found = true;
-      break;
-    }
-    position++;
-    position &= 0x7;
-  }
+  //   +---+---+---+
+  //   | 7 | 6 | 5 |
+  //   +---+---+---+
+  //   | 0 |   | 4 |
+  //   +---+---+---+
+  //   | 1 | 2 | 3 |
+  //   +---+---+---+
+  const int offset_x[] = { -1,-1,0,1,1,1,0,-1 };
+  const int offset_y[] = { 0,1,1,1,0,-1,-1,-1 };
 
-  if (!found) {
-#ifdef SCENE_GRAPH_DEBUG
-    PROGRESS("Failed to find any adjoining 1-elements - returning single pixel contour");
-#endif
-    // if we dont find a 1-element then record the nbd in this pixel
-    // and that it is an exit pixel and then return this single pixel contour
-    *sample_pointer = nbd<<1 | 0x1;
-    return 0;
-  }
+  const int offset[] = {-1,                //  0 
+			image_width-1,     //  1
+			image_width,       //  2
+			image_width+1,     //  3
+			1,                 //  4
+			1-image_width,     //  5
+			-image_width,      //  6
+			-image_width-1};   //  7
 
-  // if we found the 1-element a position n clockwise then we resume
-  // searching anti-clockwise from the position 1 after the found position
 
-  //    +---+---+---+---+         +---+---+---+---+   
-  //    | 1 | 2 | 3 |   |         | 7 | 6 | 5 |   |
-  //    +---+---+---+---+         +---+---+---+---+   
-  //    | 0 |   | 4 |   |         | 0 |   |_4_|   |
-  //    +---+---+---+---+   -->   +---+---+---+---+   
-  //    | 7 | 6 | X |   |         | 1 | 2 | X |   |
-  //    +---+---+---+---+         +---+---+---+---+   
-  //    |   |   |   |   |         |   |   |   |   |
-  //    +---+---+---+---+         +---+---+---+---+   
-  //
-  //  Found posn (clockwise)  |  Resume posn (anti)
-  //  -----------------------------------------------
-  //          0               |         1
-  //          1               |         0
-  //          2               |         7
-  //          3               |         6
-  //          4               |         5
-  //          5               |         4
-  //          6               |         3
-  //          7               |         2
-  //
-  // i.e. the restart position is:  9 - found % 8  
-  position = (9- position) % 0x7;
+  // data_pointer is the current focus of the search region
+  // sample_pointer is the current read point
+  unsigned char* sample_pointer;
 
+  // position is our current index into the search region
+  int position = start_position;
+
+  // contour_0 is the first pixel in the contour
   unsigned char* contour_0 = data_pointer;
-  unsigned char* contour_1 = sample_pointer;
 
-  // these two arrays store the offsets for each of the eight regions
-  // around the target pixel
-  const int offset[] = {-1,image_width-1,image_width,image_width+1,1,1-image_width,-image_width,-image_width-1};
-  const int offset_x[] = { -1, -1, 0, 1,1,1,0,-1};
-  const int offset_y[] = { 0, 1,1,1,0,-1,-1,-1};
-  
-  bool cell4_is_0 = false; // will be set to true when we search a region if we pass cell4 and cell4 is a 0-element
+  // pointer is the index we last wrote to in the points_buffer
+  int pointer = -1;
 
-  statistics.length = 0; // the contour length
-  statistics.min_x = start_x; // bounding box
-  statistics.max_x = start_x; // bounding box
-  statistics.min_y = start_y; // bounding box
-  statistics.max_y = start_y; // bounding box
-  statistics.convex = true; // true if this contour is convex
+  int NBD_shift = nbd << 1;
 
-  int nbd_shifted = nbd<<1;
-
-  while(pointer < MAXLENGTH*2) {
-    // work out the pixel co-ordinates for the position of interest
+  do {
+    position = (position - 1) & 0x7;
     sample_pointer = data_pointer+offset[position];
-    int sample = *sample_pointer;
-    if (sample) {  // if the pixel is a 1-element
-#ifdef SCENE_GRAPH_DEBUG
-      PROGRESS("Found 1-element at position " << position);
-#endif
-      // we now need to mark this pixel
-      // 1) if the pixel sample_x+1,sample_y (cell 4) is a 0-element and we
-      // have examined it whilst looking for this 1-element then this
-      // is an exit pixel.  Write (NBD,r).
-      if (cell4_is_0) {
-	*data_pointer = nbd_shifted | 0x1;
-      }
-      // 2) else if sample_x,sample_y is unmarked write
-      // (NBD,l).
-      else if (!(sample>>1)) {
-	*data_pointer = nbd_shifted;
-      }
-
-      // update the length
-      statistics.length += (position & 0x1 ? 45 : 32);
-      // update the bounding box
-      if (start_x < statistics.min_x) { statistics.min_x = start_x; }
-      else if (start_x > statistics.max_x) { statistics.max_x = start_x; }
-      if (start_y < statistics.min_y) { statistics.min_y = start_y; }
-      else if (start_y > statistics.max_y) { statistics.max_y = start_y; }
-
-      //      if (previous_position != position) {
-      // we've made a turn
-      //	if (position = 
-      //      }
-
-      // store this point in the pixel chain and update the start position
-      points_buffer[++pointer] = start_x;
-      points_buffer[++pointer] = start_y;
-      start_x+= offset_x[position];
-      start_y+= offset_y[position];
-      cell4_is_0=false;
-
-      // if we find the 1-element at position n anti-clockwise then we
-      // need to shift the region to be centered on the new point and
-      // resume searching one place after the previous central point
-      // i.e. if we find a point at 3 we need to resume searching from
-      // 0 (one place past the old centre at 7)
-      
-      //    +---+---+---+---+         +---+---+---+---+   
-      //    | 7 | 6 | 5 |   |         |   |   |   |   |
-      //    +---+---+---+---+         +---+---+---+---+   
-      //    | 0 |   | 4 |   |         |   |_7_| 6 | 5 |
-      //    +---+---+---+---+   -->   +---+---+---+---+   
-      //    | 1 | 2 | X |   |         |   | 0 | X | 4 |
-      //    +---+---+---+---+         +---+---+---+---+   
-      //    |   |   |   |   |         |   | 1 | 2 | 3 |
-      //    +---+---+---+---+         +---+---+---+---+   
-
-      //  Found posn (anti)       |  Resume posn (anti)
-      //  -----------------------------------------------
-      //          0               |         5
-      //          1               |         6
-      //          2               |         7
-      //          3               |         0
-      //          4               |         1
-      //          5               |         2
-      //          6               |         3
-      //          7               |         4
-      //
-      position = (position+5) & 0x7;
-    }
-    else {  // the pixel is a 0-element
-#ifdef SCENE_GRAPH_DEBUG
-      PROGRESS("Pixel is 0-element.  Advancing search position " << position);
-#endif
-      if (position == 4) {  // if we are at cell4 (this is a 0-element) then set the cell4_is_0 flag
-	cell4_is_0 = true; 
-      }
-
-      // advance the position
-      position = (position+1) & 0x7;
-    }
-
-    if ((pointer > 4) && 
-	(data_pointer == contour_0) &&
-	(sample_pointer == contour_1)) {
-      break;
-    }
-
-    data_pointer = sample_pointer;
+    if (*sample_pointer) { break; }
   }
-  
-  // discard the last two pixels because they are overlap on the
-  // beginning of the chain
+  while (position != start_position);
 
 #ifdef SCENE_GRAPH_DEBUG
-  PROGRESS("Returning contour of length " << (pointer-3)/2);
-#endif	 
+  PROGRESS("Finished clockwise scan at " << position << " (started:" << start_position << ")");
+#endif
 
-  statistics.length >>= 5;
-  return (pointer-3)/2;
+  if (position == start_position) {
+    // one pixel contour
+    *data_pointer = NBD_shift;
+    points_buffer[0] = start_x;
+    points_buffer[1] = start_y;
+#ifdef SCENE_GRAPH_DEBUG
+    PROGRESS("Found 1 pixel contour starting from "<< start_x << "," << start_y);
+#endif
+    return 1;
+  }
+  else {
+    position = (position + 1) & 0x7;
+
+    // contour_n is the last pixel in the contour
+    unsigned char* contour_n = sample_pointer;
+
+    bool cell4_is_0 = false; // will be set to true when we search a region if we pass cell4 and cell4 is a 0-element
+    
+    statistics.length = 0; // the contour length
+    statistics.min_x = start_x; // bounding box
+    statistics.max_x = start_x; // bounding box
+    statistics.min_y = start_y; // bounding box
+    statistics.max_y = start_y; // bounding box
+    statistics.convex = true; // true if this contour is convex
+
+    while(pointer < MAXLENGTH*2) {
+      sample_pointer = data_pointer+offset[position];
+      if (*sample_pointer) {
+#ifdef SCENE_GRAPH_DEBUG
+	PROGRESS("Found 1-pixel at position " << position << " around " << start_x << "," << start_y);
+#endif
+	// we now need to mark this pixel
+	// 1) if the pixel sample_x+1,sample_y (cell 4) is a 0-element and we
+	// have examined it whilst looking for this 1-element then this
+	// is an exit pixel.  Write (NBD,r).
+	if (cell4_is_0) {
+	  *data_pointer = NBD_shift;
+	}
+	// 2) else if sample_x,sample_y is unmarked write
+	// (NBD,l).
+	else if (!(*sample_pointer & ~0x1)) {
+	  *data_pointer = NBD_shift | 0x1;
+	}
+
+	// update the length
+	statistics.length += (position & 0x1 ? 45 : 32);
+	// update the bounding box
+	if (start_x < statistics.min_x) { statistics.min_x = start_x; }
+	else if (start_x > statistics.max_x) { statistics.max_x = start_x; }
+	if (start_y < statistics.min_y) { statistics.min_y = start_y; }
+	else if (start_y > statistics.max_y) { statistics.max_y = start_y; }
+
+	// check the stopping condition
+	if ((pointer > 4) && 
+	    (data_pointer == contour_n) &&
+	    (sample_pointer = contour_0)) {
+	  statistics.length >>= 5;
+#ifdef SCENE_GRAPH_DEBUG
+	  PROGRESS("Found " << (pointer>>1) << " pixel contour starting from "<< points_buffer[0] << "," << points_buffer[1]);
+#endif
+
+	  return pointer>>1;;
+    	}
+
+	// store this point in the pixel chain and update the start position
+	points_buffer[++pointer] = start_x;
+	points_buffer[++pointer] = start_y;
+	start_x += offset_x[position];
+	start_y += offset_y[position];
+	data_pointer = sample_pointer;
+
+	// reset the search value for cell 4
+	cell4_is_0=false;
+
+	// if we find the 1-element at position n anti-clockwise then we
+	// need to shift the region to be centered on the new point and
+	// resume searching one place after the previous central point
+	// i.e. if we find a point at 3 we need to resume searching from
+	// 0 (one place past the old centre at 7)
+	
+	//    +---+---+---+---+         +---+---+---+---+   
+	//    | 7 | 6 | 5 |   |         |   |   |   |   |
+	//    +---+---+---+---+         +---+---+---+---+   
+	//    | 0 |   | 4 |   |         |   |_7_| 6 | 5 |
+	//    +---+---+---+---+   -->   +---+---+---+---+   
+	//    | 1 | 2 | X |   |         |   | 0 | X | 4 |
+	//    +---+---+---+---+         +---+---+---+---+   
+	//    |   |   |   |   |         |   | 1 | 2 | 3 |
+	//    +---+---+---+---+         +---+---+---+---+   
+	
+	//  Found posn (anti)       |  Resume posn (anti)
+	//  -----------------------------------------------
+	//          0               |         5
+	//          1               |         6
+	//          2               |         7
+	//          3               |         0
+	//          4               |         1
+	//          5               |         2
+	//          6               |         3
+	//          7               |         4
+	//
+	position = (position+5) & 0x7;
+      }
+      else {  // pixel is a 0-element
+	if (position == 4) {  // if we are at cell4 (this is a 0-element) then set the cell4_is_0 flag
+	  cell4_is_0 = true; 
+	}
+	
+	// advance the position
+	position = (position+1) & 0x7;
+      }
+
+    }
+
+    statistics.length >>= 5;
+    return (pointer-3)/2;
+  }
 }
+
 
 #endif//SCENE_GRAPH_GUARD
 
