@@ -91,7 +91,7 @@ public:
    *
    * \todo Doesn't deal with the passed object being longer
    */ 
-  template<int SIZE> bool Equals(const std::bitset<SIZE>& target) const {
+  template<int SIZE> bool Equals(const CyclicBitSet<SIZE>& target) const {
     for(int i=0;i<SIZE;i++) {
       if (target[i] != (*this)[i]) {
 	return false;

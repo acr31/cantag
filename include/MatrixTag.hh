@@ -14,7 +14,6 @@
 #include <ShapeChain.hh>
 #include <findtransform.hh>
 #include <bitset>
-#include <Payload.hh>
 #include <iostream>
 #ifdef TEXT_DEBUG
 #define  MATRIX_TAG_DEBUG

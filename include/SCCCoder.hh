@@ -10,7 +10,6 @@
 #include <Config.hh>
 #include <Coder.hh>
 #include <cstdio>
-#include <Payload.hh>
 
 
 namespace cbc20 {

@@ -62,7 +62,7 @@ public:
     CyclicBitSet<BIT_COUNT> payload(data);
     data.reset();
 
-    const std::bitset<GRANULARITY> sync_sector_mask((1<<GRANULARITY)-1);
+    const CyclicBitSet<GRANULARITY> sync_sector_mask((1<<GRANULARITY)-1);
     const BigInt<BIT_COUNT> base((1<<GRANULARITY)-1);
     const BigInt<BIT_COUNT> checksum_mod( BigInt<BIT_COUNT>((1<<GRANULARITY)-1).Pwr(CHECKSUM_COUNT));
 
