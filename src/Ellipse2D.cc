@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/30 16:54:27  acr31
+ * changed the Coder api -reimplemented various bits
+ *
  * Revision 1.3  2004/01/28 17:19:42  acr31
  * providing my own implementation of draw ellipse
  *
@@ -68,7 +71,7 @@ void Ellipse2D::ProjectPoint(float angle_radians, float radius, float *projX, fl
   *projX = ix;
   *projY = iy;
   
-  PROGRESS("Projecting point radius "<<radius<<" angle "<<angle_radians<<" on to ("<< *projX <<","<< *projY <<")");
+  //  PROGRESS("Projecting point radius "<<radius<<" angle "<<angle_radians<<" on to ("<< *projX <<","<< *projY <<")");
 }
 
 

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/30 16:54:28  acr31
+ * changed the Coder api -reimplemented various bits
+ *
  * Revision 1.3  2004/01/26 12:04:31  acr31
  * noted that the routines search for white rather than black objects
  *
@@ -56,7 +59,8 @@ void FindRectangles(Image *image, int maxXDiff, int maxYDiff, std::vector<Rectan
     // Check for 4 vertices
     // Check for a convex contour
     if( result->total == 4 &&
-	cvCheckContourConvexity(result) ) {
+	cvCheckContourConvexity(result) &&
+	fabs(cvContourArea(result,CV_WHOLE_SEQ)) > 1000) {
 #ifdef IMAGE_DEBUG
       cvDrawContours(debug1,result,0,0,0,3);
 #endif	   

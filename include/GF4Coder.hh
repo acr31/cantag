@@ -4,6 +4,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/30 16:54:17  acr31
+ * changed the Coder api -reimplemented various bits
+ *
  * Revision 1.2  2004/01/27 18:06:58  acr31
  * changed inheriting classes to inherit publicly from their parents
  *
@@ -51,11 +54,8 @@ private:
 public:
   GF4Coder(int symbol_range,int symbol_count);
   
-  virtual void Set(unsigned long long value);
-  virtual unsigned int NextChunk();
-  virtual void Reset();
-  virtual bool LoadChunk(unsigned int chunk);
-  virtual unsigned long long  Decode();
+  virtual unsigned long long Encode(unsigned long long value);
+  virtual unsigned long long Decode(unsigned long long value);
 };
 
 #endif//GF4_CODER_GUARD

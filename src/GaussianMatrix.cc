@@ -58,12 +58,13 @@ void GaussianMatrix::SubtractRow(int fromrow, int row, float lambda, int startco
 }
 
 void GaussianMatrix::Print() {
-  std::cout << std::endl;
+  std::cout << std::endl << "[";
+
   for(int i=0;i<m_size;i++) {
     for(int j=0;j<m_size;j++) {
       std::cout << m_values[j][i] << "\t";
     }
-    std::cout << std::endl;
+    std::cout << ";" << std::endl;
   }
   std::cout << std::endl;
   

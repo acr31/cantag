@@ -6,6 +6,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/30 16:54:27  acr31
+ * changed the Coder api -reimplemented various bits
+ *
  * Revision 1.1  2004/01/25 14:53:35  acr31
  * moved over to autoconf/automake build system
  *
@@ -45,46 +48,25 @@ GF4Coder::GF4Coder(int symbol_range,  int symbol_count) :
   assert(symbol_count < 21);
 }
 
-void GF4Coder::Set(unsigned long long value) {
+unsigned long long GF4Coder::Encode(unsigned long long value) {
   PROGRESS("Encoder set with value "<<value);
   m_encoded = GF4Poly(value)*m_genpoly;
-  m_current_chunk = 0;
   PROGRESS("Encoded value is "<<m_encoded.GetValue());
+  return m_encoded.GetValue();
 
 }
 
-unsigned int GF4Coder::NextChunk() {
-  unsigned int chunk = m_encoded.GetTerm(m_symbol_count-1-(m_current_chunk++));
-  PROGRESS("NextChunk returns "<<chunk);
-  return chunk;
-}
-
-void GF4Coder::Reset() {
-  PROGRESS("Decoder Reset");
-  m_encoded = GF4Poly(0);
-};
-
-bool GF4Coder::LoadChunk(unsigned int chunk) { 
-  PROGRESS("LoadChunk value "<<chunk);
-  m_encoded <<=1;
-  if (chunk&~3) {
-    PROGRESS("Chunk out of range - throwing invalid symbol");
-    throw Coder::InvalidSymbol();
-  }
-  m_encoded+=chunk;
-
-}
-
-unsigned long long GF4Coder::Decode()  { 
-  PROGRESS("Encoded value = "<<m_encoded.GetValue());
+unsigned long long GF4Coder::Decode(unsigned long long value)  { 
+  GF4Poly enc(value);
+  PROGRESS("Encoded value = "<<enc.GetValue());
   for(int i=0;i<m_symbol_count;i++) {
-    GF4Poly syndrome = m_encoded % m_genpoly;
+    GF4Poly syndrome = enc % m_genpoly;
     PROGRESS("Syndrome is " << syndrome.GetValue());
     if (syndrome == (unsigned long long int)0) {
       PROGRESS("Syndrome is 0 - we have a match");
-      return (m_encoded / m_genpoly).GetValue();
+      return (enc / m_genpoly).GetValue();
     }
-    m_encoded.Rotate(1,m_symbol_count);
+    enc.Rotate(1,m_symbol_count);
   }
   PROGRESS("We failed to find a valid orientation for this code - throwing InvalidCode.");
   throw InvalidCode();

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.7  2004/01/30 16:54:27  acr31
+ * changed the Coder api -reimplemented various bits
+ *
  * Revision 1.6  2004/01/30 08:05:23  acr31
  * changed rectangle2d to use gaussian elimination
  *
@@ -43,17 +46,15 @@ Rectangle2D::Rectangle2D(float width) {
   float diff = width/2;
   m_x0 = 0;
   m_y0 = 0;
-  
   m_x1 = width;
   m_y1 = 0;
-
   m_x2 = width;
   m_y2 = width;
-
   m_x3 = 0;
   m_y3 = width;
-  sort_points();
+
   compute_central_point();
+  sort_points();
   compute_alpha();
 }
 
@@ -66,8 +67,9 @@ Rectangle2D::Rectangle2D(float x0, float y0,float x1, float y1,float x2, float y
   m_y2(y2),
   m_x3(x3),
   m_y3(y3) {
-  sort_points();
+
   compute_central_point();
+  sort_points();
   compute_alpha();
 };
 
@@ -80,8 +82,9 @@ Rectangle2D::Rectangle2D(float* coords) :
   m_y2(coords[5]),
   m_x3(coords[6]),
   m_y3(coords[7]) {
-  sort_points();
+
   compute_central_point();
+  sort_points();
   compute_alpha();
 };
 
@@ -145,9 +148,9 @@ void Rectangle2D::compute_alpha() {
    * If the co-ordinates relative to the matrix are (u,v).  Then the
    * co-ordinates in the camera frame of reference are (x,y,z)
    *
-   * x = c1 * u + c2 * v + c3
-   * y = c4 * u + c5 * v + c6
-   * z = c7 * u + c8 * v + c9
+   * x = c0 * u + c1 * v + c2
+   * y = c3 * u + c4 * v + c5
+   * z = c6 * u + c7 * v + c8
    *
    * There is nothing clever about the above - they are just an
    * arbitrary linear combination of u and v
@@ -159,16 +162,76 @@ void Rectangle2D::compute_alpha() {
    *
    * Since both of the equations are over z we can divide through by c9 to give
    *
-   *  X = (a1*x + a2*y + a3)/(a7*x+a8*y+1)
-   *  Y = (a4*x + a5*y + a6)/(a7*x+a8*y+1)
+   *  X = (a0*x + a1*y + a2)/(a6*x+a7*y+1)
+   *  Y = (a3*x + a4*y + a5)/(a6*x+a7*y+1)
    *
-   * Where a1 = c1/c9, a2 = c2/c9,  etc...
+   * Where a0 = c0/c8, a1 = c1/c8,  etc...
    *
    * Given four points on the matrix and their points in the final
    * image we can set up a set of simultaneous linear equations and
-   * solve for a1 to a8
+   * solve for a0 to a7
    *
-   * We have found four points - the four corners so we can
+   * ( X0 )   (  u0  v0  1   0   0  0  -X0*u0  -X0*v0 ) ( a0 )
+   * ( X1 )   (  u1  v1  1   0   0  0  -X1*u1  -X1*v1 ) ( a1 )
+   * ( X2 )   (  u2  v2  1   0   0  0  -X2*u2  -X2*v2 ) ( a2 )
+   * ( X3 )   (  u3  v3  1   0   0  0  -X3*u3  -X3*v3 ) ( a3 )
+   * ( Y0 ) = (   0   0  0  u0  v0  1  -Y0*u0  -Y0*v0 ) ( a4 )
+   * ( Y1 )   (   0   0  0  u1  v1  1  -Y1*u1  -Y1*v1 ) ( a5 )
+   * ( Y2 )   (   0   0  0  u2  v2  1  -Y2*u2  -Y2*v2 ) ( a6 )
+   * ( Y3 )   (   0   0  0  u3  v3  1  -Y3*u3  -Y3*y3 ) ( a7 )
+   *
+   * In the above (X_n,Y_n) are pairs of screen co-ordinates that
+   * correspond to (u_n,v_n) pairs of co-ordinates on the tag
+   *
+   * We have found four points - the four corners which we have sorted
+   * so that we have
+   *
+   * (x3,y3) +----------+ (x0,y0)
+   *         |          |
+   *         |          |
+   *         |          |
+   *         |          |
+   * (x2,y2) +----------+ (x1,y1)
+   *
+   * Our screen co-ordinate origin is top left so:
+   *
+   * x0,y0 -> 1,0 (tag co-ordinates)
+   * x1,y1 -> 1,1
+   * x2,y2 -> 0,1
+   * x3,y3 -> 0,0
+   *
+   * So we can now substitute x_n,y_n (known tag co-ordinates from
+   * above) and X_n,Y_n (known screen co-ordinates from quadtangle
+   * into the above matrix.  Do this in such away that the matrix will
+   * be easy to invert.
+   *
+   * x0,y0 -> u1,v1
+   * x1,y1 -> u0,v0
+   * x2,y2 -> u3,v3
+   * x3,y3 -> u2,v2
+   *
+   * This gives (remembering to swap X and Y's too)
+   *
+   * ( X1 )   (  x1  y1  1   0   0  0  -X1*x1  -X1*y1 ) ( a0 )
+   * ( X0 )   (  x0  y0  1   0   0  0  -X0*x0  -X0*y0 ) ( a1 )
+   * ( X3 )   (  x3  y3  1   0   0  0  -X3*x3  -X3*y3 ) ( a2 )
+   * ( X2 )   (  x2  y2  1   0   0  0  -X2*x2  -X2*y2 ) ( a3 )
+   * ( Y1 ) = (   0   0  0  x1  y1  1  -Y1*x1  -Y1*y1 ) ( a4 )
+   * ( Y0 )   (   0   0  0  x0  y0  1  -Y0*x0  -Y0*y0 ) ( a5 )
+   * ( Y3 )   (   0   0  0  x3  y3  1  -Y3*x3  -Y3*y3 ) ( a6 )
+   * ( Y2 )   (   0   0  0  x2  y2  1  -Y2*x2  -Y2*y2 ) ( a7 )
+   *
+   * which simplifies (because we know x_n,y_n) to:
+   *
+   * ( X1 )   (  1  1  1   0   0  0  -X1  -X1 ) ( a0 )
+   * ( X0 )   (  1  0  1   0   0  0  -X0    0 ) ( a1 )
+   * ( X3 )   (  0  0  1   0   0  0    0    0 ) ( a2 )
+   * ( X2 )   (  0  1  1   0   0  0    0  -X2 ) ( a3 )
+   * ( Y1 ) = (  0  0  0   1   1  1  -Y1  -Y0 ) ( a4 )
+   * ( Y0 )   (  0  0  0   1   0  1  -Y0    0 ) ( a5 )
+   * ( Y3 )   (  0  0  0   0   0  1    0    0 ) ( a6 )
+   * ( Y2 )   (  0  0  0   0   1  1    0  -Y2 ) ( a7 )
+   *
    */
 
   float** coeffs = new float*[8];
@@ -183,10 +246,10 @@ void Rectangle2D::compute_alpha() {
   coeffs[0][7] = 0;
 
   coeffs[1] = new float[8];
-  coeffs[1][0] = 0;
-  coeffs[1][1] = 1;
-  coeffs[1][2] = 1;
-  coeffs[1][3] = 0;
+  coeffs[1][0] = 1;
+  coeffs[1][1] = 0;
+  coeffs[1][2] = 0;
+  coeffs[1][3] = 1;
   coeffs[1][4] = 0;
   coeffs[1][5] = 0;
   coeffs[1][6] = 0;
@@ -203,12 +266,12 @@ void Rectangle2D::compute_alpha() {
   coeffs[2][7] = 0;
 
   coeffs[3] = new float[8];
-  coeffs[3][0] = -m_x1;
-  coeffs[3][1] = -m_x0;
+  coeffs[3][0] = 0;
+  coeffs[3][1] = 0;
   coeffs[3][2] = 0;
   coeffs[3][3] = 0;
-  coeffs[3][4] = -m_y1;
-  coeffs[3][5] = -m_y0;
+  coeffs[3][4] = 1;
+  coeffs[3][5] = 1;
   coeffs[3][6] = 0;
   coeffs[3][7] = 0;
 
@@ -218,39 +281,39 @@ void Rectangle2D::compute_alpha() {
   coeffs[4][2] = 0;
   coeffs[4][3] = 0;
   coeffs[4][4] = 1;
-  coeffs[4][5] = 1;
+  coeffs[4][5] = 0;
   coeffs[4][6] = 0;
-  coeffs[4][7] = 0;
+  coeffs[4][7] = 1;
 
   coeffs[5] = new float[8];
   coeffs[5][0] = 0;
   coeffs[5][1] = 0;
   coeffs[5][2] = 0;
   coeffs[5][3] = 0;
-  coeffs[5][4] = 0;
+  coeffs[5][4] = 1;
   coeffs[5][5] = 1;
   coeffs[5][6] = 1;
-  coeffs[5][7] = 0;
+  coeffs[5][7] = 1;
 
   coeffs[6] = new float[8];
-  coeffs[6][0] = 0;
+  coeffs[6][0] = -m_x1;
   coeffs[6][1] = -m_x0;
-  coeffs[6][2] = -m_x3;
+  coeffs[6][2] = 0;
   coeffs[6][3] = 0;
-  coeffs[6][4] = 0;
+  coeffs[6][4] = -m_y1;
   coeffs[6][5] = -m_y0;
-  coeffs[6][6] = -m_y3;
+  coeffs[6][6] = 0;
   coeffs[6][7] = 0;
 
   coeffs[7] = new float[8];
-  coeffs[7][0] = 0;
+  coeffs[7][0] = -m_x1;
   coeffs[7][1] = 0;
   coeffs[7][2] = 0;
-  coeffs[7][3] = 0;
-  coeffs[7][4] = 1;
-  coeffs[7][5] = 1;
-  coeffs[7][6] = 1;
-  coeffs[7][7] = 1;
+  coeffs[7][3] = -m_x2;
+  coeffs[7][4] = -m_y1;
+  coeffs[7][5] = 0;
+  coeffs[7][6] = 0;
+  coeffs[7][7] = -m_y2;
 
   float* xvals = new float[8];
   xvals[0] = m_x1;
@@ -262,26 +325,13 @@ void Rectangle2D::compute_alpha() {
   xvals[6] = m_y3;
   xvals[7] = m_y2;
 
-  float* result = new float[8];
-
-  GaussianElimination(xvals,coeffs,result,8);
-
- 
-  m_alpha[0] = result[0];
-  m_alpha[1] = result[1];
-  m_alpha[2] = result[2];
-  m_alpha[3] = result[4];
-  m_alpha[4] = result[5];
-  m_alpha[5] = result[7];
-  m_alpha[6] = result[3];
-  m_alpha[7] = result[6];
+  GaussianElimination(xvals,coeffs,m_alpha,8);
 
   delete[] xvals;
   for(int i=0;i<8;i++) {
     delete[] coeffs[i];
   }
   delete[] coeffs;
-  delete[] result;
 
   PROGRESS("Computed alpha[0] "<<m_alpha[0]);
   PROGRESS("         alpha[1] "<<m_alpha[1]);
@@ -298,6 +348,17 @@ void Rectangle2D::compute_alpha() {
 inline void Rectangle2D::compute_central_point() {
   /*
    * Find the central point of this rectangle (A,B,C,D)
+   *
+   *     A +--------------+ B
+   *       |              |
+   *       |              |
+   *       |              |
+   *       |              |
+   *       |              |
+   *       |              |
+   *       |              |
+   *     D +--------------+ C
+   *
    *
    *       A + AC*a = B + BD*b
    *
@@ -341,17 +402,17 @@ inline void Rectangle2D::compute_central_point() {
 
 
 float Rectangle2D::find_angle(float x, float y, float cx, float cy) {
-  if ((x > cx) && (y > cy)) {
-    return atan( (y-cy) / (x-cx) );
+  if ((x >= cx) && (y >= cy)) {
+    return PI/2+ atan( (y-cy) / (x-cx) );
   }
-  else if ((x > cx) && (y < cy)) {
-    return PI/2 + atan( (cy-y) / (x-cx) );
+  else if ((x >= cx) && (y < cy)) {
+    return atan( (cy-y) / (x-cx) );
   }
   else if ((x < cx) && (y < cy)) {
-    return PI + atan ( (cx-x) / (cy-y) );
+    return 3*PI/2 + atan ( (cy-y) / (cx-x) );
   }
-  else if ((x < cx) && (y > cy)) {
-    return 3*PI/2 + atan( (cx-x) / (y-cy));
+  else if ((x < cx) && (y >= cy)) {
+    return PI + atan( (y-cy) / (cx-x));
   }
 }
 
@@ -365,11 +426,16 @@ void Rectangle2D::sort_points()
 {
   // sort the points into clockwise order.
   float angles[4];
-  angles[0] = find_angle(m_x0,m_y0,m_yc,m_xc);
-  angles[1] = find_angle(m_x1,m_y1,m_yc,m_xc);
-  angles[2] = find_angle(m_x2,m_y2,m_yc,m_xc);
-  angles[3] = find_angle(m_x3,m_y3,m_yc,m_xc);
-
+  angles[0] = find_angle(m_x0,m_y0,m_xc,m_yc);
+  angles[1] = find_angle(m_x1,m_y1,m_xc,m_yc);
+  angles[2] = find_angle(m_x2,m_y2,m_xc,m_yc);
+  angles[3] = find_angle(m_x3,m_y3,m_xc,m_yc);
+  PROGRESS("Centre (" << m_xc << "," << m_yc <<")");
+  PROGRESS("Original order " << std::endl <<
+	   "(" << m_x0 << "," << m_y0 << ") @ "<< angles[0] << std::endl <<
+	   "(" << m_x1 << "," << m_y1 << ") @ "<< angles[1] << std::endl <<
+	   "(" << m_x2 << "," << m_y2 << ") @ "<< angles[2] << std::endl <<
+	   "(" << m_x3 << "," << m_y3 << ") @ "<< angles[3]);
   float tx,ty; 
   for(int i=0;i<4;i++) {
     if (angles[0] > angles[1]) {
@@ -390,6 +456,12 @@ void Rectangle2D::sort_points()
       swap(&angles[2],&angles[3]);
     }
   }
+  
+  PROGRESS("Final order " << std::endl <<
+	   "(" << m_x0 << "," << m_y0 << ") @ "<< angles[0] << std::endl <<
+	   "(" << m_x1 << "," << m_y1 << ") @ "<< angles[1] << std::endl <<
+	   "(" << m_x2 << "," << m_y2 << ") @ "<< angles[2] << std::endl <<
+	   "(" << m_x3 << "," << m_y3 << ") @ "<< angles[3]);
 }
 
   

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/30 16:54:17  acr31
+ * changed the Coder api -reimplemented various bits
+ *
  * Revision 1.3  2004/01/27 18:06:59  acr31
  * changed inheriting classes to inherit publicly from their parents
  *
@@ -41,169 +44,130 @@
 template<int CHECKSUM_COUNT=2>	 
 class TripOriginalCoder : public Coder {
 private:
-  int m_symbol_range;
-  int m_symbol_count;
-  int m_original_symbol_range;
-  int m_original_symbol_count;
-  int m_counter;
-  unsigned int *m_values;
-
+  unsigned int m_bitcount;
+  unsigned int m_granularity;
+  unsigned int m_codingbase;
+  unsigned int m_symbol_count;
+  unsigned int m_mask;
 
 public:
-  TripOriginalCoder(int symbol_range,int symbol_count) : 
-    m_symbol_range(symbol_range),
-    m_symbol_count(symbol_count),
-    m_original_symbol_range(symbol_range),
-    m_original_symbol_count(symbol_count),
-    m_counter(0) {
-
-    assert(symbol_range >= 2);
-
-    if (symbol_range == 2) {
-      m_symbol_count /= 2;
-      m_symbol_range = 4;
-    }
-
-    m_values = new unsigned int[m_symbol_count];
-
+  /**
+   * bitcount is the number of bits we can store on the tag
+   * granularity is the degree of symmetry in our representation
+   * - granularity 1 means that we are encoding a bit at a time and so
+   *   to generate all the possible reading of the code you
+   *   repeatedly rotate by 1 bit
+   * - granularity 2 means that we are encoding base 4 (two bits at a
+   *   time), so rotate by two bits at a time to get possible readings
+   *   of the code
+   *
+   * The significance of this is that the sync sector must be read
+   * uniquely whatever the rotation of the reading so we need to use a
+   * number of bits < the granularity to encode it
+   */
+  TripOriginalCoder(int bitcount, int granularity) : 
+    m_bitcount(bitcount),
+    m_granularity(granularity),
+    m_codingbase((1<<granularity) -1), // we encode base 2^n -1 (one of the values must be the sync sector)
+    m_symbol_count(bitcount-granularity*(1+CHECKSUM_COUNT)),
+    m_mask(( 1<<granularity) - 1)
+  {
+    
+    // we need to ensure that the sync sector can be read uniquely
+    assert(granularity >= 2);
+    assert(m_symbol_count > 0);
   };
 
+
   /**
-   * This method takes the value and stores internally a value which
-   * when interpreted with base symbol_range has the sync digit at the
-   * beginning and then two checksum digits and then the code
+   * Take the bit pattern from the tag and decode the value stored
    */
-  void Set(unsigned long long value) {
-    // check first to see if the value is too largs
-    if (value > (unsigned long long)pow(m_symbol_range-1,m_symbol_count-CHECKSUM_COUNT-1)) {
-      throw ValueTooLarge();
-    }
-
-    m_values[0] = m_symbol_range-1;
-    m_counter = 0;
-    int num_syms = m_symbol_count - CHECKSUM_COUNT -1;
-    unsigned int checksum = 0;
-    for(int i=num_syms-1;i>=0;i--) {
-      unsigned long long pwr = (unsigned long long)pow(m_symbol_range-1,i);
-      // we need to produce a base m_symbol_range-1 encoding of the value
-      m_values[i+CHECKSUM_COUNT+1] = (unsigned int)(value / pwr);
-      
-      // now remove this from the total
-      value -= m_values[i+CHECKSUM_COUNT+1] * pwr;
-      checksum += m_values[i+CHECKSUM_COUNT+1];
-    }
-    PROGRESS("Checksum is "<< checksum);
-    
-    // we now have to store the checksum in the first few values base m_symbol_range-1
-    unsigned int max_checksum = (unsigned int)pow(m_symbol_range-1,CHECKSUM_COUNT);
-    checksum %= max_checksum;
-
-    for(int i=CHECKSUM_COUNT-1;i>=0;i--) {
-      unsigned int pwr = (unsigned int)pow(m_symbol_range-1,i);
-      m_values[i+1] = checksum/pwr;
-      checksum -= m_values[i+1] * pwr;
-    }
-  }
-  
-  /**
-   * Read off the encoded code in the original symbol range
-   */
-  unsigned int NextChunk() {
-    unsigned int result;
-    if (m_original_symbol_range == 2) {
-      result = m_values[m_counter/2];
-      result >>= m_counter % 2;
-      result &= 1;
-      m_counter++;
-    }
-    else {
-      result = m_values[m_counter++];
-    }
-    PROGRESS("NextChunk returns "<<result);
-    return result;
-  }
-
-  virtual void Reset() {
-    PROGRESS("Decoder Reset");
-    m_counter=0;
-  }
-
-  /**
-   * Accumulate the encoded value - the tag is giving us data base
-   * original_symbol_range   
-   */ 
-  virtual bool LoadChunk(unsigned int chunk) {
-    PROGRESS("LoadChunk: "<<chunk);
-    if (chunk > m_original_symbol_range-1) {
-      PROGRESS("Throwing InvalidSymbol");
-      throw InvalidSymbol();
-    }
-    
-    if (m_original_symbol_range == 2) {
-      if (m_counter % 2 == 0) {
-	m_values[m_counter++/2] = chunk;
-      }
-      else {
-	m_values[m_counter++/2] += chunk << 1;
-      }
-    }
-    else {
-      m_values[m_counter++] = chunk;
-    }
-    return true;
-  }
-
-  /**
-   * We now need to decode the code
-   * It should have a sync digit at the beginning with value m_symbol_range-1
-   *
-   * Then follows some checksum digits which is a number base
-   * m_symbol_range-1 encoded in base m_symbol_range.  So we have to
-   * read each digit and add it up
-   *
-   */
-  virtual unsigned long long Decode() {
-    PROGRESS("Decoding");
-    for(int i=0;i<m_symbol_count;i++) {
-      if (m_values[i] == m_symbol_range -1 ) {
-	PROGRESS("Found SYNC sector");
-
-	// extract the checksum
-	unsigned int checksum = 0;
-	unsigned int pwr = 1;
-	for(int j=0;j<CHECKSUM_COUNT;j++) {
-	  checksum += m_values[(i+j+1) % m_symbol_count] * pwr;
-	  pwr *= m_symbol_range - 1;
+  virtual unsigned long long Decode(unsigned long long value) {
+    // try all possible rotations...
+    for(int i=0;i<m_bitcount;i+=m_granularity) {
+      // have we found sync sector
+      PROGRESS(value  << " " <<m_mask << " " <<(value &m_mask));
+      if ((value & m_mask) == m_mask) {
+	PROGRESS("Found sync sector");
+	// yes
+	value >>= m_granularity; // shift off the sync sector
+	unsigned long checksum = 0;
+	for(int i=0;i<CHECKSUM_COUNT;i++) {
+	  unsigned long pwr = (unsigned long)pow(m_codingbase,i);
+	  checksum += (value & m_mask)*pwr;
+	  value >>= m_granularity;
 	}
-	PROGRESS("Checksum is "<< checksum);
-	
-	// extract the result is what's left       	
-	unsigned long long result = 0;
-	unsigned int checksum_check = 0;
-	unsigned long long r_pwr = 1;
-	int num_syms = m_symbol_count - CHECKSUM_COUNT -1;
-	for(int j=0;j<num_syms;j++) {
-	  result += m_values[(i+j+1+CHECKSUM_COUNT) % m_symbol_count] * r_pwr;
-	  checksum_check += m_values[(i+j+1+CHECKSUM_COUNT) % m_symbol_count];
-	  r_pwr *= m_symbol_range -1;
+	PROGRESS("Read checksum "<< checksum);
+	PROGRESS("Remaining code is "<<value);
+	unsigned long long code = 0;
+	unsigned long checksum_check = 0;
+	for(int i=0;i<m_symbol_count;i++) {
+	  unsigned long long pwr = (unsigned long long)pow(m_codingbase,i);
+	  code += (value & m_mask)*pwr;
+	  checksum_check += value & m_mask;
+	  value >>= m_granularity;
 	}
-	PROGRESS("Result is "<< result);
-	PROGRESS("Checksum check is "<<checksum_check);
 
-	checksum_check %= (unsigned int)pow(m_symbol_range-1,CHECKSUM_COUNT);
-
-	if (checksum_check == checksum) {
-	  PROGRESS("Checksum valid returning "<<result);
-	  return result;
+	// now check the checksum
+	if (checksum == checksum_check % (unsigned long)pow(m_codingbase,CHECKSUM_COUNT)) {
+	  return code;		  
 	}
 	else {
-	  PROGRESS("Throwing InvalidCheckSum.  Checksum was "<<checksum_check<<" and we expected "<<checksum);
+	  PROGRESS("Failed. Checksum on tag was "<<checksum<< " and we have "<< (checksum_check % (unsigned long)pow(m_codingbase,CHECKSUM_COUNT)));
 	  throw InvalidCheckSum();
 	}
       }
+      else {
+	// sync sector not found yet
+	value = (value << m_granularity) & (((unsigned long long)1<<m_bitcount)-1) | (value >> (m_bitcount-m_granularity));
+	PROGRESS("Rotated value to "<< value);
+      }
     }
-    PROGRESS("Failed to find a synchronization sector");
+    PROGRESS("Failed to find a sync sector");
     throw InvalidCode();
+  }
+
+  /**
+   * This method encodes the given value and returns the bit pattern
+   * to store on the tag
+   */
+  virtual unsigned long long Encode(unsigned long long value) {
+    // check to see if the value is too large
+    PROGRESS("Encode called with " << value);
+    PROGRESS("Maximum value is "<< (unsigned long long)pow(m_codingbase,m_symbol_count) -1 );
+    if (value > (unsigned long long)pow(m_codingbase,m_symbol_count) -1) {
+      throw ValueTooLarge();
+    }
+
+    // now build the code from the end forwards
+    unsigned long checksum = 0;
+    unsigned long long result = 0;
+    for(int i=m_symbol_count-1;i>=0;i--) {
+      unsigned long long pwr = (unsigned long long)pow(m_codingbase,i);
+      unsigned int store = value / pwr;
+      value %= pwr;
+      result <<= m_granularity;
+      result |= store;
+      checksum+=store;
+    }
+    PROGRESS("Coded value is "<<result);
+    checksum %= (unsigned long)pow(m_codingbase,CHECKSUM_COUNT);
+    PROGRESS("Now storing checksum " << checksum);
+
+    // now store the checksum
+    for(int i=CHECKSUM_COUNT-1;i>=0;i--) {
+      result <<= m_granularity;
+      unsigned long pwr = (unsigned long)pow(m_codingbase,i);
+      result |= checksum / pwr;
+      checksum %= pwr;
+    }
+    
+    // finally, add the sync sector
+    result <<= m_granularity;
+    result |= (1<<m_granularity)-1;
+
+    PROGRESS("Final bit pattern is "<<result);
+    return result;
   }
 
 };

@@ -12,6 +12,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/01/30 16:54:17  acr31
+ * changed the Coder api -reimplemented various bits
+ *
  * Revision 1.4  2004/01/30 08:05:23  acr31
  * changed rectangle2d to use gaussian elimination
  *
@@ -61,7 +64,7 @@ private:
 public:
   MatrixTag(int size) :
     m_length(size*size - (size*size % 2)),
-    m_coder(2,size*size - (size*size % 2)),
+    m_coder(size*size - (size*size % 2),2),
     m_size(size),
     m_cell_width(1/(float)(size+2)),
     m_cell_width_2(0.5/(float)(size+2))
@@ -88,7 +91,6 @@ public:
     m_cells_corner = new float[m_size*m_size*2];
     int triangle_size = m_size*m_size / 2;
     int position = 0;
-    int maxpos =0;
     for(int height = 0; height < m_size/2; height++) {
       for(int i=height;i<m_size-1-height;i++) {
 	m_cells_corner[position] = (float)(i+1)/(m_size+2);
@@ -102,7 +104,7 @@ public:
 
 	m_cells_corner[position+triangle_size*3] = (float)(height+1)/(m_size+2);
 	m_cells_corner[position+triangle_size*3+1] = (float)(m_size-i)/(m_size+2);
-	maxpos = position+triangle_size*3+1;
+
 	position+=2;
       }
     }
@@ -133,7 +135,7 @@ public:
 			 black);
 
     // now draw the code
-    m_coder.Set(code);
+    unsigned long long value = m_coder.Encode(code);
     float projX0, projY0;
     float projX1, projY1;
     float projX2, projY2;
@@ -148,7 +150,8 @@ public:
 			   (int)projX1, (int)projY1,
 			   (int)projX2, (int)projY2,
 			   (int)projX3, (int)projY3,
-			   m_coder.NextChunk() == 1 ? black : white);
+			   (value & 1) == 1 ? black : white);
+      value >>=1;
     }
   }
 
@@ -158,39 +161,43 @@ public:
     Image* debug0 = cvCloneImage(image);
     cvConvertScale(debug0,debug0,0.5,128);    
     DrawQuadTangle(debug0,l,0,3);
+    
+    for(int i=0;i<m_size+2;i++) {
+      float dX,dY;
+      l->ProjectPoint((float)i/(m_size+2),0,&dX,&dY);
+      CvPoint p1 = cvPoint((int)dX,(int)dY);
+      l->ProjectPoint((float)i/(m_size+2),1,&dX,&dY);
+      CvPoint p2 = cvPoint((int)dX,(int)dY);
+
+      l->ProjectPoint(0,(float)i/(m_size+2),&dX,&dY);
+      CvPoint p3 = cvPoint((int)dX,(int)dY);
+      l->ProjectPoint(1,(float)i/(m_size+2),&dX,&dY);
+      CvPoint p4 = cvPoint((int)dX,(int)dY);
+
+      cvLine(debug0,p1,p2,0,1);
+      cvLine(debug0,p3,p4,0,1);      
+    }
+
 #endif
     float projX, projY;
-    m_coder.Reset();
+    unsigned long long code = 0;
     // iterate over the tag reading each section
-    for(int i=0;i<m_length;i++) {
+    for(int i=m_length-1;i>=0;i--) {
       l->ProjectPoint(m_cells_corner[2*i]+m_cell_width_2,m_cells_corner[2*i+1]+m_cell_width_2, &projX, &projY);
-      try {
-	m_coder.LoadChunk( (SampleImage(image,(int)projX,(int)projY) < 128) ? 1 : 0);
-      }
-      catch (Coder::InvalidSymbol &e) {
+      bool sample = SampleImage(image,(int)projX,(int)projY) > 128;
+      code <<= 1;
+      code |= sample ? 1 : 0;
+
 #ifdef IMAGE_DEBUG
-	cvSaveImage("debug-decode0.jpg",debug0);
-	cvReleaseImage(&debug0);
-#endif
-	throw e;
-      }
-#ifdef IMAGE_DEBUG
-      if (i==1) {
-	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),255,8);
-	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),0,6);
-      }
-      else {
-	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),255,4);
-	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),0,3);
-      }
+      cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),0,5);
 #endif	
-    }
-    
+    }    
 #ifdef IMAGE_DEBUG
-    cvSaveImage("debug-decode0.jpg",debug0);
+    cvSaveImage("debug-decode.jpg",debug0);
     cvReleaseImage(&debug0);
 #endif
-    return m_coder.Decode();
+
+    return m_coder.Decode(code);
   }
 
 };

@@ -73,9 +73,9 @@ DrawEllipseArc(Image *image,
 	       float width, float height, 
 	       float angle_radians, 
 	       float start_angle, float end_angle, int color, int thickness) {
-  if (angle_radians > PI) { angle_radians -= PI; }
+  if (angle_radians >= PI) { angle_radians -= PI; }
   
-  if (angle_radians > PI/2) {
+  if (angle_radians >= PI/2) {
     float t = width;
     width = height;
     height = t;
@@ -98,9 +98,9 @@ DrawEllipse(Image *image,
 	    float angle_radians, 
 	    int color, int thickness) {
 
-  if (angle_radians > PI) { angle_radians -= PI; }
+  if (angle_radians >= PI) { angle_radians -= PI; }
   
-  if (angle_radians > PI/2) {
+  if (angle_radians >= PI/2) {
     float t = width;
     width = height;
     height = t;

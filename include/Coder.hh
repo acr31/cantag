@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/30 16:54:17  acr31
+ * changed the Coder api -reimplemented various bits
+ *
  * Revision 1.1  2004/01/25 14:54:36  acr31
  * moved over to automake/autoconf build system
  *
@@ -29,12 +32,7 @@ public:
    *
    * Throws ValueToLarge if this value it too big to be 
    */
-  virtual void Set(unsigned long long value) = 0;
-  
-  /**
-   * Read the next chunk from the encoder
-   */
-  virtual unsigned int NextChunk() = 0;  
+  virtual unsigned long long  Encode(unsigned long long value) = 0;
   
   class ValueTooLarge : Exception {
   public:
@@ -43,26 +41,14 @@ public:
   };
     
   /**
-   * Load the next chunk of data into the decoder.  Returns true if
-   * its valid or false otherwise.  The false data are dropped from
-   * the accumulated code but the code is not reset
-   *
-   * Throws InvalidSymbol exception if the chunk is invalid.
-   */
-  virtual bool LoadChunk(unsigned int chunk) =0;
-  
-  /**
-   * Decode the loaded value
+   * Decode value
    *
    * Throws InvalidCheckSum if the code doesn't checksum
+   * Throws InvalidSymbol if the code contains invalid symbols
+   * Throws InvalidCode if the code is invalid for some other reason
    */
-  virtual unsigned long long Decode()  =0;
-  
-  /**
-   * Reset the accumulated code and start again
-   */
-  virtual void Reset()=0;  
-  
+  virtual unsigned long long Decode(unsigned long long value)  =0;
+    
   class InvalidCheckSum: Exception {
   public:
     InvalidCheckSum();

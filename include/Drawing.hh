@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.7  2004/01/30 16:54:17  acr31
+ * changed the Coder api -reimplemented various bits
+ *
  * Revision 1.6  2004/01/30 08:05:22  acr31
  * changed rectangle2d to use gaussian elimination
  *
@@ -46,13 +49,18 @@ typedef IplImage Image;
 #define PI CV_PI
 
 inline int SampleImage(Image *image,int x, int y) {
-  return (int)(((uchar*)(image->imageData + image->widthStep*y))[x]);
+  if ((x >= 0) && (x < image->width) &&
+      (y >= 0) && (y < image->height)) {
+    return (int)(((uchar*)(image->imageData + image->widthStep*y))[x]);
+  }
+  else {
+    return 0;
+  }
 }
 
 inline int SampleImage(Image *image,float x, float y) {
-  return (int)(((uchar*)(image->imageData + image->widthStep*(int)y))[(int)x]);
+  return SampleImage(image,cvRound(x),cvRound(y));
 }
-
 
 void DrawEllipse(Image *image,float xc, float yc,float width, float height, float angle_radians, int color, int thickness);
 void DrawEllipseArc(Image *image,float xc, float yc,float width, float height, float angle_radians, float start_angle, float end_angle, int color, int thickness);
@@ -94,6 +102,7 @@ inline void DrawFilledQuadTangle(Image *image,
 		   cvPoint((int)x1,(int)y1),
 		   cvPoint((int)x2,(int)y2),
 		   cvPoint((int)x3,(int)y3) };
+
   cvFillConvexPoly(image,p,4,color);
 }
 
@@ -115,14 +124,31 @@ inline void DrawQuadTangle(Image* image,
 			   float x3, float y3,
 			   int colour,
 			   int thickness) {
-  CvPoint p[4] = { cvPoint((int)x0,(int)y0),
-		   cvPoint((int)x1,(int)y1),
-		   cvPoint((int)x2,(int)y2),
-		   cvPoint((int)x3,(int)y3) };
-  CvPoint* pp[1];
-  pp[0] = p;
-  int num =4;
-  cvPolyLine(image,pp,&num,1,true,colour,thickness);
+  cvLine(image,
+	 cvPoint((int)x0,(int)y0),
+	 cvPoint((int)x1,(int)y1),
+	 colour,
+	 thickness);
+
+  cvLine(image,
+	 cvPoint((int)x1,(int)y1),
+	 cvPoint((int)x2,(int)y2),
+	 colour,
+	 thickness);
+
+  cvLine(image,
+	 cvPoint((int)x2,(int)y2),
+	 cvPoint((int)x3,(int)y3),
+	 colour,
+	 thickness);
+
+  cvLine(image,
+	 cvPoint((int)x3,(int)y3),
+	 cvPoint((int)x0,(int)y0),
+	 colour,
+	 thickness);
+
+
 }
 
 inline void DrawQuadTangle(Image* image,

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/30 16:54:17  acr31
+ * changed the Coder api -reimplemented various bits
+ *
  * Revision 1.2  2004/01/27 18:06:58  acr31
  * changed inheriting classes to inherit publicly from their parents
  *
@@ -51,7 +54,6 @@ class RingTag : public Tag<Ellipse2D> {
 private:
   int m_ring_count;
   int m_sector_count;
-  int m_sync_count;
   float m_bullseye_inner_radius;
   float m_bullseye_outer_radius;
   float m_data_inner_radius;
@@ -61,28 +63,25 @@ private:
   float *m_data_ring_outer_radii;
   float *m_data_ring_centre_radii;
   float *m_sector_angles;
-  float *m_sync_angles;
+  float *m_read_angles;
 
 public:
   RingTag(int ring_count,
 	  int sector_count,
-	  int sync_count,
 	  float bullseye_inner_radius,
 	  float bullseye_outer_radius,
 	  float data_inner_radius,
 	  float data_outer_radius) :
     m_ring_count(ring_count),
     m_sector_count(sector_count),
-    m_sync_count(sync_count),
     m_bullseye_inner_radius(bullseye_inner_radius),
     m_bullseye_outer_radius(bullseye_outer_radius),
     m_data_inner_radius(data_inner_radius),
     m_data_outer_radius(data_outer_radius),
-    m_coder(1<<ring_count,sector_count) {
+    m_coder(ring_count*sector_count,ring_count) {
 
     assert(bullseye_inner_radius < bullseye_outer_radius);
     assert(data_inner_radius < data_outer_radius);
-    assert(sector_count <= sync_count);
 
     // bullseye_inner_radius < bullseye_outer_radius < data_inner_radius < data_outer_radius
     // data_inner_radius < data_outer_radius < bullseye_inner_radius < bullseye_outer_radius
@@ -114,10 +113,12 @@ public:
     for(int i=0;i<m_sector_count+1;i++) {
       m_sector_angles[i] = 2*PI/m_sector_count *i;
     }
-  
-    m_sync_angles = new float[m_sync_count+1];
-    for(int i=0;i<m_sync_count;i++) {
-      m_sync_angles[i] = 2*PI/m_sync_count *i;
+    
+    // when we read the tag we read a total of five times and then
+    // look for three codes which are the same
+    m_read_angles = new float[m_sector_count*5];
+    for(int i=0;i<m_sector_count*5;i++) {
+      m_read_angles[i] = 2*PI/m_sector_count/5 * i;
     }
   }
 
@@ -125,7 +126,7 @@ public:
     delete[] m_data_ring_outer_radii;
     delete[] m_data_ring_centre_radii;
     delete[] m_sector_angles;
-    delete[] m_sync_angles;
+    delete[] m_read_angles;
   }
 
   virtual void Draw2D(Image* image, const Ellipse2D *l, unsigned long long code, int black, int white) {
@@ -156,11 +157,13 @@ public:
     }
 
     PROGRESS("Drawing data rings");
+    unsigned long long encoded = m_coder.Encode(code);
+
     for(int i=m_ring_count-1;i>=0;i--) {
-      m_coder.Set(code);
-      for(int j=0;j<m_sector_count;j++) {
-	unsigned int value = m_coder.NextChunk();
-	int colour = ((value & (1<<i)) == (1<<i)) ? black : white;
+      unsigned long long working = encoded;
+      for(int j=0;j<m_sector_count;j++) {	
+	int colour = ((working & (1<<i)) == (1<<i)) ? black : white;
+	working >>= m_ring_count;
 	DrawFilledEllipse(image,
 			  l->m_x,
 			  l->m_y,
@@ -213,8 +216,6 @@ public:
     // the location we have here locates the outer ring of the
     // bullseye.  Therefore we will need to scale it by the actual
     // size of the bullseye to hit the data sectors properly.
-
-    m_coder.Reset();
     
     // loop round reading chunks and passing them to the decoder
 
@@ -226,60 +227,97 @@ public:
     // if we read a full 360 degrees then we stop and ask it for the
     // code
     
-#ifdef IMAGE_DEBUG
-    int debug_attempt=0;
-    Image* debug0 = cvCloneImage(image);
-    cvConvertScale(debug0,debug0,0.5,128);    
-#endif
-    bool valid = 1;
-    for(int j=0;j<m_sector_count;j++) {
+    unsigned long long read_code[5];
+    read_code[0] = 0;
+    read_code[1] = 0;
+    read_code[2] = 0;
+    read_code[3] = 0;
+    read_code[4] = 0;
+    for(int j=m_sector_count*5 - 1;j>=0;j--) {
       // read a chunk by sampling each ring and shifting and adding
-      unsigned int chunk =0;
+      int currentcode = j%5;      
       for(int k=m_ring_count-1;k>=0;k--) {
-	chunk = chunk << 1;
 	float x;
 	float y;
-	l->ProjectPoint(m_sector_angles[j],
+	l->ProjectPoint(m_read_angles[j],
 			m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
 			&x,
 			&y);
-	bool sample = SampleImage(image,x,y) < 128;
-#ifdef IMAGE_DEBUG
-	cvLine(debug0,cvPoint((int)x,(int)y),cvPoint((int)x,(int)y),0,3);
+	bool sample = SampleImage(image,x,y) > 128;
+	read_code[currentcode] <<=1;
+	read_code[currentcode] |= (sample ? 1:0);
+      }
+    }
+
+#ifdef TEXT_DEBUG
+    for(int i=0;i<5;i++) {
+      PROGRESS("Code candidate " << i << " is " << read_code[i]);
+    }
 #endif
-	chunk |= (sample ? 1:0);
-      }
-      try {
-	if (!(m_coder.LoadChunk(chunk))) {
-	  valid =0;
-	  break;
-	}
-      }
-      catch (Coder::InvalidSymbol &e) {
+
+    // we now have 5 readings each a fifth of a sector apart
+    // search for three in a row that read the same
+    // i.e.   
+    // read_code[0] == read_code[1] == read_code[2]
+    // read_code[1] == read_code[2] == read_code[3]
+    // read_code[2] == read_code[3] == read_code[4]
+    // read_code[3] == read_code[4] == read_code[0]
+    // read_code[4] == read_code[0] == read_code[1]
+    for(int i=0;i<5;i++) {
+      if ((read_code[i] == read_code[(i+1) % 5])) { 
 #ifdef IMAGE_DEBUG
-	char filename[255];
-	snprintf(filename,255,"debug-decode%d.jpg",debug_attempt++);
-	cvSaveImage(filename,debug0);
+	Image* debug0 = cvCloneImage(image);
+	cvConvertScale(debug0,debug0,0.5,128); 
+
+	DrawEllipse(debug0,
+		    l->m_x,
+		    l->m_y,
+		    l->m_width*m_data_inner_radius/m_bullseye_outer_radius,
+		    l->m_height*m_data_inner_radius/m_bullseye_outer_radius,
+		    l->m_angle_radians,
+		    0,
+		    1);
+
+	for(int r=0;r<m_ring_count;r++) {
+	  DrawEllipse(debug0,
+		      l->m_x,
+		      l->m_y,
+		      l->m_width*m_data_ring_outer_radii[r]/m_bullseye_outer_radius,
+		      l->m_height*m_data_ring_outer_radii[r]/m_bullseye_outer_radius,
+		      l->m_angle_radians,
+		      0,
+		      1);	
+	}
+   
+	for(int k=0;k<m_sector_count;k++) {
+	  for(int r=0;r<m_ring_count;r++) {
+	    float x;
+	    float y;
+	    l->ProjectPoint(m_read_angles[5*k+((i+3)%5)],
+			    m_data_ring_outer_radii[r]/m_bullseye_outer_radius,
+			    &x,
+			    &y);
+	    cvLine(debug0,
+		   cvPoint(cvRound(l->m_x),cvRound(l->m_y)),
+		   cvPoint(cvRound(x),cvRound(y)),
+		   0,1);
+			 
+	    l->ProjectPoint(m_read_angles[5*k+((i+1)%5)],
+			    m_data_ring_centre_radii[r]/m_bullseye_outer_radius,
+			    &x,
+			    &y);
+	    cvLine(debug0,cvPoint(cvRound(x),cvRound(y)),cvPoint(cvRound(x),cvRound(y)), SampleImage(image,x,y) < 128 ? 255 : 0,3);
+				 
+
+	  }
+	}
+	cvSaveImage("debug-decode.jpg",debug0);	  	
 	cvReleaseImage(&debug0);
 #endif
-	throw e;
+	return m_coder.Decode(read_code[i]);	
       }
     }
-    
-#ifdef IMAGE_DEBUG
-    char filename[255];
-    snprintf(filename,255,"debug-decode%d.jpg",debug_attempt++);
-    cvSaveImage(filename,debug0);
-    cvCopyImage(image,debug0);
-    cvConvertScale(debug0,debug0,0.5,128);    
-#endif
-    if (valid) {
-#ifdef IMAGE_DEBUG
-      cvReleaseImage(&debug0);
-#endif
-      return m_coder.Decode();
-    }
-    return 0;
+    throw Coder::InvalidCode();
   }
 };
 
