@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.7  2004/01/23 09:09:07  acr31
+ * changes for testing the new gf4 code
+ *
  * Revision 1.6  2004/01/21 11:55:09  acr31
  * added keywords for substitution
  *
@@ -52,7 +55,8 @@ main(int argc, char* argv[]) {
 	       0.4);
 
 
-  RingTag<TripOriginalCoder<2> > t(2, //RINGS
+  //  RingTag<TripOriginalCoder<2> > t(2, //RINGS
+  RingTag<GF4Coder > t(2, //RINGS
 				  16, //SECTORS
 				  24, // SYNC ANGLES
 				  0.3, // BULLSEYE INNER
