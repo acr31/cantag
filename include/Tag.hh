@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/02/03 16:24:56  acr31
+ * various function signature changes and use of __FILE__ and __LINE__ in debug macros
+ *
  * Revision 1.2  2004/02/01 14:25:33  acr31
  * moved Rectangle2D to QuadTangle2D and refactored implementations around
  * the place
@@ -37,7 +40,7 @@
 template<class C>
 class Tag {
 public:
-  virtual void Draw2D(Image *image, const C *location, unsigned long long code, int black, int white)= 0;
+  virtual void Draw2D(Image *image, unsigned long long code, int black, int white)= 0;
   virtual unsigned long long Decode(Image *image, const C *location) =0;
 
 };

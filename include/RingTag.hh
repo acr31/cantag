@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/02/03 16:24:56  acr31
+ * various function signature changes and use of __FILE__ and __LINE__ in debug macros
+ *
  * Revision 1.4  2004/02/01 14:25:33  acr31
  * moved Rectangle2D to QuadTangle2D and refactored implementations around
  * the place
@@ -74,7 +77,7 @@ public:
 	  float data_inner_radius,
 	  float data_outer_radius);
   virtual ~RingTag();
-  virtual void Draw2D(Image* image, const Ellipse2D *l, unsigned long long code, int black, int white);
+  virtual void Draw2D(Image* image,  unsigned long long code, int black, int white);
   virtual unsigned long long Decode(Image *image, const Ellipse2D *l);
 };
 #endif//RING_TAG_GUARD

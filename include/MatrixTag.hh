@@ -12,6 +12,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.7  2004/02/03 16:24:55  acr31
+ * various function signature changes and use of __FILE__ and __LINE__ in debug macros
+ *
  * Revision 1.6  2004/02/01 14:25:33  acr31
  * moved Rectangle2D to QuadTangle2D and refactored implementations around
  * the place
@@ -52,9 +55,6 @@
 #include "Coder.hh"
 #include "QuadTangle2D.hh"
 
-#undef FILENAME
-#define FILENAME "MatrixTag.hh"
-
 class MatrixTag : public virtual Tag<QuadTangle2D>, protected virtual Coder {
 private:
   int m_length;
@@ -66,7 +66,7 @@ private:
 public:
   MatrixTag(int size);
   virtual ~MatrixTag();
-  virtual void Draw2D(Image* image, const QuadTangle2D *l, unsigned long long code, int black, int white);
+  virtual void Draw2D(Image* image, unsigned long long code, int black, int white);
   virtual unsigned long long Decode(Image *image, const QuadTangle2D *l);
 };
 #endif//MATRIX_TAG_GUARD
