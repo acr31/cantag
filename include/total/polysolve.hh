@@ -16,6 +16,12 @@ bool eigensolve(double a, double b, double c,
                 double g, double h, double i,
 		double *eigenvects, double* eigenvals);
   
+/**
+ * Find the eigenvalues and eigenvectors of the symmetric 3x3 matrix.
+ * The matrix is of the format [a b c; b d e; c e f].  The resulting
+ * eigenvector and eigenvalue arrays must contain 9 elements, they
+ * will be filled in row major order.
+ */
 void eigensolve(double a, double b, double f,
 		/*    */  double c, double d,
 		/*               */ double e,
