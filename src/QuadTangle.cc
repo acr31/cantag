@@ -77,6 +77,7 @@ QuadTangle::QuadTangle(float* points, int numpoints, bool prev_fitted) {
       m_y2 = (float)corners[2].y/1000.f;
       m_x3 = (float)corners[3].x/1000.f;
       m_y3 = (float)corners[3].y/1000.f;
+      compute_central_point();
       sort_points();
       m_fitted = true;
     }
@@ -95,7 +96,11 @@ QuadTangle::QuadTangle(float* points, int numpoints, bool prev_fitted) {
   }
 }
 
-QuadTangle::QuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3) : m_x0(x0), m_y0(y0),m_x1(x1), m_y1(y1),m_x2(x2), m_y2(y2),m_x3(x3), m_y3(y3), m_fitted(true) {}
+QuadTangle::QuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3) : m_x0(x0), m_y0(y0),m_x1(x1), m_y1(y1),m_x2(x2), m_y2(y2),m_x3(x3), m_y3(y3), m_fitted(true) {
+  compute_central_point();
+  sort_points();
+
+}
 
 float dist(float x0, float y0, float x1, float y1) {
   return sqrt( (x0-x1)*(x0-x1) + (y0-y1)*(y0-y1) );
