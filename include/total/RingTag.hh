@@ -470,6 +470,19 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
     PROGRESS("Found a concentric inner circle with matching contour");
 #endif
     // we've found a good transform
+
+    // scan round reading a sector width apart until we read two adjacent cells of different values
+    
+    // then do a binary chop between them, select the middle point and
+    // whichever edge value has the opposite colour and repeat chopping
+    
+    /**
+     * \todo assume this is the edge of a sector so roll a rotation of the required amount to centre us on the middle of each sector into the transform
+     */
+    //    for(int j=0;j<SECTOR_COUNT*READING_COUNT;j++) {
+    //      
+    //    }
+
     LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj = new LocatedObject<RING_COUNT*SECTOR_COUNT>();
     lobj->LoadTransform(correcttrans,1,camera);
     return lobj;
@@ -480,6 +493,9 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
 template<int RING_COUNT,int SECTOR_COUNT> void RingTag<RING_COUNT,SECTOR_COUNT>::DecodeNode(LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj,const Camera& camera, const Image& image) const {
 
   float* correcttrans = lobj->transform;
+  
+
+
   // loop round reading chunks and passing them to the decoder
   
   // if it returns false on any insert then we might be misaligned
