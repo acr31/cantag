@@ -42,7 +42,7 @@ public:
     for(int i=1;i<BITCOUNT;i++) {
       RotateLeft(1);
       if (*this<currentMin) {
-	currentMin = *this;
+	currentMin = *this; //copy
 	minindex=i;
       }
     }
@@ -109,11 +109,11 @@ public:
   }
 
   bool operator<(const Payload<BITCOUNT>& o) const {
-    for(unsigned int i=0;i<BITCOUNT;i++) {
-      if ( (*this)[i] && !o[i] ) {
+    for(unsigned int i=BITCOUNT;i>0;i--) {
+      if ( !(*this)[i-1] && o[i-1] ) {
 	return true;
       }
-      else if ( !(*this)[i] && o[i] ) {
+      else if ( (*this)[i-1] && !o[i-1] ) {
 	return false;
       }
     }
