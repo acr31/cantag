@@ -5,9 +5,10 @@ Camera::Camera() :
   m_r2(0),m_r4(0),m_r6(0),
   m_d1(0),m_d2(0)
 {
-  m_extrinsic[0] = 1;    m_extrinsic[1] = 0;    m_extrinsic[2] = 0;  
-  m_extrinsic[3] = 0;    m_extrinsic[4] = 1;    m_extrinsic[5] = 0;  
-  m_extrinsic[6] = 0;    m_extrinsic[7] = 0;    m_extrinsic[8] = 1;  
+  m_extrinsic[0] = 1;    m_extrinsic[1] = 0;    m_extrinsic[2] = 0;   m_extrinsic[3] = 0;    
+  m_extrinsic[4] = 0;    m_extrinsic[5] = 1;    m_extrinsic[6] = 0;   m_extrinsic[7] = 0;
+  m_extrinsic[8] = 0;    m_extrinsic[9] = 0;    m_extrinsic[10] = 1;   m_extrinsic[11] = 0;  
+  m_extrinsic[12] = 0;    m_extrinsic[13] = 0;    m_extrinsic[14] = 0;   m_extrinsic[15] = 1;  
 
   m_intrinsic[0] = 1;    m_intrinsic[1] = 0;    m_intrinsic[2] = 0.5;  
   m_intrinsic[3] = 0;    m_intrinsic[4] = 1;    m_intrinsic[5] = 0.5;  

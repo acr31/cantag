@@ -89,7 +89,7 @@ template<int BIT_COUNT, int GRANULARITY, int CHECKSUM_COUNT> int TripOriginalCod
   // try all possible rotations...
   for(size_t i=0;i<BIT_COUNT;i+=GRANULARITY) {
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
-    PROGRESS("Current rotation is "<< payload);
+    PROGRESS("Current rotation (" << i << ") is "<< payload);
 #endif
     // have we found sync sector
     if (payload.template Equals<GRANULARITY>(sync_sector_mask)) {

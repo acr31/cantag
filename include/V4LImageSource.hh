@@ -53,6 +53,8 @@ public:
   V4LImageSource(const char* deviceName, int channel);
   ~V4LImageSource();
   virtual Image* Next();
+  inline int GetWidth() { return m_image_width; }
+  inline int GetHeight() {  return m_image_height; }
 
 };
 

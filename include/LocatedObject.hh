@@ -45,7 +45,7 @@ public:
   float location[3];
 
   /**
-   * The angle of this object relative to the camera co-ordinate x axis.
+   * The angle (radians) of this object relative to the camera co-ordinate x axis.
    */
   float angle;
 
@@ -54,18 +54,16 @@ public:
    */
   boost::shared_ptr< CyclicBitSet<PAYLOAD_SIZE> > tag_code;
 
-  void Refresh(Image& image) {};
-
-  void LoadTransform(float transform[16],float tag_size, const Camera& camera);
+  void LoadTransform(float transform[16],float tag_size, float agle, const Camera& camera);
 };
 
 #include <iostream>
 
-template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(float t[16],float tag_size, const Camera& camera) {
+template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(float t[16],float tag_size, float agle, const Camera& camera) {
   for(int i=0;i<16;i++) {
     transform[i] = t[i];
   }
-  
+  angle = agle;
   GetNormalVector(transform,camera,normal);
   GetLocation(transform,location,tag_size);
   camera.CameraToWorld(location,1);

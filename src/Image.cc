@@ -31,7 +31,9 @@ Image::~Image() {
       /*
        * \todo work out why this results in unknown error code -49 in opencv
        */
+      //      cvSetImageROI(m_image,cvRect(0,0,0,0));
       //cvReleaseImageHeader(&m_image);
+      
     }
     else {
       cvReleaseImage(&m_image);

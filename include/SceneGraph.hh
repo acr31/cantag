@@ -9,6 +9,7 @@
 #include <Ellipse.hh>
 #include <SceneGraphNode.hh>
 #include <CyclicBitSet.hh>
+#include <SceneGraphFunctional.hh>
 
 #define MAXLENGTH 10000
 #define MAXDEPTH 20
@@ -35,9 +36,8 @@ class SceneGraph {
 private:
   SceneGraphNode<S,PAYLOAD_SIZE>* m_root;
   CvMemStorage* store;
-
-
 public:
+  
   /**
    * Create a scene graph.
    */ 
@@ -60,10 +60,25 @@ public:
    * or NULL if none do.
    */
   inline LocatedObject<PAYLOAD_SIZE>* Find(const CyclicBitSet<PAYLOAD_SIZE>& code );
+
+  /**
+   * Apply every Located object in the tree to this function
+   */
+  void Map(SceneGraphFunctional<PAYLOAD_SIZE>& fun);
+
+  /**
+   * Return the first located object in the scene graph
+   */
+  inline LocatedObject<PAYLOAD_SIZE>* First();
 };
 
-template<class S,int PAYLOAD_SIZE> SceneGraph<S,PAYLOAD_SIZE>::SceneGraph() : m_root(new SceneGraphNode<S,PAYLOAD_SIZE>()) { 
-  store = cvCreateMemStorage(0);
+template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Map(SceneGraphFunctional<PAYLOAD_SIZE>& fun) {
+  m_root->Map(fun);
+}
+
+template<class S,int PAYLOAD_SIZE> SceneGraph<S,PAYLOAD_SIZE>::SceneGraph() : 
+  m_root(new SceneGraphNode<S,PAYLOAD_SIZE>()),
+  store(cvCreateMemStorage(0)) {
 }
 
 template<class S,int PAYLOAD_SIZE> SceneGraph<S,PAYLOAD_SIZE>::~SceneGraph() {
@@ -75,6 +90,7 @@ template<class S,int PAYLOAD_SIZE> SceneGraph<S,PAYLOAD_SIZE>::~SceneGraph() {
 
 template<class S, int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(const Image& image, const Camera& camera) {
   CvSeq* root;
+  cvClearMemStorage(store);
   int num_contours = cvFindContours(image.m_image,store,&root,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_NONE);
 
   if (root == NULL || num_contours == 0) {
@@ -95,7 +111,7 @@ template<class S, int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(cons
   // the current parent node
   SceneGraphNode<S,PAYLOAD_SIZE>* parents[MAXDEPTH] = {0};
   delete m_root;
-  m_root = new SceneGraphNode<S,PAYLOAD_SIZE>();
+  m_root = new  SceneGraphNode<S,PAYLOAD_SIZE>();
   parents[0] = m_root;
 
   CvTreeNodeIterator treeiter;
@@ -181,6 +197,7 @@ template<class S, int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(cons
   cvSaveImage(filename,debug0);
   cvReleaseImage(&debug0);
 #endif
+
 }
   
 
@@ -192,6 +209,9 @@ template<class S,int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>* SceneGraph<S,PAY
     return m_root->Find(code);
 }
 
+template<class S,int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>* SceneGraph<S,PAYLOAD_SIZE>::First() {
+  return m_root->First();
+}
 
 #endif//SCENE_GRAPH_GUARD
 

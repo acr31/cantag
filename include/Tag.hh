@@ -11,7 +11,7 @@
 #include <SceneGraphNode.hh>
 #include <vector>
 #include <CyclicBitSet.hh>
-
+#include <boost/shared_ptr.hpp>
 /**
  * Abstract superclass for all tags.
  */

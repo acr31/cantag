@@ -40,9 +40,9 @@ public:
 
   inline bool IsChainFitted() const;
 
-  inline const S Next() const;
+  inline const S& Next() const;
 
-  inline const M GetShape() const;
+  inline const M& GetShape() const;
 
   inline bool Compare(ShapeChain<M,S> o) const;
 
@@ -68,11 +68,11 @@ template<class M, class S> bool ShapeChain<M,S>::IsChainFitted() const {
       m_next.IsChainFitted();
   }
 
-template<class M, class S> const S ShapeChain<M,S>::Next() const {
+template<class M, class S> const S& ShapeChain<M,S>::Next() const {
     return m_next;
   }
 
-template<class M, class S> const M ShapeChain<M,S>::GetShape() const {
+template<class M, class S> const M& ShapeChain<M,S>::GetShape() const {
   return m_shape;
 }
 

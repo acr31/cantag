@@ -34,6 +34,11 @@ AC_CHECK_LIB(GLU,
 	[],
 	[AC_MSG_ERROR([libGLU.so not found])])
 
+AC_CHECK_LIB(glut,
+	[glXChooseVisual],
+	[],
+	[AC_MSG_ERROR([libglut.so not found])])
+
 AC_CHECK_LIB(gmp,
 	[__gmpz_init],
 	[],

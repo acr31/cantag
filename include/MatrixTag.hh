@@ -256,8 +256,11 @@ template<int SIZE> bool MatrixTag<SIZE>::DecodeNode(SceneGraphNode< ShapeChain<Q
       PROGRESS("Found code " << *read_code);
 #endif	
 
-    LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = node->GetLocatedObject();
-    lobj->LoadTransform(transform,1,camera);
+      /**
+       * \todo load the correct angle here
+       */
+      LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = node->GetLocatedObject();
+    lobj->LoadTransform(transform,1,0,camera);
     lobj->tag_code = read_code;	   
     return true;
   }    

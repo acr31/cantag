@@ -12,7 +12,6 @@
 #include <ShapeChain.hh>
 #include <Ellipse.hh>
 #include <findtransform.hh>
-#include <iostream>
 
 #ifdef TEXT_DEBUG
 # define RING_TAG_DEBUG
@@ -29,7 +28,6 @@
 int debug_image_counter = 0;
 
 #undef LINEAR_ELLIPSE
-
 
 /**
  * The number of readings to make from a tag.  We then look for pairs
@@ -52,6 +50,9 @@ private:
   float *m_data_ring_centre_radii;
   float *m_sector_angles;
   float *m_read_angles;
+
+  float *m_sin_read_angles;
+  float *m_cos_read_angles;
 
 public:
   RingTag(float bullseye_inner_radius,
@@ -114,8 +115,12 @@ template<int RING_COUNT,int SECTOR_COUNT> RingTag<RING_COUNT,SECTOR_COUNT>::Ring
   // when we read the tag we read a total of five times and then
   // look for three codes which are the same
   m_read_angles = new float[SECTOR_COUNT*READING_COUNT];
+  m_sin_read_angles = new float[SECTOR_COUNT*READING_COUNT];
+  m_cos_read_angles = new float[SECTOR_COUNT*READING_COUNT];
   for(int i=0;i<SECTOR_COUNT*READING_COUNT;i++) {
     m_read_angles[i] = 2*PI/SECTOR_COUNT/READING_COUNT * i;
+    m_sin_read_angles[i] = sin(m_read_angles[i]);
+    m_cos_read_angles[i] = cos(m_read_angles[i]);
   }
 }
 
@@ -125,6 +130,8 @@ template<int RING_COUNT,int SECTOR_COUNT> RingTag<RING_COUNT,SECTOR_COUNT>::~Rin
   delete[] m_data_ring_centre_radii;
   delete[] m_sector_angles;
   delete[] m_read_angles;
+  delete[] m_sin_read_angles;
+  delete[] m_cos_read_angles;
 }
 
 template<int RING_COUNT,int SECTOR_COUNT> void RingTag<RING_COUNT,SECTOR_COUNT>::Draw2D(Image& image, CyclicBitSet<RING_COUNT*SECTOR_COUNT>& tag_data) const {
@@ -232,7 +239,9 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
   }
 
   // get the ellipse this node encompasses
-  Ellipse el = node->GetShapes().GetShape();
+  ShapeChain<Ellipse> sce = node->GetShapes();
+  Ellipse el = sce.GetShape();
+  //  Ellipse el = node->GetShapes().GetShape();
 
   if (!el.IsFitted()) {
 #ifdef RING_TAG_DEBUG
@@ -406,8 +415,8 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
       // read a chunk by sampling each ring and shifting and adding
       int currentcode = j%READING_COUNT;      
       for(int k=RING_COUNT-1;k>=0;k--) {
-	float tpt[]=  {  cos(m_read_angles[j]) * m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
-			 sin(m_read_angles[j]) * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
+	float tpt[]=  {  m_cos_read_angles[j] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
+			 m_sin_read_angles[j] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
 	ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
 	camera.NPCFToImage(tpt,1);
 	bool sample = image.Sample(tpt[0],tpt[1]);
@@ -426,7 +435,7 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
     int orientation;
     int code_ptr;
     for(code_ptr=0;code_ptr<READING_COUNT;code_ptr++) {
-      if (orientation = DecodePayload(*read_code[code_ptr]) >= 0) {
+      if ((orientation = DecodePayload(*read_code[code_ptr])) >= 0) {
 	if ((last_read != NULL) && (*last_read == *read_code[code_ptr])) {
 	  break;
 	}
@@ -434,7 +443,18 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
       }
     }
 
+
     if (code_ptr < READING_COUNT) {
+      // we now know that we had to rotate the code by "orientation"
+      // bits in order to align it.  This corresponds to a rotation of
+      // orientation/ring_count sectors.  Which corresponds to a
+      // rotation of orientation/ring_count*sector_count/360 degrees.
+      // we also know that this reading was made starting from m_read_angles[code_ptr]
+      // this gives the final rotation as 
+      // m_read_angles[code_ptr] + orientation/ring_count*sector_count/2/M_PI
+      
+      float angle = m_read_angles[code_ptr-1] + orientation/RING_COUNT*2*M_PI/SECTOR_COUNT;
+
 #ifdef RING_TAG_IMAGE_DEBUG
       draw_read(image,camera,correcttrans,code_ptr);
 #endif
@@ -446,15 +466,14 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
       projected1[1] = 0;
       ApplyTransform(correcttrans,projected1[0],projected1[1],projected1,projected1+1);
       camera.NPCFToImage(projected1,1);
-      std::cout << "Found code " << *read_code[code_ptr] << " at " << projected1[0] << "," << projected1[1] << std::endl;
+      PROGRESS("Found code " << *read_code[code_ptr] << " at " << projected1[0] << "," << projected1[1]);
 #endif
 #ifdef RING_TAG_DEBUG
 
       PROGRESS("Ellipse position is "<<projected1[0]<<","<<projected1[1]);
 #endif
-      //      std::cout << "!!" << el.GetX0() << " " << el.GetY0() << " " << el.GetHeight() << " " << el.GetWidth() << " " << el.GetAngle() << std::endl;
       LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj = node->GetLocatedObject();
-      lobj->LoadTransform(correcttrans,1,camera);
+      lobj->LoadTransform(correcttrans,1,angle,camera);
       lobj->tag_code = read_code[code_ptr];	   
       return true;
     }
