@@ -13,8 +13,6 @@
 /**
  * A camera model.  Use this class to convert from NPCF to Image co-ordinates and back again
  *
- * \todo fix the distortion removing functions - they dont work at the moment
- *
  * \todo add loading the camera parameters from disk
  */
 class Camera {
@@ -68,29 +66,39 @@ public:
    */
   void SetTangential(float d1, float d2);
 
-  /**
-   * Convert a set of image co-ordinates to normalised principle
-   * co-ordinate frame (NPCF) points.  This involves removing the
-   * distortion predicted by the parameters set and removing the
-   * extrinsic parameters of the camera.
-   */
-  void ImageToNPCF(float* points, int num_points) const;
 
   /**
    * Convert a set of image co-ordinates to normalised principle
    * co-ordinate frame (NPCF) points.  This involves removing the
    * distortion predicted by the parameters set and removing the
    * extrinsic parameters of the camera.
+   *
+   * Uses an approximation to the inverse distrortion calculation.
+   * It is based on the first and second terms of a taylor expansion
+   * of the distortion equeation. Neglection of the higher order terms
+   * reduces accuracy, but not noticeably AFAICT. This model assumes 
+   * only 4th order radial distortion (i.e. no r^n for n>4) and will
+   * ignore the 6th order term if set. Similarly the approximation
+   * cannot cope with tangential distortion. It is however, fast to compute
+   * and should suffice since 99.99% of digital cameras really only have
+   * 2nd order radial distortion.
+   *
+   * More details in "Precise Radial Un-distortion of Images",
+   * John Mallon and  Paul F. Whelan, 7th International Conf. on
+   * Pattern Recognition (ICPR'04), Cambridge, UK. August 2004
+   *
+   * Contains code by Rob Harle <rkh23@cam.ac.uk>
    */
   void ImageToNPCF(std::vector<float>& points) const;
 
   /**
-   * Convert a set of normalised principle co-ordinate frame (NPCF)
-   * points to image points.  This involves applying the correct
-   * distortion predicted by the camera parameters and applying the
-   * extrinsic parameters of the camera.
+   * Convert a set of image co-ordinates to normalised principle
+   * co-ordinate frame (NPCF) points.  
+   *
+   * \sa #ImageToNPCF()
    */
-  void NPCFToImage(float* points, int num_points) const;  
+  void ImageToNPCF(float* points, int num_points) const;
+
 
   /**
    * Convert a set of normalised principle co-ordinate frame (NPCF)
@@ -99,6 +107,14 @@ public:
    * extrinsic parameters of the camera.
    */
   void NPCFToImage(std::vector<float>& points) const;  
+
+  /**
+   * Convert a set of normalised principle co-ordinate frame (NPCF)
+   * points to image points. 
+   *
+   * \sa #NPCFToImage()
+   */
+  void NPCFToImage(float* points, int num_points) const;  
 
   /**
    * Remove radial and tangential distortion from the whole image.
