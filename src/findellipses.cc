@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/28 16:34:38  acr31
+ * some debugging code for drawing lines onto ellipses
+ *
  * Revision 1.3  2004/01/26 12:04:31  acr31
  * noted that the routines search for white rather than black objects
  *
@@ -38,6 +41,9 @@
 
 #include <opencv/cv.h>
 #include <cmath>
+
+#undef FILENAME
+#define FILENAME "findellipses.cc"
 
 void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, float maxYDiff, float maxRatioDiff, float maxFitError, std::vector<Ellipse2DChain*> *results) { 
   IplImage *copy = cvCloneImage(image); // the find contours process changes the image ;-(
@@ -77,7 +83,82 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
       PROGRESS("Ellipse has centre "<< current.center.x <<" " << current.center.y << " dims " << current.size.width << " " << current.size.height);
       if (calcerror(&current,fpoints,count,maxFitError)) {
 #ifdef IMAGE_DEBUG
-	cvEllipseBox(debug1,current,0,3);
+	//	cvEllipseBox(debug1,current,0,3);
+	while(current.angle >= 360) { 
+	  current.angle -= 360; 
+	}
+	std::cout << "###########  " << current.angle << std::endl;
+	if ((current.angle >= 0) && (current.angle < 90)) {
+	  std::cout << "option 1 "<< std::endl;
+	  cvLine(debug1,
+		 cvPoint(cvRound((float)current.center.x - (float)current.size.width/2*cos(current.angle/180*PI)),
+			 cvRound((float)current.center.y + (float)current.size.width/2*sin(current.angle/180*PI))),
+		 cvPoint(cvRound((float)current.center.x + (float)current.size.width/2*cos(current.angle/180*PI)),
+			 cvRound((float)current.center.y - (float)current.size.width/2*sin(current.angle/180*PI))),
+		 0,
+		 3);
+	  cvLine(debug1,
+		 cvPoint(cvRound((float)current.center.x - (float)current.size.height/2*sin(current.angle/180*PI)),
+			 cvRound((float)current.center.y + (float)current.size.height/2*cos(current.angle/180*PI))),
+		 cvPoint(cvRound((float)current.center.x + (float)current.size.height/2*sin(current.angle/180*PI)),
+			 cvRound((float)current.center.y - (float)current.size.height/2*cos(current.angle/180*PI))),
+		 0,
+		 3);
+	}
+	else if ((current.angle >= 90) && (current.angle < 180)) {
+	  std::cout << "option 2 "<< std::endl;
+
+	  cvLine(debug1,
+		 cvPoint(cvRound((float)current.center.x + (float)current.size.width/2*sin((current.angle-90)/180*PI)),
+			 cvRound((float)current.center.y + (float)current.size.width/2*cos((current.angle-90)/180*PI))),
+		 cvPoint(cvRound((float)current.center.x - (float)current.size.width/2*sin((current.angle-90)/180*PI)),
+			 cvRound((float)current.center.y - (float)current.size.width/2*cos((current.angle-90)/180*PI))),
+		 0,
+		 3);
+	  cvLine(debug1,
+		 cvPoint(cvRound((float)current.center.x + (float)current.size.height/2*cos((current.angle-90)/180*PI)),
+			 cvRound((float)current.center.y + (float)current.size.height/2*sin((current.angle-90)/180*PI))),
+		 cvPoint(cvRound((float)current.center.x - (float)current.size.height/2*cos((current.angle-90)/180*PI)),
+			 cvRound((float)current.center.y - (float)current.size.height/2*sin((current.angle-90)/180*PI))),
+		 0,
+		 3);
+	}
+	else if ((current.angle >= 180) && (current.angle < 270)) {
+	  std::cout << "option 3 "<< std::endl;
+
+	  cvLine(debug1,
+		 cvPoint(cvRound((float)current.center.x + (float)current.size.width/2*cos((current.angle-180)/180*PI)),
+			 cvRound((float)current.center.y - (float)current.size.width/2*sin((current.angle-180)/180*PI))),
+		 cvPoint(cvRound((float)current.center.x - (float)current.size.width/2*cos((current.angle-180)/180*PI)),
+			 cvRound((float)current.center.y + (float)current.size.width/2*sin((current.angle-180)/180*PI))),
+		 0,
+		 3);
+	  cvLine(debug1,
+		 cvPoint(cvRound((float)current.center.x + (float)current.size.height/2*sin((current.angle-180)/180*PI)),
+			 cvRound((float)current.center.y - (float)current.size.height/2*cos((current.angle-180)/180*PI))),
+		 cvPoint(cvRound((float)current.center.x - (float)current.size.height/2*sin((current.angle-180)/180*PI)),
+			 cvRound((float)current.center.y + (float)current.size.height/2*cos((current.angle-180)/180*PI))),
+		 0,
+		 3);
+	}
+	else { // if ((current.angle >= 270) && (current.angle < 360)) {
+	  std::cout << "option 4 "<< std::endl;
+
+	  cvLine(debug1,
+		 cvPoint(cvRound((float)current.center.x + (float)current.size.width/2*sin((current.angle-270)/180*PI)),
+			 cvRound((float)current.center.y - (float)current.size.width/2*cos((current.angle-270)/180*PI))),
+		 cvPoint(cvRound((float)current.center.x - (float)current.size.width/2*sin((current.angle-270)/180*PI)),
+			 cvRound((float)current.center.y + (float)current.size.width/2*cos((current.angle-270)/180*PI))),
+		 0,
+		 3);	  	  
+	  cvLine(debug1,
+		 cvPoint(cvRound((float)current.center.x + (float)current.size.height/2*cos((current.angle-270)/180*PI)),
+			 cvRound((float)current.center.y - (float)current.size.height/2*sin((current.angle-270)/180*PI))),
+		 cvPoint(cvRound((float)current.center.x - (float)current.size.height/2*cos((current.angle-270)/180*PI)),
+			 cvRound((float)current.center.y + (float)current.size.height/2*sin((current.angle-270)/180*PI))),
+		 0,
+		 3);	  	  
+	}
 #endif
 	/*
 	  The contour followed is the outside edge of the circle so
@@ -95,7 +176,7 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 					  current.center.y,
 					  current.size.width,
 					  current.size.height,
-					  current.angle);
+					  (float)current.angle/180*PI);
 
 	for(std::vector<Ellipse2DChain*>::const_iterator i = results->begin();i!= results->end();i++) {
 	  if (compare(newbox,(*i)->current,maxXDiff,maxYDiff,maxRatioDiff)) {
@@ -122,14 +203,10 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
     Ellipse2DChain *tocheck = *i;
     if (tocheck->nextchain != NULL) {
       do {
-	cvEllipse(debug2,
-		  cvPoint((int)tocheck->current->m_x,(int)tocheck->current->m_y),
-		  cvSize((int)(tocheck->current->m_width*0.5),(int)(tocheck->current->m_height*0.5)),
-		  tocheck->current->m_angle_radians/CV_PI*180,
-		  0,
-		  360,
-		  0,
-		  3);		  
+	DrawEllipse(debug2, 
+		    tocheck->current,
+		    0,
+		    3);
 	tocheck = tocheck->nextchain;
       } while (tocheck !=NULL);
     }
@@ -149,7 +226,9 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 
 static inline bool compare(Ellipse2D *e1, Ellipse2D *e2, float maxXDiff, float maxYDiff, float maxRatioDiff) {
   PROGRESS("Comparing ("<<e1->m_x<<","<<e1->m_y<<") ("<<e1->m_height<<","<<e1->m_width<<") with ("<<e2->m_x<<","<<e2->m_y<<") ("<<e2->m_height<<","<<e2->m_width<<")");
-
+  PROGRESS("      XDIFF = " << (fabs(e1->m_x - e2->m_x)) << " (thresh " << maxXDiff<<")");
+  PROGRESS("      YDIFF = " << (fabs(e1->m_y - e2->m_y)) << " (thresh " << maxYDiff<<")");
+  PROGRESS("      RATIO = " << (fabs(e1->m_height/e1->m_width - e2->m_height/e2->m_width)) << " (thresh " << maxRatioDiff<<")");
   return ( (fabs(e1->m_x - e2->m_x) < maxXDiff) &&
 	   (fabs(e1->m_y - e2->m_y) < maxYDiff) &&
 	   (fabs(e1->m_height/e1->m_width -
