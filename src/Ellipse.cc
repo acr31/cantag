@@ -254,7 +254,8 @@ float Ellipse::GetErrorGradient(const float* points, int count) const {
 float Ellipse::GetErrorNakagawa(const float* points, int count) const {
   
   LinearEllipse l(GetA(),GetB(),GetC(),GetD(),GetE(),GetF());
-  
+  l.Decompose();
+
   float total=0;
   for(int pt=0;pt<count*2;pt+=2) {
     float xi = points[pt];
@@ -270,12 +271,10 @@ float Ellipse::GetErrorNakagawa(const float* points, int count) const {
     float sint = sin(theta);
     float cost = cos(theta);
 
-    std::cout << a << " " << b << " " << theta << " " << y0 << " " << y0 << std::endl;
-
     float rtsub1 = -sint+k*cost;
     float rtsub2 = cost+k*sint;
     float rt = sqrt(a*a*rtsub1*rtsub1 + b*b*rtsub2*rtsub2);
-
+    
     // compute ix
     float ix;
     if (xi > x0) {
@@ -284,7 +283,7 @@ float Ellipse::GetErrorNakagawa(const float* points, int count) const {
     else {
       ix = x0 - a*b/rt;
     }
-
+    
     // compute iy
     float iy;
     if (yi > y0) {
@@ -293,7 +292,7 @@ float Ellipse::GetErrorNakagawa(const float* points, int count) const {
     else {
       iy = y0 - a*b*k/rt;
     }
-
+    
     float d = (ix-xi)*(ix-xi) + (iy-yi)*(iy-yi);
     total+=d;
   }
@@ -310,7 +309,8 @@ float Ellipse::GetErrorSafaeeRad(const float* points, int count) const {
   // portions of the ray mj and nj are determined
 
   LinearEllipse l(GetA(),GetB(),GetC(),GetD(),GetE(),GetF());
-  
+  l.Decompose();
+
   float total=0;
   for(int pt=0;pt<count*2;pt+=2) {
     float xi = points[pt];
@@ -352,10 +352,10 @@ float Ellipse::GetErrorSafaeeRad(const float* points, int count) const {
     float m = sqrt((x0-ix)*(x0-ix)+(y0-ix)*(y0-ix));
     float n = sqrt((ix-xi)*(ix-xi)+(iy-yi)*(iy-yi));
     float q = m_a*xi*xi+m_b*xi*yi+m_c*yi*yi+m_d*xi+m_e*yi+m_f;
-    
+
     total += m*(1+ n/2/a)/(1+ n/2/m)*q;   
   }
-  
+
 #ifdef ELLIPSE_DEBUG
   PROGRESS("Total error from SafaeeRad Method is "<< total/count);
 #endif
@@ -364,7 +364,8 @@ float Ellipse::GetErrorSafaeeRad(const float* points, int count) const {
 
 float Ellipse::GetErrorSafaeeRad2(const float* points, int count) const {
   LinearEllipse l(GetA(),GetB(),GetC(),GetD(),GetE(),GetF());
-  
+  l.Decompose();
+
   float total=0;
   for(int pt=0;pt<count*2;pt+=2) {
     float xi = points[pt];
@@ -405,10 +406,10 @@ float Ellipse::GetErrorSafaeeRad2(const float* points, int count) const {
 
     float m = sqrt((x0-ix)*(x0-ix)+(y0-ix)*(y0-ix));
     float q = m_a*xi*xi+m_b*xi*yi+m_c*yi*yi+m_d*xi+m_e*yi+m_f;
-    
+
     total += m*q;   
   }
-  
+
 #ifdef ELLIPSE_DEBUG
   PROGRESS("Total error from SafaeeRad2 Method is "<< total/count);
 #endif
@@ -417,12 +418,22 @@ float Ellipse::GetErrorSafaeeRad2(const float* points, int count) const {
 
 float Ellipse::GetErrorStricker(const float* points, int count) const {
   LinearEllipse l(GetA(),GetB(),GetC(),GetD(),GetE(),GetF());
+  l.Decompose();
 
   float a = l.GetWidth();
   float b = l.GetHeight();
   float x0 = l.GetX0();
   float y0 = l.GetY0();
   float theta = l.GetAngle();
+
+  // we need a^2-b^2 to be >0 so check that
+  if (a < b) {
+    float swap = a;
+    a=b;
+    b=swap;
+    
+    theta=2*M_PI-theta;
+  }
 
   float c = sqrt(a*a-b*b);
 
@@ -431,7 +442,7 @@ float Ellipse::GetErrorStricker(const float* points, int count) const {
 
   float f2x = x0 - c*cos(theta);
   float f2y = x0 - c*sin(theta);
-  
+
   float total =0;
   for(int pt=0;pt<count*2;pt+=2) {
     float x = points[pt];
@@ -443,7 +454,7 @@ float Ellipse::GetErrorStricker(const float* points, int count) const {
     float dest = 0.5*(aest - a + best - b);
 
     float ctilde = sqrt( (a+dest)*(a+dest) - (b+dest)*(b+dest) );
-    
+
     float modf1_f2 = sqrt( (f1x-f2x)*(f1x-f2x) + (f1y-f2y)*(f1y-f2y) );
 
     float f1xtilde = (f1x + f2x)/2+ctilde*(f1x-f2x)/modf1_f2;
@@ -451,9 +462,9 @@ float Ellipse::GetErrorStricker(const float* points, int count) const {
 
     float f2xtilde = (f1x + f2x)/2-ctilde*(f1x-f2x)/modf1_f2;
     float f2ytilde = (f1y + f2y)/2-ctilde*(f1y-f2y)/modf1_f2;
-    
+
     float atilde = 0.5*(sqrt( (x-f1x)*(x-f1x) + (y-f1y)*(y-f1y) ) + sqrt( (x-f2x)*(x-f2x) + (y-f2y)*(y-f2y) ));
-    
+
     total += atilde - a;   
   }
 
@@ -475,17 +486,17 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   // it turns out to be really important to the pose extraction
   // that our conic has a positive sense!
   /*
-  if (f > 0) {
+    if (f > 0) {
     a*=-1;
     b*=-1;
     c*=-1;
     d*=-1;
     e*=-1;
     f*=-1;
-#ifdef ELLIPSE_DEBUG
+    #ifdef ELLIPSE_DEBUG
     PROGRESS("Corrected for negative scale factor");
-#endif
-  }
+    #endif
+    }
   */
 
 #ifdef CIRCLE_TRANSFORM_DEBUG
@@ -498,7 +509,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
 	   f << "];");
 #endif
 
-  
+
   double eigvects[9];
   double eigvals[9];
 
@@ -717,9 +728,9 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
 
   // now work out the normal vector of each transform.  if it results in something that points away from the camera then negate it.
   /*
-  float normal[3];
-  GetNormalVector(transform1,normal);
-  if (normal[2] < 0) {
+    float normal[3];
+    GetNormalVector(transform1,normal);
+    if (normal[2] < 0) {
     PROGRESS("Swapped transform 1");
     transform1[0] *= -1;
     transform1[1] *= -1;
@@ -735,10 +746,10 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
     transform1[9] *= -1;
     transform1[10] *= -1;
     transform1[11] *= -1;
-  }
+    }
 
-  GetNormalVector(transform2,normal);
-  if (normal[2] < 0) {
+    GetNormalVector(transform2,normal);
+    if (normal[2] < 0) {
     PROGRESS("Swapped transform 2");
     transform2[0] *= -1;
     transform2[1] *= -1;
@@ -754,7 +765,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
     transform2[9] *= -1;
     transform2[10] *= -1;
     transform2[11] *= -1;
-  }
+    }
   */
 
 }
@@ -863,6 +874,7 @@ void LinearEllipse::Decompose() {
 }
 
 void LinearEllipse::GetTransform(float transform1[16], float transform2[16]) {
+  Decompose();
   transform1[0] = width*cos(angle_radians);
   transform1[1] = -height*sin(angle_radians); 
   transform1[2] = 0;
