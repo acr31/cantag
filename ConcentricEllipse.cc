@@ -1,6 +1,6 @@
 #include "ConcentricEllipse.hh"
 
-#include "IdentifyTagCircularOuter.hh"
+#include "TripOriginalIdentify.hh"
 
 #define MAX_FIT_ERROR 0.01
 #define MAX_X_OFFSET 4

@@ -5,11 +5,11 @@ CPPFLAGS=`params --opencv-cxx-flags`
 FLAGS=-g
 
 
-test: test.o ConcentricEllipse.o IdentifyTagCircularOuter.o
+test: test.o ConcentricEllipse.o TripOriginalIdentify.o
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $^ ${OPENCVLINK}
 
 
-DrawCircularOuter: DrawCircularOuter.o
+DrawTripOriginal: DrawTripOriginal.o
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $^ ${OPENCVLINK}
 
 
@@ -17,4 +17,4 @@ DrawCircularOuter: DrawCircularOuter.o
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVINC} -o $@ -c $<
 
 clean:
-	-rm -f test test.o ConcentricEllipse.o IdentifyTagCircularOuter.o
+	-rm -f test test.o ConcentricEllipse.o TripOriginalIdentify.o DrawTripOriginal DrawTripOriginal.o

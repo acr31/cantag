@@ -4,8 +4,9 @@
    edge of the bullseye.  Multiplying the radius of the outer edge of
    the bullseye by each RADII should give a radius in the middle of
    the code ring */
-double radii[] = {1.4,2};
-
+double radii_centre[] = {1.2,1.8};
+double radii_outer[] = {1.4,2};
+double radii_inner[] = {1,1.4};
 
 /* The angle of each sector in radians */
 #define SECTOR_COUNT 16

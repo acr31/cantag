@@ -34,8 +34,8 @@ main(int argc, char* argv[]) {
   CvSize s;
   
   for(int j=RING_COUNT-1;j>=0;j--) {
-    s.width=(int)(radii[j]*r);
-    s.height=(int)(radii[j]*r);
+    s.width=(int)(radii_outer[j]*r);
+    s.height=(int)(radii_outer[j]*r);
     
     for(int i=0;i<SECTOR_COUNT-1;i++) {
       double a1 = sector_angles[i]/M_PI*180;
@@ -59,8 +59,10 @@ main(int argc, char* argv[]) {
 	      a1,a2,
 	      (value & 1) ? 0 : 255, -1);
     value >>= 1;
-
+    cvCircle(image,p,(int)(radii_inner[j]*r),255,-1);
   }
+
+
   cvCircle(image,p,(int)r,0,-1);
   cvCircle(image,p,(int)(0.6*r),255,-1);
   cvCircle(image,p,(int)(0.2*r),0,-1);
