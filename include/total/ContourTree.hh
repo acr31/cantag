@@ -62,6 +62,8 @@ public:
 
 private:
   Contour* m_root_contour;
+  int m_contour_count;
+
   /**
    * Follows the edge that starts at (start_x,start_y) and stores the
    * points found in the points_buffer.  The passed NBD is used to mark
@@ -119,6 +121,7 @@ public:
   bool CheckImageToNPCF(const ContourTree& evidence, const Camera& camera) const;
   inline Contour* GetRootContour() { return m_root_contour; }
   inline const Contour* GetRootContour() const { return m_root_contour; }
+  inline int GetContourCount() const { return m_contour_count; }
   ~ContourTree();
 
   int Save(Socket& socket) const;
