@@ -1,9 +1,13 @@
-OPENCVINC=-I/usr/include/opencv
-OPENCVLIB=-L/usr/lib
-OPENCVLINK=-lopencv -lhighgui
-
+OPENCVINC=`params --opencv-inc`
+OPENCVLIB=`params --opencv-lib`
+OPENCVLINK=`params --opencv-link`
+CPPFLAGS=`params --opencv-cxx-flags`
+FLAGS=-g
 test: test.o
-	g++ -g ${OPENCVLIB} -o $@ $< ${OPENCVLINK}
+	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $< ${OPENCVLINK}
 
 %.o: %.cc
-	g++ -g ${OPENCVINC} -o $@ -c $<
+	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVINC} -o $@ -c $<
+
+clean:
+	-rm -f test test.o
