@@ -198,49 +198,35 @@ void QuadTangle::swap( float *a, float *b) {
   *b = t;
 }
 
+/**
+ * courtesy of Rob Harle <rkh23@cam.ac.uk>
+ */
 void QuadTangle::sort_points()
 {
-  // sort the points into clockwise order.
-  float angles[4];
-  angles[0] = find_angle(m_x0,m_y0,m_xc,m_yc);
-  angles[1] = find_angle(m_x1,m_y1,m_xc,m_yc);
-  angles[2] = find_angle(m_x2,m_y2,m_xc,m_yc);
-  angles[3] = find_angle(m_x3,m_y3,m_xc,m_yc);
-  //  PROGRESS("Centre (" << m_xc << "," << m_yc <<")");
-  //  PROGRESS("Original order " << std::endl <<
-  //	   "(" << m_x0 << "," << m_y0 << ") @ "<< angles[0] << std::endl <<
-  //	   "(" << m_x1 << "," << m_y1 << ") @ "<< angles[1] << std::endl <<
-  //	   "(" << m_x2 << "," << m_y2 << ") @ "<< angles[2] << std::endl <<
-  //	   "(" << m_x3 << "," << m_y3 << ") @ "<< angles[3]);
-  float tx,ty; 
-  for(int i=0;i<4;i++) {
-    if (angles[0] > angles[1]) {
-      swap(&m_x0,&m_x1);
-      swap(&m_y0,&m_y1);
-      swap(&angles[0],&angles[1]);
-    }
+ // take the vector centre -> 0
+ float p1x = m_x0-m_xc;
+ float p1y = m_y0-m_yc;
 
-    if (angles[1] > angles[2]) {
-      swap(&m_x1,&m_x2);
-      swap(&m_y1,&m_y2);
-      swap(&angles[1],&angles[2]);
-    }
+ // take the vector centre -> 1
+ float p2x = m_x1-m_xc;
+ float p2y = m_y1-m_yc;
 
-    if (angles[2] > angles[3]) {
-      swap(&m_x2,&m_x3);
-      swap(&m_y2,&m_y3);
-      swap(&angles[2],&angles[3]);
-    }
-  }
-  
-  //  PROGRESS("Final order " << std::endl <<
-  //	   "(" << m_x0 << "," << m_y0 << ") @ "<< angles[0] << std::endl <<
-  //	   "(" << m_x1 << "," << m_y1 << ") @ "<< angles[1] << std::endl <<
-  //	   "(" << m_x2 << "," << m_y2 << ") @ "<< angles[2] << std::endl <<
-  //	   "(" << m_x3 << "," << m_y3 << ") @ "<< angles[3]);
+ // Look at the z comp of a cross prod p1 x p2
+ float z = p1x*p2y-p2x*p1y;
+
+ if (z<0.0) {
+   // Order is acw - fix it!
+    double x0=m_x0, y0=m_y0;
+    double x1=m_x1, y1=m_y1;
+    double x2=m_x2, y2=m_y2;
+    double x3=m_x3, y3=m_y3;
+
+    m_x0= x0; m_y0=y0;
+    m_x1= x3; m_y1=y3;
+    m_x2= x2; m_y2=y2;
+    m_x3= x1; m_y3=y1;
+ }
 }
-
-  
 
 void QuadTangle::GetTransform(float transform[16]) const {
   // see the header file for a full explanation of what's going on here
