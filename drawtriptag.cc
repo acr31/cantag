@@ -3,11 +3,16 @@
 #include <cmath>
 #include <iostream>
 
-#include "TripOriginalTag.hh"
+#include "Config.hh"
+#include "TripOuterTag.hh"
+#include "TripOriginalCoder.hh"
+#include "Drawing.hh"
+
+#undef FILENAME
+#define FILENAME "drawtriptag.cc"
 
 int
 main(int argc, char* argv[]) {
-
   if (argc != 4) {
     std::cout << argv[0] << " [size] [code] [filename]"<<std::endl;
     exit(-1);
@@ -16,10 +21,10 @@ main(int argc, char* argv[]) {
   int width = atoi(argv[1]);
   long long value = atoll(argv[2]);
 
-  double imagewidth = width;
-  if (width < 300) {
-    imagewidth = 300;
-  }
+  PROGRESS("Drawing tag with width: " << width << ", code: " << value);
+
+  int imagewidth = 600;
+
 
   CvSize size;
   size.width=imagewidth;
@@ -32,24 +37,15 @@ main(int argc, char* argv[]) {
     }
   }
 
-  CvPoint2D32f p;
-  p.x=imagewidth/2;
-  p.y=imagewidth/2;
-
-  double r = width / TripOriginalTag<>::TagRadius();
-
-  CvSize2D32f s;
-  s.width=r;
-  s.height=r;
-
-
-  CvBox2D box;
-  box.center=p;
-  box.size=s;
-  box.angle=10.0;
+  Location2D l(imagewidth/2,
+	       imagewidth/2,
+	       width,
+	       width,
+	       PI);
   
-  TripOriginalTag<> t(box,value);
-  t.Synthesize(image,255,0);
+  TripOuterTag<TripOriginalCoder<2,16,2>,2,16,24,2,10> t;
+
+  t.Draw2D(image,&l,value, 0, 255);
 
   cvSaveImage(argv[3],image);
   cvReleaseImage(&image);

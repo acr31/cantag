@@ -41,15 +41,21 @@
  * Then remaining data sectors
  * Each sector encodes 2^(RING_COUNT-1) values - all set is not allowed
  *
+ *
+ * RING_COUNT = number of data rings
+ * SECTOR_COUNT = total number of sectors 
+ * SYNC_COUNT = total number of positions to try when looking for a sync sector
+ * CHECKSUM_COUNT = number of checksum sectors
+ * TAG_SIZE_SCALE = the outer ring of the tag is this many times the radius of the outer edge of the bulleseye
+ * DATA_RING_OFFSET = the width of the bullseye is ths many times the gap between the bullseye and the first data ring
  */
-
-#define DATA_RING_OFFSET 0.1
 
 template<int RING_COUNT=2, 
 	 int SECTOR_COUNT=16, 
 	 int SYNC_COUNT=24, 
 	 int CHECKSUM_COUNT=2, 
-	 int TAG_SIZE_SCALE=2>
+	 int TAG_SIZE_SCALE=2,
+	 int DATA_RING_OFFSET=10>
 class TripOriginalTag : virtual Tag {
 public:
   static const int ring_count = RING_COUNT;
@@ -57,8 +63,8 @@ public:
   static const int checksum_count = CHECKSUM_COUNT;
   static const int sector_count = SECTOR_COUNT;  
   static const int tag_size_scale = TAG_SIZE_SCALE;
+  static const int data_ring_offset = DATA_RING_OFFSET;
 
-  static const double data_ring_offset = DATA_RING_OFFSET;
   static const double sector_angle = 2*CV_PI / (double)SECTOR_COUNT;
   static const double sync_angle = 2*CV_PI / (double)SYNC_COUNT;
 
@@ -73,10 +79,6 @@ public:
       "Normal: [" << m_normal.x << " " << m_normal.y << " " << m_normal.z << "]"<<std::endl <<
       "Centre: [" << m_centre.x << " " << m_centre.y << " " << m_centre.z << "]"<<std::endl;
     return s;
-  }
-
-  unsigned long GetCode() const {
-    return m_code;
   }
 
   void Show(IplImage *image) {
@@ -255,7 +257,7 @@ public:
     PROGRESS("Contour following");
     IplImage *copy = cvCloneImage(gray); // the find contours process changes the image ;-(
     CvSeq* seq = NULL;
-    int num = cvFindContours(copy,store,&seq,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_TC89_KCOS);
+    int num = cvFindContours(copy,store,&seq,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_SIMPLE);
     cvReleaseImage(&copy);
 #ifdef IMAGEDEBUG
     IplImage *debug1Clone = cvCloneImage(image);
@@ -275,7 +277,7 @@ public:
 #ifdef IMAGEDEBUG
     IplImage *debug2Clone = cvCloneImage(image);
     for(std::vector<CvBox2D>::const_iterator step = ellipses->begin();step != ellipses->end(); step++) 
-      {
+      {	
 	cvEllipseBox(debug2Clone,*step,CV_RGB(255,255,0),2);
       }
     cvSaveImage("debug-ellipse.jpg",debug2Clone);
@@ -428,7 +430,6 @@ public:
   
 private:
   CvBox2D m_ellipse;
-  unsigned long m_code;
   CvPoint3D32f m_normal;
   CvPoint3D32f m_centre;
 
@@ -459,15 +460,15 @@ private:
   static inline double Radius(double ring) {
     /* The width of each data ring (w) is:
      
-    (TAG_SIZE_SCALE - DATA_RING_OFFSET - 1)/RING_COUNT
+    (TAG_SIZE_SCALE - 1/DATA_RING_OFFSET - 1)/RING_COUNT
   
     So the position to poll is the distance to the edge of the bullseye + the white ring around the bullseye + ring*width 
     */
-    return (ring * ( TAG_SIZE_SCALE - DATA_RING_OFFSET -1) / RING_COUNT)+1+DATA_RING_OFFSET;
+    return (ring * ( TAG_SIZE_SCALE - 1/DATA_RING_OFFSET -1) / RING_COUNT)+1+DATA_RING_OFFSET;
   }
   
   static inline double CentreRadius(double ring) {
-    return Radius(ring) + (TAG_SIZE_SCALE-DATA_RING_OFFSET-1)/RING_COUNT/2;
+    return Radius(ring) + (TAG_SIZE_SCALE-1/DATA_RING_OFFSET-1)/RING_COUNT/2;
   }
 
   static inline bool Sample(IplImage* image, 
@@ -488,7 +489,7 @@ private:
   {
     /* The width of each data ring (w) is:
        
-    (TAG_SIZE_SCALE - DATA_RING_OFFSET)/RING_COUNT
+    (TAG_SIZE_SCALE - 1/DATA_RING_OFFSET)/RING_COUNT
   
     So the position to poll is the distance to the edge of the bullseye + the white ring around the bullseye + ring*width + width/2 
   

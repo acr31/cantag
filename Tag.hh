@@ -1,17 +1,16 @@
 #ifndef TAG_GUARD
 #define TAG_GUARD
 
-#include <cv.h>
-#include <ostream>
+#include <iostream>
+
+#include "Config.hh"
+#include "Drawing.hh"
+#include "Location2D.hh"
 
 class Tag {
 public:
-  Tag();
-  virtual void Show(IplImage *image) =0;
-  virtual std::ostream& Print(std::ostream& s) const=0;
-  virtual unsigned long GetCode() const =0;
+  virtual void Draw2D(Image *image, Location2D *location, unsigned long code, int black, int white)= 0;
+  virtual unsigned long Decode(Image *image, Location2D *location) =0;
 };
-
-std::ostream& operator<<(std::ostream& s, const Tag& z);
 
 #endif//TAG_GUARD
