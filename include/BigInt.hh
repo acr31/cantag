@@ -56,7 +56,7 @@ public:
 
   operator unsigned int() const;
   
-  friend std::ostream& operator<<<SIZE>(std::ostream& s, const BigInt<SIZE>& z);
+  friend std::ostream& operator<<(std::ostream& s, const BigInt<SIZE>& z);
   
 };
 
