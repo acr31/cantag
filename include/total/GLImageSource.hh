@@ -69,8 +69,8 @@ public:
    * Create the image source.  It will create images of the given
    * size, with a single tag carrying the given code.
    */
-  GLImageSource(int height, int width, float fov, CyclicBitSet<TAG::TagPayloadSize>& code, const TAG& t);
-  ~GLImageSource();
+  GLImageSource(int width, int height, float fov, CyclicBitSet<TAG::TagPayloadSize>& code, const TAG& t);
+  virtual ~GLImageSource();
 
 
   /**
@@ -124,11 +124,11 @@ template<class TAG> void GLImageSource<TAG>::SetCameraParameters(Camera& cam) {
 }
 
 
-template<class TAG> GLImageSource<TAG>::GLImageSource(int height, int width, float fov, CyclicBitSet<TAG::TagPayloadSize>& code, const TAG& t) : 
-  m_height(height),
+template<class TAG> GLImageSource<TAG>::GLImageSource(int width, int height, float fov, CyclicBitSet<TAG::TagPayloadSize>& code, const TAG& t) : 
   m_width(width),
-  m_glimage(width,height),
-  m_fov(fov)
+  m_height(height),
+  m_fov(fov),
+  m_glimage(width,height)
 {
   m_ctx = OSMesaCreateContext( GL_RGB, NULL );
   m_buffer = (unsigned char*)malloc(m_width*m_height*3);     
