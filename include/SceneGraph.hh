@@ -191,7 +191,7 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	    border_type = OUTER_BORDER;
 	    contour_length = FollowContour(image, raster_x, raster_y, points_buffer, MAXLENGTH, st,0, NBD);
 	  }
-	  else if (!current_exit_pixel && !next) { // the next element is a 0-element 
+	  else if ((!current_exit_pixel || current_not_visited) && !next) { // the next element is a 0-element 
 #ifdef SCENE_GRAPH_DEBUG
 	    PROGRESS("Found start point for hole border " <<raster_x << "," << raster_y);
 #endif	    
@@ -280,6 +280,7 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	      node_hash[NBD] = Contour(parent_id,node_hash[parent_id].node,border_type);
 	    }
 	  }
+
 	  if (!current_not_visited) {
 #ifdef SCENE_GRAPH_DEBUG
 	    PROGRESS("Current node has been visited, setting LNBD to "<< (int)current_nbd);
@@ -300,17 +301,67 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
 #ifdef SCENE_GRAPH_DEBUG
   PROGRESS("Following contour");
 #endif	 
+
+  points_buffer[0] = start_x;
+  points_buffer[1] = start_y;
+  int pointer = 1;  // our index into the points buffer
+
+  // first scan around clockwise from the requested position looking for a 1-element
+  const int offset_x_clockwise[] = { -1,-1,0,1,1,1,0,-1};
+  const int offset_y_clockwise[] = { 0,-1,-1,-1,0,1,1,1};
+  bool found = false;
+  for(int i=0;i<8;i++) {
+    int clock_sample_x = start_x+offset_x_clockwise[position];
+    int clock_sample_y = start_y+offset_y_clockwise[position];
+    if (image.Sample(clock_sample_x,clock_sample_y)) {
+      found = true;
+      break;
+    }
+    position++;
+    position &= 0x7;
+  }
+
+  if (!found) {
+    // if we dont find a 1-element then record the nbd in this pixel
+    // and that it is an exit pixel and then return this single pixel contour
+    image.DrawPixel(start_x,start_y, nbd<<1 | 0x1);
+    return 1;
+  }
+
+  // if we found the 1-element a position n clockwise then we resume
+  // searching anti-clockwise from the position 1 after the found position
+
+  //    +---+---+---+---+         +---+---+---+---+   
+  //    | 1 | 2 | 3 |   |         | 7 | 6 | 5 |   |
+  //    +---+---+---+---+         +---+---+---+---+   
+  //    | 0 |   | 4 |   |         | 0 |   |_4_|   |
+  //    +---+---+---+---+   -->   +---+---+---+---+   
+  //    | 7 | 6 | X |   |         | 1 | 2 | X |   |
+  //    +---+---+---+---+         +---+---+---+---+   
+  //    |   |   |   |   |         |   |   |   |   |
+  //    +---+---+---+---+         +---+---+---+---+   
+  //
+  //  Found posn (clockwise)  |  Resume posn (anti)
+  //  -----------------------------------------------
+  //          0               |         1
+  //          1               |         0
+  //          2               |         7
+  //          3               |         6
+  //          4               |         5
+  //          5               |         4
+  //          6               |         3
+  //          7               |         2
+  //
+  // i.e. the restart position is:  9 - found % 8  
+  position = (9- position) % 0x7;
+
+  
   // these two arrays store the offsets for each of the eight regions
   // around the target pixel
   const int offset_x[] = {-1,-1,0,1,1,1,0,-1};
   const int offset_y[] = {0,1,1,1,0,-1,-1,-1};
 
   bool cell4_is_0 = false; // will be set to true when we search a region if we pass cell4 and cell4 is a 0-element
-  int start_position = position; // if, when we are searching for a 1-pixel, we get all the way round to the start position again then we stop.  In particular this deals with the one pixel contour case.
-
-  points_buffer[0] = start_x;
-  points_buffer[1] = start_y;
-  int pointer = 1;  // our index into the points buffer
 
   statistics.length = 0; // the contour length
   statistics.min_x = start_x; // bounding box
@@ -331,23 +382,18 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
       PROGRESS("Found 1-element at " << sample_x << "," << sample_y << " position " << position);
 #endif
       // we now need to mark this pixel
-      int value;
       // 1) if the pixel sample_x+1,sample_y (cell 4) is a 0-element and we
       // have examined it whilst looking for this 1-element then this
       // is an exit pixel.  Write (NBD,r).
       if (cell4_is_0) {
-	value = nbd_shifted| 0x1;
+	image.DrawPixel(start_x,start_y,nbd_shifted | 0x1);
       }
       // 2) else if sample_x,sample_y is unmarked write
       // (NBD,l).
       else if (!(sample>>1)) {
-	value = nbd_shifted;
+	image.DrawPixel(start_x,start_y,nbd_shifted);
       }
-      else {
-	value = sample;
-      }
-      //      std::cout << start_x << " " << start_y << " " << value << std::endl;
-      image.DrawPixel(start_x,start_y,value);
+
       // update the length
       statistics.length += (position & 0x1 ? 45 : 32);
       // update the bounding box
@@ -367,11 +413,36 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
       points_buffer[++pointer] = start_y;
       start_y = sample_y;
 
-      // adding 5 to our position (mod 8) will put our start
-      // position one further round than the previous central point.
       cell4_is_0=false;
-      position+=5;
-      start_position = 10;  // disable the check for failed search - we know we'll always find one
+
+      // if we find the 1-element at position n anti-clockwise then we
+      // need to shift the region to be centered on the new point and
+      // resume searching one place after the previous central point
+      // i.e. if we find a point at 3 we need to resume searching from
+      // 0 (one place past the old centre at 7)
+      
+      //    +---+---+---+---+         +---+---+---+---+   
+      //    | 7 | 6 | 5 |   |         |   |   |   |   |
+      //    +---+---+---+---+         +---+---+---+---+   
+      //    | 0 |   | 4 |   |         |   |_7_| 6 | 5 |
+      //    +---+---+---+---+   -->   +---+---+---+---+   
+      //    | 1 | 2 | X |   |         |   | 0 | X | 4 |
+      //    +---+---+---+---+         +---+---+---+---+   
+      //    |   |   |   |   |         |   | 1 | 2 | 3 |
+      //    +---+---+---+---+         +---+---+---+---+   
+
+      //  Found posn (anti)       |  Resume posn (anti)
+      //  -----------------------------------------------
+      //          0               |         5
+      //          1               |         6
+      //          2               |         7
+      //          3               |         0
+      //          4               |         1
+      //          5               |         2
+      //          6               |         3
+      //          7               |         4
+      //
+      position = (position+5) & 0x7;
     }
     else {  // the pixel is a 0-element
 #ifdef SCENE_GRAPH_DEBUG
@@ -382,15 +453,9 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
       }
 
       // advance the position
-      ++position;
+      position = (position+1) & 0x7;
     }
-
-    position &= 0x7;
     
-    if(position==start_position) { // we have searched all the way round this pixel and not found a 1-pixel
-      return 1;
-    }
-
     // if our current pixel matches the _second_ pixel found in the
     // chain and the previous pixel we found matches the first then we
     // are done.  we have to wait until pointer>4 in order to make
@@ -398,8 +463,8 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
     // notice it can unroll this loop a couple of times and remove
     // this comparison?
     if ((pointer > 4) && 
-	(points_buffer[2] == sample_x) &&
-	(points_buffer[3] == sample_y) &&
+	(points_buffer[2] == start_x) &&
+	(points_buffer[3] == start_y) &&
 	(points_buffer[0] == points_buffer[pointer-3]) &&
 	(points_buffer[1] == points_buffer[pointer-2])) {
       break;
