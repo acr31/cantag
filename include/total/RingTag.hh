@@ -188,15 +188,14 @@ template<int RING_COUNT,int SECTOR_COUNT,class C> void RingTag<RING_COUNT,SECTOR
 #endif
   }
   
-  for(int i=RING_COUNT-1;i>=0;i--) {
-    for(int j=0;j<SECTOR_COUNT;j++) {	
-      // pick the colour based on the value we encode - sensible
-      int colour = tag_data[j*RING_COUNT+i] ? COLOUR_BLACK : COLOUR_WHITE;
+  int pointer = 0;
+  for(int i=0;i<SECTOR_COUNT;++i) {
+    for(int j=0;j<RING_COUNT;++j) {
+      int colour = tag_data[pointer] ? COLOUR_BLACK : COLOUR_WHITE;
       // or pick the colour based on which sector we are encoding - useful for debugging
-      //int colour = (int)((float)(i+j*RING_COUNT) / (float)(RING_COUNT*SECTOR_COUNT) * 128)+128;
-      // or pick the colour as if we were reading the tag in the wrong order - useful for pictures
-      //int colour = (int)((float)(i*SECTOR_COUNT+j) / (float)(RING_COUNT*SECTOR_COUNT) * 128)+128;
-      image.DrawSector(x0,y0,scalefactor*m_data_ring_outer_radii[i],m_sector_angles[j],m_sector_angles[SECTOR_COUNT],colour);
+      //int colour = (int)((float)(pointer) / (float)(RING_COUNT*SECTOR_COUNT) * 128)+128;
+      image.DrawSector(x0,y0,scalefactor*m_data_ring_outer_radii[RING_COUNT-j-1],m_sector_angles[i],m_sector_angles[i+1],colour);
+      ++pointer;
     }
   }
 
@@ -499,6 +498,9 @@ template<int RING_COUNT,int SECTOR_COUNT,class C> bool RingTag<RING_COUNT,SECTOR
   }
   
   if (left == right) {
+#ifdef RING_TAG_DEBUG
+    PROGRESS("Failed to find a sector edge!");
+#endif
     return false;
   }
   
@@ -541,8 +543,8 @@ template<int RING_COUNT,int SECTOR_COUNT,class C> bool RingTag<RING_COUNT,SECTOR
   for(int j=0;j<SECTOR_COUNT;++j) {
     // read a chunk by sampling each ring and shifting and adding
     for(int k=0;k<RING_COUNT;++k) {
-      float tpt[]=  {  m_cos_read_angles[readindex] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
-		       m_sin_read_angles[readindex] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
+      float tpt[]=  {  m_cos_read_angles[readindex] * m_data_ring_centre_radii[RING_COUNT-1-k]/m_bullseye_outer_radius,
+		       m_sin_read_angles[readindex] * m_data_ring_centre_radii[RING_COUNT-1-k]/m_bullseye_outer_radius };
       ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
       camera.NPCFToImage(tpt,1);
       bool sample = image.Sample(tpt[0],tpt[1]) != 0;
@@ -692,19 +694,19 @@ template<int RING_COUNT,int SECTOR_COUNT,class C>  void RingTag<RING_COUNT,SECTO
   
   int counter=0;
   for(int k=0;k<SECTOR_COUNT*READING_COUNT;k+=READING_COUNT) {
-    for(int r=RING_COUNT-1;r>=0;r--) {
+    for(int r=0;r<RING_COUNT;++r) {
       float pts[2];
-      pts[0] = cos( m_read_angles[k + READING_COUNT/2] ) * m_data_ring_centre_radii[r]/m_bullseye_outer_radius;
-      pts[1] = sin( m_read_angles[k + READING_COUNT/2] ) * m_data_ring_centre_radii[r]/m_bullseye_outer_radius;
+      pts[0] = cos( m_read_angles[k + READING_COUNT/2] ) * m_data_ring_centre_radii[RING_COUNT-1-r]/m_bullseye_outer_radius;
+      pts[1] = sin( m_read_angles[k + READING_COUNT/2] ) * m_data_ring_centre_radii[RING_COUNT-1-r]/m_bullseye_outer_radius;
       ApplyTransform(l,pts,1);
       camera.NPCFToImage(pts,1);
       // pick the colour to be the opposite of the sampled point so we can see the dot
       int colour = image.Sample(pts[0],pts[1]) ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
       // or pick the colour to be on a gradient so we see the order it samples in
-      //int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
+      //int colour = (int)((double)counter/(double)(SECTOR_COUNT*RING_COUNT)*255);
       debug0.DrawPoint(pts[0],pts[1],colour,4);
+      counter++;
     }
-    counter++;
   }
 #endif
   char filename[256];
