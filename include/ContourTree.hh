@@ -10,12 +10,7 @@
 #include <vector>
 #include <map>
 #include <Camera.hh>
-
-#ifdef HAVE_BOOST_ARCHIVE
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/level.hpp>
-#endif
+#include <Socket.hh>
 
 /**
  * A tree of matched contours.  Create an instance of this class from
@@ -36,16 +31,11 @@ public:
     std::vector<Contour*> children;
     bool weeded;
     Contour(int id) : nbd(id),parent_id(id),weeded(false) {}
+    Contour(Socket& socket);
     ~Contour();
-#ifdef HAVE_BOOST_ARCHIVE
-  private:
-    friend class boost::serialization::access;
-    template<class Archive> void save(Archive & ar, const unsigned int version) const;
-    template<class Archive> void load(Archive & ar, const unsigned int version);
 
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-    Contour() : points(),children(), weeded(false) {}
-#endif
+    Save(Socket& socket);
+
   };
   
   struct ContourConstraint {
@@ -120,65 +110,13 @@ private:
 public:
 
   ContourTree(Image& image, std::vector<ContourConstraint>& constraints);
+  ContourTree(Socket& socket);
   void ImageToNPCF(const Camera& camera);
   inline Contour* GetRootContour() { return m_root_contour; }
   ~ContourTree();
 
-#ifdef HAVE_BOOST_ARCHIVE
-public:
-  ContourTree() : m_root_contour(NULL) {}
-private:
-  friend class boost::serialization::access;
-  template<class Archive> void serialize(Archive & ar, const unsigned int version);
-#endif
+  Save(Socket& socket);
+
 };
-
-#ifdef HAVE_BOOST_ARCHIVE
-
-BOOST_CLASS_IMPLEMENTATION(ContourTree, boost::serialization::object_serializable);
-BOOST_CLASS_IMPLEMENTATION(ContourTree::Contour, boost::serialization::object_serializable);
-BOOST_CLASS_TRACKING(ContourTree, boost::serialization::track_never);
-BOOST_CLASS_TRACKING(ContourTree::Contour, boost::serialization::track_never);
-
-template<class Archive> void ContourTree::Contour::save(Archive & ar, const unsigned int version) const {
-  ar & nbd;
-  ar & bordertype;
-  ar & parent_id;
-  ar & points;
-  int count = 0;
-  for(std::vector<Contour*>::const_iterator i = children.begin();
-      i != children.end();
-      ++i) {
-    if (!(*i)->weeded){ count ++; }
-  }
-  ar & count;
-  for(std::vector<Contour*>::const_iterator i = children.begin();
-      i != children.end();
-      ++i) {
-    if (!(*i)->weeded){ 
-      ar & *(*i);
-    }
-  }
-}
-
-template<class Archive> void ContourTree::Contour::load(Archive & ar, const unsigned int version) {
-  ar & nbd;
-  ar & bordertype;
-  ar & parent_id;
-  ar & points;
-  int count;
-  ar & count;
-  weeded = false;
-  for(int i=0; i<count;++i) {
-    Contour* contour = new Contour();
-    ar & *contour;
-    children.push_back(contour);
-  }
-}
-
-template<class Archive> void ContourTree::serialize(Archive & ar, const unsigned int version) {
-  ar & *m_root_contour;
-}
-#endif
 
 #endif//CONTOUR_TREE_GUARD

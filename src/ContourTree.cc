@@ -377,3 +377,41 @@ ContourTree::Contour::~Contour() {
     //delete *i;
   }
 }
+
+ContourTree::ContourTree(Socket& socket) {
+  m_root_contour = new Contour(socket);
+}
+
+void ContourTree::Save(Socket& socket) {
+  if (m_root_contour != NULL) {
+    m_root_contour->Save(socket);
+  }
+}
+
+ContourTree::Contour::Contour(Socket& socket) : points() {
+  nbd = socket.RecvInt();
+  border_type = socket.RecvInt();
+  parent_id = socket.RecvInt();
+  socket.Recv(points);
+  int count = socket.RecvInt();
+  for(int i=0;i<count;++i) {
+    children.push_back(new Contour(socket));
+  }
+}
+
+ContourTree::Contour::Save(Socket& socket) {
+  if (!weeded) {
+    socket.Send(nbd);
+    socket.Send(border_type);
+    socket.Send(parent_id);
+    socket.Send(points);
+  }
+  int counter = 0;
+  for(std::vector<float>::const_iterator i = children.begin(); i!= children.end(); ++i) {
+    if (!(*i)->weeded) counter++;
+  }
+  socket.Send(counter);
+  for(std::vector<float>::const_iterator i = children.begin(); i!= children.end(); ++i) {
+    (*i)->Send(socket);
+  }
+}

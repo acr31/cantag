@@ -1,5 +1,6 @@
 #include <Image.hh>
-#include <iostream>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #ifdef HAVE_BOOST_RANDOM
 # include <boost/random.hpp>
@@ -286,3 +287,21 @@ void Image::DrawEllipse(float xc, float yc,
   ellipse_polygon_approx(points,0, numsteps, xc, yc ,width, height, angle_radians, color, thickness, 0);
 }
 
+Image::Image(Socket& socket) {
+  int count;
+  int width = socket.RecvInt();
+  int height = socket.RecvInt();
+  int size = socket.RecvInt();
+  m_image = cvCreateImageHeader(cvSize(width,height),IPL_DEPTH_8U, 1);
+  m_contents = new unsigned char[size];
+  m_free_contents = true;
+  m_from_header = true;
+  socket.Recv(m_contents,size);
+}
+
+int Image::Send(Socket& socket) {
+  socket.Send(m_image->width);
+  socket.Send(m_image->height);
+  socket.Send(m_image->imageSize);
+  socket.Send(m_image->imageData,m_image->imageSize);
+}
