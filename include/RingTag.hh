@@ -26,7 +26,7 @@
 # undef DRAW_FIELD_DEBUG
 #endif
 
-int debug_image_counter= 0;
+int debug_image_counter = 0;
 
 //#define Ellipse LinearEllipse
 /**
@@ -36,7 +36,7 @@ int debug_image_counter= 0;
  *
  * \todo regression test with gl harness
  */
-#define READING_COUNT 5
+#define READING_COUNT 10
 template<int RING_COUNT, int SECTOR_COUNT>
 class RingTag : public virtual Tag< ShapeChain<Ellipse>, RING_COUNT*SECTOR_COUNT >, 
 		protected virtual Coder<RING_COUNT*SECTOR_COUNT> {
@@ -224,6 +224,7 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
 #ifdef RING_TAG_DEBUG
     PROGRESS("This node has no children.  Skipping it");
 #endif
+    node->ClearLocatedObject();
     return false;
   }
 
@@ -234,8 +235,38 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
 #ifdef RING_TAG_DEBUG
     PROGRESS("Discarding unfitted ellipse.");
 #endif
+    node->ClearLocatedObject();
+
     return false;
   }
+
+  // find a concentric child
+  LinearEllipse le(el.GetA(),el.GetB(),el.GetC(),el.GetD(),el.GetE(),el.GetF());
+  le.Decompose();
+  bool found = false;
+  for(typename std::vector< SceneGraphNode< ShapeChain<Ellipse>,  RING_COUNT*SECTOR_COUNT >* >::iterator i = node->GetChildren().begin(); i!=node->GetChildren().end();i++) {
+    Ellipse c1 = (*i)->GetShapes().GetShape();
+    if (c1.IsFitted()) {
+      LinearEllipse lc(c1.GetA(),c1.GetB(),c1.GetC(),c1.GetD(),c1.GetE(),c1.GetF());
+      lc.Decompose();
+      float dist = (lc.GetX0()-le.GetX0())*(lc.GetX0()-le.GetX0()) + (lc.GetY0()-le.GetY0())*(lc.GetY0()-le.GetY0());
+#ifdef RING_TAG_DEBUG
+      PROGRESS("Distance is " << dist);
+#endif
+      if (dist < 0.0001) {
+	found = true;
+	break;
+      }
+    }
+  }
+
+  if (!found) {
+#ifdef RING_TAG_DEBUG
+    PROGRESS("No concentric children");
+#endif
+    return false;
+  }
+
 
 #ifdef RING_TAG_DEBUG
   PROGRESS("Ellipse is a=["<<
@@ -253,7 +284,7 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
   el.GetTransform(transform1,transform2);
   
   // project some points for the inner circle using both interpretations and check which one fits  
-  int count = 30;
+  int count = 4;
   float projected1[count*2];
   float projected2[count*2];
   for(int i=0;i<count*2;i+=2) {
@@ -277,13 +308,13 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
 #ifdef RING_TAG_DEBUG
     PROGRESS("Chose orientation 1 because it points towards the camera and orientation 2 doesnt");
 #endif
-    correcttrans = transform2;
+    correcttrans = transform1;
   }
   else if ((normal1[2] > 0) && (normal2[2] < 0)) {
 #ifdef RING_TAG_DEBUG
     PROGRESS("Chose orientation 2 because it points towards the camera and orientation 1 doesnt");
 #endif
-    correcttrans = transform1;
+    correcttrans = transform2;
   }
   else {
     for(typename std::vector< SceneGraphNode< ShapeChain<Ellipse>,  RING_COUNT*SECTOR_COUNT >* >::iterator i = node->GetChildren().begin(); i!=node->GetChildren().end();i++) {
@@ -315,8 +346,9 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
 #ifdef RING_TAG_DEBUG
     PROGRESS("Failed to find a valid transform - just selecting one arbitrarily!");
 #endif
-    node->ClearLocatedObject();
-    return false;
+    //    node->ClearLocatedObject();
+    //    return false;
+    correcttrans = transform1;
   }
 
   if (correcttrans != NULL) {
@@ -383,8 +415,11 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
       projected1[1] = 0;
       ApplyTransform(correcttrans,projected1[0],projected1[1],projected1,projected1+1);
       camera.NPCFToImage(projected1,1);
+#ifdef TEXT_DEBUG
       std::cout << "Found code " << *read_code[code_ptr] << " at " << projected1[0] << "," << projected1[1] << std::endl;
+#endif
 #ifdef RING_TAG_DEBUG
+
       PROGRESS("Ellipse position is "<<projected1[0]<<","<<projected1[1]);
 #endif
       
@@ -470,16 +505,16 @@ template<int RING_COUNT,int SECTOR_COUNT>  void RingTag<RING_COUNT,SECTOR_COUNT>
       ApplyTransform(l,pts,1);
       camera.NPCFToImage(pts,1);
       // pick the colour to be the opposite of the sampled point so we can see the dot
-      //      int colour = image.Sample(pts[0],pts[1]) ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
+      int colour = image.Sample(pts[0],pts[1]) ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
       // or pick the colour to be on a gradient so we see the order it samples in
-      int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
-      debug0.DrawPoint(pts[0],pts[1],colour,3);
+      //int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
+      debug0.DrawPoint(pts[0],pts[1],colour,1);
     }
     counter++;
   }
 #endif
   char filename[256];
-  snprintf(filename,255,"debug-decode-%d.bmp",debug_image_counter++);
+  snprintf(filename,255,"debug-decode-%0.5d.bmp",debug_image_counter++);
   filename[255]=0;
   debug0.Save(filename);
 }

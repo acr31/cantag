@@ -50,7 +50,7 @@ public:
   inline void RefreshLocatedObject(Image* image);
 
   /**
-   * Replace the current located object with a new one
+   * Return the  current located object or create one and return that
    */
   inline LocatedObject<PAYLOAD_SIZE>* GetLocatedObject();
 
@@ -63,6 +63,11 @@ public:
    * Return true if this node has already been inspected
    */
   inline bool IsInspected() const;
+
+  /**
+   * Return true if this node has a located object
+   */
+  inline bool IsLocated() const;
 
   /**
    * Set this node as inspected
@@ -88,6 +93,9 @@ template<class S, int PAYLOAD_SIZE> SceneGraphNode<S,PAYLOAD_SIZE>::~SceneGraphN
       i++) {
     delete (*i);
   }
+  if (m_located != NULL) {
+    delete m_located;
+  }
 }
 
 template<class S, int PAYLOAD_SIZE> bool SceneGraphNode<S,PAYLOAD_SIZE>::Compare(const SceneGraphNode<S,PAYLOAD_SIZE>& node) const {
@@ -96,6 +104,10 @@ template<class S, int PAYLOAD_SIZE> bool SceneGraphNode<S,PAYLOAD_SIZE>::Compare
 
 template<class S, int PAYLOAD_SIZE> void SceneGraphNode<S,PAYLOAD_SIZE>::RefreshLocatedObject(Image* image) {
   m_located.Refresh(image);
+}
+
+template<class S, int PAYLOAD_SIZE> bool SceneGraphNode<S,PAYLOAD_SIZE>::IsLocated() const {
+  return (m_located != NULL);
 }
 
 template<class S, int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>* SceneGraphNode<S,PAYLOAD_SIZE>::GetLocatedObject() {

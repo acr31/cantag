@@ -12,8 +12,8 @@
 #define MAXLENGTH 10000
 #define MAXDEPTH 20
 #undef SCENE_GRAPH_DEBUG
-#define MINCONTOUR_AREA 100
-#define MINCONTOUR_LENGTH 100
+#define MINCONTOUR_AREA 10
+#define MINCONTOUR_LENGTH 10
 
 int debug_contour_count = 0;
 
@@ -45,6 +45,9 @@ public:
 
   ~SceneGraph() {
     cvReleaseMemStorage(&store);
+    if (m_root != NULL) {
+      delete m_root;
+    }
   }
   /**
    * Update the scene graph with the given image
@@ -145,7 +148,7 @@ public:
     char filename[256];
     snprintf(filename,255,"camgrab-%d.bmp",debug_contour_count++);
     filename[255]=0;
-    cvSaveImage(filename,debug0);
+    //    cvSaveImage(filename,debug0);
     cvReleaseImage(&debug0);
 #endif
     

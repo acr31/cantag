@@ -476,7 +476,7 @@ float Ellipse::GetErrorStricker(const float* points, int count) const {
 #endif
   return total/count;
 }
-
+#include <iostream>
 
 void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   float a = GetA();
@@ -525,10 +525,25 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   // equation is only defined up to a scale factor.  We do this
   // because the y axis eigenvalue must have larger magnitude than the
   // x axis value in order for our next rotation to make sense.
-  //  int count = 0;
-  //  for(int i=0;i<3;i++) {
-  //    if (eigvals[4*i] < 0) { ++count; }
-  //  }
+  int count = 0;
+  for(int i=0;i<3;i++) {
+    if (eigvals[4*i] < 0) { ++count; }
+  }
+  if (count > 1) {
+#ifdef CIRCLE_TRANSFORM_DEBUG
+    PROGRESS("Two of the eigenvalues are less than zero - reversing ellipse equation");    
+    PROGRESS("Eigen Values: v=[" << eigvals[0] << "," << eigvals[1] << "," << eigvals[2] << ";");
+    PROGRESS("                 " << eigvals[3] << "," << eigvals[4] << "," << eigvals[5] << ";");
+    PROGRESS("                 " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];");
+#endif
+    for(int i=0;i<3;i++) {
+      eigvals[4*i]*=-1;
+    }
+  }
+
+
+
+  /*
 
   if (fabs(eigvals[0]) > fabs(eigvals[4])) {
     for(int i=0;i<3;i++) {
@@ -541,12 +556,12 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
     PROGRESS("                 " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];");
 #endif
   }
-  
+  */
   
   // bubble sort the vectors (based on their eigenvalue)...I'm so embarresed ;-)
   for(int i=0;i<4;i++) {
     for(int j=1;j<3;j++) {
-      if (eigvals[j*4-4] > eigvals[j*4]) {
+      if (eigvals[j*4-4] < eigvals[j*4]) {
 	// swap the vector
 	for(int k=0;k<3;k++) {
 	  double t = eigvects[j-1+k*3];
@@ -561,41 +576,71 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
       }
     }
   }
+  /*
+  float tx1 = eigvals[0];
+  float te1 = eigvects[0];
+  float te2 = eigvects[3];
+  float te3 = eigvects[6];
 
- 
-  // arrange that the axis component of each eigenvector has the same
-  // sign as the corresponding eigenvalue.  
+  eigvals[0] = eigvals[4];
+  eigvals[4] = eigvals[8];
+  for(int i=0;i<3;i++) {
+    eigvects[3*i] = eigvects[3*i+1];
+    eigvects[3*i+1] = eigvects[3*i+2];
+  }
 
-  if (((eigvects[0] < 0) && (eigvals[0] > 0)) ||
-      ((eigvects[0] > 0) && (eigvals[0] < 0))) {
+  eigvals[8] = tx1;
+  eigvects[2] = te1;
+  eigvects[5] = te2;
+  eigvects[8] = te3;
+  */
+  
+  // testing degrees of freedom
+  //  eigvects[0] *= -1;
+  //  eigvects[3] *= -1;
+  //  eigvects[6] *= -1;
+  //  eigvects[2] *= -1;
+  //  eigvects[5] *= -1;
+  //  eigvects[8] *= -1;
+
+
+  // make sure the normal vector will point in the right direction
+  if (eigvects[8] < 0) {
+    eigvects[2]*=-1;
+    eigvects[5]*=-1;
+    eigvects[8]*=-1;
+  }
+
+  // make sure that our eigenvectors do not include any reflections
+  float determinant = 
+    eigvects[0]*eigvects[4]*eigvects[8]
+    - eigvects[0]*eigvects[5]*eigvects[7]
+    - eigvects[1]*eigvects[3]*eigvects[8] 
+    + eigvects[1]*eigvects[5]*eigvects[6] 
+    + eigvects[2]*eigvects[3]*eigvects[7]
+    - eigvects[2]*eigvects[4]*eigvects[6];
 #ifdef CIRCLE_TRANSFORM_DEBUG
-    PROGRESS("Swapped x eigenvector");
+  PROGRESS("Determinant = " << determinant);
 #endif
+
+  if (determinant < 0) {
+    // it is enough to swap one of the vectors to make the determinant positive. 
     eigvects[0] *= -1;
     eigvects[3] *= -1;
     eigvects[6] *= -1;
+#ifdef CIRCLE_TRANSFORM_DEBUG
+    determinant = 
+      eigvects[0]*eigvects[4]*eigvects[8]
+      - eigvects[0]*eigvects[5]*eigvects[7]
+      - eigvects[1]*eigvects[3]*eigvects[8] 
+      + eigvects[1]*eigvects[5]*eigvects[6] 
+      + eigvects[2]*eigvects[3]*eigvects[7]
+      - eigvects[2]*eigvects[4]*eigvects[6];
+    PROGRESS("Swap x eigvect. Det = " << determinant);
+#endif
+        
   }
 
-  if (((eigvects[4] < 0) && (eigvals[4] > 0)) ||
-      ((eigvects[4] > 0) && (eigvals[4] < 0))) {
-#ifdef CIRCLE_TRANSFORM_DEBUG
-    PROGRESS("Swapped y eigenvector");
-#endif
-    eigvects[1] *= -1;
-    eigvects[4] *= -1;
-    eigvects[7] *= -1;
-  }
-
-  if (((eigvects[8] < 0) && (eigvals[0] > 8)) ||
-      ((eigvects[8] > 0) && (eigvals[0] < 8))) {
-#ifdef CIRCLE_TRANSFORM_DEBUG
-    PROGRESS("Swapped z eigenvector");
-#endif
-    eigvects[2] *= -1;
-    eigvects[5] *= -1;
-    eigvects[8] *= -1;
-  }
-  
   double r1[] = { eigvects[0], eigvects[1], eigvects[2], 0,
 		  eigvects[3], eigvects[4], eigvects[5], 0,
 		  eigvects[6], eigvects[7], eigvects[8], 0,
@@ -609,33 +654,61 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   PROGRESS("Sorted Eigen Values: sev=[ " << eigvals[0] << "," << eigvals[1] << "," << eigvals[2] << ";");
   PROGRESS("                           " << eigvals[3] << "," << eigvals[4] << "," << eigvals[5] << ";");
   PROGRESS("                           " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];");
+
+  /*
+  double normal_t1 = sqrt( (eigvals[4]-eigvals[0])/(eigvals[4]-eigvals[8]) );
+  double normal_t2 = sqrt( (eigvals[0]-eigvals[8])/(eigvals[4]-eigvals[8]) );
+
+  double normal_x = normal_t1*eigvects[1] + normal_t2*eigvects[2];
+  double normal_y = normal_t1*eigvects[4] + normal_t2*eigvects[5];
+  double normal_z = normal_t1*eigvects[7] + normal_t2*eigvects[8];
+
+  double normal2_x = -normal_t1*eigvects[1] + normal_t2*eigvects[2];
+  double normal2_y = -normal_t1*eigvects[4] + normal_t2*eigvects[5];
+  double normal2_z = -normal_t1*eigvects[7] + normal_t2*eigvects[8];
+
+  PROGRESS("Normal vector: n=[ " << normal_x << "," << normal_y << "," << normal_z <<";");
+  PROGRESS("Normal vector: n=[ " << normal2_x << "," << normal2_y << "," << normal2_z <<";");
+  */
 #endif
       
-
   double denom = ( eigvals[8] - eigvals[0] );
   double cossq = ( eigvals[8] - eigvals[4] ) / denom;
   double sinsq = ( eigvals[4] - eigvals[0] ) / denom;
-   
-  double pmcos = sqrt(cossq);
   double pmsin = sqrt(sinsq);
+  double pmcos = sqrt(cossq);
 
-  //  double theta = atan(sqrt(( eigvals[4] - eigvals[0] ) / ( eigvals[8] - eigvals[4] )));
-  //  double pmcos = cos(theta);
-  //  double pmsin = sin(theta);
-
-  //std::cout << "theta = " << theta << std::endl;
+  /*
+  double denom = ( eigvals[8] - eigvals[4] );
+  double sinsq = ( eigvals[0] - eigvals[4] ) / denom;
+  double cossq = ( eigvals[8] - eigvals[0] ) / denom;
+   
+  double pmsin = sqrt(sinsq);
+  double pmcos = sqrt(cossq);
+  */
 
   // here is our first ambiguity choice point.  We need to decide plus or minus theta
-  float r2c1[] = { pmcos, 0, pmsin, 0,
-		   0,     1, 0,     0, 
-		   -pmsin, 0, pmcos, 0,
-		   0,     0, 0,     1 };
-  
-  float r2c2[] = { pmcos, 0, -pmsin, 0,
+
+  float r2c1[] = { pmcos, 0, -pmsin, 0,
 		   0,     1, 0,     0, 
 		   pmsin, 0, pmcos, 0,
 		   0,     0, 0,     1 };
+  
+  float r2c2[] = { pmcos, 0, pmsin, 0,
+		   0,     1, 0,     0, 
+		   -pmsin, 0, pmcos, 0,
+		   0,     0, 0,     1 };
+  /*
+  float r2c1[] = { 1,     0,     0,    0,
+		   0,     pmcos, -pmsin,0, 
+		   0,     pmsin,pmcos,0,
+		   0,     0,     0,    1 };
 
+  float r2c2[] = { 1,     0,     0,    0,
+		   0,     pmcos,pmsin,0, 
+		   0,     -pmsin, pmcos,0,
+		   0,     0,     0,    1 };
+  */
 #ifdef CIRCLE_TRANSFORM_DEBUG  
   PROGRESS("Rotation 2(1): r2c1=[" << r2c1[0] << "," << r2c1[1] << "," << r2c1[2] << "," << r2c1[3] << ";");
   PROGRESS("                " << r2c1[4] << "," << r2c1[5] << "," << r2c1[6] << "," << r2c1[7] << ";");
@@ -656,6 +729,8 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   
   // apply the relevant translation - we have to choose again here based on our choice of theta
   double tx = sqrt((eigvals[4]-eigvals[0])*(eigvals[8]-eigvals[4]))/eigvals[4];
+  //  double tx = sqrt((eigvals[8]-eigvals[0])*(eigvals[0]-eigvals[4]))/eigvals[4];
+
 #ifdef CIRCLE_TRANSFORM_DEBUG
   PROGRESS("Translation tx = "<<tx);
 #endif
@@ -673,6 +748,8 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
 
   // and another choice based on theta
   double scale = sqrt(-eigvals[0]*eigvals[8]/eigvals[4]/eigvals[4]);
+  //double scale = sqrt(1 + (eigvals[8]-eigvals[0])*(eigvals[0]-eigvals[4])/eigvals[0]/eigvals[0]/eigvals[0] - (eigvals[4]+eigvals[8])/eigvals[0]/eigvals[0]);
+
 #ifdef CIRCLE_TRANSFORM_DEBUG
   PROGRESS("Scale factor " << scale);
 #endif

@@ -13,6 +13,8 @@
 #include <Tag.hh>
 #include <CyclicBitSet.hh>
 
+#define GLIMAGESOURCE_DEBUG
+
 /**
  * An image source that synthesizes the view based on an OpenGL
  * rendering of the tag.
@@ -161,17 +163,39 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz
     // turn this on to do spot light stuff
     //    glEnable(GL_LIGHTING);
     //    glEnable(GL_LIGHT0);
+    glTranslatef(centre_x,centre_y,centre_z);
 
-    float tagsizescale=1;
-    glScalef(tagsizescale,tagsizescale,1);
-    float factor = sqrt(nz*nz+ny*ny);
+    //    float factor = sqrt(nz*nz+ny*ny);
     
-    float rotation[] = { -nz,  ny*nx/factor,                  nx, centre_x,
-			 0,    -nz*nz/factor - nx*nx/factor,  ny, centre_y,
-			 nx,   ny*nz/factor,                  nz, centre_z,
-			 0,    0,                             0,  1 };
+    //    float rotation[] = { -nz,  ny*nx/factor,                  nx, centre_x,
+    //			 0,    -nz*nz/factor - nx*nx/factor,  ny, centre_y,
+    //			 nx,   ny*nz/factor,                  nz, centre_z,
+    //			 0,    0,                             0,  1 };
+
+    // OpenGL requires column major representation
+    //   float rotation[] = { -nz,0,nx,0,
+    //			 ny*nx/factor,-nz*nz/factor-nx*nx/factor,ny*nz/factor,0,
+    //			 nx,ny,nz,0,
+    //			 0,0,0,1};
+
+    float factor = sqrt(1-ny*ny);
+
+    float rotation[] = { -nz/factor, 0, nx/factor, 0, 
+			 -ny*nx/factor, factor, -ny*nz/factor, 0,
+			 nx,ny,nz,0,
+			 0,0,0,1};
+
     glMultMatrixf(rotation);
 
+    float tagsizescale =1;
+    glScalef(tagsizescale,tagsizescale,1);
+
+#ifdef GLIMAGESOURCE_DEBUG
+    PROGRESS("Rotation is [ " << rotation[0] << " " << rotation[4] << " " << rotation[8] << " " << rotation[12]);
+    PROGRESS("              " << rotation[1] << " " << rotation[5] << " " << rotation[9] << " " << rotation[13]);
+    PROGRESS("              " << rotation[2] << " " << rotation[6] << " " << rotation[10] << " " << rotation[14]);
+    PROGRESS("              " << rotation[3] << " " << rotation[7] << " " << rotation[11] << " " << rotation[15]);
+#endif
 
     // enable texturing mode
     glEnable(GL_TEXTURE_2D);
