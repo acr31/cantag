@@ -5,26 +5,31 @@
 # include <boost/random.hpp>
 #endif
 
-Image::Image() : m_from_header(false), m_image(NULL) {};
+Image::Image() : m_from_header(false), m_free_contents(false), m_image(NULL) {};
 
 
-Image::Image(int width, int height) : m_from_header(false), m_image(cvCreateImage(cvSize(width,height), IPL_DEPTH_8U, 1)) {
+Image::Image(int width, int height) : m_from_header(false), m_free_contents(false), m_image(cvCreateImage(cvSize(width,height), IPL_DEPTH_8U, 1)) {
   cvConvertScale(m_image,m_image,0,255);
+  m_contents = (uchar*)m_image->imageData;
 };
-Image::Image(const Image& c) : m_from_header(false), m_image(cvCloneImage(c.m_image)) {};
-Image::Image(char* filename) : m_from_header(false), m_image(cvLoadImage(filename)) {
+Image::Image(const Image& c) : m_from_header(false), m_free_contents(false), m_image(cvCloneImage(c.m_image)) {
+  m_contents = (uchar*)m_image->imageData;
+};
+Image::Image(char* filename) : m_from_header(false), m_free_contents(false), m_image(cvLoadImage(filename)) {
   if (m_image->nChannels == 3) {
     IplImage* image2 = cvCreateImage(cvSize(m_image->width,m_image->height),IPL_DEPTH_8U,1);
     cvCvtColor(m_image,image2,CV_RGB2GRAY);
     cvReleaseImage(&m_image);
     m_image = image2;
   }  
+  m_contents = (uchar*)m_image->imageData;
 };
 
-Image::Image(int width,int height, uchar* contents) : m_from_header(true) {
+Image::Image(int width,int height, uchar* contents) : m_from_header(true),m_free_contents(false) {
   m_image = cvCreateImageHeader(cvSize(width,height),
 				IPL_DEPTH_8U, 1);
   m_image->imageData = m_image->imageDataOrigin = (char*)contents;
+  m_contents = contents;
 }
 
 Image::~Image() {
@@ -39,7 +44,11 @@ Image::~Image() {
     }
     else {
       cvReleaseImage(&m_image);
-    }
+    }    
+  }
+  
+  if (m_free_contents) {
+    delete m_contents;
   }
 }
 

@@ -9,6 +9,13 @@
 #include <LocatedObject.hh>
 #include <vector>
 
+#ifdef HAVE_BOOST_ARCHIVE
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+using namespace boost::archive
+#endif
+
+
 /**
  * Stores a set of located objects - the world state
  */
@@ -20,6 +27,12 @@ public:
   WorldState();
   ~WorldState();
   void Add(LocatedObject<PAYLOAD_SIZE>* object);
+
+private:
+#ifdef HAVE_BOOST_ARCHIVE
+  friend class boost::serialization::access;
+  template<class Archive> void serialize(Archive & ar, const unsigned int version);
+#endif
 };
 
 template<int PAYLOAD_SIZE> WorldState<PAYLOAD_SIZE>::WorldState() : nodes() {}
@@ -35,5 +48,11 @@ template<int PAYLOAD_SIZE> WorldState<PAYLOAD_SIZE>::~WorldState() {
 template<int PAYLOAD_SIZE> void WorldState<PAYLOAD_SIZE>::Add(LocatedObject<PAYLOAD_SIZE>* object) {
   nodes.push_back(object);
 }
+
+#ifdef HAVE_BOOST_ARCHIVE
+template<int PAYLOAD_SIZE> void WorldState<PAYLOAD_SIZE>::template<class Archive> serialize(Archive & ar, const unsigned int version) {
+  ar & nodes;
+}
+#endif
 
 #endif//WORLD_STATE_GUARD

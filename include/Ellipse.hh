@@ -7,6 +7,14 @@
 #include <Config.hh>
 #include <vector>
 #include <Image.hh>
+
+#ifdef HAVE_BOOST_ARCHIVE
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+using namespace boost::archive
+#endif
+
+
 /**
  * A class to represent ellipses in the image and fit one to a set of points.
  *
@@ -210,8 +218,28 @@ public:
 
 private:
   bool FitEllipse(const std::vector<float>& points);
+
+#ifdef HAVE_BOOST_ARCHIVE
+  friend class boost::serialization::access;
+  template<class Archive> void serialize(Archive & ar, const unsigned int version);
+#endif
 };
 
-
+#ifdef HAVE_BOOST_ARCHIVE
+void Ellipse::template<class Archive> serialize(Archive & ar, const unsigned int version) {
+  ar & m_a;
+  ar & m_b;
+  ar & m_c;
+  ar & m_d;
+  ar & m_e;
+  ar & m_f;
+  ar & m_x0;
+  ar & m_y0;
+  ar & m_angle_radians;
+  ar & m_width;
+  ar & m_height;
+  ar & m_fitted;
+}
+#endif
 
 #endif//ELLIPSE_GUARD

@@ -10,6 +10,12 @@
 #include <findtransform.hh>
 #include <Camera.hh>
 
+#ifdef HAVE_BOOST_ARCHIVE
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+using namespace boost::archive
+#endif
+
 /**
  * Represents a tag that has been located.  Contains its 3D location,
  * pose, transformation matrix and its coded value.
@@ -56,9 +62,23 @@ public:
   void LoadTransform(float transform[16],float tag_size, float agle, const Camera& camera);
 
   ~LocatedObject();
+
+private:
+#ifdef HAVE_BOOST_ARCHIVE
+  friend class boost::serialization::access;
+  template<class Archive> void serialize(Archive & ar, const unsigned int version);
+#endif
 };
 
-#include <iostream>
+#ifdef HAVE_BOOST_ARCHIVE
+template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::template<class Archive> serialize(Archive & ar, const unsigned int version) {
+  ar & transform;
+  ar & normal;
+  ar & location;
+  ar & angle;
+  ar & tag_code;  
+}
+#endif
 
 template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(float t[16],float tag_size, float agle, const Camera& camera) {
   for(int i=0;i<16;i++) {

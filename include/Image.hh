@@ -12,6 +12,12 @@
 #define COLOUR_WHITE ((unsigned char)255)
 #define PI CV_PI
 
+#ifdef HAVE_BOOST_ARCHIVE
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+using namespace boost::archive
+#endif
+
 /**
  * A wrapper object for OpenCv's image
  *
@@ -21,7 +27,8 @@ class Image {
 private:
   bool m_from_header;  // set to true if this image is created to
 		       // point to an existing buffer of data
-  
+  uchar* m_contents;   
+  bool m_free_contents;   // if true then should m_contents be free'd
   uchar* m_row_ptr;
 public:
   IplImage* m_image; // this is public for the benefit of SceneGraph
@@ -385,7 +392,38 @@ public:
 private:
   int AdaptiveWidthStep(int moving_average,int* previous_line,unsigned int i, unsigned int j,unsigned int s, int t);
   void ellipse_polygon_approx(CvPoint* points, int startindex, int length, float xc, float yc, float width, float height,  float angle_radians, int color, int thickness, float start_angle);
+
+#ifdef HAVE_BOOST_ARCHIVE
+  // SERIALIZATION
+  friend class boost::serialization::access;
+  template<class Archive> void save(Archive & ar, const unsigned int version) const;
+  template<class Archive> void load(Archive & ar, const unsigned int version);
+
+  BOOST_SERIALIZATION_SPLIT_MEMBER()
+#endif
 };
 
+#ifdef HAVE_BOOST_ARCHIVE
+template<class Archive>
+void Image::save(Archive & ar, const unsigned int version) const {
+  ar & m_image->width;
+  ar & m_image->height;
+  ar & m_contents;
+}
+
+template<class Archive>
+void Image::load(Archive & ar, const unsigned int version) {
+  int width;
+  int height;
+  ar & width;
+  ar & height;
+  ar & m_contents;
+  m_free_contents = true;
+  m_image = cvCreateImageHeader(cvSize(width,height),
+				IPL_DEPTH_8U, 1);
+  m_image->imageData = m_image->imageDataOrigin = (char*)m_contents;
+  m_from_header = true;
+}
+#endif
 
 #endif//IMAGE_GUARD

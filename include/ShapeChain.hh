@@ -5,6 +5,13 @@
 #ifndef SHAPE_CHAIN_GUARD
 #define SHAPE_CHAIN_GUARD
 
+
+#ifdef HAVE_BOOST_ARCHIVE
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+using namespace boost::archive
+#endif
+
 /**
  * Placeholder for end of shape chain list
  */
@@ -15,6 +22,12 @@ public:
   ShapeChainEOL(const std::vector<float>& points,bool fitted) {};
   inline bool IsChainFitted() const { return false; }
   inline void DrawChain(Image& image) const {};
+
+private:
+#ifdef HAVE_BOOST_ARCHIVE
+  friend class boost::serialization::access;
+  template<class Archive> void serialize(Archive & ar, const unsigned int version) {}
+#endif
 };
 
 
@@ -49,8 +62,19 @@ public:
 
   void DrawChain(Image& image) const;
   
+private:
+#ifdef HAVE_BOOST_ARCHIVE
+  friend class boost::serialization::access;
+  template<class Archive> void serialize(Archive & ar, const unsigned int version);
+#endif
 };
 
+#ifdef HAVE_BOOST_ARCHIVE
+template<class M, class S> ShapeChain<M,S>::template<class Archive> serialize(Archive & ar, const unsigned int version) {
+  ar & m_shape;
+  ar & m_next;
+}
+#endif
 
 template<class M, class S> ShapeChain<M,S>::ShapeChain() : m_shape(), m_next() {};
 template<class M, class S> ShapeChain<M,S>::~ShapeChain() {};

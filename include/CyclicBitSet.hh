@@ -7,6 +7,13 @@
 
 #include <bitset>
 
+#ifdef HAVE_BOOST_ARCHIVE
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+using namespace boost::archive
+#endif
+
+
 /**
  * A simple extension of the STL bitset that supports some cyclic
  * operations.
@@ -91,7 +98,21 @@ public:
 
   CyclicBitSet& operator>>(size_t shift) const;
 
+private:
+
+#ifdef HAVE_BOOST_ARCHIVE
+  friend class boost::serialization::access;
+  template<class Archive> void serialize(Archive & ar, const unsigned int version);
+#endif
+
 };
+
+#ifdef HAVE_BOOST_ARCHIVE
+template<int BIT_COUNT> void CyclicBitSet<BIT_COUNT>::template<class Archive> serialize(Archive & ar, const unsigned int version) {
+  ar & boost::serialization::base_object<CyclicBitSet<BIT_COUNT> >(*this);
+  ar & m_rotation;
+}
+#endif
 
 template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet() : std::bitset<BIT_COUNT>(), m_rotation(0) {};
 

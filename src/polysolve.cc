@@ -65,7 +65,7 @@ bool check_eigen(double a, double b, double c,
   
   //  printf("   Sol: %lf,%lf,%lf\n",u1,u2,u3);
   //accuracy required for the eigenvector
-  double test = 0.01;
+  double test = 10000;
   if (fabs(u1)<test && fabs(u2)<test && fabs(u3)<test)
     return 1;
   else

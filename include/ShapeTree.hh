@@ -8,6 +8,13 @@
 #include <Config.hh>
 #include <ContourTree.hh>
 #include <Camera.hh>
+
+#ifdef HAVE_BOOST_ARCHIVE
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+using namespace boost::archive
+#endif
+
 /**
  * Takes a ContourTree and builds a tree of matched shapes
  */
@@ -27,6 +34,12 @@ public:
 	delete *i;
       }
     }
+#ifdef HAVE_BOOST_ARCHIVE
+  private:
+    friend class boost::serialization::access;
+    template<class Archive> void serialize(Archive & ar, const unsigned int version);
+    Node() {}
+#endif
   };
 
 private:
@@ -44,6 +57,12 @@ public:
   ShapeTree(const ContourTree::Contour& contour);
   Node* GetRootNode() { return &m_root_node; }
 
+#ifdef HAVE_BOOST_ARCHIVE
+private:
+  friend class boost::serialization::access;
+  template<class Archive> void serialize(Archive & ar, const unsigned int version);
+  ShapeTree() {}
+#endif
 };
 
 template<class S> ShapeTree<S>::ShapeTree(const ContourTree::Contour& contour) : m_root_node() {
@@ -76,5 +95,16 @@ template<class S> void ShapeTree<S>::walk_tree(Node* current, const ContourTree:
     walk_tree(current,*i);
   }  
 };
+
+#ifdef HAVE_BOOST_ARCHIVE
+template<class S> void ShapeTree<S>::Node::template<class Archive> serialize(Archive & ar, const unsigned int version) {
+  ar & matched;
+  ar & children;  
+}
+
+template<class S> void ShapeTree<S>::template<class Archive> serialize(Archive & ar, const unsigned int version) {
+  ar & m_root_node;
+}
+#endif
 
 #endif//SHAPE_TREE_GUARD

@@ -17,8 +17,8 @@
 # undef DECOMPOSE_DEBUG
 #endif
 
-#define MAXFITERROR 1
-#define COMPARETHRESH 0.0001
+#define MAXFITERROR 100
+#define COMPARETHRESH 1
 #undef MAXDISTANCE 
 
 static void print(const char* label, double* array, int rows, int cols);

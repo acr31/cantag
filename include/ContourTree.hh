@@ -10,6 +10,12 @@
 #include <vector>
 #include <map>
 
+#ifdef HAVE_BOOST_ARCHIVE
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+using namespace boost::archive
+#endif
+
 /**
  * A tree of matched contours.  Create an instance of this class from
  * an image and a set of contour "weeding" constraints.  A weeding
@@ -28,8 +34,22 @@ public:
     std::vector<float> points;
     std::vector<Contour*> children;
     Contour(int id) : nbd(id),parent_id(id) {}
-  };
+    ~Contour() {
+      for(std::vector<Contour*>::const_iterator i = children.begin();
+	  i!=children.end();
+	  ++i) {
+	delete *i;
+      }
+    }
 
+#ifdef HAVE_BOOST_ARCHIVE
+  private:
+    friend class boost::serialization::access;
+    template<class Archive> void serialize(Archive & ar, const unsigned int version);
+    Contour() {}
+#endif
+  };
+  
   struct ContourConstraint {
     int minLength;
     int maxLength;
@@ -51,9 +71,7 @@ public:
   };
 
 private:
-  Image& m_image;
-  std::vector<ContourConstraint>& m_constraints;
-  std::map<int,Contour*> m_node_hash;
+  Contour* m_root_contour;
   /**
    * Follows the edge that starts at (start_x,start_y) and stores the
    * points found in the points_buffer.  The passed NBD is used to mark
@@ -102,8 +120,29 @@ private:
 public:
 
   ContourTree(Image& image, std::vector<ContourConstraint>& constraints);
-  inline Contour* GetRootContour() { return m_node_hash[1]; }
+  inline Contour* GetRootContour() { return m_root_contour; }
   ~ContourTree();
+
+#ifdef HAVE_BOOST_ARCHIVE
+private:
+  friend class boost::serialization::access;
+  template<class Archive> void serialize(Archive & ar, const unsigned int version);
+  ContourTree();
+#endif
 };
+
+#ifdef HAVE_BOOST_ARCHIVE
+template<class Archive> void ContourTree::Contour::serialize(Archive & ar, const unsigned int version) {
+  ar & nbd;
+  ar & bordertype;
+  ar & parent_id;
+  ar & points;
+  ar & children;
+}
+
+template<class Archive> void ContourTree::serialize(Archive & ar, const unsigned int version) {
+  ar & m_root_contour;
+}
+#endif
 
 #endif//CONTOUR_TREE_GUARD

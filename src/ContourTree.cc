@@ -8,11 +8,10 @@
 
 Image* debug_image;
 
-ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constraints) :
-  m_image(image),
-  m_constraints(constraints)
+ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constraints) : m_root_contour(NULL)
 {
   unsigned int* nbd_store = new unsigned int[image.GetWidth()*image.GetHeight()];
+  std::map<int,Contour*> node_hash;
   unsigned char* data_pointer = image.GetDataPointer();
   int image_width = image.GetWidth();
   int image_height = image.GetHeight();
@@ -39,13 +38,14 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
   debug_image= new Image(image.GetWidth(),image.GetHeight());
 #endif
 
-  m_node_hash[1] = new Contour(1);
-  Contour* current = m_node_hash[1];
+  m_root_contour = new Contour(1);
+  Contour* current = m_root_contour;
   current->bordertype=HOLE_BORDER;
+  node_hash[1] = current;
   data_pointer = image.GetDataPointer();
   int NBD = 2;
-  m_node_hash[NBD] = new Contour(NBD);
-  current = m_node_hash[NBD];
+  node_hash[NBD] = new Contour(NBD);
+  current = node_hash[NBD];
   
   // we're going to mark the image with contour id's as we find them
   // the LSB will indicate if we have a exit or an entry pixel
@@ -100,7 +100,7 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
 	// OUTER        HOLE       LNBD
 	// HOLE         OUTER      LNBD
 	// HOLE         HOLE       Parent of LNBD
-	current->parent_id = current->bordertype == m_node_hash[LNBD]->bordertype ?  m_node_hash[LNBD]->parent_id : LNBD;
+	current->parent_id = current->bordertype == node_hash[LNBD]->bordertype ?  node_hash[LNBD]->parent_id : LNBD;
 #ifdef JAM
 	int size = current->points.size();
 	float* pointsarray = new float[size];
@@ -113,7 +113,7 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
 #endif
 	
 	if (current->parent_id != NBD) {
-	  m_node_hash[current->parent_id]->children.push_back(current);
+	  node_hash[current->parent_id]->children.push_back(current);
 #ifdef CONTOUR_TREE_DEBUG
 	  PROGRESS("Adding contour "<<NBD <<" as child of " << current->parent_id);
 #endif
@@ -124,7 +124,7 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
 	//	if (NBD==0) { ++NBD; }	 
 	
 	current = new Contour(NBD);
-	m_node_hash[NBD] = current;
+	node_hash[NBD] = current;
 	
       }
       else { // this is a 0-element
@@ -205,7 +205,7 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 #endif
 #ifdef IMAGE_DEBUG
     debug_image->DrawPixel(start_x,start_y,COLOUR_BLACK);
-    //    debug_image->Save("debug-contourtree-contours.bmp");
+    //! debug_image->Save("debug-contourtree-contours.bmp");
 #endif
     return 1;
   }
@@ -232,7 +232,7 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 #endif
 #ifdef IMAGE_DEBUG
 	debug_image->DrawPixel(start_x,start_y,128);
-	//	debug_image->Save("debug-contourtree-contours.bmp");
+	//!	debug_image->Save("debug-contourtree-contours.bmp");
 #endif
 	// we now need to mark this pixel
 	// 1) if the pixel sample_x+1,sample_y (cell 4) is a 0-element and we
@@ -274,7 +274,7 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 #endif
 #ifdef IMAGE_DEBUG
 	  debug_image->DrawPixel(start_x,start_y,0);		  
-	  //	  debug_image->Save("debug-contourtree-contours.bmp");
+	  //!	  debug_image->Save("debug-contourtree-contours.bmp");
 #endif
 	  return points.size()>>1;
     	}
@@ -335,7 +335,7 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 }
 
 ContourTree::~ContourTree() {
-  for(std::map<int,Contour*>::const_iterator i = m_node_hash.begin();i!=m_node_hash.end();++i) {
-    delete i->second;
+  if (m_root_contour != NULL) {
+    delete m_root_contour;
   }
 }

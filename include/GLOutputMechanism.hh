@@ -117,7 +117,14 @@ template<int PAYLOAD_SIZE> GLOutputMechanism<PAYLOAD_SIZE>::~GLOutputMechanism()
 }
 
 template<int PAYLOAD_SIZE> void GLOutputMechanism<PAYLOAD_SIZE>::NewData(Image* newdata) {
-
+    glMatrixMode(GL_MODELVIEW);
+    /* reset modelview matrix to the identity matrix */
+    glLoadIdentity();
+    /* move the camera back three units */
+    glTranslatef(0.0, 0.0, -3.0);
+    glRasterPos2i(0,0);
+    glPixelZoom(1.0, -1.0);
+    glDrawPixels(newdata->GetWidth(),newdata->GetHeight(),GL_RED,GL_UNSIGNED_BYTE, newdata->GetDataPointer());
 }
 
 template<int PAYLOAD_SIZE> void GLOutputMechanism<PAYLOAD_SIZE>::Draw(int mode) {
