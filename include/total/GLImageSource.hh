@@ -141,8 +141,8 @@ namespace Total {
     m_tmap = new GLubyte[source.GetHeight()*source.GetWidth()*4];
 
     int pos=0;
-    for(int i=0;i<source.GetHeight();i++) {
-      for(int j=0;j<source.GetWidth();j++) {
+    for(int j=source.GetWidth()-1;j>=0;--j) {
+	for(int i=0;i<source.GetHeight();++i) {
 	m_tmap[pos++] = (GLubyte)source.Sample(i,j);
 	m_tmap[pos++] = (GLubyte)source.Sample(i,j);
 	m_tmap[pos++] = (GLubyte)source.Sample(i,j);
