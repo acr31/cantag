@@ -8,40 +8,31 @@
 #include <ostream>
 #include <tripover/LocatedObject.hh>
 
-template<int PAYLOAD_SIZE> 
 class TextOutputMechanism {
 private:
   std::ostream& m_ostream;
 
-  class TextOutputFun : public SceneGraphFunctional<PAYLOAD_SIZE> {
-  public:
-    void Eval(LocatedObject<PAYLOAD_SIZE>*  loc) {
-      std::cout << "Found tag: " << *(loc->tag_code) << 
-	" Location: " << loc->location[0] << " " << loc->location[1] << " " << loc->location[2] <<
-	" Normal: "   << loc->normal[0] << " " << loc->normal[1] << " " << loc->normal[2] << std::endl;
-    }
-  };
-  
-
 public:
   
-  TextOutputMechanism(std::ostream& ostream);
+  TextOutputMechanism(std::ostream& ostream) : m_ostream(ostream) {};
   
-  void NewData(const Image* newdata);
-  template<class C> void Output(SceneGraph<C,PAYLOAD_SIZE>& sg);
-
+  inline void FromImageSource(const Image& image) {};
+  inline void FromThreshold(const Image& image) {};
+  inline void FromContourTree(const ContourTree& contours) {};
+  inline void FromRemoveIntrinsic(const ContourTree& contours) {};
+  template<class ShapeType> inline void FromShapeTree(const ShapeTree<ShapeType>& shapes) {};
+  template<int PAYLOADSIZE> void FromTag(const WorldState<PAYLOADSIZE>& world);
 };
 
-template<int PAYLOAD_SIZE> TextOutputMechanism<PAYLOAD_SIZE>::TextOutputMechanism(std::ostream& ostream) :
-  m_ostream(ostream) {}
-
-
-template<int PAYLOAD_SIZE> template<class C> void TextOutputMechanism<PAYLOAD_SIZE>::Output(SceneGraph<C,PAYLOAD_SIZE>& sg) {
-
-  TextOutputFun j;
-  sg.Map(j);
+template<int PAYLOADSIZE> void TextOutputMechanism::FromTag(const WorldState<PAYLOADSIZE>& world) {
+  for(typename std::vector<LocatedObject<PAYLOADSIZE>*>::const_iterator i = world.GetNodes().begin();
+      i != world.GetNodes().end();
+      ++i) {
+    LocatedObject<PAYLOADSIZE>* loc = *i;
+    m_ostream << "Found tag: " << *(loc->tag_code) << 
+      " Location: " << loc->location[0] << " " << loc->location[1] << " " << loc->location[2] <<
+      " Normal: "   << loc->normal[0] << " " << loc->normal[1] << " " << loc->normal[2] << std::endl;
+  }
 }
-
-template<int PAYLOAD_SIZE> void TextOutputMechanism<PAYLOAD_SIZE>::NewData(const Image* newdata) {}
 
 #endif//TEXT_OUTPUT_MECHANISM_GUARD

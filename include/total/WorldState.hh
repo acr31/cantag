@@ -21,7 +21,7 @@ public:
   WorldState();
   ~WorldState();
   void Add(LocatedObject<PAYLOAD_SIZE>* object);
-  const std::vector<LocatedObject<PAYLOAD_SIZE>*>& GetNodes() { return nodes; }
+  const std::vector<LocatedObject<PAYLOAD_SIZE>*>& GetNodes() const { return nodes; }
   WorldState(Socket& socket);
   int Save(Socket& socket) const;
 };

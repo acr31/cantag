@@ -25,8 +25,8 @@ private:
   uchar* m_contents;   
   bool m_free_contents;   // if true then should m_contents be free'd
   uchar* m_row_ptr;
+  IplImage* m_image; 
 public:
-  IplImage* m_image; // this is public for the benefit of SceneGraph
 
   Image();
   Image(int width, int height);
