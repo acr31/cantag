@@ -7,9 +7,9 @@
 
 #include <Config.hh>
 #include <Coder.hh>
-#include <TagPayload.hh>
+#include <Payload.hh>
 #include <cmath>
-
+#include <BigInt.hh>
 #define TRIP_ORIGINAL_CODER_DEBUG
 
 /**
@@ -26,141 +26,149 @@
  */ 
 template<int BIT_COUNT, int GRANULARITY, int CHECKSUM_COUNT=2>	 
 class TripOriginalCoder : public virtual Coder<BIT_COUNT> {
-private:
-  unsigned int m_bitcount;
-  unsigned int m_granularity;
-  unsigned int m_codingbase;
-  unsigned int m_symbol_count;
-  unsigned int m_mask;
 
 public:
-  TripOriginalCoder() : 
-    m_bitcount(bitcount),
-    m_granularity(granularity),
-    m_codingbase((1<<granularity) -1), // we encode base 2^n -1 (one of the values must be the sync sector)
-    m_symbol_count(bitcount-granularity*(1+CHECKSUM_COUNT)),
-    m_mask(( 1<<granularity) - 1)
+  TripOriginalCoder() 
   {
+    // we encode into BIT_COUNT bits
+    // reserve GRANULARITY of these for the sync sector
+    // then reserve CHECKSUM_COUNT*GRANULARITY of these for the checksum
+    // this leaves the remaining bits for data:
+    //   BIT_COUNT - GRANULARITY*(CHECKSUM_COUNT+1)
+    // we get one symbol for every GRANULARITY bits
+    // so this leaves
+    //   (BIT_COUNT - GRANULARITY*(CHECKSUM_COUNT+1))/GRANULARITY
+    // data symbols
+        
 
-    assert(bitcount >= granularity);
+    assert(BIT_COUNT >= GRANULARITY);
     // we need to ensure that the sync sector can be read uniquely
-    assert(granularity >= 2);
-    assert(m_symbol_count > 0);
+    assert(GRANULARITY >= 2);
+
   };
 
 
   /**
    * Take the bit pattern from the tag and decode the value stored
    */
-  virtual int DecodeTag(Payload& payload) {
+  virtual int DecodePayload(std::bitset<BIT_COUNT>& tag_data, Payload<BIT_COUNT>& payload) {
     std::bitset<GRANULARITY> sync_sector_mask;
+    const BigInt<BIT_COUNT> base((1<<GRANULARITY)-1);
+    BigInt<BIT_COUNT> checksum_mod((1<<GRANULARITY)-1);
+    checksum_mod.Pwr(CHECKSUM_COUNT);
     sync_sector_mask.flip();
     // try all possible rotations...
-    for(int i=0;i<BIT_COUNT;i+=GRANULARITY) {
+    for(unsigned int i=0;i<BIT_COUNT;i+=GRANULARITY) {
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
       PROGRESS("Current rotation is "<< payload.to_string());
 #endif
       // have we found sync sector
-
-      if (payload.Match(sync_sector_mask)) {
+      if (payload.template Match<GRANULARITY>(sync_sector_mask)) {
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
 	PROGRESS("Found sync sector");
 #endif
-	// yes
-	value >>= m_granularity; // shift off the sync sector
-	unsigned long checksum = 0;
-	for(int i=0;i<CHECKSUM_COUNT;i++) {
-	  unsigned long pwr = (unsigned long)pow(m_codingbase,i);
-	  checksum += (value & m_mask)*pwr;
-	  value >>= m_granularity;
-	}
+
+	// accumulate the checksum
+	BigInt<BIT_COUNT> checksum(0);
+	BigInt<BIT_COUNT> checksum_pwr(1);
+	for(unsigned int c=0;c<CHECKSUM_COUNT;c++) {
+	  unsigned int symbol = payload.Get(c+1,GRANULARITY);
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
-	PROGRESS("Read checksum "<< checksum);
-	PROGRESS("Remaining code is "<<value);
+	  PROGRESS("Read Symbol "<< symbol);
 #endif
-	unsigned long long code = 0;
-	unsigned long checksum_check = 0;
-	for(int i=0;i<m_symbol_count;i++) {
-	  unsigned long long pwr = (unsigned long long)pow(m_codingbase,i);
-	  code += (value & m_mask)*pwr;
-	  checksum_check += value & m_mask;
-	  value >>= m_granularity;
+	 
+	  checksum += checksum_pwr * BigInt<BIT_COUNT>(symbol);
+	  checksum_pwr *= base;
 	}
 
+	BigInt<BIT_COUNT> checksum_count(0);
+
+	BigInt<BIT_COUNT> pwr(1);
+	tag_data.reset();
+	BigInt<BIT_COUNT> bi(tag_data);
+	
+	int data_symbol_count = (BIT_COUNT - GRANULARITY*(CHECKSUM_COUNT+1))/GRANULARITY;
+	
+	for(int c=0;c<data_symbol_count;c++) {
+	  BigInt<BIT_COUNT> next(payload.Get(c+1+CHECKSUM_COUNT,GRANULARITY));
+	  checksum_count+=next;
+	  bi += pwr * next;
+	  pwr *= base;
+	}
+
+#ifdef TRIP_ORIGINAL_CODER_DEBUG
+	PROGRESS("Code is " << bi);
+	PROGRESS("Read checksum "<< checksum);
+	PROGRESS("Accumulated checksum "<< checksum_count);	
+#endif
 	// now check the checksum
-	if (checksum == checksum_check % (unsigned long)pow(m_codingbase,CHECKSUM_COUNT)) {
-	  return code;		  
+	if (checksum == checksum_count % checksum_mod) {
+	  return i;
 	}
 	else {
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
-	  PROGRESS("Failed. Checksum on tag was "<<checksum<< " and we have "<< (checksum_check % (unsigned long)pow(m_codingbase,CHECKSUM_COUNT)));
+	  PROGRESS("Failed. Checksum mismatch");
 #endif
-	  throw InvalidCheckSum();
+	  return -1;
 	}
       }
       else {
 	// sync sector not found yet
-	value = (value << m_granularity) & (((unsigned long long)1<<m_bitcount)-1) | (value >> (m_bitcount-m_granularity));
-#ifdef TRIP_ORIGINAL_CODER_DEBUG
-	PROGRESS("Rotated value to "<< value);
-#endif
+	payload.RotateLeft(GRANULARITY);
       }
     }
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
     PROGRESS("Failed to find a sync sector");
 #endif
-    throw InvalidCode();
+    return -1;
   }
 
   /**
    * This method encodes the given value and returns the bit pattern
    * to store on the tag
    */
-  virtual unsigned long long EncodeTag(unsigned long long value) {
-    // check to see if the value is too large
+  virtual bool EncodePayload(const std::bitset<BIT_COUNT>& tag_data, Payload<BIT_COUNT>& payload) {
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
-    PROGRESS("Encode called with " << value);
-    PROGRESS("Maximum value is "<< (unsigned long long)pow(m_codingbase,m_symbol_count) -1 );
+    PROGRESS("Encode called with " << tag_data);
 #endif
-    if (value > (unsigned long long)pow(m_codingbase,m_symbol_count) -1) {
-      throw ValueTooLarge();
-    }
-
-    // now build the code from the end forwards
-    unsigned long checksum = 0;
-    unsigned long long result = 0;
-    for(int i=m_symbol_count-1;i>=0;i--) {
-      unsigned long long pwr = (unsigned long long)pow(m_codingbase,i);
-      unsigned int store = value / pwr;
-      value %= pwr;
-      result <<= m_granularity;
-      result |= store;
-      checksum+=store;
-    }
-#ifdef TRIP_ORIGINAL_CODER_DEBUG
-    PROGRESS("Coded value is "<<result);
-#endif
-    checksum %= (unsigned long)pow(m_codingbase,CHECKSUM_COUNT);
-#ifdef TRIP_ORIGINAL_CODER_DEBUG
-    PROGRESS("Now storing checksum " << checksum);
-#endif
-
-    // now store the checksum
-    for(int i=CHECKSUM_COUNT-1;i>=0;i--) {
-      result <<= m_granularity;
-      unsigned long pwr = (unsigned long)pow(m_codingbase,i);
-      result |= checksum / pwr;
-      checksum %= pwr;
-    }
+    const BigInt<BIT_COUNT> base((1<<GRANULARITY)-1);
+    BigInt<BIT_COUNT> checksum_mod((1<<GRANULARITY)-1);
+    checksum_mod.Pwr(CHECKSUM_COUNT);
     
-    // finally, add the sync sector
-    result <<= m_granularity;
-    result |= (1<<m_granularity)-1;
+    // build the code by taking the remainder of tag_data with
+    // (1<<GRANULARITY)-1 to get the next symbol and then dividing
+    // tag_data by (1<<GRANULARITY)-1
+
+    BigInt<BIT_COUNT> bi(tag_data);
+    BigInt<BIT_COUNT> checksum(0);
+    int data_symbol_count = (BIT_COUNT - GRANULARITY*(CHECKSUM_COUNT+1))/GRANULARITY;
+
+    for(int i=0;i<data_symbol_count;i++) {
+      unsigned int symbol = bi % base;
+      checksum+=BigInt<BIT_COUNT>(symbol);
+      payload.Put(symbol,i+1+CHECKSUM_COUNT,GRANULARITY);
+      bi/=base;
+    }
+
+    checksum %= checksum_mod;
+#ifdef TRIP_ORIGINAL_CODER_DEBUG
+    PROGRESS("Checksum is "<<checksum << payload.to_string());
+#endif
+    for(int i=0;i<CHECKSUM_COUNT;i++) {
+      unsigned int symbol = checksum % base;
+      payload.Put(symbol,i+1,GRANULARITY);
+      checksum /= base;
+    }
+#ifdef TRIP_ORIGINAL_CODER_DEBUG
+    PROGRESS("Adding Sync sector");
+#endif
+    // sync sector
+    payload.Put( (1<<GRANULARITY)-1 , 0, GRANULARITY);
 
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
-    PROGRESS("Final bit pattern is "<<result);
+    PROGRESS("Final bit pattern is "<<payload.to_string());
 #endif
-    return result;
+    return true;
   }
 
 };

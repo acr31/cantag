@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(tripover,1.0)
-AC_CONFIG_SRCDIR(src/Ellipse2D.cc)
+AC_CONFIG_SRCDIR(src/Makefile.am)
 AM_INIT_AUTOMAKE
 AC_LANG([C++])
 
@@ -34,6 +34,16 @@ AC_CHECK_LIB(GLU,
 	[],
 	[AC_MSG_ERROR([libGLU.so not found])])
 
+AC_CHECK_LIB(gmp,
+	[__gmpz_init],
+	[],
+	[AC_MSG_ERROR([libgmp.so not found])])
+
+AC_CHECK_LIB(gmpxx,
+	[__gmpz_set],
+	[],
+	[AC_MSG_ERROR([libgmpxx.so not found])])
+
 dnl Checks for header files.
 AC_CHECK_HEADER(opencv/cv.h,
 	[],
@@ -47,7 +57,12 @@ AC_CHECK_HEADER(GL/gl.h,
 AC_CHECK_HEADER(GL/osmesa.h,
 	[],
 	[AC_MSG_ERROR([GL/osmesa.h not found in include path])])
-
+AC_CHECK_HEADER(boost/operators.hpp,
+	[],
+	[AC_MSG_ERROR([boost/operators.hpp not found in include path])])
+AC_CHECK_HEADER(gmpxx.h,
+	[],
+	[AC_MSG_ERROR([gmpxx.h not found in include path])])
 
 
 dnl Checks for typedefs, structures, and compiler characteristics.

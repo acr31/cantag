@@ -145,7 +145,7 @@ public:
     CvPoint pts[numsteps+1];
     for(int i=0;i<numsteps;i++) {
       float theta = start_radians + (end_radians - start_radians)*(float)i/(float)numsteps;
-      pts[i] = cvPoint(x0 + cvRound(radius*cos(theta)), y0 - cvRound(radius*sin(theta)));
+      pts[i] = cvPoint(x0 + cvRound(radius*cos(theta)), y0 + cvRound(radius*sin(theta)));
     }
     pts[numsteps] = cvPoint(x0,y0);
     cvFillConvexPoly(m_image,pts,numsteps+1,colour);

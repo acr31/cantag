@@ -16,7 +16,7 @@ public:
    *
    * Returns false if the value could not be encoded for some reason.
    */
-  virtual bool EncodePayload(Payload<PAYLOAD_SIZE>& payload) = 0;
+  virtual bool EncodePayload(const std::bitset<PAYLOAD_SIZE>& tag_data, Payload<PAYLOAD_SIZE>& payload) = 0;
 
     
   /**
@@ -26,7 +26,7 @@ public:
    * correctly or -1 if there was some kind of failure
    *
    */
-  virtual int DecodeTag(Payload<PAYLOAD_SIZE>& payload)  =0;
+  virtual int DecodePayload(std::bitset<PAYLOAD_SIZE>& data, Payload<PAYLOAD_SIZE>& payload)  =0;
 
 };
 

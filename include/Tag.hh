@@ -10,11 +10,12 @@
 #include <Camera.hh>
 #include <SceneGraphNode.hh>
 #include <vector>
+#include <bitset>
 
-template<class C>
+template<class C, int PAYLOAD_SIZE>
 class Tag {
 public:
-  virtual void Draw2D(Image& image, unsigned long long code)= 0;
+  virtual void Draw2D(Image& image, const std::bitset<PAYLOAD_SIZE>& tag_data)= 0;
   void WalkSceneGraph(SceneGraphNode<C>* root_node, const Camera& camera, const Image& image) {
     // walk the tree finding all the tags
     DecodeNode(root_node,camera,image);
