@@ -1,39 +1,5 @@
 /**
  * $Header$
- *
- * $Log$
- * Revision 1.5  2004/02/01 14:25:33  acr31
- * moved Rectangle2D to QuadTangle2D and refactored implementations around
- * the place
- *
- * Revision 1.4  2004/01/30 16:54:17  acr31
- * changed the Coder api -reimplemented various bits
- *
- * Revision 1.3  2004/01/27 18:06:59  acr31
- * changed inheriting classes to inherit publicly from their parents
- *
- * Revision 1.2  2004/01/25 15:13:25  acr31
- * added check for code out of range
- *
- * Revision 1.1  2004/01/25 14:54:37  acr31
- * moved over to automake/autoconf build system
- *
- * Revision 1.7  2004/01/24 19:29:24  acr31
- * removed ellipsetoxy and put the project method in Ellipse2D objects
- *
- * Revision 1.6  2004/01/24 17:53:22  acr31
- * Extended TripOriginalCoder to deal with base 2 encodings.  MatrixTag
- * implementation now works.
- *
- * Revision 1.5  2004/01/23 22:35:04  acr31
- * changed coder to use unsigned long long
- *
- * Revision 1.4  2004/01/23 18:18:12  acr31
- * added Matrix Tag and a test program and the beginning of the CRC coder
- *
- * Revision 1.3  2004/01/21 11:55:08  acr31
- * added keywords for substitution
- *
  */
 #ifndef TRIP_ORIGINAL_CODER_GUARD
 #define TRIP_ORIGINAL_CODER_GUARD
@@ -73,10 +39,11 @@ public:
     m_bitcount(bitcount),
     m_granularity(granularity),
     m_codingbase((1<<granularity) -1), // we encode base 2^n -1 (one of the values must be the sync sector)
-    m_symbol_count(bitcount-granularity*(1+CHECKSUM_COUNT)),
+    m_symbol_count((int)pow(m_codingbase,bitcount-1-CHECKSUM_COUNT)),
     m_mask(( 1<<granularity) - 1)
   {
-    
+
+    assert(bitcount >= granularity);
     // we need to ensure that the sync sector can be read uniquely
     assert(granularity >= 2);
     assert(m_symbol_count > 0);

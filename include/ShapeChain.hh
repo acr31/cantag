@@ -1,10 +1,5 @@
 /**
  * $Header$
- *
- * $Log$
- * Revision 1.1  2004/02/20 22:25:55  acr31
- * major reworking of matching algorithms and architecture
- *
  */
 
 #ifndef SHAPE_CHAIN_GUARD
