@@ -149,8 +149,8 @@ void Image::AdaptiveThreshold(const unsigned int window_size, const unsigned cha
       int pixel = *data_pointer;
       moving_average = pixel + moving_average - (moving_average >> window_size);
       int current_thresh = (moving_average + previous_line[j])>>1;
-      previous_line[j] = moving_average;
-      *data_pointer = (pixel << window_size+8) < (current_thresh * useoffset) ? 1 : 0;
+      previous_line[j] = moving_average;      
+      *data_pointer = (pixel << window_size+8) < (current_thresh * useoffset) ? ((*data_pointer & 0xFC) | 1) : (*data_pointer & 0xFC);
       ++data_pointer;
     }
 
@@ -161,8 +161,8 @@ void Image::AdaptiveThreshold(const unsigned int window_size, const unsigned cha
       moving_average = pixel + moving_average - (moving_average >> window_size);
       int current_thresh = (moving_average + previous_line[j])>>1;
       previous_line[j] = moving_average;
-      *data_pointer = (pixel << window_size+8) < (current_thresh * useoffset)  ? 1 : 0;
-      --data_pointer;
+      *data_pointer = (pixel << window_size+8) < (current_thresh * useoffset)  ? ((*data_pointer & 0xFC) | 1) : (*data_pointer & 0xFC);
+     --data_pointer;
     }
     ++i;
   }  
@@ -330,6 +330,19 @@ void Image::ConvertScale(float scalefactor, int offset) {
       unsigned char value = *ptr;
       *ptr = Round(value*scalefactor)+offset;
       ptr++;
+    }
+  }
+}
+
+void Image::Mask(unsigned char mask) {
+  if (mask == 1) {
+    m_binary = true;
+  }
+  for(int i=0;i<GetHeight();++i) {
+    unsigned char* ptr = GetRow(i);
+    for(int j=0;j<GetWidth();++j) {
+      *ptr &= mask;
+      ++ptr;
     }
   }
 }
@@ -537,7 +550,8 @@ void Image::Save(const char* filename) const {
     for(int y=0;y<GetHeight();++y) {
       const unsigned char* row = GetRow(y);
       for(int x=0;x<GetWidth();++x) {	
-	Magick::ColorGray color(m_binary ? (*row ? 1.0 : 0.0) : (double)*row/255);
+	Magick::ColorGray color(m_binary ? ((*row & 1) ? 1.0 : 0.0) : (double)*row/255);
+	//	Magick::ColorGray color((double)*row/255);
 	i.pixelColor(x,y,color);
 	++row;
       }

@@ -142,6 +142,11 @@ public:
   void ConvertScale(float scalefactor, int offset);
 
   /**
+   * Bitwise AND this mask with every pixel
+   */
+  void Mask(unsigned char mask);
+
+  /**
    * Plot a point in the image with the given colour.  x and y are
    * bounds checked; out of range values will be ignored.
    */ 
