@@ -535,7 +535,26 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
       }
     }
   }
+
+  // we'd like our tag to still face the same way
+  if (eigvects[8] < 0) {
+    eigvects[2] *= -1;
+    eigvects[5] *= -1;
+    eigvects[8] *= -1;
+  }
  
+  if (eigvects[4] < 0) {
+    eigvects[1] *= -1;
+    eigvects[4] *= -1;
+    eigvects[7] *= -1;
+  }
+
+  if (eigvects[0] < 0) {
+    eigvects[0] *= -1;
+    eigvects[3] *= -1;
+    eigvects[6] *= -1;
+  }
+
   // our eigenvectors might incorporate reflections about various axes
   // so we need to check that we still have a right handed frame. In a
   // righthanded frame v1 x v2 = v3 so we cross v1 and v2 and check
@@ -555,17 +574,21 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
    *  ( uz*vx - ux*vz ) . ( wy ) = (uy*vz - uz*vy)*wx + (uz*vx - ux*vz)*wy + (ux*vy - uy*vx)*wz
    *  ( ux*vy - uy*vx )   ( wz )
    * 
+   * we cross the y axis (eigvects[1,4,7]) with z axis
+   * (eigvects[2,5,8]) and dot with the x axis (eigvects[0,3,6])
+   * changing the sign of the x axis if we are wrong so we dont
+   * interfere with the direction of the z axis
    */
-  double crossx = eigvects[3]*eigvects[7] - eigvects[6]*eigvects[4];
-  double crossy = eigvects[6]*eigvects[1] - eigvects[0]*eigvects[7];
-  double crossz = eigvects[0]*eigvects[4] - eigvects[3]*eigvects[1];
+  double crossx = eigvects[4]*eigvects[8] - eigvects[7]*eigvects[5];
+  double crossy = eigvects[7]*eigvects[2] - eigvects[1]*eigvects[8];
+  double crossz = eigvects[1]*eigvects[5] - eigvects[4]*eigvects[2];
   
   
 #ifdef CIRCLE_TRANSFORM_DEBUG
   PROGRESS("Cross = " << crossx <<"," << crossy << "," << crossz);
 #endif
 
-  double dotcross = crossx*eigvects[2] + crossy*eigvects[5] + crossz*eigvects[8];
+  double dotcross = crossx*eigvects[0] + crossy*eigvects[3] + crossz*eigvects[6];
 
 #ifdef CIRCLE_TRANSFORM_DEBUG
   PROGRESS("Dotcross = " << dotcross);
@@ -575,9 +598,9 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
 #ifdef CIRCLE_TRANSFORM_DEBUG
     PROGRESS("Reversing vectors to create right handed axis");
 #endif
-    eigvects[2] *= -1;
-    eigvects[5] *= -1;
-    eigvects[8] *= -1;
+    eigvects[0] *= -1;
+    eigvects[3] *= -1;
+    eigvects[6] *= -1;
   }
 
   double r1[] = { eigvects[0], eigvects[1], eigvects[2], 0,
@@ -660,7 +683,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
 #ifdef CIRCLE_TRANSFORM_DEBUG
   PROGRESS("Scale factor " << scale);
 #endif
-  // this multiplies rows 0 and 1 of the transform by scale
+  // this multiplies cols 0 and 1 of the transform by scale
   for(int col=0;col<4;col++) {
     transc1[col*4] *= scale;
     transc1[col*4+1] *= -scale;
@@ -670,6 +693,19 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
 
   }
     
+#ifdef CIRCLE_TRANSFORM_DEBUG  
+  PROGRESS("transc1=[" << transc1[0] << "," << transc1[1] << "," << transc1[2] << "," << transc1[3] << ";");
+  PROGRESS("                 " << transc1[4] << "," << transc1[5] << "," << transc1[6] << "," << transc1[7] << ";");
+  PROGRESS("                 " << transc1[8] << "," << transc1[9] << "," << transc1[10] << "," << transc1[11] << ";");
+  PROGRESS("                 " << transc1[12] << "," << transc1[13] << "," << transc1[14] << "," << transc1[15] << ";");
+
+  PROGRESS("transc2: mt2=[" << transc2[0] << "," << transc2[1] << "," << transc2[2] << "," << transc2[3] << ";");
+  PROGRESS("                 " << transc2[4] << "," << transc2[5] << "," << transc2[6] << "," << transc2[7] << ";");
+  PROGRESS("                 " << transc2[8] << "," << transc2[9] << "," << transc2[10] << "," << transc2[11] << ";");
+  PROGRESS("                 " << transc2[12] << "," << transc2[13] << "," << transc2[14] << "," << transc2[15] << ";");
+#endif
+
+
   double rtotc1[16];
   double rtotc2[16];
   // premultiply by r2
