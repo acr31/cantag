@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/01/29 12:47:14  acr31
+ * added method for drawing unfilled quadtangles
+ *
  * Revision 1.4  2004/01/28 17:19:35  acr31
  * providing my own implementation of draw ellipse
  *
@@ -102,6 +105,35 @@ inline void DrawFilledQuadTangle(Image* image,
 		       colour);
 }
 
+inline void DrawQuadTangle(Image* image,
+			   float x0, float y0,
+			   float x1, float y1,
+			   float x2, float y2,
+			   float x3, float y3,
+			   int colour,
+			   int thickness) {
+  CvPoint p[4] = { cvPoint((int)x0,(int)y0),
+		   cvPoint((int)x1,(int)y1),
+		   cvPoint((int)x2,(int)y2),
+		   cvPoint((int)x3,(int)y3) };
+  CvPoint* pp[1];
+  pp[0] = p;
+  int num =4;
+  cvPolyLine(image,pp,&num,1,true,colour,thickness);
+}
+
+inline void DrawQuadTangle(Image* image,
+			   const Rectangle2D* r,
+			   int colour,
+			   int thickness) {
+  DrawQuadTangle(image,
+		 r->m_x0,r->m_y0,
+		 r->m_x1,r->m_y1,
+		 r->m_x2,r->m_y2,
+		 r->m_x3,r->m_y3,
+		 colour,
+		 thickness);
+}
 
 inline Image* CreateImage(int width, int height) {
   Image* result =  cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);

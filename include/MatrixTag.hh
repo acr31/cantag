@@ -12,6 +12,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/29 12:47:14  acr31
+ * added method for drawing unfilled quadtangles
+ *
  * Revision 1.2  2004/01/27 18:06:58  acr31
  * changed inheriting classes to inherit publicly from their parents
  *
@@ -79,9 +82,10 @@ public:
      * other option is to read it 4 times at the top of each triangle.
      *
      */
-    m_cells_corner = new float[m_size*m_size];
+    m_cells_corner = new float[m_size*m_size*2];
     int triangle_size = m_size*m_size / 2;
     int position = 0;
+    int maxpos =0;
     for(int height = 0; height < m_size/2; height++) {
       for(int i=height;i<m_size-1-height;i++) {
 	m_cells_corner[position] = (float)(i+1)/(m_size+2);
@@ -95,6 +99,7 @@ public:
 
 	m_cells_corner[position+triangle_size*3] = (float)(height+1)/(m_size+2);
 	m_cells_corner[position+triangle_size*3+1] = (float)(m_size-i)/(m_size+2);
+	maxpos = position+triangle_size*3+1;
 	position+=2;
       }
     }
@@ -149,6 +154,7 @@ public:
 #ifdef IMAGE_DEBUG
     Image* debug0 = cvCloneImage(image);
     cvConvertScale(debug0,debug0,0.5,128);    
+    DrawQuadTangle(image,l,0,3);
 #endif
     float projX, projY;
     m_coder.Reset();
