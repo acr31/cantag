@@ -184,6 +184,10 @@ namespace Total {
     return count;
   }
 
+
+  // BEGIN CornerQuadTangle
+
+
   static void compute(const float* xwindow, const float* ywindow, int datapointer, int k, float* lik, float* rik) {
     float chordx = xwindow[MASK(datapointer+k)] - xwindow[MASK(datapointer-k)];
     float chordy = ywindow[MASK(datapointer+k)] - ywindow[MASK(datapointer-k)];
@@ -240,8 +244,6 @@ namespace Total {
       m_fitted = false;
     }
   };
-
-  CornerQuadTangle::CornerQuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3) : QuadTangle(x0,y0,x1,y1,x2,y2,x3,y3) {};
 
   bool CornerQuadTangle::Fit(const std::vector<float>& points) {
     if (points.size() > (2<<LOGMAXWINDOW) && points.size() > 50) {
@@ -321,4 +323,229 @@ namespace Total {
     return false;
   }
 
+  // BEGIN PolygonQuadTangle
+  PolygonQuadTangle::PolygonQuadTangle() : QuadTangle() {};
+
+  PolygonQuadTangle::PolygonQuadTangle(const std::vector<float>& points, bool prev_fitted) : QuadTangle() {
+    if (!prev_fitted) {
+      m_fitted = Fit(points);
+    }
+    else {
+      m_fitted = false;
+    }
+  };
+  
+  /**
+   * The corner curvature we use for weeding out false vertexes
+   * e.g. for max angle 0.9 => 154 deg [= 360*math.acos(-0.9)/(2*math.pi)]
+   */
+#define DPMAX_ANGLE 0.7 
+  
+  /**
+   * The threshold we use to determine if we should add an extra edge
+   */
+#define DPMAX_THRESH 0.00085
+
+  float PolygonQuadTangle::DPAngle(const std::pair<float,float>& p, 
+				   const std::pair<float,float>& q,
+				   const std::pair<float,float>& r) {
+    float ax = p.first-q.first;
+    float ay = p.second-q.second;
+    float bx = r.first-q.first;
+    float by = r.second-q.second;
+    
+    float dot = ax*bx+ay*by;
+    float denom = sqrt(ax*ax+ay*ay)+sqrt(bx*bx+by*by);
+    
+    if (denom < 1e-8)
+      return -1;
+    else
+      return dot/denom;
+  }
+  
+  void PolygonQuadTangle::DPJoin(std::list<std::pair<float,float> >& fulllist,
+				 std::list<std::pair<float,float> >::iterator start,
+				 std::list<std::pair<float,float> >::iterator mid,
+				 std::list<std::pair<float,float> >::iterator end) {
+
+    // keep a copy of this iterator so we can work forwards with the second list
+    std::list<std::pair<float,float> >::iterator fwd_mid = mid;
+
+    // move back to the last element of the first list
+    --mid;
+
+    std::list<std::pair<float,float> >::iterator z = mid;
+
+    // a is the first element of the second list
+    std::list<std::pair<float,float> >::iterator a = fwd_mid;
+
+    // check if we have more than one element in list 1
+    if (mid != start) {
+      --mid;
+      std::list<std::pair<float,float> >::iterator y = mid;      
+      float yza = DPAngle(*y,*z,*a);
+      if (fabs(yza) > DPMAX_ANGLE) {
+	fulllist.erase(z);
+	z = y;
+      }
+    }
+
+
+    ++fwd_mid;
+    // check we have more than one element in list 2
+    if (fwd_mid != end) {
+      std::list<std::pair<float,float> >::iterator b = fwd_mid;
+      float zab = DPAngle(*z,*a,*b);
+      if (fabs(zab) > DPMAX_ANGLE) {
+	fulllist.erase(a);    
+      }
+    }
+
+  }
+
+  std::list<std::pair<float,float> >::iterator
+  PolygonQuadTangle::DPSplit(std::list<std::pair<float,float> >& fulllist,
+			     std::list<std::pair<float,float> >::iterator start,
+			     std::list<std::pair<float,float> >::iterator end) {
+    
+    // move end back to the last element of the list
+    --end;
+    
+    assert(start != end);
+
+    float maxd = 0;
+    std::list<std::pair<float,float> >::iterator split_iterator = start;
+
+    float fx = start->first;
+    float fy = start->second;
+    float lx = end->first;
+    float ly = end->second;
+    
+    //    std::cerr << " Size:" << a.size() << std::endl;
+    //    std::cerr << " Vals:" << fx << " " << fy << " " << lx << " " << ly << std::endl;
+    
+    for(;start != end; ++start) {
+      float px = start->first;
+      float py = start->second;
+
+      float a = (fx-px)*(fx-px)+(fy-py)*(fy-py);
+      float b = (px-lx)*(px-lx)+(py-ly)*(py-ly);
+      float c = (fx-lx)*(fx-lx)+(fy-ly)*(fy-ly);
+      float d = 0;
+      
+      try {
+	//do we want fabs(sqrt(...)) here?
+	d = sqrt(b-(((b+c-a)*(b+c-a))/(4*c)));
+      } catch (...) {
+	d = 0;
+      }
+      
+      //std::cerr << "a,b,c,d " << a << " " << b << " " << c << " " << d << std::endl;
+      
+      if (d > maxd) {
+	split_iterator = start;
+	maxd=d;
+      }
+    }
+    
+    //    std::cerr << " - DPSplit: maxi = (" << maxi->first << "," << maxi->second 
+    //	      << "), d = " << maxd << " tmpmaxi = "<< tmpmaxi << std::endl;
+    
+    return split_iterator;
+  }
+  
+  void PolygonQuadTangle::DPRecurse(std::list<std::pair<float,float> >& fulllist,
+				    std::list<std::pair<float,float> >::iterator start,
+				    std::list<std::pair<float,float> >::iterator end) {
+    
+    
+    std::list<std::pair<float,float> >::iterator split_iterator = DPSplit(fulllist,start,end);
+    if (split_iterator != start) { // we split the list
+      DPRecurse(fulllist,start,split_iterator);
+      DPRecurse(fulllist,split_iterator,end);
+      DPJoin(fulllist,start,split_iterator,end);
+    }
+    else { // we didn't split the list so we remove everything except the first and last element
+      ++start;
+      if (start == end) { // its only a 1 element list so nothing to do
+	return;
+      }
+      --end;
+      if (start == end) { // its only a 2 element list so nothing to do
+	return;
+      }
+      fulllist.erase(start,end);
+    }
+  }
+  
+  bool PolygonQuadTangle::Fit(const std::vector<float>& points) {
+    if (points.size() > 20) {
+
+      std::list<std::pair<float,float> > fulllist;
+      
+      std::list<std::pair<float,float> >::iterator maxi;
+      float maxd=0;
+
+      float firstx=*points.begin();
+      float firsty=*++points.begin();
+    
+      std::cerr << "Size:" << points.size() << std::endl;
+
+      //must copy since we want to modify this datastructure and vector is const!
+      for(std::vector<float>::const_iterator i = points.begin(); i != points.end(); ++i) {
+	float x = *i;
+	++i;
+	float y = *i;
+	fulllist.push_back(std::pair<float,float>(x,y));
+	float d = (firstx-x)*(firstx-x)+(firsty-y)*(firsty-y);
+	if (d > maxd) {
+	  maxi = --fulllist.end();
+	  maxd = d;
+	}
+      }
+    
+      ++maxi;
+      DPRecurse(fulllist,fulllist.begin(),maxi);
+      DPRecurse(fulllist,maxi,fulllist.end());
+      DPJoin(fulllist,fulllist.begin(),maxi,fulllist.end());
+    
+      //Since we now know that this is a closed polygon, must check
+      //that both ends of the polygon are joined
+      if (fulllist.size() > 2) {
+	float d = DPAngle(*fulllist.rbegin(),*fulllist.begin(),*++fulllist.begin());
+	if (fabs(d) > DPMAX_ANGLE) {
+	  fulllist.pop_front();
+	}
+      }
+      if (fulllist.size() > 2) {
+	float d = DPAngle(*++fulllist.rbegin(),*fulllist.rbegin(),*fulllist.begin());
+	if (fabs(d) > DPMAX_ANGLE) {
+	  fulllist.pop_back();
+	}
+      }    
+
+      std::cerr << "Finished:" << fulllist.size() << std::endl;
+
+      for(std::list<std::pair<float,float> >::iterator i=fulllist.begin();
+	  i != fulllist.end(); ++i)
+	std::cout << i->first << " " << i->second << std::endl;
+
+
+      if (fulllist.size() == 4) {
+	std::list<std::pair<float,float> >::iterator i = fulllist.begin();
+	m_x0 = i->first;
+	m_y0 = i->second;
+	m_x1 = ++i->first;
+	m_y1 = i->second;
+	m_x2 = ++i->first;
+	m_y2 = i->second;
+	m_x3 = ++i->first;
+	m_y3 = i->second;
+	compute_central_point();
+	sort_points();
+	return true;
+      }
+    }
+    return false;
+  }
 }
