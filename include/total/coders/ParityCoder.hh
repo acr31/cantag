@@ -39,7 +39,7 @@ template<int BIT_COUNT> bool ParityCoder<BIT_COUNT>::EncodePayload(CyclicBitSet<
       parity = !parity;
     }
   }
-  data[BIT_COUNT] = parity;
+  data[BIT_COUNT-1] = !parity;
   return true;
 }
 
@@ -51,7 +51,7 @@ template<int BIT_COUNT> int ParityCoder<BIT_COUNT>::DecodePayload(CyclicBitSet<B
       parity = !parity;
     }
   }
-  data[BIT_COUNT] = false;
+  data[BIT_COUNT-1] = false;
 
 #ifdef PARITY_DEBUG
   PROGRESS("Parity is "<<parity);
