@@ -7,7 +7,7 @@ GlobalThreshold::~GlobalThreshold() {};
 
 Image* GlobalThreshold::LoadImage(Image* image) {
   m_image=image;
-  cvThreshold(image,image,m_threshold,255,CV_THRESH_BINARY);
+  cvThreshold(image,image,m_threshold,255,CV_THRESH_BINARY_INV);
   return image;
 }
 

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.7  2004/02/18 09:22:22  acr31
+ * *** empty log message ***
+ *
  * Revision 1.6  2004/02/16 16:02:27  acr31
  * *** empty log message ***
  *
@@ -85,7 +88,7 @@ void EllipseFeatureDetector::FindFeatures(Image *image,Camera* camera) {
   image = LoadImage(image);
 
   IplImage *copy = cvCloneImage(image); // the find contours process changes the image ;-(
-  
+
 #ifdef IMAGE_DEBUG
   IplImage *debug0 = cvCloneImage(image);
   cvConvertScale(debug0,debug0,0.5,128);
@@ -95,10 +98,9 @@ void EllipseFeatureDetector::FindFeatures(Image *image,Camera* camera) {
 
   CvMemStorage* store = cvCreateMemStorage(0);
   PROGRESS("Initializing contour scanner");
-  CvContourScanner scanner = cvStartFindContours(copy,store,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_SIMPLE);
+  CvContourScanner scanner = cvStartFindContours(copy,store,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_NONE);
 
   CvPoint points[MAXLENGTH];
-  CvPoint2D32f fpoints[MAXLENGTH];
   float flpoints[MAXLENGTH*2];
   CvBox2D current;
   CvSeq* c;
@@ -115,15 +117,17 @@ void EllipseFeatureDetector::FindFeatures(Image *image,Camera* camera) {
       cvCvtSeqToArray( c, points ,cvSlice(0,count));
       int pointer = 0;
       for( int pt = 0; pt < count; pt++ ) {
-	fpoints[pt].x = (float)points[pt].x;
-	fpoints[pt].y = (float)points[pt].y;
 	flpoints[pointer++] = (float)points[pt].x;
 	flpoints[pointer++] = (float)points[pt].y;	
       }
-
       camera->ImageToNPCF(flpoints,count);
       Ellipse2D* e2d = fitellipse(flpoints,count);
 
+      if (e2d != NULL) {
+	Decode(image, camera,e2d);
+	delete e2d;
+	return;
+      }
       if (e2d) {
 #ifdef IMAGE_DEBUG
 	DrawEllipse(debug1,

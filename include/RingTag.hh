@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.8  2004/02/18 09:22:21  acr31
+ * *** empty log message ***
+ *
  * Revision 1.7  2004/02/16 08:02:02  acr31
  * *** empty log message ***
  *
@@ -83,5 +86,8 @@ public:
   virtual ~RingTag();
   virtual void Draw2D(Image* image,  unsigned long long code, int black, int white);
   virtual unsigned long long Decode(Image *image, Camera* camera, const Ellipse2D *l);
+
+private:
+  void draw_read(Image* image, Camera* camera, const Ellipse2D* l, int i);
 };
 #endif//RING_TAG_GUARD

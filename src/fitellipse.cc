@@ -7,7 +7,7 @@
 
 #undef ELLIPSE_DEBUG
 
-#define MAXFITERROR 0.1
+#define MAXFITERROR 0.000001
 
 static void print(const char* label, double* array, int rows, int cols) {
   std::cout << "-----------------------------------" << std::endl;
@@ -41,24 +41,34 @@ static bool calcerror(float a,
 		      float e,
 		      float f,
 		      float* points, int count) {
+  // calculate the algebraic distance inversly weighted by the
+  // gradient
   float total=0;
   for (int pt=0;pt<count*2;pt+=2) {
     float x = points[pt];
     float y = points[pt+1];
     float dist = a*x*x+b*x*y+c*y*y+d*x+e*y+f;
-    total+= dist;
+    
+    float dx = 2*a*x+b*y+d;
+    float dy = b*x+2*c*y+e;
+
+    float norm = dx*dx + dy*dy;
+
+    total+= dist*dist/norm;
   }
-  PROGRESS("Total error was "<< (total/count) << " and threshold is "<<MAXFITERROR);
-  return (total < MAXFITERROR * count);
+
+  PROGRESS("Total error was "<< total/count << " and threshold is "<<MAXFITERROR);
+  return (total < MAXFITERROR*count);
 }
 
 Ellipse2D* fitellipse(float* points, int numpoints) {
 
   //#ifdef ELLIPSE_DEBUG
   for(int i=0;i<numpoints*2;i+=2) {
-    std::cout << points[i] << " " << points[i+1] << " ; ";
+    std::cerr << points[i] << " " << points[i+1] << " ; ";
   }
-  std::cout << std::endl;
+  std::cerr << std::endl;
+  std::cerr << std::endl;
   //#endif
 
   double d1[numpoints*3];

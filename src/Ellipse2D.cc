@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.13  2004/02/18 09:22:22  acr31
+ * *** empty log message ***
+ *
  * Revision 1.12  2004/02/17 08:01:29  acr31
  * *** empty log message ***
  *
@@ -100,7 +103,6 @@ void Ellipse2D::ProjectPoint(float angle_radians, float radius, float *projX, fl
   // work out where we want our point to be if our tag was a circle
   // centred on the origin and then transform it with the transform
   // matrix
-
   float x = radius*cos(angle_radians);
   float y = radius*sin(angle_radians);
   float z = 1;
@@ -111,15 +113,17 @@ void Ellipse2D::ProjectPoint(float angle_radians, float radius, float *projX, fl
   float projZ = m_transform[8]*x + m_transform[9]*y + m_transform[10]*z + m_transform[11]*h;
   float projH = m_transform[12]*x + m_transform[13]*y + m_transform[14]*z + m_transform[15]*h;
   
+  *projX /= projH;
+  *projY /= projH;
+  projZ /= projH;
+
   // now do a perspective transform - note that the homogenous
   // parameter H that we need to divide through by cancels out: X/H /
   // (Z/H) = X/H /Z * H = X/Z
   *projX /= projZ;
   *projY /= projZ;
   
-
-
-  PROGRESS("Projecting point radius "<<radius<<" angle "<<angle_radians<<" on to ("<< *projX <<","<< *projY <<")");
+  //  PROGRESS("Projecting point radius "<<radius<<" angle "<<angle_radians<<" on to ("<< *projX <<","<< *projY <<")");
 }
 
 void Ellipse2D::ToGeneralConic() {
@@ -320,44 +324,14 @@ void Ellipse2D::ComputePose() {
   eigensolve(m_a,m_b/2,m_d/2,m_c,m_e/2,m_f, eigvects, eigvals);
 
 #ifdef POSE_DEBUG
-  std::cout << "Eigen Vectors: " << eigvects[0] << " " << eigvects[1] << " " << eigvects[2] << std::endl;
-  std::cout << "               " << eigvects[3] << " " << eigvects[4] << " " << eigvects[5] << std::endl;
-  std::cout << "               " << eigvects[6] << " " << eigvects[7] << " " << eigvects[8] << std::endl;
+  std::cout << "Eigen Vectors: e=[" << eigvects[0] << "," << eigvects[1] << "," << eigvects[2] << ";" << std::endl;
+  std::cout << "                  " << eigvects[3] << "," << eigvects[4] << "," << eigvects[5] << ";" << std::endl;
+  std::cout << "                  " << eigvects[6] << "," << eigvects[7] << "," << eigvects[8] << "];" << std::endl;
 
-  std::cout << "Eigen Values: " << eigvals[0] << " " << eigvals[1] << " " << eigvals[2] << std::endl;
-  std::cout << "              " << eigvals[3] << " " << eigvals[4] << " " << eigvals[5] << std::endl;
-  std::cout << "              " << eigvals[6] << " " << eigvals[7] << " " << eigvals[8] << std::endl;
+  std::cout << "Eigen Values: v=[" << eigvals[0] << "," << eigvals[1] << "," << eigvals[2] << ";" << std::endl;
+  std::cout << "                 " << eigvals[3] << "," << eigvals[4] << "," << eigvals[5] << ";" << std::endl;
+  std::cout << "                 " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];" << std::endl;
 #endif
-
-  // normalise the eigen vectors 
-  /*
-  double dete1 = sqrt(eigvects[0]*eigvects[0] +
-		     eigvects[3]*eigvects[3] +
-		     eigvects[6]*eigvects[6]);
-  eigvects[0] /= dete1;
-  eigvects[3] /= dete1;
-  eigvects[6] /= dete1;
-  
-  double dete2 = sqrt(eigvects[1]*eigvects[1] + 
-		     eigvects[4]*eigvects[4] +
-		     eigvects[7]*eigvects[7]);
-  eigvects[1] /= dete2;
-  eigvects[4] /= dete2;
-  eigvects[7] /= dete2;
-  
-  double dete3 = sqrt(eigvects[2]*eigvects[2] + 
-		     eigvects[5]*eigvects[5] + 
-		     eigvects[8]*eigvects[8]);
-  eigvects[2] /= dete3;
-  eigvects[5] /= dete3;
-  eigvects[8] /= dete3;
-  */
-#ifdef POSE_DEBUG
-  std::cout << "Normalised Eigen Vectors: " << eigvects[0] << " " << eigvects[1] << " " << eigvects[2] << std::endl;
-  std::cout << "                          " << eigvects[3] << " " << eigvects[4] << " " << eigvects[5] << std::endl;
-  std::cout << "                          " << eigvects[6] << " " << eigvects[7] << " " << eigvects[8] << std::endl;
-#endif
-
 
   for(int i=0;i<4;i++) {
     for(int j=1;j<3;j++) {
@@ -378,19 +352,19 @@ void Ellipse2D::ComputePose() {
   }
 
 #ifdef POSE_DEBUG
-  std::cout << "Rotation 1: " << eigvects[0] << " " << eigvects[1] << " " << eigvects[2] << std::endl;
-  std::cout << "            " << eigvects[3] << " " << eigvects[4] << " " << eigvects[5] << std::endl;
-  std::cout << "            " << eigvects[6] << " " << eigvects[7] << " " << eigvects[8] << std::endl;
+  std::cout << "Rotation 1: r1=[ " << eigvects[0] << "," << eigvects[1] << "," << eigvects[2] << ";" << std::endl;
+  std::cout << "                 " << eigvects[3] << "," << eigvects[4] << "," << eigvects[5] << ";" << std::endl;
+  std::cout << "                 " << eigvects[6] << "," << eigvects[7] << "," << eigvects[8] << "];" << std::endl;
 
-  std::cout << "Sorted Eigen Values: " << eigvals[0] << " " << eigvals[1] << " " << eigvals[2] << std::endl;
-  std::cout << "                     " << eigvals[3] << " " << eigvals[4] << " " << eigvals[5] << std::endl;
-  std::cout << "                     " << eigvals[6] << " " << eigvals[7] << " " << eigvals[8] << std::endl;
+  std::cout << "Sorted Eigen Values: sev=[ " << eigvals[0] << "," << eigvals[1] << "," << eigvals[2] << ";" << std::endl;
+  std::cout << "                           " << eigvals[3] << "," << eigvals[4] << "," << eigvals[5] << ";" << std::endl;
+  std::cout << "                           " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];" << std::endl;
 #endif
       
 
-  double tcosn = ( eigvals[8] - eigvals[4] );
-  double tsinn = ( eigvals[4] - eigvals[0] );
   double denom = ( eigvals[8] - eigvals[0] );
+  double cossq = ( eigvals[8] - eigvals[4] ) / denom;
+  double sinsq = ( eigvals[4] - eigvals[0] ) / denom;
   
   /*
   if (fabs(cc) < 0.0001) {
@@ -400,18 +374,20 @@ void Ellipse2D::ComputePose() {
     s = 0;
   }
   */
-  double tcosn2 = sqrt(tcosn);
-  double tsinn2 = sqrt(tsinn);
-  double denom2 = sqrt(denom);
+  // ambiguity problem - choose 1 or -1
+  double choice = 1;
 
-  float r2[] = { tcosn2/denom2, 0, tsinn2/denom2,
+  double pmcos = sqrt(cossq);
+  double pmsin = choice*sqrt(sinsq);
+
+  float r2[] = { pmcos, 0, pmsin,
 		 0   , 1, 0,
-		 -tsinn2/denom2,0, tcosn2/denom2};
+		 -pmsin,0, pmcos };
 
 #ifdef POSE_DEBUG  
-  std::cout << "Rotation 2: " << r2[0] << " " << r2[1] << " " << r2[2] << std::endl;
-  std::cout << "            " << r2[3] << " " << r2[4] << " " << r2[5] << std::endl;
-  std::cout << "            " << r2[6] << " " << r2[7] << " " << r2[8] << std::endl;
+  std::cout << "Rotation 2: r2=[" << r2[0] << "," << r2[1] << "," << r2[2] << ";" << std::endl;
+  std::cout << "                " << r2[3] << "," << r2[4] << "," << r2[5] << ";" << std::endl;
+  std::cout << "                " << r2[6] << "," << r2[7] << "," << r2[8] << "];" << std::endl;
 #endif
 
   double rtot[16];
@@ -425,19 +401,18 @@ void Ellipse2D::ComputePose() {
     }
   }
   rtot[3] = rtot[7] = rtot[11] = 0;
-  rtot[12]=rtot[13]=rtot[14]=0;
-  rtot[15] = 1;
+  rtot[12]= rtot[13]= rtot[14] = 0;
+  rtot[15]= 1;
 
-  // now incorporate the scale factor 
-  double scale = sqrt(tsinn*tcosn/eigvals[4] - ( (eigvals[8]*eigvals[8] - eigvals[0]*eigvals[0])/denom ) + eigvals[4]);
-  // this multiplies columns 0 and 1 of the transform by scale
-  for(int row=0;row<4;row++) {
-    rtot[row*4] *= scale;
-    rtot[row*4+1] *= scale;
-  }
+#ifdef POSE_DEBUG  
+  std::cout << "Rotation: r=[" << rtot[0] << "," << rtot[1] << "," << rtot[2] << "," << rtot[3] << ";" << std::endl;
+  std::cout << "             " << rtot[4] << "," << rtot[5] << "," << rtot[6] << "," << rtot[7] << ";" << std::endl;
+  std::cout << "             " << rtot[8] << "," << rtot[9] << "," << rtot[10] << "," << rtot[11] << ";" << std::endl;
+  std::cout << "             " << rtot[12] << "," << rtot[13] << "," << rtot[14] << "," << rtot[15] << "];" << std::endl;
+#endif
 
   // apply the relevant translation
-  double tx = tsinn2*tcosn2/eigvals[4];
+  double tx = choice*sqrt((eigvals[4]-eigvals[0])*(eigvals[8]-eigvals[4]))/eigvals[4];
   double trans[16] = { 1,0,0,tx,
 		       0,1,0,0,
 		       0,0,1,0,
@@ -451,14 +426,25 @@ void Ellipse2D::ComputePose() {
       }
     }
   }
-  
-  
+
+  double scale = choice*sqrt(-eigvals[0]*eigvals[8]/eigvals[4]/eigvals[4]);
+
+#ifdef POSE_DEBUG
+  std::cout << "Scale factor " << scale << std::endl;
+#endif
+
+  // this multiplies columns 0 and 1 of the transform by scale
+  for(int row=0;row<4;row++) {
+    m_transform[row*4] *= scale;
+    m_transform[row*4+1] *= scale;
+  }
+
 
 #ifdef POSE_DEBUG  
-  std::cout << "M_Transform: " << m_transform[0] << " " << m_transform[1] << " " << m_transform[2] << " " << m_transform[3] << std::endl;
-  std::cout << "             " << m_transform[4] << " " << m_transform[5] << " " << m_transform[6] << " " << m_transform[7] << std::endl;
-  std::cout << "             " << m_transform[8] << " " << m_transform[9] << " " << m_transform[10] << " " << m_transform[11] << std::endl;
-  std::cout << "             " << m_transform[12] << " " << m_transform[13] << " " << m_transform[14] << " " << m_transform[15] << std::endl;
+  std::cout << "M_Transform: mt=[" << m_transform[0] << "," << m_transform[1] << "," << m_transform[2] << "," << m_transform[3] << ";" << std::endl;
+  std::cout << "                 " << m_transform[4] << "," << m_transform[5] << "," << m_transform[6] << "," << m_transform[7] << ";" << std::endl;
+  std::cout << "                 " << m_transform[8] << "," << m_transform[9] << "," << m_transform[10] << "," << m_transform[11] << ";" << std::endl;
+  std::cout << "                 " << m_transform[12] << "," << m_transform[13] << "," << m_transform[14] << "," << m_transform[15] << ";" << std::endl;
 #endif
 
   // store the eigenvalues in the position field - we'll need them to

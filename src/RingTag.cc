@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.6  2004/02/18 09:22:22  acr31
+ * *** empty log message ***
+ *
  * Revision 1.5  2004/02/16 16:02:28  acr31
  * *** empty log message ***
  *
@@ -157,7 +160,12 @@ void RingTag::Draw2D(Image* image,unsigned long long code, int black, int white)
   for(int i=m_ring_count-1;i>=0;i--) {
     unsigned long long working = encoded;
     for(int j=m_sector_count-1;j>=0;j--) {	
+      // pick the colour based on the value we encode - sensible
       int colour = ((working & (1<<i)) == (1<<i)) ? black : white;
+
+      // or pick the colour based on which sector we are encoding - useful for debuggin
+      //      int colour = (int)((double)(i*m_sector_count+j) / (double)(m_ring_count*m_sector_count) * 255);
+
       working >>= m_ring_count;
       DrawFilledEllipse(image,
 			l.m_x,
@@ -261,81 +269,80 @@ unsigned long long RingTag::Decode(Image *image, Camera* camera, const Ellipse2D
   for(int i=0;i<5;i++) {
     if ((read_code[i] == read_code[(i+1) % 5])) { 
 #ifdef IMAGE_DEBUG
-      Image* debug0 = cvCloneImage(image);
-      cvConvertScale(debug0,debug0,0.5,128); 
-      /*      
-      DrawEllipse(debug0,
-		  l->m_x,
-		  l->m_y,
-		  l->m_width*m_data_inner_radius/m_bullseye_outer_radius,
-		  l->m_height*m_data_inner_radius/m_bullseye_outer_radius,
-		  l->m_angle_radians,
-		  0,
-		  1);
-      
-      for(int r=0;r<m_ring_count;r++) {
-	DrawEllipse(debug0,
-		    l->m_x,
-		    l->m_y,
-		    l->m_width*m_data_ring_outer_radii[r]/m_bullseye_outer_radius,
-		    l->m_height*m_data_ring_outer_radii[r]/m_bullseye_outer_radius,
-		    l->m_angle_radians,
-		    0,
-		    1);	
-      }
-      */
-      for(int k=0;k<m_sector_count;k++) {
-	for(int r=0;r<m_ring_count;r++) {
-	  float pts[2];
-	  l->ProjectPoint(m_read_angles[5*k+((i+1)%5)],
-			  m_data_ring_centre_radii[r]/m_bullseye_outer_radius,
-			  pts,
-			  pts+1);
-	  camera->NPCFToImage(pts,1);
-	  cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), SampleImage(image,pts[0],pts[1]) < 128 ? 255 : 0,3);
-
-	  l->ProjectPoint(m_read_angles[5*k+((i+1)%5)],
-			  0,
-			  pts,
-			  pts+1);
-	  camera->NPCFToImage(pts,1);
-	  cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), SampleImage(image,pts[0],pts[1]) < 128 ? 255 : 0,3);
-
-	  
-	}
-      }
-      cvSaveImage("debug-decode.jpg",debug0);	  	
-      cvReleaseImage(&debug0);
+      draw_read(image,camera,l,i);
 #endif
       return DecodeTag(read_code[i]);	
     }
   }
 
 #ifdef IMAGE_DEBUG
-  Image* debug0 = cvCloneImage(image);
-  cvConvertScale(debug0,debug0,0.5,128); 
-      
-  for(int k=0;k<m_sector_count;k++) {
-    for(int r=0;r<m_ring_count;r++) {
-      float pts[2];
-      l->ProjectPoint(m_read_angles[5*k],
-		      m_data_ring_centre_radii[r]/m_bullseye_outer_radius,
-		      pts,
-		      pts+1);
-      camera->NPCFToImage(pts,1);
-      cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), SampleImage(image,pts[0],pts[1]) < 128 ? 255 : 0,3);
-      
-      l->ProjectPoint(m_read_angles[5*k],
-		      0,
-		      pts,
-		      pts+1);
-      camera->NPCFToImage(pts,1);
-      cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), SampleImage(image,pts[0],pts[1]) < 128 ? 255 : 0,3);
-    }
-  }
-  cvSaveImage("debug-decode.jpg",debug0);	  	
-  cvReleaseImage(&debug0);
+  draw_read(image,camera,l,0);
 #endif
   throw Coder::InvalidCode();
 };
 
+void RingTag::draw_read(Image* image, Camera* camera, const Ellipse2D* l, int i) {
+  Image* debug0 = cvCloneImage(image);
+  cvConvertScale(debug0,debug0,0.5,128); 
+  
+  for(int step=0;step<360;step++) {
+    float pts[2];
+    l->ProjectPoint((float)step/180*PI,
+		    m_bullseye_inner_radius / m_bullseye_outer_radius,
+		    pts,
+		    pts+1);
+    camera->NPCFToImage(pts,1);
+    cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), 0,1);	
+  }
+  
+  for(int step=0;step<360;step++) {
+    float pts[2];
+    l->ProjectPoint((float)step/180*PI,
+		    1,
+		    pts,
+		    pts+1);
+    camera->NPCFToImage(pts,1);
+    cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), 0,1);	
+  }
+  
+  for(int step=0;step<360;step++) {
+    float pts[2];
+    l->ProjectPoint((float)step/180*PI,
+		    m_data_inner_radius/m_bullseye_outer_radius,
+		    pts,
+		    pts+1);
+    camera->NPCFToImage(pts,1);
+    cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), 0,1);	
+  }
+  
+  for(int r=0;r<m_ring_count;r++) {
+    for(int step=0;step<360;step++) {	
+      float pts[2];
+      l->ProjectPoint((float)step/180*PI,
+		      m_data_ring_outer_radii[r]/m_bullseye_outer_radius,
+		      pts,
+		      pts+1);
+      camera->NPCFToImage(pts,1);
+      cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), 0,1);	
+    }
+  }
+  
+  for(int k=0;k<m_sector_count;k++) {
+    for(int r=0;r<m_ring_count;r++) {
+      float pts[2];
+      l->ProjectPoint(m_read_angles[5*k+((i+1)%5)],
+		      m_data_ring_centre_radii[r]/m_bullseye_outer_radius,
+		      pts,
+		      pts+1);
+      camera->NPCFToImage(pts,1);
+      // pick the colour to be the opposite of the sampled point so we can see the dot
+      //int colour = SampleImage(image,pts[0],pts[1]) < 128 ? 255 : 0;
+      // or pick the colour to be on a gradient so we see the order it samples in
+      int colour = (int)((double)k/(double)m_sector_count*255);
+      cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), colour,3);
+      
+    }
+  }
+  cvSaveImage("debug-decode.jpg",debug0);	  	
+  cvReleaseImage(&debug0);
+}
