@@ -9,7 +9,7 @@ extern "C" {
 #include <sys/shm.h>
 }
 
-#define XOUTPUT_DEBUG
+#undef XOUTPUT_DEBUG
 
 XOutputMechanism::XOutputMechanism(int width, int height, const Camera& camera) :
   m_image(NULL),

@@ -11,7 +11,8 @@
 #include <unistd.h>     // for mmap()
 #include <sys/mman.h>   // for mmap()
 #include <cerrno>
-#define V4L_DEBUG
+
+#undef V4L_DEBUG
 
 /**
  * Create a video4linux image source.  Takes a device i.e. /dev/video0

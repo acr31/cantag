@@ -9,7 +9,7 @@
 
 #define COMPARE_THRESH 1
 
-#define QUADTANGLE_DEBUG
+#undef QUADTANGLE_DEBUG
 
 QuadTangle::QuadTangle() {
   m_fitted = false;
