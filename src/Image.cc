@@ -261,12 +261,7 @@ void Image::ellipse_polygon_approx(float* points, int startindex, int length, fl
   }
 
   int numvertices = startindex+length;
-  if (thickness > 0) {
-    DrawPolygon(points,numvertices,color,thickness);
-  }
-  else {
-    DrawFilledPolygon(points,numvertices,color);
-  }
+  DrawPolygon(points,numvertices,color,thickness);
 }
 
 void Image::DrawEllipseArc(int xc, int yc, 
@@ -288,6 +283,18 @@ void Image::DrawEllipseArc(float xc, float yc,
   points[0] = Round(xc);
   points[1] = Round(yc);
   ellipse_polygon_approx(points, 1, numsteps, xc, yc ,width, height, angle_radians, color, thickness, start_angle); 
+  if (thickness == -1) {
+    float angle = angle_radians + (start_angle+end_angle)/2;
+    // remember that y increases down from the top of the image so we
+    // do yc minus point rather than yc + point
+    float cosa = cos(angle_radians);
+    float sina = sin(angle_radians);
+    float cost = cos(angle);
+    float sint = sin(angle);
+    int fx = Round(xc + width/4*cosa*cost + height/4*sina*sint);
+    int fy = Round(yc + width/4*sina*cost - height/4*cosa*sint);
+    SeedFill(fx,fy,color);
+  }
 }
 
 void Image::DrawEllipse(float xc, float yc, 
@@ -300,6 +307,11 @@ void Image::DrawEllipse(float xc, float yc,
 
   float points[numsteps*2];
   ellipse_polygon_approx(points,0, numsteps, xc, yc ,width, height, angle_radians, color, thickness, 0);
+  
+  if (thickness == -1) {
+    SeedFill(Round(xc),Round(yc),color);
+  }
+
 }
 
 Image::Image(Socket& socket) {
@@ -346,7 +358,7 @@ void Image::DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigne
     int y = y0;
     DrawPixel(x,y,colour);
 
-    if (dy > 0 && dy > dx) { // NE or N
+    if (dy > 0 && dy >= dx) { // NE or N
       int d = (int)((a*(x+0.5)+b*(y+1)+c));
       while (y < y1) {
 	++y;
@@ -452,6 +464,8 @@ void Image::DrawFilledPolygon(float* points, int numpoints, unsigned char colour
 /*
  * Recursive fill.  OK, so it's not pretty, but
  * we don't need high performance and it works fine!
+ *
+ * Rob Harle <rkh23@cam.ac.uk>
  */
 void Image::SeedFill(int x, int y,unsigned char colour) {
   if (x<0 || y<0 || x >=(int)m_width || y >= (int)m_height) return;

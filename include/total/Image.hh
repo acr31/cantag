@@ -294,21 +294,21 @@ public:
    * Draw a filled circle centred on x0,y0
    */
   inline void DrawFilledCircle(int x0, int y0, int radius, unsigned char colour) {
-    DrawSector(x0,y0,radius,0,2*PI,colour);
+    DrawEllipse((float)x0,(float)y0,(float)radius,(float)radius,0,colour,-1);
   }
 
   /**
-   * Draw a filled circle centred on x0,y0, the radius is rounded to the nearest integer
+   * Draw a filled circle centred on x0,y0
    */
   inline void DrawFilledCircle(int x0, int y0, float radius, unsigned char colour) {
-    DrawSector(x0,y0,Round(radius),0,2*PI,colour);
+    DrawEllipse((float)x0,(float)y0,radius,radius,0,colour,-1);
   }
 
   /**
-   * Draw a filled circle rounding x0,y0 and radius to the nearest integers
+   * Draw a filled circle centred on x0,y0
    */
   inline void DrawFilledCircle(float x0, float y0, float radius, unsigned char colour) {
-    DrawSector(Round(x0),Round(y0),Round(radius),0,2*PI,colour);
+    DrawEllipse(x0,y0,radius,radius,0,colour,-1);
   }
 
   /**
@@ -318,7 +318,7 @@ public:
    * anti-clockwise direction.
    */
   inline void DrawSector(int x0, int y0, int radius, float start_radians, float end_radians, unsigned char colour) {
-    DrawEllipseArc(x0,y0,radius/2,radius/2,0,start_radians,end_radians,colour,-1);
+    DrawEllipseArc(x0,y0,radius,radius,0,start_radians,end_radians,colour,-1);
   }
 
   /**
