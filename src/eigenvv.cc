@@ -231,7 +231,7 @@ void eigensolve(double a, double b, double f,
       eigenvals[6] = 0;     eigenvals[7] = 0;     eigenvals[8] = e;
       }*/
 }  
-void eigensolve(double a, double b, double c,
+bool eigensolve(double a, double b, double c,
 		double d, double e, double f,
 		double g, double h, double i,
 		double *eigenvects, double* eigenvals) {
@@ -465,7 +465,8 @@ void eigensolve(double a, double b, double c,
       std::cout << " "<<d<<" "<<e<<" "<< f << ";" << std::endl;
       std::cout << " "<<g<<" "<<h<<" "<< i << "]" << std::endl;
 #endif
-    }	  
+      return false;
+    }	   
   else
     {
 #ifdef EIGEN_DEBUG
@@ -541,7 +542,7 @@ void eigensolve(double a, double b, double c,
 #ifdef EIGEN_DEBUG      
 	std::cout << "Complex evals, ignore the following" << std::endl;
 #endif
-	return;
+	return false;
       }
 
       // Calculate eigenvectors for original matrix
@@ -605,7 +606,9 @@ void eigensolve(double a, double b, double c,
       eigenvals[0] = v1;     eigenvals[1] = 0;     eigenvals[2] = 0;
       eigenvals[3] = 0;      eigenvals[4] = v2;    eigenvals[5] = 0;
       eigenvals[6] = 0;      eigenvals[7] = 0;     eigenvals[8] = v3;
-    }   
+      
+      return true;
+    }
 }
 
 
