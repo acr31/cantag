@@ -18,6 +18,8 @@
  * Create a video4linux image source.  Takes a device i.e. /dev/video0
  * and the channel. The channel is the index of the channel in the
  * list of channels returned by the video card.
+ *
+ * \todo need someway of saying composite input
  */
 V4LImageSource::V4LImageSource(char* device, int channel) : 
   m_handle(-1), m_mmap((unsigned char*)MAP_FAILED,-1),
