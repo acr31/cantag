@@ -146,7 +146,7 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
   delete current;
   m_contour_count--;
 #ifdef IMAGE_DEBUG
-  debug_image->Save("debug-contourtree-contours.bmp");
+  debug_image->Save("debug-contourtree-contours.pnm");
 #endif
   delete[] nbd_store;
 }
