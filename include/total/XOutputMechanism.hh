@@ -35,7 +35,10 @@ private:
   bool m_createdpixmap;
   bool m_shmat;
   bool m_shmgot;
-
+  bool m_gcgot;
+  bool m_mapped;
+  bool m_windowgot;
+  bool m_displaygot;
   void FromContourTree(const ContourTree::Contour* contour);
   template<class S> void FromShapeTree(Image& i, const typename ShapeTree<S>::Node* node);
 public:

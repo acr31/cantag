@@ -126,8 +126,9 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
 	}
 	
 	//	NBD = (NBD + 1) & 0x7F;
-	NBD = (NBD + 1);
+	NBD = NBD + 1;
 	//	if (NBD==0) { ++NBD; }	 
+
 	
 	current = new Contour(NBD);
 	node_hash[NBD] = current;
@@ -139,7 +140,7 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
     }
     ++data_pointer; // exclude the last pixel on the line
   }
-  
+  delete current;
 #ifdef IMAGE_DEBUG
   debug_image->Save("debug-contourtree-contours.bmp");
 #endif
@@ -374,7 +375,7 @@ ContourTree::Contour::~Contour() {
   for(std::vector<Contour*>::const_iterator i = children.begin();
       i!=children.end();
       ++i) {
-    //delete *i;
+    delete *i;
   }
 }
 

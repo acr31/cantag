@@ -16,25 +16,32 @@ XOutputMechanism::XOutputMechanism(int width, int height, const Camera& camera) 
   m_createdpixmap(false),
   m_shmat(false),
   m_shmgot(false),
+  m_gcgot(false),
+  m_mapped(false),
+  m_windowgot(false),
+  m_displaygot(false),
   m_camera(camera)
 {
  
   if ((m_display = XOpenDisplay(NULL)) == NULL) {
     throw "Failed to open display.\n";
   }
-
+  m_displaygot = true;
     // Get default colo
   int blackColour = BlackPixel(m_display, DefaultScreen(m_display));
   int whiteColour = WhitePixel(m_display, DefaultScreen(m_display));
 
   m_window = XCreateSimpleWindow(m_display, DefaultRootWindow(m_display), 0, 0, m_width, m_height, 0, blackColour, blackColour);
+  m_windowgot = true;
   XStoreName(m_display, m_window, "TripOver");
   XGetWindowAttributes(m_display, m_window, &m_windowAttributes);
   int depth;
   depth = m_windowAttributes.depth;
   XSelectInput(m_display, m_window, StructureNotifyMask);
   XMapWindow(m_display, m_window);
+  m_mapped = true;
   m_gc = XCreateGC(m_display, m_window, 0, 0);
+  m_gcgot = true;
   XSetForeground(m_display, m_gc, 0xFF);
   Visual* visual = DefaultVisualOfScreen(DefaultScreenOfDisplay(m_display));
   // Xshm stuff
@@ -84,10 +91,13 @@ XOutputMechanism::~XOutputMechanism() {
   if (m_image) XDestroyImage(m_image);
   if (m_shmat) shmdt(m_shminfo.shmaddr);
   if (m_shmgot) shmctl(m_shminfo.shmid,IPC_RMID,0);
+  if (m_gcgot) XFreeGC(m_display,m_gc);
+  if (m_mapped) XUnmapWindow(m_display,m_window);
+  if (m_windowgot) XDestroyWindow(m_display,m_window);
+  if (m_displaygot) XCloseDisplay(m_display);
 }
 
 void XOutputMechanism::FromImageSource(const Image& image) {
-  if (!m_image) { throw "Noimage"; }
   for (int y=0; y<m_height/2; ++y) {
     const unsigned char* pointer = image.GetRow(2*y);
     for (int x=0; x<m_width/2; ++x) {
@@ -104,7 +114,6 @@ void XOutputMechanism::FromImageSource(const Image& image) {
 }
 
 void XOutputMechanism::FromThreshold(const Image& image) {
-  if (!m_image) { throw "Noimage"; }
   for (int y=0; y<m_height/2; ++y) {
     const unsigned char* pointer = image.GetRow(2*y);
     for (int x=m_width/2; x<m_width; ++x) {
@@ -117,7 +126,6 @@ void XOutputMechanism::FromThreshold(const Image& image) {
 }
 
 void XOutputMechanism::FromContourTree(const ContourTree& contours) {
-  if (!m_image) { throw "Noimage"; }
   for(int x=0;x<m_width/2;++x) {
     for(int y=m_height/2;y<m_height;++y) {
       XPutPixel(m_image,x,y,(1<<16)-1);
