@@ -230,12 +230,13 @@ template<int SIZE> bool MatrixTag<SIZE>::DecodeNode( LocatedObject<SIZE*SIZE-(SI
 		    m_cells_corner[2*i+1]+m_cell_width_2 };
     ApplyTransform(transform,pts[0],pts[1],pts,pts+1);
     camera.NPCFToImage(pts,1);
-    bool sample = image.Sample(pts[0],pts[1]) > 0;
+    bool sample = (image.Sample(pts[0],pts[1]) & 0x1) != 0;
     (*read_code)[i] = sample;
   }
 
 #ifdef IMAGE_DEBUG
   Image debug0(image);
+  debug0.Mask(1);
   debug0.ConvertScale(50,0);
   debug0.ConvertScale(-1,255);
   for(int i=-SIZE-2;i<=SIZE+2;i+=2) {
@@ -259,7 +260,7 @@ template<int SIZE> bool MatrixTag<SIZE>::DecodeNode( LocatedObject<SIZE*SIZE-(SI
     ApplyTransform(transform,pts[0],pts[1],pts,pts+1);
     camera.NPCFToImage(pts,1);
     // pick the colour to be the opposite of the sampled point so we can see the dot
-    int colour = image.Sample(pts[0],pts[1]) < 1 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
+    int colour = image.Sample(pts[0],pts[1]) & 1 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
     // or pick the colour to be on a gradient so we see the order it samples in
     //int colour = (int)((double)i/(double)(SIZE*SIZE - (SIZE*SIZE % 2))*255);
     debug0.DrawPoint(pts[0],pts[1],colour,4);
