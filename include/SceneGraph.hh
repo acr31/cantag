@@ -11,7 +11,7 @@
 
 #define MAXLENGTH 10000
 #define MAXDEPTH 20
-#undef SCENE_GRAPH_DEBUG
+#define SCENE_GRAPH_DEBUG
 #undef ADD_CONTOUR_NOISE
 
 #ifdef ADD_CONTOUR_NOISE
@@ -94,10 +94,7 @@ public:
       CvSeq *c = (CvSeq*)treeiter.node;
 
       if ((c != NULL) && (fabs(cvContourArea(c,CV_WHOLE_SEQ))>10)) {
-#ifdef IMAGE_DEBUG
-	// draw found contours
-	cvDrawContours(debug0,c,0,0,0,1,8);
-#endif
+
 
 #ifdef SCENE_GRAPH_DEBUG
 	PROGRESS("Found contour at level "<< treeiter.level);
@@ -130,6 +127,10 @@ public:
 	SceneGraphNode<S,PAYLOAD_SIZE>* next = new SceneGraphNode<S,PAYLOAD_SIZE>(m_fpoints,count);
 
 	if (next->GetShapes().IsChainFitted()) {
+#ifdef IMAGE_DEBUG
+	  // draw found contours
+	  cvDrawContours(debug0,c,0,0,0,2,8);
+#endif
 	  // now add this node as a child of its parent.  Its parent is
 	  // the node stored in index level-1 in the parents array. 
 	  bool added = false;

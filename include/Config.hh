@@ -1,5 +1,7 @@
 /**
  * $Header$
+
+ \todo this code doesn't work when image_debug is off - find out why
  */
 #ifndef CONFIG_GUARD
 #define CONFIG_GUARD

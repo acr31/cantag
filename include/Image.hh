@@ -23,7 +23,7 @@ private:
 public:
   // SceneGraph.hh currently needs this
   IplImage* m_image;
-
+  Image();
   Image(int width, int height);
   Image(int width, int height, uchar* contents);
   Image(const Image& c);

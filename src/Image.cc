@@ -3,6 +3,8 @@
 
 #include <boost/random.hpp>
 
+Image::Image() : m_image(NULL) {};
+
 
 Image::Image(int width, int height) : m_image(cvCreateImage(cvSize(width,height), IPL_DEPTH_8U, 1)) {
   cvConvertScale(m_image,m_image,0,255);

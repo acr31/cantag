@@ -7,10 +7,35 @@
 
 #include <Config.hh>
 #include <ImageSource.hh>
-#include <boost/scoped_ptr.hpp>
+#include <boost/scoped_array.hpp>
+
+extern "C" {
+# include <linux/videodev.h> // for Video4Linux
+};
+
 
 class V4LImageSource : public ImageSource {
 private:
+  
+  class VideoDevHandle {
+  private:
+    int m_f_handle;
+  public:
+    VideoDevHandle(int f_handle);
+    ~VideoDevHandle();
+    int Get() const;
+  };
+
+  class MMapHandle {
+  private:
+    uchar* m_mmap_start;
+    int m_size;
+  public:
+    MMapHandle(uchar* mmap_start, int size);
+    ~MMapHandle();
+    uchar* Get();
+  };
+
   VideoDevHandle m_handle;
   MMapHandle  m_mmap;
   int m_channel;
@@ -21,31 +46,12 @@ private:
   boost::scoped_array<video_mmap> m_slots;
   boost::scoped_array<Image> m_images;
 
-  class VideoDevHandle {
-  private:
-    int m_f_handle;
-  public:
-    VideoDevHandle(int f_handle);
-    ~VideoDevHandle();
-    operator int() const;
-  }
-
-  class MMapHandle {
-  private:
-    int m_mmap_start;
-    int m_size;
-  public:
-    MMapHandle(uchar* mmap_start, int size);
-    ~MMapHandle();
-    operator int() const;
-  }
-
 public:
 
-  V4LImageSource(const char* deviceName);
+  V4LImageSource(const char* deviceName, int channel);
 
   virtual Image* Next();
 
-}
+};
 
 #endif//V4L_IMAGE_SOURCE_GUARD

@@ -283,12 +283,12 @@ public:
     }
     */
 
-    /*    if (correcttrans == NULL) {
+       if (correcttrans == NULL) {
 #ifdef RING_TAG_DEBUG
       PROGRESS("Failed to find a valid transform - just selecting one arbitrarily!");
 #endif
       correcttrans = transform1;
-      }*/
+      }
 
     if (correcttrans != NULL) {
  
@@ -446,7 +446,7 @@ private:
     }
 #endif
     char filename[256];
-    snprintf(filename,255,"debug-decode-%d.bmp",debug_image_counter++);
+    snprintf(filename,255,"debug-decode-%d.jpg",debug_image_counter++);
     filename[255]=0;
     debug0.Save(filename);
   }
