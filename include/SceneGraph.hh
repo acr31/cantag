@@ -93,7 +93,7 @@ public:
     do {
       CvSeq *c = (CvSeq*)treeiter.node;
 
-      if ((c != NULL) && (fabs(cvContourArea(c,CV_WHOLE_SEQ))>10)) {
+      if ((c != NULL) && (fabs(cvContourArea(c,CV_WHOLE_SEQ))>100)) {
 
 
 #ifdef SCENE_GRAPH_DEBUG

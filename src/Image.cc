@@ -3,14 +3,14 @@
 
 #include <boost/random.hpp>
 
-Image::Image() : m_image(NULL) {};
+Image::Image() : m_from_header(false), m_image(NULL) {};
 
 
-Image::Image(int width, int height) : m_image(cvCreateImage(cvSize(width,height), IPL_DEPTH_8U, 1)) {
+Image::Image(int width, int height) : m_from_header(false), m_image(cvCreateImage(cvSize(width,height), IPL_DEPTH_8U, 1)) {
   cvConvertScale(m_image,m_image,0,255);
 };
-Image::Image(const Image& c) : m_image(cvCloneImage(c.m_image)) {};
-Image::Image(char* filename) : m_image(cvLoadImage(filename)) {
+Image::Image(const Image& c) : m_from_header(false), m_image(cvCloneImage(c.m_image)) {};
+Image::Image(char* filename) : m_from_header(false), m_image(cvLoadImage(filename)) {
   if (m_image->nChannels == 3) {
     IplImage* image2 = cvCreateImage(cvSize(m_image->width,m_image->height),IPL_DEPTH_8U,1);
     cvCvtColor(m_image,image2,CV_RGB2GRAY);
@@ -19,15 +19,24 @@ Image::Image(char* filename) : m_image(cvLoadImage(filename)) {
   }  
 };
 
-Image::Image(int width,int height, uchar* contents) {
-  cvInitImageHeader(m_image,
-		    cvSize(width,height),
-		    IPL_DEPTH_8U, 1, IPL_ORIGIN_TL, 4 );
+Image::Image(int width,int height, uchar* contents) : m_from_header(true) {
+  m_image = cvCreateImageHeader(cvSize(width,height),
+				IPL_DEPTH_8U, 1);
   m_image->imageData = m_image->imageDataOrigin = (char*)contents;
 }
 
 Image::~Image() {
-  cvReleaseImage(&m_image);
+  if (m_from_header) {
+    /*
+     * \todo work out why this results in unknown error code -49 in opencv
+     */
+    //    cvReleaseImageHeader(&m_image);
+  }
+  else {
+    if (m_image != NULL) {
+      cvReleaseImage(&m_image);
+    }
+  }
 }
 
 void Image::GlobalThreshold(unsigned char threshold) {

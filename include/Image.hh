@@ -19,6 +19,8 @@
  */
 class Image {
 private:
+  bool m_from_header;  // set to true if this image is created to
+		       // point to an existing buffer of data
   
 public:
   // SceneGraph.hh currently needs this

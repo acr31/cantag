@@ -24,6 +24,7 @@ private:
     VideoDevHandle(int f_handle);
     ~VideoDevHandle();
     int Get() const;
+    VideoDevHandle& SetHandle(int);
   };
 
   class MMapHandle {
@@ -34,6 +35,7 @@ private:
     MMapHandle(uchar* mmap_start, int size);
     ~MMapHandle();
     uchar* Get();
+    MMapHandle& SetHandle(uchar*,int);
   };
 
   VideoDevHandle m_handle;
@@ -49,7 +51,7 @@ private:
 public:
 
   V4LImageSource(const char* deviceName, int channel);
-
+  ~V4LImageSource();
   virtual Image* Next();
 
 };
