@@ -31,18 +31,18 @@ namespace Total {
 
   Ellipse::Ellipse(): m_fitted(false) {}
 
-  Ellipse::Ellipse(const std::vector<float>& points) {
-    m_fitted = FitEllipse(points);
-  }
+//   Ellipse::Ellipse(const std::vector<float>& points) {
+//     m_fitted = FitEllipse(points);
+//   }
 
-  Ellipse::Ellipse(const std::vector<float>& points, bool prev_fit) {
-    if (!prev_fit) {
-      m_fitted = FitEllipse(points);
-    }
-    else {
-      m_fitted =false;
-    }
-  }
+ //  Ellipse::Ellipse(const std::vector<float>& points, bool prev_fit) {
+//     if (!prev_fit) {
+//       m_fitted = FitEllipse(points);
+//     }
+//     else {
+//       m_fitted =false;
+//     }
+//   }
 
   Ellipse::Ellipse(float a, float b, float c, float d, float e, float f) :
     m_a(a), m_b(b), m_c(c), m_d(d), m_e(e), m_f(f), m_fitted(true) { Decompose();}
@@ -742,11 +742,11 @@ namespace Total {
 
   SimpleEllipse::SimpleEllipse() : Ellipse() {}
 
-  SimpleEllipse::SimpleEllipse(const std::vector<float>& points) : Ellipse(points) {}
+  //  SimpleEllipse::SimpleEllipse(const std::vector<float>& points) : Ellipse(points) {}
 
-  SimpleEllipse::SimpleEllipse(const std::vector<float>& points, bool prev_fit) : Ellipse(points,prev_fit) {}
+  // SimpleEllipse::SimpleEllipse(const std::vector<float>& points, bool prev_fit) : Ellipse(points,prev_fit) {}
 
-  SimpleEllipse::SimpleEllipse(Socket& socket) : Ellipse(socket) {}
+  //  SimpleEllipse::SimpleEllipse(Socket& socket) : Ellipse(socket) {}
 
   bool SimpleEllipse::FitEllipse(const std::vector<float>& points) {
 

@@ -22,20 +22,16 @@ namespace Total {
 
 #define MASK(x) ((x) & ((1<<LOGMAXWINDOW)-1))
 
-  QuadTangle::QuadTangle() {
-    m_fitted = false;
-  }
+  QuadTangle::QuadTangle() {}
 
-  QuadTangle::QuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3) : m_x0(x0), m_y0(y0),m_x1(x1), m_y1(y1),m_x2(x2), m_y2(y2),m_x3(x3), m_y3(y3), m_fitted(true) {
+  QuadTangle::QuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3) : m_x0(x0), m_y0(y0),m_x1(x1), m_y1(y1),m_x2(x2), m_y2(y2),m_x3(x3), m_y3(y3) {
     compute_central_point();
     sort_points();
   }
 
 
   void QuadTangle::Draw(Image& image,const Camera& camera) const {
-    if (m_fitted) {
       camera.DrawQuadTangle(image,*this);
-    }
   }
 
   float dist(float x0, float y0, float x1, float y1) {
@@ -157,6 +153,9 @@ namespace Total {
     }
   }
 
+  /**
+   * \todo Check for fitted
+   */
   QuadTangle::QuadTangle(Socket& socket) {
     m_x0 = socket.RecvFloat();
     m_y0 = socket.RecvFloat();
@@ -168,9 +167,13 @@ namespace Total {
     m_y3 = socket.RecvFloat();
     m_xc = socket.RecvFloat();
     m_yc = socket.RecvFloat();
-    m_fitted = (bool)socket.RecvInt();
+    //    m_fitted = (bool)socket.RecvInt();
   }
 
+
+  /**
+   * \todo Check for fitted
+   */
   int QuadTangle::Save(Socket& socket) const {
     int count = socket.Send(m_x0);
     count += socket.Send(m_y0);
@@ -182,7 +185,7 @@ namespace Total {
     count += socket.Send(m_y3);
     count += socket.Send(m_xc);
     count += socket.Send(m_yc);
-    count += socket.Send((int)m_fitted);
+    //  count += socket.Send((int)m_fitted);
     return count;
   }
 
@@ -236,18 +239,18 @@ namespace Total {
     return result;
   }
 
-  CornerQuadTangle::CornerQuadTangle() : QuadTangle() {};
+  //  CornerQuadTangle::CornerQuadTangle() : QuadTangle() {};
 
-  CornerQuadTangle::CornerQuadTangle(const std::vector<float>& points, bool prev_fitted) : QuadTangle() {
-    if (!prev_fitted) {
-      m_fitted = Fit(points);
-    }
-    else {
-      m_fitted = false;
-    }
-  };
+ //  //  CornerQuadTangle::CornerQuadTangle(const std::vector<float>& points, bool prev_fitted) : QuadTangle() {
+//     if (!prev_fitted) {
+//       m_fitted = Fit(points);
+//     }
+//     else {
+//       m_fitted = false;
+//     }
+//   };
 
-  bool CornerQuadTangle::Fit(const std::vector<float>& points) {
+  bool CornerQuadTangle::FitPoints(const std::vector<float>& points) {
     if (points.size() > (2<<LOGMAXWINDOW) && points.size() > 50) {
       float xcorners[4];
       float ycorners[4];
@@ -326,18 +329,17 @@ namespace Total {
   }
 
   // BEGIN RegressionQuadTangle
-  RegressionQuadTangle::RegressionQuadTangle() : QuadTangle() {};
+  // RegressionQuadTangle::RegressionQuadTangle() : QuadTangle() {};
 
-  RegressionQuadTangle::RegressionQuadTangle(const std::vector<float>& points, bool prev_fitted) : QuadTangle() {
-    if (!prev_fitted) {
-      m_fitted = Fit(points);
-    }
-    else {
-      m_fitted = false;
-    }
-  };
-  
-  float RegressionQuadTangle::isLeft( const std::vector<float> &V, 
+//   RegressionQuadTangle::RegressionQuadTangle(const std::vector<float>& points, bool prev_fitted) : QuadTangle() {
+//     if (!prev_fitted) {
+//       m_fitted = Fit(points);
+//     }
+//     else {
+//       m_fitted = false;
+//     }
+//   };  
+  float ConvexHullQuadTangle::isLeft( const std::vector<float> &V, 
 				      int l0, int l1, int p) {
     return (V[l1*2] - V[l0*2])*(V[p*2+1] - V[l0*2+1]) - 
       (V[p*2] - V[l0*2])*(V[l1*2+1] - V[l0*2+1]);
@@ -350,7 +352,7 @@ namespace Total {
    * This code may be freely used and modified for any purpose
    * providing that this copyright notice is included with it.
    */
-  int RegressionQuadTangle::ConvexHull(const std::vector<float> &V, int n, int* H) {
+  int ConvexHullQuadTangle::ConvexHull(const std::vector<float> &V, int n, int* H) {
     // initialize a deque D[] from bottom to top so that the
     // 1st three vertices of V[] are a counterclockwise triangle
     
@@ -393,9 +395,8 @@ namespace Total {
     return h-1;
   }
 
-  
-  bool RegressionQuadTangle::Fit(const std::vector<float>& points) {
-    // Take a convex hull of the polyline ( O(n) )
+  bool ConvexHullQuadTangle::FitPoints(const std::vector<float>& points) {
+  // Take a convex hull of the polyline ( O(n) )
     int h[points.size()/2];
     int n = ConvexHull(points,points.size()/2,h);
 
@@ -460,7 +461,37 @@ namespace Total {
       }
     }
     sort(indexes.begin(), indexes.end());
-    
+
+    m_x0 = points[indexes[0]*2];
+    m_y0 = points[indexes[0]*2+1];
+    m_x1 = points[indexes[1]*2];
+    m_y1 = points[indexes[1]*2+1];
+    m_x2 = points[indexes[2]*2];
+    m_y2 = points[indexes[2]*2+1];
+    m_x3 = points[indexes[3]*2];
+    m_y3 = points[indexes[3]*2+1];
+    m_fitted=true;
+    compute_central_point();
+    sort_points();
+    return true;
+      
+  }
+
+  
+  bool RegressionQuadTangle::Refine(const std::vector<float>& points) {
+    // Calculate the indexes of the current points
+    std::vector<int> indexes(4);
+    for (int i=0; i<4; i++) indexes[i]=-1;
+    for (int i=0; i<points.size(); i+=2) {
+      if (m_x0==points[i] && m_y0==points[i+1]) indexes[0]=i/2;
+      if (m_x1==points[i] && m_y1==points[i+1]) indexes[1]=i/2;
+      if (m_x2==points[i] && m_y2==points[i+1]) indexes[2]=i/2;
+      if (m_x3==points[i] && m_y3==points[i+1]) indexes[3]=i/2;
+    }
+    sort(indexes.begin(), indexes.end());
+
+    for (int i=0; i<4; i++) if (indexes[i]==-1) return false;
+
     // Now we have estimates of the corner indexes within points
     // So do some regression. We ignore the 4 points next to 
     // an estimated corner since these are less reliable indicators
@@ -561,16 +592,16 @@ namespace Total {
 
 
   // BEGIN PolygonQuadTangle
-  PolygonQuadTangle::PolygonQuadTangle() : QuadTangle() {};
+ //  PolygonQuadTangle::PolygonQuadTangle() : QuadTangle() {};
 
-  PolygonQuadTangle::PolygonQuadTangle(const std::vector<float>& points, bool prev_fitted) : QuadTangle() {
-    if (!prev_fitted) {
-      m_fitted = Fit(points);
-    }
-    else {
-      m_fitted = false;
-    }
-  };
+//   PolygonQuadTangle::PolygonQuadTangle(const std::vector<float>& points, bool prev_fitted) : QuadTangle() {
+//     if (!prev_fitted) {
+//       m_fitted = Fit(points);
+//     }
+//     else {
+//       m_fitted = false;
+//     }
+//   };
   
   /**
    * The corner curvature we use for weeding out false vertexes
@@ -821,7 +852,7 @@ namespace Total {
     }
   }
   
-  bool PolygonQuadTangle::Fit(const std::vector<float>& points) {
+  bool PolygonQuadTangle::FitPoints(const std::vector<float>& points) {
     if (points.size() > 4) {
 
       std::list<std::pair<float,float> > fulllist;
