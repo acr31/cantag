@@ -346,14 +346,8 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
       else {
 	value = sample;
       }
-      //std::cout << start_x << " " << start_y << " " << value << std::endl;
-
+      //      std::cout << start_x << " " << start_y << " " << value << std::endl;
       image.DrawPixel(start_x,start_y,value);
-
-      // store this point in the pixel chain and update the start position
-
-      points_buffer[++pointer] = start_x = sample_x;
-      points_buffer[++pointer] = start_y = sample_y;
       // update the length
       statistics.length += (position & 0x1 ? 45 : 32);
       // update the bounding box
@@ -366,6 +360,12 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
       // we've made a turn
       //	if (position = 
       //      }
+
+      // store this point in the pixel chain and update the start position
+      points_buffer[++pointer] = start_x ;
+      start_x = sample_x;
+      points_buffer[++pointer] = start_y;
+      start_y = sample_y;
 
       // adding 5 to our position (mod 8) will put our start
       // position one further round than the previous central point.
