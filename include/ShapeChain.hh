@@ -7,9 +7,7 @@
 
 
 #ifdef HAVE_BOOST_ARCHIVE
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-using namespace boost::archive
+#include <boost/serialization/access.hpp>
 #endif
 
 /**
@@ -70,7 +68,7 @@ private:
 };
 
 #ifdef HAVE_BOOST_ARCHIVE
-template<class M, class S> ShapeChain<M,S>::template<class Archive> serialize(Archive & ar, const unsigned int version) {
+template<class M, class S> template<class Archive> void ShapeChain<M,S>::serialize(Archive & ar, const unsigned int version) {
   ar & m_shape;
   ar & m_next;
 }

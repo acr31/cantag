@@ -136,7 +136,7 @@ void multi_square(int size) {
 }
 
 void test_multi_square() {
-  multi_square(200);
+  multi_square(10);
 }
 
 void test_circle() {

@@ -4,7 +4,7 @@
 
 #include <ContourTree.hh>
 
-#define CONTOUR_TREE_DEBUG
+#undef CONTOUR_TREE_DEBUG
 
 Image* debug_image;
 
@@ -91,6 +91,8 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
 	else {
 	  continue;
 	}
+
+	if (contour_length < 40) { current->weeded = true; }
 	
 	// now decide the parent of this border
 	
@@ -182,7 +184,7 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
   // contour_0 is the first pixel in the contour
   const unsigned char* contour_0 = data_pointer;
 
-  const int NBD_shift = nbd << 1;
+  const int NBD_shift = 1 << 1;
 
   do {
     position = (position - 1) & 0x7;
@@ -239,7 +241,7 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 	// have examined it whilst looking for this 1-element then this
 	// is an exit pixel.  Write (NBD,r).
 	if (cell4_is_0) {
-	  *data_pointer = NBD_shift;
+	  *data_pointer = NBD_shift & 0xFF;
 	  nbd_store[start_x+image_width*start_y] = nbd;
 #ifdef CONTOUR_TREE_DEBUG
 	  PROGRESS("Marked  exit " << start_x << "," << start_y << " with " << NBD_shift);
@@ -249,7 +251,7 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 	// (NBD,l).
 	//	else if (!(*sample_pointer & ~0x1)) {
 	else if (!(*data_pointer & ~0x1)) {
-	  *data_pointer = NBD_shift | 0x1;
+	  *data_pointer = (NBD_shift | 0x1) & 0xFF;
 	  nbd_store[start_x+image_width*start_y] = nbd;
 #ifdef CONTOUR_TREE_DEBUG
 	  PROGRESS("Marked " << start_x << "," << start_y << " with " << (NBD_shift | 0x1));
@@ -265,7 +267,7 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 	else if (start_y > statistics.max_y) { statistics.max_y = start_y; }
 
 	// check the stopping condition
-	if ((points.size() > 4) &&
+	if ((points.size() > 4) && // i.e. we have seen more than two pixels
 	    (data_pointer == contour_n) &&
 	    (sample_pointer == contour_0)) {
 	  statistics.length >>= 5;

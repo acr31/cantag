@@ -9,9 +9,7 @@
 #include <Image.hh>
 
 #ifdef HAVE_BOOST_ARCHIVE
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-using namespace boost::archive
+#include <boost/serialization/access.hpp>
 #endif
 
 
@@ -62,11 +60,11 @@ public:
   inline float GetE() const { return m_e; }
   inline float GetF() const { return m_f; }
 
-  inline float GetX0() const { PROGRESS(m_x0); return m_x0; }
-  inline float GetY0() const { PROGRESS(m_y0);return m_y0; }
-  inline float GetWidth() const { PROGRESS(m_width);return m_width; }
-  inline float GetHeight() const { PROGRESS(m_height);return m_height; }
-  inline float GetAngle() const { PROGRESS(m_angle_radians);return m_angle_radians; }
+  inline float GetX0() const { return m_x0; }
+  inline float GetY0() const { return m_y0; }
+  inline float GetWidth() const { return m_width; }
+  inline float GetHeight() const { return m_height; }
+  inline float GetAngle() const {  return m_angle_radians; }
 
   float GetError(const std::vector<float>& points) const;
   float GetErrorAlgebraic(const std::vector<float>& points) const;
@@ -226,7 +224,7 @@ private:
 };
 
 #ifdef HAVE_BOOST_ARCHIVE
-void Ellipse::template<class Archive> serialize(Archive & ar, const unsigned int version) {
+template<class Archive> void Ellipse::serialize(Archive & ar, const unsigned int version) {
   ar & m_a;
   ar & m_b;
   ar & m_c;

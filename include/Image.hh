@@ -13,9 +13,8 @@
 #define PI CV_PI
 
 #ifdef HAVE_BOOST_ARCHIVE
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-using namespace boost::archive
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/split_member.hpp>
 #endif
 
 /**
@@ -408,7 +407,12 @@ template<class Archive>
 void Image::save(Archive & ar, const unsigned int version) const {
   ar & m_image->width;
   ar & m_image->height;
-  ar & m_contents;
+  ar & m_image->imageSize;
+  const unsigned char* datapointer = GetDataPointer();
+  for(int i=0;i<m_image->imageSize;++i) {
+    ar & *datapointer;
+    ++datapointer;
+  }
 }
 
 template<class Archive>
@@ -417,8 +421,15 @@ void Image::load(Archive & ar, const unsigned int version) {
   int height;
   ar & width;
   ar & height;
-  ar & m_contents;
   m_free_contents = true;
+  int size;
+  ar & size;
+  m_contents = new unsigned char[size];
+  unsigned char* datapointer = m_contents;
+  for(int i=0;i<size;++i) {
+    ar & *datapointer;
+    ++datapointer;
+  }
   m_image = cvCreateImageHeader(cvSize(width,height),
 				IPL_DEPTH_8U, 1);
   m_image->imageData = m_image->imageDataOrigin = (char*)m_contents;

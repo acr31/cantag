@@ -11,13 +11,13 @@
 #include <polysolve.hh>
 
 #ifdef TEXT_DEBUG
-# define ELLIPSE_DEBUG
-# define ELLIPSE_DEBUG_DUMP_POINTS
-# define CIRCLE_TRANSFORM_DEBUG
+# undef ELLIPSE_DEBUG
+# undef ELLIPSE_DEBUG_DUMP_POINTS
+# undef CIRCLE_TRANSFORM_DEBUG
 # undef DECOMPOSE_DEBUG
 #endif
 
-#define MAXFITERROR 100
+#define MAXFITERROR 1
 #define COMPARETHRESH 1
 #undef MAXDISTANCE 
 
@@ -124,6 +124,30 @@ bool Ellipse::FitEllipse(const std::vector<float>& points) {
   print("S2",s2,3,3);
   print("S3",s3,3,3);
 #endif
+
+  // check the determinant of S3 is non-zero - if we have a straight line for example then this is zero
+  /*
+    
+  | a b c | 
+  | d e f |  = a(ei-hf) - b(di-fg) + c(dh-eg)
+  | g h i | 
+  */
+  float determinant = 
+    s3[0][0]*(s3[1][1]*s3[2][2]-s3[1][2]*s3[2][1]) -
+    s3[1][0]*(s3[0][1]*s3[2][2]-s3[2][1]*s3[0][2]) +
+    s3[2][0]*(s3[0][1]*s3[1][2]-s3[1][1]*s3[0][2]);
+  
+#ifdef ELLIPSE_DEBUG
+  PROGRESS("Determinant of S3 " << determinant);
+#endif    
+
+  if (fabs(determinant) < 1e-15) { 
+#ifdef ELLIPSE_DEBUG
+    PROGRESS("Determinant of S3 is zero - no fit");
+#endif
+    return false; 
+}
+
   // Compute
 
   // T = -inv(S3) * S2'

@@ -8,9 +8,8 @@
 #include <bitset>
 
 #ifdef HAVE_BOOST_ARCHIVE
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-using namespace boost::archive
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/base_object.hpp>
 #endif
 
 
@@ -108,7 +107,7 @@ private:
 };
 
 #ifdef HAVE_BOOST_ARCHIVE
-template<int BIT_COUNT> void CyclicBitSet<BIT_COUNT>::template<class Archive> serialize(Archive & ar, const unsigned int version) {
+template<int BIT_COUNT> template<class Archive> void CyclicBitSet<BIT_COUNT>::serialize(Archive & ar, const unsigned int version) {
   ar & boost::serialization::base_object<CyclicBitSet<BIT_COUNT> >(*this);
   ar & m_rotation;
 }

@@ -10,9 +10,7 @@
 #include <Camera.hh>
 
 #ifdef HAVE_BOOST_ARCHIVE
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-using namespace boost::archive
+#include <boost/serialization/access.hpp>
 #endif
 
 /**
@@ -38,7 +36,6 @@ public:
   private:
     friend class boost::serialization::access;
     template<class Archive> void serialize(Archive & ar, const unsigned int version);
-    Node() {}
 #endif
   };
 
@@ -58,10 +55,11 @@ public:
   Node* GetRootNode() { return &m_root_node; }
 
 #ifdef HAVE_BOOST_ARCHIVE
+public:
+  ShapeTree() {}
 private:
   friend class boost::serialization::access;
   template<class Archive> void serialize(Archive & ar, const unsigned int version);
-  ShapeTree() {}
 #endif
 };
 
@@ -78,16 +76,18 @@ template<class S> ShapeTree<S>::ShapeTree(const ContourTree::Contour& contour) :
 
 template<class S> void ShapeTree<S>::walk_tree(Node* current, const ContourTree::Contour* contour) {
   // try to match this contour using 
-  Node* n = new Node(contour->points);
-  if (n->matched.IsChainFitted()) {
+  if (!contour->weeded) {
+    Node* n = new Node(contour->points);
+    if (n->matched.IsChainFitted()) {
 #ifdef IMAGE_DEBUG
-    n->matched.DrawChain(*debug_image);
+      n->matched.DrawChain(*debug_image);
 #endif
-    current->children.push_back(n);
-    current = n;
-  }
-  else {
-    delete n;
+      current->children.push_back(n);
+      current = n;
+    }
+    else {
+      delete n;
+    }
   }
   for(std::vector<ContourTree::Contour*>::const_iterator i = contour->children.begin() ;
       i != contour->children.end();
@@ -97,12 +97,12 @@ template<class S> void ShapeTree<S>::walk_tree(Node* current, const ContourTree:
 };
 
 #ifdef HAVE_BOOST_ARCHIVE
-template<class S> void ShapeTree<S>::Node::template<class Archive> serialize(Archive & ar, const unsigned int version) {
+template<class S> template<class Archive> void ShapeTree<S>::Node::serialize(Archive & ar, const unsigned int version) {
   ar & matched;
   ar & children;  
 }
 
-template<class S> void ShapeTree<S>::template<class Archive> serialize(Archive & ar, const unsigned int version) {
+template<class S> template<class Archive> void ShapeTree<S>::serialize(Archive & ar, const unsigned int version) {
   ar & m_root_node;
 }
 #endif

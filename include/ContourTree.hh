@@ -11,9 +11,8 @@
 #include <map>
 
 #ifdef HAVE_BOOST_ARCHIVE
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-using namespace boost::archive
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/vector.hpp>
 #endif
 
 /**
@@ -33,7 +32,8 @@ public:
     int parent_id;
     std::vector<float> points;
     std::vector<Contour*> children;
-    Contour(int id) : nbd(id),parent_id(id) {}
+    bool weeded;
+    Contour(int id) : nbd(id),parent_id(id),weeded(false) {}
     ~Contour() {
       for(std::vector<Contour*>::const_iterator i = children.begin();
 	  i!=children.end();
@@ -124,10 +124,11 @@ public:
   ~ContourTree();
 
 #ifdef HAVE_BOOST_ARCHIVE
+public:
+  ContourTree() {}
 private:
   friend class boost::serialization::access;
   template<class Archive> void serialize(Archive & ar, const unsigned int version);
-  ContourTree();
 #endif
 };
 

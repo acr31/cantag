@@ -10,9 +10,7 @@
 #include <vector>
 
 #ifdef HAVE_BOOST_ARCHIVE
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-using namespace boost::archive
+#include <boost/serialization/access.hpp>
 #endif
 
 
@@ -27,7 +25,7 @@ public:
   WorldState();
   ~WorldState();
   void Add(LocatedObject<PAYLOAD_SIZE>* object);
-
+  const std::vector<LocatedObject<PAYLOAD_SIZE>*>& GetNodes() { return nodes; }
 private:
 #ifdef HAVE_BOOST_ARCHIVE
   friend class boost::serialization::access;
@@ -50,7 +48,7 @@ template<int PAYLOAD_SIZE> void WorldState<PAYLOAD_SIZE>::Add(LocatedObject<PAYL
 }
 
 #ifdef HAVE_BOOST_ARCHIVE
-template<int PAYLOAD_SIZE> void WorldState<PAYLOAD_SIZE>::template<class Archive> serialize(Archive & ar, const unsigned int version) {
+template<int PAYLOAD_SIZE> template<class Archive> void WorldState<PAYLOAD_SIZE>::serialize(Archive & ar, const unsigned int version) {
   ar & nodes;
 }
 #endif

@@ -11,9 +11,7 @@
 #include <Camera.hh>
 
 #ifdef HAVE_BOOST_ARCHIVE
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-using namespace boost::archive
+#include <boost/serialization/access.hpp>
 #endif
 
 /**
@@ -71,7 +69,7 @@ private:
 };
 
 #ifdef HAVE_BOOST_ARCHIVE
-template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::template<class Archive> serialize(Archive & ar, const unsigned int version) {
+template<int PAYLOAD_SIZE> template<class Archive> void LocatedObject<PAYLOAD_SIZE>::serialize(Archive & ar, const unsigned int version) {
   ar & transform;
   ar & normal;
   ar & location;
