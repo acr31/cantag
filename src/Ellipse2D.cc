@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/27 18:07:27  acr31
+ * added another constructor for construct at origin
+ *
  * Revision 1.1  2004/01/25 14:53:35  acr31
  * moved over to autoconf/automake build system
  *
@@ -28,6 +31,18 @@
 
 #undef FILENAME
 #define FILENAME "Ellipse2D.cc"
+
+Ellipse2D::Ellipse2D(float width) {
+  m_x = width;
+  m_y = width;
+  m_width = width;
+  m_height = width;
+  m_angle_radians = 0;
+
+  m_cost = 1;
+  m_sint = 0;
+
+}
 
 Ellipse2D::Ellipse2D(float x, float y, float width, float height, float angle_radians) : 
   m_x(x),

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/27 18:07:27  acr31
+ * added another constructor for construct at origin
+ *
  * Revision 1.3  2004/01/26 09:07:42  acr31
  * added comments to new method of solving linear equation
  *
@@ -27,6 +30,24 @@
 
 #undef FILENAME
 #define FILENAME "Rectangle2D.cc"
+
+Rectangle2D::Rectangle2D(float width) {
+  float diff = width/2;
+  m_x0 = 0;
+  m_y0 = 0;
+  
+  m_x1 = 0;
+  m_y1 = width;
+
+  m_x2 = width;
+  m_y2 = width;
+
+  m_x3 = width;
+  m_y3 = 0;
+
+  compute_central_point();
+  compute_alpha();
+}
 
 Rectangle2D::Rectangle2D(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3) :
   m_x0(x0),
