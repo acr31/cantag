@@ -7,6 +7,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/23 11:49:54  acr31
+ * Finished integrating the GF4 coder - I've ripped out the error correcting stuff for now and its just looking for a match but it doesn't seem to work.  I need to spend some time to understand the division and mod operations in the GF4Poly to progress
+ *
  * Revision 1.2  2004/01/23 09:08:40  acr31
  * More work integrating the GF4 stuff with tripover
  *
@@ -193,16 +196,20 @@ GF4Poly GF4Poly::operator %(const GF4Poly& rhs) const
 {
   GF4Poly res, mul;
 
-  int shift = 0;
-  int order = 0;
+  unsigned int shift = 0;
+  unsigned int order = 0;
 
-  order = rhs.order();
+  order = rhs.Order();
  
-  mul = rhs * GF4Poly((rhs.val >> (order * 2 )) == 1 ? 1 : (rhs.val >> (order * 2 )) ^ 1);
+  mul = rhs * GF4Poly(
+
+		      (rhs.val >> (order * 2 )) == 1 ? 
+		      1 : 
+		      (rhs.val >> (order * 2 )) ^ 1);
 
   res.val = val;
  
-  shift = res.order();
+  shift = res.Order();
 
   while (shift >= order) {
     res += (mul << (shift - order)) * GF4Poly(res.val >> (shift * 2));
@@ -223,16 +230,16 @@ GF4Poly GF4Poly::operator /(const GF4Poly& rhs) const
 {
   GF4Poly res, mul, rem;
 
-  int shift = 0;
-  int order = 0;
+  unsigned int shift = 0;
+  unsigned int order = 0;
 
-  order = rhs.order();
+  order = rhs.Order();
  
   mul = GF4Poly((rhs.val >> (order * 2 )) == 1 ? 1 : (rhs.val >> (order * 2 )) ^ 1);
 
   rem.val = val;
  
-  shift = rem.order();
+  shift = rem.Order();
 
   while (shift >= order) {
     res += (mul << (shift - order)) * GF4Poly(rem.val >> (shift * 2));
@@ -301,14 +308,25 @@ GF4Poly& GF4Poly::Rotate(unsigned int rotation, unsigned int length)
   return *this;
 }
 
+/**
+ * Compute the order of this polynomial - i.e. the highest power that
+ * has non-zero co-efficient
+ */
 unsigned int GF4Poly::Order() const
 {
+  int res = m_symbol_length;
+  while( (val >> (--res*2)) & 3 ) {};
+  return res+1;
+
+  /*
+    I can't understand how this returns the highest non-zero power,
+    surely it returns the lowest non-zero power?
   int res = 0;
  
   while (val >> ((res + 1) * 2))
     res ++;
 
-  return res;
+    return res; */
 }
 
 unsigned int GF4Poly::Weight() const
@@ -344,7 +362,12 @@ GF4Poly::operator unsigned long long int() const
 //   return res;
 // }
 
-unsigned int GF4Poly::Constant() const
+unsigned int GF4Poly::GetTerm(int order) const
 {
-  return val & 3;
+  return (val >> (order*2)) & 3;
+}
+
+unsigned long long GF4Poly::GetValue() const
+{
+  return val;
 }

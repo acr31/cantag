@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.8  2004/01/23 11:49:54  acr31
+ * Finished integrating the GF4 coder - I've ripped out the error correcting stuff for now and its just looking for a match but it doesn't seem to work.  I need to spend some time to understand the division and mod operations in the GF4Poly to progress
+ *
  * Revision 1.7  2004/01/23 09:09:07  acr31
  * changes for testing the new gf4 code
  *
@@ -18,6 +21,7 @@
 #include "Drawing.hh"
 #include "TripOriginalCoder.hh"
 #include "RingTag.hh"
+#include "GF4Coder.hh"
 
 #undef FILENAME
 #define FILENAME "drawtriptag.cc"
@@ -57,7 +61,7 @@ main(int argc, char* argv[]) {
 
   //  RingTag<TripOriginalCoder<2> > t(2, //RINGS
   RingTag<GF4Coder > t(2, //RINGS
-				  16, //SECTORS
+				  19, //SECTORS
 				  24, // SYNC ANGLES
 				  0.3, // BULLSEYE INNER
 				  1.2, // BULLSEYE OUTER

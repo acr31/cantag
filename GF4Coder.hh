@@ -4,6 +4,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/23 11:49:53  acr31
+ * Finished integrating the GF4 coder - I've ripped out the error correcting stuff for now and its just looking for a match but it doesn't seem to work.  I need to spend some time to understand the division and mod operations in the GF4Poly to progress
+ *
  * Revision 1.2  2004/01/23 09:08:40  acr31
  * More work integrating the GF4 stuff with tripover
  *
@@ -28,7 +31,7 @@ private:
   int m_symbol_range;
   int m_symbol_count;
   unsigned long m_accum_code;
-
+  int m_current_chunk;
   int m_base;
   
   GF4Poly m_genpoly;
@@ -43,8 +46,7 @@ public:
   virtual unsigned int NextChunk();
   virtual void Reset();
   virtual bool LoadChunk(unsigned int chunk);
-  virtual unsigned long Decode() const;
-
+  virtual unsigned long Decode();
 };
 
 #endif//GF4_CODER_GUARD

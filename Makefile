@@ -18,7 +18,7 @@ drawtriptag: Location2D.o Coder.o ellipsetoxy.o drawtriptag.o GF4Coder.o GF4Poly
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVINC} -o $@ -c $<
 
 clean:
-	-rm -f *.o triptest2 drawtriptag
+	-rm -f *.o triptest2 drawtriptag debug*.jpg
 
 depend:
 	makedepend -Y. ${CPPFLAGS} *.cc 2>/dev/null
@@ -30,8 +30,10 @@ Coder.o: Coder.hh Exception.hh Config.hh
 concentricellipse.o: concentricellipse.hh
 drawtriptag.o: Config.hh Drawing.hh TripOriginalCoder.hh Coder.hh
 drawtriptag.o: Exception.hh RingTag.hh Tag.hh Location2D.hh ellipsetoxy.hh
+drawtriptag.o: GF4Coder.hh GF4Poly.hh
 ellipsetoxy.o: ellipsetoxy.hh Config.hh Drawing.hh
 findellipses.o: findellipses.hh Config.hh Location2D.hh Drawing.hh
+GF4Code.o: GF4Code.h
 GF4Coder.o: GF4Coder.hh Config.hh Coder.hh Exception.hh GF4Poly.hh
 GF4Poly.o: GF4Poly.hh
 GrayScaleFileImageSource.o: GrayScaleFileImageSource.hh Drawing.hh Config.hh

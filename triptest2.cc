@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/23 11:49:54  acr31
+ * Finished integrating the GF4 coder - I've ripped out the error correcting stuff for now and its just looking for a match but it doesn't seem to work.  I need to spend some time to understand the division and mod operations in the GF4Poly to progress
+ *
  * Revision 1.3  2004/01/21 13:41:37  acr31
  * added pose from circle to triptest - (pose from circle is unstable at the moment)
  *
@@ -24,6 +27,7 @@
 #include "posefromcircle.hh"
 #include "Location2D.hh"
 #include "Location3D.hh"
+#include "GF4Coder.hh"
 
 #undef FILENAME
 #define FILENAME "drawtriptag.cc"
@@ -66,9 +70,10 @@ main(int argc, char* argv[]) {
 	       imagewidth/2,
 	       size,
 	       size,
-	       0.05);
+	       PI/2);
 
-  RingTag<TripOriginalCoder<2> > t(rings, //RINGS
+  //  RingTag<TripOriginalCoder<2> > t(rings, //RINGS
+  RingTag<GF4Coder > t(rings, //RINGS
 				   sectors, //SECTORS
 				   sync_angles, // SYNC ANGLES
 				   bullseye_inner, // BULLSEYE INNER
