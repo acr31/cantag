@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.7  2004/01/23 16:08:55  acr31
+ * remove spurious #include
+ *
  * Revision 1.6  2004/01/23 16:03:51  acr31
  * moved CircularTag back to Tag - but its now templated on the type of tag - ellipse or rectangle
  *
@@ -24,9 +27,10 @@
 
 #include "Config.hh"
 #include "Drawing.hh"
-#include "CircularTag.hh"
+#include "Tag.hh"
 #include "Coder.hh"
 #include "ellipsetoxy.hh"
+#include "Ellipse2D.hh"
 
 #undef FILENAME
 #define FILENAME "RingTag.hh"
