@@ -399,7 +399,7 @@ ContourTree::Contour::Contour(Socket& socket) : points() {
   }
 }
 
-ContourTree::Contour::Save(Socket& socket) {
+ContourTree::Contour::Save(Socket& socket) const {
   if (!weeded) {
     socket.Send(nbd);
     socket.Send(border_type);

@@ -34,20 +34,9 @@ AC_CHECK_HEADER(boost/test/unit_test.hpp,
 	[AM_CONDITIONAL(BUILD_TEST_FRAMEWORK_INCLUDE,true)],
 	[AM_CONDITIONAL(BUILD_TEST_FRAMEWORK_INCLUDE,false)
          AC_MSG_NOTICE([boost/test/unit_test.hpp not found in include path])])
-AC_CHECK_HEADER(boost/archive/text_oarchive.hpp,
-	[AC_DEFINE(HAVE_BOOST_ARCHIVE)
-         AM_CONDITIONAL(BUILD_BOOST_ARCHIVE,true)],
-	[AM_CONDITIONAL(BUILD_BOOST_ARCHIVE,false)])
-AC_CHECK_HEADER(boost/iostreams/concepts.hpp,
-	[AC_DEFINE(HAVE_BOOST_IOSTREAMS)
-	 AM_CONDITIONAL(BUILD_BOOST_IOSTREAMS,true)],
-	[AM_CONDITIONAL(BUILD_BOOST_IOSTREAMS,false)])
-
 AC_CHECK_HEADER(gmpxx.h,
 	[],
 	[])
-
-
 AC_CHECK_HEADER(asm/types.h,[],[])
 AC_CHECK_HEADER(linux/videodev2.h,
 	[AM_CONDITIONAL(BUILD_VIDEO4LINUX2,true)],

@@ -5,10 +5,7 @@
 #ifndef SHAPE_CHAIN_GUARD
 #define SHAPE_CHAIN_GUARD
 
-
-#ifdef HAVE_BOOST_ARCHIVE
-#include <boost/serialization/access.hpp>
-#endif
+#include <Socket.hh>
 
 /**
  * Placeholder for end of shape chain list
@@ -20,12 +17,9 @@ public:
   ShapeChainEOL(const std::vector<float>& points,bool fitted) {};
   inline bool IsChainFitted() const { return false; }
   inline void DrawChain(Image& image) const {};
+    ShapeChainEOL(Socket& socket) {};
+    void Save(Socket& socket) const {};
 
-private:
-#ifdef HAVE_BOOST_ARCHIVE
-  friend class boost::serialization::access;
-  template<class Archive> void serialize(Archive & ar, const unsigned int version) {}
-#endif
 };
 
 
@@ -59,52 +53,18 @@ public:
   inline bool Compare(ShapeChain<M,S> o) const;
 
   void DrawChain(Image& image) const;
-  
-private:
-#ifdef HAVE_BOOST_ARCHIVE
-  friend class boost::serialization::access;
-  template<class Archive> void serialize(Archive & ar, const unsigned int version);
-#endif
+
+    void Save(Socket& socket) const;
+    ShapeChain(Socket& socket);
 };
 
-#ifdef HAVE_BOOST_ARCHIVE
-//BOOST_CLASS_TRACKING(ShapeChain, boost::serialization::track_never);
-namespace boost { 
-  namespace serialization {
-    template<class M,class S>
-    struct tracking_level<ShapeChain<M,S> >
-    {
-      typedef mpl::integral_c_tag tag;
-      typedef mpl::int_<track_never> type;
-      BOOST_STATIC_CONSTANT(
-			    enum tracking_type, 
-			    value = static_cast<enum tracking_type>(type::value)
-			    );
-    };
-  } // serialization
-} // boost
-
-//BOOST_CLASS_IMPLEMENTATION(ShapeChain, boost::serialization::object_serializable);
-namespace boost { 
-  namespace serialization {
-    template<class M,class S>
-    struct implementation_level<ShapeChain<M,S> >
-    {
-      typedef mpl::integral_c_tag tag;
-      typedef mpl::int_<object_serializable> type;
-      BOOST_STATIC_CONSTANT(
-			    enum level_type,
-			    value = static_cast<enum level_type>(type::value)
-			    );
-    };
-  } // serialization
-} // boost
-
-template<class M, class S> template<class Archive> void ShapeChain<M,S>::serialize(Archive & ar, const unsigned int version) {
-  ar & m_shape;
-  ar & m_next;
+template<class M, class S> void ShapeChain<M,S>::Save(Socket& socket) {
+    m_shape.Save(socket);
+    m_next.Save(socket);
 }
-#endif
+
+template<class M, class S> ShapeChain<M,S>::ShapeChain(Socket& socket) :
+    m_shape(socket), m_next(socket) {}
 
 template<class M, class S> ShapeChain<M,S>::ShapeChain() : m_shape(), m_next() {};
 template<class M, class S> ShapeChain<M,S>::~ShapeChain() {};

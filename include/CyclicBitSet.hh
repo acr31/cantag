@@ -6,14 +6,7 @@
 #define CYCLIC_BIT_SET
 
 #include <bitset>
-
-#ifdef HAVE_BOOST_ARCHIVE
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/tracking.hpp>
-#endif
-
-
+#include <Socket.hh>
 /**
  * A simple extension of the STL bitset that supports some cyclic
  * operations.
@@ -97,56 +90,17 @@ public:
   CyclicBitSet& operator<<(size_t shift) const;
 
   CyclicBitSet& operator>>(size_t shift) const;
-
-private:
-
-#ifdef HAVE_BOOST_ARCHIVE
-  friend class boost::serialization::access;
-  template<class Archive> void serialize(Archive & ar, const unsigned int version);
-#endif
+    
+    void Save(Socket& socket) const;
+    CyclicBitSet(Socket& socket);
 
 };
 
-#ifdef HAVE_BOOST_ARCHIVE
-//BOOST_CLASS_TRACKING(CyclicBitSet, boost::serialization::track_never);
-namespace boost { 
-  namespace serialization {
-    template<int BIT_COUNT>
-    struct tracking_level<CyclicBitSet<BIT_COUNT> >
-    {
-      typedef mpl::integral_c_tag tag;
-      typedef mpl::int_<track_never> type;
-      BOOST_STATIC_CONSTANT(
-			    enum tracking_type, 
-			    value = static_cast<enum tracking_type>(type::value)
-			    );
-    };
-  } // serialization
-} // boost
-
-//BOOST_CLASS_IMPLEMENTATION(CyclicBitSet, boost::serialization::object_serializable);
-namespace boost { 
-  namespace serialization {
-    template<int BIT_COUNT>
-    struct implementation_level<CyclicBitSet<BIT_COUNT> >
-    {
-      typedef mpl::integral_c_tag tag;
-      typedef mpl::int_<object_serializable> type;
-      BOOST_STATIC_CONSTANT(
-			    enum level_type,
-			    value = static_cast<enum level_type>(type::value)
-			    );
-    };
-  } // serialization
-} // boost
-
-
-
-template<int BIT_COUNT> template<class Archive> void CyclicBitSet<BIT_COUNT>::serialize(Archive & ar, const unsigned int version) {
-  ar & boost::serialization::base_object<CyclicBitSet<BIT_COUNT> >(*this);
-  ar & m_rotation;
+template<int BIT_COUNT> void CyclicBitSet<BIT_COUNT>::Save(Socket& socket) const {
+    socket.Send(m_rotation);
+    socket.Send(*this);
 }
-#endif
+
 
 template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet() : std::bitset<BIT_COUNT>(), m_rotation(0) {};
 

@@ -8,11 +8,7 @@
 #include <Config.hh>
 #include <LocatedObject.hh>
 #include <vector>
-
-#ifdef HAVE_BOOST_ARCHIVE
-#include <boost/serialization/access.hpp>
-#endif
-
+#include <Socket.hh>
 
 /**
  * Stores a set of located objects - the world state
@@ -26,11 +22,8 @@ public:
   ~WorldState();
   void Add(LocatedObject<PAYLOAD_SIZE>* object);
   const std::vector<LocatedObject<PAYLOAD_SIZE>*>& GetNodes() { return nodes; }
-private:
-#ifdef HAVE_BOOST_ARCHIVE
-  friend class boost::serialization::access;
-  template<class Archive> void serialize(Archive & ar, const unsigned int version);
-#endif
+    WorldState(Socket& socket);
+    void Save(Socket& socket);
 };
 
 template<int PAYLOAD_SIZE> WorldState<PAYLOAD_SIZE>::WorldState() : nodes() {}
@@ -47,43 +40,19 @@ template<int PAYLOAD_SIZE> void WorldState<PAYLOAD_SIZE>::Add(LocatedObject<PAYL
   nodes.push_back(object);
 }
 
-#ifdef HAVE_BOOST_ARCHIVE
-//BOOST_CLASS_TRACKING(WorldState, boost::serialization::track_never);
-namespace boost { 
-  namespace serialization {
-    template<int PAYLOAD_SIZE>
-    struct tracking_level<WorldState<PAYLOAD_SIZE> >
-    {
-      typedef mpl::integral_c_tag tag;
-      typedef mpl::int_<track_never> type;
-      BOOST_STATIC_CONSTANT(
-			    enum tracking_type, 
-			    value = static_cast<enum tracking_type>(type::value)
-			    );
-    };
-  } // serialization
-} // boost
-
-//BOOST_CLASS_IMPLEMENTATION(WorldState, boost::serialization::object_serializable);
-namespace boost { 
-  namespace serialization {
-    template<int PAYLOAD_SIZE>
-    struct implementation_level<WorldState<PAYLOAD_SIZE> >
-    {
-      typedef mpl::integral_c_tag tag;
-      typedef mpl::int_<object_serializable> type;
-      BOOST_STATIC_CONSTANT(
-			    enum level_type,
-			    value = static_cast<enum level_type>(type::value)
-			    );
-    };
-  } // serialization
-} // boost
-
-
-template<int PAYLOAD_SIZE> template<class Archive> void WorldState<PAYLOAD_SIZE>::serialize(Archive & ar, const unsigned int version) {
-  ar & nodes;
+template<int PAYLOAD_SIZE> void WorldState<PAYLOAD_SIZE>::Save(Socket& socket) const {
+    int count = socket.RecvInt();
+    for(int i=0;i<count;++i) {
+	nodes.push_back(new LocatedObject<PAYLOAD_SIZE>(socket));
+    }
 }
-#endif
+
+template<int PAYLOAD_SIZE> void WorldState<PAYLOAD_SIZE>::WorldState(Socket& socket) {
+    socket.Send(nodes.size());
+    for(std::vector<LocatedObject<PAYLOAD_SIZE>*>::const_iterator i = nodes.begin();i!=nodes.end();++i) {
+	(*i)->Save(socket);
+    }
+}
+
 
 #endif//WORLD_STATE_GUARD

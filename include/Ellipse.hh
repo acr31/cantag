@@ -7,11 +7,7 @@
 #include <Config.hh>
 #include <vector>
 #include <Image.hh>
-
-#ifdef HAVE_BOOST_ARCHIVE
-#include <boost/serialization/access.hpp>
-#endif
-
+#include <Socket.hh>
 
 /**
  * A class to represent ellipses in the image and fit one to a set of points.
@@ -212,35 +208,13 @@ public:
    *
    */
   virtual void Decompose();
-  
+
+    void Save(Socket& socket) const;
+    Ellipse(Socket& socket);
 
 private:
   bool FitEllipse(const std::vector<float>& points);
 
-#ifdef HAVE_BOOST_ARCHIVE
-  friend class boost::serialization::access;
-  template<class Archive> void serialize(Archive & ar, const unsigned int version);
-#endif
 };
-
-#ifdef HAVE_BOOST_ARCHIVE
-BOOST_CLASS_IMPLEMENTATION(Ellipse, boost::serialization::object_serializable);
-BOOST_CLASS_TRACKING(Ellipse, boost::serialization::track_never);
-
-template<class Archive> void Ellipse::serialize(Archive & ar, const unsigned int version) {
-  ar & m_a;
-  ar & m_b;
-  ar & m_c;
-  ar & m_d;
-  ar & m_e;
-  ar & m_f;
-  ar & m_x0;
-  ar & m_y0;
-  ar & m_angle_radians;
-  ar & m_width;
-  ar & m_height;
-  ar & m_fitted;
-}
-#endif
 
 #endif//ELLIPSE_GUARD

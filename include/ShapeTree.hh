@@ -7,12 +7,7 @@
 
 #include <Config.hh>
 #include <ContourTree.hh>
-
-#ifdef HAVE_BOOST_ARCHIVE
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/level.hpp>
-#endif
-
+#include <Socket.hh>
 /**
  * Takes a ContourTree and builds a tree of matched shapes
  */
@@ -32,11 +27,10 @@ public:
 	delete *i;
       }
     }
-#ifdef HAVE_BOOST_ARCHIVE
-  private:
-    friend class boost::serialization::access;
-    template<class Archive> void serialize(Archive & ar, const unsigned int version);
-#endif
+
+      Node(Socket& socket);
+      void Save(Socket& socket) const;
+
   };
 
 private:
@@ -54,13 +48,8 @@ public:
   ShapeTree(const ContourTree::Contour& contour);
   Node* GetRootNode() { return &m_root_node; }
 
-#ifdef HAVE_BOOST_ARCHIVE
-public:
-  ShapeTree() {}
-private:
-  friend class boost::serialization::access;
-  template<class Archive> void serialize(Archive & ar, const unsigned int version);
-#endif
+    void Save(Socket& socket) const;
+    ShapeTree(Socket& socket);
 };
 
 template<class S> ShapeTree<S>::ShapeTree(const ContourTree::Contour& contour) : m_root_node() {
@@ -96,81 +85,26 @@ template<class S> void ShapeTree<S>::walk_tree(Node* current, const ContourTree:
   }  
 };
 
-#ifdef HAVE_BOOST_ARCHIVE
 
-//BOOST_CLASS_TRACKING(ShapeTree, boost::serialization::track_never);
-namespace boost { 
-  namespace serialization {
-    template<class S>
-    struct tracking_level<ShapeTree<S> >
-    {
-      typedef mpl::integral_c_tag tag;
-      typedef mpl::int_<track_never> type;
-      BOOST_STATIC_CONSTANT(
-			    enum tracking_type, 
-			    value = static_cast<enum tracking_type>(type::value)
-			    );
-    };
-  } // serialization
-} // boost
-
-//BOOST_CLASS_IMPLEMENTATION(ShapeTree, boost::serialization::object_serializable);
-namespace boost { 
-  namespace serialization {
-    template<class S>
-    struct implementation_level<ShapeTree<S> >
-    {
-      typedef mpl::integral_c_tag tag;
-      typedef mpl::int_<object_serializable> type;
-      BOOST_STATIC_CONSTANT(
-			    enum level_type,
-			    value = static_cast<enum level_type>(type::value)
-			    );
-    };
-  } // serialization
-} // boost
-
-//BOOST_CLASS_TRACKING(ShapeTree::Node, boost::serialization::track_never);
-namespace boost { 
-  namespace serialization {
-    template<class S>
-    struct tracking_level<typename ShapeTree<S>::Node >
-    {
-      typedef mpl::integral_c_tag tag;
-      typedef mpl::int_<track_never> type;
-      BOOST_STATIC_CONSTANT(
-			    enum tracking_type, 
-			    value = static_cast<enum tracking_type>(type::value)
-			    );
-    };
-  } // serialization
-} // boost
-
-//BOOST_CLASS_IMPLEMENTATION(ShapeTree::Node, boost::serialization::object_serializable);
-namespace boost { 
-  namespace serialization {
-    template<class S>
-    struct implementation_level<typename ShapeTree<S>::Node >
-    {
-      typedef mpl::integral_c_tag tag;
-      typedef mpl::int_<object_serializable> type;
-      BOOST_STATIC_CONSTANT(
-			    enum level_type,
-			    value = static_cast<enum level_type>(type::value)
-			    );
-    };
-  } // serialization
-} // boost
-
-
-template<class S> template<class Archive> void ShapeTree<S>::Node::serialize(Archive & ar, const unsigned int version) {
-  ar & matched;
-  ar & children;  
+template<class S> void ShapeTree<S>::Node::Save(Socket& socket) const {
+    matched.Save(socket);
+    socket.Send(children.size());
+    for(std::vector<Node*>::const_iterator i = children.begin(); i!=children.end(); ++i) {
+	(*i)->Save(socket);
+    }
 }
 
-template<class S> template<class Archive> void ShapeTree<S>::serialize(Archive & ar, const unsigned int version) {
-  ar & m_root_node;
+template<class S> ShapeTree<S>::Node::Node(Socket& socket) : matched(socket) {
+    int count = socket.RecvInt();
+    for(int i=0;i<count;++i) {
+	children.push_back(new Node(socket));
+    }
 }
-#endif
+
+template<class S> void ShapeTree<S>::Save(Socket& socket) const {
+    m_root_node.Save(socket);
+}
+
+template<class S> ShapeTree<S>::ShapeTree(Socket& socket) : m_root_node(socket) {}
 
 #endif//SHAPE_TREE_GUARD

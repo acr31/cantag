@@ -411,7 +411,7 @@ public:
    * Send this image over the network using the socket proffered.
    * Return the number of bytes written
    */
-  int Send(int socket_handle);
+  int Send(int socket_handle) const;
 
 private:
   int AdaptiveWidthStep(int moving_average,int* previous_line,unsigned int i, unsigned int j,unsigned int s, int t);

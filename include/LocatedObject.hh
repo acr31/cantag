@@ -10,10 +10,6 @@
 #include <findtransform.hh>
 #include <Camera.hh>
 
-#ifdef HAVE_BOOST_ARCHIVE
-#include <boost/serialization/access.hpp>
-#endif
-
 /**
  * Represents a tag that has been located.  Contains its 3D location,
  * pose, transformation matrix and its coded value.
@@ -61,55 +57,23 @@ public:
 
   ~LocatedObject();
 
-private:
-#ifdef HAVE_BOOST_ARCHIVE
-  friend class boost::serialization::access;
-  template<class Archive> void serialize(Archive & ar, const unsigned int version);
-#endif
+    void Save(Socket& socket) const;
+    LocatedObject(Socket& socket);
 };
 
-#ifdef HAVE_BOOST_ARCHIVE
-//BOOST_CLASS_TRACKING(LocatedObject, boost::serialization::track_never);
-namespace boost { 
-  namespace serialization {
-    template<int PAYLOAD_SIZE>
-    struct tracking_level<LocatedObject<PAYLOAD_SIZE> >
-    {
-      typedef mpl::integral_c_tag tag;
-      typedef mpl::int_<track_never> type;
-      BOOST_STATIC_CONSTANT(
-			    enum tracking_type, 
-			    value = static_cast<enum tracking_type>(type::value)
-			    );
-    };
-  } // serialization
-} // boost
-
-//BOOST_CLASS_IMPLEMENTATION(ShapeTree, boost::serialization::object_serializable);
-namespace boost { 
-  namespace serialization {
-    template<int PAYLOAD_SIZE>
-    struct implementation_level<LocatedObject<PAYLOAD_SIZE> >
-    {
-      typedef mpl::integral_c_tag tag;
-      typedef mpl::int_<object_serializable> type;
-      BOOST_STATIC_CONSTANT(
-			    enum level_type,
-			    value = static_cast<enum level_type>(type::value)
-			    );
-    };
-  } // serialization
-} // boost
-
-
-template<int PAYLOAD_SIZE> template<class Archive> void LocatedObject<PAYLOAD_SIZE>::serialize(Archive & ar, const unsigned int version) {
-  ar & transform;
-  ar & normal;
-  ar & location;
-  ar & angle;
-  ar & tag_code;  
+template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::Save(Socket& socket) const {
+    socket.Send(transform,16);
+    socket.Send(normal,3);
+    socket.Send(angle);
+    tag_code->Save(socket);
 }
-#endif
+
+template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LocatedObject(Socket& socket) {
+    socket.Recv(transform,16);
+    socket.Recv(location,3);
+    socket.Recv(angle);
+    tag_code = new CyclicBitSet<PAYLOAD_SIZE>(socket);
+}
 
 template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(float t[16],float tag_size, float agle, const Camera& camera) {
   for(int i=0;i<16;i++) {
