@@ -52,6 +52,7 @@ void test_contour() {
 	image.DrawPixel(newx,newy,0);
       }      
     }
+    image.GlobalThreshold(128); // this will invert our image for the contour follower
     //    image.Save("test.bmp");
     
     ImageSegmentor s;
