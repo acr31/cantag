@@ -1,7 +1,7 @@
 #include <Image.hh>
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include <iostream>
 #ifdef HAVE_BOOST_RANDOM
 # include <boost/random.hpp>
 #endif
@@ -292,16 +292,24 @@ Image::Image(Socket& socket) {
   int width = socket.RecvInt();
   int height = socket.RecvInt();
   int size = socket.RecvInt();
+  std::cout << "width " << width << std::endl;
+  std::cout << "height " << height << std::endl;
+  std::cout << "size " << size << std::endl;
   m_image = cvCreateImageHeader(cvSize(width,height),IPL_DEPTH_8U, 1);
   m_contents = new unsigned char[size];
+  m_image->imageData = m_image->imageDataOrigin = (char*)m_contents;
   m_free_contents = true;
   m_from_header = true;
   socket.Recv(m_contents,size);
 }
 
 int Image::Save(Socket& socket) const {
-  socket.Send(m_image->width);
-  socket.Send(m_image->height);
-  socket.Send(m_image->imageSize);
-  socket.Send((unsigned char*)m_image->imageData,m_image->imageSize);
+  int count = socket.Send(m_image->width);
+  count += socket.Send(m_image->height);
+  count += socket.Send(m_image->imageSize);
+  std::cout << "width " << m_image->width << std::endl;
+  std::cout << "height " << m_image->height << std::endl;
+  std::cout << "size " << m_image->imageSize << std::endl;
+  count += socket.Send((unsigned char*)m_image->imageData,m_image->imageSize);
+  return count;
 }

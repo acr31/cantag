@@ -22,8 +22,8 @@ public:
   ~WorldState();
   void Add(LocatedObject<PAYLOAD_SIZE>* object);
   const std::vector<LocatedObject<PAYLOAD_SIZE>*>& GetNodes() { return nodes; }
-    WorldState(Socket& socket);
-    void Save(Socket& socket) const;
+  WorldState(Socket& socket);
+  int Save(Socket& socket) const;
 };
 
 template<int PAYLOAD_SIZE> WorldState<PAYLOAD_SIZE>::WorldState() : nodes() {}
@@ -40,11 +40,12 @@ template<int PAYLOAD_SIZE> void WorldState<PAYLOAD_SIZE>::Add(LocatedObject<PAYL
   nodes.push_back(object);
 }
 
-template<int PAYLOAD_SIZE> void WorldState<PAYLOAD_SIZE>::Save(Socket& socket) const {
-    socket.Send(nodes.size());
-    for(typename std::vector<LocatedObject<PAYLOAD_SIZE>*>::const_iterator i = nodes.begin();i!=nodes.end();++i) {
-	(*i)->Save(socket);
-    }
+template<int PAYLOAD_SIZE> int WorldState<PAYLOAD_SIZE>::Save(Socket& socket) const {
+  count = socket.Send(nodes.size());
+  for(typename std::vector<LocatedObject<PAYLOAD_SIZE>*>::const_iterator i = nodes.begin();i!=nodes.end();++i) {
+    count += (*i)->Save(socket);
+  }
+  return count;
 }
 
 template<int PAYLOAD_SIZE> WorldState<PAYLOAD_SIZE>::WorldState(Socket& socket) {

@@ -91,14 +91,14 @@ public:
 
   CyclicBitSet& operator>>(size_t shift) const;
     
-    void Save(Socket& socket) const;
-    CyclicBitSet(Socket& socket);
+  int Save(Socket& socket) const;
+  CyclicBitSet(Socket& socket);
 
 };
 
-template<int BIT_COUNT> void CyclicBitSet<BIT_COUNT>::Save(Socket& socket) const {
-    socket.Send(m_rotation);
-    socket.Send(*this);
+template<int BIT_COUNT> int CyclicBitSet<BIT_COUNT>::Save(Socket& socket) const {
+  int count = socket.Send(m_rotation);
+  count += socket.Send(*this);
 }
 
 

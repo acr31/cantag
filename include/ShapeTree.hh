@@ -28,8 +28,8 @@ public:
       }
     }
 
-      Node(Socket& socket);
-      void Save(Socket& socket) const;
+    Node(Socket& socket);
+    int Save(Socket& socket) const;
 
   };
 
@@ -48,8 +48,8 @@ public:
   ShapeTree(const ContourTree::Contour& contour);
   Node* GetRootNode() { return &m_root_node; }
 
-    void Save(Socket& socket) const;
-    ShapeTree(Socket& socket);
+  int Save(Socket& socket) const;
+  ShapeTree(Socket& socket);
 };
 
 template<class S> ShapeTree<S>::ShapeTree(const ContourTree::Contour& contour) : m_root_node() {
@@ -86,12 +86,13 @@ template<class S> void ShapeTree<S>::walk_tree(Node* current, const ContourTree:
 };
 
 
-template<class S> void ShapeTree<S>::Node::Save(Socket& socket) const {
-    matched.Save(socket);
-    socket.Send(children.size());
-    for(typename std::vector<Node*>::const_iterator i = children.begin(); i!=children.end(); ++i) {
-	(*i)->Save(socket);
-    }
+template<class S> int ShapeTree<S>::Node::Save(Socket& socket) const {
+  int count = matched.Save(socket);
+  count += socket.Send((int)children.size());
+  for(typename std::vector<Node*>::const_iterator i = children.begin(); i!=children.end(); ++i) {
+    count += (*i)->Save(socket);
+  }
+  return count;
 }
 
 template<class S> ShapeTree<S>::Node::Node(Socket& socket) : matched(socket) {
@@ -101,8 +102,8 @@ template<class S> ShapeTree<S>::Node::Node(Socket& socket) : matched(socket) {
     }
 }
 
-template<class S> void ShapeTree<S>::Save(Socket& socket) const {
-    m_root_node.Save(socket);
+template<class S> int ShapeTree<S>::Save(Socket& socket) const {
+  return m_root_node.Save(socket);
 }
 
 template<class S> ShapeTree<S>::ShapeTree(Socket& socket) : m_root_node(socket) {}

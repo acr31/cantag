@@ -17,15 +17,16 @@ public:
   ~Socket();
   void Bind(const char* host, int port);
   void Listen();
-  Socket Accept();
+  void Connect(const char* host, int port);
+  Socket* Accept();
   void Recv(unsigned char* buf, size_t len);
   void Recv(std::vector<float>& vec);
   int RecvInt();
   float RecvFloat();
-  void Send(const unsigned char* buf, size_t len);
-  void Send(int item);
-  void Send(float item);
-  void Send(const std::vector<float>& vec);
+  int Send(const unsigned char* buf, size_t len);
+  int Send(int item);
+  int Send(float item);
+  int Send(const std::vector<float>& vec);
 };
 
 #endif//SOCKET_GUARD

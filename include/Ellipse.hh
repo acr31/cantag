@@ -209,8 +209,8 @@ public:
    */
   virtual void Decompose();
 
-    void Save(Socket& socket) const;
-    Ellipse(Socket& socket);
+  int Save(Socket& socket) const;
+  Ellipse(Socket& socket);
 
 private:
   bool FitEllipse(const std::vector<float>& points);

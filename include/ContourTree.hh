@@ -34,7 +34,7 @@ public:
     Contour(Socket& socket);
     ~Contour();
 
-    void Save(Socket& socket) const;
+    int Save(Socket& socket) const;
 
   };
   
@@ -115,7 +115,7 @@ public:
   inline Contour* GetRootContour() { return m_root_contour; }
   ~ContourTree();
 
-  void Save(Socket& socket) const;
+  int Save(Socket& socket) const;
 
 };
 

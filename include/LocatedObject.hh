@@ -58,15 +58,16 @@ public:
   LocatedObject();
   ~LocatedObject();
 
-    void Save(Socket& socket) const;
-    LocatedObject(Socket& socket);
+  int Save(Socket& socket) const;
+  LocatedObject(Socket& socket);
 };
 
-template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::Save(Socket& socket) const {
-    socket.Send(transform,16);
-    socket.Send(normal,3);
-    socket.Send(angle);
-    tag_code->Save(socket);
+template<int PAYLOAD_SIZE> int LocatedObject<PAYLOAD_SIZE>::Save(Socket& socket) const {
+  int count = socket.Send(transform,16);
+  count += socket.Send(normal,3);
+  count += socket.Send(angle);
+  count += tag_code->Save(socket);
+  return count;
 }
 
 template<int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>::LocatedObject(Socket& socket) {

@@ -382,9 +382,12 @@ ContourTree::ContourTree(Socket& socket) {
   m_root_contour = new Contour(socket);
 }
 
-void ContourTree::Save(Socket& socket) const {
+int ContourTree::Save(Socket& socket) const {
   if (m_root_contour != NULL) {
-    m_root_contour->Save(socket);
+    return m_root_contour->Save(socket);
+  }
+  else {
+    return 0;
   }
 }
 
@@ -399,19 +402,21 @@ ContourTree::Contour::Contour(Socket& socket) : points() {
   }
 }
 
-void ContourTree::Contour::Save(Socket& socket) const {
+int ContourTree::Contour::Save(Socket& socket) const {
+  int byte_count = 0;
   if (!weeded) {
-    socket.Send(nbd);
-    socket.Send((int)bordertype);
-    socket.Send(parent_id);
-    socket.Send(points);
+    byte_count += socket.Send(nbd);
+    byte_count += socket.Send((int)bordertype);
+    byte_count += socket.Send(parent_id);
+    byte_count += socket.Send(points);
   }
   int counter = 0;
   for(std::vector<Contour*>::const_iterator i = children.begin(); i!= children.end(); ++i) {
     if (!(*i)->weeded) counter++;
   }
-  socket.Send(counter);
+  byte_count+= socket.Send(counter);
   for(std::vector<Contour*>::const_iterator i = children.begin(); i!= children.end(); ++i) {
-    (*i)->Save(socket);
+    byte_count += (*i)->Save(socket);
   }
+  return byte_count;
 }

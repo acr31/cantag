@@ -4,7 +4,7 @@
 
 #include <Socket.hh>
 #include <cerrno>
-
+#include <iostream>
 extern "C" {
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -39,12 +39,30 @@ void Socket::Bind(const char* host, int port) {
   int status = inet_pton(AF_INET,host,&s.sin_addr);
   if (status <= 0) {
     perror(NULL);
-    throw "Failed to get address for local machine!";
+    throw "Failed to get address for chosen machine!";
   }
   // connect to remote machine
   if (::bind(m_socket,(struct sockaddr*)&s,sizeof(struct sockaddr)) != 0) {
     perror(NULL);
     throw "Failed to bind socket!";
+  } 
+}
+
+void Socket::Connect(const char* host, int port) {
+   // lookup address
+  struct sockaddr_in s;
+  memset(&s,0,sizeof(sockaddr));
+  s.sin_family = AF_INET;
+  s.sin_port = htons(port);
+  int status = inet_pton(AF_INET,host,&s.sin_addr);
+  if (status <= 0) {
+    perror(NULL);
+    throw "Failed to get address for chosen machine!";
+  }
+  // connect to remote machine
+  if (::connect(m_socket,(struct sockaddr*)&s,sizeof(struct sockaddr)) != 0) {
+    perror(NULL);
+    throw "Failed to connect to remote machine!";
   } 
 }
 
@@ -56,7 +74,7 @@ void Socket::Listen() {
   }
 }
 
-Socket Socket::Accept() {
+Socket* Socket::Accept() {
   struct sockaddr_in s;
   memset(&s,0,sizeof(sockaddr));
   socklen_t len = sizeof(struct sockaddr);
@@ -65,7 +83,7 @@ Socket Socket::Accept() {
     perror(NULL);
     throw "Failed to accept connection";
   }
-  return Socket(accepted);
+  return new Socket(accepted);
 }
 
 void Socket::Recv(unsigned char* buf, size_t len) {
@@ -98,26 +116,34 @@ void Socket::Recv(std::vector<float>& vec) {
   }
 }
 
-void Socket::Send(const unsigned char* buf, size_t len) {
-  int sent = ::send(m_socket,buf,len,0);
-  if (sent == -1 || sent != len) throw "Send yields -1 or failed to send required number of bytes";
+int Socket::Send(const unsigned char* buf, size_t len) {
+  std::cout << "Sending " << len << " bytes" << std::endl;
+  int total = 0;
+  while(total != len) {
+    int sent = ::send(m_socket,buf+total,len-total,0);
+    std::cout << "Sent returns " << sent << std::endl;
+    if (sent == -1) throw "Send yields -1";
+    total+=sent;
+  }
+  return total;
 }
 
-void Socket::Send(int message) {
-  Send((unsigned char*)&message,sizeof(int));
+int Socket::Send(int message) {
+  return Send((unsigned char*)&message,sizeof(int));
 }
 
-void Socket::Send(float message) {
-  Send((unsigned char*)&message,sizeof(float));
+int Socket::Send(float message) {
+  return Send((unsigned char*)&message,sizeof(float));
 }
 
-void Socket::Send(const std::vector<float>& vec) {
+int Socket::Send(const std::vector<float>& vec) {
   float* points = new float[vec.size()];
   float* pointsptr = points;
   for(std::vector<float>::const_iterator i = vec.begin();i!=vec.end();++i) {
     *(pointsptr++) = *i;
   }
-  Send((int)vec.size());
-  Send( (unsigned char*)points, vec.size() * sizeof(float) );
+  int count = Send((int)vec.size());
+  count += Send( (unsigned char*)points, vec.size() * sizeof(float) );
   delete[] points;
+  return count;
 }

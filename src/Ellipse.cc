@@ -1036,18 +1036,19 @@ void Ellipse::GetTransformLinear(float transform1[16], float transform2[16]) {
   }  
 }
 
-void Ellipse::Save(Socket& socket) const {
-    socket.Send(m_a);
-    socket.Send(m_b);
-    socket.Send(m_c);
-    socket.Send(m_d);
-    socket.Send(m_e);
-    socket.Send(m_f);
-    socket.Send(m_x0);
-    socket.Send(m_y0);
-    socket.Send(m_angle_radians);
-    socket.Send(m_width);
-    socket.Send(m_height);
+int Ellipse::Save(Socket& socket) const {
+  int count = socket.Send(m_a);
+  count += socket.Send(m_b);
+  count += socket.Send(m_c);
+  count += socket.Send(m_d);
+  count += socket.Send(m_e);
+  count += socket.Send(m_f);
+  count += socket.Send(m_x0);
+  count += socket.Send(m_y0);
+  count += socket.Send(m_angle_radians);
+  count += socket.Send(m_width);
+  count += socket.Send(m_height);
+  return count;
 }
 
 Ellipse::Ellipse(Socket& socket) {

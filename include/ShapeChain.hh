@@ -17,8 +17,8 @@ public:
   ShapeChainEOL(const std::vector<float>& points,bool fitted) {};
   inline bool IsChainFitted() const { return false; }
   inline void DrawChain(Image& image) const {};
-    ShapeChainEOL(Socket& socket) {};
-    void Save(Socket& socket) const {};
+  ShapeChainEOL(Socket& socket) {};
+  int Save(Socket& socket) const { return 0; };
 
 };
 
@@ -54,13 +54,14 @@ public:
 
   void DrawChain(Image& image) const;
 
-    void Save(Socket& socket) const;
-    ShapeChain(Socket& socket);
+  int Save(Socket& socket) const;
+  ShapeChain(Socket& socket);
 };
 
-template<class M, class S> void ShapeChain<M,S>::Save(Socket& socket) const {
-    m_shape.Save(socket);
-    m_next.Save(socket);
+template<class M, class S> int ShapeChain<M,S>::Save(Socket& socket) const {
+  int count= m_shape.Save(socket);
+  count += m_next.Save(socket);
+  return count;
 }
 
 template<class M, class S> ShapeChain<M,S>::ShapeChain(Socket& socket) :
