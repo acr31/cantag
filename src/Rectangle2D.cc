@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/26 08:56:22  acr31
+ * rewrite of the find central point method - needs to be finished
+ *
  * Revision 1.1  2004/01/25 14:53:35  acr31
  * moved over to autoconf/automake build system
  *
@@ -208,6 +211,8 @@ inline void Rectangle2D::compute_central_point() {
                 
      Ay + ACy * (Bx + BDx * b - Ax) / ACx = By + BDy * b  (subst in 2)
 
+     ACx*Ay + ACy * (Bx + BDx * b - Ax)   = ACx*By + ACx*BDy * b
+     
      b = ( Ay * ACx + ACy * Bx + ACy * Ax - ACx * By ) / ( ACx * (BDy + BDx) )
 
      Central point  = B+BD*b
@@ -231,10 +236,15 @@ inline void Rectangle2D::compute_central_point() {
   float BDx = Dx-Bx;
   float BDy = Dy-By;
 
-  float b = ( Ay * ACx + ACy * Bx + ACy * Ax - ACx * By ) / ( ACx * (BDy + BDx) );
-  
-  m_xc = Bx+BDx*b;
-  m_yc = By+BDy*b;        
+  float ABx = Bx-Ax;
+  float ABy = By-Ay;
+
+  float b = (BDx*ABy - BDy*ABx)/(ACy*BDx - ACx*BDy);
+  //  assert(ACx*(BDy + BDx) != 0);
+  m_xc = Ax+ACx*b;
+  m_yc = Ay+ACy*b;        
+  std::cout << m_x0 << " " << m_y0 << " " << m_x1 << " " << m_y1 << " " << m_x2 << " " << m_y2 << " " << m_x3 << " " << m_y3 << std::endl;
+  std::cout << m_xc << " " << m_yc<<std::endl;
 }
 
   
