@@ -437,10 +437,10 @@ private:
 	ApplyTransform(l,pts,1);
 	camera.NPCFToImage(pts,1);
 	// pick the colour to be the opposite of the sampled point so we can see the dot
-	//int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
+	int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
 	// or pick the colour to be on a gradient so we see the order it samples in
-	int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
-	debug0.DrawPoint(pts[0],pts[1],colour,4);
+	//int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
+	debug0.DrawPoint(pts[0],pts[1],colour,3);
       }
       counter++;
     }

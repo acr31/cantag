@@ -14,12 +14,18 @@
 
 /**
  * A wrapper object for OpenCv's image
+ *
+ * \todo Make the m_image object private!
  */
 class Image {
+private:
   
 public:
+  // SceneGraph.hh currently needs this
   IplImage* m_image;
+
   Image(int width, int height);
+  Image(int width, int height, uchar* contents);
   Image(const Image& c);
   Image(char* filename);
   ~Image();
@@ -36,6 +42,10 @@ public:
     else {
       return 0;
     }
+  }
+
+  inline unsigned char SampleNoCheck(unsigned int x,unsigned int y) const {
+    return ((uchar*)(m_image->imageData + m_image->widthStep*y))[x];
   }
 
   /**
@@ -84,6 +94,10 @@ public:
 	(y >= 0) && (y < m_image->height)) {
       ((uchar*)(m_image->imageData+m_image->widthStep*y))[x] = colour;
     }
+  }
+
+  inline void DrawPixelNoCheck(int x,int y, unsigned char colour) {
+    ((uchar*)(m_image->imageData+m_image->widthStep*y))[x] = colour;
   }
 
   /**
@@ -343,7 +357,7 @@ public:
 
 
 private:
-  void AdaptiveWidthStep(float* moving_average,float* previous_line,unsigned int i, unsigned int j,unsigned int s, float t);
+  int AdaptiveWidthStep(int moving_average,int* previous_line,unsigned int i, unsigned int j,unsigned int s, int t);
 };
 
 

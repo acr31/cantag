@@ -17,6 +17,13 @@ Image::Image(char* filename) : m_image(cvLoadImage(filename)) {
   }  
 };
 
+Image::Image(int width,int height, uchar* contents) {
+  cvInitImageHeader(m_image,
+		    cvSize(width,height),
+		    IPL_DEPTH_8U, 1, IPL_ORIGIN_TL, 4 );
+  m_image->imageData = m_image->imageDataOrigin = (char*)contents;
+}
+
 Image::~Image() {
   cvReleaseImage(&m_image);
 }
@@ -44,16 +51,14 @@ void Image::GlobalThreshold(unsigned char threshold) {
  * \todo Doesnt work properly on noisy images
  */
 void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
-  float moving_average = 127;
-  unsigned int s = window_size;
-  float t = (float)offset/255;
-  float previous_line[m_image->width];
+  int moving_average = 127;
+  int previous_line[m_image->width];
   for(unsigned int i=0;i<m_image->height;i+=2) {
     for(unsigned int j=0;j<m_image->width;j++) {
-      AdaptiveWidthStep(&moving_average,previous_line,i,j,s,t);
+      moving_average = AdaptiveWidthStep(moving_average,previous_line,i,j,window_size,offset);
     }
-    for(unsigned int j=m_image->width;j>0;j--) {
-      AdaptiveWidthStep(&moving_average,previous_line,i+1,j-1,s,t);
+    for(int j=m_image->width-1;j>=0;j--) {
+      moving_average = AdaptiveWidthStep(moving_average,previous_line,i+1,j,window_size,offset);
     }
   }  
 
@@ -62,16 +67,18 @@ void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
 #endif
 }
 
-void Image::AdaptiveWidthStep(float* moving_average, float* previous_line, unsigned int i, unsigned int j, unsigned int s, float t) {
-  *moving_average = Sample(j,i) + (1-1/(float)s) * (*moving_average);
-  float current_thresh = (*moving_average + (i==0 ? 0 : previous_line[j]))/2;
-  previous_line[j] = *moving_average;
-  if (Sample(j,i) < *moving_average/s * t) {
-    DrawPixel(j,i,COLOUR_WHITE);
+inline int Image::AdaptiveWidthStep(int moving_average, int* previous_line, unsigned int i, unsigned int j, unsigned int s, int offset) {
+  moving_average = SampleNoCheck(j,i) + moving_average - moving_average/s;
+  //  int current_thresh = (moving_average + (i==0 ? 0 : previous_line[j]))/2;
+  int current_thresh = moving_average;
+  previous_line[j] = moving_average;
+  if (Sample(j,i)*s*255 < moving_average*(255-offset)) {
+    DrawPixelNoCheck(j,i,COLOUR_WHITE);
   }
   else {
-    DrawPixel(j,i,COLOUR_BLACK);
+    DrawPixelNoCheck(j,i,COLOUR_BLACK);
   }
+  return moving_average;
 }
 
 

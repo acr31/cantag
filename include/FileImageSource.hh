@@ -23,8 +23,7 @@ public:
    */ 
   FileImageSource(char* filename);
   virtual ~FileImageSource();
-  virtual void Next();
-  virtual Image* GetBuffer(); 
+  virtual Image* Next();
 };
 
 #endif//FILE_IMAGE_SOURCE

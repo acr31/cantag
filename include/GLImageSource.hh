@@ -101,13 +101,8 @@ public:
     free(m_buffer);
   }
 
-
-  Image* GetBuffer() {
-    return &m_glimage;
-  }
-
-  void Next() {
-    Next(0,M_PI,0,0,0,2);
+  Image* Next() {
+    return Next(0,M_PI,0,0,0,2);
   };
 
   /**
@@ -117,8 +112,8 @@ public:
    * \todo find some way of incorporating the lighting and occlusion
    * options.
    */
-  void Next(float x_radians, float y_radians, float z_radians, 
-	    float centre_x, float centre_y, float centre_z) {
+  Image* Next(float x_radians, float y_radians, float z_radians, 
+	      float centre_x, float centre_y, float centre_z) {
 
     glClearColor(1.0,1.0,1.0,0.0);
     glShadeModel(GL_SMOOTH);
@@ -232,6 +227,7 @@ public:
 	m_glimage.DrawPixel(j,i,val);
       }
     }
+    return &m_glimage;
   }
 };
 

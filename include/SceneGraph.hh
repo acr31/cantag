@@ -30,6 +30,8 @@
  *
  * \todo regression test: create dummy images with squares etc in them
  * and try to match them
+ *
+ * \todo stop depending on opencv's stuff either implement my own contour follower or move it to the image class
  */
 template<class S,int PAYLOAD_SIZE>
 class SceneGraph {

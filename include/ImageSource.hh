@@ -12,16 +12,10 @@
 class ImageSource {
 public:
   /**
-   * Overwrite the contents of the image buffer with the next frame
+   * Get the next frame.  This method may or may not invalidate the
+   * current pointer to the buffer.
    */
-  virtual void Next() = 0;
-
-  /**
-   * Get the image buffer for this image source.  Calls to Next() will
-   * destructivly alter this buffer so you dont need to keep calling
-   * this method.
-   */
-  virtual Image* GetBuffer() = 0;
+  virtual Image* Next() = 0;
 };
 
 #endif//IMAGE_SOURCE_GUARD
