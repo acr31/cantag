@@ -7,6 +7,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/02/09 21:39:56  acr31
+ * manual matrix stuff in ellipse fitter.  Added camera functions and a test.
+ *
  * Revision 1.1  2004/01/25 14:53:35  acr31
  * moved over to autoconf/automake build system
  *
@@ -180,8 +183,8 @@ GF4Poly GF4Poly::operator *(const GF4Poly& rhs) const
 
     if (x & 2) { // do we have an x term
       y = val << 1;
-      y &= 0xaaaaaaaaaaaaaaaa;
-      m = val & 0xaaaaaaaaaaaaaaaa;
+      y &= 0xaaaaaaaaaaaaaaaaLL;
+      m = val & 0xaaaaaaaaaaaaaaaaLL;
       m |= m >> 1;
       y ^= m;
     }

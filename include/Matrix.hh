@@ -5,10 +5,9 @@
 
 template<class T,int ROWS,int COLS>
 class Matrix {
-private:
+public:
   T* m_data;
 
-public:
   Matrix() {
     m_data = new T[ROWS*COLS];
   };
@@ -145,12 +144,10 @@ public:
     }   
   }
 
-  void eigenVV(Matrix<T,ROWS,COLS>* vecs, Matrix<T,ROWS,1>* vals) const {
-    // this is not a valid thing to do
-  }
+  void eigenVV(Matrix<T,ROWS,COLS>* vecs, Matrix<T,ROWS,COLS>* vals) const;
 };
 
-template<> void Matrix<float,ROWS,ROWS>::eigenVV(Matrix<float,ROWS,ROWS>* vecs, Matrix<float,ROWS,ROWS>* vals) const {
+template<class T,int ROWS,int COLS> void Matrix<float,ROWS,ROWS>::eigenVV(Matrix<float,ROWS,ROWS>* vecs, Matrix<float,ROWS,ROWS>* vals) const {
   float v[ROWS*ROWS];
   for(int i=0;i<ROWS*ROWS;i++) {
     v.m_data[i] = m_data[i];
@@ -214,7 +211,5 @@ template<> Matrix<double,COLS,ROWS> Matrix<double,ROWS,COLS>::inv() const {
   cvInvert(&m1,&m2,CV_LU);
   return r;
 }
-
-
 
 #endif//MATRIX_GUARD

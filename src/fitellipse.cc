@@ -1,35 +1,33 @@
 #include <Config.hh>
 #include <Drawing.hh>
 #include <opencv/cv.h>
-#include <Matrix.hh>
 
-static void print(double* array, int rows, int cols) {
+static void print(const char* label, double* array, int rows, int cols) {
   std::cout << "-----------------------------------" << std::endl;
-  std::cout << "[ ";
+  std::cout << label << "= [ ";
   for(int i=0;i<rows;i++) {
     for(int j=0;j<cols;j++) {
       std::cout << array[i*cols+j] << "\t";
     }
     std::cout << ";" << std::endl;
   }
-  std::cout << "]";
+  std::cout << "]" << std::endl;
 }
 
 Ellipse2D fitellipse(float* points, int numpoints) {
 
-  Matrix<float,2,2> m1;
-  m1[0][0]=1;
-  m1[0][1]=2;
-  m1[1][0]=3;
-  m1[1][1]=4;
- std::cout << m1.det() << std::endl;
-
-  for(int i=0;i<numpoints*2;i++) {
-    std::cout << "  " << points[i] << " " << points[i+1] << ";" << std::endl;
+  for(int i=0;i<numpoints*2;i+=2) {
+    std::cout << points[i] << " " << points[i+1] << " ; ";
   }
-  
+  std::cout << std::endl;
+
   double d1[numpoints*3];
   double d2[numpoints*3];
+  
+  // Compute
+
+  // D1 = [ x.^2 , x.*y , y.^2 ]
+  // D2 = [ x , y , 1]
 
   int pointer = 0;
   for(int i=0;i<numpoints*2;i+=2) {
@@ -43,65 +41,87 @@ Ellipse2D fitellipse(float* points, int numpoints) {
     d2[pointer++] = 1;
   }
   
-    print(d1,numpoints,3);
-   print(d2,numpoints,3);
+  print("D1",d1,numpoints,3);
+  print("D2",d2,numpoints,3);
 
-  CvMat D1;
-  CvMat D2;
-  cvInitMatHeader(&D1,numpoints,3,CV_64F,d1);
-  cvInitMatHeader(&D2,numpoints,3,CV_64F,d2);
 
   double s1[9];
   double s2[9];
   double s3[9];
 
-  CvMat S1;
-  CvMat S2;
+  // Compute
+
+  // S1 = D1' * D1
+  // S2 = D1' * D2
+  // S3 = D2' * D2
+
+  for(int i=0;i<3;i++) {
+    for(int j=0;j<3;j++) {
+      s1[i*3+j] = d1[i]*d1[j];
+      s2[i*3+j] = d1[i]*d2[j];
+      s3[i*3+j] = d2[i]*d2[j];
+      for(int k=1;k<numpoints;k++) {
+	s1[i*3+j] += d1[i+k*3] * d1[j+k*3];
+	s2[i*3+j] += d1[i+k*3] * d2[j+k*3];
+	s3[i*3+j] += d2[i+k*3] * d2[j+k*3];
+      }
+    }
+  }
+
+  print("S1",s1,3,3);
+  print("S2",s2,3,3);
+  print("S3",s3,3,3);
+
+  // Compute
+  
+  // S3Inv = inv(S3)
+  
+  double s3inv[9];
   CvMat S3;
-
-  cvInitMatHeader(&S1,3,3,CV_64F,s1);
-  cvInitMatHeader(&S2,3,3,CV_64F,s2);
+  CvMat S3Inv;
   cvInitMatHeader(&S3,3,3,CV_64F,s3);
-  
-  cvMulTransposed(&D1,&S1,1); // this does S1 = D1' * D1 
-  cvGEMM(&D1,&D2,1,NULL,1,&S2, CV_GEMM_A_T); // this does S2 = D1' * D2
-  cvMulTransposed(&D2,&S3,1); // this does S3 = D2' * D2
+  cvInitMatHeader(&S3Inv,3,3,CV_64F,s3inv);
+  cvInvert(&S3,&S3Inv,CV_LU);
+  // do gaussian eliminiation with S3*x1= [1;0;0], S3*x2=[0;1;0], S3*x3=[0;0;1]
 
-   print(s1,3,3);
-   print(s2,3,3);
-   print(s3,3,3);
+  print("S3Inv",s3inv,3,3);
 
-  double invs3[9];
-  CvMat invS3;
-  cvInitMatHeader(&invS3,3,3,CV_64F,invs3);
-  cvInvert(&S3,&invS3,CV_LU);
-  
-   print(invs3,3,3);
- 
-  CvMat T;
+  // Compute
+
+  // T = -inv(S3) * S2
+
   double t[9];
-  cvInitMatHeader(&T,3,3,CV_64F,t);
-  cvGEMM(&invS3,&S2,-1,NULL,1,&T,CV_GEMM_B_T); // this does T = -inv(S3)*S2'
+  for(int i=0;i<3;i++) {
+    for(int j=0;j<3;j++) {
+      t[i*3+j] = -s3inv[i*3]*s2[j*3];
+      for(int k=1;k<3;k++) {
+	t[i*3+j] -= s3inv[i*3+k] * s2[j*3+k];
+      }
+    }
+  }
+  print("T",t,3,3);
 
-   print(t,3,3);
+  // Compute
+
+  // M = S1 + S2 * T
 
   double m[9];
-  CvMat M;
-  cvInitMatHeader(&M,3,3,CV_64F,m);
-  cvMatMulAdd(&S2,&T,&S1,&M);// this does M = S1 + S2 * T
-  
-   print(m,3,3);
+  for(int i=0;i<3;i++) {
+    for(int j=0;j<3;j++) {
+      m[i*3+j] = s1[i*3+j];
+      for(int k=0;k<3;k++) {
+	m[i*3+j] += s2[i*3+k] * t[k*3+j];
+      }
+    }
+  }
+  print("M",m,3,3);
 
   double m2[9];
-  CvMat M2;
-  cvInitMatHeader(&M2,3,3,CV_64F,m2);
-
   // premultiply M by inv(C1)
   //
   // ( M31/2 M32/2 M33/2 )
   // ( -M21  -M22  -M23  )
   // ( M11/2 M12/2 M13/2 )
-
   m2[0] = m[6]/2;
   m2[1] = m[7]/2;
   m2[2] = m[8]/2;
@@ -114,7 +134,11 @@ Ellipse2D fitellipse(float* points, int numpoints) {
   m2[7] = m[1]/2;
   m2[8] = m[2]/2;
 
-    print(m2,3,3);
+  print("M2",m2,3,3);
+
+
+  CvMat M2;
+  cvInitMatHeader(&M2,3,3,CV_64F,m2);
 
   double eigvals[3];
   double eigvects[9];
@@ -124,11 +148,9 @@ Ellipse2D fitellipse(float* points, int numpoints) {
   cvInitMatHeader(&Eigvects,3,3,CV_64F,eigvects);
 
   cvEigenVV(&M2,&Eigvects,&Eigvals,pow(10,-30));
+  print("Eigvals",eigvals,1,3);
+  print("Eigvects",eigvects,3,3);
 
-    print(eigvals,3,1);
-    print(eigvects,3,3);
-
-  
   for(int i = 0; i < 9; i+=3) {
     if (4*eigvects[i]*eigvects[i+2]-eigvects[i+1]*eigvects[i+1] >= 0.0) {
       PROGRESS("Fitted ellipse: a="<<

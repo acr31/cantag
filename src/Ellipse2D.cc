@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.9  2004/02/09 21:39:56  acr31
+ * manual matrix stuff in ellipse fitter.  Added camera functions and a test.
+ *
  * Revision 1.8  2004/02/08 20:30:17  acr31
  * changes to interfaces to add the ImageFilter class
  *
@@ -47,9 +50,6 @@
  */
 #include <Ellipse2D.hh>
 
-#undef FILENAME
-#define FILENAME "Ellipse2D.cc"
-
 Ellipse2D::Ellipse2D(float width) {
   m_x = width/2;
   m_y = width/2;
@@ -62,6 +62,7 @@ Ellipse2D::Ellipse2D(float width) {
 }
 
 Ellipse2D::Ellipse2D(float a, float b, float c, float d, float e, float f) {
+
   /*
     NOTES ON HOW TO EXTRACT ELLIPSE DETAILS FROM EQNS OF A CONIC SECTION
     (See The Geometry Toolbox for graphics and modelling by Farin and Hansford)
@@ -94,9 +95,9 @@ Ellipse2D::Ellipse2D(float a, float b, float c, float d, float e, float f) {
 
      [x'-v']R'DR[x-v]-z=0
 
-    this expands to: (where A = R'DR)
+    this expands to: (where A = R'DR) - note A is symmetric so v'Ax = x'Av
 
-     x'Ax + 2x'Av + v'Av - z = 0
+     x'Ax - 2x'Av - v'Av - z = 0
 
     Thus we know that t = Av (by equating the co-efficients of the terms only in x)
 
@@ -114,7 +115,7 @@ Ellipse2D::Ellipse2D(float a, float b, float c, float d, float e, float f) {
                         ( ae - bd/2 )
   
         = 1/disc  * ( 2cd - be )
-	             ( 2ae - bd )
+	            ( 2ae - bd )
   */
 
   m_x = (2*c*d - b*e) / disc;
