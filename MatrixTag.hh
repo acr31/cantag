@@ -12,6 +12,10 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/24 17:53:22  acr31
+ * Extended TripOriginalCoder to deal with base 2 encodings.  MatrixTag
+ * implementation now works.
+ *
  * Revision 1.2  2004/01/23 22:36:39  acr31
  * added a cyclic reading and writing scheme
  *
@@ -88,6 +92,13 @@ public:
 	position+=2;
       }
     }
+    
+    /**
+       print co-ordinates for GNUPLOT
+    for (int i=0;i<m_length;i++) {
+      std::cout << m_cells_corner[2*i] << " " << m_cells_corner[2*i+1] << std::endl;
+    }
+    */
   }
 
   virtual ~MatrixTag() {
@@ -151,11 +162,11 @@ public:
 #ifdef IMAGE_DEBUG
       if (i==1) {
 	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),255,8);
-	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),0,6);
+	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),255-10*i,6);
       }
       else {
 	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),255,4);
-	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),0,3);
+	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),255-10*i,3);
       }
 #endif	
     }

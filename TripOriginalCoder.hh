@@ -2,6 +2,10 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.6  2004/01/24 17:53:22  acr31
+ * Extended TripOriginalCoder to deal with base 2 encodings.  MatrixTag
+ * implementation now works.
+ *
  * Revision 1.5  2004/01/23 22:35:04  acr31
  * changed coder to use unsigned long long
  *
@@ -22,148 +26,167 @@
 #undef FILENAME
 #define FILENAME "TripOriginalCoder.hh"
 
-enum state_t {SYNC, CHECKSUM, CODE};
-
 template<int CHECKSUM_COUNT=2>	 
 class TripOriginalCoder : Coder {
 private:
   int m_symbol_range;
   int m_symbol_count;
-  unsigned long long m_accum_code;
-  unsigned int m_accum_checksum;
-  unsigned int m_accum_checksum_check;
-  state_t m_state;
-  unsigned int m_state_counter;
+  int m_original_symbol_range;
+  int m_original_symbol_count;
+  int m_counter;
+  unsigned int *m_values;
 
-  unsigned long m_encoded;
-
-  int m_base;
 
 public:
   TripOriginalCoder(int symbol_range,int symbol_count) : 
     m_symbol_range(symbol_range),
     m_symbol_count(symbol_count),
-    m_accum_code(0),
-    m_accum_checksum(0), 
-    m_accum_checksum_check(0), 
-    m_state(SYNC), 
-    m_state_counter(0),
-    m_encoded(0) {
-    assert(symbol_range > 2);
-    m_base = symbol_range - 1;    
+    m_original_symbol_range(symbol_range),
+    m_original_symbol_count(symbol_count),
+    m_counter(0) {
+
+    assert(symbol_range >= 2);
+
+    if (symbol_range == 2) {
+      m_symbol_count /= 2;
+      m_symbol_range = 4;
+    }
+
+    m_values = new unsigned int[m_symbol_count];
+
   };
-  
+
+  /**
+   * This method takes the value and stores internally a value which
+   * when interpreted with base symbol_range has the sync digit at the
+   * beginning and then two checksum digits and then the code
+   */
   void Set(unsigned long long value) {
-    PROGRESS("Encoder set with value "<<value);
-    unsigned long long code = 0;
-    unsigned long long checksum = 0;
+    m_values[0] = m_symbol_range-1;
     
-    int max = (m_symbol_count-CHECKSUM_COUNT-1);
-
-    if (value >= pow(m_base,max)) {
-      throw ValueTooLarge();
+    int num_syms = m_symbol_count - CHECKSUM_COUNT -1;
+    unsigned int checksum = 0;
+    for(int i=num_syms-1;i>=0;i--) {
+      unsigned long long pwr = (unsigned long long)pow(m_symbol_range-1,i);
+      // we need to produce a base m_symbol_range-1 encoding of the value
+      m_values[i+CHECKSUM_COUNT+1] = (unsigned int)(value / pwr);
+      
+      // now remove this from the total
+      value -= m_values[i+CHECKSUM_COUNT+1] * pwr;
+      checksum += m_values[i+CHECKSUM_COUNT+1];
     }
+    PROGRESS("Checksum is "<< checksum);
+    
+    // we now have to store the checksum in the first few values base m_symbol_range-1
+    unsigned int max_checksum = (unsigned int)pow(m_symbol_range-1,CHECKSUM_COUNT);
+    checksum %= max_checksum;
 
-    // Work backwards from the end of the code
-    for(int position=max;position>=0;position--) {
-      int pwr = (int)pow(m_base,position);
-      int bit = (int)(value/pwr);
-      value = value % pwr;
-      code = code * m_symbol_range;
-      code |= bit;
-      checksum += bit;
+    for(int i=CHECKSUM_COUNT-1;i>=0;i--) {
+      unsigned int pwr = (unsigned int)pow(m_symbol_range-1,i);
+      m_values[i+1] = checksum/pwr;
+      checksum -= m_values[i+1] * pwr;
     }
-    PROGRESS("Checksum is "<<checksum);
-    // Add the checksum
-    checksum = checksum % (int)pow(m_base,CHECKSUM_COUNT);
-    for(int position=CHECKSUM_COUNT-1;position>=0;position--) {
-      int pwr = (int)pow(m_base,position);
-      int bit = (int)(checksum/pwr);
-      checksum = checksum % pwr;
-      code = code * m_symbol_range;
-      code |= bit;      
-    }
-
-    // Add the sync sector
-    code = code * m_symbol_range;
-    code |= m_base;
-
-    m_encoded = code;
-    PROGRESS("Encoded value is "<<code);
   }
-
+  
+  /**
+   * Read off the encoded code in the original symbol range
+   */
   unsigned int NextChunk() {
-    unsigned int result = m_encoded  % m_symbol_range;
+    unsigned int result;
+    if (m_original_symbol_range == 2) {
+      result = m_values[m_counter/2];
+      result >>= m_counter % 2;
+      result &= 1;
+      m_counter++;
+    }
+    else {
+      result = m_values[m_counter++];
+    }
     PROGRESS("NextChunk returns "<<result);
-    m_encoded = (int)(m_encoded / m_symbol_range);
     return result;
   }
 
-
   virtual void Reset() {
     PROGRESS("Decoder Reset");
-    m_accum_code = 0;
-    m_accum_checksum = 0;
-    m_accum_checksum_check = 0;
-    m_state = SYNC;
-    m_state_counter =0;
+    m_counter=0;
   }
 
+  /**
+   * Accumulate the encoded value - the tag is giving us data base
+   * original_symbol_range   
+   */ 
   virtual bool LoadChunk(unsigned int chunk) {
-    PROGRESS("LoadChunk value "<<chunk);
-    if (chunk > m_symbol_range-1) {
+    PROGRESS("LoadChunk: "<<chunk);
+    if (chunk > m_original_symbol_range-1) {
       PROGRESS("Throwing InvalidSymbol");
       throw InvalidSymbol();
     }
-
-    if (m_state == SYNC) {
-      // we are looking for the sync sector
-      if (chunk == m_symbol_range-1) {
-	m_state = CHECKSUM;
-	PROGRESS("Accepting sync sector");
-	return true;
+    
+    if (m_original_symbol_range == 2) {
+      if (m_counter % 2 == 0) {
+	m_values[m_counter++/2] = chunk;
       }
       else {
-	PROGRESS("Rejected missing sync sector");
-	return false;
+	m_values[m_counter++/2] += chunk << 1;
       }
-    }
-    else if (chunk == m_symbol_range-1) {
-      PROGRESS("Throwing InvalidSymbol - non sync sector reading all ones");
-      throw InvalidSymbol();
-    }
-    else if (m_state == CHECKSUM) {
-      PROGRESS("Accumulating checksum");
-      int pwr = (int)pow(m_base,m_state_counter);
-      m_accum_checksum+=pwr*chunk;
-      if (m_state_counter == CHECKSUM_COUNT-1) {
-	m_state = CODE;
-	m_state_counter=0;
-      }
-      else {
-	m_state_counter++;
-      }
-    }
-    else { // if (m_state == CODE) {
-      PROGRESS("Accumulating code");
-      int pwr = (int)pow(m_base,m_state_counter);
-      m_accum_code+=pwr*chunk;
-      m_accum_checksum_check += chunk;
-      m_state_counter++;
-    }
-  }
-
-  virtual unsigned long long Decode() {
-    PROGRESS("Decode called");
-    int check = m_accum_checksum_check % (int)pow(m_base,CHECKSUM_COUNT);
-    if (check == m_accum_checksum) {
-      PROGRESS("Checksum valid returning "<<m_accum_code);
-      return m_accum_code;
     }
     else {
-      PROGRESS("Throwing InvalidCheckSum.  Checksum was "<<check<<" and we expected "<<m_accum_checksum);
-      throw InvalidCheckSum();
+      m_values[m_counter++] = chunk;
     }
+    return true;
+  }
+
+  /**
+   * We now need to decode the code
+   * It should have a sync digit at the beginning with value m_symbol_range-1
+   *
+   * Then follows some checksum digits which is a number base
+   * m_symbol_range-1 encoded in base m_symbol_range.  So we have to
+   * read each digit and add it up
+   *
+   */
+  virtual unsigned long long Decode() {
+    PROGRESS("Decoding");
+    for(int i=0;i<m_symbol_count;i++) {
+      if (m_values[i] == m_symbol_range -1 ) {
+	PROGRESS("Found SYNC sector");
+
+	// extract the checksum
+	unsigned int checksum = 0;
+	unsigned int pwr = 1;
+	for(int j=0;j<CHECKSUM_COUNT;j++) {
+	  checksum += m_values[(i+j+1) % m_symbol_count] * pwr;
+	  pwr *= m_symbol_range - 1;
+	}
+	PROGRESS("Checksum is "<< checksum);
+	
+	// extract the result is what's left       	
+	unsigned long long result = 0;
+	unsigned int checksum_check = 0;
+	unsigned long long r_pwr = 1;
+	int num_syms = m_symbol_count - CHECKSUM_COUNT -1;
+	for(int j=0;j<num_syms;j++) {
+	  result += m_values[(i+j+1+CHECKSUM_COUNT) % m_symbol_count] * r_pwr;
+	  checksum_check += m_values[(i+j+1+CHECKSUM_COUNT) % m_symbol_count];
+	  r_pwr *= m_symbol_range -1;
+	}
+	PROGRESS("Result is "<< result);
+	PROGRESS("Checksum check is "<<checksum_check);
+
+	checksum_check %= (unsigned int)pow(m_symbol_range-1,CHECKSUM_COUNT);
+
+	if (checksum_check == checksum) {
+	  PROGRESS("Checksum valid returning "<<result);
+	  return result;
+	}
+	else {
+	  PROGRESS("Throwing InvalidCheckSum.  Checksum was "<<checksum_check<<" and we expected "<<checksum);
+	  throw InvalidCheckSum();
+	}
+      }
+    }
+    PROGRESS("Failed to find a synchronization sector");
+    throw InvalidCode();
   }
 
 };

@@ -2,6 +2,10 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/24 17:53:22  acr31
+ * Extended TripOriginalCoder to deal with base 2 encodings.  MatrixTag
+ * implementation now works.
+ *
  * Revision 1.2  2004/01/23 18:18:11  acr31
  * added Matrix Tag and a test program and the beginning of the CRC coder
  *
@@ -60,15 +64,35 @@ void Rectangle2D::compute_alpha() {
    *  year          = "1998",
    * }
    *
-   *   
-   * points x,y in the matrix code have
-   * corresponding points in the image X,Y given by:
+   *
+   * If the co-ordinates relative to the matrix are (u,v).  Then the
+   * co-ordinates in the camera frame of reference are (x,y,z)
+   *
+   * x = c1 * u + c2 * v + c3
+   * y = c4 * u + c5 * v + c6
+   * z = c7 * u + c8 * v + c9
+   *
+   * There is nothing clever about the above - they are just an
+   * arbitrary linear combination of u and v
+   *
+   * Our screen co-ordinates X and Y are a perspective projection of (x,y,z)
+   *
+   * X = x/z
+   * Y = y/z
+   *
+   * Since both of the equations are over z we can divide through by c9 to give
    *
    *  X = (a1*x + a2*y + a3)/(a7*x+a8*y+1)
    *  Y = (a4*x + a5*y + a6)/(a7*x+a8*y+1)
    *
-   * We have found found four points - the four corners so we can
-   * solve this (using this matlab script
+   * Where a1 = c1/c9, a2 = c2/c9,  etc...
+   *
+   * Given four points on the matrix and their points in the final
+   * image we can set up a set of simultaneous linear equations and
+   * solve for a1 to a8
+   *
+   * We have found four points - the four corners so we can
+   * solve this (using this matlab script)
    *
    * syms X1 X2 X3 X4 Y1 Y2 Y3 Y4
    * syms x1 x2 x3 x4 y1 y2 y3 y4

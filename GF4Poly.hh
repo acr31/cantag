@@ -6,6 +6,10 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/24 17:53:22  acr31
+ * Extended TripOriginalCoder to deal with base 2 encodings.  MatrixTag
+ * implementation now works.
+ *
  * Revision 1.3  2004/01/23 11:49:54  acr31
  * Finished integrating the GF4 coder - I've ripped out the error correcting stuff for now and its just looking for a match but it doesn't seem to work.  I need to spend some time to understand the division and mod operations in the GF4Poly to progress
  *
@@ -45,6 +49,8 @@ class GF4Poly
   GF4Poly& operator <<=(const unsigned int);
   GF4Poly operator >>(const unsigned int) const;
   GF4Poly& operator >>=(const unsigned int);
+
+  GF4Poly pwr(unsigned int, const GF4Poly&) const;
 
   inline bool operator ==(const unsigned long long int rhs) const
     { return val == rhs; };

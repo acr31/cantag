@@ -2,6 +2,10 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/24 17:53:22  acr31
+ * Extended TripOriginalCoder to deal with base 2 encodings.  MatrixTag
+ * implementation now works.
+ *
  * Revision 1.2  2004/01/23 22:38:53  acr31
  * testing of square tags
  *
@@ -61,7 +65,7 @@ main(int argc, char* argv[]) {
 		  imagewidth/2 - size/2,
 		  imagewidth/2 + size/2);
 
-    MatrixTag<CRCCoder > t(codesize);
+    MatrixTag<TripOriginalCoder<2> > t(codesize);
 
     t.Draw2D(image,&l,code, 0, 255);
   

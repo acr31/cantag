@@ -2,6 +2,10 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.6  2004/01/24 17:53:22  acr31
+ * Extended TripOriginalCoder to deal with base 2 encodings.  MatrixTag
+ * implementation now works.
+ *
  * Revision 1.5  2004/01/23 11:57:09  acr31
  * moved Location2D to Ellipse2D in preparation for Square Tags
  *
@@ -73,10 +77,10 @@ main(int argc, char* argv[]) {
 	       imagewidth/2,
 	       size,
 	       size,
-	       PI/2);
+	       0.1);
 
-  //  RingTag<TripOriginalCoder<2> > t(rings, //RINGS
-  RingTag<GF4Coder > t(rings, //RINGS
+  RingTag<TripOriginalCoder<2> > t(rings, //RINGS
+  //  RingTag<GF4Coder > t(rings, //RINGS
 				   sectors, //SECTORS
 				   sync_angles, // SYNC ANGLES
 				   bullseye_inner, // BULLSEYE INNER

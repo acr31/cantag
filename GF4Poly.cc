@@ -7,7 +7,11 @@
  * $Header$
  *
  * $Log$
- * Revision 1.5  2004/01/23 11:59:25  acr31
+ * Revision 1.6  2004/01/24 17:53:22  acr31
+ * Extended TripOriginalCoder to deal with base 2 encodings.  MatrixTag
+ * implementation now works.
+ *
+ 1.5  2004/01/23 11:59:25  acr31
  * removed my attempt at the Order function because it causes triptest to spin forever
  *
  * Revision 1.4  2004/01/23 11:57:07  acr31
@@ -207,23 +211,64 @@ GF4Poly GF4Poly::operator %(const GF4Poly& rhs) const
 
   order = rhs.Order();
  
+  /**
+   * multiplicative inverse of 1 is 1, of x is x+1 and of x+1 is x
+   */
   mul = rhs * GF4Poly(
 
 		      (rhs.val >> (order * 2 )) == 1 ? 
 		      1 : 
 		      (rhs.val >> (order * 2 )) ^ 1);
+  /**
+   * Now mul is a multiple of rhs with highest co-efficient == 1
+   * because we have multiplied through by the constant term that is
+   * the inverse of the highest term
+   */
 
   res.val = val;
  
   shift = res.Order();
+  /**
+   * shift = highest power of X with a non-zero co-efficient
+   */
 
   while (shift >= order) {
+    /**
+     * The order of (mul << (shift - order)) is shift - because mul
+     * has same order as rhs and rhs has order "order"
+     *
+     * GF4Poly(res.val >> (shift*2)) is a new poly containing only the
+     * leading co-efficient of res
+     *
+     * The product of these two is a polynomial with same degree as
+     * res and same leading co-efficient.  So when we add them to res
+     * the leading co-efficient of res is cancelled out - remember
+     * that addition = subraction ( because 1+1=0 )
+     */
     res += (mul << (shift - order)) * GF4Poly(res.val >> (shift * 2));
-      
+    /*
+     * res has now been changed by the correct multiple of rhs that
+     * knocks off the top co-efficient (of res)
+     */
+
+    /*
+     * Now search down for the next non-zero co-efficient of res.
+     */
     while (!((res.val >> (shift * 2)) || shift == 0))
       shift--;
+
+    /*
+     * Keep doing this until the order of res (shift) is strictly less
+     * than the order of rhs (order).  Once this is true we know there
+     * are no more factors to remove
+     */
   }
 
+  /**
+   * So now res is a polynomial of degree less than the order of rhs
+   * and was arrived at by removing multiples of rhs.  Therefore it
+   * must be the modulus
+   */
   return res;
 }
 
@@ -234,13 +279,22 @@ GF4Poly& GF4Poly::operator %=(const GF4Poly& rhs)
 
 GF4Poly GF4Poly::operator /(const GF4Poly& rhs) const
 {
+  /**
+   * This method is basically the same as % but you have to keep track
+   * of the multiples that you remove and then return them at the end
+   * all added up
+   */
   GF4Poly res, mul, rem;
 
   unsigned int shift = 0;
   unsigned int order = 0;
 
   order = rhs.Order();
- 
+
+  /**
+   * build mul in the same way as for the % operator - mul is of the
+   * same order as rhs but with 1 as the leading co-efficient
+   */
   mul = GF4Poly((rhs.val >> (order * 2 )) == 1 ? 1 : (rhs.val >> (order * 2 )) ^ 1);
 
   rem.val = val;
@@ -248,6 +302,13 @@ GF4Poly GF4Poly::operator /(const GF4Poly& rhs) const
   shift = rem.Order();
 
   while (shift >= order) {
+    /**
+     * We now remove multiples of rhs from the remainder (rem) until
+     * the remainder's order becomes less than the order of rhs. 
+     *
+     * Keep adding those multiples that we remove to res so that we
+     * can return it as the result
+     */
     res += (mul << (shift - order)) * GF4Poly(rem.val >> (shift * 2));
     rem += rhs * (mul << (shift - order)) * GF4Poly(rem.val >> (shift * 2));
 
@@ -295,6 +356,9 @@ GF4Poly& GF4Poly::operator >>=(const unsigned int shift)
   return *this;
 }
 
+/**
+ * Rotate the polynomial (of given length) by a given rotation
+ */ 
 GF4Poly& GF4Poly::Rotate(unsigned int rotation, unsigned int length)
 {
   unsigned long long int t;
@@ -320,16 +384,7 @@ GF4Poly& GF4Poly::Rotate(unsigned int rotation, unsigned int length)
  */
 unsigned int GF4Poly::Order() const
 {
-
-  /*
-  int res = 32;
-  while( (val >> (--res*2)) & 3 ) {};
-  return res+1;
-  */
-  /*
-    I can't understand how this returns the highest non-zero power,
-    surely it returns the lowest non-zero power?
-  */
+ 
   int res = 0;
  
   while (val >> ((res + 1) * 2))
@@ -338,6 +393,9 @@ unsigned int GF4Poly::Order() const
   return res; 
 }
 
+/**
+ * Compute the number of non zero co-efficients
+ */
 unsigned int GF4Poly::Weight() const
 {
   int res = 0;
@@ -379,4 +437,19 @@ unsigned int GF4Poly::GetTerm(int order) const
 unsigned long long GF4Poly::GetValue() const
 {
   return val;
+}
+
+GF4Poly GF4Poly::pwr(unsigned int exp, const GF4Poly& modulus) const {
+  if (exp == 0) {
+    return GF4Poly(1);
+  }
+  else {
+    GF4Poly r =  (*this * *this) % modulus;
+    if (exp % 2 == 0) {
+      return r.pwr( exp/2,modulus) % modulus;;
+    }
+    else {
+      return (*this * r.pwr( exp/2,modulus)) % modulus;
+    }
+  }
 }
