@@ -212,6 +212,25 @@ bool Ellipse::FitEllipse(const float* points, int numpoints) {
 }
 
 float Ellipse::GetError(const float* points, int count) const {
+  return GetErrorAlgebraic(points,count);
+}
+
+float Ellipse::GetErrorAlgebraic(const float* points, int count) const {
+  // calculate the algebraic distance
+  float total=0;
+  for (int pt=0;pt<count*2;pt+=2) {
+    float x = points[pt];
+    float y = points[pt+1];
+    float dist = m_a*x*x+m_b*x*y+m_c*y*y+m_d*x+m_e*y+m_f;
+    total+= fabs(dist);
+  }
+#ifdef ELLIPSE_DEBUG
+  PROGRESS("Total error from Algebraic method is "<< total/count);
+#endif
+  return total/count;
+}
+
+float Ellipse::GetErrorGradient(const float* points, int count) const {
   // calculate the algebraic distance inversly weighted by the
   // gradient
   float total=0;
@@ -224,15 +243,226 @@ float Ellipse::GetError(const float* points, int count) const {
     float dy = m_b*x+2*m_c*y+m_e;
 
     float norm = dx*dx + dy*dy;
-    total+= dist*dist/norm;
+    total+= sqrt(dist*dist/norm);
   }
 #ifdef ELLIPSE_DEBUG
-  PROGRESS("Total error was "<< total/count);
+  PROGRESS("Total error from Gradient method is "<< total/count);
 #endif
   return total/count;
 }
 
-void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
+float Ellipse::GetErrorNakagawa(const float* points, int count) const {
+  
+  LinearEllipse l(GetA(),GetB(),GetC(),GetD(),GetE(),GetF());
+  
+  float total=0;
+  for(int pt=0;pt<count*2;pt+=2) {
+    float xi = points[pt];
+    float yi = points[pt+1];
+
+    float a = l.GetWidth();
+    float b = l.GetHeight();
+    float theta  = l.GetAngle();
+    float x0 = l.GetX0();
+    float y0 = l.GetY0();
+    float k = (y0-yi)/(x0-xi);
+
+    float sint = sin(theta);
+    float cost = cos(theta);
+
+
+    float rtsub1 = -sint+k*cost;
+    float rtsub2 = cost+k*sint;
+    float rt = sqrt(a*a*ixrtsub1*ixrtsub1 + b*b*ixrtsub2*ixrtsub2);
+
+    // compute ix
+    float ix;
+    if (xi > x0) {
+      ix = x0 + a*b/rt;
+    }
+    else {
+      ix = x0 - a*b/rt;
+    }
+
+    // compute iy
+    float iy;
+    if (yi > y0) {
+      iy = y0 + a*b*k/rt;
+    }
+    else {
+      iy = y0 - a*b*k/rt;
+    }
+
+    float d = (ix-xi)*(ix-xi) + (iy-yi)*(iy-yi);
+    total+=d;
+  }
+  
+#ifdef ELLIPSE_DEBUG
+  PROGRESS("Total error from Nakagawa Method is "<< total/count);
+#endif
+  return total/count;
+}
+
+float Ellipse::GetErrorSafaeeRad(const float* points, int count) const {
+  // draw a ray between each point and the centre of the ellipse C
+  // intersecting the ellipse at Ij.  The lengths of the bisected
+  // portions of the ray mj and nj are determined
+
+  LinearEllipse l(GetA(),GetB(),GetC(),GetD(),GetE(),GetF());
+  
+  float total=0;
+  for(int pt=0;pt<count*2;pt+=2) {
+    float xi = points[pt];
+    float yi = points[pt+1];
+
+    float a = l.GetWidth();
+    float b = l.GetHeight();
+    float theta  = l.GetAngle();
+    float x0 = l.GetX0();
+    float y0 = l.GetY0();
+    float k = (y0-yi)/(x0-xi);
+
+    float sint = sin(theta);
+    float cost = cos(theta);
+
+
+    float rtsub1 = -sint+k*cost;
+    float rtsub2 = cost+k*sint;
+    float rt = sqrt(a*a*ixrtsub1*ixrtsub1 + b*b*ixrtsub2*ixrtsub2);
+
+    // compute ix
+    float ix;
+    if (xi > x0) {
+      ix = x0 + a*b/rt;
+    }
+    else {
+      ix = x0 - a*b/rt;
+    }
+
+    // compute iy
+    float iy;
+    if (yi > y0) {
+      iy = y0 + a*b*k/rt;
+    }
+    else {
+      iy = y0 - a*b*k/rt;
+    }
+
+    float m = sqrt((x0-ix)*(x0-ix)+(y0-ix)*(y0-ix));
+    float n = sqrt((ix-xi)*(ix-xi)+(iy-yi)*(iy-yi));
+    float q = m_a*xi*xi+m_b*xi*yi+m_c*yi*yi+m_d*xi+m_e*yi+m_f;
+    
+    total += m*(1+ n/2/a)/(1+ n/2/m)*q;   
+  }
+  
+#ifdef ELLIPSE_DEBUG
+  PROGRESS("Total error from SafaeeRad Method is "<< total/count);
+#endif
+  return total/count;
+}
+
+float Ellipse::GetErrorSafaeeRad2(const float* points, int count) const {
+  LinearEllipse l(GetA(),GetB(),GetC(),GetD(),GetE(),GetF());
+  
+  float total=0;
+  for(int pt=0;pt<count*2;pt+=2) {
+    float xi = points[pt];
+    float yi = points[pt+1];
+
+    float a = l.GetWidth();
+    float b = l.GetHeight();
+    float theta  = l.GetAngle();
+    float x0 = l.GetX0();
+    float y0 = l.GetY0();
+    float k = (y0-yi)/(x0-xi);
+
+    float sint = sin(theta);
+    float cost = cos(theta);
+
+
+    float rtsub1 = -sint+k*cost;
+    float rtsub2 = cost+k*sint;
+    float rt = sqrt(a*a*ixrtsub1*ixrtsub1 + b*b*ixrtsub2*ixrtsub2);
+
+    // compute ix
+    float ix;
+    if (xi > x0) {
+      ix = x0 + a*b/rt;
+    }
+    else {
+      ix = x0 - a*b/rt;
+    }
+
+    // compute iy
+    float iy;
+    if (yi > y0) {
+      iy = y0 + a*b*k/rt;
+    }
+    else {
+      iy = y0 - a*b*k/rt;
+    }
+
+    float m = sqrt((x0-ix)*(x0-ix)+(y0-ix)*(y0-ix));
+    float q = m_a*xi*xi+m_b*xi*yi+m_c*yi*yi+m_d*xi+m_e*yi+m_f;
+    
+    total += m*q;   
+  }
+  
+#ifdef ELLIPSE_DEBUG
+  PROGRESS("Total error from SafaeeRad2 Method is "<< total/count);
+#endif
+  return total/count;
+}
+
+float Ellipse::GetErrorStricker(const float* points, int count) const {
+  LinearEllipse l(GetA(),GetB(),GetC(),GetD(),GetE(),GetF());
+
+  float a = l.GetWidth();
+  float b = l.GetHeight();
+  float x0 = l.GetX0();
+  float y0 = l.GetY();
+  float theta = l.GetAngle();
+
+  float c = sqrt(a*a-b*b);
+
+  float f1x = x0 + c*cos(theta);
+  float f1y = y0 + c*sin(theta);
+
+  float f2x = x0 - c*cos(theta);
+  float f2y = x0 - c*sin(theta);
+  
+  for(int pt=0;pt<count*2;pt+=2) {
+    float x = points[pt];
+    float y = points[pt+1];
+
+    float aest = 0.5 * sqrt( (x-f1x)*(x-f1x) + (y-f1y)*(y-f1y) ) + sqrt( (x-f2x)*(x-f2x) + (y-f2y)*(y-f2y));
+    float best = sqrt(aest*aest - a*a + b*b);
+
+    float dest = 0.5*(aest - a + best - b);
+
+    float ctilde = sqrt( (a+dest)*(a+dest) - (b+dest)*(b+dest) );
+    
+    float modf1_f2 = sqrt( (f1x-f2x)*(f1x-f2x) + (f1y-f2y)*(f1y-f2y) );
+
+    float f1xtilde = (f1x + f2x)/2+ctilde*(f1x-f2x)/modf1_f2;
+    float f1ytilde = (f1y + f2y)/2+ctilde*(f1y-f2y)/modf1_f2;
+
+    float f2xtilde = (f1x + f2x)/2-ctilde*(f1x-f2x)/modf1_f2;
+    float f2ytilde = (f1y + f2y)/2-ctilde*(f1y-f2y)/modf1_f2;
+    
+    float atilde = 0.5*(sqrt( (x-f1x)*(x-f1x) + (y-f1y)*(y-f1y) ) + sqrt( (x-f2x)*(x-f2x) + (y-f2y)*(y-f2y) ));
+    
+    total += atilde - a;   
+  }
+
+#ifdef ELLIPSE_DEBUG
+  PROGRESS("Total error from Stricker Method is "<< total/count);
+#endif
+  return total/count;
+}
+
+
+void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   float a = GetA();
   float b = GetB();
   float c = GetC();
@@ -414,7 +644,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
 
   // check if the original r1 transform will result in a circle that points away from us
   double yfactor;
-  if (eigvects[8] > 0) {
+  if (eigvects[8] < 0) {
     yfactor = -1;
   }
   else {
@@ -557,7 +787,7 @@ LinearEllipse::LinearEllipse(float* points, int numpoints) : Ellipse(points,nump
 LinearEllipse::LinearEllipse(float* points, int numpoints, bool prev_fit): Ellipse(points,numpoints,prev_fit) {};
 LinearEllipse::LinearEllipse(float a, float b, float c, float d, float e,float f): Ellipse(a,b,c,d,e,f) {};
 
-void LinearEllipse::GetTransform(float transform1[16], float transform2[16]) const {
+void LinearEllipse::Decompose() {
   float a = GetA();
   float b = GetB();
   float c = GetC();
@@ -587,8 +817,8 @@ void LinearEllipse::GetTransform(float transform1[16], float transform2[16]) con
     PROGRESS("Constraint Error: this is not an ellipse");
 #endif
 
-  float x0 = (2*c*d - b*e) / disc;
-  float y0 = (2*a*e - b*d) / disc;
+  x0 = (2*c*d - b*e) / disc;
+  y0 = (2*a*e - b*d) / disc;
 
 #ifdef DECOMPOSE_DEBUG
   PROGRESS("X= " << x0);
@@ -614,20 +844,23 @@ void LinearEllipse::GetTransform(float transform1[16], float transform2[16]) con
   PROGRESS("scale= " << scale_factor);
 #endif
 
-  float width = lambda1 * scale_factor;
-  float height = lambda2 * scale_factor;
+  width = lambda1 * scale_factor;
+  height = lambda2 * scale_factor;
 
 #ifdef DECOMPOSE_DEBUG
   PROGRESS("width= " << width);
   PROGRESS("height= " <<height);
 #endif
 
-  float angle_radians = atan( -(a-lambda1t)/(0.5*b) );
+  angle_radians = atan( -(a-lambda1t)/(0.5*b) );
 
 #ifdef DECOMPOSE_DEBUG
   PROGRESS("angle= " << angle_radians);
 #endif
   
+}
+
+void LinearEllipse::GetTransform(float transform1[16], float transform2[16]) {
   transform1[0] = width*cos(angle_radians);
   transform1[1] = -height*sin(angle_radians); 
   transform1[2] = 0;
@@ -647,7 +880,6 @@ void LinearEllipse::GetTransform(float transform1[16], float transform2[16]) con
 
   for(int i=0;i<16;i++) {
     transform2[i] = transform1[i];
-  }
-  
+  }  
 }
 

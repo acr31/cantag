@@ -44,8 +44,14 @@ public:
   inline float GetF() const { return m_f; }
 
   float GetError(const float* points, int numpoints) const;
+  float GetErrorAlgebraic(const float* points, int count) const;
+  float GetErrorGradient(const float* points, int count) const;
+  float GetErrorGetErrorNakagawa(const float* points, int numpoints) const;
+  float GetErrorGetErrorSafaeeRad(const float* points, int numpoints) const;
+  float GetErrorGetErrorSafaeeRad2(const float* points, int numpoints) const;
+  float GetErrorGetErrorStricker(const float* points, int numpoints) const;
 
-  virtual void GetTransform(float transform1[16], float transform2[16]) const;
+  virtual void GetTransform(float transform1[16], float transform2[16]);
 
 private:
   bool FitEllipse(const float* points, int numpoints);
@@ -57,11 +63,24 @@ private:
  * ellipse rather than the proper pose based transform
  */
 class LinearEllipse : public Ellipse {
+private:
+  float x0;
+  float y0;
+  float width;
+  float height;
+  float angle_radians;
+
 public:
   LinearEllipse();
   LinearEllipse(float* points, int numpoints);
   LinearEllipse(float* points, int numpoints, bool prev_fit);
   LinearEllipse(float a, float b, float c, float d, float e, float f);
+
+  inline float GetX0() { return x0; }
+  inline float GetY0() { return y0; }
+  inline float GetWidth() { return width; }
+  inline float GetHeight() { return height; }
+  inline float GetAngle() { return angle_radians; }
 
   /**
    * Calculate the ellipse transform based on decomposing the general
@@ -172,6 +191,11 @@ public:
    * (we use the same eigenvalue as the width of the ellipse because by
    *  convention that is the one that defines the angle)
    *
+   */
+  virtual void Decompose();
+  
+
+  /*
    * We then build the transformation matrix that transforms the unit circle onto the ellipse
    *
    * This is a scale factor   ( width 0      0 0 )
@@ -194,7 +218,7 @@ public:
    * anything when we apply it later)
    *
    */
-  virtual void GetTransform(float transform1[16], float transform2[16]) const;
+  virtual void GetTransform(float transform1[16], float transform2[16]);
 };
 
 #endif//ELLIPSE_GUARD
