@@ -19,9 +19,6 @@
  *
  * \todo regression test by giving it a set of points derived from an
  * ellipse and asking it to fit them
- *
- * \todo allow the projection method to be altered between ellipse and
- * linear ellipse
  */
 class Ellipse  {
 protected:
