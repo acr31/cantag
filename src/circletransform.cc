@@ -1,16 +1,11 @@
 /**
  * $Header$
- * 
- * $Log$
- * Revision 1.1  2004/02/20 22:26:01  acr31
- * major reworking of matching algorithms and architecture
- *
  */
 
 #include <circletransform.hh>
 #include <eigenvv.hh>
 
-#define POSE_DEBUG
+#undef POSE_DEBUG
 
 void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2[16]) {
 #ifdef POSE_DEBUG
@@ -31,12 +26,10 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
    *                       ( m_b/2   m_c      m_e/2 )
    *                       ( m_d/2   m_e/2    m_f   )
    */
-  eigensolve(ellipse.GetA(),
-	     ellipse.GetB(),
-	     ellipse.GetC(),
-	     ellipse.GetD(),
-	     ellipse.GetE(),
-	     ellipse.GetF(), eigvects, eigvals);
+  eigensolve(ellipse.GetA(),ellipse.GetB()/2, ellipse.GetD()/2,
+	     /*          */ ellipse.GetC()  , ellipse.GetE()/2,
+	     /*                           */  ellipse.GetF(),
+	     eigvects, eigvals);
 
 #ifdef POSE_DEBUG
   std::cout << "Eigen Vectors: e=[" << eigvects[0] << "," << eigvects[1] << "," << eigvects[2] << ";" << std::endl;
@@ -240,11 +233,15 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
 }
 
 
-void ApplyTransform(float transform[16], float x, float y, float* projX, float* projY) {
+void ApplyTransform(const float transform[16], float x, float y, float* projX, float* projY) {
   *projX = transform[0]*x + transform[1]*y + transform[2] + transform[3];
   *projY = transform[4]*x + transform[5]*y + transform[6] + transform[7];
   float projZ = transform[8]*x + transform[9]*y + transform[10] + transform[11];
   float projH = transform[12]*x + transform[13]*y + transform[14] + transform[15];
+
+#ifdef POSE_DEBUG
+  PROGRESS("Transformed ("<<x<<","<<y<<","<<"0) on to ("<<*projX<<","<<*projY<<","<<projZ<<","<<projH<<")");
+#endif
   
   *projX /= projH;
   *projY /= projH;
@@ -252,10 +249,15 @@ void ApplyTransform(float transform[16], float x, float y, float* projX, float* 
 
   *projX /= projZ;
   *projY /= projZ;
+
+#ifdef POSE_DEBUG
+  PROGRESS("Projected ("<<x<<","<<y<<","<<"0) on to ("<<*projX<<","<<*projY<<")");
+#endif
+
 }
 
-void ApplyTransform(float transform[16], float* points, int numpoints) {
-  for(int i=0;i<numpoints*2;i++) {
+void ApplyTransform(const float transform[16], float* points, int numpoints) {
+  for(int i=0;i<numpoints*2;i+=2) {
     ApplyTransform(transform,points[i],points[i+1],points+i,points+i+1);
   }
 }

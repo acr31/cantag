@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/02/21 10:05:57  acr31
+ * got it working!
+ *
  * Revision 1.1  2004/02/20 22:25:59  acr31
  * major reworking of matching algorithms and architecture
  *
@@ -14,7 +17,7 @@
 #include <eigenvv.hh>
 #include <cmath>
 
-#define ELLIPSE_DEBUG
+#undef ELLIPSE_DEBUG
 #undef ELLIPSE_DEBUG_DUMP_POINTS
 
 #define MAXFITERROR 0.000001
@@ -217,12 +220,12 @@ void Ellipse::FitEllipse(float* points, int numpoints) {
       PROGRESS("Fitted ellipse: a="<<m_a<<","<<m_b<<","<<m_c<<","<<m_d<<","<<m_e<<","<<m_f);
 #endif      
 
-      m_fitted = CheckError(points,numpoints,MAXFITERROR);
+      m_fitted = (GetError(points,numpoints) < MAXFITERROR);
     }
   }
 }
 
-bool Ellipse::CheckError(float* points, int count, float threshold) const {
+float Ellipse::GetError(float* points, int count) const {
   // calculate the algebraic distance inversly weighted by the
   // gradient
   float total=0;
@@ -239,9 +242,9 @@ bool Ellipse::CheckError(float* points, int count, float threshold) const {
     total+= dist*dist/norm;
   }
 #ifdef ELLIPSE_DEBUG
-  PROGRESS("Total error was "<< total/count << " and threshold is "<<threshold);
+  PROGRESS("Total error was "<< total/count);
 #endif
-  return (total < threshold*count);
+  return total/count;
 }
 
 

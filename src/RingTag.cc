@@ -197,34 +197,27 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
     ApplyTransform(transform2,x,y,projected2+i,projected2+i+1);
   }     
 
-  Image* t = cvCloneImage(&image);
-  for(int i=0;i<count*2;i++) {
-    cvLine(t,
-	   cvPoint((int)projected1[i],(int)projected1[i+1]),
-	   cvPoint((int)projected1[i],(int)projected1[i+1]),
-	   128,5);    
-  }
-  cvSaveImage("test.jpg",t);
-
-
   // get the children of this node and check for a good match with either interpretation
   float* correcttrans = NULL;
   for(std::vector< SceneGraphNode< ShapeChain<Ellipse> >* >::iterator i = node->GetChildren().begin(); i!=node->GetChildren().end();i++) {
-    if ( (*i)->GetShapes().GetShape().CheckError(projected1,count,0.1) ) {
+    float error1 = (*i)->GetShapes().GetShape().GetError(projected1,count);
+    float error2 = (*i)->GetShapes().GetShape().GetError(projected2,count);
+
+    if ((error1 < error2) && (error1 < 0.001)) {
+#ifdef RING_TAG_DEBUG
+      PROGRESS("Chose orientation 1 with error "<<error1<<" instead of orientation 2 with error "<<error2);
+#endif
       correcttrans = transform1;
       break;
     }
+
+    if ((error2 <= error1) && (error2 < 0.001)) {
 #ifdef RING_TAG_DEBUG
-    PROGRESS("Child does not match in orientation 1");
+      PROGRESS("Chose orientation 2 with error "<<error2<<" instead of orientation 1 with error "<<error1);
 #endif
-    
-    if ( (*i)->GetShapes().GetShape().CheckError(projected2,count,0.1) ) {
       correcttrans = transform2;
       break;
     }
-#ifdef RING_TAG_DEBUG
-    PROGRESS("Child does not match in orientation 2");
-#endif
   }
 
   if (correcttrans != NULL) {
@@ -242,22 +235,17 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
     
     // if we read a full 360 degrees then we stop and ask it for the
     // code
-    
-    unsigned long long read_code[5];
-    read_code[0] = 0;
-    read_code[1] = 0;
-    read_code[2] = 0;
-    read_code[3] = 0;
-    read_code[4] = 0;
+
+    unsigned long long read_code[5] = {0};
     for(int j=m_sector_count*5 - 1;j>=0;j--) {
       // read a chunk by sampling each ring and shifting and adding
       int currentcode = j%5;      
       for(int k=m_ring_count-1;k>=0;k--) {
-	float pt[2] = { cos(m_read_angles[j]) * m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
-			sin(m_read_angles[j]) * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
-	ApplyTransform(correcttrans,pt,1);
-	camera.NPCFToImage(pt,1);
-	bool sample = SampleImage(image,pt[0],pt[1]) > 128;
+	float tpt[]=  {  cos(m_read_angles[j]) * m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
+			 sin(m_read_angles[j]) * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
+	ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
+	camera.NPCFToImage(tpt,1);
+	bool sample = SampleImage(image,tpt[0],tpt[1]) > 128;
 	read_code[currentcode] <<=1;
 	read_code[currentcode] |= (sample ? 1:0);
       }
@@ -318,6 +306,7 @@ void RingTag::draw_circle(Image* debug0, const Camera& camera, float l[16], doub
   for(int step=1;step<=count;step++) {
     pts[0] = cos( (float)step*2*PI/(float)count ) * radius;
     pts[1] = sin( (float)step*2*PI/(float)count ) * radius;
+    ApplyTransform(l,pts,1);
     camera.NPCFToImage(pts,1);
     cvLine(debug0,cvPoint(cvRound(oldpts[0]),cvRound(oldpts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), 0,1);	
     oldpts[0] = pts[0];
@@ -343,7 +332,7 @@ void RingTag::draw_read(const Image& image, const Camera& camera, float l[16], i
       float pts[2];
       pts[0] = cos( m_read_angles[5*k+((i+1)%5)] ) * m_data_ring_centre_radii[r]/m_bullseye_outer_radius;
       pts[1] = sin( m_read_angles[5*k+((i+1)%5)] ) * m_data_ring_centre_radii[r]/m_bullseye_outer_radius;
-      
+      ApplyTransform(l,pts,1);
       camera.NPCFToImage(pts,1);
       // pick the colour to be the opposite of the sampled point so we can see the dot
       int colour = SampleImage(image,pts[0],pts[1]) < 128 ? 0: 255; // our debug image is inverted 255 : 0;

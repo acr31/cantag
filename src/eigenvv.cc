@@ -6,6 +6,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/02/21 10:05:57  acr31
+ * got it working!
+ *
  * Revision 1.4  2004/02/18 15:58:53  acr31
  * fixes to the pose extraction
  *
@@ -23,7 +26,7 @@
 
 #include <eigenvv.hh>
 
-#define EIGEN_DEBUG
+#undef EIGEN_DEBUG
 
 #ifdef EIGEN_DEBUG
 #include <iostream>

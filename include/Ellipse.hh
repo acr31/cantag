@@ -4,6 +4,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/02/21 10:05:57  acr31
+ * got it working!
+ *
  * Revision 1.1  2004/02/20 22:25:54  acr31
  * major reworking of matching algorithms and architecture
  *
@@ -37,7 +40,7 @@ public:
   inline float GetE() const { return m_e; }
   inline float GetF() const { return m_f; }
 
-  bool CheckError(float* points, int numpoints, float threshold) const;
+  float GetError(float* points, int numpoints) const;
 
 private:
   void FitEllipse(float* points, int numpoints);
