@@ -15,10 +15,14 @@
 #include <findtransform.hh>
 #include <bitset>
 #include <iostream>
+
 #ifdef TEXT_DEBUG
-#define  MATRIX_TAG_DEBUG
-#undef  MATRIX_TAG_DEBUG_POINTS
+# define MATRIX_TAG_DEBUG
+# undef MATRIX_TAG_DEBUG_POINTS
 #endif
+
+int debug_matrix_image_counter = 0;
+
 
 /**
  * An implementation of the Matrix tag found in
@@ -198,7 +202,8 @@ template<int SIZE> bool MatrixTag<SIZE>::DecodeNode(SceneGraphNode< ShapeChain<Q
   
   GetTransform(quad,transform);
 
-  CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)> read_code;
+
+  boost::shared_ptr< CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)> > read_code(new CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>());
   float projX, projY;
   // iterate over the tag reading each section
   for(int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);i++) {
@@ -206,8 +211,8 @@ template<int SIZE> bool MatrixTag<SIZE>::DecodeNode(SceneGraphNode< ShapeChain<Q
 		    m_cells_corner[2*i+1]+m_cell_width_2 };
     ApplyTransform(transform,pts[0],pts[1],pts,pts+1);
     camera.NPCFToImage(pts,1);
-    bool sample = image.Sample(pts[0],pts[1]) > 128;
-    read_code[i] = sample;
+    bool sample = image.Sample(pts[0],pts[1]) > 0;
+    (*read_code)[i] = sample;
   }
 
 #ifdef IMAGE_DEBUG
@@ -235,20 +240,28 @@ template<int SIZE> bool MatrixTag<SIZE>::DecodeNode(SceneGraphNode< ShapeChain<Q
     ApplyTransform(transform,pts[0],pts[1],pts,pts+1);
     camera.NPCFToImage(pts,1);
     // pick the colour to be the opposite of the sampled point so we can see the dot
-    int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
+    int colour = image.Sample(pts[0],pts[1]) < 1 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
     // or pick the colour to be on a gradient so we see the order it samples in
-    //int colour = (int)((double)i/(double)(SIZE*SIZE - (SIZE*SIZE % 2)))*255);
+    //int colour = (int)((double)i/(double)(SIZE*SIZE - (SIZE*SIZE % 2))*255);
     debug0.DrawPoint(pts[0],pts[1],colour,4);
   }
 
-  debug0.Save("debug-decode.bmp");
+  char filename[256];
+  snprintf(filename,255,"debug-decode-%0.5d.bmp",debug_matrix_image_counter++);
+  filename[255]=0;
+  debug0.Save(filename);
 #endif
 
-  if (DecodePayload(read_code) >= 0) {
+  if (DecodePayload(*read_code) >= 0) {
+#ifdef MATRIX_TAG_DEBUG
+      PROGRESS("Found code " << *read_code);
+#endif	
+
     LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = node->GetLocatedObject();
     for(int i=0;i<16;i++) {
       lobj->transform[i] = transform[i];
     }	
+    lobj->tag_code = read_code;	   
     return true;
   }    
   else {
