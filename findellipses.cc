@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/01/22 12:01:03  acr31
+ * added a test for a curved contour before trying to ellipse fit
+ *
  * Revision 1.4  2004/01/21 13:41:36  acr31
  * added pose from circle to triptest - (pose from circle is unstable at the moment)
  *
@@ -40,7 +43,7 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 #ifdef IMAGE_DEBUG
     cvDrawContours(debug0,c,0,0,0,3,8);
 #endif
-    if (count > 6) {
+    if ((CV_IS_SEQ_CURVE(c) && (count > 6)) {
       PROGRESS("Found contour with "<<count<<" (>6) vertices");
       if (count > maxLength) { count = maxLength; }
       /* Copy the points into floating point versions for the
@@ -84,13 +87,13 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 	    }
 	    toadd->nextchain = new Location2DChain(newbox);
 	    newbox = NULL;
+	    break;
 	  }
 	}
 
 	if (newbox != NULL) {
 	  PROGRESS("No concentric partner found");
-	  Location2DChain *toadd = new Location2DChain(newbox);
-	  results->push_back(toadd);
+	  results->push_back(new Location2DChain(newbox));
 	}
       }
     }
