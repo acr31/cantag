@@ -149,7 +149,7 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
     node_hash[1] = Contour(m_root,HOLE_BORDER);
 
     // we mark the contours in the image with the following coding
-    // bit 1 = l-pixel or r-pixel
+    // bit 1 = set if this is an exit pixel (corresponds to -NBD in the paper)
     // bit 2-8 = NBD
 
 #ifdef IMAGE_DEBUG
@@ -158,14 +158,23 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 #endif
 
     float points_buffer[MAXLENGTH*2];
-    int NBD = 2;
+
+    int NBD = 2;  // the next border ID to issue is stored in NBD
+
     for(int raster_y=0;raster_y < image.GetHeight(); raster_y++) {
-      int LNBD = 1; // we've just "seen" the frame border
+      int LNBD = 1; // we've just "seen" the frame border so set the last seen border id to match
       for(int raster_x=1;raster_x < image.GetWidth()-1;raster_x++) {
+
+	// the sampled value with either be:
+	//  0  => 0-element
+	//  1  => 1-element that we havn't visited before
+	//  >1 => 1-element that we have visited before.  In this case the low bit will be set if this is an exit pixel and the remaining bits encode the NBD
+
 	const unsigned char current = image.SampleNoCheck(raster_x,raster_y);
-	const unsigned char current_id = current >> 1;
-	const bool current_not_visited = current_id==0;  // this will be true if this is an element that has not been visited before
-	const bool current_exit_pixel = current_id && (current & 0x1);
+	const unsigned char current_nbd = current >> 1;
+	const bool current_not_visited = current_nbd == 0;  // this will be true if this is an element that has not been visited before
+	const bool current_exit_pixel = current_nbd && (current & 0x1);
+
 	if (current) { // the current pixel is a 1-element (possibly visited before)
 	  const unsigned char previous = image.SampleNoCheck(raster_x-1,raster_y);
 	  const unsigned char next = image.SampleNoCheck(raster_x+1,raster_y);
@@ -185,14 +194,14 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	    contour_length = FollowContour(image,raster_x,raster_y,points_buffer,MAXLENGTH,NULL,4,NBD);
 	    border_type = HOLE_BORDER;
 	    if (!current_not_visited) {
-	      LNBD = current_id;
+	      LNBD = current_nbd;
 	    }
 	  }
-	  else {
+	  else {  // otherwise we just carry on looking
 	    contour_length =0;
 	  }
 	  
-	  if (contour_length > 10) {
+	  if (contour_length > 0) {
 #ifdef IMAGE_DEBUG
 	    debug0.DrawPolygon(points_buffer,contour_length,0,1);
 #endif
@@ -223,8 +232,7 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 #ifdef SCENE_GRAPH_DEBUG
 	    PROGRESS("parent_id is " << parent_id);
 #endif
-	    
-	    
+	    	    
 	    // now attempt to fit a shape to this border
 	    
 	    // if we succeed then create a new scene graph node and insert
@@ -242,22 +250,22 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 #endif
 	      node_hash[parent_id].node->AddChild(next_node);
 	      node_hash[NBD] = Contour(parent_id,next_node,border_type);					
+
+	      NBD++;
+	      NBD &= 127;
+	      if (NBD==0) { NBD++; }	      
 	    }
 	    else {
 	      delete next_node;
 	      node_hash[NBD] = Contour(parent_id,node_hash[parent_id].node,border_type);
-	    }
-
-	    NBD++;
-	    NBD &= 127;
-	    if (NBD==0) { NBD++; }
+	    }	    
 	  }
 	  
 	  if (!current_not_visited) {
 #ifdef SCENE_GRAPH_DEBUG
 	    PROGRESS("Current node has been visited, setting LNBD to "<< (int)current_id);
 #endif
-	    LNBD = current_id;
+	    LNBD = current_nbd;
 	  }
 	}  
       }
