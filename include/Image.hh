@@ -123,7 +123,7 @@ public:
   }
 
   inline void Save(const char* filename) const {
-    //    cvSaveImage(filename,m_image);
+    cvSaveImage(filename,m_image);
   }
 
   inline void DrawCircle(int x0, int y0, int radius, unsigned char colour, unsigned int thickness) {

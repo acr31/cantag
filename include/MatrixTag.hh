@@ -91,7 +91,7 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
 
   virtual ~MatrixTag() {}
 
-  virtual void Draw2D(Image& image, const std::bitset< SIZE*SIZE - (SIZE*SIZE % 2)>& tag_data) {
+  virtual void Draw2D(Image& image, const std::bitset< SIZE*SIZE - (SIZE*SIZE % 2)>& tag_data) const {
 #ifdef MATRIX_TAG_DEBUG
     PROGRESS("Draw2D called");
 #endif
@@ -214,7 +214,11 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
     node->SetInspected();
     LocatedObject* lobj = node->GetLocatedObject();
     std::bitset<SIZE*SIZE-(SIZE*SIZE%2)> tagcode(0);
-    if (DecodePayload(tagcode,read_code) >= 0) {
+    if ((DecodePayload(tagcode,read_code) >= 0) &&
+	((m_must_match == NULL) || *m_must_match == tagcode)) {
+      float normal[3];
+      GetNormalVector(transform,normal);
+      std::cout << "Normal vector is "<<normal[0]<<" "<<normal[1]<<" "<< normal[2] << std::endl;
       for(int i=0;i<16;i++) {
 	lobj->transform[i] = transform[i];
       }	

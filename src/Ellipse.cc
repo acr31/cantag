@@ -430,8 +430,8 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
     transc1[col*4+1] *= scale;
 
     transc2[col*4] *= scale;
-    transc2[col*4+1] *= scale;
-    transc2[col*4+2] *= -1;
+    transc2[col*4+1] *= -scale;
+    transc2[col*4+2] *= 1;
   }
     
   double rtotc1[16];

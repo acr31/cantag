@@ -53,7 +53,7 @@ public:
   /**
    * Take the bit pattern from the tag and decode the value stored
    */
-  virtual int DecodePayload(std::bitset<BIT_COUNT>& tag_data, Payload<BIT_COUNT>& payload) {
+  virtual int DecodePayload(std::bitset<BIT_COUNT>& tag_data, Payload<BIT_COUNT>& payload) const {
     std::bitset<GRANULARITY> sync_sector_mask;
     const BigInt<BIT_COUNT> base((1<<GRANULARITY)-1);
     BigInt<BIT_COUNT> checksum_mod((1<<GRANULARITY)-1);
@@ -133,7 +133,7 @@ public:
    * This method encodes the given value and returns the bit pattern
    * to store on the tag
    */
-  virtual bool EncodePayload(const std::bitset<BIT_COUNT>& tag_data, Payload<BIT_COUNT>& payload) {
+  virtual bool EncodePayload(const std::bitset<BIT_COUNT>& tag_data, Payload<BIT_COUNT>& payload) const {
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
     PROGRESS("Encode called with " << tag_data);
 #endif

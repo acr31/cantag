@@ -101,7 +101,7 @@ public:
     delete[] m_read_angles;
   }
 
-  virtual void Draw2D(Image& image, const std::bitset<RING_COUNT*SECTOR_COUNT>& tag_data) {
+  virtual void Draw2D(Image& image, const std::bitset<RING_COUNT*SECTOR_COUNT>& tag_data) const {
     // Work from the outside inwards
     
     int x0 = image.GetWidth()/2;

@@ -15,12 +15,14 @@
 template<class C, int PAYLOAD_SIZE>
 class Tag {
 public:
+  typedef C TagShapeType;
+  static const int TagPayloadSize = PAYLOAD_SIZE;
   
   std::bitset<PAYLOAD_SIZE>* m_must_match;
   
   Tag() : m_must_match(NULL) {}
 
-  virtual void Draw2D(Image& image, const std::bitset<PAYLOAD_SIZE>& tag_data)= 0;
+  virtual void Draw2D(Image& image, const std::bitset<PAYLOAD_SIZE>& tag_data) const = 0;
   void WalkSceneGraph(SceneGraphNode<C>* root_node, const Camera& camera, const Image& image) {
     // walk the tree finding all the tags
     DecodeNode(root_node,camera,image);
