@@ -1,38 +1,13 @@
-/**
- * An implementation of the Matrix tag found in
- *
- * @InProceedings{ip:apchi:rekimoto98,
- *  author        = "Jun Rekimoto",
- *  title         = "Matrix: A Realtime Object Identification and Registration Method for Augmented Reality",
- *  booktitle     = "Proceedings of Asia Pacific Computer Human Interaction",
- *  year          = "1998",
- * }
- * 
- *
+/*
  * $Header$
- *
- * $Log$
- * Revision 1.3  2004/02/16 08:02:03  acr31
- * *** empty log message ***
- *
- * Revision 1.2  2004/02/03 16:25:10  acr31
- * more work on template tags and some function signature changes
- *
- * Revision 1.1  2004/02/01 14:26:48  acr31
- * Implementations for Matrixtag and ringtag
- *
- *
  */
 
 #include <Config.hh>
 #include <MatrixTag.hh>
-#include <Drawing.hh>
-#include <Tag.hh>
-#include <Coder.hh>
-#include <QuadTangle2D.hh>
+#include <findtransform.hh>
 
-#undef FILENAME
-#define FILENAME "MatrixTag.cc"
+#define MATRIX_TAG_DEBUG
+#define MATRIX_TAG_DEBUG_POINTS
 
 MatrixTag::MatrixTag(int size) :
   m_length(size*size - (size*size % 2)),
@@ -40,7 +15,6 @@ MatrixTag::MatrixTag(int size) :
   m_cell_width(1/(float)(size+2)),
   m_cell_width_2(0.5/(float)(size+2))
 {
-  
   /* we read the tag in triangles:
    *
    *    1  2  3  4  5  6  7 17       1  2  3  4  5  6 13
@@ -80,34 +54,35 @@ MatrixTag::MatrixTag(int size) :
     }
   }
     
-  /**
-     print co-ordinates for GNUPLOT
+#ifdef MATRIX_TAG_DEBUG_POINTS
      for (int i=0;i<m_length;i++) {
-     std::cout << m_cells_corner[2*i] << " " << m_cells_corner[2*i+1] << std::endl;
+       std::cout << m_cells_corner[2*i] << " " << m_cells_corner[2*i+1] << std::endl;
      }
-  */
+#endif
 }
 
 MatrixTag::~MatrixTag() {}
 
-void MatrixTag::Draw2D(Image* image, unsigned long long code, int black, int white) {
+void MatrixTag::Draw2D(Image& image, unsigned long long code) {
+#ifdef MATRIX_TAG_DEBUG
+  PROGRESS("Draw2D called");
+#endif
+  int x0 = 0;
+  int y0 = 0;
+  int x1 = image.GetWidth();
+  int y1 = 0;
+  int x2 = image.GetWidth();
+  int y2 = image.GetHeight();
+  int x3 = 0;
+  int y3 = image.GetHeight();
 
-  QuadTangle2D l(0,0,
-		 image->width,0,
-		 image->width,image->height,
-		 0,image->height);
-  PROGRESS("Drawing tag " <<
-	   "(" << l.m_x0 << "," << l.m_y0 << ") " <<
-	   "(" << l.m_x1 << "," << l.m_y1 << ") " <<
-	   "(" << l.m_x2 << "," << l.m_y2 << ") " <<
-	   "(" << l.m_x3 << "," << l.m_y3 << ")");
-  DrawFilledQuadTangle(image,
-		       l.m_x0, l.m_y0,
-		       l.m_x1, l.m_y1,
-		       l.m_x2, l.m_y2,
-		       l.m_x3, l.m_y3,
-		       black);
+  int size = image.GetWidth() < image.GetHeight() ? image.GetWidth() : image.GetHeight();
 
+  image.DrawFilledQuadTangle(x0, y0,
+			     x1, y1,
+			     x2, y2,
+			     x3, y3,COLOUR_BLACK);
+			  
   // now draw the code
   unsigned long long value = EncodeTag(code);
   float projX0, projY0;
@@ -115,65 +90,93 @@ void MatrixTag::Draw2D(Image* image, unsigned long long code, int black, int whi
   float projX2, projY2;
   float projX3, projY3;
   for(int i=0;i<m_length;i++) {
-    l.ProjectPoint(m_cells_corner[2*i],m_cells_corner[2*i+1], &projX0, &projY0);
-    l.ProjectPoint(m_cells_corner[2*i]+m_cell_width,m_cells_corner[2*i+1], &projX1, &projY1);
-    l.ProjectPoint(m_cells_corner[2*i]+m_cell_width,m_cells_corner[2*i+1]+m_cell_width, &projX2, &projY2);
-    l.ProjectPoint(m_cells_corner[2*i],m_cells_corner[2*i+1]+m_cell_width, &projX3, &projY3);
-    DrawFilledQuadTangle(image,
-			 (int)projX0, (int)projY0,
-			 (int)projX1, (int)projY1,
-			 (int)projX2, (int)projY2,
-			 (int)projX3, (int)projY3,
-			 (value & 1) == 1 ? black : white);
+    int u0 = (int)(m_cells_corner[2*i]*(float)size);
+    int v0 = (int)(m_cells_corner[2*i+1]*(float)size);
+    int u1 = (int)((m_cells_corner[2*i]+m_cell_width)*(float)size);
+    int v1 = (int)(m_cells_corner[2*i+1]*(float)size);
+    int u2 = (int)((m_cells_corner[2*i]+m_cell_width)*(float)size);
+    int v2 = (int)((m_cells_corner[2*i+1]+m_cell_width)*(float)size);
+    int u3 = (int)(m_cells_corner[2*i]*(float)size);
+    int v3 = (int)((m_cells_corner[2*i+1]+m_cell_width)*(float)size);
+    image.DrawFilledQuadTangle(u0,v0,
+			       u1,v1,
+			       u2,v2,
+			       u3,v3,
+			       (value & 1) == 1 ? COLOUR_BLACK : COLOUR_WHITE);
     value >>=1;
   }
 }
 
-
-unsigned long long MatrixTag::Decode(Image *image, Camera* camera, const QuadTangle2D *l) { 
-#ifdef IMAGE_DEBUG
-  Image* debug0 = cvCloneImage(image);
-  cvConvertScale(debug0,debug0,0.5,128);    
-  DrawQuadTangle(debug0,l,0,3);
-    
-  for(int i=0;i<m_size+2;i++) {
-    float dX,dY;
-    l->ProjectPoint((float)i/(m_size+2),0,&dX,&dY);
-    CvPoint p1 = cvPoint((int)dX,(int)dY);
-    l->ProjectPoint((float)i/(m_size+2),1,&dX,&dY);
-    CvPoint p2 = cvPoint((int)dX,(int)dY);
-
-    l->ProjectPoint(0,(float)i/(m_size+2),&dX,&dY);
-    CvPoint p3 = cvPoint((int)dX,(int)dY);
-    l->ProjectPoint(1,(float)i/(m_size+2),&dX,&dY);
-    CvPoint p4 = cvPoint((int)dX,(int)dY);
-
-    cvLine(debug0,p1,p2,0,1);
-    cvLine(debug0,p3,p4,0,1);      
-  }
-
+void MatrixTag::DecodeNode(SceneGraphNode< ShapeChain<QuadTangle> >* node, const Camera& camera, const Image& image) {
+#ifdef MATRIX_TAG_DEBUG
+  PROGRESS("Decode node called");
 #endif
 
+  const QuadTangle quad = node->GetShapes().GetShape();
+#ifdef MATRIX_TAG_DEBUG
+  PROGRESS("QuadTangle: " << 
+	   "("<<quad.GetX0()<<","<<quad.GetY0()<<"),"<<
+	   "("<<quad.GetX1()<<","<<quad.GetY1()<<"),"<<
+	   "("<<quad.GetX2()<<","<<quad.GetY2()<<"),"<<
+	   "("<<quad.GetX3()<<","<<quad.GetY3()<<"),");	   
+#endif
+
+  // extract its pose
+  float transform[16];
+  
+  GetTransform(quad,transform);
 
   float projX, projY;
   unsigned long long code = 0;
   // iterate over the tag reading each section
   for(int i=m_length-1;i>=0;i--) {
-    l->ProjectPoint(m_cells_corner[2*i]+m_cell_width_2,m_cells_corner[2*i+1]+m_cell_width_2, &projX, &projY);
-    bool sample = SampleImage(image,(int)projX,(int)projY) > 128;
+    float pts[] = { m_cells_corner[2*i]+m_cell_width_2,
+		  m_cells_corner[2*i+1]+m_cell_width_2 };
+    ApplyTransform(transform,pts[0],pts[1],pts,pts+1);
+    camera.NPCFToImage(pts,1);
+    bool sample = image.Sample(pts[0],pts[1]) > 128;
     code <<= 1;
     code |= sample ? 1 : 0;
-#ifdef IMAGE_DEBUG
-    cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),0,5);
-#endif	
-  }    
-
+  }
 
 #ifdef IMAGE_DEBUG
-  cvSaveImage("debug-decode.jpg",debug0);
-  cvReleaseImage(&debug0);
+  Image debug0(image);
+  debug0.ConvertScale(-1,255);
+  debug0.ConvertScale(0.5,128);
+  for(int i=0;i<m_size;i++) {
+    float pts[] = { 0,
+		  (float)i/m_length,
+		  1,
+		  (float)i/m_length,
+		  (float)i/m_length,
+		  0,
+		  (float)i/m_length,
+		  1 };
+    ApplyTransform(transform,pts,4);
+    camera.NPCFToImage(pts,4);
+    debug0.DrawLine(pts[0],pts[1],pts[2],pts[3],COLOUR_BLACK,1);
+    debug0.DrawLine(pts[4],pts[5],pts[6],pts[7],COLOUR_BLACK,1);
+  }
+  
+  for(int i=m_length-1;i>=0;i--) {
+    float pts[] = { m_cells_corner[2*i]+m_cell_width_2,
+		  m_cells_corner[2*i+1]+m_cell_width_2 };
+    ApplyTransform(transform,pts[0],pts[1],pts,pts+1);
+    camera.NPCFToImage(pts,1);
+    // pick the colour to be the opposite of the sampled point so we can see the dot
+    int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
+    // or pick the colour to be on a gradient so we see the order it samples in
+    //int colour = (int)((double)k/(double)m_sector_count*255);
+    debug0.DrawPoint(pts[0],pts[1],colour,4);
+  }
+
+  debug0.Save("debug-decode.jpg");
 #endif
-
-  return DecodeTag(code);
-}
+  unsigned long long result = DecodeTag(code);
+  LocatedObject* lobj = node->GetLocatedObject();
+  for(int i=0;i<16;i++) {
+    lobj->transform[i] = transform[i];
+  }	
+  node->SetInspected();
+}    
 

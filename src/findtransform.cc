@@ -2,13 +2,102 @@
  * $Header$
  */
 
-#include <circletransform.hh>
+#include <findtransform.hh>
 #include <eigenvv.hh>
+#include <gaussianelimination.hh>
 
-#undef POSE_DEBUG
+#undef CIRCLE_TRANSFORM_DEBUG
+#define SQUARE_TRANSFORM_DEBUG
+#undef APPLY_TRANSFORM_DEBUG
+
+void GetTransform(const QuadTangle& quad, float transform[16]) {
+  // see the header file for a full explanation of what's going on here
+#ifdef SQUARE_TRANSFORM_DEBUG
+  PROGRESS("Calculating transform for :"
+	   "("<<quad.GetX0()<<","<<quad.GetY0()<<"),"<<
+	   "("<<quad.GetX1()<<","<<quad.GetY1()<<"),"<<
+	   "("<<quad.GetX2()<<","<<quad.GetY2()<<"),"<<
+	   "("<<quad.GetX3()<<","<<quad.GetY3()<<"),");	   
+#endif
+
+  // we particularly want coeffs to be an array of pointers to arrays
+  // containing the columns of the matrix - then we can swap columns
+  // conveniently by swapping pointers
+  double coeffs0[] = {1,1,0,0,0,0,0,0};
+  double coeffs1[] = {1,0,0,1,0,0,0,0};
+  double coeffs2[] = {1,1,1,1,0,0,0,0};
+  double coeffs3[] = {0,0,0,0,1,1,0,0};
+  double coeffs4[] = {0,0,0,0,1,0,0,1};
+  double coeffs5[] = {0,0,0,0,1,1,1,1};
+  double coeffs6[] = {-quad.GetX1(),-quad.GetX0(),0,0,-quad.GetY1(),-quad.GetY0(),0,0};
+  double coeffs7[] = {-quad.GetX1(),0,0,-quad.GetX2(),-quad.GetY1(),0,0,-quad.GetY2()};
+  double* coeffs[] = {coeffs0,
+		      coeffs1,
+		      coeffs2,
+		      coeffs3,
+		      coeffs4,
+		      coeffs5,
+		      coeffs6,
+		      coeffs7};
+		     
+  double xvals[] = { quad.GetX1(),
+		     quad.GetX0(),
+		     quad.GetX3(),
+		     quad.GetX2(),
+		     quad.GetY1(),
+		     quad.GetY0(),
+		     quad.GetY3(),
+		     quad.GetY2() };
+  double result[8];
+
+  solve_simultaneous(xvals,coeffs,result,8);
+
+#ifdef SQUARE_TRANSFORM_DEBUG
+  PROGRESS("Computed a0 "<<result[0]);
+  PROGRESS("         a1 "<<result[1]);
+  PROGRESS("         a2 "<<result[2]);
+  PROGRESS("         a3 "<<result[3]);
+  PROGRESS("         a4 "<<result[4]);
+  PROGRESS("         a5 "<<result[5]);
+  PROGRESS("         a6 "<<result[6]);
+  PROGRESS("         a7 "<<result[7]);
+#endif
+
+  double scalefactor = result[1]*result[1]+result[4]*result[4]+result[7]*result[7];
+#ifdef SQUARE_TRANSFORM_DEBUG
+  PROGRESS("Scale factor is "<<scalefactor);
+#endif
+
+  for(int i=0;i<8;i++) {
+    result[8] += scalefactor;
+  }
+#ifdef SQUARE_TRANSFORM_DEBUG
+  PROGRESS("Scaled   a0 "<<result[0]);
+  PROGRESS("         a1 "<<result[1]);
+  PROGRESS("         a2 "<<result[2]);
+  PROGRESS("         a3 "<<result[3]);
+  PROGRESS("         a4 "<<result[4]);
+  PROGRESS("         a5 "<<result[5]);
+  PROGRESS("         a6 "<<result[6]);
+  PROGRESS("         a7 "<<result[7]);
+#endif
+ 
+  transform[0] = result[0];  transform[1] = result[1];  transform[2] = 0;  transform[3] = result[2];
+  transform[4] = result[3];  transform[5] = result[4];  transform[6] = 0;  transform[7] = result[5];
+  transform[8] = result[6];  transform[9] = result[7];  transform[10]= 0;  transform[11]= result[8];
+  transform[12]= 0;          transform[13]= 0;          transform[14]= 0;  transform[15]= 1;
+
+#ifdef SQUARE_TRANSFORM_DEBUG
+  PROGRESS("Final trans=[" << transform[0] << "," << transform[1] << "," << transform[2] << ","<<transform[3] <<";");
+  PROGRESS("             " << transform[4] << "," << transform[5] << "," << transform[6] << ","<<transform[7] <<";");
+  PROGRESS("             " << transform[8] << "," << transform[9] << "," << transform[10]<< ","<<transform[11]<<";");
+  PROGRESS("             " << transform[12]<< "," << transform[13]<< "," << transform[14]<< ","<<transform[15]<<"];");
+#endif
+
+}
 
 void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2[16]) {
-#ifdef POSE_DEBUG
+#ifdef CIRCLE_TRANSFORM_DEBUG
   std::cout << "Ellipse params (a-f) are ["<<
     ellipse.GetA() << "," <<
     ellipse.GetB() << "," <<
@@ -31,7 +120,7 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
 	     /*                           */  ellipse.GetF(),
 	     eigvects, eigvals);
 
-#ifdef POSE_DEBUG
+#ifdef CIRCLE_TRANSFORM_DEBUG
   std::cout << "Eigen Vectors: e=[" << eigvects[0] << "," << eigvects[1] << "," << eigvects[2] << ";" << std::endl;
   std::cout << "                  " << eigvects[3] << "," << eigvects[4] << "," << eigvects[5] << ";" << std::endl;
   std::cout << "                  " << eigvects[6] << "," << eigvects[7] << "," << eigvects[8] << "];" << std::endl;
@@ -84,18 +173,18 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
   double crossy = eigvects[6]*eigvects[1] - eigvects[0]*eigvects[7];
   double crossz = eigvects[0]*eigvects[4] - eigvects[3]*eigvects[1];
   
-#ifdef POSE_DEBUG
+#ifdef CIRCLE_TRANSFORM_DEBUG
   std::cout << "Cross = " << crossx <<"," << crossy << "," << crossy << std::endl;
 #endif
 
   double dotcross = crossx*eigvects[2] + crossy*eigvects[5] + crossz*eigvects[8];
 
-#ifdef POSE_DEBUG
+#ifdef CIRCLE_TRANSFORM_DEBUG
   std::cout << "Dotcross = " << dotcross << std::endl;
 #endif
 
   if (dotcross < 0) {
-#ifdef POSE_DEBUG
+#ifdef CIRCLE_TRANSFORM_DEBUG
     std::cout << "Reversing z vector" << std::endl;
 #endif
     eigvects[2] *= -1;
@@ -108,7 +197,7 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
 		  eigvects[6], eigvects[7], eigvects[8], 0,
 		  0,           0,           0,           1};
 
-#ifdef POSE_DEBUG
+#ifdef CIRCLE_TRANSFORM_DEBUG
   std::cout << "Rotation 1: r1=[ " << eigvects[0] << "," << eigvects[1] << "," << eigvects[2] << ";" << std::endl;
   std::cout << "                 " << eigvects[3] << "," << eigvects[4] << "," << eigvects[5] << ";" << std::endl;
   std::cout << "                 " << eigvects[6] << "," << eigvects[7] << "," << eigvects[8] << "];" << std::endl;
@@ -146,7 +235,7 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
 		   pmsin, 0, pmcos, 0,
 		   0,     0, 0,     1 };
 
-#ifdef POSE_DEBUG  
+#ifdef CIRCLE_TRANSFORM_DEBUG  
   std::cout << "Rotation 2(1): r2c1=[" << r2c1[0] << "," << r2c1[1] << "," << r2c1[2] << "," << r2c1[3] << ";" << std::endl;
   std::cout << "                " << r2c1[4] << "," << r2c1[5] << "," << r2c1[6] << "," << r2c1[7] << ";" << std::endl;
   std::cout << "                " << r2c1[8] << "," << r2c1[9] << "," << r2c1[10] << "," << r2c1[11] << ";" << std::endl;
@@ -166,7 +255,7 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
   
   // apply the relevant translation - we have to choose again here based on our choice of theta
   double tx = sqrt((eigvals[4]-eigvals[0])*(eigvals[8]-eigvals[4]))/eigvals[4];
-#ifdef POSE_DEBUG
+#ifdef CIRCLE_TRANSFORM_DEBUG
   std::cout << "Translation tx = "<<tx <<std::endl;
 #endif
   double transc1[] = {1,0,0,tx,
@@ -181,7 +270,7 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
 
   // and another choice based on theta
   double scale = sqrt(-eigvals[0]*eigvals[8]/eigvals[4]/eigvals[4]);
-#ifdef POSE_DEBUG
+#ifdef CIRCLE_TRANSFORM_DEBUG
   std::cout << "Scale factor " << scale << std::endl;
 #endif
   // this multiplies rows 0 and 1 of the transform by scale
@@ -219,7 +308,7 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
     }
   }
   
-#ifdef POSE_DEBUG  
+#ifdef CIRCLE_TRANSFORM_DEBUG  
   std::cout << "M_Transform: mt=[" << transform1[0] << "," << transform1[1] << "," << transform1[2] << "," << transform1[3] << ";" << std::endl;
   std::cout << "                 " << transform1[4] << "," << transform1[5] << "," << transform1[6] << "," << transform1[7] << ";" << std::endl;
   std::cout << "                 " << transform1[8] << "," << transform1[9] << "," << transform1[10] << "," << transform1[11] << ";" << std::endl;
@@ -239,7 +328,7 @@ void ApplyTransform(const float transform[16], float x, float y, float* projX, f
   float projZ = transform[8]*x + transform[9]*y + transform[10] + transform[11];
   float projH = transform[12]*x + transform[13]*y + transform[14] + transform[15];
 
-#ifdef POSE_DEBUG
+#ifdef APPLY_TRANSFORM_DEBUG
   PROGRESS("Transformed ("<<x<<","<<y<<","<<"0) on to ("<<*projX<<","<<*projY<<","<<projZ<<","<<projH<<")");
 #endif
   
@@ -250,7 +339,7 @@ void ApplyTransform(const float transform[16], float x, float y, float* projX, f
   *projX /= projZ;
   *projY /= projZ;
 
-#ifdef POSE_DEBUG
+#ifdef APPLY_TRANSFORM_DEBUG
   PROGRESS("Projected ("<<x<<","<<y<<","<<"0) on to ("<<*projX<<","<<*projY<<")");
 #endif
 

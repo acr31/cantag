@@ -1,13 +1,7 @@
 /**
  * A class to fit points to a quadtangle and encapsulate the result
  *
- * $Header$
- *
- * $Log$
- * Revision 1.1  2004/02/20 22:25:54  acr31
- * major reworking of matching algorithms and architecture
- *
- *
+ * $Header$ 
  */
 #ifndef QUADTANGLE_GUARD
 #define QUADTANGLE_GUARD
@@ -26,7 +20,7 @@ private:
   bool m_fitted;
 
 public:
-  QuadTangle(float* points, int numpoints);
+  QuadTangle(float* points, int numpoints, bool prev_fitted=false);
   QuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3);
   inline bool IsFitted() const { return m_fitted; }
   bool Compare(const QuadTangle& o) const;

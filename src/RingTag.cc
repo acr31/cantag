@@ -3,7 +3,7 @@
  */
 
 #include <RingTag.hh>
-#include <circletransform.hh>
+#include <findtransform.hh>
 #include <vector>
 
 #define RING_TAG_DEBUG

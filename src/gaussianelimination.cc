@@ -1,24 +1,5 @@
-/**
- * Provides gaussian elimination functionality for square matrices
- *
+/*
  *  $Header$
- *
- *  $Log$
- *  Revision 1.5  2004/02/13 21:47:40  acr31
- *  work on ellipse fitting
- *
- *  Revision 1.4  2004/02/11 08:23:49  acr31
- *  *** empty log message ***
- *
- *  Revision 1.3  2004/02/10 22:22:03  acr31
- *  added inverting a matrix
- *
- *  Revision 1.2  2004/02/10 22:19:27  acr31
- *  got gaussian elimination working for inverting matrices
- *
- *  Revision 1.1  2004/02/10 18:12:43  acr31
- *  moved gaussian elimination functionality around a bit
- *
  */
 
 #include <Config.hh>
