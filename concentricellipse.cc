@@ -1,5 +1,6 @@
 #include "concentricellipse.hh"
 #include <cmath>
+#include <iostream>
 int
 FindConcentricEllipses(CvSeq *contourTree, 		       
 		       std::vector<CvBox2D> *result,
@@ -9,6 +10,7 @@ FindConcentricEllipses(CvSeq *contourTree,
 		       double maxRatioDiff,
 		       double maxFitError)
 {
+  if (contourTree == NULL) return 0;
   /* Traverse the the tree of contours finding concentric ellipses */
   CvTreeNodeIterator i;
   cvInitTreeNodeIterator(&i,contourTree,maxDepth);
@@ -77,23 +79,20 @@ FindConcentricEllipses(CvSeq *contourTree,
 	}
 	
 	if (total < maxFitError * count) {
-	  /* We accept this ellipse as a good fit */
+	  //	  std::cout << "erro " << total/count << " " << count << " " << boxes[i.level].center.x << " " << boxes[i.level].center.y << " " << ((double)boxes[i.level].size.height/(double)boxes[i.level].size.width) << std::endl;
 	  
+	  /* We accept this ellipse as a good fit */
 	  /* If our ellipse shares aspect ratio and center points
 	     with the parent ellipse then we accept them as
 	     concentric */
 	  if ((i.level > 0) &&
 	      (fabs(boxes[i.level].center.x - boxes[i.level-1].center.x) < maxXDiff)  &&
 	      (fabs(boxes[i.level].center.y - boxes[i.level-1].center.y) < maxYDiff) &&
-	      (fabs((double)boxes[i.level].size.height/(double)boxes[i.level-1].size.width - 
-		    (double)boxes[i.level].size.height/(double)boxes[i.level-1].size.width) < maxRatioDiff)) {
+	      (fabs((double)boxes[i.level].size.height/(double)boxes[i.level].size.width - 
+		    (double)boxes[i.level-1].size.height/(double)boxes[i.level-1].size.width) < maxRatioDiff)) {
 	    
 	    result->push_back(boxes[i.level-1]);
-	    
-	    /* We can now push the iterator on to get the next sibling of the parent */
-	    int target_level = i.level-1;
-	    while(cvNextTreeNode(&i) && (i.level > target_level)) {};
-	  }               
+	  }
 	}
       }
     }

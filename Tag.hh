@@ -9,6 +9,7 @@ public:
   Tag();
   virtual void Show(IplImage *image) =0;
   virtual std::ostream& Print(std::ostream& s) const=0;
+  virtual unsigned long GetCode() const =0;
 };
 
 std::ostream& operator<<(std::ostream& s, const Tag& z);

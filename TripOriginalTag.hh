@@ -8,8 +8,8 @@
 #include "Tag.hh"
 #include "concentricellipse.hh"
 
-#define IMAGEDEBUG
-#define TEXTDEBUG
+//#define IMAGEDEBUG
+//#define TEXTDEBUG
 
 #ifdef TEXTDEBUG
 #include <iostream>
@@ -67,6 +67,10 @@ public:
   {
     s << m_code;
     return s;
+  }
+
+  unsigned long GetCode() const {
+    return m_code;
   }
 
   void Show(IplImage *image) {
@@ -187,17 +191,47 @@ public:
 
 
   static void Process(IplImage *image,std::vector<Tag*> *result) {
+    IplImage *gray = GrayScaleImage(image);
+    AdaptiveThreshold(gray);
+
+    CvMemStorage *store = cvCreateMemStorage(0);
+    CvSeq *seq = FollowContours(gray,store,image);
+
+    std::vector<CvBox2D> ellipses;
+    ConcentricEllipses(gray,seq,&ellipses,image);
+
+    cvReleaseMemStorage(&store);
+
+    for(std::vector<CvBox2D>::const_iterator i = ellipses.begin(); i != ellipses.end(); i++) 
+      {
+	Tag* tag = DecodeTag(gray, *i,image );
+	if (tag != NULL) {
+	  result->push_back(tag);
+	}
+      }
+    cvReleaseImage(&gray);
+    
+  }
+
+  static inline IplImage* GrayScaleImage(IplImage *image) {
     /* ------------ */
     /* 1 - Convert image to grayscale */
     PROGRESS("Converting image to greyscale");
-    IplImage *gray = cvCreateImage(cvSize(image->width,image->height),IPL_DEPTH_8U,1);
-    cvCvtColor(image,gray,CV_RGB2GRAY);
+    IplImage *gray;
+    if (image->nChannels==3) {
+      gray = cvCreateImage(cvSize(image->width,image->height),IPL_DEPTH_8U,1);
+      cvCvtColor(image,gray,CV_RGB2GRAY);
+    }
+    else {
+      gray = cvCloneImage(image);
+    }
 #ifdef IMAGEDEBUG
     cvSaveImage("debug-grayscale.jpg",gray);
 #endif
-    PROGRESS("Done");
-    /* ------------ */
-    
+    return gray;
+  }    
+
+  static inline void AdaptiveThreshold(IplImage* gray) {
     /* ------------ */
     /* 2 - Adaptive Threshold */
     PROGRESS("Adaptive thresholding");
@@ -207,15 +241,14 @@ public:
 #ifdef IMAGEDEBUG
     cvSaveImage("debug-adaptive.jpg",gray);
 #endif
-    PROGRESS("Done");
-    /* ------------ */
-    
+  }    
+
+  static inline CvSeq* FollowContours(IplImage* gray, CvMemStorage* store, IplImage* image) {
     /* ------------ */
     /* 3 - Contour Following */
     PROGRESS("Contour following");
-    CvMemStorage *store = cvCreateMemStorage(0);
-    CvSeq *seq = NULL;
     IplImage *copy = cvCloneImage(gray); // the find contours process changes the image ;-(
+    CvSeq* seq = NULL;
     int num = cvFindContours(copy,store,&seq,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_TC89_KCOS);
     cvReleaseImage(&copy);
 #ifdef IMAGEDEBUG
@@ -224,157 +257,160 @@ public:
     cvSaveImage("debug-contours.jpg",debug1Clone);
     cvReleaseImage(&debug1Clone);
 #endif
-    PROGRESS("Done - Found " << num << " contours");
-    /* ------------ */
+    PROGRESS("Found " << num << " contours");
+    return seq;
+  }
     
-    
+  static inline void ConcentricEllipses(IplImage* gray, CvSeq *seq, std::vector<CvBox2D> *ellipses, IplImage *image) {
     /* ------------ */
     /* 4 - Identifying concentric ellipses */
     PROGRESS("Concentric ellipses");
-    std::vector<CvBox2D> ellipses;
-    int numEllipse = FindConcentricEllipses(seq,&ellipses);
+    int numEllipse = FindConcentricEllipses(seq,ellipses);
 #ifdef IMAGEDEBUG
     IplImage *debug2Clone = cvCloneImage(image);
-    for(std::vector<CvBox2D>::const_iterator i = ellipses.begin();i != ellipses.end(); i++) 
+    for(std::vector<CvBox2D>::const_iterator step = ellipses->begin();step != ellipses->end(); step++) 
       {
-	cvEllipseBox(debug2Clone,*i,CV_RGB(255,255,0),2);
+	cvEllipseBox(debug2Clone,*step,CV_RGB(255,255,0),2);
       }
     cvSaveImage("debug-ellipse.jpg",debug2Clone);
     cvReleaseImage(&debug2Clone);
 #endif
-    PROGRESS("Done - Found " << numEllipse << " concentric pairs");
-    /* ------------ */
+    PROGRESS("Found " << numEllipse << " concentric pairs");
+  }
     
-    
+  static inline TripOriginalTag<RING_COUNT,SECTOR_COUNT,SYNC_COUNT,CHECKSUM_COUNT,TAG_SIZE_SCALE>* DecodeTag(IplImage *gray, const CvBox2D &ellipse, IplImage *image) {
     /* ------------ */
     /* 5 - Decoding tag name */
-    PROGRESS("Decoding tags");
-    for(std::vector<CvBox2D>::const_iterator i = ellipses.begin(); i != ellipses.end(); i++) 
-      {
-	double radians = i->angle / 180 * M_PI;
-	double sint = sin(radians);
-	double cost = cos(radians);
-	double a = i->size.width/2;
-	double b = i->size.height/2;
-	
-	/* ------------ */
-	/* 5.1 - Find synchronization sector. This is two black sectors
-	   aligned in each code ring */
-	PROGRESS("Searching for synchronization sector");
-	bool search = 0;
-	bool secondtry =0;
-	int sync;
+    PROGRESS("Decoding tag");
+    double radians = ellipse.angle / 180 * M_PI;
+    double sint = sin(radians);
+    double cost = cos(radians);
+    double a = ellipse.size.width/2;
+    double b = ellipse.size.height/2;
+    
+    /* ------------ */
+    /* 5.1 - Find synchronization sector. This is two black sectors
+       aligned in each code ring */
+    PROGRESS("Searching for synchronization sector");
+    bool search = 0;
+    bool secondtry =0;
+    int sync_try;
+#define IMAGEDEBUG
 #ifdef IMAGEDEBUG
-	IplImage* debug3Clone = cvCloneImage(image);
+    IplImage* debug3Clone = cvCloneImage(image);
 #endif
-	for(sync=0;sync<SYNC_COUNT;sync++) {
-	  search = 1;
-	  for(int ring=0;ring<RING_COUNT;ring++) {
+    int sync_ring = 0;
+    for(sync_try=0;sync_try<SYNC_COUNT;sync_try++) {
+      search = 1;
+      for(sync_ring=0;sync_ring<RING_COUNT;sync_ring++) {
 #ifdef IMAGEDEBUG
-	    bool result = Sample(gray,ring,sync,cost,sint,a,b,i->center.x,i->center.y,sync_angle,0,debug3Clone);
+	bool result = Sample(gray,sync_ring,sync_try,cost,sint,a,b,ellipse.center.x,ellipse.center.y,sync_angle,0,debug3Clone);
 #else
-	    bool result = Sample(gray,ring,sync,cost,sint,a,b,i->center.x,i->center.y,sync_angle,0);
+	bool result = Sample(gray,sync_ring,sync_try,cost,sint,a,b,ellipse.center.x,ellipse.center.y,sync_angle,0);
 #endif
-	    search &= result;
-	  }    
-	  if (secondtry) { 
-	    // we stop after the extra pass through.  If the search was
-	    // successful we leave secondtry to be 1 to signal that we
-	    // found the sync sector twice.
-	    if (!search) secondtry=0;
-	    break; 
-	  }
-	  if (search) {
-	    // if we find a sync sector then loop round once more to see
-	    // if we find another one.  If we do find another then we
-	    // assume they are the same sector and we have fallen on an
-	    // edge and so we'll take the average of the two angles
-	    secondtry = 1;
-	  } 
-	}
+	if (!result) { break; }
+      }    
+
+      if (secondtry) { 
+	// we stop after the extra pass through.  If the search was
+	// successful we leave secondtry to be 1 to signal that we
+	// found the sync sector twice.
+	if (sync_ring != RING_COUNT) secondtry=0;
+	sync_ring = RING_COUNT;
+	break; 
+      }
+      if (sync_ring == RING_COUNT) {
+	// if we find a sync sector then loop round once more to see
+	// if we find another one.  If we do find another then we
+	// assume they are the same sector and we have fallen on an
+	// edge and so we'll take the average of the two angles
+	secondtry = 1;
+      } 
+    }
 #ifdef IMAGEDEBUG
-	cvSaveImage("debug-scan.jpg",debug3Clone);
-	cvReleaseImage(&debug3Clone);
+    cvSaveImage("debug-scan.jpg",debug3Clone);
+    cvReleaseImage(&debug3Clone);
 #endif      	
-	/* ------------ */
-	/* 5.2 - If we found a sync sector then read tag */
-	int success = 0;
-	unsigned long code = 0;
-	unsigned long checksum = 0;
-	unsigned long target_checksum = 0;
-	if (search || secondtry) {
-	  PROGRESS ("Sync Found.  Reading Code");
-	  double angle_offset;
-	  /* If we found the sync sector on two adjacent samples then
-	     take the mid value for the start point */
-	  if (secondtry) {
-	    PROGRESS ("Adjusted sync position for sector boundary");
-	    angle_offset = angle_offset*(sync-0.5);
-	  }
-	  else {
-	    angle_offset = angle_offset*sync;
-	  }
-	  
+    /* ------------ */
+    /* 5.2 - If we found a sync sector then read tag */
+    int success = 0;
+    unsigned long code = 0;
+    unsigned long checksum = 0;
+    unsigned long target_checksum = 0;
+    if (sync_ring == RING_COUNT) {
+      PROGRESS ("Sync Found.  Reading Code");
+      double angle_offset;
+      /* If we found the sync sector on two adjacent samples then
+	 take the mid value for the start point */
+      if (secondtry) {
+	PROGRESS ("Adjusted sync position for sector boundary");
+	angle_offset = sync_angle*(sync_try-0.5);
+      }
+      else {
+	angle_offset = sync_angle*(sync_try-1);
+      }
+
 #ifdef IMAGEDEBUG
-	  IplImage* debug4Clone = cvCloneImage(image);
+      IplImage* debug4Clone = cvCloneImage(image);
 #endif
-	  success = 1;
-	  for(int sector=1;sector<SECTOR_COUNT;sector++) {
-	    unsigned int sector_value = 0;
-	    for(int ring=RING_COUNT-1;ring>=0;ring--) {
-	      sector_value <<=1;
+      success = 1;
+      for(int sector=1;sector<SECTOR_COUNT;sector++) {
+	unsigned int sector_value = 0;
+	for(int ring=RING_COUNT-1;ring>=0;ring--) {
+	  sector_value <<=1;
 #ifdef IMAGEDEBUG
-	      sector_value |= (Sample(gray,ring,sector,cost,sint,a,b,i->center.x,i->center.y,sector_angle,angle_offset,debug4Clone) ? 1 : 0);
+	  sector_value |= (Sample(gray,ring,sector,cost,sint,a,b,ellipse.center.x,ellipse.center.y,sector_angle,angle_offset,debug4Clone) ? 1 : 0);
 #else
-	      sector_value |= (Sample(gray,ring,sector,cost,sint,a,b,i->center.x,i->center.y,sector_angle,angle_offset) ? 1 : 0);
+	  sector_value |= (Sample(gray,ring,sector,cost,sint,a,b,ellipse.center.x,ellipse.center.y,sector_angle,angle_offset) ? 1 : 0);
 #endif
-	    }
-	    PROGRESS("Read sector " << sector << ": " << sector_value);
-	    if (sector_value == (1<<RING_COUNT)-1) {
-	      /* We read a sector of all 1's - which we shouldn't have done */
-	      PROGRESS("Read bogus sector - aborting this tag");
-	      success = 0;
-	      break;
-	    }
-	    
-	    if (sector < CHECKSUM_COUNT + 1) {
-	      target_checksum += sector_value * (unsigned long)pow((1<<RING_COUNT)-1,sector-1);
-	    }
-	    else {
-	      code += sector_value * (unsigned long)pow((1<<RING_COUNT)-1,sector-CHECKSUM_COUNT-1);
-	      checksum += sector_value;
-	    }
-	  }
-#ifdef IMAGEDEBUG
-	  cvSaveImage("debug-read.jpg",debug4Clone);
-	  cvReleaseImage(&debug4Clone);
-#endif	
+	}
+	PROGRESS("Read sector " << sector << ": " << sector_value);
+	if (sector_value == (1<<RING_COUNT)-1) {
+	  /* We read a sector of all 1's - which we shouldn't have done */
+	  PROGRESS("Read bogus sector - aborting this tag");
+	  success = 0;
+	  break;
+	}
+	
+	if (sector < CHECKSUM_COUNT + 1) {
+	  target_checksum += sector_value * (unsigned long)pow((1<<RING_COUNT)-1,sector-1);
 	}
 	else {
-	  PROGRESS("Failed to find synchronization sector - aborting this tag");
-	}
-	/* ------------ */
-	
-	
-	if (success) {
-	  checksum = checksum % (int)pow((1<<RING_COUNT)-1,CHECKSUM_COUNT);
-	  
-	  PROGRESS("Code is " << code);
-	  PROGRESS("Target checksum is " << target_checksum);
-	  PROGRESS("Checksum is " << checksum);
-	  
-	  if (checksum == target_checksum) {
-	    PROGRESS("Accepting checksum");
-	    result->push_back(new TripOriginalTag<RING_COUNT,SECTOR_COUNT,SYNC_COUNT,CHECKSUM_COUNT,TAG_SIZE_SCALE>(*i,code));
-	  }
-	  else {
-	    PROGRESS("Checksum did not match - refusing tag");
-	  }
+	  code += sector_value * (unsigned long)pow((1<<RING_COUNT)-1,sector-CHECKSUM_COUNT-1);
+	  checksum += sector_value;
 	}
       }
-    cvReleaseImage(&gray);
-  } 
-
+#ifdef IMAGEDEBUG
+      cvSaveImage("debug-read.jpg",debug4Clone);
+      cvReleaseImage(&debug4Clone);
+#endif	
+    }
+    else {
+      PROGRESS("Failed to find synchronization sector - aborting this tag");
+    }
+    /* ------------ */
+    
+    
+    if (success) {
+      checksum = checksum % (int)pow((1<<RING_COUNT)-1,CHECKSUM_COUNT);
+      
+      PROGRESS("Code is " << code);
+      PROGRESS("Target checksum is " << target_checksum);
+      PROGRESS("Checksum is " << checksum);
+      
+      if (checksum == target_checksum) {
+	PROGRESS("Accepting checksum");
+	return new TripOriginalTag<RING_COUNT,SECTOR_COUNT,SYNC_COUNT,CHECKSUM_COUNT,TAG_SIZE_SCALE>(ellipse,code);	
+      }
+      else {
+	PROGRESS("Checksum did not match - refusing tag");
+	return NULL;
+      }
+    }
+    else {
+      return NULL;
+    }
+  }
 
   static double TagRadius() {
     return Radius(RING_COUNT);
