@@ -10,8 +10,10 @@
 #include <tripover/Coder.hh>
 #include <tripover/Camera.hh>
 #include <tripover/ShapeChain.hh>
-#include <tripover/Ellipse.hh>
+#include <tripover/EllipseTransform.hh>
 #include <tripover/findtransform.hh>
+#include <tripover/Ellipse.hh>
+#include <tripover/Coder.hh>
 #include <iostream>
 #include <cassert>
 
@@ -29,20 +31,16 @@
 
 static int debug_image_counter = 0;
 
-#undef LINEAR_ELLIPSE
 
 /**
- * The number of readings to make from a tag.  We then look for pairs
- * of reading that are the same in order to guess the correct angle of
- * the tag.
- *
  * \todo regression test with gl harness
  */
 #define READING_COUNT 200
 #define MAX_CHILD_DISTANCE 0.1
-template<int RING_COUNT, int SECTOR_COUNT>
-class RingTag : public virtual Tag< ShapeChain<Ellipse>, RING_COUNT*SECTOR_COUNT >, 
-		protected virtual Coder<RING_COUNT*SECTOR_COUNT> {
+template<int RING_COUNT, int SECTOR_COUNT, class C>
+class RingTag : public virtual Tag< ShapeChain<C>, RING_COUNT*SECTOR_COUNT >, 
+		protected virtual Coder<RING_COUNT*SECTOR_COUNT>,
+                protected virtual EllipseTransform {
 private:
   float m_bullseye_inner_radius;
   float m_bullseye_outer_radius;
@@ -63,12 +61,12 @@ public:
 	  float data_outer_radius);
   virtual ~RingTag();
   virtual void Draw2D(Image& image, CyclicBitSet<RING_COUNT*SECTOR_COUNT>& tag_data) const;
-  virtual LocatedObject<RING_COUNT*SECTOR_COUNT>* GetTransform(ShapeTree<ShapeChain<Ellipse> >::Node* node, 
+  virtual LocatedObject<RING_COUNT*SECTOR_COUNT>* GetTransform(typename ShapeTree<ShapeChain<C> >::Node* node, 
 							       const Camera& camera, const Image& image) const;
   virtual bool DecodeNode(LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj,
 			  const Camera& camera, const Image& image) const;
 
-  virtual bool CheckTransform(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, ShapeTree<ShapeChain<Ellipse> >::Node* node) const;
+  virtual bool CheckTransform(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, typename ShapeTree<ShapeChain<C> >::Node* node) const;
   virtual bool CheckDecode(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, const Camera& camera, const Image& image) const;
  
 private:
@@ -77,7 +75,7 @@ private:
 
 };
 
-template<int RING_COUNT,int SECTOR_COUNT> RingTag<RING_COUNT,SECTOR_COUNT>::RingTag(float bullseye_inner_radius,
+template<int RING_COUNT,int SECTOR_COUNT,class C> RingTag<RING_COUNT,SECTOR_COUNT,C>::RingTag(float bullseye_inner_radius,
 										    float bullseye_outer_radius,
 										    float data_inner_radius,
 										    float data_outer_radius) : 
@@ -133,7 +131,7 @@ template<int RING_COUNT,int SECTOR_COUNT> RingTag<RING_COUNT,SECTOR_COUNT>::Ring
 }
 
 
-template<int RING_COUNT,int SECTOR_COUNT> RingTag<RING_COUNT,SECTOR_COUNT>::~RingTag() {
+template<int RING_COUNT,int SECTOR_COUNT,class C> RingTag<RING_COUNT,SECTOR_COUNT,C>::~RingTag() {
   delete[] m_data_ring_outer_radii;
   delete[] m_data_ring_centre_radii;
   delete[] m_sector_angles;
@@ -142,7 +140,7 @@ template<int RING_COUNT,int SECTOR_COUNT> RingTag<RING_COUNT,SECTOR_COUNT>::~Rin
   delete[] m_cos_read_angles;
 }
 
-template<int RING_COUNT,int SECTOR_COUNT> void RingTag<RING_COUNT,SECTOR_COUNT>::Draw2D(Image& image, CyclicBitSet<RING_COUNT*SECTOR_COUNT>& tag_data) const {
+template<int RING_COUNT,int SECTOR_COUNT,class C> void RingTag<RING_COUNT,SECTOR_COUNT,C>::Draw2D(Image& image, CyclicBitSet<RING_COUNT*SECTOR_COUNT>& tag_data) const {
 
   EncodePayload(tag_data);
       
@@ -226,7 +224,7 @@ template<int RING_COUNT,int SECTOR_COUNT> void RingTag<RING_COUNT,SECTOR_COUNT>:
   }
 }
 
-template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>* RingTag<RING_COUNT,SECTOR_COUNT>::GetTransform(ShapeTree<ShapeChain<Ellipse> >::Node* node, 
+template<int RING_COUNT,int SECTOR_COUNT,class C> LocatedObject<RING_COUNT*SECTOR_COUNT>* RingTag<RING_COUNT,SECTOR_COUNT,C>::GetTransform(typename ShapeTree<ShapeChain<C> >::Node* node, 
 															       const Camera& camera, const Image& image) const {
 #ifdef RING_TAG_DEBUG
   PROGRESS("DecodeNode called");
@@ -244,16 +242,16 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
   }
 
   // get the ellipse this node encompasses
-  ShapeChain<Ellipse> sce = node->matched;
-  Ellipse el = sce.GetShape();
+  ShapeChain<C> sce = node->matched;
+  C el = sce.GetShape();
 
   if (!el.IsFitted()) { return false; }
 
   bool found = false;
-  for(typename std::vector< ShapeTree<ShapeChain<Ellipse> >::Node* >::iterator i = node->children.begin(); 
+  for(typename std::vector< typename ShapeTree<ShapeChain<C> >::Node* >::iterator i = node->children.begin(); 
       i!=node->children.end();
       ++i) {
-    Ellipse c1 = (*i)->matched.GetShape();
+    C c1 = (*i)->matched.GetShape();
     if (c1.IsFitted()) {
       float dist = (c1.GetX0()-el.GetX0())*(c1.GetX0()-el.GetX0()) + (c1.GetY0()-el.GetY0())*(c1.GetY0()-el.GetY0());
 #ifdef RING_TAG_DEBUG
@@ -288,11 +286,7 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
   float transform1[16];
   float transform2[16];
 
-#ifdef LINEAR_ELLIPSE
-  el.GetTransformLinear(transform1,transform2);
-#else
-  el.GetTransform(transform1,transform2);
-#endif
+  TransformEllipse(el,transform1,transform2);
   
   // project some points for the inner circle using both interpretations and check which one fits  
   int count = 200;
@@ -420,10 +414,10 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
       //    float direction1 = atan((el.GetY0()-points1[1])/(el.GetX0()-points1[0]));
       //    float direction2 = atan((el.GetY0()-points2[1])/(el.GetX0()-points2[0]));
       
-      for(typename std::vector< ShapeTree<ShapeChain<Ellipse> >::Node* >::iterator i = node->children.begin();
+      for(typename std::vector< typename ShapeTree<ShapeChain<C> >::Node* >::iterator i = node->children.begin();
 	  i!=node->children.end();
 	  ++i) {      
-	Ellipse child = (*i)->matched.GetShape();
+	C child = (*i)->matched.GetShape();
 	
 	
 	//      float test_dir
@@ -481,7 +475,7 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
   return NULL;
 }
 
-template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>::DecodeNode(LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj,const Camera& camera, const Image& image) const {
+template<int RING_COUNT,int SECTOR_COUNT,class C> bool RingTag<RING_COUNT,SECTOR_COUNT,C>::DecodeNode(LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj,const Camera& camera, const Image& image) const {
 
   float* correcttrans = lobj->transform;
   
@@ -631,7 +625,7 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
   }
 };  
 
-template<int RING_COUNT,int SECTOR_COUNT> void RingTag<RING_COUNT,SECTOR_COUNT>::draw_circle(Image& debug0, const Camera& camera, float l[16], double radius) const {
+template<int RING_COUNT,int SECTOR_COUNT,class C> void RingTag<RING_COUNT,SECTOR_COUNT,C>::draw_circle(Image& debug0, const Camera& camera, float l[16], double radius) const {
   float oldpts[2] = { radius ,
 		      0 };
   float pts[2];
@@ -663,7 +657,7 @@ template<int RING_COUNT,int SECTOR_COUNT> void RingTag<RING_COUNT,SECTOR_COUNT>:
   }
 }
 
-template<int RING_COUNT,int SECTOR_COUNT>  void RingTag<RING_COUNT,SECTOR_COUNT>::draw_read(const Image& image, const Camera& camera, float l[16]) const {
+template<int RING_COUNT,int SECTOR_COUNT,class C>  void RingTag<RING_COUNT,SECTOR_COUNT,C>::draw_read(const Image& image, const Camera& camera, float l[16]) const {
   int i =0;
   Image debug0(image);
   debug0.ConvertScale(-1,255);
@@ -715,7 +709,7 @@ template<int RING_COUNT,int SECTOR_COUNT>  void RingTag<RING_COUNT,SECTOR_COUNT>
   debug0.Save(filename);
 }
 
-template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>::CheckTransform(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, ShapeTree<ShapeChain<Ellipse> >::Node* node) const {
+template<int RING_COUNT,int SECTOR_COUNT,class C> bool RingTag<RING_COUNT,SECTOR_COUNT,C>::CheckTransform(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, typename ShapeTree<ShapeChain<C> >::Node* node) const {
   // project some points for the inner circle using both interpretations and check which one fits  
   int count = 200;
   std::vector<float> projected;
@@ -730,7 +724,7 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
 /**
  * \todo implement this properly
  */
-template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>::CheckDecode(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, const Camera& camera, const Image& image) const {
+template<int RING_COUNT,int SECTOR_COUNT,class C> bool RingTag<RING_COUNT,SECTOR_COUNT,C>::CheckDecode(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, const Camera& camera, const Image& image) const {
   LocatedObject<RING_COUNT*SECTOR_COUNT> copy(*lobj);
   copy.tag_codes.clear();
   DecodeNode(&copy,camera,image);

@@ -10,6 +10,7 @@
 #include <tripover/Tag.hh>
 #include <tripover/Coder.hh>
 #include <tripover/QuadTangle.hh>
+#include <tripover/QuadTangleTransform.hh>
 #include <tripover/Camera.hh>
 #include <tripover/ShapeChain.hh>
 #include <tripover/findtransform.hh>
@@ -38,7 +39,7 @@ static int debug_matrix_image_counter = 0;
  * \todo regression test with gl harness
  */ 
 template<int SIZE>
-class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*SIZE % 2) >, public virtual Coder<SIZE*SIZE - (SIZE*SIZE % 2)> {
+class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*SIZE % 2) >, public virtual Coder<SIZE*SIZE - (SIZE*SIZE % 2)>, public virtual QuadTangleTransform {
  private:
   float m_cell_width;
   float m_cell_width_2;
@@ -210,7 +211,7 @@ template<int SIZE> LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* MatrixTag<SIZE>::GetT
   // extract its pose
   float transform[16];
   
-  quad.GetTransform(transform);
+  TransformQuadTangle(quad,transform);
 
   LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = new LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>();
   lobj->LoadTransform(transform,1,camera);

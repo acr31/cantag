@@ -23,8 +23,8 @@
  * \todo allow the projection method to be altered between ellipse and
  * linear ellipse
  */
-class Ellipse {
-private:
+class Ellipse  {
+protected:
   float m_a;
   float m_b;
   float m_c;
@@ -46,7 +46,6 @@ public:
   Ellipse(const std::vector<float>& points, bool prev_fit); 
   Ellipse(float a, float b, float c, float d, float e, float f);
   Ellipse(float x0, float y0,float width, float height, float angle);
-  ~Ellipse();
   inline bool IsFitted() const { return m_fitted; }
   bool Compare(const Ellipse& o) const;
 
@@ -72,33 +71,6 @@ public:
   float GetErrorSafaeeRad(const std::vector<float>& points) const;
   float GetErrorSafaeeRad2(const std::vector<float>& points) const;
   float GetErrorStricker(const std::vector<float>& points) const;
-
-  void GetTransform(float transform1[16], float transform2[16]);
-
-  /**
-   * We then build the transformation matrix that transforms the unit circle onto the ellipse
-   *
-   * This is a scale factor   ( width 0      0 0 )
-   *                          ( 0     height 0 0 ) 
-   *                          ( 0     0      1 0 )
-   *                          ( 0     0      0 1 )
-   *
-   * premultiplied by a rotation around the z axis  ( cos(theta)  -sin(theta) 0 0 )
-   *                                                ( sin(theta)  cos(theta)  0 0 )
-   *                                                ( 0           0           1 0 )
-   *                                                ( 0           0           0 1 )
-   *
-   *
-   * premultiplied by a translation in x and y ( 1 0 0 x0 )
-   *                                           ( 0 1 0 y0 )
-   *                                           ( 0 0 1 1  )
-   *                                           ( 0 0 0 1  ) 
-   *
-   * (translate by 1 in z so that the perspective transform doesn't do
-   * anything when we apply it later)
-   *
-   */
-  void GetTransformLinear(float transform1[16], float transform2[16]);
 
   /**
    * Calculate the ellipse transform based on decomposing the general
@@ -218,10 +190,19 @@ public:
 
   bool Check(const std::vector<float>& points) const;
 
-private:
-  bool FitEllipseSimple(const std::vector<float>& points);
-  bool FitEllipse(const std::vector<float>& points);
+protected:
+  virtual bool FitEllipse(const std::vector<float>& points); 
 
+};
+
+class SimpleEllipse : public Ellipse {
+public:
+  SimpleEllipse();
+  SimpleEllipse(const std::vector<float>& points); 
+  SimpleEllipse(const std::vector<float>& points, bool prev_fit); 
+  SimpleEllipse(Socket& socket);
+protected:
+  virtual bool FitEllipse(const std::vector<float>& points);   
 };
 #else
 class Ellipse;
