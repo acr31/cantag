@@ -92,7 +92,11 @@ public:
 	int data_symbol_count = (BIT_COUNT - GRANULARITY*(CHECKSUM_COUNT+1))/GRANULARITY;
 	
 	for(int c=0;c<data_symbol_count;c++) {
-	  BigInt<BIT_COUNT> next(payload.Get(c+1+CHECKSUM_COUNT,GRANULARITY));
+	  unsigned int symbol = payload.Get(c+1+CHECKSUM_COUNT,GRANULARITY);
+#ifdef TRIP_ORIGINAL_CODER_DEBUG
+	  PROGRESS("Read Symbol "<< symbol);
+#endif	  
+	  BigInt<BIT_COUNT> next(symbol);
 	  checksum_count+=next;
 	  bi += pwr * next;
 	  pwr *= base;
@@ -101,7 +105,7 @@ public:
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
 	PROGRESS("Code is " << bi);
 	PROGRESS("Read checksum "<< checksum);
-	PROGRESS("Accumulated checksum "<< checksum_count);	
+	PROGRESS("Accumulated checksum "<< checksum_count % checksum_mod);	
 #endif
 	// now check the checksum
 	if (checksum == checksum_count % checksum_mod) {
@@ -142,19 +146,22 @@ public:
     // tag_data by (1<<GRANULARITY)-1
 
     BigInt<BIT_COUNT> bi(tag_data);
+#ifdef TRIP_ORIGINAL_CODER_DEBUG
+    PROGRESS("Value to encode is "<<bi);
+#endif
     BigInt<BIT_COUNT> checksum(0);
     int data_symbol_count = (BIT_COUNT - GRANULARITY*(CHECKSUM_COUNT+1))/GRANULARITY;
 
     for(int i=0;i<data_symbol_count;i++) {
       unsigned int symbol = bi % base;
       checksum+=BigInt<BIT_COUNT>(symbol);
-      payload.Put(symbol,i+1+CHECKSUM_COUNT,GRANULARITY);
+      payload.Put(symbol,i+1+CHECKSUM_COUNT,GRANULARITY); 
       bi/=base;
     }
 
     checksum %= checksum_mod;
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
-    PROGRESS("Checksum is "<<checksum << payload.to_string());
+    PROGRESS("Checksum is "<<checksum);
 #endif
     for(int i=0;i<CHECKSUM_COUNT;i++) {
       unsigned int symbol = checksum % base;

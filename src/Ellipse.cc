@@ -8,12 +8,15 @@
 #include <eigenvv.hh>
 #include <cmath>
 #include <iostream>
-#undef ELLIPSE_DEBUG
-#undef ELLIPSE_DEBUG_DUMP_POINTS
-#undef CIRCLE_TRANSFORM_DEBUG
-#undef DECOMPOSE_DEBUG
 
-#define MAXFITERROR 0.000001
+#ifdef TEXT_DEBUG
+# define ELLIPSE_DEBUG
+# undef ELLIPSE_DEBUG_DUMP_POINTS
+# undef CIRCLE_TRANSFORM_DEBUG
+# undef DECOMPOSE_DEBUG
+#endif
+
+#define MAXFITERROR 0.0001
 #define COMPARETHRESH 0.0001
 
 static void print(const char* label, double* array, int rows, int cols);
@@ -80,7 +83,7 @@ void Ellipse::FitEllipse(const float* points, int numpoints) {
     d2[pointer++] = 1;
   }
 
-#ifdef ELLIPSE_DEBUG
+#ifdef ELLIPSE_DEBUG_DUMP_POINTS
   print("D1",d1,numpoints,3);
   print("D2",d2,numpoints,3);
 #endif

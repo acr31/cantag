@@ -8,119 +8,87 @@
 
 #define COMPARE_THRESH 1
 
-#ifdef TEXT_DEBUG
 #define QUADTANGLE_DEBUG
-#endif
 
 QuadTangle::QuadTangle() {
   m_fitted = false;
 }
 
-static float coskvect(const float* points, int index, int k, int numpoints) {
-  int lower_index = index-k;
-  int upper_index = index+k;
-
-  if (lower_index < 0) {
-    lower_index += numpoints;
-  }
-
-  if (upper_index >= numpoints) {
-    upper_index -= numpoints;
-  }
-
-  float ax = points[2*index]-points[2*lower_index];
-  float ay = points[2*index+1]-points[2*lower_index+1];
-
-  float bx = points[2*index]-points[2*upper_index];
-  float by = points[2*index+1]-points[2*upper_index+1];
-
-  float adotb =  ax*bx + ay*by;      
-  float maga = sqrt( ax*ax + ay*ay);
-  float magb = sqrt( bx*bx + by*by);
-  
-  return adotb/maga/magb;
-}
-
-
-
-QuadTangle::QuadTangle(const float* points, int numpoints, bool prev_fitted) {
+QuadTangle::QuadTangle(float* points, int numpoints, bool prev_fitted) {
   
   if (!prev_fitted && points) {
-    float curvature[numpoints];
-    int support[numpoints];
-    int m = numpoints/10;
-    for(int i=0;i<numpoints;i++) {
-      curvature[i] = -1;
-      support[i] = 0;
-      for(int k=m;k>0;k--) {
-	float newcos = coskvect(points,i,k,numpoints);
-	if (newcos < curvature[i]) {
-	  break;
-	}
-	else {
-	  support[i] = k;
-	  curvature[i] = newcos;
-	}
-      }
+    CvMemStorage* seqstore = cvCreateMemStorage(0);
+    CvSeq* contour = cvCreateSeq(CV_SEQ_POLYGON,sizeof(CvSeq),sizeof(CvPoint),seqstore);
+    for(int i=0;i<numpoints*2;i+=2) {
+      CvPoint p = cvPoint((int)(points[i]*1000),(int)(points[i+1]*1000));
+      cvSeqPush(contour,&p);    
     }
 
-    int partition_indices[4];
-    int ptr=0;
-    for(int i=0;i<numpoints;i++) {
-      bool accept = true;
-      for(int j=0;j<=support[i]/2;j++) {
-	int lower_index = i-j;
-	int upper_index = i+j;
-	if (lower_index <0) { lower_index += numpoints; }
-	if (upper_index >= numpoints) { upper_index -= numpoints; }
+    //CvPoint poly2[contour->total];
+    //    cvCvtSeqToArray( contour, poly2 , cvSlice(0,contour->total));
+    //for( int pt = 0; pt < contour->total; pt++ ) {
+    //      std::cerr << poly2[pt].x << " " << poly2[pt].y << std::endl;
+    //    }
 
-	accept = accept && 
-	  curvature[lower_index] <= curvature[i] &&
-	  curvature[upper_index] <= curvature[i];		  	
-      }
-      if (accept) {
-	if (ptr == 4) {
-	  // we've just found our fifth point - can't be a quadtangle
 #ifdef QUADTANGLE_DEBUG
-	  PROGRESS("Found fifth point on this contour - it can't be a square");
+    PROGRESS("Copied points back into opencv sequence");
 #endif
-	  m_fitted = false;
-	  return;
-	}
-	else {
-	  partition_indices[ptr++] = i;
-	}
-      }
-    }
+    CvMemStorage* store = cvCreateMemStorage(0);
+    CvSeq *result = cvApproxPoly( contour, sizeof(CvContour), store,
+				  CV_POLY_APPROX_DP, 
+				  cvContourPerimeter(contour)*0.02, 0 );
     
-    if (ptr != 4) {
-      // we havn't found enough points
+    //    CvPoint poly[result->total];
+    //    cvCvtSeqToArray( result, poly , cvSlice(0,result->total));
+    //    for( int pt = 0; pt < result->total; pt++ ) {
+    //      std::cerr << "0 0 " << poly[pt].x << " " << poly[pt].y << std::endl;
+    //    }
+    //    std::cerr<<"-"<<std::endl;
+
 #ifdef QUADTANGLE_DEBUG
-      PROGRESS("Only found " << ptr << " points - it can't be a square");
+    PROGRESS("Applied polygon approximation");
+    PROGRESS("Vertices = " << result->total);
+    PROGRESS("Convex = " << (cvCheckContourConvexity(result) ? "yes" : "no"));
+    PROGRESS("Area = " << fabs(cvContourArea(result,CV_WHOLE_SEQ)));
+#endif
+
+    // Check for 4 vertices
+    // Check for a convex contour
+    
+    if( result->total == 4 &&
+	cvCheckContourConvexity(result) &&
+	fabs(cvContourArea(result,CV_WHOLE_SEQ)) > 1000) {    
+      CvPoint corners[4];
+      cvCvtSeqToArray(result,corners,cvSlice(0,4));
+#ifdef QUADTANGLE_DEBUG
+      PROGRESS("Accepting polygon with points " <<
+	       "("<<corners[0].x<<","<<corners[0].y<<") "<<
+	       "("<<corners[1].x<<","<<corners[1].y<<") "<<
+	       "("<<corners[2].x<<","<<corners[2].y<<") "<<
+	       "("<<corners[3].x<<","<<corners[3].y<<")");
+
+#endif
+
+      m_x0 = (float)corners[0].x/1000.f;
+      m_y0 = (float)corners[0].y/1000.f;
+      m_x1 = (float)corners[1].x/1000.f;
+      m_y1 = (float)corners[1].y/1000.f;
+      m_x2 = (float)corners[2].x/1000.f;
+      m_y2 = (float)corners[2].y/1000.f;
+      m_x3 = (float)corners[3].x/1000.f;
+      m_y3 = (float)corners[3].y/1000.f;
+      sort_points();
+      m_fitted = true;
+    }
+    else {
+#ifdef QUADTANGLE_DEBUG
+      PROGRESS("Rejecting polygon");
 #endif
       m_fitted = false;
-      return;
     }
-
-    m_x0 = points[partition_indices[0]*2];
-    m_y0 = points[partition_indices[0]*2+1];
-    m_x1 = points[partition_indices[1]*2];
-    m_y1 = points[partition_indices[1]*2+1];
-    m_x2 = points[partition_indices[2]*2];
-    m_y2 = points[partition_indices[2]*2+1];
-    m_x3 = points[partition_indices[3]*2];
-    m_y3 = points[partition_indices[3]*2+1];
-
-#ifdef QUADTANGLE_DEBUG
-    PROGRESS("Accepting polygon with points " <<
-	     "("<< m_x0 << "," << m_y0 << ") " <<
-	     "("<< m_x1 << "," << m_y1 << ") " <<
-	     "("<< m_x2 << "," << m_y2 << ") " <<
-	     "("<< m_x3 << "," << m_y3 << ") ");
-
-#endif
-    sort_points();
-    m_fitted = true;
+  
+    cvReleaseMemStorage(&seqstore);
+    cvReleaseMemStorage(&store);
   }
   else {
     m_fitted = false;
@@ -140,74 +108,7 @@ bool QuadTangle::Compare(const QuadTangle& o) const {
 	  (dist(m_x3,m_y3,o.m_x3,o.m_y3) < COMPARE_THRESH));
 }
 
-float QuadTangle::find_angle(float x, float y, float cx, float cy) {
-  if ((x >= cx) && (y >= cy)) {
-    return M_PI/2+ atan( (y-cy) / (x-cx) );
-  }
-  else if ((x >= cx) && (y < cy)) {
-    return atan( (cy-y) / (x-cx) );
-  }
-  else if ((x < cx) && (y < cy)) {
-    return 3*M_PI/2 + atan ( (cy-y) / (cx-x) );
-  }
-  else if ((x < cx) && (y >= cy)) {
-    return M_PI + atan( (y-cy) / (cx-x));
-  }
-}
-
-void QuadTangle::swap( float *a, float *b) {
-  float t = *a;
-  *a = *b;
-  *b = t;
-}
-
-void QuadTangle::sort_points()
-{
-  // sort the points into clockwise order.
-  float angles[4];
-  angles[0] = find_angle(m_x0,m_y0,m_xc,m_yc);
-  angles[1] = find_angle(m_x1,m_y1,m_xc,m_yc);
-  angles[2] = find_angle(m_x2,m_y2,m_xc,m_yc);
-  angles[3] = find_angle(m_x3,m_y3,m_xc,m_yc);
-
-#ifdef QUADTANGLE_DEBUG
-  PROGRESS("Centre (" << m_xc << "," << m_yc <<")");
-  PROGRESS("Original order " << std::endl <<
-  	   "(" << m_x0 << "," << m_y0 << ") @ "<< angles[0] << std::endl <<
-  	   "(" << m_x1 << "," << m_y1 << ") @ "<< angles[1] << std::endl <<
-  	   "(" << m_x2 << "," << m_y2 << ") @ "<< angles[2] << std::endl <<
-  	   "(" << m_x3 << "," << m_y3 << ") @ "<< angles[3]);
-#endif
-  float tx,ty; 
-  for(int i=0;i<4;i++) {
-    if (angles[0] > angles[1]) {
-      swap(&m_x0,&m_x1);
-      swap(&m_y0,&m_y1);
-      swap(&angles[0],&angles[1]);
-    }
-
-    if (angles[1] > angles[2]) {
-      swap(&m_x1,&m_x2);
-      swap(&m_y1,&m_y2);
-      swap(&angles[1],&angles[2]);
-    }
-
-    if (angles[2] > angles[3]) {
-      swap(&m_x2,&m_x3);
-      swap(&m_y2,&m_y3);
-      swap(&angles[2],&angles[3]);
-    }
-  }
-#ifdef QUADTANGLE_DEBUG
-  PROGRESS("Final order " << std::endl <<
-  	   "(" << m_x0 << "," << m_y0 << ") @ "<< angles[0] << std::endl <<
-  	   "(" << m_x1 << "," << m_y1 << ") @ "<< angles[1] << std::endl <<
-  	   "(" << m_x2 << "," << m_y2 << ") @ "<< angles[2] << std::endl <<
-  	   "(" << m_x3 << "," << m_y3 << ") @ "<< angles[3]);
-#endif
-}
-
-void QuadTangle::compute_central_point() {
+inline void QuadTangle::compute_central_point() {
   /*
    * Find the central point of this quadtangle (A,B,C,D)
    *
@@ -262,3 +163,68 @@ void QuadTangle::compute_central_point() {
   m_yc = Ay+ACy*b;        
 }
 
+
+float QuadTangle::find_angle(float x, float y, float cx, float cy) {
+  if ((x >= cx) && (y >= cy)) {
+    return M_PI/2+ atan( (y-cy) / (x-cx) );
+  }
+  else if ((x >= cx) && (y < cy)) {
+    return atan( (cy-y) / (x-cx) );
+  }
+  else if ((x < cx) && (y < cy)) {
+    return 3*M_PI/2 + atan ( (cy-y) / (cx-x) );
+  }
+  else if ((x < cx) && (y >= cy)) {
+    return M_PI + atan( (y-cy) / (cx-x));
+  }
+}
+
+void QuadTangle::swap( float *a, float *b) {
+  float t = *a;
+  *a = *b;
+  *b = t;
+}
+
+void QuadTangle::sort_points()
+{
+  // sort the points into clockwise order.
+  float angles[4];
+  angles[0] = find_angle(m_x0,m_y0,m_xc,m_yc);
+  angles[1] = find_angle(m_x1,m_y1,m_xc,m_yc);
+  angles[2] = find_angle(m_x2,m_y2,m_xc,m_yc);
+  angles[3] = find_angle(m_x3,m_y3,m_xc,m_yc);
+  //  PROGRESS("Centre (" << m_xc << "," << m_yc <<")");
+  //  PROGRESS("Original order " << std::endl <<
+  //	   "(" << m_x0 << "," << m_y0 << ") @ "<< angles[0] << std::endl <<
+  //	   "(" << m_x1 << "," << m_y1 << ") @ "<< angles[1] << std::endl <<
+  //	   "(" << m_x2 << "," << m_y2 << ") @ "<< angles[2] << std::endl <<
+  //	   "(" << m_x3 << "," << m_y3 << ") @ "<< angles[3]);
+  float tx,ty; 
+  for(int i=0;i<4;i++) {
+    if (angles[0] > angles[1]) {
+      swap(&m_x0,&m_x1);
+      swap(&m_y0,&m_y1);
+      swap(&angles[0],&angles[1]);
+    }
+
+    if (angles[1] > angles[2]) {
+      swap(&m_x1,&m_x2);
+      swap(&m_y1,&m_y2);
+      swap(&angles[1],&angles[2]);
+    }
+
+    if (angles[2] > angles[3]) {
+      swap(&m_x2,&m_x3);
+      swap(&m_y2,&m_y3);
+      swap(&angles[2],&angles[3]);
+    }
+  }
+  
+  //  PROGRESS("Final order " << std::endl <<
+  //	   "(" << m_x0 << "," << m_y0 << ") @ "<< angles[0] << std::endl <<
+  //	   "(" << m_x1 << "," << m_y1 << ") @ "<< angles[1] << std::endl <<
+  //	   "(" << m_x2 << "," << m_y2 << ") @ "<< angles[2] << std::endl <<
+  //	   "(" << m_x3 << "," << m_y3 << ") @ "<< angles[3]);
+}
+
+  

@@ -57,9 +57,9 @@ AC_CHECK_HEADER(GL/gl.h,
 AC_CHECK_HEADER(GL/osmesa.h,
 	[],
 	[AC_MSG_ERROR([GL/osmesa.h not found in include path])])
-AC_CHECK_HEADER(boost/operators.hpp,
+AC_CHECK_HEADER(boost/random.hpp,
 	[],
-	[AC_MSG_ERROR([boost/operators.hpp not found in include path])])
+	[AC_MSG_ERROR([boost/random.hpp not found in include path])])
 AC_CHECK_HEADER(gmpxx.h,
 	[],
 	[AC_MSG_ERROR([gmpxx.h not found in include path])])

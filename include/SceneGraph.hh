@@ -12,7 +12,11 @@
 #define MAXLENGTH 10000
 #define MAXDEPTH 20
 #undef SCENE_GRAPH_DEBUG
+#undef ADD_CONTOUR_NOISE
 
+#ifdef ADD_CONTOUR_NOISE
+# include <boost/random.hpp>
+#endif
 
 /**
  * A scene graph.  This class maintains a logical view of the current
@@ -27,11 +31,23 @@ private:
   float m_fpoints[MAXLENGTH*2];
   SceneGraphNode<S>* m_parents[MAXDEPTH];
 
+#ifdef ADD_CONTOUR_NOISE
+  boost::normal_distribution<float> m_normal_dist;
+  boost::rand48 m_rand_generator;
+  boost::variate_generator<boost::rand48&, boost::normal_distribution<float> > m_normal;
+#endif
+
 public:
   /**
    * Create a scene graph.
    */ 
-  SceneGraph() : m_root(NULL) {};
+  SceneGraph() : m_root(NULL) 
+#ifdef ADD_CONTOUR_NOISE
+		 ,m_normal_dist(0,1),
+		 m_rand_generator((unsigned long long)time(0)),
+		 m_normal(m_rand_generator,m_normal_dist)
+#endif
+{};
 
   ~SceneGraph() {
     if (m_root != NULL) {
@@ -86,7 +102,18 @@ public:
 	int pointer = 0;
 	for( int pt = 0; pt < count; pt++ ) {
 	  m_fpoints[pointer++] = (float)m_points[pt].x;
-	  m_fpoints[pointer++] = (float)m_points[pt].y;	
+	  m_fpoints[pointer++] = (float)m_points[pt].y;
+#ifdef ADD_CONTOUR_NOISE
+	  float xoff = m_normal();
+	  float yoff = m_normal();
+	  //	  PROGRESS("x    " << m_fpoints[pointer-2]);
+	  //	  PROGRESS("y    " << m_fpoints[pointer-1]);
+	  //	  PROGRESS("xoff " << xoff);
+	  //	  PROGRESS("yoff " << yoff);
+
+	  m_fpoints[pointer-2] += xoff;
+	  m_fpoints[pointer-1] += yoff;
+#endif	
 	}
 	camera.ImageToNPCF(m_fpoints,count);
 	SceneGraphNode<S>* next = new SceneGraphNode<S>(m_fpoints,count);

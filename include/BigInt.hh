@@ -20,11 +20,14 @@
 template<int SIZE>
 class BigInt : boost::operators< BigInt<SIZE> > {
 private:
-  mpz_class m_gmpint;
+
   std::bitset<SIZE> *m_backing_store;
   mpz_class m_bit1;
 
 public:
+  mpz_class m_gmpint;
+  BigInt(unsigned int i) : m_gmpint(i), m_backing_store(NULL), m_bit1(1) {}
+
   BigInt(const std::bitset<SIZE>& t) : m_gmpint(0), m_backing_store(NULL), m_bit1(1) {
     for(int i=SIZE-1;i>=0;i--) {
       m_gmpint <<= 1;
@@ -49,6 +52,8 @@ public:
       }
     }
   }
+
+  BigInt(const BigInt& bi) : m_gmpint(bi.m_gmpint), m_backing_store(NULL), m_bit1(1) {}
 
   bool operator<(const BigInt& x) const {
     return this->m_gmpint < x.m_gmpint;
@@ -119,6 +124,12 @@ public:
   operator unsigned int() const {
     return m_gmpint.get_ui();
   }
+
 };
+
+template<int T> std::ostream& operator<<(std::ostream& s, const BigInt<T>& z) {
+  s << z.m_gmpint;
+  return s;
+}
 
 #endif

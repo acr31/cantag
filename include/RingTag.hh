@@ -22,7 +22,7 @@
 #undef   DRAW_FIELD_DEBUG
 #endif
 
-#define Ellipse LinearEllipse
+//#define Ellipse LinearEllipse
 
 /**
  * The number of readings to make from a tag.  We then look for pairs
@@ -311,9 +311,10 @@ public:
       for(int i=0;i<READING_COUNT;i++) {
 	if ((read_code[i] == read_code[(i+1) % READING_COUNT])) { 
 	  std::bitset<RING_COUNT*SECTOR_COUNT> code;
-	  if (DecodePayload(code,read_code[i]) >= 0) {
+	  if ((DecodePayload(code,read_code[i]) >= 0) &&
+	      ((m_must_match == NULL) || *m_must_match == code)) {
 #ifdef RING_TAG_IMAGE_DEBUG
-	  draw_read(image,camera,correcttrans,(i+1)%READING_COUNT);
+	    draw_read(image,camera,correcttrans,(i+1)%READING_COUNT);
 #endif
 #ifdef RING_TAG_DEBUG
 	    PROGRESS("Found code " << code);
