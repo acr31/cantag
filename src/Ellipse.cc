@@ -663,7 +663,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   // this multiplies rows 0 and 1 of the transform by scale
   for(int col=0;col<4;col++) {
     transc1[col*4] *= scale;
-    transc1[col*4+1] *= scale;
+    transc1[col*4+1] *= -scale;
 
     transc2[col*4] *= scale;
     transc2[col*4+1] *= scale;
