@@ -48,7 +48,11 @@ dnl Checks for libraries.
 AC_CHECK_LIB(opencv,
 	[cvGetErrStatus],
 	[],
-	[AC_MSG_ERROR([libopencv.so not found])])
+	[
+AC_CHECK_LIB(cv,
+	[cvGetErrStatus],
+	[],
+	AC_MSG_ERROR([libopencv.so or libcv.so not found]))])
 
 AC_CHECK_LIB(highgui,
         [cvGetWindowName],
