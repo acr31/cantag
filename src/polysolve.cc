@@ -52,8 +52,9 @@ static inline bool solve_poly3(double *x, double *res) {
   double q = (a2*a2-3*a1)/9;
   double r = (2*a2*a2*a2-9*a1*a2+27*a0)/54;
 
-  if ((r*r)>(q*q*q))
+  if ((r*r)>(q*q*q)) {
     return 0;
+  }
   
   double theta = acos(r/sqrt(q*q*q));
 
@@ -133,7 +134,7 @@ bool eigensolve3(double M[3][3], double evects[3][3], double evals[3]) {
   #endif
 
   //solve cubic to determine eigenvalues
-  assert(solve_poly3(x,evals));
+  if (!solve_poly3(x,evals)) return 0;
 
   #ifdef EIGEN_DEBUG
   printf("Evals %lf %lf %lf\n",evals[0],evals[1],evals[2]);
@@ -220,8 +221,12 @@ bool eigensolve(double a, double b, double c,
   bool ret;
   ret = eigensolve3(M,res,eigenvals);
   if (ret) {
+    eigenvals[4] = eigenvals[1];
+    eigenvals[8] = eigenvals[2];
+    eigenvals[1] = eigenvals[2] = eigenvals[3] = eigenvals[5] = eigenvals[6] = eigenvals[7] = 0;
+    
     for (int i=0;i<9;i++) {
-      eigenvects[i]=res[(i/3)][i%3];
+      eigenvects[i]=res[i%3][(i/3)];
     }
     return 1;
   } else {
@@ -240,6 +245,7 @@ void eigensolve(double a, double b, double f,
   assert(eigensolve(a,b,f,b,c,d,f,d,e,eigenvects,eigenvals));
 }
 
+/*
 int main(void) {
   double A[3][3] = {{0.0066505931317806243896, 5.587231852114200592 
   	     , 6.396405552513897419},
@@ -270,3 +276,4 @@ int main(void) {
 
   eigensolve3(A, evects, evals);
 }
+*/
