@@ -1,68 +1,50 @@
 #include <tripover/Image.hh>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <iostream>
+#include <fstream>
+#include <cassert>
 #ifdef HAVE_BOOST_RANDOM
 # include <boost/random.hpp>
 #endif
 
-Image::Image() : m_from_header(false), m_free_contents(false), m_image(NULL) {};
+//Image::Image() : m_from_header(false), m_free_contents(false), m_image(NULL) {};
 
 
-Image::Image(int width, int height) : m_from_header(false), m_free_contents(false), m_image(cvCreateImage(cvSize(width,height), IPL_DEPTH_8U, 1)) {
-  cvConvertScale(m_image,m_image,0,255);
-  m_contents = (uchar*)m_image->imageData;
-};
-Image::Image(const Image& c) : m_from_header(false), m_free_contents(false), m_image(cvCloneImage(c.m_image)) {
-  m_contents = (uchar*)m_image->imageData;
-};
-Image::Image(char* filename) : m_from_header(false), m_free_contents(false), m_image(cvLoadImage(filename)) {
-  if (m_image->nChannels == 3) {
-    IplImage* image2 = cvCreateImage(cvSize(m_image->width,m_image->height),IPL_DEPTH_8U,1);
-    cvCvtColor(m_image,image2,CV_RGB2GRAY);
-    cvReleaseImage(&m_image);
-    m_image = image2;
-  }  
-  m_contents = (uchar*)m_image->imageData;
+Image::Image(int width, int height) : m_width(width),m_height(height), m_contents(new unsigned char[width*height]), m_free_contents(true), m_width_step(m_width), m_binary(false) {
+  ConvertScale(0,255);
 };
 
-Image::Image(int width,int height, uchar* contents) : m_from_header(true),m_free_contents(false) {
-  m_image = cvCreateImageHeader(cvSize(width,height),
-				IPL_DEPTH_8U, 1);
-  m_image->imageData = m_image->imageDataOrigin = (char*)contents;
-  m_contents = contents;
-}
+Image::Image(const Image& c) : m_width(c.m_width), m_height(c.m_height), m_contents(new unsigned char[c.m_width_step*c.m_height]), m_free_contents(true), m_width_step(c.m_width_step), m_binary(c.m_binary) {
+  memcpy(m_contents,c.m_contents,m_width_step*m_height);
+};
+
+/**
+ * \todo implement this!
+ */
+Image::Image(char* filename) { 
+  assert(false);
+};
+
+Image::Image(int width,int height, int width_step, unsigned char* contents) : m_width(width), m_height(height), m_contents(contents),m_free_contents(false),m_width_step(width_step), m_binary(false) {}
 
 Image::~Image() {
-  if (m_image != NULL) {
-    if (m_from_header) {
-      /*
-       * \todo work out why this results in unknown error code -49 in opencv
-       */
-      //      cvSetImageROI(m_image,cvRect(0,0,0,0));
-      //cvReleaseImageHeader(&m_image);
-      
-    }
-    else {
-      cvReleaseImage(&m_image);
-    }    
-  }
-  
   if (m_free_contents) {
     delete[] m_contents;
-  }
+  }    
 }
 
-unsigned char Image::GlobalThreshold(unsigned char threshold) {
+unsigned char Image::GlobalThreshold(const unsigned char threshold) {
   unsigned char histogram[128] = {0};
   unsigned int total = 0;
-  for(int i=0;i<m_image->height;++i) {
+  const int width = GetWidth();
+  const int height = GetHeight();
+  for(int i=0;i<height;++i) {
     unsigned char* data_pointer = GetRow(i);
-    for(int j=0;j<m_image->width;++j) {
+    for(int j=0;j<width;++j) {
       unsigned char pixel = *data_pointer;
-      histogram[pixel]++;
+      //      histogram[pixel]++;
       total+=pixel;
-      *data_pointer = pixel > threshold ? 1 : 0;
+      *data_pointer = pixel > threshold ? 0 : 1;
       data_pointer++;
     }
   }
@@ -70,61 +52,10 @@ unsigned char Image::GlobalThreshold(unsigned char threshold) {
   Save("debug-globalthreshold.bmp");
 #endif
 
-  total/=m_image->height*m_image->width;
-
+  total/=width*height;
+  m_binary = true;
   return total;
 
-}
-
-
-/**
- * 
- * Adapted to use a more efficient calculation for the moving
- * average. the window used is now 2^window_size
- *
- */
-void Image::AdaptiveThreshold2(unsigned int window_size, unsigned char offset) {
-  int moving_average = 127;
-  int previous_line[m_image->width];
-  for(int i=0;i<m_image->width;++i) { previous_line[i] = 127; }
-
-  for(int i=0;i<m_image->height-1;) { // use height-1 so we dont overrun the image if its height is an odd number
-    unsigned char* data_pointer = GetRow(i);
-    for(int j=0;j<m_image->width;j++) {
-      unsigned char pixel = *data_pointer;
-      moving_average = (pixel + (moving_average << window_size) - moving_average) >> window_size;
-      int current_thresh = (moving_average + previous_line[j])/2;
-      previous_line[j] = moving_average;
-      if (pixel*255 < current_thresh*(255-offset)) {
-	*data_pointer = 1;
-      }
-      else {
-	*data_pointer = 0;
-      }
-      data_pointer++;
-    }
-
-    i++;
-    data_pointer = GetRow(i) + m_image->width-1;
-    for(int j=m_image->width-1;j>=0;j--) {
-      unsigned char pixel = *data_pointer;
-      moving_average = (pixel + (moving_average << window_size) - moving_average) >> window_size;
-      int current_thresh = (moving_average + previous_line[j])/2;
-      previous_line[j] = moving_average;
-      if (pixel*255 < current_thresh*(255-offset)) {
-	*data_pointer = 1;
-      }
-      else {
-	*data_pointer = 0;
-      }
-      data_pointer--;
-    }
-    i++;
-  }  
-
-#ifdef IMAGE_DEBUG
-  cvSaveImage("debug-adaptivethreshold2.bmp",m_image);
-#endif
 }
 
 /**
@@ -138,70 +69,73 @@ void Image::AdaptiveThreshold2(unsigned int window_size, unsigned char offset) {
  *     comment      = "Nice introduction to global and adaptive thresholding.  Presents an efficient and effective adaptive thresholding technique and demonstrates on lots of example images.",
  *     file         = "ar/ddesk-threshold.pdf"
  *   }
+ * 
+ * Adapted to use a more efficient calculation for the moving
+ * average. the window used is now 2^window_size
  *
  */
 
 void Image::AdaptiveThreshold(const unsigned int window_size, const unsigned char offset) {
   int moving_average = 127;
-  const int image_width = m_image->width;
-  const int image_height = m_image->height;
-  const int useoffset = 255-offset;
+  const int image_width = GetWidth();
+  const int image_height = GetHeight();
 
   int previous_line[image_width];
-  memset(previous_line,127,sizeof(previous_line));
+  // intentionally uninitialised
+  //  for(int i=0;i<image_width;++i) { previous_line[i] = 127; }
 
   for(int i=0;i<image_height-1;) { // use height-1 so we dont overrun the image if its height is an odd number
     unsigned char* data_pointer = GetRow(i);
-    for(int j=0;j<image_width;j++) {
-      unsigned char pixel = *data_pointer;
-      moving_average = pixel + moving_average - moving_average/(1<<window_size);
+    for(int j=0;j<image_width;++j) {
+      int pixel = *data_pointer;
+      moving_average = pixel + moving_average - (moving_average >> window_size);
       int current_thresh = (moving_average + previous_line[j])>>1;
       previous_line[j] = moving_average;
-      if (pixel*(1<<window_size)<<8 < current_thresh*useoffset) {
-	*data_pointer = 1;
-      }
-      else {
-	*data_pointer = 0;
-      }
-      data_pointer++;
+      *data_pointer = (pixel << window_size) < current_thresh ? 1 : 0;
+      ++data_pointer;
     }
 
-    i++;
+    ++i;
     data_pointer = GetRow(i) + image_width-1;
-    for(int j=image_width-1;j>=0;j--) {
-      unsigned char pixel = *data_pointer;
-      moving_average = pixel + moving_average - moving_average/(1<<window_size);
+    for(int j=image_width-1;j>=0;--j) {
+      int pixel = *data_pointer;
+      moving_average = pixel + moving_average - (moving_average >> window_size);
       int current_thresh = (moving_average + previous_line[j])>>1;
       previous_line[j] = moving_average;
-      if (pixel*(1<<window_size)<<8 < current_thresh*useoffset) {
-	*data_pointer = 1;
-      }
-      else {
-	*data_pointer = 0;
-      }
-      data_pointer--;
+      *data_pointer = (pixel << window_size) < current_thresh  ? 1 : 0;
+      --data_pointer;
     }
-    i++;
+    ++i;
   }  
+  m_binary = true;
 
 #ifdef IMAGE_DEBUG
-  cvSaveImage("debug-adaptivethreshold.bmp",m_image);
+  Save("debug-adaptivethreshold.bmp");
 #endif
 }
 
+/**
+ * apply canny edge detector
+ */
 void Image::HomogenousTransform() {
   // take the log of each pixel in the image
-  for(int i=0;i<m_image->height;i++) {
-    for(int j=0;j<m_image->width;j++) {
-      uchar* ptr = (uchar*)(m_image->imageData + i * m_image->widthStep + j);
+  const int image_width = GetWidth();
+  const int image_height = GetHeight();
+  
+  for(int i=0;i<image_height;++i) {
+    unsigned char* row_pointer = GetRow(i);
+    for(int j=0;j<image_width;++j) {
+      unsigned char* ptr = row_pointer+j;
       double result = 45.985904 * log((double)*ptr + 1);
-      *ptr = (uchar)result;
+      *ptr = (unsigned char)result;
     }
   }
   // and apply a small kernel edge detector
-  cvCanny(m_image,m_image,128,128,3);
+  //  cvCanny(m_image,m_image,128,128,3);
+  m_binary = true;
+
 #ifdef IMAGE_DEBUG
-  cvSaveImage("debug-homogenoustransform.jpg",m_image);
+  Save("debug-homogenoustransform.jpg");
 #endif
 }
 
@@ -223,14 +157,15 @@ void Image::AddNoise(float mean, float stddev) {
   boost::normal_distribution<float> normal_dist(mean,stddev);
   boost::rand48 rand_generator((unsigned long long)time(0));
   boost::variate_generator<boost::rand48&, boost::normal_distribution<float> > normal(rand_generator,normal_dist);
-  for(int i=0;i<m_image->height;i++) {
-    for(int j=0;j<m_image->width;j++) {
+  for(int i=0;i<GetHeight();++i) {
+    unsigned char* row_pointer = GetRow(i);
+    for(int j=0;j<GetWidth();++j) {
       float randomval = normal();
-      int sample = ((uchar*)(m_image->imageData + i * m_image->widthStep))[j];
-      sample += cvRound(normal());
+      int sample = row_pointer[j];
+      sample += Round(normal());
       if (sample < 0) { sample = 0; }
       else if (sample > 255) { sample = 255; }
-      ((uchar*)(m_image->imageData + i * m_image->widthStep))[j] = sample;
+      row_pointer[j] = sample;
     }
   }
 }
@@ -241,7 +176,7 @@ void Image::AddNoise(float mean, float stddev) {
 #endif
 
 #define STEPSIZE 0.1f
-void Image::ellipse_polygon_approx(CvPoint* points, int startindex, int length, float xc, float yc, float width, float height,  float angle_radians, int color, int thickness, float start_angle) {
+void Image::ellipse_polygon_approx(float* points, int startindex, int length, float xc, float yc, float width, float height,  float angle_radians, unsigned char color, int thickness, float start_angle) {
   /**
    * The parametric equation for an ellipse
    *
@@ -252,91 +187,225 @@ void Image::ellipse_polygon_approx(CvPoint* points, int startindex, int length, 
    * angle_radians is the angle between the axis given by width and the horizontal
    *
    */
-
-  /** 
-   * Plan: create a polygon approximation to the ellipse and then get
-   * opencv to render it for us
-   */
-
-  CvPoint* ppoints[1] = {points};
-
   float cosa = cos(angle_radians);
   float sina = sin(angle_radians);
   float a = width/2;
   float b = height/2;
 
   float currentAngle = start_angle;
-  for(int i=startindex;i<length+startindex;i++) {
+  for(int i=2*startindex;i<2*(length+startindex);i+=2) {
     float cost = cos(currentAngle);
     float sint = sin(currentAngle);
     // remember that y increases down from the top of the image so we
     // do yc minus point rather than yc + point
-    points[i] = cvPoint( cvRound(xc + a*cosa*cost + b*sina*sint) , 
-			 cvRound(yc + a*sina*cost - b*cosa*sint) );
+    points[i] = Round(xc + a*cosa*cost + b*sina*sint);
+    points[i+1] = Round(yc + a*sina*cost - b*cosa*sint);
     currentAngle += STEPSIZE;
   }
 
   int numvertices = startindex+length;
   if (thickness > 0) {
-    cvPolyLine(m_image,
-	       ppoints,
-	       &numvertices,
-	       1, // number of contours
-	       true, // isClosed
-	       color,thickness);
+    DrawPolygon(points,numvertices,color,thickness);
   }
   else {
-    cvFillPoly(m_image,
-	       ppoints,
-	       &numvertices,
-	       1, // number of contours
-	       color);
+    DrawFilledPolygon(points,numvertices,color);
   }
+}
+
+void Image::DrawEllipseArc(int xc, int yc, 
+			   int  width, int height, 
+			   float angle_radians, 
+			   float start_angle, float end_angle, unsigned char color, int thickness) {
+  DrawEllipseArc((float)xc,(float)yc,(float)width,(float)height,angle_radians,start_angle,end_angle,color,thickness);
 }
 
 void Image::DrawEllipseArc(float xc, float yc, 
 			   float width, float height, 
 			   float angle_radians, 
-			   float start_angle, float end_angle, int color, int thickness) {
+			   float start_angle, float end_angle, unsigned char color, int thickness) {
   assert(thickness > 0 || thickness == -1);
 
   int numsteps = (int)(((float)(end_angle - start_angle))/STEPSIZE)+1; // add one to get to the edge of the sector
   // add in an extra point (the centre) if we are drawing a slice
-  CvPoint points[numsteps + 1]; 
-  points[0] = cvPoint(cvRound(xc),cvRound(yc));
+  float points[numsteps*2+2];
+  points[0] = Round(xc);
+  points[1] = Round(yc);
   ellipse_polygon_approx(points, 1, numsteps, xc, yc ,width, height, angle_radians, color, thickness, start_angle); 
 }
 
 void Image::DrawEllipse(float xc, float yc, 
 			float width, float height, 
 			float angle_radians, 
-			int color, int thickness) {
-
+			unsigned char color, int thickness) {
   assert(thickness > 0 || thickness == -1);
 
   int numsteps = (int)(2*PI/STEPSIZE); 
 
-  CvPoint points[numsteps]; 
+  float points[numsteps*2];
   ellipse_polygon_approx(points,0, numsteps, xc, yc ,width, height, angle_radians, color, thickness, 0);
 }
 
 Image::Image(Socket& socket) {
   int count;
-  int width = socket.RecvInt();
-  int height = socket.RecvInt();
-  int size = socket.RecvInt();
-  m_image = cvCreateImageHeader(cvSize(width,height),IPL_DEPTH_8U, 1);
-  m_contents = new unsigned char[size];
-  m_image->imageData = m_image->imageDataOrigin = (char*)m_contents;
+  m_width = socket.RecvInt();
+  m_height = socket.RecvInt();
+  m_width_step = socket.RecvInt();
+  m_binary = socket.RecvInt() == 1;
+  m_contents = new unsigned char[m_width_step*m_height];
   m_free_contents = true;
-  m_from_header = true;
-  socket.Recv(m_contents,size);
+  socket.Recv(m_contents,m_height*m_width_step);
 }
 
 int Image::Save(Socket& socket) const {
-  int count = socket.Send(m_image->width);
-  count += socket.Send(m_image->height);
-  count += socket.Send(m_image->imageSize);
-  count += socket.Send((unsigned char*)m_image->imageData,m_image->imageSize);
+  int count = socket.Send(m_width);
+  count += socket.Send(m_height);
+  count += socket.Send(m_width_step);
+  count += socket.Send(m_binary ? 1 : 0);
+  count += socket.Send(m_contents,m_height*m_width_step);
   return count;
 }
+
+void Image::ConvertScale(float scalefactor, int offset) {
+  for(int i=0;i<GetHeight();++i) {
+    unsigned char* ptr = GetRow(i);
+    for(int j=0;j<GetWidth();++j) {
+      unsigned char value = *ptr;
+      *ptr = Round(value*scalefactor)+offset;
+      ptr++;
+    }
+  }
+}
+
+void Image::DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigned int thickness) {
+  if (x1 < x0 || (x0 == x1 && y1 < y0)) {
+    DrawLine(x1,y1,x0,y0,colour,thickness);
+  }
+  else {
+    int dy = y1-y0;
+    int dx = x1-x0;
+    int a = y1-y0;
+    int b = -(x1-x0);
+    int c = x1*y0-x0*y1;
+    int x = x0;
+    int y = y0;
+    DrawPixel(x,y,colour);
+
+    if (dy > 0 && dy > dx) { // NE or N
+      int d = a*(x+0.5)+b*(y+1)+c;
+      while (y < y1) {
+	++y;
+	if (d>0) {
+	  d+=b;
+	}
+	else {
+	  d+=a+b;	  
+	  ++x;
+	}
+	DrawPixel(x,y,colour);
+      }
+    }
+    else if (dy > 0 && dx > dy) { // E or NE
+      int d = a*(x+1)+b*(y+0.5)+c;
+      while (x < x1) {
+	++x;
+	if (d<0) {
+	  d+= a;
+	}
+	else {
+	  d+=a+b;
+	  ++y;
+	}
+	DrawPixel(x,y,colour);
+      }
+    }
+    else if (dy < 0 && dx > -dy) { // E or SE
+      int d = a*(x+1)+b*(y-0.5)+c;
+      while (x<x1) {
+	++x;
+	if (d>0) {
+	  d+=a;
+	}
+	else {
+	  d+=a-b;
+	  --y;
+	}
+	DrawPixel(x,y,colour);	  
+      }
+    }
+    else { // SE or S
+      int d = a*(x+0.5)+b*(y-1)+c;
+      while (y > y1) {
+	--y;
+	if (d<0) {
+	  d-=b;	  
+	}
+	else {
+	  d+=a-b;
+	  ++x;
+	}
+	DrawPixel(x,y,colour);
+      }
+    }
+  }
+}
+
+void Image::DrawPolygon(int* points, int numpoints, unsigned char colour, unsigned int thickness) {
+  for(int i=2;i<2*numpoints;i+=2) {
+    DrawLine(points[i-2],points[i-1],points[i],points[i+1],colour,thickness);
+  }
+  DrawLine(points[2*numpoints-2],points[2*numpoints-1],points[0],points[1],colour,thickness);
+}
+
+void Image::DrawPolygon(float* points, int numpoints, unsigned char colour, unsigned int thickness) {
+  for(int i=2;i<2*numpoints;i+=2) {
+    DrawLine(points[i-2],points[i-1],points[i],points[i+1],colour,thickness);
+  }  
+  DrawLine(points[2*numpoints-2],points[2*numpoints-1],points[0],points[1],colour,thickness);
+
+}
+
+
+/**
+ * \todo currently unfilled
+ */
+void Image::DrawFilledPolygon(int* points, int numpoints, unsigned char colour) {
+  DrawPolygon(points,numpoints,colour,1);
+}
+
+
+/**
+ * \todo currently unfilled
+ */
+void Image::DrawFilledPolygon(float* points, int numpoints, unsigned char colour) {
+  DrawPolygon(points,numpoints,colour,1);
+}
+
+/**
+ * \todo only does pnm
+ */
+void Image::Save(const char* filename) const {
+  std::ofstream output(filename);
+  output << "P2" << std::endl;
+  output << "# CREATOR: TOTAL" << std::endl;
+  output << GetWidth() << " " << GetHeight() << std::endl;
+  output << 255 << std::endl;
+  for(int i=0;i<GetHeight();++i) {
+    const unsigned char* row_pointer = GetRow(i);
+    for(int j=0;j<GetWidth();++j) {
+      int data = (int)row_pointer[j];
+      if (m_binary) {
+	output << (data == 0 ? 0 : 255) << std::endl;
+      }
+      else {
+	output << data << std::endl;
+      }
+    }
+  }
+  output.flush();
+  output.close();
+}
+
+/**
+ * \todo unimplemented
+ */
+void Image::Resize(Image& image) const {}
