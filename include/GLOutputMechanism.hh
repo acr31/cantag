@@ -165,6 +165,8 @@ template<int PAYLOAD_SIZE> template<class C> void GLOutputMechanism<PAYLOAD_SIZE
     float nx = loc->normal[0];
     float ny = loc->normal[1];
     float nz = loc->normal[2];
+    std::cout << "Tag: " << loc->location[0] << "," << loc->location[1] << "," << loc->location[2] << std::endl;
+
     /* rotate by X, Y, and Z angles */
     float norm = sqrt(nx*nx+ny*ny+nz*nz);
     nx/=norm;
