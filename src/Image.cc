@@ -141,49 +141,45 @@ void Image::AdaptiveThreshold2(unsigned int window_size, unsigned char offset) {
  *
  */
 
-void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
+void Image::AdaptiveThreshold(const unsigned int window_size, const unsigned char offset) {
   int moving_average = 127;
-  int previous_line[m_image->width];
-  for(int i=0;i<m_image->width;++i) { previous_line[i] = 127; }
+  const int image_width = m_image->width;
+  const int image_height = m_image->height;
+  const int useoffset = 255-offset;
 
-  for(int i=0;i<m_image->height-1;) { // use height-1 so we dont overrun the image if its height is an odd number
+  int previous_line[image_width];
+  memset(previous_line,127,sizeof(previous_line));
+
+  for(int i=0;i<image_height-1;) { // use height-1 so we dont overrun the image if its height is an odd number
     unsigned char* data_pointer = GetRow(i);
-    for(int j=0;j<m_image->width;j++) {
+    for(int j=0;j<image_width;j++) {
       unsigned char pixel = *data_pointer;
-      //      moving_average = (pixel + (moving_average << window_size) - moving_average) >> window_size;
       moving_average = pixel + moving_average - moving_average/(1<<window_size);
-      int current_thresh = (moving_average + previous_line[j])/2;
+      int current_thresh = (moving_average + previous_line[j])>>1;
       previous_line[j] = moving_average;
-      //      if (pixel*255 < current_thresh*(255-offset)) {
-      if (pixel*(1<<window_size)*255 < current_thresh*(255-offset)) {
-	//	DrawPixelNoCheck(j,i,1);
+      if (pixel*(1<<window_size)<<8 < current_thresh*useoffset) {
 	*data_pointer = 1;
       }
       else {
-	//	DrawPixelNoCheck(j,i,0);
 	*data_pointer = 0;
       }
       data_pointer++;
     }
 
     i++;
-    data_pointer = GetRow(i) + m_image->width-1;
-    for(int j=m_image->width-1;j>=0;j--) {
+    data_pointer = GetRow(i) + image_width-1;
+    for(int j=image_width-1;j>=0;j--) {
       unsigned char pixel = *data_pointer;
-     //      moving_average = (pixel + (moving_average << window_size) - moving_average) >> window_size;
-     moving_average = pixel + moving_average - moving_average/(1<<window_size);
-     int current_thresh = (moving_average + previous_line[j])/2;
-     previous_line[j] = moving_average;
-     //     if (pixel*255 < current_thresh*(255-offset)) {
-     if (pixel*(1<<window_size)*255 < current_thresh*(255-offset)) {
-       //       DrawPixelNoCheck(j,i,1);
-       *data_pointer = 1;
-     }
-     else {
-       //	DrawPixelNoCheck(j,i,0);
-       *data_pointer = 0;
-     }
-     data_pointer--;
+      moving_average = pixel + moving_average - moving_average/(1<<window_size);
+      int current_thresh = (moving_average + previous_line[j])>>1;
+      previous_line[j] = moving_average;
+      if (pixel*(1<<window_size)<<8 < current_thresh*useoffset) {
+	*data_pointer = 1;
+      }
+      else {
+	*data_pointer = 0;
+      }
+      data_pointer--;
     }
     i++;
   }  
@@ -192,35 +188,6 @@ void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
   cvSaveImage("debug-adaptivethreshold.bmp",m_image);
 #endif
 }
-
-/*
-void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
-  assert(window_size%2==1);
-  cvAdaptiveThreshold(m_image,m_image,255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY_INV,window_size,offset);
-}
-*/
-inline int Image::AdaptiveWidthStep(int moving_average,  // the current average
-				    int* previous_line,  // a pointer to an array of size image_width for the averages of the previous line
-				    unsigned int i,      // the y co-ordinate
-				    unsigned int j,      // the x co-ordinate
-				    unsigned int s,      // the window size is 2^s
-				    int offset) {          // the offset
-  unsigned char pixel = SampleNoCheck(j,i);
-  moving_average = (pixel + (moving_average << s) - moving_average) >> s;
-  int current_thresh = (moving_average + previous_line[j])/2;
-  previous_line[j] = moving_average;
-  if (abs(pixel - current_thresh) < offset) {
-  }
-
-  if (pixel*255 < current_thresh*(255-offset)) {
-    DrawPixelNoCheck(j,i,COLOUR_WHITE);
-  }
-  else {
-    DrawPixelNoCheck(j,i,COLOUR_BLACK);
-  }
-  return moving_average;
-}
-
 
 void Image::HomogenousTransform() {
   // take the log of each pixel in the image

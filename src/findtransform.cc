@@ -188,3 +188,4 @@ void GetNormalVector(const float transform[16], const Camera& cam, float normal[
   //#endif
 
 }
+

@@ -19,7 +19,7 @@
 
 #define MAXFITERROR 0.01
 #define COMPARETHRESH 1
-#undef MAXDISTANCE 
+#define MAXDISTANCE 
 
 static void print(const char* label, double* array, int rows, int cols);
 static void print(const char* label, double** array, int rows, int cols);
@@ -29,13 +29,13 @@ Ellipse::Ellipse(): m_fitted(false) {}
 Ellipse::~Ellipse() {}
 
 Ellipse::Ellipse(const std::vector<float>& points) {
-  m_fitted = FitEllipse(points);
+  m_fitted = FitEllipseSimple(points);
   if (m_fitted) { Decompose(); }
 }
 
 Ellipse::Ellipse(const std::vector<float>& points, bool prev_fit) {
   if (!prev_fit) {
-    m_fitted = FitEllipse(points);
+    m_fitted = FitEllipseSimple(points);
     if (m_fitted) { Decompose(); }
   }
   else {
@@ -45,6 +45,9 @@ Ellipse::Ellipse(const std::vector<float>& points, bool prev_fit) {
 
 Ellipse::Ellipse(float a, float b, float c, float d, float e, float f) :
   m_a(a), m_b(b), m_c(c), m_d(d), m_e(e), m_f(f), m_fitted(true) { Decompose();}
+
+Ellipse::Ellipse(float x0, float y0, float width, float height, float angle) :
+  m_x0(x0), m_y0(y0), m_width(width),m_height(height),m_angle_radians(angle),m_fitted(true) { Compose(); }
 
 void Ellipse::Draw(Image& image,const Camera& camera) const {
   if (m_fitted) {
@@ -63,6 +66,60 @@ bool Ellipse::Compare(const Ellipse& o) const {
 	  (fabs(m_d - o.m_d) < COMPARETHRESH) &&
 	  (fabs(m_e - o.m_e) < COMPARETHRESH) &&
 	  (fabs(m_f - o.m_f) < COMPARETHRESH));
+}
+
+bool Ellipse::FitEllipseSimple(const std::vector<float>& points) {
+
+  float centrex = 0;
+  float centrey = 0;
+  int count = 0;
+  for(std::vector<float>::const_iterator i = points.begin(); i!= points.end(); ++i) {
+    centrex += *i;
+    ++i;
+    centrey += *i;
+    count++;
+  }
+  centrex/=count;
+  centrey/=count;
+
+  float majorx;
+  float majory;
+  float majorlen = 0;
+
+  float minorx;
+  float minory;
+  float minorlen = 1e10;
+
+  for(std::vector<float>::const_iterator i = points.begin(); i!= points.end(); ++i) {
+    float x = *i;
+    ++i;
+    float y = *i;
+    float distsq = (centrex - x)*(centrex-x) + (centrey-y)*(centrey-y);
+    if (distsq > majorlen) {
+      majorx = x;
+      majory = y;
+      majorlen = distsq;
+    }
+    if (distsq < minorlen) {
+      minorx = x;
+      minory = y;
+      minorlen = distsq;
+    }
+  }
+
+  majorlen = sqrt(majorlen);
+  minorlen = sqrt(minorlen);
+
+  float theta = atan((majory-centrey)/(majorx-centrex));
+  
+  m_x0 = centrex;
+  m_y0 = centrey;
+  m_angle_radians = theta;
+  m_width = majorlen;
+  m_height = minorlen;
+
+  Compose();
+  return true;
 }
 
 bool Ellipse::FitEllipse(const std::vector<float>& points) {
@@ -770,14 +827,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   double pmsin = sqrt(sinsq);
   double pmcos = sqrt(cossq);
 
-  /*
-  double denom = ( eigvals[8] - eigvals[4] );
-  double sinsq = ( eigvals[0] - eigvals[4] ) / denom;
-  double cossq = ( eigvals[8] - eigvals[0] ) / denom;
-   
-  double pmsin = sqrt(sinsq);
-  double pmcos = sqrt(cossq);
-  */
+ 
 
   // here is our first ambiguity choice point.  We need to decide plus or minus theta
 
@@ -821,14 +871,14 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   
   // apply the relevant translation - we have to choose again here based on our choice of theta
   double tx = sqrt((eigvals[4]-eigvals[0])*(eigvals[8]-eigvals[4]))/eigvals[4];
-  //  double tx = sqrt( eigvals[0] - (eigvals[4] + eigvals[0]*eigvals[8]/eigvals[4]) + eigvals[8] );
+
 
 #ifdef CIRCLE_TRANSFORM_DEBUG
   PROGRESS("Translation tx = "<<tx);
 #endif
   // and another choice based on theta
   double scale = sqrt(-eigvals[0]*eigvals[8]/eigvals[4]/eigvals[4]);
-  //double scale = sqrt(1 + (eigvals[8]-eigvals[0])*(eigvals[0]-eigvals[4])/eigvals[0]/eigvals[0]/eigvals[0] - (eigvals[4]+eigvals[8])/eigvals[0]/eigvals[0]);
+
 
 #ifdef CIRCLE_TRANSFORM_DEBUG
   PROGRESS("Scale factor " << scale);
@@ -845,21 +895,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
 		      0,0,0,1};
 
 
-  //  // this multiplies cols 0 and 1 of the transform by scale
-  //  for(int col=0;col<4;col++) {
-  //    for(int row=0;row<4;row++) {
-  //      transc1[row*4+col] *= scale;
-  //      transc2[row*4+col] *= scale;
-  //    }
-    //    transc1[col*4] *= scale;
-    //    transc1[col*4+1] *= scale;
-    //    transc1[col*4+2] *= scale;
 
-    //    transc2[col*4] *= scale;
-    //    transc2[col*4+1] *= scale;
-    //    transc2[col*4+2] *= scale;
-
-  //  }
     
 #ifdef CIRCLE_TRANSFORM_DEBUG  
   PROGRESS("transc1=[" << transc1[0] << "," << transc1[1] << "," << transc1[2] << "," << transc1[3] << ";");
@@ -939,6 +975,26 @@ static void print(const char* label, double** array, int rows, int cols) {
   std::cout << "]" << std::endl;
 }
 
+void Ellipse::Compose() {
+  float x0 = GetX0();
+  float y0 = GetY0();
+  float alpha1sq = GetWidth()*GetWidth();
+  float alpha2sq = GetHeight()*GetHeight();
+
+  float angle = GetAngle();
+
+  float c = cos(angle);
+  float s = sin(angle);
+  
+  m_a = c*c/alpha1sq + s*s/alpha2sq;
+  m_b = 2*c*s*(1/alpha1sq - 1/alpha2sq);
+  m_c = s*s/alpha1sq + c*c/alpha2sq;
+  m_d = -2*x0*m_a - y0*m_b;
+  m_e = -x0*m_b - 2*y0*m_c;
+  m_f = x0*x0*m_a + x0*y0*m_b + y0*y0*m_c - 1;
+
+}
+
 
 void Ellipse::Decompose() {
   float a = GetA();
@@ -979,8 +1035,8 @@ void Ellipse::Decompose() {
 #endif
   
   float tmproot = sqrt( (a-c)*(a-c) + b*b );
-  float lambda1 = (a+c + tmproot)/2;
-  float lambda2 = (a+c - tmproot)/2;
+  float lambda1 = ((a+c) - tmproot)/2;
+  float lambda2 = ((a+c) + tmproot)/2;
   float lambda1t = lambda1;
   lambda1 = 1/sqrt(lambda1);
   lambda2 = 1/sqrt(lambda2);
@@ -991,22 +1047,22 @@ void Ellipse::Decompose() {
   PROGRESS("lambda2= " << lambda2);
 #endif
   
-  float scale_factor = sqrt( -f + a*m_x0*m_x0 + b*m_x0*m_y0 + c*m_y0*m_y0);
-
-#ifdef DECOMPOSE_DEBUG
-  PROGRESS("scale= " << scale_factor);
-#endif
-
-  m_width = lambda1 * scale_factor;
-  m_height = lambda2 * scale_factor;
+  
+  m_width = lambda1;
+  m_height = lambda2;
 
 #ifdef DECOMPOSE_DEBUG
   PROGRESS("width= " << m_width);
   PROGRESS("height= " <<m_height);
 #endif
 
-  m_angle_radians = atan( -(a-lambda1t)/(0.5*b) );
-  
+  if (m_width == m_height) {
+    // obviously the angle is undefined if we have a circle
+    m_angle_radians = 0;
+  }
+  else {
+    m_angle_radians = atan( -(a-lambda1t)/(0.5*b) );
+  }
 #ifdef DECOMPOSE_DEBUG
   PROGRESS("angle= " << m_angle_radians);
 #endif
