@@ -25,9 +25,10 @@ boost::variate_generator<boost::mt19937, boost::uniform_int<> > numbers(rng, num
 
 void test_contour() {
   numbers();
-  for(int count=0;count<100;count++) {
+  int* contour_points = new int[(XLENGTH+YLENGTH)*LAPS*2];
+  float* points = new float[(XLENGTH+YLENGTH)*LAPS*2];
+  for(int count=0;count<1000;count++) {
     // generate a contour 
-    int* contour_points = new int[(XLENGTH+YLENGTH)*LAPS*2];
     contour_points[0] = START_X;
     contour_points[1] = START_Y;
     Image image(IMAGE_WIDTH,IMAGE_HEIGHT);
@@ -51,22 +52,16 @@ void test_contour() {
 	image.DrawPixel(newx,newy,0);
       }      
     }
-    image.Save("test.bmp");
+    //    image.Save("test.bmp");
     
     ImageSegmentor s;
-    float* points = new float[(XLENGTH+YLENGTH)*LAPS*2];
+    
+    s.FollowContour(image,START_X,START_Y,points,(XLENGTH+YLENGTH)*LAPS);
 
-    time_t start = time(NULL);
-    for(int c2 =0;c2<1000;c2++) {
-      s.FollowContour(image,START_X,START_Y,points,(XLENGTH+YLENGTH)*LAPS);
-    }
-    time_t diff = time(NULL)-start;
-    std::cout << diff << std::endl;
-
-    Image t(IMAGE_WIDTH,IMAGE_HEIGHT);
-    t.DrawPolygon(points,(XLENGTH+YLENGTH)*LAPS*2,0,1);
-    t.Save("done.bmp");
-
+    //    Image t(IMAGE_WIDTH,IMAGE_HEIGHT);
+    //    t.DrawPolygon(points,(XLENGTH+YLENGTH)*LAPS*2,0,1);
+    //t.Save("done.bmp");
+    
     int data_pointer =0;
 
     for(int i=0;i<(XLENGTH+YLENGTH)*LAPS*2;i++) {
@@ -79,9 +74,6 @@ void test_contour() {
       std::cout << data_pointer <<std::endl;
       throw "Too many points missed on contour";
     }
-    
-    delete[] points;
-    delete[] contour_points;
   }
 }
 
