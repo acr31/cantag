@@ -139,7 +139,7 @@ public:
    * method is an antialiased line and thickess is ignored.
    */
   inline void DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigned int thickness) {
-    cvLineAA(m_image,cvPoint(x0,y0),cvPoint(x1,y1),colour,0);
+    cvLine(m_image,cvPoint(x0,y0),cvPoint(x1,y1),colour,0);
   }
 
   /**
@@ -194,7 +194,7 @@ public:
     }
     int npts[] = {numpoints};
     CvPoint* ppts = pts;
-    cvPolyLineAA(m_image,&ppts,npts,1,1,colour,0);
+    cvPolyLine(m_image,&ppts,npts,1,1,colour,0);
   }
   
   /**
@@ -211,7 +211,7 @@ public:
     cvFillConvexPoly(m_image,pts,numpoints,colour);
     int npts[] = {numpoints};
     CvPoint* ppts = pts;
-    cvPolyLineAA(m_image,&ppts,npts,1,1,colour,0);
+    cvPolyLine(m_image,&ppts,npts,1,1,colour,0);
   }
 
   /**
@@ -226,7 +226,7 @@ public:
     cvFillConvexPoly(m_image,pts,numpoints,colour);
     int npts[] = {numpoints};
     CvPoint* ppts = pts;
-    cvPolyLineAA(m_image,&ppts,npts,1,1,colour,0);
+    cvPolyLine(m_image,&ppts,npts,1,1,colour,0);
   }
 
   /**
@@ -305,7 +305,7 @@ public:
     cvFillConvexPoly(m_image,pts,numsteps+1,colour);
     int npts[] = {numsteps+1};
     CvPoint* ppts = pts;
-    cvPolyLineAA(m_image,&ppts,npts,1,1,colour,0);
+    cvPolyLine(m_image,&ppts,npts,1,1,colour,0);
   }
 
   /**
