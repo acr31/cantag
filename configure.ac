@@ -108,10 +108,9 @@ dnl Checks for library functions.
 AC_OUTPUT([
 Makefile
 src/Makefile
-tests/Makefile
 unit/Makefile
 include/Makefile
-include/tripover/Makefile
+include/total/Makefile
 ])
 
 if test "$have_gl_gl_h$havelib_gl$havelib_glu$havelib_glut" = "yesyesyesyes"; then
