@@ -51,8 +51,21 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
 
   virtual void Draw2D(Image& image, CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>& tag_data) const;
 
-  virtual LocatedObject<SIZE*SIZE-(SIZE*SIZE % 2)>* DecodeNode(ShapeTree< ShapeChain<QuadTangle> >::Node* node, 
-							      const Camera& camera, const Image& image) const;
+  virtual LocatedObject<SIZE*SIZE-(SIZE*SIZE % 2)>* GetTransform(ShapeTree< ShapeChain<QuadTangle> >::Node* node, 
+								 const Camera& camera, const Image& image) const;
+  virtual void DecodeNode(LocatedObject<SIZE*SIZE-(SIZE*SIZE % 2)>* lobj,
+			  const Camera& camera, const Image& image) const;
+
+  /**
+   * \todo implement CheckTransform
+   */
+  virtual bool CheckTransform(const LocatedObject<SIZE*SIZE-(SIZE*SIZE % 2)>* lobj, ShapeTree<ShapeChain<QuadTangle> >::Node* node) const { return true; }
+
+  /**
+   * \todo implement CheckDecode
+   */
+  virtual bool CheckDecode(const LocatedObject<SIZE*SIZE-(SIZE*SIZE % 2)>* lobj, const Camera& camera, const Image& image) const { return true; }
+
 };
 
 template<int SIZE> MatrixTag<SIZE>::MatrixTag() :
@@ -177,7 +190,7 @@ template<int SIZE> void MatrixTag<SIZE>::Draw2D(Image& image, CyclicBitSet<SIZE*
 }
 
 
-template<int SIZE> LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* MatrixTag<SIZE>::DecodeNode(ShapeTree< ShapeChain<QuadTangle> >::Node* node, const Camera& camera, const Image& image) const {
+template<int SIZE> LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* MatrixTag<SIZE>::GetTransform(ShapeTree< ShapeChain<QuadTangle> >::Node* node, const Camera& camera, const Image& image) const {
 #ifdef MATRIX_TAG_DEBUG
   PROGRESS("Decode node called");
 #endif
@@ -199,7 +212,15 @@ template<int SIZE> LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* MatrixTag<SIZE>::Deco
   
   quad.GetTransform(transform);
 
+  LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = new LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>();
+  lobj->LoadTransform(transform,1,camera);
+  
+  return lobj;
+}
 
+template<int SIZE> void MatrixTag<SIZE>::DecodeNode( LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* lobj, const Camera& camera, const Image& image) const {
+  
+  float* transform= lobj->transform;
   CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>* read_code = new CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>();
   float projX, projY;
   // iterate over the tag reading each section
@@ -260,16 +281,14 @@ template<int SIZE> LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* MatrixTag<SIZE>::Deco
     // the code is rotated by divide this by the number of cells in
     // each quarter i.e. if we have a 6x6 square then there are 9
     // cells per quadrant
-    const float angle = rotation/cells_per_quadrant * PI/2;
-    LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = new LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>();
-    lobj->LoadTransform(transform,1,angle,camera);
+    /**
+     * \todo alter the transform here to include the correct rotation
+     */
     lobj->tag_codes.push_back(read_code);
-    return lobj;
   }    
   else {
     delete read_code;
   }
-  return NULL;
 }
 
 

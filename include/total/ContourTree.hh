@@ -31,8 +31,9 @@ public:
     std::vector<float> points;
     std::vector<Contour*> children;
     bool weeded;
-    Contour(int id) : nbd(id),parent_id(id),weeded(false) {}
+    Contour(int id) : nbd(id),parent_id(id),points(),children(),weeded(false) {}
     Contour(Socket& socket);
+    Contour(const Contour& contour);
     ~Contour();
 
     int Save(Socket& socket) const;
@@ -108,11 +109,14 @@ private:
                     );
 
   void ImageToNPCF(const Camera& camera, Contour* contour);
+  bool CheckImageToNPCF(const Camera& camera, const Contour* current, const Contour* evidence_current) const;
 public:
 
   ContourTree(Image& image, std::vector<ContourConstraint>& constraints);
   ContourTree(Socket& socket);
+  ContourTree(const ContourTree& tree);
   void ImageToNPCF(const Camera& camera);
+  bool CheckImageToNPCF(const ContourTree& evidence, const Camera& camera) const;
   inline Contour* GetRootContour() { return m_root_contour; }
   inline const Contour* GetRootContour() const { return m_root_contour; }
   ~ContourTree();

@@ -80,34 +80,36 @@ template<int PAYLOADSIZE> void XOutputMechanism::FromTag(const WorldState<PAYLOA
       i!=world.GetNodes().end();
       ++i) {
     LocatedObject<PAYLOADSIZE>* lobj = *i;
-    float pts[] = {-1,-1,
-		   -1,1,
-		   1,1,
-		   1,-1};
-    ApplyTransform(lobj->transform,pts,4);
-    m_camera.NPCFToImage(pts,4);
-    XDrawLine(m_display,m_window,m_gc,
-	      (int)(pts[0]),(int)(pts[1]),
-	      (int)(pts[2]),(int)(pts[3]));
-    XDrawLine(m_display,m_window,m_gc,
-	      (int)(pts[2]),(int)(pts[3]),
-	      (int)(pts[4]),(int)(pts[5]));
-    XDrawLine(m_display,m_window,m_gc,
-	      (int)(pts[4]),(int)(pts[5]),
-	      (int)(pts[6]),(int)(pts[7]));
-    XDrawLine(m_display,m_window,m_gc,
-	      (int)(pts[6]),(int)(pts[7]),
-	      (int)(pts[0]),(int)(pts[1]));
-    XTextItem ti;
-    ti.chars=new char[PAYLOADSIZE];
-    for(int i=0;i<PAYLOADSIZE;++i) {
-      ti.chars[i] = (*(lobj->tag_codes[0]))[i] ? '1' : '0';
+    if (lobj->tag_codes.size() >0) {
+      float pts[] = {-1,-1,
+		     -1,1,
+		     1,1,
+		     1,-1};
+      ApplyTransform(lobj->transform,pts,4);
+      m_camera.NPCFToImage(pts,4);
+      XDrawLine(m_display,m_window,m_gc,
+		(int)(pts[0]),(int)(pts[1]),
+		(int)(pts[2]),(int)(pts[3]));
+      XDrawLine(m_display,m_window,m_gc,
+		(int)(pts[2]),(int)(pts[3]),
+		(int)(pts[4]),(int)(pts[5]));
+      XDrawLine(m_display,m_window,m_gc,
+		(int)(pts[4]),(int)(pts[5]),
+		(int)(pts[6]),(int)(pts[7]));
+      XDrawLine(m_display,m_window,m_gc,
+		(int)(pts[6]),(int)(pts[7]),
+		(int)(pts[0]),(int)(pts[1]));
+      XTextItem ti;
+      ti.chars=new char[PAYLOADSIZE];
+      for(int i=0;i<PAYLOADSIZE;++i) {
+	ti.chars[i] = (*(lobj->tag_codes[0]))[i] ? '1' : '0';
+      }
+      ti.nchars=PAYLOADSIZE;
+      ti.delta=0;
+      ti.font=None;
+      XDrawText(m_display,m_window,m_gc,(int)(pts[0]),(int)(pts[1]),&ti,1);
+      delete[] ti.chars;
     }
-    ti.nchars=PAYLOADSIZE;
-    ti.delta=0;
-    ti.font=None;
-    XDrawText(m_display,m_window,m_gc,(int)(pts[0]),(int)(pts[1]),&ti,1);
-    delete[] ti.chars;
   }
 }
 

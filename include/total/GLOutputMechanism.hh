@@ -55,48 +55,49 @@ template<int PAYLOAD_SIZE> void GLOutputMechanism::FromTag(const WorldState<PAYL
     glRasterPos2i(0,0);
     glPixelZoom(1.0, -1.0);
     //    glDrawPixels(newdata->GetWidth(),newdata->GetHeight(),GL_RED,GL_UNSIGNED_BYTE, newdata->GetDataPointer());
-  
-    if (world.GetNodes().size() > 0) {
-      LocatedObject<PAYLOAD_SIZE>* loc = *(world.GetNodes().begin());
-      
-      float nx = loc->normal[0];
-      float ny = loc->normal[1];
-      float nz = loc->normal[2];
-      std::cout << "Tag: " << loc->location[0] << "," << loc->location[1] << "," << loc->location[2] << std::endl;
-      
-      /* rotate by X, Y, and Z angles */
-      float norm = sqrt(nx*nx+ny*ny+nz*nz);
-      nx/=norm;
-      ny/=norm;
-      nz/=norm;
-      
-      float factor = -sqrt(nx*nx+nz*nz);
-      float rotation[] = { nz/factor, 0, -nx/factor, 0, 
-			   -ny*nx/factor, factor, -ny*nz/factor, 0,
-			   nx,ny,nz,0,
-			   0,0,0,1};
-      float angle = -loc->angle/M_PI*180;
-      
-      glMatrixMode(GL_MODELVIEW);
-      /* reset modelview matrix to the identity matrix */
-      glLoadIdentity();
-      /* move the camera back three units */
-      glTranslatef(0.0, 0.0, -3.0);
-      
-      glMultMatrixf(rotation);
-      /* rotate tag around z axis for angle */
-      glRotatef(angle,0.0,0.0,1.0);
-      
-      float tagsizescale=(34-loc->location[2])/20;
-      
-      glScalef(tagsizescale,tagsizescale,tagsizescale);
-      
-      Draw(1);
-    }
-    else {
-      Draw(2);
-    }
 
+    for(typename std::vector<LocatedObject<PAYLOAD_SIZE>*>::const_iterator i = world.GetNodes().begin();
+	i!=world.GetNodes().end();
+	++i) {
+      LocatedObject<PAYLOAD_SIZE>* loc = *i;
+      if (loc->tag_codes.size() > 0) {
+	float nx = loc->normal[0];
+	float ny = loc->normal[1];
+	float nz = loc->normal[2];
+	std::cout << "Tag: " << loc->location[0] << "," << loc->location[1] << "," << loc->location[2] << std::endl;
+	
+	/* rotate by X, Y, and Z angles */
+	float norm = sqrt(nx*nx+ny*ny+nz*nz);
+	nx/=norm;
+	ny/=norm;
+	nz/=norm;
+	
+	float factor = -sqrt(nx*nx+nz*nz);
+	float rotation[] = { nz/factor, 0, -nx/factor, 0, 
+			     -ny*nx/factor, factor, -ny*nz/factor, 0,
+			     nx,ny,nz,0,
+			     0,0,0,1};
+	float angle = -loc->angle/M_PI*180;
+	
+	glMatrixMode(GL_MODELVIEW);
+	/* reset modelview matrix to the identity matrix */
+	glLoadIdentity();
+	/* move the camera back three units */
+	glTranslatef(0.0, 0.0, -3.0);
+	
+	glMultMatrixf(rotation);
+	/* rotate tag around z axis for angle */
+	glRotatef(angle,0.0,0.0,1.0);
+	
+	float tagsizescale=(34-loc->location[2])/20;
+	
+	glScalef(tagsizescale,tagsizescale,tagsizescale);
+	
+	Draw(1);
+	return;
+      }
+    }
+    Draw(2);
 }
 
 

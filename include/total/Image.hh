@@ -379,7 +379,7 @@ public:
    * pixels less than the threshold will be set to 1.  In particular,
    * this method inverts as well as binarizes.
    */
-  void GlobalThreshold(unsigned char threshold);
+  unsigned char GlobalThreshold(unsigned char threshold);
 
   /**
    * Apply an adaptive threshold to the image.  For each pixel a

@@ -214,6 +214,8 @@ public:
   int Save(Socket& socket) const;
   Ellipse(Socket& socket);
 
+  bool Check(const std::vector<float>& points) const;
+
 private:
   bool FitEllipse(const std::vector<float>& points);
 

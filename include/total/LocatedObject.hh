@@ -15,10 +15,6 @@
  * pose, transformation matrix and its coded value.
  *
  * \todo we want some method of checking for expected tags in the image
- *
- * \todo how to output the location data found
- *
- * \todo how to integrate with image overlay
  */
 template<int PAYLOAD_SIZE>
 class LocatedObject {
@@ -53,7 +49,7 @@ public:
    */
   std::vector<CyclicBitSet<PAYLOAD_SIZE>*> tag_codes;
 
-  void LoadTransform(float transform[16],float tag_size, float agle, const Camera& camera);
+  void LoadTransform(float transform[16],float tag_size, const Camera& camera);
 
   LocatedObject();
   ~LocatedObject();
@@ -87,11 +83,11 @@ template<int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>::LocatedObject(Socket& so
 
 template<int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>::LocatedObject() : tag_codes() {}
 
-template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(float t[16],float tag_size, float agle, const Camera& camera) {
+template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(float t[16],float tag_size,  const Camera& camera) {
   for(int i=0;i<16;i++) {
     transform[i] = t[i];
   }
-  angle = agle;
+  angle = 0;
   GetNormalVector(transform,camera,normal);
   GetLocation(transform,location,tag_size);
   camera.CameraToWorld(location,1);

@@ -204,6 +204,11 @@ public:
 
   QuadTangle(Socket& socket);
   int Save(Socket& socket) const;
+
+  /**
+   * \todo implement the check method
+   */ 
+  bool Check(const std::vector<float>& points) const {return true;};
 private:
   inline void compute_central_point();
   void sort_points();

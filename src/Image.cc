@@ -53,12 +53,29 @@ Image::~Image() {
   }
 }
 
-void Image::GlobalThreshold(unsigned char threshold) {
-  cvThreshold(m_image,m_image,threshold,1,CV_THRESH_BINARY_INV);
+unsigned char Image::GlobalThreshold(unsigned char threshold) {
+  unsigned char histogram[128] = {0};
+  unsigned int total = 0;
+  for(int i=0;i<m_image->height;++i) {
+    unsigned char* data_pointer = GetRow(i);
+    for(int j=0;j<m_image->width;++j) {
+      unsigned char pixel = *data_pointer;
+      histogram[pixel]++;
+      total+=pixel;
+      *data_pointer = pixel > threshold ? 1 : 0;
+      data_pointer++;
+    }
+  }
 #ifdef IMAGE_DEBUG
-  cvSaveImage("debug-globalthreshold.bmp",m_image);
+  Save("debug-globalthreshold.bmp");
 #endif
+
+  total/=m_image->height*m_image->width;
+
+  return total;
+
 }
+
 
 /**
  * 

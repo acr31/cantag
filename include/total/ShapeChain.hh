@@ -22,7 +22,7 @@ public:
   inline void DrawChain(Image& image, const Camera& camera) const {};
   ShapeChainEOL(Socket& socket) {};
   int Save(Socket& socket) const { return 0; };
-
+  inline bool Check(const std::vector<float>& points) const { return false; }
 };
 
 
@@ -55,6 +55,8 @@ public:
 
   inline bool Compare(ShapeChain<M,S> o) const;
 
+  inline bool Check(const std::vector<float>& points) const;
+
   void DrawChain(Image& image, const Camera& camera) const;
 
   int Save(Socket& socket) const;
@@ -77,6 +79,15 @@ template<class M, class S> ShapeChain<M,S>::~ShapeChain() {};
 template<class M, class S> ShapeChain<M,S>::ShapeChain(const std::vector<float>& points) : 
     m_shape(points,false),
     m_next(points,m_shape.IsFitted()) {};
+
+template<class M, class S> bool ShapeChain<M,S>::Check(const std::vector<float>& points) const {
+  if (IsFitted()) {
+    return m_shape.Check(points);
+  }
+  else {
+    m_next.Check(points);
+  }
+}
 
 template<class M, class S> ShapeChain<M,S>::ShapeChain(const std::vector<float>& points, bool prev_fitted) :
     m_shape(points,prev_fitted),

@@ -61,8 +61,13 @@ public:
 	  float data_outer_radius);
   virtual ~RingTag();
   virtual void Draw2D(Image& image, CyclicBitSet<RING_COUNT*SECTOR_COUNT>& tag_data) const;
-  virtual LocatedObject<RING_COUNT*SECTOR_COUNT>* DecodeNode(ShapeTree<ShapeChain<Ellipse> >::Node* node, 
-							    const Camera& camera, const Image& image) const;
+  virtual LocatedObject<RING_COUNT*SECTOR_COUNT>* GetTransform(ShapeTree<ShapeChain<Ellipse> >::Node* node, 
+							       const Camera& camera, const Image& image) const;
+  virtual void DecodeNode(LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj,
+			  const Camera& camera, const Image& image) const;
+
+  virtual bool CheckTransform(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, ShapeTree<ShapeChain<Ellipse> >::Node* node) const;
+  virtual bool CheckDecode(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, const Camera& camera, const Image& image) const;
  
 private:
   void draw_circle(Image& debug0, const Camera& camera, float l[16], double radius) const;
@@ -219,12 +224,15 @@ template<int RING_COUNT,int SECTOR_COUNT> void RingTag<RING_COUNT,SECTOR_COUNT>:
   }
 }
 
-template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>* RingTag<RING_COUNT,SECTOR_COUNT>::DecodeNode(ShapeTree<ShapeChain<Ellipse> >::Node* node, 
+template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>* RingTag<RING_COUNT,SECTOR_COUNT>::GetTransform(ShapeTree<ShapeChain<Ellipse> >::Node* node, 
 															       const Camera& camera, const Image& image) const {
 #ifdef RING_TAG_DEBUG
   PROGRESS("DecodeNode called");
 #endif
 
+  /**
+   * \todo this check will not work for the SplitRing tags
+   */
   if (node->children.size() != 1) {
 #ifdef RING_TAG_DEBUG
     PROGRESS("This node has " << node->children.size() << " children.  Skipping it");
@@ -462,107 +470,109 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
     PROGRESS("Found a concentric inner circle with matching contour");
 #endif
     // we've found a good transform
+    LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj = new LocatedObject<RING_COUNT*SECTOR_COUNT>();
+    lobj->LoadTransform(correcttrans,1,camera);
+    return lobj;
+  }
+  return NULL;
+}
 
-    // loop round reading chunks and passing them to the decoder
-    
-    // if it returns false on any insert then we might be misaligned
-    // so rotate a little bit round and try again
-    
-    // if it throws an InvalidSymbol exception then we stop trying
-    
-    // if we read a full 360 degrees then we stop and ask it for the
-    // code
-    CyclicBitSet<RING_COUNT*SECTOR_COUNT>*  read_code[READING_COUNT];
-    for(int b=0;b<READING_COUNT;b++) { 
-      read_code[b] = new CyclicBitSet<RING_COUNT*SECTOR_COUNT>();
-    };
+template<int RING_COUNT,int SECTOR_COUNT> void RingTag<RING_COUNT,SECTOR_COUNT>::DecodeNode(LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj,const Camera& camera, const Image& image) const {
 
-    for(int j=0;j<SECTOR_COUNT*READING_COUNT;j++) {
-      // read a chunk by sampling each ring and shifting and adding
-      int currentcode = j%READING_COUNT;      
-      for(int k=RING_COUNT-1;k>=0;k--) {
-	float tpt[]=  {  m_cos_read_angles[j] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
-			 m_sin_read_angles[j] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
-	ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
-	camera.NPCFToImage(tpt,1);
-	bool sample = image.Sample(tpt[0],tpt[1]) != 0;
-	(*read_code[currentcode])[j/READING_COUNT * RING_COUNT + k] = sample;
-      }
+  float* correcttrans = lobj->transform;
+  // loop round reading chunks and passing them to the decoder
+  
+  // if it returns false on any insert then we might be misaligned
+  // so rotate a little bit round and try again
+  
+  // if it throws an InvalidSymbol exception then we stop trying
+  
+  // if we read a full 360 degrees then we stop and ask it for the
+  // code
+  CyclicBitSet<RING_COUNT*SECTOR_COUNT>*  read_code[READING_COUNT];
+  for(int b=0;b<READING_COUNT;b++) { 
+    read_code[b] = new CyclicBitSet<RING_COUNT*SECTOR_COUNT>();
+  };
+  
+  for(int j=0;j<SECTOR_COUNT*READING_COUNT;j++) {
+    // read a chunk by sampling each ring and shifting and adding
+    int currentcode = j%READING_COUNT;      
+    for(int k=RING_COUNT-1;k>=0;k--) {
+      float tpt[]=  {  m_cos_read_angles[j] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
+		       m_sin_read_angles[j] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
+      ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
+      camera.NPCFToImage(tpt,1);
+      bool sample = image.Sample(tpt[0],tpt[1]) != 0;
+      (*read_code[currentcode])[j/READING_COUNT * RING_COUNT + k] = sample;
     }
-    
+  }
+  
 #ifdef RING_TAG_DEBUG
-    for(int i=0;i<READING_COUNT;i++) {
-      PROGRESS("Code candidate " << i << " is " << *read_code[i]);
-    }
+  for(int i=0;i<READING_COUNT;i++) {
+    PROGRESS("Code candidate " << i << " is " << *read_code[i]);
+  }
 #endif
-
-    // scan round decoding candidates until we find two successful reads that are the same
-    CyclicBitSet<RING_COUNT*SECTOR_COUNT>* last_read = NULL;
-    int orientation;
-    int code_ptr;
-    for(code_ptr=0;code_ptr<READING_COUNT;code_ptr++) {
-      if ((orientation = DecodePayload(*read_code[code_ptr])) >= 0) {
-	if ((last_read != NULL) && (*last_read == *read_code[code_ptr])) {
-	  break;
-	}
-	last_read = &(*read_code[code_ptr]);
+  
+  // scan round decoding candidates until we find two successful reads that are the same
+  CyclicBitSet<RING_COUNT*SECTOR_COUNT>* last_read = NULL;
+  int orientation;
+  int code_ptr;
+  for(code_ptr=0;code_ptr<READING_COUNT;code_ptr++) {
+    if ((orientation = DecodePayload(*read_code[code_ptr])) >= 0) {
+      if ((last_read != NULL) && (*last_read == *read_code[code_ptr])) {
+	break;
       }
+      last_read = &(*read_code[code_ptr]);
     }
-
-
-    if (code_ptr < READING_COUNT) {
-      // we now know that we had to rotate the code by "orientation"
-      // bits in order to align it.  This corresponds to a rotation of
-      // orientation/ring_count sectors.  Which corresponds to a
-      // rotation of orientation/ring_count*sector_count/360 degrees.
-      // we also know that this reading was made starting from m_read_angles[code_ptr]
-      // this gives the final rotation as 
-      // m_read_angles[code_ptr] + orientation/ring_count*sector_count/2/M_PI
-      
-      float angle = m_read_angles[code_ptr-1] + orientation/RING_COUNT*2*M_PI/SECTOR_COUNT;
-
+  }
+  
+  
+  if (code_ptr < READING_COUNT) {
+    // we now know that we had to rotate the code by "orientation"
+    // bits in order to align it.  This corresponds to a rotation of
+    // orientation/ring_count sectors.  Which corresponds to a
+    // rotation of orientation/ring_count*sector_count/360 degrees.
+    // we also know that this reading was made starting from m_read_angles[code_ptr]
+    // this gives the final rotation as 
+    // m_read_angles[code_ptr] + orientation/ring_count*sector_count/2/M_PI
+    
+    float angle = m_read_angles[code_ptr-1] + orientation/RING_COUNT*2*M_PI/SECTOR_COUNT;
+    
 #ifdef RING_TAG_IMAGE_DEBUG
-      draw_read(image,camera,correcttrans,code_ptr);
+    draw_read(image,camera,correcttrans,code_ptr);
 #endif
 #ifdef RING_TAG_DEBUG
-      PROGRESS("Found code " << *read_code[code_ptr]);
+    PROGRESS("Found code " << *read_code[code_ptr]);
 #endif	
 #ifdef RING_TAG_DEBUG
 #ifdef TEXT_DEBUG
-      float temp[2] = {0,0};
-      ApplyTransform(correcttrans,temp[0],temp[1],temp,temp+1);
-      camera.NPCFToImage(temp,1);
-      PROGRESS("Found code " << *read_code[code_ptr] << " at " << temp[0] << "," << temp[1]);
+    float temp[2] = {0,0};
+    ApplyTransform(correcttrans,temp[0],temp[1],temp,temp+1);
+    camera.NPCFToImage(temp,1);
+    PROGRESS("Found code " << *read_code[code_ptr] << " at " << temp[0] << "," << temp[1]);
 #endif
 #endif
-      LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj = new LocatedObject<RING_COUNT*SECTOR_COUNT>();
-      lobj->LoadTransform(correcttrans,1,angle,camera);
-      lobj->tag_codes.push_back(read_code[code_ptr]);
-      for(int i=0;i<READING_COUNT;++i) {
-	if (i != code_ptr) {
-	  delete read_code[i];
-	}
-      }
-      return lobj;
-    }
-    else {
-      for(int i=0;i<READING_COUNT;++i) {
+    /**
+     * \todo alter the transform to include the rotation required to line up the code
+     */
+    lobj->tag_codes.push_back(read_code[code_ptr]);
+    for(int i=0;i<READING_COUNT;++i) {
+      if (i != code_ptr) {
 	delete read_code[i];
-      } 
-#ifdef RING_TAG_DEBUG
-      PROGRESS("Failed to decode two identical readings");
-#endif
-#ifdef RING_TAG_IMAGE_DEBUG
-      draw_read(image,camera,correcttrans,0);
-#endif
+      }
     }
   }
-  else {   
+  else {
+    for(int i=0;i<READING_COUNT;++i) {
+      delete read_code[i];
+    } 
 #ifdef RING_TAG_DEBUG
-    PROGRESS("Failed to find a valid transformation");
+    PROGRESS("Failed to decode two identical readings");
 #endif
-  }  
-  return NULL;
+#ifdef RING_TAG_IMAGE_DEBUG
+    draw_read(image,camera,correcttrans,0);
+#endif
+  }
 };  
 
 template<int RING_COUNT,int SECTOR_COUNT> void RingTag<RING_COUNT,SECTOR_COUNT>::draw_circle(Image& debug0, const Camera& camera, float l[16], double radius) const {
@@ -635,6 +645,29 @@ template<int RING_COUNT,int SECTOR_COUNT>  void RingTag<RING_COUNT,SECTOR_COUNT>
   filename[255]=0;
   debug0.Save(filename);
 }
+
+template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>::CheckTransform(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, ShapeTree<ShapeChain<Ellipse> >::Node* node) const {
+  // project some points for the inner circle using both interpretations and check which one fits  
+  int count = 200;
+  std::vector<float> projected;
+  for(int i=0;i<count*2;i+=2) {
+    float x = cos( (float)i*PI/(float)count );
+    float y = sin( (float)i*PI/(float)count );
+    ApplyTransform(lobj->transform,x,y,projected);
+  }       
+  return node->matched.GetShape().Check(projected);
+}
+
+/**
+ * \todo implement this properly
+ */
+template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>::CheckDecode(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, const Camera& camera, const Image& image) const {
+  LocatedObject<RING_COUNT*SECTOR_COUNT> copy(*lobj);
+  copy.tag_codes.clear();
+  DecodeNode(&copy,camera,image);
+  return copy.tag_codes.size() == lobj->tag_codes.size();
+}
+
 
 #endif//RING_TAG_GUARD
 

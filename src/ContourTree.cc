@@ -147,6 +147,8 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
   delete[] nbd_store;
 }
 
+ContourTree::ContourTree(const ContourTree& tree) : m_root_contour(new Contour(*(tree.m_root_contour))) {}
+
 
 int ContourTree::FollowContour(Image& image, // the image to track the contour in (will be altered)
 			       unsigned char* data_pointer,
@@ -371,6 +373,32 @@ void ContourTree::ImageToNPCF(const Camera& camera, Contour* current) {
   }
 }
 
+bool ContourTree::CheckImageToNPCF(const ContourTree& evidence, const Camera& camera) const {
+  return CheckImageToNPCF(camera,GetRootContour(),evidence.GetRootContour());
+}
+
+#include <iostream>
+bool ContourTree::CheckImageToNPCF(const Camera& camera, const Contour* current, const Contour* evidence_current) const {
+  if (current->points.size() != evidence_current->points.size()) return false; 
+  if (current->children.size() != evidence_current->children.size()) return false;
+
+  std::vector<float> pointscopy = current->points;
+  camera.NPCFToImage(pointscopy);
+  int size = current->points.size();
+  for(int i=0;i<size;++i) {
+    if (fabs(pointscopy[i]-evidence_current->points[i]) > 0.5) return false;
+  }
+
+  std::vector<Contour*>::const_iterator i = current->children.begin();
+  std::vector<Contour*>::const_iterator j = evidence_current->children.begin();
+  for(;
+      i != current->children.end() && j != evidence_current->children.end();
+      ++i,++j) {
+    if (!CheckImageToNPCF(camera,*i,*j)) return false;
+  }
+  return true;
+}
+
 ContourTree::Contour::~Contour() {
   for(std::vector<Contour*>::const_iterator i = children.begin();
       i!=children.end();
@@ -406,6 +434,21 @@ ContourTree::Contour::Contour(Socket& socket) : points() {
   int count = socket.RecvInt();
   for(int i=0;i<count;++i) {
     children.push_back(new Contour(socket));
+  }
+}
+
+ContourTree::Contour::Contour(const Contour& contour)  : 
+      nbd(contour.nbd),
+      bordertype(contour.bordertype),
+      parent_id(contour.parent_id),
+      points(contour.points),
+      children(),
+      weeded(contour.weeded)
+{
+  for(std::vector<Contour*>::const_iterator i = contour.children.begin();
+      i!=contour.children.end();
+      ++i) {
+    children.push_back(new Contour(*(*i)));
   }
 }
 

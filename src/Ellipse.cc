@@ -241,7 +241,7 @@ bool Ellipse::FitEllipse(const std::vector<float>& points) {
       PROGRESS("MAXFITERROR is " << MAXFITERROR);
 #endif      
 
-      return (GetErrorGradient(points) < MAXFITERROR);
+      return (GetError(points) < MAXFITERROR);
     }
   }
   return false;
@@ -1065,4 +1065,8 @@ Ellipse::Ellipse(Socket& socket) {
     m_width = socket.RecvFloat();
     m_height = socket.RecvFloat();    
     m_fitted = (bool)socket.RecvInt();    
+}
+
+bool Ellipse::Check(const std::vector<float>& points) const {
+  return (GetError(points) < MAXFITERROR); 
 }
