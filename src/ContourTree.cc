@@ -8,7 +8,7 @@
 #undef  CONTOUR_TREE_DEBUG_SAVE
 Image* debug_image;
 
-ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constraints) : m_root_contour(NULL)
+ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constraints) : m_root_contour(NULL), m_contour_count(0)
 {
   unsigned int* nbd_store = new unsigned int[image.GetWidth()*image.GetHeight()];
   std::map<int,Contour*> node_hash;
@@ -39,6 +39,7 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
 #endif
 
   m_root_contour = new Contour(1);
+  m_contour_count++;
   m_root_contour->weeded = true;
   Contour* current = m_root_contour;
   current->bordertype=HOLE_BORDER;
@@ -46,6 +47,7 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
   data_pointer = image.GetDataPointer();
   int NBD = 2;
   node_hash[NBD] = new Contour(NBD);
+  m_contour_count++;
   current = node_hash[NBD];
   
   // we're going to mark the image with contour id's as we find them
@@ -94,7 +96,7 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
 	  continue;
 	}
 
-	if (contour_length < 20) { current->weeded = true; }
+	if (contour_length < 20) { current->weeded = true; m_contour_count--;}
 	
 	// now decide the parent of this border
 	
@@ -131,6 +133,7 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
 
 	
 	current = new Contour(NBD);
+	m_contour_count++;
 	node_hash[NBD] = current;
 	
       }
@@ -141,6 +144,7 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
     ++data_pointer; // exclude the last pixel on the line
   }
   delete current;
+  m_contour_count--;
 #ifdef IMAGE_DEBUG
   debug_image->Save("debug-contourtree-contours.bmp");
 #endif
