@@ -2,6 +2,10 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/23 22:38:26  acr31
+ * renamed debug images.  Now throws away outer most contour - edge of image.
+ * And filters on block size.
+ *
  * Revision 1.1  2004/01/23 15:42:29  acr31
  * Initial commit of rectangle detection code
  *
@@ -13,6 +17,7 @@
 #include <cmath>
 
 void FindRectangles(Image *image, int maxXDiff, int maxYDiff, std::vector<Rectangle2DChain*> *results) { 
+  IplImage *copy = cvCloneImage(image);
 
 #ifdef IMAGE_DEBUG
   IplImage *debug0 = cvCloneImage(image);
@@ -23,9 +28,12 @@ void FindRectangles(Image *image, int maxXDiff, int maxYDiff, std::vector<Rectan
 
   CvMemStorage* store = cvCreateMemStorage(0);
   PROGRESS("Initializing contour scanner");
-  CvContourScanner scanner = cvStartFindContours(image,store,sizeof(CvContour),CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE );
+  CvContourScanner scanner = cvStartFindContours(copy,store,sizeof(CvContour),CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE );
   CvSeq* c;
   CvPoint points[4];
+
+  // throw away the first contour which is always the outside edge of the image
+  c = cvFindNextContour(scanner);
 
   while ((c = cvFindNextContour(scanner)) != NULL) {
     int count = c->total;
@@ -38,7 +46,8 @@ void FindRectangles(Image *image, int maxXDiff, int maxYDiff, std::vector<Rectan
     // Check for 4 vertices
     // Check for a convex contour
     if( result->total == 4 &&
-	cvCheckContourConvexity(result) ) {
+	cvCheckContourConvexity(result) &&
+	(fabs(cvContourArea(result,CV_WHOLE_SEQ)) > 10000)) {
 #ifdef IMAGE_DEBUG
       cvDrawContours(debug1,result,0,0,0,3);
 #endif	   
@@ -97,9 +106,9 @@ void FindRectangles(Image *image, int maxXDiff, int maxYDiff, std::vector<Rectan
       } while (tocheck !=NULL);
     }
   }
-  cvSaveImage("debug-findellipses0.jpg",debug0);
-  cvSaveImage("debug-findellipses1.jpg",debug1);
-  cvSaveImage("debug-findellipses2.jpg",debug2);
+  cvSaveImage("debug-findrectangles0.jpg",debug0);
+  cvSaveImage("debug-findrectangles1.jpg",debug1);
+  cvSaveImage("debug-findrectangles2.jpg",debug2);
   cvReleaseImage(&debug0);
   cvReleaseImage(&debug1);
   cvReleaseImage(&debug2);
@@ -107,6 +116,7 @@ void FindRectangles(Image *image, int maxXDiff, int maxYDiff, std::vector<Rectan
   
   cvEndFindContours(&scanner);
   cvReleaseMemStorage(&store);
+  cvReleaseImage(&copy);
 }
 
 static bool compare(Rectangle2D *r1, Rectangle2D *r2, float xdist, float ydist) 
