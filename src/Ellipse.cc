@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/02/21 20:35:31  acr31
+ * another stale file removed.  and a spurious #include
+ *
  * Revision 1.2  2004/02/21 10:05:57  acr31
  * got it working!
  *
@@ -12,7 +15,6 @@
 
 #include <Config.hh>
 #include <Ellipse.hh>
-#include <fitellipse.hh>
 #include <gaussianelimination.hh>
 #include <eigenvv.hh>
 #include <cmath>
