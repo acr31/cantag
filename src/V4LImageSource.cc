@@ -18,7 +18,7 @@
  * and the channel. The channel is the index of the channel in the
  * list of channels returned by the video card.
  */
-V4LImageSource::V4LImageSource(const char* device, const int channel) : 
+V4LImageSource::V4LImageSource(char* device, int channel) : 
   m_handle(-1), m_mmap((uchar*)MAP_FAILED,-1),
   m_slots(NULL),m_images(NULL)
 {

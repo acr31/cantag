@@ -9,6 +9,13 @@
 #include <gmp.h>
 #include <bitset>
 #include <CyclicBitSet.hh>
+
+template<int SIZE> class BigInt;
+
+template<int T> std::ostream& operator<<(std::ostream& s, const BigInt<T>& z) {
+  s << z.m_gmpint;
+  return s;
+}
 /**
  * Arbitrary precision big integer using a given backing store.
  * Currently the destructor must be called to force the thing to flush
@@ -56,8 +63,7 @@ public:
 
   operator unsigned int() const;
   
-  friend std::ostream& operator<<(std::ostream& s, const BigInt<SIZE>& z);
-  
+  friend std::ostream& operator<< <>(std::ostream& s, const BigInt<SIZE>& z);
 };
 
 template<int SIZE> BigInt<SIZE>::BigInt(unsigned int i) : m_gmpint(i), m_backing_store(NULL), m_bit1(1) {};
@@ -163,9 +169,6 @@ template<int SIZE> BigInt<SIZE>::operator unsigned int() const {
 }
 
 
-template<int T> std::ostream& operator<<(std::ostream& s, const BigInt<T>& z) {
-  s << z.m_gmpint;
-  return s;
-}
+
 
 #endif

@@ -11,7 +11,7 @@ TestEigen_SOURCES = TestEigen.cc
 TestContourTree_SOURCES = TestContourTree.cc
 TestSocket_SOURCES = TestSocket.cc
 
-if BUILD_VIDEO4LINUX2
+if BUILD_VIDEO4LINUX
 noinst_PROGRAMS += TestV4LImageSource
 TestV4LImageSource_SOURCES = TestV4LImageSource.cc
 endif
