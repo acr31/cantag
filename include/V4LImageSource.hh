@@ -9,7 +9,8 @@
 #include <ImageSource.hh>
 
 extern "C" {
-# include <linux/videodev.h> // for Video4Linux
+# include <asm/types.h>
+# include <linux/videodev2.h> // for Video4Linux
 };
 
 
@@ -44,7 +45,7 @@ private:
   int m_total_frames;
   int m_image_width;
   int m_image_height;
-  video_mmap* m_slots;
+  v4l2_buffer* m_slots;
   Image* m_images;
 
 public:

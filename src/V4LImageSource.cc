@@ -35,25 +35,25 @@ V4LImageSource::V4LImageSource(const char* device, const int channel) :
 #endif
 
   // load the capabilities of the video device
-  video_capability capability;
-  if (ioctl(m_handle.Get(),VIDIOCGCAP,&capability) < 0) {
+  v4l2_capability capability;
+  if (ioctl(m_handle.Get(),VIDIOC_QUERYCAP,&capability) < 0) {
     throw "Failed to ioctl (VIDIOCGCAP) video device";
   }
 
 #ifdef V4L_DEBUG
   PROGRESS("Read video capability");
-  PROGRESS(" name: " << capability.name);
-  PROGRESS(" type: " << capability.type);
-  PROGRESS(" channels: " << capability.channels);
-  PROGRESS(" audios: " << capability.audios);
-  PROGRESS(" maxwidth: " << capability.maxwidth);
-  PROGRESS(" maxheight: " << capability.maxheight);
-  PROGRESS(" minwidth: " << capability.minwidth);
-  PROGRESS(" minheight: " << capability.minheight);
+  PROGRESS(" driver: " << capability.driver);
+  PROGRESS(" name: " << capability.card);
+  PROGRESS(" location: " << capability.bus_info);
+  PROGRESS(" version: " << 
+	   ((capability.version >> 16) & 0xFF) << "." <<
+	   ((capability.version >> 8) & 0xFF) << "." <<
+	   (capability.version & 0xFF));
+  PROGRESS(" capabilities: " << capability.capabilities);
 #endif
   
   // check if this is a capture device
-  if (capability.type & VID_TYPE_CAPTURE == 0) {
+  if (capability.capabilities & V4L2_CAP_VIDEO_CAPTURE == 0) {
     throw "This device is not capable of video capture";
   }
 
@@ -62,79 +62,74 @@ V4LImageSource::V4LImageSource(const char* device, const int channel) :
 #endif
 
   // check that the requested channel is in range
-  if (channel > capability.channels-1) {
+  v4l2_input channel_info;
+  channel_info.index = channel;
+  if (ioctl(m_handle.Get(),VIDIOC_ENUMINPUT,&channel_info) < 0) {
     throw "Channel out of range";
   }
   m_channel = channel;
 
 #ifdef V4L_DEBUG
-  PROGRESS("Accepted selected channel");
+  PROGRESS("Accepted selected channel " << channel_info.name);
 #endif
   
-  // find out the details of the buffer needed
-  video_mbuf mbuf;
-  if (ioctl(m_handle.Get(),VIDIOCGMBUF,&mbuf) < 0) {
-    throw "Failed to ioctl (VIDIOCGMBUF) video device";
+  v4l2_requestbuffers request;
+  request.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  request.memory = V4L2_MEMORY_USERPTR;
+  if (ioctl(m_handle.Get(),VIDIOC_REQBUFS,&request) < 0) {
+    throw "Failed to ioctl (VIDIOC_REQBUFS) video device";
+  }
+
+  v4l2_format format;
+  memset(&format,0,sizeof(format));
+  format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  if (ioctl(m_handle.Get(),VIDIOC_G_FMT,&format) < 0) {
+    throw "Failed to ioctl (VIDIOC_G_FMT) video device";
   }
 
 #ifdef V4L_DEBUG
-  PROGRESS("Found buffer details");
-  PROGRESS(" size: "<<mbuf.size);
-  PROGRESS(" frames: " << mbuf.frames);
-  for(int i=0;i<mbuf.frames;i++) {
-    PROGRESS(" offset"<<i<<": " << mbuf.offsets[i]);
-  }
+  PROGRESS("Collected format information");
+  PROGRESS(" width = " << format.fmt.pix.width);
+  PROGRESS(" height = " << format.fmt.pix.height);
+  PROGRESS(" pixelformat = " << format.fmt.pix.pixelformat);
+  PROGRESS(" field = " << format.fmt.pix.field);
+  PROGRESS(" bytesperline = " << format.fmt.pix.bytesperline);
+  PROGRESS(" sizeimage = " << format.fmt.pix.sizeimage);
+  PROGRESS(" colorspace = " << format.fmt.pix.colorspace);
 #endif
-  
-  // memory map the right buffer size
-  // the video device will read into n different frames sequentially
-  // however the _total_ amount of memory needed for all of these
-  // frames if given by mbuf.size
-  if ((m_mmap.SetHandle((uchar*)mmap(0,mbuf.size,PROT_READ | PROT_WRITE,MAP_SHARED,m_handle.Get(),0),mbuf.size)).Get() == (uchar*)MAP_FAILED) {
-    throw "Failed to mmap suitable buffer size";
-  }
-  m_total_frames = mbuf.frames;
-  
-  m_image_width = capability.maxwidth;
-  m_image_height = capability.maxheight;
 
-#ifdef V4L_DEBUG
-  PROGRESS("Successfully mmapped file");
-#endif
+
+  m_image_width = format.fmt.pix.width;
+  m_image_height = format.fmt.pix.height;
+
+  format.fmt.pix.pixelformat = V4L2_PIX_FMT_GREY;
 
   // configure the device to give us greyscale images
-  struct video_picture p;
-  if (ioctl(m_handle.Get(),VIDIOCGPICT,&p) < 0) {
-      throw "Failed to ioctl (VIDIOCGPICT) video device";
+  if (ioctl(m_handle.Get(),VIDIOC_S_FMT,&format) < 0) {
+      throw "Failed to ioctl (VIDIOC_S_FMT) video device";
   }
-  
-  p.palette = VIDEO_PALETTE_GREY;
-  p.depth = 8;
-  if (ioctl(m_handle.Get(),VIDIOCSPICT,&p) < 0) {
-    throw "Failed to ioctl (VIDIOCSPICT) video device";
-  } 
 
 #ifdef V4L_DEBUG
   PROGRESS("Configured palette");
 #endif
 
-  // create a (scoped) array of video_mmap structs - we use these when
-  // we ask the capture card to asynchronously fetch the images for
-  // us.
-  m_slots = new struct video_mmap[m_total_frames];
+  m_total_frames = 4;
+  m_slots = new v4l2_buffer[m_total_frames];
   m_images = new Image[m_total_frames];
 
   // populate the arrays
   for(int i=0;i<m_total_frames;i++) {
-    m_slots[i].format = p.palette;
-    m_slots[i].frame = i;
-    m_slots[i].width = m_image_width;
-    m_slots[i].height = m_image_height;
-    m_images[i] = Image(m_image_width,m_image_height,m_mmap.Get()+mbuf.offsets[i]);
+    memset(m_slots+i,0,sizeof(v4l2_buffer));
+    m_images[i] = Image(m_image_width,m_image_height);
+    m_slots[i].index = i;
+    m_slots[i].type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    m_slots[i].memory = V4L2_MEMORY_USERPTR;
+    m_slots[i].length = m_image_width*m_image_height;
+    m_slots[i].m.userptr = (unsigned long)m_images[i].GetDataPointer();
     // start the device asynchronously fetching the frame
     if (i>0) { // dont start capturing for this one because we'll
 	       // start it when we first call next
-      if (ioctl(m_handle.Get(),VIDIOCMCAPTURE,&(m_slots[i])) < 0) {
+      if (ioctl(m_handle.Get(),VIDIOC_QBUF,&(m_slots[i])) < 0) {
 	throw "Failed to ioctl (VIDIOCMCAPTURE) video device";
       }
     }
@@ -163,18 +158,23 @@ Image* V4LImageSource::Next() {
   // start the device collecting the one we just used
   int rs;
   int retry = 0;
-  while(rs = ioctl(m_handle.Get(),VIDIOCMCAPTURE,&(m_slots[m_current_frame])) == EBUSY && ++retry<=5);
+  while(rs = ioctl(m_handle.Get(),VIDIOC_QBUF,&(m_slots[m_current_frame])) == EBUSY && ++retry<=5);
   if (rs < 0) {
-    throw "Failed to ioctl (VIDIOCMCAPTURE) video device";
+    throw "Failed to ioctl (VIDIOC_QBUF) video device";
   }
 
   m_current_frame++;
   m_current_frame%=m_total_frames;
 
+  v4l2_buffer request;
+  memset(&request,0,sizeof(v4l2_buffer));
+  request.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  request.memory = V4L2_MEMORY_USERPTR;
+
   // collect the next image - block until its there
-  while(rs = ioctl(m_handle.Get(),VIDIOCSYNC,&(m_slots[m_current_frame].frame)) == EINTR);
+  while(rs = ioctl(m_handle.Get(),VIDIOC_DQBUF,&request) == EINTR);
   if (rs < 0) {
-    throw "Failed to ioctl (VIDIOCSYNC) video device";
+    throw "Failed to ioctl (VIDIOC_DQBUF) video device";
   }  
 
   Image* result = &m_images[m_current_frame];
