@@ -29,13 +29,13 @@ Ellipse::Ellipse(): m_fitted(false) {}
 Ellipse::~Ellipse() {}
 
 Ellipse::Ellipse(const std::vector<float>& points) {
-  m_fitted = FitEllipseSimple(points);
+  m_fitted = FitEllipse(points);
   if (m_fitted) { Decompose(); }
 }
 
 Ellipse::Ellipse(const std::vector<float>& points, bool prev_fit) {
   if (!prev_fit) {
-    m_fitted = FitEllipseSimple(points);
+    m_fitted = FitEllipse(points);
     if (m_fitted) { Decompose(); }
   }
   else {
@@ -198,7 +198,7 @@ bool Ellipse::FitEllipse(const std::vector<float>& points) {
   PROGRESS("Determinant of S3 " << determinant);
 #endif    
 
-  if (fabs(determinant) < 1e-15) { 
+  if (fabs(determinant) < 1e-5) { 
 #ifdef ELLIPSE_DEBUG
     PROGRESS("Determinant of S3 is zero - no fit");
 #endif
@@ -1047,9 +1047,17 @@ void Ellipse::Decompose() {
   PROGRESS("lambda2= " << lambda2);
 #endif
   
+  float scale_factor = sqrt( -f + a*m_x0*m_x0 + b*m_x0*m_y0 + c*m_y0*m_y0);
   
-  m_width = lambda1;
-  m_height = lambda2;
+#ifdef DECOMPOSE_DEBUG
+  PROGRESS("scale= " << scale_factor);
+#endif
+  
+  m_width = lambda1 * scale_factor;
+  m_height = lambda2 * scale_factor;
+  
+  //  m_width = lambda1;
+  //  m_height = lambda2;
 
 #ifdef DECOMPOSE_DEBUG
   PROGRESS("width= " << m_width);
