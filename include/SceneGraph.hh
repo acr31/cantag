@@ -195,9 +195,6 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	  if (contour_length > 10) {
 #ifdef IMAGE_DEBUG
 	    debug0.DrawPolygon(points_buffer,contour_length,0,1);
-	    debug0.Save("countours.bmp");    
-	    image.Save("tracked.bmp");
-	    //	    exit(-1);
 #endif
 	    
 	    // now decide the parent of this border
@@ -267,7 +264,7 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	
     }
 #ifdef IMAGE_DEBUG
-      debug0.Save("countours.bmp");
+      debug0.Save("debug-contours.bmp");
 #endif
       
 }
