@@ -104,8 +104,8 @@ void test_symbolchunk() {
 }
 
 void test_scc() {
-  SCCCoder<155,5> t;
-  codertest<155>(t);
+  SCCCoder<2,17,3,6> t;
+  codertest<34>(t);
 }
 
 test_suite*
