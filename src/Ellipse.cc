@@ -772,18 +772,6 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
 #ifdef CIRCLE_TRANSFORM_DEBUG
   PROGRESS("Translation tx = "<<tx);
 #endif
-
-  
-  double transc1[] = {1,0,0,tx,
-		      0,1,0,0,
-		      0,0,1,0,
-		      0,0,0,1};
-  
-  double transc2[] = {1,0,0,-tx,
-		      0,1,0,0,
-		      0,0,1,0,
-		      0,0,0,1};
-
   // and another choice based on theta
   double scale = sqrt(-eigvals[0]*eigvals[8]/eigvals[4]/eigvals[4]);
   //double scale = sqrt(1 + (eigvals[8]-eigvals[0])*(eigvals[0]-eigvals[4])/eigvals[0]/eigvals[0]/eigvals[0] - (eigvals[4]+eigvals[8])/eigvals[0]/eigvals[0]);
@@ -791,15 +779,33 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
 #ifdef CIRCLE_TRANSFORM_DEBUG
   PROGRESS("Scale factor " << scale);
 #endif
-  // this multiplies cols 0 and 1 of the transform by scale
-  for(int col=0;col<4;col++) {
-    transc1[col*4] *= scale;
-    transc1[col*4+1] *= scale;
+  
+  double transc1[] = {1,0,0,tx/scale,
+		      0,1,0,0,
+		      0,0,1,1/scale,
+		      0,0,0,1};
+  
+  double transc2[] = {1,0,0,-tx/scale,
+		      0,1,0,0,
+		      0,0,1,1/scale,
+		      0,0,0,1};
 
-    transc2[col*4] *= scale;
-    transc2[col*4+1] *= scale;
 
-  }
+  //  // this multiplies cols 0 and 1 of the transform by scale
+  //  for(int col=0;col<4;col++) {
+  //    for(int row=0;row<4;row++) {
+  //      transc1[row*4+col] *= scale;
+  //      transc2[row*4+col] *= scale;
+  //    }
+    //    transc1[col*4] *= scale;
+    //    transc1[col*4+1] *= scale;
+    //    transc1[col*4+2] *= scale;
+
+    //    transc2[col*4] *= scale;
+    //    transc2[col*4+1] *= scale;
+    //    transc2[col*4+2] *= scale;
+
+  //  }
     
 #ifdef CIRCLE_TRANSFORM_DEBUG  
   PROGRESS("transc1=[" << transc1[0] << "," << transc1[1] << "," << transc1[2] << "," << transc1[3] << ";");

@@ -93,14 +93,15 @@ void GetTransform(const QuadTangle& quad, float transform[16]) {
   PROGRESS("         a7 "<<result[7]);
 #endif
  
-  //  transform[0] = result[0];  transform[1] = result[1];  transform[2] = 0;  transform[3] = result[2];
-  //  transform[4] = result[3];  transform[5] = result[4];  transform[6] = 0;  transform[7] = result[5];
-  //  transform[8] = result[6];  transform[9] = result[7];  transform[10]= 0;  transform[11]= 1/scalefactor;
-  //  transform[12]= 0;          transform[13]= 0;          transform[14]= 0;  transform[15]= 1;
+  // the final vector for the transform is simply the cross product of the first two
+  double final[] = { result[3]*result[7] - result[6]*result[4],
+		     result[6]*result[1] - result[0]*result[7],
+		     result[0]*result[4] - result[3]*result[1] };
+  
 
-  transform[0] = result[0];  transform[1] = result[1];  transform[2] = 0;  transform[3] = result[2];
-  transform[4] = result[3];  transform[5] = result[4];  transform[6] = 0;  transform[7] = result[5];
-  transform[8] = result[6];  transform[9] = result[7];  transform[10]= 0;  transform[11]= 1;
+  transform[0] = result[0];  transform[1] = result[1];  transform[2] = final[0];  transform[3] = result[2];
+  transform[4] = result[3];  transform[5] = result[4];  transform[6] = final[1];  transform[7] = result[5];
+  transform[8] = result[6];  transform[9] = result[7];  transform[10]= final[2];  transform[11]= 1;
   transform[12]= 0;          transform[13]= 0;          transform[14]= 0;  transform[15]= 1;
 
 #ifdef SQUARE_TRANSFORM_DEBUG
@@ -138,13 +139,13 @@ void ApplyTransform(const float transform[16], float x, float y, float z, float*
 
 
 void ApplyTransform(const float transform[16], float x, float y, float* projX, float* projY) {
-  ApplyTransform(transform,x,y,1,projX,projY);
+  ApplyTransform(transform,x,y,0,projX,projY);
 }
 
 
 void ApplyTransform(const float transform[16], float* points, int numpoints) {
   for(int i=0;i<numpoints*2;i+=2) {
-    ApplyTransform(transform,points[i],points[i+1],1,points+i,points+i+1);
+    ApplyTransform(transform,points[i],points[i+1],0,points+i,points+i+1);
   }
 }
 
