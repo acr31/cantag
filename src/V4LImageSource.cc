@@ -163,7 +163,6 @@ Image* V4LImageSource::Next() {
   int retry = 0;
   while(rs = ioctl(m_handle.Get(),VIDIOCMCAPTURE,&(m_slots[m_current_frame])) == EBUSY && ++retry<=5);
   if (rs < 0) {
-    std::cout << strerror(errno) << std::endl;   
     throw "Failed to ioctl (VIDIOCMCAPTURE) video device";
   }
 
@@ -173,7 +172,6 @@ Image* V4LImageSource::Next() {
   // collect the next image - block until its there
   while(rs = ioctl(m_handle.Get(),VIDIOCSYNC,&(m_slots[m_current_frame].frame)) == EINTR);
   if (rs < 0) {
-    std::cout << strerror(errno) << std::endl;      
     throw "Failed to ioctl (VIDIOCSYNC) video device";
   }  
 

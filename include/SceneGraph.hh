@@ -50,10 +50,8 @@ public:
    * Update the scene graph with the given image
    */
   void Update(const Image& image, const Camera& camera) {
-    //    IplImage *copy = cvCloneImage(image.m_image); // the find contours process changes the image ;-(
     CvSeq* root;
     cvFindContours(image.m_image,store,&root,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_NONE);
-    //    cvReleaseImage(&copy);
 
 #ifdef IMAGE_DEBUG
     IplImage *debug0 = cvCloneImage(image.m_image);
