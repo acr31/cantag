@@ -30,6 +30,8 @@ int debug_image_counter= 0;
  * The number of readings to make from a tag.  We then look for pairs
  * of reading that are the same in order to guess the correct angle of
  * the tag.
+ *
+ * \todo regression test with gl harness
  */
 #define READING_COUNT 1
 template<int RING_COUNT, int SECTOR_COUNT>

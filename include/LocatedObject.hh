@@ -13,6 +13,12 @@
 /**
  * Represents a tag that has been located.  Contains its 3D location,
  * pose, transformation matrix and its coded value.
+ *
+ * \todo we want some method of checking for expected tags in the image
+ *
+ * \todo how to output the location data found
+ *
+ * \todo how to integrate with image overlay
  */
 template<int PAYLOAD_SIZE>
 class LocatedObject {

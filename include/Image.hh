@@ -11,6 +11,7 @@
 #define COLOUR_BLACK ((unsigned char)0)
 #define COLOUR_WHITE ((unsigned char)255)
 #define PI CV_PI
+
 /**
  * A wrapper object for OpenCv's image
  */
@@ -23,6 +24,10 @@ public:
   Image(char* filename);
   ~Image();
 
+  /**
+   * Read the pixel at the given x and y co-ordinates. Includes a
+   * bounds check---returns 0 if out of range.
+   */
   inline unsigned char Sample(unsigned int x, unsigned int y) const {
     if ((x < m_image->width) &&
 	(y < m_image->height)) {
@@ -33,6 +38,10 @@ public:
     }
   }
 
+  /**
+   * Read the pixel at the given x and y co-ordinates. Includes a
+   * bounds check---returns 0 if out of range.
+   */
   inline unsigned char Sample(int x, int y) const {
     if ((x >= 0) && (x < m_image->width) &&
 	(y >= 0) && (y < m_image->height)) {
@@ -43,14 +52,25 @@ public:
     }
   }
 
+  /**
+   * Round the floating point values to the nearest pixel and then
+   * sample the image at that point.
+   */
   inline unsigned char Sample(float x, float y) const {
     return Sample(cvRound(x),cvRound(y));
   }
 
+  /**
+   * Mutltiply every point in the image by scalefactor and add on the
+   * offset.
+   */
   inline void ConvertScale(float scalefactor, int offset) {
     cvConvertScale(m_image,m_image,scalefactor,offset);
   }
   
+  /**
+   * Resize the image and store the result in the target image
+   */
   inline void Resize(Image& dest) const {
     cvResize(m_image,dest.m_image);
   }

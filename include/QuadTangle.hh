@@ -1,11 +1,14 @@
-/**
- * A class to fit points to a quadtangle and encapsulate the result
- *
+/*
  * $Header$ 
  */
 #ifndef QUADTANGLE_GUARD
 #define QUADTANGLE_GUARD
 
+/**
+ * A class to fit points to a quadtangle and encapsulate the result
+ *
+ * \todo regression test give it sets of points we see if it fits them properly
+ */
 class QuadTangle {
 private:
   float m_x0;

@@ -10,6 +10,9 @@
 
 #define PARITY_DEBUG
 
+/**
+ * A parity coding scheme.  Lays out the code with a parity bit at the end.
+ */
 template<int BIT_COUNT>
 class ParityCoder : public virtual Coder<BIT_COUNT> {
 public:

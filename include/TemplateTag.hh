@@ -16,6 +16,8 @@
 
 /**
  * An implementation of Template based tags found in ARToolKit
+ *
+ * \todo Needs updating and testing
  */
 class TemplateTag : public virtual Tag< ShapeChain<QuadTangle>,16> {
 private:

@@ -12,7 +12,9 @@
 #include <vector>
 #include <CyclicBitSet.hh>
 
-
+/**
+ * Abstract superclass for all tags.
+ */
 template<class C, int PAYLOAD_SIZE>
 class Tag {
 public:

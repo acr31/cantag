@@ -24,6 +24,12 @@
  *
  * \todo square matching is currently requiring that you change
  * APPROX_NONE to APPROX_SIMPLE.  Fix the square fitter.
+ *
+ * \todo has a memory leak. we throw away scenegraphnodes without
+ * deleteing them
+ *
+ * \todo regression test: create dummy images with squares etc in them
+ * and try to match them
  */
 template<class S,int PAYLOAD_SIZE>
 class SceneGraph {

@@ -30,8 +30,7 @@
  *  year          = "1998",
  * }
  *
- * \todo contains one of the vile hacks about checking if the code is
- * correct
+ * \todo regression test with gl harness
  */ 
 template<int SIZE>
 class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*SIZE % 2) >,

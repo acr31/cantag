@@ -5,6 +5,12 @@
 #include <Image.hh>
 #include <Camera.hh>
 
+/**
+ * A template code.  Handles correlation with other templates and the
+ * like.
+ *
+ * \todo{regression test: create various images which we expect various correlation coefficients from and try them}
+ */
 class Template {
 private:
   float m_average;
