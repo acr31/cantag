@@ -4,6 +4,8 @@
 #ifndef QUADTANGLE_GUARD
 #define QUADTANGLE_GUARD
 
+#include <vector>
+#include <Image.hh>
 /**
  * A class to fit points to a quadtangle and encapsulate the result
  *
@@ -27,11 +29,11 @@ private:
 
 public:
   QuadTangle();
-  QuadTangle(float* points, int numpoints, bool prev_fitted=false);
+  QuadTangle(const std::vector<float>& points, bool prev_fitted=false);
   QuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3);
   inline bool IsFitted() const { return m_fitted; }
   bool Compare(const QuadTangle& o) const;
-  
+  void Draw(Image& image) const;
   /*
    * Taken from:
    *

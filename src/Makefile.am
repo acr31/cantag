@@ -5,4 +5,8 @@ if BUILD_VIDEO4LINUX2
 libtripover_la_SOURCES += V4LImageSource.cc
 endif
 
+if BUILD_BOOST_IOSTREAMS
+libtripover_la_SOURCES += NetworkOStream.cc NetworkIStream.cc
+endif
+
 AM_CPPFLAGS=-I../include

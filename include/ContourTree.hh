@@ -156,7 +156,7 @@ template<class Archive> void ContourTree::Contour::save(Archive & ar, const unsi
       i != children.end();
       ++i) {
     if (!(*i)->weeded){ 
-      ar & *i;
+      ar & *(*i);
     }
   }
 }
@@ -171,13 +171,13 @@ template<class Archive> void ContourTree::Contour::load(Archive & ar, const unsi
   weeded = false;
   for(int i=0; i<count;++i) {
     Contour* contour = new Contour();
-    ar & contour;
+    ar & *contour;
     children.push_back(contour);
   }
 }
 
 template<class Archive> void ContourTree::serialize(Archive & ar, const unsigned int version) {
-  ar & m_root_contour;
+  ar & *m_root_contour;
 }
 #endif
 

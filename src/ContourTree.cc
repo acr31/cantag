@@ -5,7 +5,7 @@
 #include <ContourTree.hh>
 
 #undef CONTOUR_TREE_DEBUG
-
+#undef  CONTOUR_TREE_DEBUG_SAVE
 Image* debug_image;
 
 ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constraints) : m_root_contour(NULL)
@@ -57,7 +57,7 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
 #ifdef CONTOUR_TREE_DEBUG
     PROGRESS("Updating LNBD to 1 (row start)");
 #endif
-    int LNBD = 1; // we've just "seen" the frame border so set the last seen border id to match
+    unsigned int LNBD = 1; // we've just "seen" the frame border so set the last seen border id to match
     data_pointer = image.GetRow(raster_y);
     ++data_pointer; // exclude the first pixel on the line
     for(int raster_x=1;raster_x < image_width_1;++raster_x, ++data_pointer) {
@@ -67,7 +67,8 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
 	if (cNBD) { // this pixel has been seen before and it is not an exit pixel
 	  //	if (cNBD && (*data_pointer & 0x1)) { // this pixel has been seen before and it is not an exit pixel
 #ifdef CONTOUR_TREE_DEBUG
-	  PROGRESS("Updating LNBD to " << cNBD);
+	  //	  PROGRESS("Updating LNBD to " << cNBD);
+	  PROGRESS("Updating LNBD to " << nbd_store[raster_x+raster_y*image.GetWidth()]);
 #endif
 	  //	  LNBD = cNBD;
 	  LNBD = nbd_store[raster_x+raster_y*image.GetWidth()];
@@ -93,7 +94,7 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
 	  continue;
 	}
 
-	if (contour_length < 40) { current->weeded = true; }
+	if (contour_length < 20) { current->weeded = true; }
 	
 	// now decide the parent of this border
 	
@@ -156,6 +157,7 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 			       unsigned int* nbd_store
 			       ) {
   int image_width = image.GetWidth();
+  int image_width_step = image.GetWidthStep();
   
   //   +---+---+---+
   //   | 7 | 6 | 5 |
@@ -168,13 +170,13 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
   const int offset_y[] = { 0,1,1,1,0,-1,-1,-1 };
 
   const int offset[] = {-1,                //  0 
-			image_width-1,     //  1
-			image_width,       //  2
-			image_width+1,     //  3
+			image_width_step-1,     //  1
+			image_width_step,       //  2
+			image_width_step+1,     //  3
 			1,                 //  4
-			1-image_width,     //  5
-			-image_width,      //  6
-			-image_width-1};   //  7
+			1-image_width_step,     //  5
+			-image_width_step,      //  6
+			-image_width_step-1};   //  7
 
 
   // data_pointer is the current focus of the search region
@@ -203,14 +205,17 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
   if (position == start_position) {
     // one pixel contour
     *data_pointer = NBD_shift;
+    nbd_store[start_x+image_width*start_y] = nbd;
     points.push_back(start_x);
     points.push_back(start_y);
 #ifdef CONTOUR_TREE_DEBUG
     PROGRESS("Found 1 pixel contour starting from "<< start_x << "," << start_y);
 #endif
 #ifdef IMAGE_DEBUG
-    //! debug_image->DrawPixel(start_x,start_y,COLOUR_BLACK);
-    //! debug_image->Save("debug-contourtree-contours.bmp");
+#ifdef CONTOUR_TREE_DEBUG_SAVE
+    debug_image->DrawPixel(start_x,start_y,COLOUR_BLACK);
+    debug_image->Save("debug-contourtree-contours.bmp");
+#endif
 #endif
     return 1;
   }
@@ -231,13 +236,18 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 
     while(1) {
       sample_pointer = data_pointer+offset[position];
+#ifdef CONTOUR_TREE_DEBUG
+      PROGRESS("Searching position " << position << " value is " << (int)*sample_pointer);
+#endif
       if (*sample_pointer) {
 #ifdef CONTOUR_TREE_DEBUG
 	PROGRESS("Found 1-pixel at position " << position << " around " << start_x << "," << start_y);
 #endif
 #ifdef IMAGE_DEBUG
-	//!     debug_image->DrawPixel(start_x,start_y,128);
-	//!	debug_image->Save("debug-contourtree-contours.bmp");
+#ifdef CONTOUR_TREE_DEBUG_SAVE
+	debug_image->DrawPixel(start_x,start_y,128);
+	debug_image->Save("debug-contourtree-contours.bmp");
+#endif
 #endif
 	// we now need to mark this pixel
 	// 1) if the pixel sample_x+1,sample_y (cell 4) is a 0-element and we
@@ -278,8 +288,10 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 	  PROGRESS("Found " << (points.size()>>1) << " pixel contour starting from "<< points[0] << "," << points[1]);
 #endif
 #ifdef IMAGE_DEBUG
-	  //!     debug_image->DrawPixel(start_x,start_y,0);		  
-	  //!	  debug_image->Save("debug-contourtree-contours.bmp");
+#ifdef CONTOUR_TREE_DEBUG_SAVE
+	  debug_image->DrawPixel(start_x,start_y,0);		  
+	  debug_image->Save("debug-contourtree-contours.bmp");
+#endif
 #endif
 	  return points.size()>>1;
     	}

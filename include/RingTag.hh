@@ -25,7 +25,7 @@
 # undef DRAW_FIELD_DEBUG
 #endif
 
-int debug_image_counter = 0;
+static int debug_image_counter = 0;
 
 #undef LINEAR_ELLIPSE
 
@@ -287,12 +287,23 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
   int count = 200;
   std::vector<float> projected1;
   std::vector<float> projected2;
+  std::vector<float> projected1b; // this one is a circle between the outer and the inner - should be all 0-pixels
+  std::vector<float> projected2b; // this one is a circle between the outer and the inner - should be all 0-pixels
   for(int i=0;i<count*2;i+=2) {
-    float x = cos( (float)i*PI/(float)count ) * m_bullseye_inner_radius / m_bullseye_outer_radius;
-    float y = sin( (float)i*PI/(float)count ) * m_bullseye_inner_radius / m_bullseye_outer_radius;
-    ApplyTransform(transform1,x,y,projected1);
-    ApplyTransform(transform2,x,y,projected2);
+    float x = cos( (float)i*PI/(float)count );
+    float innerx = x * m_bullseye_inner_radius / m_bullseye_outer_radius;
+    float midx = x * (1-m_bullseye_inner_radius / m_bullseye_outer_radius)/2;
+    float y = sin( (float)i*PI/(float)count );
+    float innery = y * m_bullseye_inner_radius / m_bullseye_outer_radius;
+    float midy = y * (1-m_bullseye_inner_radius / m_bullseye_outer_radius)/2;
+    ApplyTransform(transform1,innerx,innery,projected1);
+    ApplyTransform(transform2,innerx,innery,projected2);
+
+    ApplyTransform(transform1,midx,midy,projected1b);
+    ApplyTransform(transform2,midx,midy,projected2b);
   }     
+  camera.NPCFToImage(projected1b);
+  camera.NPCFToImage(projected2b);
   // get the children of this node and check for a good match with either interpretation
   float* correcttrans = NULL;
   float* correctnormal = NULL;
@@ -305,70 +316,136 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
   PROGRESS("Normal vector for transform2 " << normal2[0] << " " << normal2[1] << " " << normal2[2]);
 #endif
   
-  if ((normal1[2] < 0) && (normal2[2] > 0)) {
+  // first check that the points on the mid transforms are all 0-pixels
+  bool transform1mid_ok = true;
+  for(std::vector<float>::const_iterator i = projected1b.begin();
+      i!=projected1b.end();
+      ++i) {
+    float x = *i;
+    ++i;
+    float y = *i;
+    if (image.Sample(x,y)) { transform1mid_ok = false; break; }
+  }
 #ifdef RING_TAG_DEBUG
-    PROGRESS("Chose orientation 1 because it points towards the camera and orientation 2 doesnt");
+  PROGRESS("Transform1mid_ok " << transform1mid_ok);
 #endif
-    correcttrans = transform1;
-    correctnormal = normal1;
+
+  // first check that the points on the mid transforms are all 0-pixels
+  bool transform2mid_ok = true;
+  for(std::vector<float>::const_iterator i = projected2b.begin();
+      i!=projected2b.end();
+      ++i) {
+    float x = *i;
+    ++i;
+    float y = *i;
+    if (image.Sample(x,y)) { transform2mid_ok = false; break; }
+  }
+#ifdef RING_TAG_DEBUG
+  PROGRESS("Transform2mid_ok " << transform2mid_ok);
+#endif
+
+  if (!transform1mid_ok && !transform2mid_ok) {
+#ifdef RING_TAG_DEBUG
+    PROGRESS("Neither transform1mid or transform2mid are ok - aborting");
+#endif
+    return NULL;
+  }
+
+  if ((normal1[2] < 0) && (normal2[2] > 0)) {
+    if (transform1mid_ok) {
+#ifdef RING_TAG_DEBUG
+      PROGRESS("Chose orientation 1 because it points towards the camera and orientation 2 doesnt");
+#endif
+      correcttrans = transform1;
+      correctnormal = normal1;
+    }
+    else {
+#ifdef RING_TAG_DEBUG
+      PROGRESS("Orientation 1 points towards camera, and orientation 2 doesnt but Orientation 1 mid is false - aborting");
+#endif      
+      return NULL;
+    }
   }
   else if ((normal1[2] > 0) && (normal2[2] < 0)) {
+    if (transform2mid_ok) {
 #ifdef RING_TAG_DEBUG
-    PROGRESS("Chose orientation 2 because it points towards the camera and orientation 1 doesnt");
+      PROGRESS("Chose orientation 2 because it points towards the camera and orientation 1 doesnt");
 #endif
-    correcttrans = transform2;
-    correctnormal = normal2;
+      correcttrans = transform2;
+      correctnormal = normal2;
+    }
+    else {
+#ifdef RING_TAG_DEBUG
+      PROGRESS("Orientation 2 points towards camera, and orientation 1 doesnt but Orientation 2 mid is false - aborting");
+#endif      
+      return NULL;
+    }
   }
   else {
-    // find out where the centre of each of the projected ellipses would be
-    float points1[2];
-    float points2[2];
-    ApplyTransform(transform1,0,0,points1,points1+1);
-    ApplyTransform(transform2,0,0,points2,points2+1);
-
-    // now work out the direction of the vector that would run from
-    // the centre of the main ellipse to the centre of each projeted
-    // ellipse.
-    //    float direction1 = atan((el.GetY0()-points1[1])/(el.GetX0()-points1[0]));
-    //    float direction2 = atan((el.GetY0()-points2[1])/(el.GetX0()-points2[0]));
-
-    for(typename std::vector< ShapeTree<ShapeChain<Ellipse> >::Node* >::iterator i = node->children.begin();
-	i!=node->children.end();
-	++i) {      
-      Ellipse child = (*i)->matched.GetShape();
+    if (transform1mid_ok && !transform2mid_ok) {
+#ifdef RING_TAG_DEBUG
+      PROGRESS("Orientation 1 mid is true and Orientation 2 mid is false - choosing 1");
+#endif      
+      correcttrans = transform1;
+      correctnormal = normal1;
+    }
+    else if (transform2mid_ok && !transform1mid_ok) {
+#ifdef RING_TAG_DEBUG
+      PROGRESS("Orientation 2 mid is true and Orientation 1 mid is false - choosing 2");
+#endif      
+      correcttrans = transform2;
+      correctnormal = normal2;      
+    }
+    else {
+      // find out where the centre of each of the projected ellipses would be
+      float points1[2];
+      float points2[2];
+      ApplyTransform(transform1,0,0,points1,points1+1);
+      ApplyTransform(transform2,0,0,points2,points2+1);
       
+      // now work out the direction of the vector that would run from
+      // the centre of the main ellipse to the centre of each projeted
+      // ellipse.
+      //    float direction1 = atan((el.GetY0()-points1[1])/(el.GetX0()-points1[0]));
+      //    float direction2 = atan((el.GetY0()-points2[1])/(el.GetX0()-points2[0]));
       
-      //      float test_dir
-      /*
-      float error1 = (le.GetX0()-points1[0])*(le.GetX0()-points1[0]) + (le.GetY0()-points1[1])*(le.GetY0()-points1[1]);
-	float error2 = (le.GetX0()-points2[0])*(le.GetX0()-points2[0]) + (le.GetY0()-points2[1])*(le.GetY0()-points2[1]);
-      */
-
-      float error1 = (*i)->matched.GetShape().GetError(projected1);
-      float error2 = (*i)->matched.GetShape().GetError(projected2);
+      for(typename std::vector< ShapeTree<ShapeChain<Ellipse> >::Node* >::iterator i = node->children.begin();
+	  i!=node->children.end();
+	  ++i) {      
+	Ellipse child = (*i)->matched.GetShape();
+	
+	
+	//      float test_dir
+	/*
+	  float error1 = (le.GetX0()-points1[0])*(le.GetX0()-points1[0]) + (le.GetY0()-points1[1])*(le.GetY0()-points1[1]);
+	  float error2 = (le.GetX0()-points2[0])*(le.GetX0()-points2[0]) + (le.GetY0()-points2[1])*(le.GetY0()-points2[1]);
+	*/
+	
+	float error1 = (*i)->matched.GetShape().GetError(projected1);
+	float error2 = (*i)->matched.GetShape().GetError(projected2);
 #ifdef RING_TAG_DEBUG
-      PROGRESS("Error 1 " << error1);
-      PROGRESS("Error 2 " << error2);   
+	PROGRESS("Error 1 " << error1);
+	PROGRESS("Error 2 " << error2);   
 #endif
-      if ((error1 < error2) && (error1 < 0.01)) {
+	if ((error1 < error2) && (error1 < 0.01)) {
 #ifdef RING_TAG_DEBUG
-	PROGRESS("Chose orientation 1 with error "<<error1<<" instead of orientation 2 with error "<<error2);
+	  PROGRESS("Chose orientation 1 with error "<<error1<<" instead of orientation 2 with error "<<error2);
 #endif
-	correcttrans = transform1;
-	correctnormal = normal1;
-	break;
-      }
-      else if ((error2 <= error1) && (error2 < 0.01)) {
+	  correcttrans = transform1;
+	  correctnormal = normal1;
+	  break;
+	}
+	else if ((error2 <= error1) && (error2 < 0.01)) {
 #ifdef RING_TAG_DEBUG
-	PROGRESS("Chose orientation 2 with error "<<error2<<" instead of orientation 1 with error "<<error1);
+	  PROGRESS("Chose orientation 2 with error "<<error2<<" instead of orientation 1 with error "<<error1);
 #endif
-	correcttrans = transform2;
-	correctnormal = normal2;
-	break;
+	  correcttrans = transform2;
+	  correctnormal = normal2;
+	  break;
+	}
       }
     }
   }
-
   if (correcttrans == NULL) {
 #ifdef RING_TAG_DEBUG
     PROGRESS("Failed to find a valid transform - just selecting one arbitrarily!");

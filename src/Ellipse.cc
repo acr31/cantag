@@ -17,7 +17,7 @@
 # undef DECOMPOSE_DEBUG
 #endif
 
-#define MAXFITERROR 1
+#define MAXFITERROR 0.01
 #define COMPARETHRESH 1
 #undef MAXDISTANCE 
 

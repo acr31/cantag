@@ -22,7 +22,7 @@
 # undef MATRIX_TAG_DEBUG_POINTS
 #endif
 
-int debug_matrix_image_counter = 0;
+static int debug_matrix_image_counter = 0;
 
 
 /**
@@ -249,17 +249,22 @@ template<int SIZE> LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* MatrixTag<SIZE>::Deco
   debug0.Save(filename);
 #endif
 
-  if (DecodePayload(*read_code) >= 0) {
+  int rotation = DecodePayload(*read_code);
+  const int cells_per_quadrant = (SIZE*SIZE - (SIZE*SIZE % 2))/4;
+  if (rotation >= 0 && (rotation % cells_per_quadrant == 0)) {
 #ifdef MATRIX_TAG_DEBUG
-    PROGRESS("Found code " << *read_code);
+    PROGRESS("Found code " << *read_code << " rotation is " << rotation);
 #endif	
 
-    /**
-     * \todo load the correct angle here
-     */
+    // find out the angle of rotation by looking at the number of bits
+    // the code is rotated by divide this by the number of cells in
+    // each quarter i.e. if we have a 6x6 square then there are 9
+    // cells per quadrant
+    const float angle = rotation/cells_per_quadrant * PI/2;
     LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = new LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>();
     lobj->LoadTransform(transform,1,0,camera);
     lobj->tag_code = read_code;	   
+    lobj->angle = angle;
     return lobj;
   }    
   else {

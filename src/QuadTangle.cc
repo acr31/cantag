@@ -15,12 +15,12 @@ QuadTangle::QuadTangle() {
   m_fitted = false;
 }
 
-QuadTangle::QuadTangle(float* points, int numpoints, bool prev_fitted) {
+QuadTangle::QuadTangle(const std::vector<float>& points, bool prev_fitted) {
   
-  if (!prev_fitted && points) {
+  if (!prev_fitted) {
     CvMemStorage* seqstore = cvCreateMemStorage(0);
     CvSeq* contour = cvCreateSeq(CV_SEQ_POLYGON,sizeof(CvSeq),sizeof(CvPoint),seqstore);
-    for(int i=0;i<numpoints*2;i+=2) {
+    for(int i=0;i<points.size();i+=2) {
       CvPoint p = cvPoint((int)(points[i]*1000),(int)(points[i+1]*1000));
       cvSeqPush(contour,&p);    
     }
@@ -101,6 +101,16 @@ QuadTangle::QuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,
   compute_central_point();
   sort_points();
 
+}
+
+
+void QuadTangle::Draw(Image& image) const {
+  image.DrawQuadTangle(m_x0,m_y0,
+		       m_x1,m_y1,
+		       m_x2,m_y2,
+		       m_x3,m_y3,
+		       COLOUR_BLACK,
+		       1);
 }
 
 float dist(float x0, float y0, float x1, float y1) {

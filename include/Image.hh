@@ -45,6 +45,10 @@ public:
     return (uchar*)(y*m_image->widthStep+m_image->imageData);
   }
 
+  inline unsigned int GetWidthStep() {
+    return m_image->widthStep;
+  }
+
   inline unsigned char* GetDataPointer() {
     return (uchar*)m_image->imageData;
   }
@@ -250,6 +254,22 @@ public:
 		  x2,y2,
 		  x3,y3 };
     DrawFilledPolygon(pts,4,colour);
+  }
+  
+  /**
+   * Draw a quadtangle from (x0,y0) to (x1,y1) to (x2,y2) to (x3,y3).
+   */
+  inline void DrawQuadTangle(int x0, int y0,
+			     int x1, int y1,
+			     int x2, int y2,
+			     int x3, int y3,
+			     unsigned char colour,
+			     unsigned int thickness) {
+    int pts[] = { x0,y0,
+		  x1,y1,
+		  x2,y2,
+		  x3,y3 };
+    DrawPolygon(pts,4,colour,thickness);
   }
   
   /**

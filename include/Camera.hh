@@ -90,6 +90,14 @@ public:
   void NPCFToImage(float* points, int num_points) const;  
 
   /**
+   * Convert a set of normalised principle co-ordinate frame (NPCF)
+   * points to image points.  This involves applying the correct
+   * distortion predicted by the camera parameters and applying the
+   * extrinsic parameters of the camera.
+   */
+  void NPCFToImage(std::vector<float>& points) const;  
+
+  /**
    * Remove radial and tangential distortion from the whole image.
    */
   void UnDistortImage(Image& image) const;
