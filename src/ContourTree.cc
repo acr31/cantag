@@ -4,7 +4,7 @@
 
 #include <total/ContourTree.hh>
 
-#define CONTOUR_TREE_DEBUG
+#undef CONTOUR_TREE_DEBUG
 #undef  CONTOUR_TREE_DEBUG_SAVE
 
 namespace Total {
