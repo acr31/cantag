@@ -8,13 +8,13 @@
 #include <total/Config.hh>
 #include <total/Coder.hh>
 #include <total/CyclicBitSet.hh>
-
+#include <iostream>
 namespace Total {
 
   /**
    * A raw coding scheme.  Lays out the code given - no error detection.
    */
-  template<int BIT_COUNT>
+  template<int BIT_COUNT, int SYMBOLSIZE>
   class RawCoder : public virtual Coder<BIT_COUNT> {
   public:
     virtual bool IsErrorCorrecting() const { return false; }
@@ -27,8 +27,8 @@ namespace Total {
     virtual int DecodePayload(CyclicBitSet<BIT_COUNT>& data) const;
   };
 
-  template<int BIT_COUNT> int RawCoder<BIT_COUNT>::DecodePayload(CyclicBitSet<BIT_COUNT>& data) const {
-    int rotation = data.MinRotate();
+  template<int BIT_COUNT,int SYMBOLSIZE> int RawCoder<BIT_COUNT,SYMBOLSIZE>::DecodePayload(CyclicBitSet<BIT_COUNT>& data) const {
+    int rotation = data.MinRotate(SYMBOLSIZE) * SYMBOLSIZE;
     return rotation;
   }
 }

@@ -280,7 +280,7 @@ namespace Total {
 
     int rotation = DecodePayload(*read_code);
     const int cells_per_quadrant = (SIZE*SIZE - (SIZE*SIZE % 2))/4;
-    if (rotation >= 0 && (rotation % cells_per_quadrant == 0)) {
+    if ((rotation >= 0)  && (rotation % cells_per_quadrant == 0)) {
 #ifdef MATRIX_TAG_DEBUG
       PROGRESS("Found code " << *read_code << " rotation is " << rotation);
 #endif	
@@ -289,9 +289,27 @@ namespace Total {
       // the code is rotated by divide this by the number of cells in
       // each quarter i.e. if we have a 6x6 square then there are 9
       // cells per quadrant
-      /**
-       * \todo alter the transform here to include the correct rotation
-       */
+
+      int angle = rotation / cells_per_quadrant;
+      int cosa[] = {1,0,-1,0};
+      int sina[] = {0,1,0,-1};
+
+      int rotation[16] = { cosa[angle], -sina[angle],0,0,
+			   sina[angle], cosa[angle],0,0,
+			   0,0,1,0,
+			   0,0,0,1};
+      
+      float finaltrans[16] = {0};
+      // premultiply rotations by transforms
+      for(int row=0;row<4;row++) {
+	for(int col=0;col<4;col++) {
+	  for(int k=0;k<4;k++) {
+	    finaltrans[row*4+col] += transform[row*4+k] * rotation[k*4+col];
+	  }
+	}
+      }
+
+      lobj->LoadTransform(finaltrans,1,camera);
       lobj->tag_codes.push_back(read_code);
       return true;
     }    
