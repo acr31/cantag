@@ -30,6 +30,7 @@
 
 // output mechanisms
 #include <total/TextOutputMechanism.hh>
+#include <total/ImageOutputMechanism.hh>
 #if defined(HAVE_X11_XLIB_H) && defined(HAVE_X11_XUTIL_H) && defined(HAVE_X11_EXTENSIONS_XSHM_H)
 # include <total/XOutputMechanism.hh>
 # include <total/XOutputStagesMechanism.hh>
