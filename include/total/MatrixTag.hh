@@ -19,7 +19,7 @@
 
 #ifdef TEXT_DEBUG
 # define MATRIX_TAG_DEBUG
-# undef MATRIX_TAG_DEBUG_POINTS
+# define MATRIX_TAG_DEBUG_POINTS
 #endif
 
 static int debug_matrix_image_counter = 0;
@@ -56,8 +56,8 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
 };
 
 template<int SIZE> MatrixTag<SIZE>::MatrixTag() :
-  m_cell_width(1/(float)(SIZE+2)),
-  m_cell_width_2(0.5/(float)(SIZE+2))
+  m_cell_width(2/(float)(SIZE+2)),
+  m_cell_width_2(1/(float)(SIZE+2))
 {
   /* we read the tag in triangles:
    *
@@ -82,17 +82,17 @@ template<int SIZE> MatrixTag<SIZE>::MatrixTag() :
   int position = 0;
   for(int height = 0; height < SIZE/2; height++) {
     for(int i=height;i<SIZE-1-height;i++) {
-      m_cells_corner[position] = (float)(i+1)/(SIZE+2);
-      m_cells_corner[position+1] = (float)(height+1)/(SIZE+2);
+      m_cells_corner[position] = 2*(float)(i+1)/(SIZE+2) - 1;
+      m_cells_corner[position+1] = 2*(float)(height+1)/(SIZE+2) - 1;
 
-      m_cells_corner[position+triangle_size] = (float)(SIZE-height)/(SIZE+2);
-      m_cells_corner[position+triangle_size+1] = (float)(i+1)/(SIZE+2);
+      m_cells_corner[position+triangle_size] = 2*(float)(SIZE-height)/(SIZE+2) - 1;
+      m_cells_corner[position+triangle_size+1] = 2*(float)(i+1)/(SIZE+2) - 1;
 
-      m_cells_corner[position+triangle_size*2] = (float)(SIZE-i)/(SIZE+2);
-      m_cells_corner[position+triangle_size*2+1] = (float)(SIZE-height)/(SIZE+2);
+      m_cells_corner[position+triangle_size*2] = 2*(float)(SIZE-i)/(SIZE+2) - 1;
+      m_cells_corner[position+triangle_size*2+1] = 2*(float)(SIZE-height)/(SIZE+2) - 1;
 
-      m_cells_corner[position+triangle_size*3] = (float)(height+1)/(SIZE+2);
-      m_cells_corner[position+triangle_size*3+1] = (float)(SIZE-i)/(SIZE+2);
+      m_cells_corner[position+triangle_size*3] = 2*(float)(height+1)/(SIZE+2) - 1;
+      m_cells_corner[position+triangle_size*3+1] = 2*(float)(SIZE-i)/(SIZE+2) - 1;
 
       position+=2;
     }
@@ -122,7 +122,7 @@ template<int SIZE> void MatrixTag<SIZE>::Draw2D(Image& image, CyclicBitSet<SIZE*
   int x3 = 0;
   int y3 = image.GetHeight();
 
-  int size = image.GetWidth() < image.GetHeight() ? image.GetWidth() : image.GetHeight();
+  int size = (image.GetWidth() < image.GetHeight() ? image.GetWidth() : image.GetHeight())/2;
 
   image.DrawFilledQuadTangle(x0, y0,
 			     x1, y1,
@@ -136,14 +136,14 @@ template<int SIZE> void MatrixTag<SIZE>::Draw2D(Image& image, CyclicBitSet<SIZE*
   float projX2, projY2;
   float projX3, projY3;
   for(int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);i++) {
-    int u0 = (int)(m_cells_corner[2*i]*(float)size);
-    int v0 = (int)(m_cells_corner[2*i+1]*(float)size);
-    int u1 = (int)((m_cells_corner[2*i]+m_cell_width)*(float)size);
-    int v1 = (int)(m_cells_corner[2*i+1]*(float)size);
-    int u2 = (int)((m_cells_corner[2*i]+m_cell_width)*(float)size);
-    int v2 = (int)((m_cells_corner[2*i+1]+m_cell_width)*(float)size);
-    int u3 = (int)(m_cells_corner[2*i]*(float)size);
-    int v3 = (int)((m_cells_corner[2*i+1]+m_cell_width)*(float)size);
+    int u0 = (int)((m_cells_corner[2*i]+1)*(float)size);
+    int v0 = (int)((m_cells_corner[2*i+1]+1)*(float)size);
+    int u1 = (int)((m_cells_corner[2*i]+m_cell_width+1)*(float)size);
+    int v1 = (int)((m_cells_corner[2*i+1]+1)*(float)size);
+    int u2 = (int)((m_cells_corner[2*i]+m_cell_width+1)*(float)size);
+    int v2 = (int)((m_cells_corner[2*i+1]+m_cell_width+1)*(float)size);
+    int u3 = (int)((m_cells_corner[2*i]+1)*(float)size);
+    int v3 = (int)((m_cells_corner[2*i+1]+m_cell_width+1)*(float)size);
     int colour = tag_data[i] ? COLOUR_BLACK : COLOUR_WHITE;
     //int colour = (int)((float)i/(float)(SIZE*SIZE - (SIZE*SIZE % 2)) * 128)+128;
     image.DrawFilledQuadTangle(u0,v0,
@@ -262,9 +262,8 @@ template<int SIZE> LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* MatrixTag<SIZE>::Deco
     // cells per quadrant
     const float angle = rotation/cells_per_quadrant * PI/2;
     LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = new LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>();
-    lobj->LoadTransform(transform,1,0,camera);
+    lobj->LoadTransform(transform,1,angle,camera);
     lobj->tag_codes.push_back(read_code);
-    lobj->angle = angle;
     return lobj;
   }    
   else {

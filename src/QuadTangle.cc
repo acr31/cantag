@@ -331,10 +331,29 @@ void QuadTangle::GetTransform(float transform[16]) const {
 		     result[0]*result[4] - result[3]*result[1] };
   
 
-  transform[0] = result[0];  transform[1] = result[1];  transform[2] = final[0];  transform[3] = result[2];
-  transform[4] = result[3];  transform[5] = result[4];  transform[6] = final[1];  transform[7] = result[5];
-  transform[8] = result[6];  transform[9] = result[7];  transform[10]= final[2];  transform[11]= scalefactor;
-  transform[12]= 0;          transform[13]= 0;          transform[14]= 0;  transform[15]= 1;
+  //  transform[0] = result[0];  transform[1] = result[1];  transform[2] = final[0];  transform[3] = result[2];
+  //  transform[4] = result[3];  transform[5] = result[4];  transform[6] = final[1];  transform[7] = result[5];
+  //  transform[8] = result[6];  transform[9] = result[7];  transform[10]= final[2];  transform[11]= scalefactor;
+  //  transform[12]= 0;          transform[13]= 0;          transform[14]= 0;  transform[15]= 1;
+
+  // however, our tag co-ordinate frame is actually a square centred
+  // on the origin with sides of length 2.  Therefore we need to scale
+  // and translate our co-ordinates onto the square expected by these
+  // equations
+
+  // this corresponds to post-multiplying the transformation here by a translation of (0.5,0.5,0) and then a scaling of factor (0,5,0.5,1)
+
+  //             [ 1 0 0 0.5 ]   [ 0.5 0   0 0 ]                 [ 0.5 0   0 0.5 ]
+  // transform * [ 0 1 0 0.5 ] * [ 0   0.5 0 0 ]  =  transform * [ 0   0.5 0 0.5 ]
+  //             [ 0 0 1 0   ]   [ 0   0   1 0 ]                 [ 0   0   1 0   ]
+  //             [ 0 0 0 1   ]   [ 0   0   0 1 ]                 [ 0   0   0 1   ]
+  
+  transform[0] = result[0]/2; transform[1] = result[1]/2; transform[2] = final[0];  transform[3] = (result[0]+result[1])/2+result[2];
+  transform[4] = result[3]/2; transform[5] = result[4]/2; transform[6] = final[1];  transform[7] = (result[3]+result[4])/2+result[5];
+  transform[8] = result[6]/2; transform[9] = result[7]/2; transform[10] = final[2]; transform[11] = (result[6]+result[7])/2+scalefactor;
+  transform[12] = 0;          transform[13] = 0;          transform[14] = 0;  transform[15] = 1;
+
+
 
 #ifdef SQUARE_TRANSFORM_DEBUG
   PROGRESS("Final trans=[" << transform[0] << "," << transform[1] << "," << transform[2] << ","<<transform[3] <<";");
