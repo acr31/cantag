@@ -12,6 +12,7 @@ extern "C" {
 #include <netinet/in.h>
 #include <netdb.h>  
 #include <arpa/inet.h>
+#include <unistd.h>
 }
 
 Socket::Socket() : m_byte_count(0), m_host(NULL), m_port(0), m_soft_connect(false) {
@@ -34,30 +35,34 @@ Socket::~Socket() {
     delete m_host;
   }
 }
-void Socket::Bind(const char* host, int port) {
+
+void Socket::PopulateSockAddr(const char* host, int port, sockaddr_in* s) {
   struct hostent* hostdetails;
   if ((hostdetails = gethostbyname(host)) == NULL) {
     throw "Failed to lookup address";
   }
-
-  char* address = hostdetails->h_addr_list[0];
+  unsigned char* address = (unsigned char*)hostdetails->h_addr_list[0];
   unsigned int q0 = address[0];
   unsigned int q1 = address[1];
   unsigned int q2 = address[2];
   unsigned int q3 = address[3];
-
+  char addressstring[16];
+  snprintf(addressstring,16,"%d.%d.%d.%d",q0,q1,q2,q3);
   // lookup address
+
+  memset(s,0,sizeof(sockaddr_in));
+  s->sin_family = AF_INET;
+  s->sin_port = htons(port);
+  int result = inet_aton(addressstring,&s->sin_addr);
+  if (result == 0) {
+    throw "Invalid IP address!";
+  }
+}
+
+void Socket::Bind(const char* host, int port) {
   struct sockaddr_in s;
-  memset(&s,0,sizeof(sockaddr));
-  s.sin_family = AF_INET;
-  s.sin_port = htons(port);
-  s.sin_addr.s_addr = q0 | (q1 << 8) | (q2 << 16) | (q3 << 24);
-  //  int status = inet_pton(AF_INET,host,&s.sin_addr);
-  //  if (status <= 0) {
-  //   perror(NULL);
-  //   throw "Failed to get address for chosen machine!";
-  //  }
-  // connect to remote machine
+  PopulateSockAddr(host,port,&s);
+  // bind socket
   if (::bind(m_socket,(struct sockaddr*)&s,sizeof(struct sockaddr)) != 0) {
     perror(NULL);
     throw "Failed to bind socket!";
@@ -67,14 +72,7 @@ void Socket::Bind(const char* host, int port) {
 void Socket::Connect(const char* host, int port) {
    // lookup address
   struct sockaddr_in s;
-  memset(&s,0,sizeof(sockaddr));
-  s.sin_family = AF_INET;
-  s.sin_port = htons(port);
-  int status = inet_pton(AF_INET,host,&s.sin_addr);
-  if (status <= 0) {
-    perror(NULL);
-    throw "Failed to get address for chosen machine!";
-  }
+  PopulateSockAddr(host,port,&s);
   // connect to remote machine
   if (::connect(m_socket,(struct sockaddr*)&s,sizeof(struct sockaddr)) != 0) {
     perror(NULL);
@@ -83,7 +81,7 @@ void Socket::Connect(const char* host, int port) {
 }
 
 void Socket::SoftConnect(const char* host, int port) {
-  m_host = new char[strlen(host)];
+  m_host = new char[strlen(host)+1];
   strcpy(m_host,host);
   m_port = port;
   m_soft_connect = true;
@@ -143,11 +141,17 @@ void Socket::Recv(std::vector<float>& vec) {
     vec.push_back(*(data++));
   }
 }
-
+#include <iostream>
 int Socket::Send(const unsigned char* buf, size_t len) {
-  if (m_soft_connect) {
-    Connect(m_host,m_port);
-    m_soft_connect = false;
+  while (m_soft_connect) {
+    try {
+      Connect(m_host,m_port);
+      m_soft_connect = false;
+    }
+    catch (const char*) {
+      std::cout << "retry"<<std::endl;
+      sleep(1);
+    }
   }
   int total = 0;
   while(total != len) {

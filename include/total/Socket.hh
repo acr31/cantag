@@ -9,6 +9,10 @@
 #include <vector>
 #include <bitset>
 
+extern "C" {
+#include <netinet/in.h>
+}
+
 class Socket {
 private:
   int m_socket;
@@ -20,6 +24,8 @@ private:
   bool m_soft_connect;
 
   Socket(int handle); // private constructor for accepting connections
+
+  void PopulateSockAddr(const char* host, int port, sockaddr_in* s);
 public:
   Socket();
   virtual ~Socket();
