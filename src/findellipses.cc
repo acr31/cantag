@@ -2,6 +2,10 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/26 08:57:11  acr31
+ * added compensation for ellipse contour being on the outside of the
+ * ellipse
+ *
  * Revision 1.1  2004/01/25 14:53:35  acr31
  * moved over to autoconf/automake build system
  *
@@ -76,8 +80,8 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 	  The contour followed is the outside edge of the circle so
 	  our estimate is out by 2 pixels.
 	*/
-	//current.size.width -=2;
-	//	current.size.height -=2;
+	current.size.width -=2;
+	current.size.height -=2;
 	
 	/* We accept this ellipse as a good fit */
 	/* If our ellipse shares aspect ratio and center points
