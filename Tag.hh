@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.11  2004/01/23 22:37:02  acr31
+ * made codes an unsigned long long
+ *
  * Revision 1.10  2004/01/23 16:03:52  acr31
  * moved CircularTag back to Tag - but its now templated on the type of tag - ellipse or rectangle
  *
@@ -27,8 +30,8 @@
 template<class C>
 class Tag {
 public:
-  virtual void Draw2D(Image *image, const C *location, unsigned long code, int black, int white)= 0;
-  virtual unsigned long Decode(Image *image, const C *location) =0;
+  virtual void Draw2D(Image *image, const C *location, unsigned long long code, int black, int white)= 0;
+  virtual unsigned long long Decode(Image *image, const C *location) =0;
 };
 
 #endif//TAG_GUARD
