@@ -342,7 +342,7 @@ int decode(int *R)
       if(index>=qe-1) index-=qe-1;
     }
   if(modh) modh = dlog[modh];
-  else {printf("modh = 0\n"); exit(0);}
+  else {printf("modh = 0\n"); return -1;// exit(0);}
 
   //  printf("rot: %d",(25*modh)%31);
   return (25*modh)%31;
