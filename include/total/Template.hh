@@ -16,7 +16,7 @@ private:
   float m_average;
   unsigned int m_size;
   unsigned int m_subsample;
-  uchar* m_values;
+  unsigned char* m_values;
   float m_sigma;
   Image* m_original;
 
