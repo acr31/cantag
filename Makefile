@@ -3,8 +3,8 @@ OPENCVLIB=`params --opencv-lib`
 OPENCVLINK=`params --opencv-link`
 CPPFLAGS=`params --opencv-cxx-flags`
 FLAGS=-g
-test: test.o
-	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $< ${OPENCVLINK}
+test: test.o ConcentricEllipse.o
+	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $^ ${OPENCVLINK}
 
 %.o: %.cc
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVINC} -o $@ -c $<

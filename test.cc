@@ -4,96 +4,35 @@
 #include <vector>
 #include <cmath>
 
-using namespace std;
-
-#define MAX_FIT_ERROR 0.01
-#define MAX_X_OFFSET 4
-#define MAX_Y_OFFSET 4
-#define MAX_RATIO_DIFF 0.1
+#include "ConcentricEllipse.hh"
 
 int 
 main(int argc,char* argv[]) 
 {
+  /* load image from disk */
   IplImage *img = cvLoadImage(argv[1]);
+
+  /* Convert to grayscale */
   CvSize size;
   size.width=img->width;
   size.height=img->height;
   IplImage *gray = cvCreateImage(size,IPL_DEPTH_8U,1);
   cvCvtColor(img,gray,CV_RGB2GRAY);
 
+  /* Adaptive Threshold using a window size 1/8th of the image size */
   int window_size = gray->width/8;
-  window_size+= 1-(window_size %2);
+  window_size+= 1-(window_size %2); /* window size must be an odd number */
   cvAdaptiveThreshold(gray,gray,255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY,window_size,40);
-  cvCanny(gray,gray,128,128,3);  
 
-  CvMemStorage *store = cvCreateMemStorage(0);
-  CvSeq *seq = NULL;
-  int num = cvFindContours(gray,store,&seq,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_TC89_KCOS);
-
-  vector<CvBox2D> boxes;
-
-
-  CvTreeNodeIterator i;
-  cvInitTreeNodeIterator(&i,seq,10);
+  std::vector<CvBox2D> result;
+  findTags(gray,&result);
   
-  while(cvNextTreeNode(&i)) 
-    {
-      CvSeq* c = (CvSeq*)i.node;
-      if (c != NULL) {
-	cvDrawContours(img,c,16776960,16711680,0,1,8);
-
-
-      int count = c->total;
-      if (count > 10) {
-	CvPoint points[count];
-	CvPoint2D32f fpoints[count];
-	cvCvtSeqToArray( c, points );
-	for( int i = 0; i < count; i++ )
-	  {
-	    fpoints[i].x = (float)points[i].x;
-	    fpoints[i].y = (float)points[i].y;
-	  }
-	CvBox2D box;
-	cvFitEllipse( fpoints, count, &box );
-	if ((box.size.width < img->width) &&
-	    (box.size.height < img->height)) {
-	  
-	  double asq = (double)box.size.width*(double)box.size.width / 4;
-	  double bsq = (double)box.size.height*(double)box.size.height / 4;
-	  double sina = sin((double)box.angle / 180 * M_PI);
-	  double cosa = cos((double)box.angle / 180 * M_PI);
-	  // work out the error
-	  double total = 0.0;
-	  for ( int i=0;i<count;i++) {
-	    double x = fpoints[i].x-box.center.x;
-	    double y = fpoints[i].y-box.center.y;
-	    double dist = 
-	      sqrt( (x*cosa+y*sina)*(x*cosa+y*sina)/asq +
-		    (y*cosa-x*sina)*(y*cosa-x*sina)/bsq ) - 1;
-	    total+= dist*dist;
-	  }
-	  if (total < MAX_FIT_ERROR * count) {
-	    boxes.push_back(box);
-	  }
-	}
-      }
-    }
-    }
-  for(vector<CvBox2D>::const_iterator step = boxes.begin();step != boxes.end();step++) {
-    for(vector<CvBox2D>::const_iterator search = boxes.begin();search != boxes.end();search++) {
-      if ((search != step) && 
-	  (abs(step->center.x - search->center.x) < MAX_X_OFFSET)  &&
-	  (abs(step->center.y - search->center.y) < MAX_Y_OFFSET) &&
-	  (fabs( (double)step->size.height/(double)step->size.width - (double)search->size.height/(double)search->size.width) < MAX_RATIO_DIFF))
-      {
-	  int color = CV_RGB( rand(), rand(), rand() );
-	  cvEllipseBox( img, *search,color,3);
-      }
-    }
+  for(std::vector<CvBox2D>::const_iterator search = result.begin();search != result.end();search++) {
+    int color = CV_RGB( rand(), rand(), rand() );
+    cvEllipseBox( img, *search,color,3);
   }
 
   cvSaveImage(argv[2],img);
-  cvSaveImage(argv[3],gray);
   cvReleaseImage(&img);
   cvReleaseImage(&gray);
   return 0;
