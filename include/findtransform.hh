@@ -167,5 +167,6 @@ void ApplyTransform(const float transform[16], float x0, float y0, float* projX,
 
 void ApplyTransform(const float transform[16], float* points, int numpoints);
 
+void GetNormalVector(const float transform[16], float normal[3]);
 
 #endif//FIND_TRANSFORM_GUARD

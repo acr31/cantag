@@ -6,7 +6,7 @@
 #include <eigenvv.hh>
 #include <gaussianelimination.hh>
 
-#undef CIRCLE_TRANSFORM_DEBUG
+#define CIRCLE_TRANSFORM_DEBUG
 #define SQUARE_TRANSFORM_DEBUG
 #undef APPLY_TRANSFORM_DEBUG
 
@@ -98,13 +98,13 @@ void GetTransform(const QuadTangle& quad, float transform[16]) {
 
 void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2[16]) {
 #ifdef CIRCLE_TRANSFORM_DEBUG
-  std::cout << "Ellipse params (a-f) are ["<<
-    ellipse.GetA() << "," <<
-    ellipse.GetB() << "," <<
-    ellipse.GetC() << "," <<
-    ellipse.GetD() << "," <<
-    ellipse.GetE() << "," <<
-    ellipse.GetF() << "];" << std::endl;
+  PROGRESS("Ellipse params (a-f) are ["<<
+	   ellipse.GetA() << "," <<
+	   ellipse.GetB() << "," <<
+	   ellipse.GetC() << "," <<
+	   ellipse.GetD() << "," <<
+	   ellipse.GetE() << "," <<
+	   ellipse.GetF() << "];");
 #endif
 
   double eigvects[9];
@@ -121,13 +121,13 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
 	     eigvects, eigvals);
 
 #ifdef CIRCLE_TRANSFORM_DEBUG
-  std::cout << "Eigen Vectors: e=[" << eigvects[0] << "," << eigvects[1] << "," << eigvects[2] << ";" << std::endl;
-  std::cout << "                  " << eigvects[3] << "," << eigvects[4] << "," << eigvects[5] << ";" << std::endl;
-  std::cout << "                  " << eigvects[6] << "," << eigvects[7] << "," << eigvects[8] << "];" << std::endl;
+  PROGRESS("Eigen Vectors: e=[" << eigvects[0] << "," << eigvects[1] << "," << eigvects[2] << ";");
+  PROGRESS("                  " << eigvects[3] << "," << eigvects[4] << "," << eigvects[5] << ";");
+  PROGRESS("                  " << eigvects[6] << "," << eigvects[7] << "," << eigvects[8] << "];");
 
-  std::cout << "Eigen Values: v=[" << eigvals[0] << "," << eigvals[1] << "," << eigvals[2] << ";" << std::endl;
-  std::cout << "                 " << eigvals[3] << "," << eigvals[4] << "," << eigvals[5] << ";" << std::endl;
-  std::cout << "                 " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];" << std::endl;
+  PROGRESS("Eigen Values: v=[" << eigvals[0] << "," << eigvals[1] << "," << eigvals[2] << ";");
+  PROGRESS("                 " << eigvals[3] << "," << eigvals[4] << "," << eigvals[5] << ";");
+  PROGRESS("                 " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];");
 #endif
 
   // bubble sort the vectors...I'm so embarresed ;-)
@@ -174,18 +174,18 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
   double crossz = eigvects[0]*eigvects[4] - eigvects[3]*eigvects[1];
   
 #ifdef CIRCLE_TRANSFORM_DEBUG
-  std::cout << "Cross = " << crossx <<"," << crossy << "," << crossy << std::endl;
+  PROGRESS("Cross = " << crossx <<"," << crossy << "," << crossy);
 #endif
 
   double dotcross = crossx*eigvects[2] + crossy*eigvects[5] + crossz*eigvects[8];
 
 #ifdef CIRCLE_TRANSFORM_DEBUG
-  std::cout << "Dotcross = " << dotcross << std::endl;
+  PROGRESS("Dotcross = " << dotcross);
 #endif
 
   if (dotcross < 0) {
 #ifdef CIRCLE_TRANSFORM_DEBUG
-    std::cout << "Reversing z vector" << std::endl;
+    PROGRESS("Reversing z vector to create right handed axis");
 #endif
     eigvects[2] *= -1;
     eigvects[5] *= -1;
@@ -198,29 +198,20 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
 		  0,           0,           0,           1};
 
 #ifdef CIRCLE_TRANSFORM_DEBUG
-  std::cout << "Rotation 1: r1=[ " << eigvects[0] << "," << eigvects[1] << "," << eigvects[2] << ";" << std::endl;
-  std::cout << "                 " << eigvects[3] << "," << eigvects[4] << "," << eigvects[5] << ";" << std::endl;
-  std::cout << "                 " << eigvects[6] << "," << eigvects[7] << "," << eigvects[8] << "];" << std::endl;
+  PROGRESS("Rotation 1: r1=[ " << eigvects[0] << "," << eigvects[1] << "," << eigvects[2] << ";");
+  PROGRESS("                 " << eigvects[3] << "," << eigvects[4] << "," << eigvects[5] << ";");
+  PROGRESS("                 " << eigvects[6] << "," << eigvects[7] << "," << eigvects[8] << "];");
 
-  std::cout << "Sorted Eigen Values: sev=[ " << eigvals[0] << "," << eigvals[1] << "," << eigvals[2] << ";" << std::endl;
-  std::cout << "                           " << eigvals[3] << "," << eigvals[4] << "," << eigvals[5] << ";" << std::endl;
-  std::cout << "                           " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];" << std::endl;
+  PROGRESS("Sorted Eigen Values: sev=[ " << eigvals[0] << "," << eigvals[1] << "," << eigvals[2] << ";");
+  PROGRESS("                           " << eigvals[3] << "," << eigvals[4] << "," << eigvals[5] << ";");
+  PROGRESS("                           " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];");
 #endif
       
 
   double denom = ( eigvals[8] - eigvals[0] );
   double cossq = ( eigvals[8] - eigvals[4] ) / denom;
   double sinsq = ( eigvals[4] - eigvals[0] ) / denom;
-  
-  /*
-  if (fabs(cc) < 0.0001) {
-    cc = 0;
-  }
-  if (fabs(s) < 0.0001) {
-    s = 0;
-  }
-  */
-
+   
   double pmcos = sqrt(cossq);
   double pmsin = sqrt(sinsq);
 
@@ -236,15 +227,15 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
 		   0,     0, 0,     1 };
 
 #ifdef CIRCLE_TRANSFORM_DEBUG  
-  std::cout << "Rotation 2(1): r2c1=[" << r2c1[0] << "," << r2c1[1] << "," << r2c1[2] << "," << r2c1[3] << ";" << std::endl;
-  std::cout << "                " << r2c1[4] << "," << r2c1[5] << "," << r2c1[6] << "," << r2c1[7] << ";" << std::endl;
-  std::cout << "                " << r2c1[8] << "," << r2c1[9] << "," << r2c1[10] << "," << r2c1[11] << ";" << std::endl;
-  std::cout << "                " << r2c1[12] << "," << r2c1[13] << "," << r2c1[14] << "," << r2c1[15] << "];" << std::endl;
+  PROGRESS("Rotation 2(1): r2c1=[" << r2c1[0] << "," << r2c1[1] << "," << r2c1[2] << "," << r2c1[3] << ";");
+  PROGRESS("                " << r2c1[4] << "," << r2c1[5] << "," << r2c1[6] << "," << r2c1[7] << ";");
+  PROGRESS("                " << r2c1[8] << "," << r2c1[9] << "," << r2c1[10] << "," << r2c1[11] << ";");
+  PROGRESS("                " << r2c1[12] << "," << r2c1[13] << "," << r2c1[14] << "," << r2c1[15] << "];");
 
-  std::cout << "Rotation 2(2): r2c2=[" << r2c2[0] << "," << r2c2[1] << "," << r2c2[2] << "," << r2c2[3] << ";" << std::endl;
-  std::cout << "                " << r2c2[4] << "," << r2c2[5] << "," << r2c2[6] << "," << r2c2[7] << ";" << std::endl;
-  std::cout << "                " << r2c2[8] << "," << r2c2[9] << "," << r2c2[10] << "," << r2c2[11] << ";" << std::endl;
-  std::cout << "                " << r2c2[12] << "," << r2c2[13] << "," << r2c2[14] << "," << r2c2[15] << "];" << std::endl;
+  PROGRESS("Rotation 2(2): r2c2=[" << r2c2[0] << "," << r2c2[1] << "," << r2c2[2] << "," << r2c2[3] << ";");
+  PROGRESS("                " << r2c2[4] << "," << r2c2[5] << "," << r2c2[6] << "," << r2c2[7] << ";");
+  PROGRESS("                " << r2c2[8] << "," << r2c2[9] << "," << r2c2[10] << "," << r2c2[11] << ";");
+  PROGRESS("                " << r2c2[12] << "," << r2c2[13] << "," << r2c2[14] << "," << r2c2[15] << "];");
 #endif
 
   // now build the transformation matrix that goes from the unit circle to the 3d circle
@@ -256,7 +247,7 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
   // apply the relevant translation - we have to choose again here based on our choice of theta
   double tx = sqrt((eigvals[4]-eigvals[0])*(eigvals[8]-eigvals[4]))/eigvals[4];
 #ifdef CIRCLE_TRANSFORM_DEBUG
-  std::cout << "Translation tx = "<<tx <<std::endl;
+  PROGRESS("Translation tx = "<<tx);
 #endif
   double transc1[] = {1,0,0,tx,
 		      0,1,0,0,
@@ -271,14 +262,14 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
   // and another choice based on theta
   double scale = sqrt(-eigvals[0]*eigvals[8]/eigvals[4]/eigvals[4]);
 #ifdef CIRCLE_TRANSFORM_DEBUG
-  std::cout << "Scale factor " << scale << std::endl;
+  PROGRESS("Scale factor " << scale);
 #endif
   // this multiplies rows 0 and 1 of the transform by scale
   for(int col=0;col<4;col++) {
     transc1[col*4] *= scale;
     transc1[col*4+1] *= scale;
 
-    transc2[col*4] *= -scale;
+    transc2[col*4] *= scale;
     transc2[col*4+1] *= -scale;
   }
     
@@ -307,17 +298,17 @@ void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2
       }
     }
   }
-  
-#ifdef CIRCLE_TRANSFORM_DEBUG  
-  std::cout << "M_Transform: mt=[" << transform1[0] << "," << transform1[1] << "," << transform1[2] << "," << transform1[3] << ";" << std::endl;
-  std::cout << "                 " << transform1[4] << "," << transform1[5] << "," << transform1[6] << "," << transform1[7] << ";" << std::endl;
-  std::cout << "                 " << transform1[8] << "," << transform1[9] << "," << transform1[10] << "," << transform1[11] << ";" << std::endl;
-  std::cout << "                 " << transform1[12] << "," << transform1[13] << "," << transform1[14] << "," << transform1[15] << ";" << std::endl;
 
-  std::cout << "M_Transform: mt2=[" << transform2[0] << "," << transform2[1] << "," << transform2[2] << "," << transform2[3] << ";" << std::endl;
-  std::cout << "                 " << transform2[4] << "," << transform2[5] << "," << transform2[6] << "," << transform2[7] << ";" << std::endl;
-  std::cout << "                 " << transform2[8] << "," << transform2[9] << "," << transform2[10] << "," << transform2[11] << ";" << std::endl;
-  std::cout << "                 " << transform2[12] << "," << transform2[13] << "," << transform2[14] << "," << transform2[15] << ";" << std::endl;
+#ifdef CIRCLE_TRANSFORM_DEBUG  
+  PROGRESS("M_Transform: mt=[" << transform1[0] << "," << transform1[1] << "," << transform1[2] << "," << transform1[3] << ";");
+  PROGRESS("                 " << transform1[4] << "," << transform1[5] << "," << transform1[6] << "," << transform1[7] << ";");
+  PROGRESS("                 " << transform1[8] << "," << transform1[9] << "," << transform1[10] << "," << transform1[11] << ";");
+  PROGRESS("                 " << transform1[12] << "," << transform1[13] << "," << transform1[14] << "," << transform1[15] << ";");
+
+  PROGRESS("M_Transform: mt2=[" << transform2[0] << "," << transform2[1] << "," << transform2[2] << "," << transform2[3] << ";");
+  PROGRESS("                 " << transform2[4] << "," << transform2[5] << "," << transform2[6] << "," << transform2[7] << ";");
+  PROGRESS("                 " << transform2[8] << "," << transform2[9] << "," << transform2[10] << "," << transform2[11] << ";");
+  PROGRESS("                 " << transform2[12] << "," << transform2[13] << "," << transform2[14] << "," << transform2[15] << ";");
 #endif
 }
 
@@ -349,4 +340,35 @@ void ApplyTransform(const float transform[16], float* points, int numpoints) {
   for(int i=0;i<numpoints*2;i+=2) {
     ApplyTransform(transform,points[i],points[i+1],points+i,points+i+1);
   }
+}
+
+
+void GetNormalVector(const float transform[16], float normal[3]) {
+
+  // project (0,0,0) and (0,0,1).  Take the difference between them and normalize it
+
+  float proj0x = transform[3];
+  float proj0y = transform[7];
+  float proj0z = transform[11];
+  float proj0h = transform[15];
+
+  float proj1x = transform[2] + transform[3];
+  float proj1y = transform[6] + transform[7];
+  float proj1z = transform[10] + transform[11];
+  float proj1h = transform[14] + transform[15];
+
+  normal[0] = proj1x/proj1h - proj0x/proj0h;
+  normal[1] = proj1y/proj1h - proj0y/proj0h;
+  normal[2] = proj1z/proj1h - proj0z/proj0h;
+  
+  float modulus = sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
+  
+  normal[0]/=modulus;
+  normal[1]/=modulus;
+  normal[2]/=modulus;
+
+  //#ifdef APPLY_TRANSFORM_DEBUG
+  PROGRESS("Found normal vector ("<<normal[0]<<","<<normal[1]<<","<<normal[2]<<")");
+  //#endif
+
 }

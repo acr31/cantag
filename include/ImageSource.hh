@@ -21,7 +21,7 @@ public:
    * destructivly alter this buffer so you dont need to keep calling
    * this method.
    */
-  virtual Image& GetBuffer() = 0;
+  virtual Image* GetBuffer() = 0;
 };
 
 #endif//IMAGE_SOURCE_GUARD

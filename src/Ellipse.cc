@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/02/24 20:46:35  acr31
+ * *** empty log message ***
+ *
  * Revision 1.3  2004/02/21 20:35:31  acr31
  * another stale file removed.  and a spurious #include
  *
@@ -58,6 +61,11 @@ bool Ellipse::Compare(const Ellipse& o) const {
 }
 
 void Ellipse::FitEllipse(float* points, int numpoints) {
+  if (numpoints < 6) {
+    m_fitted = false;
+    return;
+  }
+
 #ifdef ELLIPSE_DEBUG_DUMP_POINTS
   for(int i=0;i<numpoints*2;i+=2) {
     std::cout << points[i] << " " << points[i+1] << " ; ";

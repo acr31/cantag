@@ -1,16 +1,5 @@
 /**
- * A scene graph.  This class maintains a logical view of the current
- * image in terms of a hierachy of recognised shapes.
- *
  * $Header$
- *
- * $Log$
- * Revision 1.2  2004/02/21 20:33:10  acr31
- * removed a load of obsolete files - factored in some more code to the new framework
- *
- * Revision 1.1  2004/02/20 22:25:55  acr31
- * major reworking of matching algorithms and architecture
- *
  */
 
 #ifndef SCENE_GRAPH_GUARD
@@ -20,7 +9,7 @@
 #include <Ellipse.hh>
 #include <SceneGraphNode.hh>
 
-#define MAXLENGTH 1000
+#define MAXLENGTH 10000
 #define MAXDEPTH 20
 #define SCENE_GRAPH_DEBUG
 
@@ -64,10 +53,6 @@ public:
 #ifdef IMAGE_DEBUG
     IplImage *debug0 = cvCloneImage(image.m_image);
     cvConvertScale(debug0,debug0,0.5,128);
-    // draw found contours
-    cvDrawContours(debug0,root,0,0,MAXDEPTH,2,8);
-    cvSaveImage("debug-scenegraphcontours.jpg",debug0);
-    cvReleaseImage(&debug0);
 #endif
 
     CvTreeNodeIterator treeiter;
@@ -75,15 +60,26 @@ public:
     for(int i=0;i<MAXDEPTH;i++) {
       m_parents[i] = NULL;
     }
-
+    m_parents[0] = new SceneGraphNode<S>();
+    m_root = m_parents[0];
     do {
       CvSeq *c = (CvSeq*)treeiter.node;
-      if (c != NULL) {
+      if ((c != NULL) && (fabs(cvContourArea(c,CV_WHOLE_SEQ))>100)) {
+#ifdef IMAGE_DEBUG
+	// draw found contours
+	cvDrawContours(debug0,c,0,0,0,2,8);
+#endif
+
 #ifdef SCENE_GRAPH_DEBUG
 	PROGRESS("Found contour at level "<< treeiter.level);
 #endif
 	int count = c->total;
-	if (count > MAXLENGTH) { count = MAXLENGTH; }
+	if (count > MAXLENGTH) { 
+#ifdef SCENE_GRAPH_DEBUG
+	  PROGRESS("Truncated length "<<count << " to "<< MAXLENGTH);
+#endif
+	  count = MAXLENGTH; 
+	}
 	cvCvtSeqToArray( c, m_points , cvSlice(0,count));
 	int pointer = 0;
 	for( int pt = 0; pt < count; pt++ ) {
@@ -97,7 +93,7 @@ public:
 	  // now add this node as a child of its parent.  Its parent is
 	  // the node stored in index level-1 in the parents array. 
 	  bool added = false;
-	  for(int i=treeiter.level-1;i>=0;i--) {
+	  for(int i=treeiter.level;i>=0;i--) {
 	    if (m_parents[i] != NULL) {
 	      m_parents[i]->AddChild(next);
 #ifdef SCENE_GRAPH_DEBUG
@@ -107,13 +103,7 @@ public:
 	      break;
 	    }
 	  }
-	  if (treeiter.level == 0 || !added) {
-#ifdef SCENE_GRAPH_DEBUG
-	    PROGRESS("Set as root node");
-#endif
-	    m_root = next;
-	  }
-	  m_parents[treeiter.level] = next;
+	  m_parents[treeiter.level+1] = next;
 	}
 	else {
 #ifdef SCENE_GRAPH_DEBUG
@@ -124,7 +114,10 @@ public:
       }
     }
     while(cvNextTreeNode(&treeiter));
-    
+#ifdef IMAGE_DEBUG
+    cvSaveImage("debug-scenegraphcontours.jpg",debug0);
+    cvReleaseImage(&debug0);
+#endif
     cvReleaseMemStorage(&store);
   }
   

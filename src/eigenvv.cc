@@ -6,6 +6,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.7  2004/02/24 20:46:36  acr31
+ * *** empty log message ***
+ *
  * Revision 1.6  2004/02/21 20:33:12  acr31
  * removed a load of obsolete files - factored in some more code to the new framework
  *
@@ -40,7 +43,7 @@ void eigensolve(double a, double b, double f,
 		/*               */ double e,
 		double* eigenvects,
 		double* eigenvals) {
-  /*
+
   double m[] = { a, b, f,
 		 b, c, d,
 		 f, d, e };
@@ -64,7 +67,7 @@ void eigensolve(double a, double b, double f,
   eigenvects[3] = vects[1];   eigenvects[4] = vects[4];   eigenvects[5] = vects[7]; 
   eigenvects[6] = vects[2];   eigenvects[7] = vects[5];   eigenvects[8] = vects[8]; 
 
-  */
+  /*
 
   
   // Matrix is:
@@ -209,7 +212,6 @@ void eigensolve(double a, double b, double f,
       w = sqrt(1-(b/z)*(b/z));  // z>=b, so not bad sqrt
       x = sqrt((1+w)/2);        // w<=1, so x<=1
       y = sqrt((1-w)/2);        // w<=1, so not bad sqrt
-      //      if((a-c>0)^(b>0)) y = -y;
       if ((a-c)*b < 0) y=-y;
 
       // Eigenvalues finally
@@ -250,7 +252,7 @@ void eigensolve(double a, double b, double f,
       eigenvals[0] = a;     eigenvals[1] = 0;     eigenvals[2] = 0;
       eigenvals[3] = 0;     eigenvals[4] = c;     eigenvals[5] = 0;
       eigenvals[6] = 0;     eigenvals[7] = 0;     eigenvals[8] = e;
-    }
+      }*/
 }  
 void eigensolve(double a, double b, double c,
 		double d, double e, double f,

@@ -1,10 +1,5 @@
 /**
  * $Header$
- *
- * $Log$
- * Revision 1.1  2004/02/20 22:25:55  acr31
- * major reworking of matching algorithms and architecture
- *
  */
 
 #ifndef SCENE_GRAPH_NODE_GUARD
@@ -40,6 +35,8 @@ private:
 
 public:
   SceneGraphNode(float* points, int numpoints) : m_inspected(false), m_located(NULL), m_matcher(points,numpoints), m_children() {};
+
+  SceneGraphNode() : m_inspected(false), m_located(NULL), m_matcher(NULL,0), m_children() {};
 
   ~SceneGraphNode() {
     for(typename std::vector< SceneGraphNode<S>* >::iterator i = m_children.begin();

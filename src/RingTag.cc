@@ -211,6 +211,10 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
   }
 
   if (correcttrans != NULL) {
+    float normal[3];
+    GetNormalVector(correcttrans,normal);
+
+
 #ifdef RING_TAG_DEBUG
     PROGRESS("Found a concentric inner circle with matching contour");
 #endif
@@ -227,7 +231,7 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
     // code
 
     unsigned long long read_code[5] = {0};
-    for(int j=m_sector_count*5 - 1;j>=0;j--) {
+    for(int j=0;j<m_sector_count*5;j++) {
       // read a chunk by sampling each ring and shifting and adding
       int currentcode = j%5;      
       for(int k=m_ring_count-1;k>=0;k--) {
@@ -259,13 +263,14 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
     for(int i=0;i<5;i++) {
       if ((read_code[i] == read_code[(i+1) % 5])) { 
 #ifdef RING_TAG_IMAGE_DEBUG
-	draw_read(image,camera,correcttrans,i);
+	draw_read(image,camera,correcttrans,(i+1)%5);
 #endif
 	unsigned long long code = DecodeTag(read_code[i]);
 
 #ifdef RING_TAG_DEBUG
 	PROGRESS("Found code " << code);
 #endif	
+
 	LocatedObject* lobj = node->GetLocatedObject();
 	for(int i=0;i<16;i++) {
 	  lobj->transform[i] = correcttrans[i];
@@ -283,6 +288,11 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
 #endif
     node->SetInspected();
     return;
+  }
+  else {
+#ifdef RING_TAG_DEBUG
+    PROGRESS("Failed to find a valid transformation");
+#endif
   }
 };  
 
@@ -317,8 +327,10 @@ void RingTag::draw_read(const Image& image, const Camera& camera, float l[16], i
     draw_circle(debug0,camera,l,m_data_ring_outer_radii[r] / m_bullseye_outer_radius);
   }
   
+  
+  int counter=0;
   for(int k=0;k<m_sector_count;k++) {
-    for(int r=0;r<m_ring_count;r++) {
+    for(int r=m_ring_count-1;r>=0;r--) {
       float pts[2];
       pts[0] = cos( m_read_angles[5*k+((i+1)%5)] ) * m_data_ring_centre_radii[r]/m_bullseye_outer_radius;
       pts[1] = sin( m_read_angles[5*k+((i+1)%5)] ) * m_data_ring_centre_radii[r]/m_bullseye_outer_radius;
@@ -327,9 +339,10 @@ void RingTag::draw_read(const Image& image, const Camera& camera, float l[16], i
       // pick the colour to be the opposite of the sampled point so we can see the dot
       int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
       // or pick the colour to be on a gradient so we see the order it samples in
-      //int colour = (int)((double)k/(double)m_sector_count*255);
+      //int colour = (int)((double)counter/(double)m_sector_count*255);
       debug0.DrawPoint(pts[0],pts[1],colour,4);
     }
+    counter++;
   }
   debug0.Save("debug-decode.jpg");
 }

@@ -4,7 +4,14 @@ Image::Image(int width, int height) : m_image(cvCreateImage(cvSize(width,height)
   cvConvertScale(m_image,m_image,0,255);
 };
 Image::Image(const Image& c) : m_image(cvCloneImage(c.m_image)) {};
-Image::Image(char* filename) : m_image(cvLoadImage(filename)) {};
+Image::Image(char* filename) : m_image(cvLoadImage(filename)) {
+  if (m_image->nChannels == 3) {
+    IplImage* image2 = cvCreateImage(cvSize(m_image->width,m_image->height),IPL_DEPTH_8U,1);
+    cvCvtColor(m_image,image2,CV_RGB2GRAY);
+    cvReleaseImage(&m_image);
+    m_image = image2;
+  }  
+};
 
 Image::~Image() {
   cvReleaseImage(&m_image);

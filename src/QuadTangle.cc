@@ -14,10 +14,16 @@ QuadTangle::QuadTangle(float* points, int numpoints, bool prev_fitted) {
   
   if (!prev_fitted) {
     CvMemStorage* store = cvCreateMemStorage(0);
-    CvSeq* contour = cvCreateSeq(CV_SEQ_POLYLINE,sizeof(CvSeq),sizeof(CvPoint),store);
+    CvSeq* contour = cvCreateSeq(CV_SEQ_POLYGON,sizeof(CvSeq),sizeof(CvPoint),store);
     for(int i=0;i<numpoints*2;i+=2) {
-      CvPoint p = cvPoint((int)points[i],(int)points[i+1]);
+      CvPoint p = cvPoint((int)(points[i]*100000),(int)(points[i+1]*100000));
       cvSeqPush(contour,&p);    
+    }
+
+    CvPoint poly2[contour->total];
+    cvCvtSeqToArray( contour, poly2 , cvSlice(0,contour->total));
+    for( int pt = 0; pt < contour->total; pt++ ) {
+      std::cerr << poly2[pt].x << " " << poly2[pt].y << std::endl;
     }
 
 #ifdef QUADTANGLE_DEBUG
@@ -27,11 +33,22 @@ QuadTangle::QuadTangle(float* points, int numpoints, bool prev_fitted) {
     CvSeq *result = cvApproxPoly( contour, sizeof(CvContour), store,
 				  CV_POLY_APPROX_DP, 
 				  cvContourPerimeter(contour)*0.02, 0 );
+    
+    CvPoint poly[result->total];
+    cvCvtSeqToArray( result, poly , cvSlice(0,result->total));
+    for( int pt = 0; pt < result->total; pt++ ) {
+      std::cerr << "0 0 " << poly[pt].x << " " << poly[pt].y << std::endl;
+    }
+    std::cerr<<"-"<<std::endl;
+
 #ifdef QUADTANGLE_DEBUG
     PROGRESS("Applied polygon approximation");
+    PROGRESS("Vertices = " << result->total);
+    PROGRESS("Convex = " << (cvCheckContourConvexity(result) ? "yes" : "no"));
+    PROGRESS("Area = " << fabs(cvContourArea(result,CV_WHOLE_SEQ)));
 #endif
 
-   // Check for 4 vertices
+    // Check for 4 vertices
     // Check for a convex contour
     
     if( result->total == 4 &&
@@ -40,16 +57,16 @@ QuadTangle::QuadTangle(float* points, int numpoints, bool prev_fitted) {
 #ifdef QUADTANGLE_DEBUG
       PROGRESS("Accepting polygon");
 #endif
-      float corners[4];
+      CvPoint corners[4];
       cvCvtSeqToArray(result,corners,cvSlice(0,4));
-      m_x0 = corners[0];
-      m_y0 = corners[1];
-      m_x1 = corners[2];
-      m_y1 = corners[3];
-      m_x2 = corners[4];
-      m_y2 = corners[5];
-      m_x3 = corners[6];
-      m_y3 = corners[7];
+      m_x0 = (float)corners[0].x/100000;
+      m_y0 = (float)corners[0].y/100000;
+      m_x1 = (float)corners[1].x/100000;
+      m_y1 = (float)corners[1].y/100000;
+      m_x2 = (float)corners[2].x/100000;
+      m_y2 = (float)corners[2].y/100000;
+      m_x3 = (float)corners[3].x/100000;
+      m_y3 = (float)corners[3].y/100000;
       m_fitted = true;
     }
     else {
