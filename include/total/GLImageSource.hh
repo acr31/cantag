@@ -334,7 +334,7 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz
 	unsigned char val = (unsigned char)(0.3*(float)m_buffer[pointer++] +
 					    0.59*(float)m_buffer[pointer++] +
 					    0.11*(float)m_buffer[pointer++]);
-	m_glimage.DrawPixel(j,i,val);
+	m_glimage.DrawPixelNoCheck(j,i,val);
       }
     }
     return &m_glimage;
