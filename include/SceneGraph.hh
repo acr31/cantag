@@ -364,7 +364,9 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
   // i.e. the restart position is:  9 - found % 8  
   position = (9- position) % 0x7;
 
-  
+  unsigned char* contour_0 = data_pointer;
+  unsigned char* contour_1 = sample_pointer;
+
   // these two arrays store the offsets for each of the eight regions
   // around the target pixel
   const int offset[] = {-1,image_width-1,image_width,image_width+1,1,1-image_width,-image_width,-image_width-1};
@@ -421,7 +423,6 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
       points_buffer[++pointer] = start_y;
       start_x+= offset_x[position];
       start_y+= offset_y[position];
-      data_pointer = sample_pointer;
       cell4_is_0=false;
 
       // if we find the 1-element at position n anti-clockwise then we
@@ -464,20 +465,13 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
       // advance the position
       position = (position+1) & 0x7;
     }
-    
-    // if our current pixel matches the _second_ pixel found in the
-    // chain and the previous pixel we found matches the first then we
-    // are done.  we have to wait until pointer>4 in order to make
-    // sure we dont immediatly stop.  I wonder if the compiler will
-    // notice it can unroll this loop a couple of times and remove
-    // this comparison?
-    if ((pointer > 4) && 
-	(points_buffer[2] == points_buffer[pointer-1]) &&
-	(points_buffer[3] == points_buffer[pointer]) &&
-	(points_buffer[0] == points_buffer[pointer-3]) &&
-	(points_buffer[1] == points_buffer[pointer-2])) {
+
+    if ((data_pointer == contour_1) &&
+	(sample_pointer == contour_0)) {
       break;
     }
+
+    data_pointer = sample_pointer;
   }
   
   // discard the last two pixels because they are overlap on the
