@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/02/10 18:12:43  acr31
+ * moved gaussian elimination functionality around a bit
+ *
  * Revision 1.2  2004/02/03 07:48:30  acr31
  * added template tag
  *
@@ -42,10 +45,9 @@
  *
  */
 #include <QuadTangle2D.hh>
-#include <GaussianElimination.hh>
+#include <gaussianelimination.hh>
 #include <Drawing.hh>
-#undef FILENAME
-#define FILENAME "Quadtangle2D.cc"
+
 #define ZERO_DISTANCE 0.00001
 
 QuadTangle2D::QuadTangle2D(float width) {
@@ -240,104 +242,38 @@ void QuadTangle2D::compute_alpha() {
    *
    */
 
-  float** coeffs = new float*[8];
-  coeffs[0] = new float[8];
-  coeffs[0][0] = 1;
-  coeffs[0][1] = 1;
-  coeffs[0][2] = 0;
-  coeffs[0][3] = 0;
-  coeffs[0][4] = 0;
-  coeffs[0][5] = 0;
-  coeffs[0][6] = 0;
-  coeffs[0][7] = 0;
+  // we particularly want coeffs to be an array of pointers to arrays
+  // containing the columns of the matrix - then we can swap columns
+  // conveniently by swapping pointers
+  float coeffs0[] = {1,1,0,0,0,0,0,0};
+  float coeffs1[] = {1,0,0,1,0,0,0,0};
+  float coeffs2[] = {1,1,1,1,0,0,0,0};
+  float coeffs3[] = {0,0,0,0,1,1,0,0};
+  float coeffs4[] = {0,0,0,0,1,0,0,1};
+  float coeffs5[] = {0,0,0,0,1,1,1,1};
+  float coeffs6[] = {-m_x1,-m_x0,0,0,-m_y1,-m_y0,0,0};
+  float coeffs7[] = {-m_x1,0,0,-m_x2,-m_y1,0,0,-m_y2};
+  float* coeffs[] = {coeffs0,
+		     coeffs1,
+		     coeffs2,
+		     coeffs3,
+		     coeffs4,
+		     coeffs5,
+		     coeffs6,
+		     coeffs7};
+		     
+  float xvals[] = { m_x1,
+		    m_x0,
+		    m_x3,
+		    m_x2,
+		    m_y1,
+		    m_y0,
+		    m_y3,
+		    m_y2 };
 
-  coeffs[1] = new float[8];
-  coeffs[1][0] = 1;
-  coeffs[1][1] = 0;
-  coeffs[1][2] = 0;
-  coeffs[1][3] = 1;
-  coeffs[1][4] = 0;
-  coeffs[1][5] = 0;
-  coeffs[1][6] = 0;
-  coeffs[1][7] = 0;
 
-  coeffs[2] = new float[8];
-  coeffs[2][0] = 1;
-  coeffs[2][1] = 1;
-  coeffs[2][2] = 1;
-  coeffs[2][3] = 1;
-  coeffs[2][4] = 0;
-  coeffs[2][5] = 0;
-  coeffs[2][6] = 0;
-  coeffs[2][7] = 0;
 
-  coeffs[3] = new float[8];
-  coeffs[3][0] = 0;
-  coeffs[3][1] = 0;
-  coeffs[3][2] = 0;
-  coeffs[3][3] = 0;
-  coeffs[3][4] = 1;
-  coeffs[3][5] = 1;
-  coeffs[3][6] = 0;
-  coeffs[3][7] = 0;
-
-  coeffs[4] = new float[8];
-  coeffs[4][0] = 0;
-  coeffs[4][1] = 0;
-  coeffs[4][2] = 0;
-  coeffs[4][3] = 0;
-  coeffs[4][4] = 1;
-  coeffs[4][5] = 0;
-  coeffs[4][6] = 0;
-  coeffs[4][7] = 1;
-
-  coeffs[5] = new float[8];
-  coeffs[5][0] = 0;
-  coeffs[5][1] = 0;
-  coeffs[5][2] = 0;
-  coeffs[5][3] = 0;
-  coeffs[5][4] = 1;
-  coeffs[5][5] = 1;
-  coeffs[5][6] = 1;
-  coeffs[5][7] = 1;
-
-  coeffs[6] = new float[8];
-  coeffs[6][0] = -m_x1;
-  coeffs[6][1] = -m_x0;
-  coeffs[6][2] = 0;
-  coeffs[6][3] = 0;
-  coeffs[6][4] = -m_y1;
-  coeffs[6][5] = -m_y0;
-  coeffs[6][6] = 0;
-  coeffs[6][7] = 0;
-
-  coeffs[7] = new float[8];
-  coeffs[7][0] = -m_x1;
-  coeffs[7][1] = 0;
-  coeffs[7][2] = 0;
-  coeffs[7][3] = -m_x2;
-  coeffs[7][4] = -m_y1;
-  coeffs[7][5] = 0;
-  coeffs[7][6] = 0;
-  coeffs[7][7] = -m_y2;
-
-  float* xvals = new float[8];
-  xvals[0] = m_x1;
-  xvals[1] = m_x0;
-  xvals[2] = m_x3;
-  xvals[3] = m_x2;
-  xvals[4] = m_y1;
-  xvals[5] = m_y0;
-  xvals[6] = m_y3;
-  xvals[7] = m_y2;
-
-  GaussianElimination(xvals,coeffs,m_alpha,8);
-
-  delete[] xvals;
-  for(int i=0;i<8;i++) {
-    delete[] coeffs[i];
-  }
-  delete[] coeffs;
+  solve_simultaneous(xvals,coeffs,m_alpha,8);
 
   PROGRESS("Computed alpha[0] "<<m_alpha[0]);
   PROGRESS("         alpha[1] "<<m_alpha[1]);
