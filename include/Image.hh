@@ -153,7 +153,7 @@ public:
     int numsteps = (int)(100/fabs(start_radians - end_radians)*2*PI);
     CvPoint pts[numsteps+1];
     for(int i=0;i<numsteps;i++) {
-      float theta = start_radians + (end_radians - start_radians)*(float)i/(float)numsteps;
+      float theta = start_radians + (end_radians - start_radians)*(float)i/(float)(numsteps-1);
       pts[i] = cvPoint(x0 + cvRound(radius*cos(theta)), y0 + cvRound(radius*sin(theta)));
     }
     pts[numsteps] = cvPoint(x0,y0);
