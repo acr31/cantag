@@ -39,7 +39,7 @@ static int debug_image_counter = 0;
 #define MAX_CHILD_DISTANCE 0.1
 template<int RING_COUNT, int SECTOR_COUNT, class C>
 class RingTag : public virtual Tag< ShapeChain<C>, RING_COUNT*SECTOR_COUNT >, 
-		protected virtual Coder<RING_COUNT*SECTOR_COUNT>,
+		public virtual Coder<RING_COUNT*SECTOR_COUNT>,
                 protected virtual EllipseTransform {
 private:
   float m_bullseye_inner_radius;
