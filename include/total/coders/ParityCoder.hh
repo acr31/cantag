@@ -39,6 +39,8 @@ template<int BIT_COUNT> bool ParityCoder<BIT_COUNT>::EncodePayload(CyclicBitSet<
       parity = !parity;
     }
   }
+  data[BIT_COUNT] = parity;
+  return true;
 }
 
 template<int BIT_COUNT> int ParityCoder<BIT_COUNT>::DecodePayload(CyclicBitSet<BIT_COUNT>& data) const {
