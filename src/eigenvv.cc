@@ -6,6 +6,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/02/18 15:58:53  acr31
+ * fixes to the pose extraction
+ *
  * Revision 1.3  2004/02/17 08:01:29  acr31
  * *** empty log message ***
  *
@@ -26,13 +29,37 @@
 #include <iostream>
 #endif
 
-
 void eigensolve(double a, double b, double f,
 		/*    */  double c, double d,
 		/*               */ double e,
 		double* eigenvects,
 		double* eigenvals) {
+  double m[] = { a, b, f,
+		 b, c, d,
+		 f, d, e };
+  CvMat M;
+  cvInitMatHeader(&M,3,3,CV_64F,m);
 
+  double vects[9];
+  double vals[3];
+  CvMat Vects;
+  CvMat Vals;
+  cvInitMatHeader(&Vects,3,3,CV_64F,vects);
+  cvInitMatHeader(&Vals,3,1,CV_64F,vals);
+  
+  cvEigenVV(&M,&Vects,&Vals,0.0000000000000000001);
+
+  eigenvals[0] = vals[0];   eigenvals[1] = 0;        eigenvals[2] = 0;
+  eigenvals[3] = 0;         eigenvals[4] = vals[1];  eigenvals[5] = 0;
+  eigenvals[6] = 0;         eigenvals[7] = 0;        eigenvals[8] = vals[2];
+
+  eigenvects[0] = vects[0];   eigenvects[1] = vects[3];   eigenvects[2] = vects[6]; 
+  eigenvects[3] = vects[1];   eigenvects[4] = vects[4];   eigenvects[5] = vects[7]; 
+  eigenvects[6] = vects[2];   eigenvects[7] = vects[5];   eigenvects[8] = vects[8]; 
+
+
+
+  /*
   // Matrix is:
 
   // a b f
@@ -216,8 +243,8 @@ void eigensolve(double a, double b, double f,
       eigenvals[3] = 0;     eigenvals[4] = c;     eigenvals[5] = 0;
       eigenvals[6] = 0;     eigenvals[7] = 0;     eigenvals[8] = e;
     }
+  */
 }  
-
 void eigensolve(double a, double b, double c,
 		double d, double e, double f,
 		double g, double h, double i,

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.15  2004/02/18 15:58:52  acr31
+ * fixes to the pose extraction
+ *
  * Revision 1.14  2004/02/18 14:17:48  acr31
  * fixed problem of negative conic
  *
@@ -389,9 +392,10 @@ void Ellipse2D::ComputePose() {
     eigvects[8] *= -1;
   }
   
-  
-
-
+  double r1[] = { eigvects[0], eigvects[1], eigvects[2], 0,
+		  eigvects[3], eigvects[4], eigvects[5], 0,
+		  eigvects[6], eigvects[7], eigvects[8], 0,
+		  0,           0,           0,           1};
 
 #ifdef POSE_DEBUG
   std::cout << "Rotation 1: r1=[ " << eigvects[0] << "," << eigvects[1] << "," << eigvects[2] << ";" << std::endl;
@@ -422,16 +426,68 @@ void Ellipse2D::ComputePose() {
   double pmcos = sqrt(cossq);
   double pmsin = choice*sqrt(sinsq);
 
-  float r2[] = { pmcos, 0, pmsin,
-		 0   , 1, 0,
-		 -pmsin,0, pmcos };
+  float r2[] = { pmcos, 0, pmsin, 0,
+		 0,     1, 0,     0, 
+		 -pmsin, 0, pmcos, 0,
+		 0,     0, 0,     1 };
 
 #ifdef POSE_DEBUG  
-  std::cout << "Rotation 2: r2=[" << r2[0] << "," << r2[1] << "," << r2[2] << ";" << std::endl;
-  std::cout << "                " << r2[3] << "," << r2[4] << "," << r2[5] << ";" << std::endl;
-  std::cout << "                " << r2[6] << "," << r2[7] << "," << r2[8] << "];" << std::endl;
+  std::cout << "Rotation 2: r2=[" << r2[0] << "," << r2[1] << "," << r2[2] << "," << r2[3] << ";" << std::endl;
+  std::cout << "                " << r2[4] << "," << r2[5] << "," << r2[6] << "," << r2[7] << ";" << std::endl;
+  std::cout << "                " << r2[8] << "," << r2[9] << "," << r2[10] << "," << r2[11] << ";" << std::endl;
+  std::cout << "                " << r2[12] << "," << r2[13] << "," << r2[14] << "," << r2[15] << "];" << std::endl;
 #endif
 
+  // now build the transformation matrix that goes from the unit circle to the 3d circle
+  // this is a translation in x to align on the axis  premultiplied by
+  // a scale factor premultiplied by
+  // rotation r2 premuliplied by
+  // rotation r1
+  
+  // apply the relevant translation
+  double tx = choice*sqrt((eigvals[4]-eigvals[0])*(eigvals[8]-eigvals[4]))/eigvals[4];
+#ifdef POSE_DEBUG
+  std::cout << "Translation tx = "<<tx <<std::endl;
+#endif
+  double trans[] = {1,0,0,tx,
+		    0,1,0,0,
+		    0,0,1,0,
+		    0,0,0,1};
+
+  double scale = choice*sqrt(-eigvals[0]*eigvals[8]/eigvals[4]/eigvals[4]);
+#ifdef POSE_DEBUG
+  std::cout << "Scale factor " << scale << std::endl;
+#endif
+  // this multiplies rows 0 and 1 of the transform by scale
+  for(int col=0;col<4;col++) {
+    trans[col*4] *= scale;
+    trans[col*4+1] *= scale;
+  }
+  
+  double rtot[16];
+  // premultiply by r2
+  for(int row=0;row<4;row++) {
+    for(int col=0;col<4;col++) {
+      rtot[row*4+col] = 0;
+      for(int k=0;k<4;k++) {
+	rtot[row*4+col] += r2[row*4+k] * trans[k*4+col];
+      }
+    }
+  }
+
+
+  // premultiply by r1
+  for(int row=0;row<4;row++) {
+    for(int col=0;col<4;col++) {
+      m_transform[row*4+col] = 0;
+      for(int k=0;k<4;k++) {
+	m_transform[row*4+col] += r1[row*4+k] * rtot[k*4+col];
+      }
+    }
+  }
+  
+
+  /*
   double rtot[16];
   // multiply r1 (eigvects) and r2
   for(int row=0;row<3;row++) {
@@ -471,7 +527,7 @@ void Ellipse2D::ComputePose() {
       }
     }
   }
-  
+
    double scale = choice*sqrt(-eigvals[0]*eigvals[8]/eigvals[4]/eigvals[4]);
 
 #ifdef POSE_DEBUG
@@ -483,9 +539,9 @@ void Ellipse2D::ComputePose() {
     m_transform[row*4] *= scale;
     m_transform[row*4+1] *= scale;
   }
-
-
   
+
+  */  
 
 
 #ifdef POSE_DEBUG  

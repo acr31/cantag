@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.7  2004/02/18 15:58:52  acr31
+ * fixes to the pose extraction
+ *
  * Revision 1.6  2004/02/18 09:22:22  acr31
  * *** empty log message ***
  *
@@ -336,9 +339,9 @@ void RingTag::draw_read(Image* image, Camera* camera, const Ellipse2D* l, int i)
 		      pts+1);
       camera->NPCFToImage(pts,1);
       // pick the colour to be the opposite of the sampled point so we can see the dot
-      //int colour = SampleImage(image,pts[0],pts[1]) < 128 ? 255 : 0;
+      int colour = SampleImage(image,pts[0],pts[1]) < 128 ? 255 : 0;
       // or pick the colour to be on a gradient so we see the order it samples in
-      int colour = (int)((double)k/(double)m_sector_count*255);
+      //int colour = (int)((double)k/(double)m_sector_count*255);
       cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), colour,3);
       
     }

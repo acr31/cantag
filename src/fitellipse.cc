@@ -209,6 +209,8 @@ Ellipse2D* fitellipse(float* points, int numpoints) {
       float e = t[0][1]*eigvects[i]+t[1][1]*eigvects[i+3]+t[2][1]*eigvects[i+6];
       float f = t[0][2]*eigvects[i]+t[1][2]*eigvects[i+3]+t[2][2]*eigvects[i+6];
 
+      // it turns out to be really important to the pose extraction
+      // that our conic has a positive sense!
       if (f > 0) {
 	a*=-1;
 	b*=-1;
