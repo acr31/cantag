@@ -157,6 +157,8 @@ public:
     }
   }
 
+  void Image::SeedFill(int x, int y,unsigned char colour);
+
   inline void DrawPixelNoCheck(int x,int y, unsigned char colour) {
     (m_contents+m_width_step*y)[x] = colour;
   }
