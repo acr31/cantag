@@ -42,8 +42,6 @@ XOutputMechanism::XOutputMechanism(int width, int height, const Camera& camera) 
   XSelectInput(m_display, m_window, StructureNotifyMask);
   XMapWindow(m_display, m_window);
   m_mapped = true;
-  m_gc = XCreateGC(m_display, m_window, 0, 0);
-  m_gcgot = true;
 
   Visual* visual = DefaultVisualOfScreen(DefaultScreenOfDisplay(m_display));
   
@@ -55,9 +53,19 @@ XOutputMechanism::XOutputMechanism(int width, int height, const Camera& camera) 
   xc.green=65535;
   xc.blue=0;
   
-  int fgcol = XAllocColor(m_display,m_colormap,&xc);
+  if (!XAllocColor(m_display,m_colormap,&xc)) {
+    throw "Failed to allocate colour for highlighting!";
+  }
 
-  XSetForeground(m_display, m_gc, xc.pixel);
+
+  XGCValues values;
+  values.foreground = xc.pixel;
+  values.background = blackColour;
+  values.line_width = 2;
+
+  m_gc = XCreateGC(m_display, m_window, (GCForeground | GCBackground | GCLineWidth), &values);
+  m_gcgot = true;
+
   // Xshm stuff
   Status found = XShmQueryExtension(m_display);
   if (!found) {
@@ -112,6 +120,8 @@ XOutputMechanism::XOutputMechanism(int width, int height, const Camera& camera) 
   PROGRESS("Blue mask is " << m_image->blue_mask << " = " << m_bluebits << " shifted by " << m_blueshift);
 #endif
 
+  m_bytes_per_pixel = m_image->bits_per_pixel/8;
+
   // Wait for MapNotify
   while (1) {
     XEvent e;
@@ -135,7 +145,6 @@ XOutputMechanism::~XOutputMechanism() {
 }
 
 void XOutputMechanism::FromImageSource(const Image& image) {
-
   for (int y=0; y<m_height/2; ++y) {
     const unsigned char* pointer = image.GetRow(2*y);
     char* destptr = m_image->data + m_image->bytes_per_line * y;
@@ -159,8 +168,7 @@ void XOutputMechanism::FromImageSource(const Image& image) {
       bPart <<= m_blueshift;      
 
       unsigned long value = rPart | gPart | bPart;
-      //      std::cout << (int)data<< " " << rPart << " " << gPart << " " << bPart << " " << (rPart|gPart|bPart) << std::endl;
-      for(int i=0;i<m_image->bits_per_pixel/8;++i) {
+      for(int i=0;i<m_bytes_per_pixel;++i) {
 	*destptr = value & 0xFF;
 	destptr++;
 	value>>=8;
@@ -170,22 +178,25 @@ void XOutputMechanism::FromImageSource(const Image& image) {
 }
 
 void XOutputMechanism::FromThreshold(const Image& image) {
+  const int midpoint = m_bytes_per_pixel * m_width/2;
   for (int y=0; y<m_height/2; ++y) {
     const unsigned char* pointer = image.GetRow(2*y);
-    for (int x=m_width/2; x<m_width; ++x) {
+    char* destptr = m_image->data + m_image->bytes_per_line * y + midpoint;
+    for (int x=0; x<m_width/2; ++x) {
       unsigned char data = *pointer;
       pointer+=2;
-      unsigned long colourPixel = data == 0 ? 0 : ((1<<16)-1);
-      XPutPixel(m_image,x,y,colourPixel);
+      for(int i=0;i<m_bytes_per_pixel;++i) {
+	*destptr = data == 0 ? 0xFF : 0;
+	destptr++;
+      }
     }
   }
 }
 
 void XOutputMechanism::FromContourTree(const ContourTree& contours) {
-  for(int x=0;x<m_width/2;++x) {
-    for(int y=m_height/2;y<m_height;++y) {
-      XPutPixel(m_image,x,y,(1<<16)-1);
-    }
+  const int midpoint = m_image->bits_per_pixel/8*m_image->width/2;
+  for(int y=m_height/2;y<m_height;++y) {
+    memset(m_image->data+m_image->bytes_per_line*y,0xFF,midpoint);
   }
   FromContourTree(contours.GetRootContour());
 }

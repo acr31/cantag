@@ -48,7 +48,7 @@ private:
   int m_redshift;
   int m_blueshift;
   int m_greenshift;
-
+  int m_bytes_per_pixel; 
   void FromContourTree(const ContourTree::Contour* contour);
   template<class S> void FromShapeTree(Image& i, const typename ShapeTree<S>::Node* node);
 public:
@@ -75,23 +75,23 @@ template<class S> void XOutputMechanism::FromShapeTree(Image& image,const typena
 
 
 template<class S> void XOutputMechanism::FromShapeTree(const ShapeTree<S>& shapes) {
-  if (!m_image) { throw "Noimage"; }
-  for(int x=m_width/2;x<m_width;++x) {
-    for(int y=m_height/2;y<m_height;++y) {
-      XPutPixel(m_image,x,y,(1<<16)-1);
-    }
-  }
   Image image(m_width,m_height);
   FromShapeTree<S>(image,shapes.GetRootNode());
+
+  // copy the image into the XImage
+  const int midpoint = m_bytes_per_pixel * m_width/2;
   int row = 0;
   for (int y=m_height/2; y<m_height; ++y) {
     const unsigned char* pointer = image.GetRow(row);
+    char* destptr = m_image->data + m_image->bytes_per_line * y + midpoint;
     row+=2;
-    for (int x=m_width/2; x<m_width; ++x) {
+    for (int x=0; x<m_width/2; ++x) {
       unsigned char data = *pointer;
       pointer+=2;
-      unsigned long colourPixel = data == 0 ? 0 : ((1<<16)-1);
-      XPutPixel(m_image,x,y,colourPixel);
+      for(int i=0;i<m_bytes_per_pixel;++i) {
+	*destptr = data == 0 ? 0 : 0xFF;
+	destptr++;
+      }
     }
   }
 };
