@@ -13,13 +13,17 @@
 #include <Ellipse.hh>
 #include <findtransform.hh>
 #include <iostream>
+
 #ifdef TEXT_DEBUG
-#define   RING_TAG_DEBUG
+# define RING_TAG_DEBUG
 #endif
 
 #ifdef IMAGE_DEBUG
-#define  RING_TAG_IMAGE_DEBUG
-#undef   DRAW_FIELD_DEBUG
+# define  RING_TAG_IMAGE_DEBUG
+# undef   DRAW_FIELD_DEBUG
+#else 
+# undef RING_TAG_IMAGE_DEUG
+# undef DRAW_FIELD_DEBUG
 #endif
 
 int debug_image_counter= 0;
