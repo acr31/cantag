@@ -486,8 +486,8 @@ template<int RING_COUNT,int SECTOR_COUNT,class C> bool RingTag<RING_COUNT,SECTOR
   bool right = true;
   int k=RING_COUNT-1;
   int j;
-  // scan round reading a sector width apart until we read two adjacent cells of different values
-  for(j=0;j<SECTOR_COUNT*READING_COUNT;j+=READING_COUNT) {
+  // scan round reading a half sector width apart until we read two adjacent cells of different values
+  for(j=0;j<SECTOR_COUNT*READING_COUNT;j+=READING_COUNT/2) {
     float tpt[]=  {  m_cos_read_angles[j] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
 		     m_sin_read_angles[j] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
     ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
