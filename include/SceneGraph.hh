@@ -149,6 +149,22 @@ public:
 
 
 private:
+
+  // maintain a linked list of pointers to open chains
+  
+  // scan across the line
+  // if you see a white to black transition then 
+  //    scan accross the linked list of pointers looking for an open chain to attach to
+  //    if the item at the head of the list has image column greater than the current position +1 then stop looking
+  //    if you find a chain then add this point to it
+  //    if you dont find a chain then start a new one and insert it into the list at the current position
+  //    every chain you take off the list when looking for the new chain is now closed
+  // if you continue to find black pixels, add them to the chain
+  // if you find a black to white transition then insert this chain into the list again
+  // 
+
+  /*
+
   void FollowContours(Image& image) {
 
     // we alter the current image to encode
@@ -192,7 +208,7 @@ private:
 
       // we move a window of 3 pixels across the image
       for(int raster_x = 0; raster_x < image.GetWidth()-3; raster_x++) {
-	if (data[1] & 0x2) {
+	if (data[1] & 0x2) { // this is a edge pixel
 	  if (!data[0] & 0x2) {
 	    // this is an entry pixel
 	    if (data[1] & ~0x2) {
@@ -208,6 +224,7 @@ private:
 	    }
 	    else {
 	      // this doesn't match an existing contour
+	      contourID++;
 	      
 	    }
 	  }
@@ -236,6 +253,7 @@ private:
     }
 
   }
+  */
 };
 
 #endif//SCENE_GRAPH_GUARD

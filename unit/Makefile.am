@@ -1,4 +1,5 @@
-noinst_PROGRAMS = TestCoder TestBigInt TestCamera TestV4LImageSource TestGaussian
+noinst_PROGRAMS = TestCoder TestBigInt TestCamera TestV4LImageSource TestGaussian TestSegmentor
+TestSegmentor_SOURCES = TestSegmentor.cc
 TestGaussian_SOURCES = TestGaussian.cc
 TestCoder_SOURCES = TestCoder.cc
 TestBigInt_SOURCES = TestBigInt.cc

@@ -173,6 +173,7 @@ public:
     int npts[] = {numpoints};
     CvPoint* ppts = pts;
     cvPolyLineAA(m_image,&ppts,npts,1,1,colour,0);
+    //    cvPolyLine(m_image,&ppts,npts,1,1,colour,1,8);
   }
 
   /**
