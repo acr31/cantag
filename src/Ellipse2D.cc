@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.14  2004/02/18 14:17:48  acr31
+ * fixed problem of negative conic
+ *
  * Revision 1.13  2004/02/18 09:22:22  acr31
  * *** empty log message ***
  *
@@ -123,7 +126,7 @@ void Ellipse2D::ProjectPoint(float angle_radians, float radius, float *projX, fl
   *projX /= projZ;
   *projY /= projZ;
   
-  //  PROGRESS("Projecting point radius "<<radius<<" angle "<<angle_radians<<" on to ("<< *projX <<","<< *projY <<")");
+  PROGRESS("Projecting point radius "<<radius<<" angle "<<angle_radians<<" on to ("<< *projX <<","<< *projY <<")");
 }
 
 void Ellipse2D::ToGeneralConic() {
@@ -351,6 +354,45 @@ void Ellipse2D::ComputePose() {
     }
   }
 
+  // our eigenvectors might incorporate reflections about various axes
+  // so we need to check that we still have a right handed frame in a
+  // righthanded frame v1 x v2 = v3 so we cross v1 and v2 and check
+  // the sign compared with v3 if they are different we multiply v3 by
+  // -1 so this is v1 cross v2 dot v3 - if this is +ve v3 is parallel
+  // with where it should be for a right handed axis if not then we
+  // scale it
+
+  // cross product of u and v 
+  /*   ( ux )    ( vx )     ( uy*vz - uz*vy )
+   *   ( uy ) x  ( vy )  =  ( uz*vx - ux*vz )
+   *   ( uz )    ( vz )     ( ux*vy - uy*vx )
+   *
+   * now dot product with w
+   *
+   *  ( uy*vz - uz*vy )   ( wx )   
+   *  ( uz*vx - ux*vz ) . ( wy ) = (uy*vz - uz*vy)*wx + (uz*vx - ux*vz)*wy + (ux*vy - uy*vx)*wz
+   *  ( ux*vy - uy*vx )   ( wz )
+   * 
+   */
+  double crossx = eigvects[3]*eigvects[7] - eigvects[6]*eigvects[4];
+  double crossy = eigvects[6]*eigvects[1] - eigvects[0]*eigvects[7];
+  double crossz = eigvects[0]*eigvects[4] - eigvects[3]*eigvects[1];
+  
+  PROGRESS("Cross = "<<crossx << "," << crossy << ","<<crossz);
+
+  double dotcross = crossx*eigvects[2] + crossy*eigvects[5] + crossz*eigvects[8];
+
+  PROGRESS("Dotcross = "<<dotcross);
+  if (dotcross < 0) {
+    eigvects[2] *= -1;
+    eigvects[5] *= -1;
+    eigvects[8] *= -1;
+  }
+  
+  
+
+
+
 #ifdef POSE_DEBUG
   std::cout << "Rotation 1: r1=[ " << eigvects[0] << "," << eigvects[1] << "," << eigvects[2] << ";" << std::endl;
   std::cout << "                 " << eigvects[3] << "," << eigvects[4] << "," << eigvects[5] << ";" << std::endl;
@@ -413,11 +455,14 @@ void Ellipse2D::ComputePose() {
 
   // apply the relevant translation
   double tx = choice*sqrt((eigvals[4]-eigvals[0])*(eigvals[8]-eigvals[4]))/eigvals[4];
+#ifdef POSE_DEBUG
+  std::cout << "Translation tx = "<<tx <<std::endl;
+#endif
   double trans[16] = { 1,0,0,tx,
 		       0,1,0,0,
 		       0,0,1,0,
 		       0,0,0,1 };
-
+  
   for(int row=0;row<4;row++) {
     for(int col=0;col<4;col++) {
       m_transform[row*4+col] = 0;
@@ -426,8 +471,8 @@ void Ellipse2D::ComputePose() {
       }
     }
   }
-
-  double scale = choice*sqrt(-eigvals[0]*eigvals[8]/eigvals[4]/eigvals[4]);
+  
+   double scale = choice*sqrt(-eigvals[0]*eigvals[8]/eigvals[4]/eigvals[4]);
 
 #ifdef POSE_DEBUG
   std::cout << "Scale factor " << scale << std::endl;
@@ -438,6 +483,9 @@ void Ellipse2D::ComputePose() {
     m_transform[row*4] *= scale;
     m_transform[row*4+1] *= scale;
   }
+
+
+  
 
 
 #ifdef POSE_DEBUG  

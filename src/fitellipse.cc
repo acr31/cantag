@@ -208,6 +208,17 @@ Ellipse2D* fitellipse(float* points, int numpoints) {
       float d = t[0][0]*eigvects[i]+t[1][0]*eigvects[i+3]+t[2][0]*eigvects[i+6];
       float e = t[0][1]*eigvects[i]+t[1][1]*eigvects[i+3]+t[2][1]*eigvects[i+6];
       float f = t[0][2]*eigvects[i]+t[1][2]*eigvects[i+3]+t[2][2]*eigvects[i+6];
+
+      if (f > 0) {
+	a*=-1;
+	b*=-1;
+	c*=-1;
+	d*=-1;
+	e*=-1;
+	f*=-1;
+	PROGRESS("Corrected for negative scale factor");
+      }
+
       PROGRESS("Fitted ellipse: a="<<a<<","<<b<<","<<c<<","<<d<<","<<e<<","<<f);
       
       if (calcerror(a,b,c,d,e,f,points,numpoints)) {	
