@@ -22,20 +22,20 @@ Template::Template(char* filename, int size=16,int subsample=4) :
   m_subsample(subsample) {
   m_filename = new char[strlen(filename)];
   strncpy(m_filename,filename,strlen(filename));
-  Image* image = LoadImage(filename);
-  
-  assert(image->width == image->height);
+  PROGRESS("Filename "<<filename);
+  m_original = LoadImage(filename);  
 
-  if (image->nChannels==3) {
-    Image* t = cvCreateImage(cvSize(image->width,image->height),IPL_DEPTH_8U,1);
-    cvCvtColor(image,t,CV_RGB2GRAY);
-    FreeImage(&image);
-    image = t;
+  assert(m_original->width == m_original->height);
+
+  if (m_original->nChannels==3) {
+    Image* t = cvCreateImage(cvSize(m_original->width,m_original->height),IPL_DEPTH_8U,1);
+    cvCvtColor(m_original,t,CV_RGB2GRAY);
+    FreeImage(&m_original);
+    m_original = t;
   }
   
   Image* dest = cvCreateImage(cvSize(size,size),IPL_DEPTH_8U,1);
-  cvResize(image,dest);
-  cvReleaseImage(&image);
+  cvResize(m_original,dest);
 
   m_values = new unsigned char[size*size];
   for(int i=0;i<size*size;i++) {
@@ -53,6 +53,7 @@ bool Template::operator<(const Template& t) {
 
 Template::~Template() {
   delete[] m_values;
+  cvReleaseImage(&m_original);
 }
 
 /**
@@ -118,3 +119,22 @@ void Template::calculate_mean_stddev(unsigned char* values, float* stddev, float
   *stddev = sqrt(( diffsq - ( diff * diff / (float)m_size / (float)m_size ) ) / (float)(m_size*m_size-1));
 }
 
+void Template::Draw2D(Image *image, const QuadTangle2D* l, int white, int black) {
+
+  for(int i=0;i<m_original->height;i++) {
+    float u = (float)i/(float)m_original->height;
+    float prevX;
+    float prevY;
+    for(int j=0;j<m_original->width;j++) {
+      float x;
+      float y;
+      float v = (float)j/(float)m_original->width;
+      l->ProjectPoint(u,v,&x,&y);
+      if (j!=0) {
+	cvLine(image,cvPoint(prevX,prevY),cvPoint(x,y),SampleImage(image,x,y));
+      }
+      prevX=x;
+      prevY=y;
+    }
+  }
+}

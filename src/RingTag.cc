@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/02/03 07:48:31  acr31
+ * added template tag
+ *
  * Revision 1.1  2004/02/01 14:26:48  acr31
  * Implementations for Matrixtag and ringtag
  *
@@ -299,6 +302,56 @@ unsigned long long RingTag::Decode(Image *image, const Ellipse2D *l) {
       return DecodeTag(read_code[i]);	
     }
   }
+
+#ifdef IMAGE_DEBUG
+  Image* debug0 = cvCloneImage(image);
+  cvConvertScale(debug0,debug0,0.5,128); 
+      
+  DrawEllipse(debug0,
+	      l->m_x,
+	      l->m_y,
+	      l->m_width*m_data_inner_radius/m_bullseye_outer_radius,
+	      l->m_height*m_data_inner_radius/m_bullseye_outer_radius,
+	      l->m_angle_radians,
+	      0,
+	      1);
+      
+  for(int r=0;r<m_ring_count;r++) {
+    DrawEllipse(debug0,
+		l->m_x,
+		l->m_y,
+		l->m_width*m_data_ring_outer_radii[r]/m_bullseye_outer_radius,
+		l->m_height*m_data_ring_outer_radii[r]/m_bullseye_outer_radius,
+		l->m_angle_radians,
+		0,
+		1);	
+  }
+      
+  for(int k=0;k<m_sector_count;k++) {
+    for(int r=0;r<m_ring_count;r++) {
+      float x;
+      float y;
+      l->ProjectPoint(m_read_angles[5*k],
+		      m_data_ring_outer_radii[r]/m_bullseye_outer_radius,
+		      &x,
+		      &y);
+      cvLine(debug0,
+	     cvPoint(cvRound(l->m_x),cvRound(l->m_y)),
+	     cvPoint(cvRound(x),cvRound(y)),
+	     0,1);
+	  
+      l->ProjectPoint(m_read_angles[5*k],
+		      m_data_ring_centre_radii[r]/m_bullseye_outer_radius,
+		      &x,
+		      &y);
+      cvLine(debug0,cvPoint(cvRound(x),cvRound(y)),cvPoint(cvRound(x),cvRound(y)), SampleImage(image,x,y) < 128 ? 255 : 0,3);
+	  
+	  
+    }
+  }
+  cvSaveImage("debug-decode.jpg",debug0);	  	
+  cvReleaseImage(&debug0);
+#endif
   throw Coder::InvalidCode();
 };
 

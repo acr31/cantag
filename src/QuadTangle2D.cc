@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/02/03 07:48:30  acr31
+ * added template tag
+ *
  * Revision 1.1  2004/02/01 14:26:24  acr31
  * moved rectangle2d to quadtangle2d and refactored implmentations
  *
@@ -94,7 +97,7 @@ QuadTangle2D::QuadTangle2D(float* coords) :
 void QuadTangle2D::ProjectPoint(float x, float y, float *projX, float *projY) const {
   *projX = (m_alpha[0]*x+m_alpha[1]*y+m_alpha[2])/(m_alpha[6]*x+m_alpha[7]*y+1);
   *projY = (m_alpha[3]*x+m_alpha[4]*y+m_alpha[5])/(m_alpha[6]*x+m_alpha[7]*y+1);
-  PROGRESS("Projecting point ("<<x <<","<<y<<") on to ("<< *projX<<","<<*projY<<")");
+  //  PROGRESS("Projecting point ("<<x <<","<<y<<") on to ("<< *projX<<","<<*projY<<")");
 }
 
 Location3D* QuadTangle2D::EstimatePose(float width, float height) {

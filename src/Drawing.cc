@@ -90,6 +90,7 @@ DrawEllipse(Image *image,
 	    float width, float height, 
 	    float angle_radians, 
 	    int color, int thickness) {
+
   assert(thickness > 0 || thickness == -1);
 
   int numsteps = (int)(2*PI/STEPSIZE); 

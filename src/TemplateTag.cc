@@ -1,3 +1,12 @@
+/**
+ * 
+ * $Header$
+ *
+ * $Log$
+ * Revision 1.2  2004/02/03 07:48:31  acr31
+ * added template tag
+ *
+ */
 #include <Config.hh>
 #include <TemplateTag.hh>
 
@@ -12,10 +21,12 @@ TemplateTag::TemplateTag(char* tagdirectory, int size, int subsample) : m_templa
   if (dir) {
     dirent* ptr;
     while(ptr = readdir(dir)) {
-      char filename[255];
-      snprintf(filename,255,"%s/%s",tagdirectory,ptr->d_name);
-      m_templates.push_back(new Template(filename,size,subsample));
-      free(ptr);
+      if (strncmp(ptr->d_name,".",1)) {
+	char filename[255];
+	snprintf(filename,255,"%s/%s",tagdirectory,ptr->d_name);
+	m_templates.push_back(new Template(filename,size,subsample));
+	free(ptr);
+      }
     }    
   }
   std::sort(m_templates.begin(),m_templates.end());
@@ -30,7 +41,8 @@ TemplateTag::~TemplateTag() {
 };
 
 void TemplateTag::Draw2D(Image* image, const QuadTangle2D *l, unsigned long long code, int black, int white) {
-
+  DrawFilledQuadTangle(image,l,black);
+  (*m_templates.begin())->Draw2D(image,l,black,white);
 }
 
 unsigned long long TemplateTag::Decode(Image* image, const QuadTangle2D *l) {

@@ -4,6 +4,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/02/03 07:48:25  acr31
+ * added template tag
+ *
  * Revision 1.1  2004/02/01 21:29:53  acr31
  * added template tags initial implementation
  *
@@ -23,7 +26,7 @@
 #undef FILENAME
 #define FILENAME "TemplateTag.hh"
 
-class TemplateTag : public virtual Tag<QuadTangle2D>, protected virtual Coder {
+class TemplateTag : public virtual Tag<QuadTangle2D> {
 private:
   std::vector<Template*> m_templates;
 

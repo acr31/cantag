@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.10  2004/02/03 07:48:25  acr31
+ * added template tag
+ *
  * Revision 1.9  2004/02/01 21:29:53  acr31
  * added template tags initial implementation
  *
@@ -55,6 +58,16 @@ typedef IplImage Image;
 
 #define PI CV_PI
 
+inline void DrawPixel(Image *image,int x, int y, unsigned int value) {
+  if ((x >= 0) && (x < image->width) &&
+      (y >= 0) && (y < image->height)) {
+    ((uchar*)(image->imageData + image->widthStep*y))[x] = (uchar)value;
+  }
+}
+
+inline void DrawPixel(Image *image,float x, float y, unsigned int value) {
+  DrawPixel(image,cvRound(x),cvRound(y),value);
+}
 inline int SampleImage(Image *image,int x, int y) {
   if ((x >= 0) && (x < image->width) &&
       (y >= 0) && (y < image->height)) {
@@ -104,7 +117,6 @@ inline void DrawFilledQuadTangle(Image *image,
 				 float x2, float y2,
 				 float x3, float y3,
 				 int color) {
-  PROGRESS("Drawing filled quad tangle ("<<x0<<","<<y0<<") ("<<x1<<","<<y1<<") ("<<x2<<","<<y2<<") ("<<x3<<","<<y3<<") Colour " << color);
   CvPoint p[4] = { cvPoint((int)x0,(int)y0),
 		   cvPoint((int)x1,(int)y1),
 		   cvPoint((int)x2,(int)y2),
@@ -114,7 +126,7 @@ inline void DrawFilledQuadTangle(Image *image,
 }
 
 inline void DrawFilledQuadTangle(Image* image,
-				 QuadTangle2D* r,
+				 const QuadTangle2D* r,
 				 int colour) {
   DrawFilledQuadTangle(image,
 		       r->m_x0,r->m_y0,
