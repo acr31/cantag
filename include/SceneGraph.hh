@@ -167,6 +167,7 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 
     for(int raster_y=0;raster_y < image.GetHeight(); ++raster_y) {
       int LNBD = 1; // we've just "seen" the frame border so set the last seen border id to match
+      data_pointer++;
       for(int raster_x=1;raster_x < image.GetWidth()-1;++raster_x) {
 	
 	// the sampled value with either be:
@@ -294,6 +295,7 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	}  
 	data_pointer++;
       }
+      data_pointer++;
     }
 #ifdef IMAGE_DEBUG
       debug0.Save("debug-contours.bmp");
