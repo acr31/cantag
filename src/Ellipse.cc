@@ -169,11 +169,16 @@ bool Ellipse::FitEllipse(const float* points, int numpoints) {
 
   double eigvals[9];
   double eigvects[9];
-  eigensolve(s1[6]/2,s1[7]/2,s1[8]/2,
-	     -s1[3],-s1[4],-s1[5],
-	     s1[0]/2,s1[1]/2,s1[2]/2,
-	     eigvects,
-	     eigvals);
+  if (!eigensolve(s1[6]/2,s1[7]/2,s1[8]/2,
+		  -s1[3],-s1[4],-s1[5],
+		  s1[0]/2,s1[1]/2,s1[2]/2,
+		  eigvects,
+		  eigvals)) {
+#ifdef ELLIPSE_DEBUG
+    PROGRESS("Failed to solve eigenvectors of the non-symmetric matrix.  Fit failed.");
+#endif
+    return false;
+  }
 
 
 #ifdef ELLIPSE_DEBUG

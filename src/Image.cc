@@ -107,14 +107,6 @@ void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
     i++;
 
   }  
-  for(int i=0;i<m_image->height;i++) {
-    DrawPixelNoCheck(0,i,0);
-    DrawPixelNoCheck(m_image->width-1,i,0);
-  }
-  for(int i=0;i<m_image->width;i++) {
-    DrawPixelNoCheck(i,0,0);
-    DrawPixelNoCheck(i,m_image->height-1,0);
-  }  
 
 #ifdef IMAGE_DEBUG
   cvSaveImage("debug-adaptivethreshold.bmp",m_image);

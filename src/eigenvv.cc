@@ -537,9 +537,12 @@ void eigensolve(double a, double b, double c,
 	m33 =0;
       }
 
+      if (t<0) {
 #ifdef EIGEN_DEBUG      
-      if(t<0) std::cout << "Complex evals, ignore the following" << std::endl;
+	std::cout << "Complex evals, ignore the following" << std::endl;
 #endif
+	return;
+      }
 
       // Calculate eigenvectors for original matrix
 
