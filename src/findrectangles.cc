@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/26 12:04:31  acr31
+ * noted that the routines search for white rather than black objects
+ *
  * Revision 1.2  2004/01/26 08:57:53  acr31
  * removed check for minumum area of contour
  *
@@ -22,6 +25,9 @@
 #include <opencv/cv.h>
 #include <cmath>
 
+/** 
+ * Find rectangular white objects- for black tags you _must_ invert the image.
+ */
 void FindRectangles(Image *image, int maxXDiff, int maxYDiff, std::vector<Rectangle2DChain*> *results) { 
   IplImage *copy = cvCloneImage(image);
 
@@ -38,8 +44,6 @@ void FindRectangles(Image *image, int maxXDiff, int maxYDiff, std::vector<Rectan
   CvSeq* c;
   CvPoint points[4];
 
-  // throw away the first contour which is always the outside edge of the image
-  c = cvFindNextContour(scanner);
 
   while ((c = cvFindNextContour(scanner)) != NULL) {
     int count = c->total;

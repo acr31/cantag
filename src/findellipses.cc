@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/26 12:04:31  acr31
+ * noted that the routines search for white rather than black objects
+ *
  * Revision 1.2  2004/01/26 08:57:11  acr31
  * added compensation for ellipse contour being on the outside of the
  * ellipse
@@ -71,7 +74,7 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
       }
 
       cvFitEllipse( fpoints, count,&current);
-
+      PROGRESS("Ellipse has centre "<< current.center.x <<" " << current.center.y << " dims " << current.size.width << " " << current.size.height);
       if (calcerror(&current,fpoints,count,maxFitError)) {
 #ifdef IMAGE_DEBUG
 	cvEllipseBox(debug1,current,0,3);
@@ -80,8 +83,8 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 	  The contour followed is the outside edge of the circle so
 	  our estimate is out by 2 pixels.
 	*/
-	current.size.width -=2;
-	current.size.height -=2;
+	//current.size.width -=2;
+	//	current.size.height -=2;
 	
 	/* We accept this ellipse as a good fit */
 	/* If our ellipse shares aspect ratio and center points
@@ -89,10 +92,10 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 	   concentric */
 
 	Ellipse2D *newbox = new Ellipse2D(current.center.x,
-					    current.center.y,
-					    current.size.width,
-					    current.size.height,
-					    current.angle);
+					  current.center.y,
+					  current.size.width,
+					  current.size.height,
+					  current.angle);
 
 	for(std::vector<Ellipse2DChain*>::const_iterator i = results->begin();i!= results->end();i++) {
 	  if (compare(newbox,(*i)->current,maxXDiff,maxYDiff,maxRatioDiff)) {
@@ -153,7 +156,7 @@ static inline bool compare(Ellipse2D *e1, Ellipse2D *e2, float maxXDiff, float m
 		 e2->m_height/e2->m_width)) < maxRatioDiff);
 }
 
-static inline bool calcerror(CvBox2D *ellipse, CvPoint2D32f *fpoints, int count, float maxFitError) {
+static bool calcerror(CvBox2D *ellipse, CvPoint2D32f *fpoints, int count, float maxFitError) {
   /* Work out the error for this fit.  This just tries every
      point on the contour with the ellipse function from the
      fitter and accumulates the difference 
@@ -182,6 +185,11 @@ static inline bool calcerror(CvBox2D *ellipse, CvPoint2D32f *fpoints, int count,
      b = box.size.height/2;
      t = box.angle (convert degrees to radians)
   */
+  if ((fabs(ellipse->size.width) < 0.00001) ||
+      (fabs(ellipse->size.height) < 0.00001)) {
+    PROGRESS("Aborting error check because ellipse radius is tiny.");
+    return false;
+  }
   float asq = (float)ellipse->size.width*(float)ellipse->size.width / 4;
   float bsq = (float)ellipse->size.height*(float)ellipse->size.height / 4;
   float radians = (float)ellipse->angle / 180 * CV_PI;
@@ -192,8 +200,8 @@ static inline bool calcerror(CvBox2D *ellipse, CvPoint2D32f *fpoints, int count,
     float x = fpoints[pt].x-ellipse->center.x;
     float y = fpoints[pt].y-ellipse->center.y;
     float dist = 
-      sqrt( (x*cosa+y*sina)*(x*cosa+y*sina)/asq +
-	    (y*cosa-x*sina)*(y*cosa-x*sina)/bsq ) - 1;
+      sqrt( ((x*cosa+y*sina)*(x*cosa+y*sina))/asq +
+	    ((y*cosa-x*sina)*(y*cosa-x*sina))/bsq ) - 1;
     total+= dist*dist;
   }
   PROGRESS("Total error was "<< (total/count) << " and threshold is "<<maxFitError);
