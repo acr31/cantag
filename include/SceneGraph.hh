@@ -101,6 +101,7 @@ private:
    *  4) convexity
    */
   int FollowContour(Image& image, // the image to track the contour in (will be altered)
+		    unsigned char* data_pointer,
 		    int start_x,  int start_y, // the start position (must lie on contour)
 		    float* points_buffer,  // the buffer to store the points
 		    const int maxcount, // maximum number of points to return (buffer size must be twice this)
@@ -161,16 +162,19 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 
     int NBD = 2;  // the next border ID to issue is stored in NBD
 
+    unsigned char* data_pointer = image.GetDataPointer();
+    int image_width = image.GetWidth();
+
     for(int raster_y=0;raster_y < image.GetHeight(); ++raster_y) {
       int LNBD = 1; // we've just "seen" the frame border so set the last seen border id to match
       for(int raster_x=1;raster_x < image.GetWidth()-1;++raster_x) {
-
+	
 	// the sampled value with either be:
 	//  0  => 0-element
 	//  1  => 1-element that we havn't visited before
 	//  >1 => 1-element that we have visited before.  In this case the low bit will be set if this is an exit pixel and the remaining bits encode the NBD
 
-	const int current = image.SampleNoCheck(raster_x,raster_y);
+	const int current = *data_pointer;
 	const int current_nbd = current >> 1;
 	const bool current_not_visited = current_nbd == 0;  // this will be true if this is an element that has not been visited before
 	const bool current_exit_pixel = current_nbd && (current & 0x1);
@@ -179,8 +183,8 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 #ifdef SCENE_GRAPH_DEBUG
 	  PROGRESS("Pixel value is " << (int)current);
 #endif
-	  const int previous = image.SampleNoCheck(raster_x-1,raster_y);
-	  const int next = image.SampleNoCheck(raster_x+1,raster_y);
+	  const int previous = *(data_pointer-1);
+	  const int next = *(data_pointer+1);
 	  int contour_length;
 	  bordertype_t border_type;
 	  ContourStatistics st;
@@ -189,13 +193,13 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	    PROGRESS("Found start point for outer border at " <<raster_x << "," << raster_y);
 #endif	    
 	    border_type = OUTER_BORDER;
-	    contour_length = FollowContour(image, raster_x, raster_y, points_buffer, MAXLENGTH, st,0, NBD);
+	    contour_length = FollowContour(image, data_pointer, raster_x, raster_y, points_buffer, MAXLENGTH, st,0, NBD);
 	  }
 	  else if ((!current_exit_pixel || current_not_visited) && !next) { // the next element is a 0-element 
 #ifdef SCENE_GRAPH_DEBUG
 	    PROGRESS("Found start point for hole border " <<raster_x << "," << raster_y);
 #endif	    
-	    contour_length = FollowContour(image,raster_x,raster_y,points_buffer,MAXLENGTH,st,4,NBD);
+	    contour_length = FollowContour(image,data_pointer, raster_x,raster_y,points_buffer,MAXLENGTH,st,4,NBD);
 	    border_type = HOLE_BORDER;
 	    if (!current_not_visited) {
 	      LNBD = current_nbd;
@@ -288,8 +292,8 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	    LNBD = current_nbd;
 	  }
 	}  
+	data_pointer++;
       }
-      
     }
 #ifdef IMAGE_DEBUG
       debug0.Save("debug-contours.bmp");
@@ -297,7 +301,7 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
       
 }
   
-template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour(Image& image, int start_x, int start_y, float* points_buffer, const int maxcount, ContourStatistics& statistics, int position, const int nbd) {
+template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour(Image& image, unsigned char* data_pointer, int start_x, int start_y, float* points_buffer, const int maxcount, ContourStatistics& statistics, int position, const int nbd) {
 #ifdef SCENE_GRAPH_DEBUG
   PROGRESS("Following contour");
 #endif	 
@@ -306,7 +310,6 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
   //  points_buffer[1] = start_y;
   int pointer = -1;  // our index into the points buffer
   int image_width = image.GetWidth();
-  uchar* data_pointer = image.GetDataPointer() + start_x + start_y *image_width;
 
   // first scan around clockwise from the requested position looking for a 1-element
   const int offset_clockwise[] = { -1,-image_width-1,-image_width,1-image_width,1,1+image_width,image_width,image_width-1};
