@@ -75,7 +75,7 @@ public:
     }
     int npts[] = {numpoints};
     CvPoint* ppts = pts;
-    cvPolyLine(m_image,&ppts,npts,1,1,colour,thickness);
+    cvPolyLineAA(m_image,&ppts,npts,1,1,colour,0);
   }
 
   inline void DrawPolygon(float* points, int numpoints, unsigned char colour, unsigned int thickness) {
@@ -85,7 +85,7 @@ public:
     }
     int npts[] = {numpoints};
     CvPoint* ppts = pts;
-    cvPolyLine(m_image,&ppts,npts,1,1,colour,thickness);
+    cvPolyLineAA(m_image,&ppts,npts,1,1,colour,0);
   }
   
   inline void DrawFilledPolygon(int* points, int numpoints, unsigned char colour) {
@@ -94,6 +94,9 @@ public:
       pts[i] = cvPoint(points[2*i],points[2*i+1]);
     }
     cvFillConvexPoly(m_image,pts,numpoints,colour);
+    int npts[] = {numpoints};
+    CvPoint* ppts = pts;
+    cvPolyLineAA(m_image,&ppts,npts,1,1,colour,0);
   }
 
   inline void DrawFilledPolygon(float* points, int numpoints, unsigned char colour) {
@@ -102,6 +105,9 @@ public:
       pts[i] = cvPoint(cvRound(points[2*i]),cvRound(points[2*i+1]));
     }
     cvFillConvexPoly(m_image,pts,numpoints,colour);
+    int npts[] = {numpoints};
+    CvPoint* ppts = pts;
+    cvPolyLineAA(m_image,&ppts,npts,1,1,colour,0);
   }
 
   inline void DrawFilledQuadTangle(int x0, int y0,
@@ -129,15 +135,18 @@ public:
   }
 
   inline void DrawFilledCircle(int x0, int y0, int radius, unsigned char colour) {
-    cvCircle(m_image,cvPoint(x0,y0),radius,colour,-1);
+    //    cvCircle(m_image,cvPoint(x0,y0),radius,colour,-1);
+    DrawSector(x0,y0,radius,0,2*PI,colour);
   }
 
   inline void DrawFilledCircle(int x0, int y0, float radius, unsigned char colour) {
-    DrawFilledCircle(x0,y0,cvRound(radius),colour);
+    //    DrawFilledCircle(x0,y0,cvRound(radius),colour);
+    DrawSector(x0,y0,cvRound(radius),0,2*PI,colour);
   }
 
   inline void DrawFilledCircle(float x0, float y0, float radius, unsigned char colour) {
-    DrawFilledCircle(cvRound(x0),cvRound(y0),cvRound(radius),colour);
+    //    DrawFilledCircle(cvRound(x0),cvRound(y0),cvRound(radius),colour);
+    DrawSector(cvRound(x0),cvRound(y0),cvRound(radius),0,2*PI,colour);
   }
 
   inline void DrawSector(int x0, int y0, int radius, float start_radians, float end_radians, unsigned char colour) {
@@ -149,6 +158,9 @@ public:
     }
     pts[numsteps] = cvPoint(x0,y0);
     cvFillConvexPoly(m_image,pts,numsteps+1,colour);
+    int npts[] = {numsteps+1};
+    CvPoint* ppts = pts;
+    cvPolyLineAA(m_image,&ppts,npts,1,1,colour,0);
   }
 
   inline void DrawSector(int x0, int y0, float radius, float start_radians, float end_radians, unsigned char colour) {
