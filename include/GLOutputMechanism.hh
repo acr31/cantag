@@ -189,6 +189,10 @@ template<int PAYLOAD_SIZE> template<class C> void GLOutputMechanism<PAYLOAD_SIZE
     glMultMatrixf(rotation);
     /* rotate tag around z axis for angle */
     glRotatef(angle,0.0,0.0,1.0);
+
+    float tagsizescale=(50-loc->location[2])/20;
+
+    glScalef(tagsizescale,tagsizescale,tagsizescale);
     
     Draw(1);
   }
