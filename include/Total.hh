@@ -42,6 +42,10 @@
 # include <tripover/GLOutputMechanism.hh>
 #endif
 
+#if defined(HAVE_GL_GL_H) && defined(HAVE_GL_GLU_H) && defined(HAVE_GL_OSMESA_H) && defined(HAVELIB_GL) && defined(HAVELIB_OSMESA) && defined(HAVELIB_GLU)
+# include <tripover/GLImageSource.hh>
+#endif
+
 // some predefined tags
 #include <tripover/Tags.hh>
 
