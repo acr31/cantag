@@ -145,6 +145,5 @@ AC_OUTPUT([
 Makefile
 src/Makefile
 tests/Makefile
-gltest/Makefile
 unit/Makefile
 ])
