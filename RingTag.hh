@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.8  2004/01/24 10:33:35  acr31
+ * changed unsigned long to unsigned long long
+ *
  * Revision 1.7  2004/01/23 16:08:55  acr31
  * remove spurious #include
  *
@@ -117,7 +120,7 @@ public:
     delete[] m_sync_angles;
   }
 
-  virtual void Draw2D(Image* image, const Ellipse2D *l, unsigned long code, int black, int white) {
+  virtual void Draw2D(Image* image, const Ellipse2D *l, unsigned long long code, int black, int white) {
     PROGRESS("Draw2D called for ellipse centre (" << l->m_x << "," << l->m_y<< "), size ("<<l->m_width<<","<<l->m_height<<"), code "<<code);
     
     // Work from the outside inwards
@@ -198,7 +201,7 @@ public:
     }
   }
 
-  virtual unsigned long Decode(Image *image, const Ellipse2D *l) {
+  virtual unsigned long long Decode(Image *image, const Ellipse2D *l) {
     // the location we have here locates the outer ring of the
     // bullseye.  Therefore we will need to scale it by the actual
     // size of the bullseye to hit the data sectors properly.
