@@ -159,9 +159,9 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 
     float points_buffer[MAXLENGTH*2];
     int NBD = 2;
-    for(int raster_y=0;raster_y < image.GetWidth(); raster_y++) {
+    for(int raster_y=0;raster_y < image.GetHeight(); raster_y++) {
       int LNBD = 1; // we've just "seen" the frame border
-      for(int raster_x=1;raster_x < image.GetHeight()-1;raster_x++) {
+      for(int raster_x=1;raster_x < image.GetWidth()-1;raster_x++) {
 	const unsigned char current = image.SampleNoCheck(raster_x,raster_y);
 	const unsigned char current_id = current >> 1;
 	const bool current_not_visited = current_id==0;  // this will be true if this is an element that has not been visited before
