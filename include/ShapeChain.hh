@@ -63,10 +63,9 @@ template<class M, class S> int ShapeChain<M,S>::Save(Socket& socket) const {
   count += m_next.Save(socket);
   return count;
 }
-#include <iostream>
+
 template<class M, class S> ShapeChain<M,S>::ShapeChain(Socket& socket) :
     m_shape(socket), m_next(socket) {
-  std::cout <<"Loaded shape chain" << std::endl;
 }
 
 template<class M, class S> ShapeChain<M,S>::ShapeChain() : m_shape(), m_next() {};

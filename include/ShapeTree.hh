@@ -96,7 +96,6 @@ template<class S> int ShapeTree<S>::Node::Save(Socket& socket) const {
 }
 
 template<class S> ShapeTree<S>::Node::Node(Socket& socket) : matched(socket) {
-  std::cout << "Loading root node " << std::endl;
   int count = socket.RecvInt();
   for(int i=0;i<count;++i) {
     children.push_back(new Node(socket));
