@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/01/29 12:47:27  acr31
+ * factoring around with the alpha calculation stuff
+ *
  * Revision 1.4  2004/01/27 18:07:27  acr31
  * added another constructor for construct at origin
  *
@@ -27,23 +30,25 @@
  *
  */
 #include <Rectangle2D.hh>
+#include <FixedPoint.hh>
 
 #undef FILENAME
 #define FILENAME "Rectangle2D.cc"
+#define ZERO_DISTANCE 0.00001
 
 Rectangle2D::Rectangle2D(float width) {
   float diff = width/2;
   m_x0 = 0;
   m_y0 = 0;
   
-  m_x1 = 0;
-  m_y1 = width;
+  m_x1 = width;
+  m_y1 = 0;
 
   m_x2 = width;
   m_y2 = width;
 
-  m_x3 = width;
-  m_y3 = 0;
+  m_x3 = 0;
+  m_y3 = width;
 
   compute_central_point();
   compute_alpha();
@@ -122,6 +127,7 @@ Location3D* Rectangle2D::EstimatePose(float width, float height) {
 }
 
 void Rectangle2D::compute_alpha() {
+  PROGRESS(m_x0<<","<<m_y0<< " " <<m_x1<<","<<m_y1<< " " <<m_x2<<","<<m_y2<< " " <<m_x3<<","<<m_y3);
   /*
    * Taken from:
    *
@@ -200,15 +206,60 @@ void Rectangle2D::compute_alpha() {
    *        1/(-Y3+Y2)*Y1-Y2/(-Y3+Y2)+Y3/(-Y3+Y2)-1/(-Y3+Y2)*Y4 ;
    *        -1/(-X4+X3)*X1+1/(-X4+X3)*X2-X3/(-X4+X3)+X4/(-X4+X3)+(-X3+X2)/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)*Y1-(-X3+X2)/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)*Y2+(-X3+X2)*Y3/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)-(-X3+X2)/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)*Y4 ]
    */
-  
-  m_alpha[0] = -m_x0+m_x1+m_x1/(-m_y2+m_y1)*m_y0-m_x1/(-m_y2+m_y1)*m_y1+m_x1/(-m_y2+m_y1)*m_y2-m_x1/(-m_y2+m_y1)*m_y3 ;
-  m_alpha[1] = -m_x2/(-m_x3+m_x2)*m_x0+m_x3/(-m_x3+m_x2)*m_x1+m_x3*(-m_x2+m_x1)/(m_y2*m_x3-m_y2*m_x2-m_y1*m_x3+m_y1*m_x2)*m_y0-m_x3*(-m_x2+m_x1)/(m_y2*m_x3-m_y2*m_x2-m_y1*m_x3+m_y1*m_x2)*m_y1+m_x3*(-m_x2+m_x1)/(m_y2*m_x3-m_y2*m_x2-m_y1*m_x3+m_y1*m_x2)*m_y2-m_x3*(-m_x2+m_x1)/(m_y2*m_x3-m_y2*m_x2-m_y1*m_x3+m_y1*m_x2)*m_y3 ;
+
+  float alpha0_t1 = (m_y0 - m_y1 + m_y2 - m_y3) * m_x1;
+  if (fabs(alpha0_t1) > ZERO_DISTANCE) {
+    alpha0_t1 /= (m_x1-m_y2);
+  }
+  m_alpha[0] = m_x1 - m_x0 + alpha0_t1;
+
+  float alpha1_t1 = m_x1*m_x3 - m_x0*m_x2;
+  if (fabs(alpha1_t1) > ZERO_DISTANCE) {
+    alpha1_t1 /= (m_x2-m_x3);
+  }
+  float alpha1_t2 = m_y0 - m_y1 + m_y2 - m_y3;
+  if (fabs(alpha1_t2) > ZERO_DISTANCE) {
+    alpha1_t2 *= (m_x1-m_x2)*m_x3/(m_x2*(m_x3-m_y2+m_x1) - m_y1*m_x3);
+  }
+  m_alpha[1] = alpha1_t1 + alpha1_t2;
+
   m_alpha[2] = m_x0;
-  m_alpha[3] = m_y2/(-m_y2+m_y1)*m_y0-m_y1/(-m_y2+m_y1)*m_y3;
-  m_alpha[4] = -m_y2/(-m_x3+m_x2)*m_x0+m_y2/(-m_x3+m_x2)*m_x1-m_y2/(-m_x3+m_x2)*m_x2+m_y2/(-m_x3+m_x2)*m_x3+(m_y2*m_x1-m_y2*m_x3+m_y1*m_x3-m_y1*m_x2)/(m_y2*m_x3-m_y2*m_x2-m_y1*m_x3+m_y1*m_x2)*m_y0-(-m_x2+m_x1)*m_y2/(m_y2*m_x3-m_y2*m_x2-m_y1*m_x3+m_y1*m_x2)*m_y1+(-m_x2+m_x1)*m_y2*m_y2/(m_y2*m_x3-m_y2*m_x2-m_y1*m_x3+m_y1*m_x2)-(m_y2*m_x1-m_y2*m_x3+m_y1*m_x3-m_y1*m_x2)/(m_y2*m_x3-m_y2*m_x2-m_y1*m_x3+m_y1*m_x2)*m_y3 ;
+
+  float alpha3_t1 = m_y2*m_y0 - m_y1*m_y3;
+  if (fabs(alpha3_t1) > ZERO_DISTANCE) {
+    alpha3_t1 /= m_y1 - m_y2;   
+  }
+  m_alpha[3] = alpha3_t1;
+
+  float alpha4_t1 = m_y2 * (m_x1 - m_x0 - m_x2 + m_x3);
+  if (fabs(alpha4_t1) > ZERO_DISTANCE) {
+    alpha4_t1 /= m_x2 - m_x3;
+  }
+
+  float alpha4_t2 = m_y0*m_y2*m_x1-m_y0*m_y2*m_x3+m_y0*m_y1*m_x3-m_x2*m_y0*m_y1+m_y2*m_y1*m_x2-m_y2*m_y1*m_x1-m_y2*m_y2*m_x2+m_y2*m_y2*m_x1-m_y3*m_y2*m_x1+m_y3*m_y2*m_x3-m_y3*m_y1*m_x3+m_x2*m_y3*m_y1;
+  if (fabs(alpha4_t2) > ZERO_DISTANCE) {
+    alpha4_t2 /= (-m_y2+m_y1)*(-m_x3+m_x2);
+  }
+  m_alpha[4] = alpha4_t1 + alpha4_t2;
+
   m_alpha[5] = m_y0;
-  m_alpha[6] = 1/(-m_y2+m_y1)*m_y0-m_y1/(-m_y2+m_y1)+m_y2/(-m_y2+m_y1)-1/(-m_y2+m_y1)*m_y3 ;
-  m_alpha[7] = -1/(-m_x3+m_x2)*m_x0+1/(-m_x3+m_x2)*m_x1-m_x2/(-m_x3+m_x2)+m_x3/(-m_x3+m_x2)+(-m_x2+m_x1)/(m_y2*m_x3-m_y2*m_x2-m_y1*m_x3+m_y1*m_x2)*m_y0-(-m_x2+m_x1)/(m_y2*m_x3-m_y2*m_x2-m_y1*m_x3+m_y1*m_x2)*m_y1+(-m_x2+m_x1)*m_y2/(m_y2*m_x3-m_y2*m_x2-m_y1*m_x3+m_y1*m_x2)-(-m_x2+m_x1)/(m_y2*m_x3-m_y2*m_x2-m_y1*m_x3+m_y1*m_x2)*m_y3; 
+
+  float alpha6_t1 = m_y0 - m_y1 + m_y2 - m_y3;
+  if (fabs(alpha6_t1) > ZERO_DISTANCE) {
+    alpha6_t1 /= m_y1-m_y2;
+  }
+  m_alpha[6] = alpha6_t1;
+
+  float alpha7_t1 = m_y0-m_y1+m_y2-m_y3;
+  if (fabs(alpha7_t1) > ZERO_DISTANCE) {
+    alpha7_t1 /= m_y2 - m_y3;
+  }
+  
+  float alpha7_t2 = (m_x1-m_x2)*(m_y0-m_y1+m_y2-m_y3);
+  if (fabs(alpha7_t2) > ZERO_DISTANCE) {
+    alpha7_t2 /= (m_y1-m_y2)*(m_x2-m_x3);
+  }
+  m_alpha[7] = alpha7_t1 + alpha7_t2;
   
   PROGRESS("Computed alpha[0] "<<m_alpha[0]);
   PROGRESS("         alpha[1] "<<m_alpha[1]);
