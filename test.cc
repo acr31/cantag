@@ -6,6 +6,11 @@
 
 using namespace std;
 
+#define MAX_FIT_ERROR 0.01
+#define MAX_X_OFFSET 4
+#define MAX_Y_OFFSET 4
+#define MAX_RATIO_DIFF 0.1
+
 int 
 main(int argc,char* argv[]) 
 {
@@ -19,7 +24,7 @@ main(int argc,char* argv[])
   int window_size = gray->width/8;
   window_size+= 1-(window_size %2);
   cvAdaptiveThreshold(gray,gray,255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY,window_size,40);
-  cvCanny(gray,gray,128,128,3);  
+  //  cvCanny(gray,gray,128,128,3);  
   CvMemStorage *store = cvCreateMemStorage(0);
   CvSeq *seq = NULL;
   int num = cvFindContours(gray,store,&seq,sizeof(CvContour));
@@ -44,13 +49,24 @@ main(int argc,char* argv[])
 	cvFitEllipse( fpoints, count, &box );
 	if ((box.size.width < img->width) &&
 	    (box.size.height < img->height)) {
-	  boxes.push_back(box);
-	  /*	  cout << endl << "Box--------"<< endl;
-	  cout << "Size " << box.size.width << " " << box.size.height << endl;
-	  cout << "Center " << box.center.x << " " << box.center.y << endl;
-	  cout << "Angle " << box.angle << endl;
-	  cvEllipseBox(img,box,16711680,1);
-	  */
+
+	  double asq = (double)box.size.width*(double)box.size.width / 4;
+	  double bsq = (double)box.size.height*(double)box.size.height / 4;
+	  double sina = sin((double)box.angle / 180 * M_PI);
+	  double cosa = cos((double)box.angle / 180 * M_PI);
+	  // work out the error
+	  double total = 0.0;
+	  for ( int i=0;i<count;i++) {
+	    double x = fpoints[i].x-box.center.x;
+	    double y = fpoints[i].y-box.center.y;
+	    double dist = 
+	      sqrt( (x*cosa+y*sina)*(x*cosa+y*sina)/asq +
+		    (y*cosa-x*sina)*(y*cosa-x*sina)/bsq ) - 1;
+	    total+= dist*dist;
+	  }
+	  if (total < MAX_FIT_ERROR * count) {
+	    boxes.push_back(box);
+	  }
 	}
       }
       seq = seq->h_next;
@@ -59,18 +75,18 @@ main(int argc,char* argv[])
   for(vector<CvBox2D>::const_iterator step = boxes.begin();step != boxes.end();step++) {
     for(vector<CvBox2D>::const_iterator search = boxes.begin();search != boxes.end();search++) {
       if ((search != step) && 
-	  (fabs(step->center.x - search->center.x) + fabs(step->center.y - search->center.y) < 50) &&
-	  (step->size.width > search->size.width) &&
-	  (step->size.height > search->size.height))
-	{
+	  (abs(step->center.x - search->center.x) < MAX_X_OFFSET)  &&
+	  (abs(step->center.y - search->center.y) < MAX_Y_OFFSET) &&
+	  (fabs( (double)step->size.height/(double)step->size.width - (double)search->size.height/(double)search->size.width) < MAX_RATIO_DIFF))
+      {
 	  int color = CV_RGB( rand(), rand(), rand() );
-	  cvEllipseBox(img,*step,color,5);
-	  cvEllipseBox(img,*search,color,5);	   
-	}
+	  //	  cvEllipseBox( img, *search,color,3);
+      }
     }
   }
 
   cvSaveImage(argv[2],img);
+  cvSaveImage(argv[3],gray);
   cvReleaseImage(&img);
   cvReleaseImage(&gray);
   return 0;
