@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.8  2004/01/23 22:37:46  acr31
+ * added missing ReleaseImage call
+ *
  * Revision 1.7  2004/01/23 11:57:08  acr31
  * moved Location2D to Ellipse2D in preparation for Square Tags
  *
@@ -131,6 +134,7 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 
   cvEndFindContours(&scanner);
   cvReleaseMemStorage(&store);
+  cvReleaseImage(&copy);
 }
 
 static inline bool compare(Ellipse2D *e1, Ellipse2D *e2, float maxXDiff, float maxYDiff, float maxRatioDiff) {
