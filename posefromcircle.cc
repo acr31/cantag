@@ -1,10 +1,16 @@
+/**
+ * $Header$
+ *
+ * $Log$
+ * Revision 1.2  2004/01/21 11:55:09  acr31
+ * added keywords for substitution
+ *
+ */
+
 #include "posefromcircle.hh"
 
-#define DEBUG
-
-#ifdef DEBUG
-#include <iostream>
-#endif
+#undef FILENAME
+#define FILENAME "posefromcircle.cc"
 
 void
 PoseFromCircle(const CvBox2D &ellipse, double radius, CvPoint3D32f* unit_normal, CvPoint3D32f* centre) {

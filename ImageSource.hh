@@ -1,3 +1,11 @@
+/**
+ * $Header$
+ *
+ * $Log$
+ * Revision 1.2  2004/01/21 11:55:08  acr31
+ * added keywords for substitution
+ *
+ */
 #ifndef IMAGE_SOURCE_GUARD
 #define IMAGE_SOURCE_GUARD
 

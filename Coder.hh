@@ -1,3 +1,11 @@
+/**
+ * $Header$
+ *
+ * $Log$
+ * Revision 1.3  2004/01/21 11:55:07  acr31
+ * added keywords for substitution
+ *
+ */
 #ifndef CODER_GUARD
 #define CODER_GUARD
 

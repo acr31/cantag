@@ -1,3 +1,11 @@
+/**
+ * $Header$
+ *
+ * $Log$
+ * Revision 1.2  2004/01/21 11:55:09  acr31
+ * added keywords for substitution
+ *
+ */
 #ifndef SAMPLE_ELLIPSE_GUARD
 #define SAMPLE_ELLIPSE_GUARD
 

@@ -1,3 +1,11 @@
+/**
+ * $Header$
+ *
+ * $Log$
+ * Revision 1.2  2004/01/21 11:55:10  acr31
+ * added keywords for substitution
+ *
+ */
 #include <cv.h>
 #include <highgui.h>
 #include <cmath>

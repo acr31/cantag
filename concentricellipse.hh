@@ -1,3 +1,11 @@
+/**
+ * $Header$
+ *
+ * $Log$
+ * Revision 1.3  2004/01/21 11:55:09  acr31
+ * added keywords for substitution
+ *
+ */
 #ifndef CONCENTRIC_ELLIPSE_GUARD
 #define CONCENTRIC_ELLIPSE_GUARD
 
