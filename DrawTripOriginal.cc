@@ -3,17 +3,50 @@
 #include <cmath>
 #include <iostream>
 
-#include "CircularOuterParams.hh"
+#include "TripOriginalParams.hh"
+
+#define WHITE 255
+#define BLACK 0
+
+bool
+allset(long long value, int sector) {
+  bool result = 1;
+  for(int i=0;i<RING_COUNT;i++) {
+    result &= 1<<sector+i*SECTOR_COUNT;
+  }
+  return result;
+}
+
 
 int
 main(int argc, char* argv[]) {
 
   if (argc != 4) {
     std::cout << argv[0] << " [size] [code] [filename]"<<std::endl;
+    exit(-1);
   }
 
+  std::cout << argv[0] << std::endl;
+  std::cout << "Number of rings: " << RING_COUNT << std::endl;
+  std::cout << "Number of sectors per ring: " << SECTOR_COUNT << std::endl;
+
   int width = atoi(argv[1]);
-  unsigned int value = (unsigned int)atol(argv[2]);
+  long long value = atoll(argv[2]);
+
+  /* value must have a sync sector at the begining and then no other
+     sectors which are both set */
+  if (!allset(value,0)) {
+    std::cout << "!!! Code must contain synchronization sector (all set) for first sector" << std::endl;
+    exit(-1);
+  }
+
+  for(int i=0;i<SECTOR_COUNT;i++) {
+    if (allset(value,i)) {
+      std::cout << "!!! Code must not contain any fully set sectors excluding the synchronization sector" << std::endl;
+      exit(-1);
+    }
+  }
+
   CvSize size;
   size.width=width;
   size.height=width;
@@ -25,7 +58,7 @@ main(int argc, char* argv[]) {
     }
   }
 
-  double r = width / 2 / radii[RING_COUNT-1];
+  double r = width / 2 / radii_outer[RING_COUNT-1];
 
   CvPoint p;
   p.x=width/2;
@@ -45,7 +78,7 @@ main(int argc, char* argv[]) {
       
       cvEllipse(image,p,s,0,
 		a1,a2,
-		(value & 1) ? 0 : 255, -1);
+		(value & 1) ? BLACK : WHITE, -1);
       value >>= 1;
     }
 
@@ -57,15 +90,17 @@ main(int argc, char* argv[]) {
 
     cvEllipse(image,p,s,0,
 	      a1,a2,
-	      (value & 1) ? 0 : 255, -1);
+	      (value & 1) ? BLACK : WHITE, -1);
     value >>= 1;
     cvCircle(image,p,(int)(radii_inner[j]*r),255,-1);
   }
 
 
-  cvCircle(image,p,(int)r,0,-1);
-  cvCircle(image,p,(int)(0.6*r),255,-1);
-  cvCircle(image,p,(int)(0.2*r),0,-1);
+  cvCircle(image,p,(int)r,BLACK,-1);
+  cvCircle(image,p,(int)(0.6*r),WHITE,-1);
+  cvCircle(image,p,(int)(0.2*r),BLACK,-1);
 
   cvSaveImage(argv[3],image);
 }
+
+

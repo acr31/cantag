@@ -5,6 +5,8 @@ CPPFLAGS=`params --opencv-cxx-flags`
 FLAGS=-g
 
 
+all: test DrawTripOriginal
+
 test: test.o ConcentricEllipse.o TripOriginalIdentify.o
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $^ ${OPENCVLINK}
 
