@@ -7,10 +7,6 @@
 #include <tripover/Config.hh>
 #include <tripover/Socket.hh>
 
-#ifdef HAVE_MAGICkXX
-#include <Magic++.h>
-#endif
-
 #include <cmath>
 
 #define COLOUR_BLACK ((unsigned char)0)

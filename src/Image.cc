@@ -7,6 +7,12 @@
 # include <boost/random.hpp>
 #endif
 
+#if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(HAVELIB_MAGICK)
+#include <Magick++.h>
+#endif
+
+
+
 Image::Image(int width, int height) : m_width(width),m_height(height), m_contents(new unsigned char[width*height]), m_free_contents(true), m_width_step(m_width), m_binary(false) {
   ConvertScale(0,255);
 };
@@ -19,11 +25,30 @@ Image::Image(char* filename) {
   Load(filename);
 };
 
-#if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(DISABLED)
+#if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(HAVELIB_MAGICK)
 void Image::Load(const char* filename) {
-  
+  Magick::Image i;
+  try {
+    i.read(filename);
+    i.quantizeColorSpace(Magick::GRAYColorspace);
+    i.quantizeColors(256);
+    i.quantize();
+    m_width = i.baseColumns();
+    m_width_step = m_width;
+    m_height = i.baseRows();
+    m_contents = new unsigned char[m_width*m_height];
+    m_free_contents = true;
+    Magick::PixelPacket *pixel_cache = i.getPixels(0,0,m_width,m_height);
+    int size = m_width*m_height;
+    for(int ptr=0;ptr<size;++ptr) {
+      m_contents[ptr] = pixel_cache->red;
+      ++pixel_cache;
+    }
+  }
+  catch(Magick::Exception& e) {
+    throw e.what();
+  }
 }
-
 #else
 void Image::Load(const char* filename) {
   std::ifstream input(filename);
@@ -440,10 +465,27 @@ void Image::SeedFill(int x, int y,unsigned char colour) {
   }
 }
 
-
-/**
- * \todo only does pnm
- */
+#if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(HAVELIB_MAGICK)
+void Image::Save(const char* filename) const {
+  try {
+    Magick::Image i(Magick::Geometry(this->GetWidth(),this->GetHeight()),
+		    Magick::ColorRGB(1.0,1.0,1.0));
+    i.modifyImage();
+    for(int y=0;y<GetHeight();++y) {
+      const unsigned char* row = GetRow(y);
+      for(int x=0;x<GetWidth();++x) {
+	Magick::ColorRGB color((double)*row/255,(double)*row/255,(double)*row/255);
+	i.pixelColor(x,y,color);
+	++row;
+      }
+    } 
+    i.write(filename);
+  }
+  catch(Magick::Exception& e) {
+    throw e.what();
+  }
+}
+#else
 void Image::Save(const char* filename) const {
   std::ofstream output(filename);
   output << "P2" << std::endl;
@@ -465,6 +507,7 @@ void Image::Save(const char* filename) const {
   output.flush();
   output.close();
 }
+#endif 
 
 /**
  * \todo unimplemented
