@@ -537,7 +537,7 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
 #endif
       LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj = new LocatedObject<RING_COUNT*SECTOR_COUNT>();
       lobj->LoadTransform(correcttrans,1,angle,camera);
-      lobj->tag_code = read_code[code_ptr];	   
+      lobj->tag_codes.push_back(read_code[code_ptr]);
       for(int i=0;i<READING_COUNT;++i) {
 	if (i != code_ptr) {
 	  delete read_code[i];

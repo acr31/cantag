@@ -31,7 +31,7 @@ template<int PAYLOADSIZE> void TextOutputMechanism::FromTag(const WorldState<PAY
       i != world.GetNodes().end();
       ++i) {
     LocatedObject<PAYLOADSIZE>* loc = *i;
-    m_ostream << "Found tag: " << *(loc->tag_code) << 
+    m_ostream << "Found tag: " << *(loc->tag_codes[0]) << 
       " Location: " << loc->location[0] << " " << loc->location[1] << " " << loc->location[2] <<
       " Normal: "   << loc->normal[0] << " " << loc->normal[1] << " " << loc->normal[2] << std::endl;
   }

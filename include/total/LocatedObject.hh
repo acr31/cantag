@@ -51,7 +51,7 @@ public:
   /**
    * The code stored on the tag.
    */
-  CyclicBitSet<PAYLOAD_SIZE>* tag_code;
+  std::vector<CyclicBitSet<PAYLOAD_SIZE>*> tag_codes;
 
   void LoadTransform(float transform[16],float tag_size, float agle, const Camera& camera);
 
@@ -66,18 +66,26 @@ template<int PAYLOAD_SIZE> int LocatedObject<PAYLOAD_SIZE>::Save(Socket& socket)
   int count = socket.Send(transform,16);
   count += socket.Send(normal,3);
   count += socket.Send(angle);
-  count += tag_code->Save(socket);
+  count += socket.Send((int)tag_codes.size());
+  for(typename std::vector<CyclicBitSet<PAYLOAD_SIZE>*>::const_iterator i = tag_codes.begin();
+      i != tag_codes.end();
+      ++i) {
+    count += (*i)->Save(socket);
+  }
   return count;
 }
 
-template<int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>::LocatedObject(Socket& socket) {
+template<int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>::LocatedObject(Socket& socket) : tag_codes() {
     socket.Recv(transform,16);
     socket.Recv(location,3);
-    socket.Recv(angle);
-    tag_code = new CyclicBitSet<PAYLOAD_SIZE>(socket);
+    angle = socket.RecvFloat();
+    int codecount = socket.RecvInt();
+    for(int i=0;i<codecount;++i) {
+      tag_codes.push_back(new CyclicBitSet<PAYLOAD_SIZE>(socket));
+    }
 }
 
-template<int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>::LocatedObject() : tag_code(NULL) {}
+template<int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>::LocatedObject() : tag_codes() {}
 
 template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(float t[16],float tag_size, float agle, const Camera& camera) {
   for(int i=0;i<16;i++) {
@@ -91,8 +99,10 @@ template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(float
 }
 
 template<int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>::~LocatedObject() {
-  if (tag_code) {
-    delete tag_code;
+  for(typename std::vector<CyclicBitSet<PAYLOAD_SIZE>*>::const_iterator i = tag_codes.begin();
+      i != tag_codes.end();
+      ++i) {
+    delete *i;    
   }
 }
 

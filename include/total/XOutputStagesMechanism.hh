@@ -91,7 +91,7 @@ template<int PAYLOADSIZE> void XOutputStagesMechanism::FromTag(const WorldState<
     XTextItem ti;
     ti.chars=new char[PAYLOADSIZE];
     for(int i=0;i<PAYLOADSIZE;++i) {
-      ti.chars[i] = (*(lobj->tag_code))[i] ? '1' : '0';
+      ti.chars[i] = (*(lobj->tag_codes[0]))[i] ? '1' : '0';
     }
     ti.nchars=PAYLOADSIZE;
     ti.delta=0;

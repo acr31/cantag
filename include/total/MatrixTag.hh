@@ -263,7 +263,7 @@ template<int SIZE> LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* MatrixTag<SIZE>::Deco
     const float angle = rotation/cells_per_quadrant * PI/2;
     LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = new LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>();
     lobj->LoadTransform(transform,1,0,camera);
-    lobj->tag_code = read_code;	   
+    lobj->tag_codes.push_back(read_code);
     lobj->angle = angle;
     return lobj;
   }    
