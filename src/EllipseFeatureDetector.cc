@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/02/08 20:30:17  acr31
+ * changes to interfaces to add the ImageFilter class
+ *
  * Revision 1.2  2004/02/06 21:11:44  acr31
  * adding ellipse fitting
  *
@@ -63,12 +66,14 @@
 #define MAXXDIFF 10
 #define MAXYDIFF 10
 #define MAXRATIODIFF 0.1
-#define MAXFITERROR 0.1
+#define MAXFITERROR 1
 
 EllipseFeatureDetector::EllipseFeatureDetector() {};
 
 void EllipseFeatureDetector::FindFeatures(Image *image) { 
   std::vector<Ellipse2DChain*> results;
+
+  image = LoadImage(image);
 
   IplImage *copy = cvCloneImage(image); // the find contours process changes the image ;-(
   

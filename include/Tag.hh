@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/02/08 20:30:10  acr31
+ * changes to interfaces to add the ImageFilter class
+ *
  * Revision 1.3  2004/02/03 16:24:56  acr31
  * various function signature changes and use of __FILE__ and __LINE__ in debug macros
  *
@@ -42,7 +45,6 @@ class Tag {
 public:
   virtual void Draw2D(Image *image, unsigned long long code, int black, int white)= 0;
   virtual unsigned long long Decode(Image *image, const C *location) =0;
-
 };
 
 #endif//TAG_GUARD

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.8  2004/02/08 20:30:17  acr31
+ * changes to interfaces to add the ImageFilter class
+ *
  * Revision 1.7  2004/02/06 21:11:44  acr31
  * adding ellipse fitting
  *
@@ -165,8 +168,8 @@ Ellipse2D::Ellipse2D(float a, float b, float c, float d, float e, float f) {
     then by 2 because we want the whole width not just the "radius"
   */
 
-  m_width = lambda1 * scale_factor;
-  m_height = lambda2 * scale_factor;
+  m_width = lambda1 * scale_factor * 2;
+  m_height = lambda2 * scale_factor * 2;
 
   /*
     And since A = R'DR, and R'R=I => R'=R^, => RA=DR, therefore

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.6  2004/02/08 20:30:10  acr31
+ * changes to interfaces to add the ImageFilter class
+ *
  * Revision 1.5  2004/02/03 16:24:56  acr31
  * various function signature changes and use of __FILE__ and __LINE__ in debug macros
  *
@@ -52,9 +55,6 @@
 #include "Tag.hh"
 #include "Coder.hh"
 #include "Ellipse2D.hh"
-
-#undef FILENAME
-#define FILENAME "RingTag.hh"
 
 class RingTag : public virtual Tag<Ellipse2D>, protected virtual Coder {
 private:
