@@ -4,6 +4,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/27 18:06:58  acr31
+ * changed inheriting classes to inherit publicly from their parents
+ *
  * Revision 1.1  2004/01/25 14:54:36  acr31
  * moved over to automake/autoconf build system
  *
@@ -32,7 +35,7 @@
 #undef FILENAME
 #define FILENAME "GF4Coder.hh"
 
-class GF4Coder : Coder {
+class GF4Coder : public Coder {
 private:
   int m_symbol_range;
   int m_symbol_count;

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/27 18:06:59  acr31
+ * changed inheriting classes to inherit publicly from their parents
+ *
  * Revision 1.2  2004/01/25 15:13:25  acr31
  * added check for code out of range
  *
@@ -36,7 +39,7 @@
 #define FILENAME "TripOriginalCoder.hh"
 
 template<int CHECKSUM_COUNT=2>	 
-class TripOriginalCoder : Coder {
+class TripOriginalCoder : public Coder {
 private:
   int m_symbol_range;
   int m_symbol_count;

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/27 18:06:58  acr31
+ * changed inheriting classes to inherit publicly from their parents
+ *
  * Revision 1.2  2004/01/26 08:55:36  acr31
  * added some new drawing method for Ellipse2D's and Rectangle2D's
  *
@@ -111,5 +114,21 @@ inline void DrawFilledQuadTangle(Image* image,
 		       r->m_x3,r->m_y3,
 		       colour);
 }
-			   
+
+
+inline Image* CreateImage(int width, int height) {
+  return cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
+}
+
+inline Image* CreateRGBImage(int width, int height) {
+  return cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,3);
+}
+
+inline void FreeImage(Image** image) {
+  cvReleaseImage(image);
+}
+
+inline void SaveImage(const char* filename, Image* image) {
+  cvSaveImage(filename,image);
+}
 #endif//DRAWING_GUARD

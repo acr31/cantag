@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/27 18:06:58  acr31
+ * changed inheriting classes to inherit publicly from their parents
+ *
  * Revision 1.1  2004/01/25 14:54:37  acr31
  * moved over to automake/autoconf build system
  *
@@ -41,7 +44,8 @@ public:
   float m_xc;
   float m_yc;
   
-
+  Rectangle2D(float size); // construct a rectangle 2d centred on the
+			   // origin, no bigger than the given size
   Rectangle2D(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3);
   Rectangle2D(float* coords);
   void ProjectPoint(float rectx, float recty, float *projX, float *projY) const;

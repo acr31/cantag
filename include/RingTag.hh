@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/27 18:06:58  acr31
+ * changed inheriting classes to inherit publicly from their parents
+ *
  * Revision 1.1  2004/01/25 14:54:37  acr31
  * moved over to automake/autoconf build system
  *
@@ -44,7 +47,7 @@
 #define FILENAME "RingTag.hh"
 
 template<class C>
-class RingTag : virtual Tag<Ellipse2D> {
+class RingTag : public Tag<Ellipse2D> {
 private:
   int m_ring_count;
   int m_sector_count;
