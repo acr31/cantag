@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/01/23 12:05:48  acr31
+ * moved Tag to CircularTag in preparation for Squaretag
+ *
  * Revision 1.4  2004/01/23 11:57:08  acr31
  * moved Location2D to Ellipse2D in preparation for Square Tags
  *
@@ -18,7 +21,7 @@
 
 #include "Config.hh"
 #include "Drawing.hh"
-#include "Tag.hh"
+#include "CircularTag.hh"
 #include "Coder.hh"
 #include "ellipsetoxy.hh"
 
@@ -26,7 +29,7 @@
 #define FILENAME "RingTag.hh"
 
 template<class C>
-class RingTag : virtual Tag {
+class RingTag : virtual CircularTag {
 private:
   int m_ring_count;
   int m_sector_count;
