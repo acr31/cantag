@@ -7,6 +7,10 @@
 #include <tripover/Config.hh>
 #include <tripover/Socket.hh>
 
+#ifdef HAVE_MAGICkXX
+#include <Magic++.h>
+#endif
+
 #include <cmath>
 
 #define COLOUR_BLACK ((unsigned char)0)
@@ -151,8 +155,8 @@ public:
    * bounds checked; out of range values will be ignored.
    */ 
   inline void DrawPixel(int x,int y, unsigned char colour) {
-    if ((x >= 0) && (x < m_width) &&
-	(y >= 0) && (y < m_height)) {
+    if ((x >= 0) && (x < (int)m_width) &&
+	(y >= 0) && (y < (int)m_height)) {
       DrawPixelNoCheck(x,y,colour);
     }
   }
@@ -271,8 +275,7 @@ public:
   }
   
   /**
-   * Save the current image to disk. The file type is inferred from
-   * the filename currently only bmp and jpg are supported.
+   * Save the current image to disk. 
    */
   void Save(const char* filename) const;
 
@@ -357,7 +360,7 @@ public:
    * pixels less than the threshold will be set to 1.  In particular,
    * this method inverts as well as binarizes.
    */
-  unsigned char GlobalThreshold(unsigned char threshold);
+  void GlobalThreshold(unsigned char threshold);
 
   /**
    * Apply an adaptive threshold to the image.  For each pixel a
@@ -401,6 +404,7 @@ public:
 private:
   int AdaptiveWidthStep(int moving_average,int* previous_line,unsigned int i, unsigned int j,unsigned int s, int t);
   void ellipse_polygon_approx(float* points, int startindex, int length, float xc, float yc, float width, float height,  float angle_radians, unsigned char color, int thickness, float start_angle);
+  void Load(const char* filename);
 
 };
 

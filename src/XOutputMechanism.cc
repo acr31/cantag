@@ -12,9 +12,6 @@ extern "C" {
 #undef XOUTPUT_DEBUG
 
 XOutputMechanism::XOutputMechanism(int width, int height, const Camera& camera) :
-  m_image(NULL),
-  m_width(width),
-  m_height(height),
   m_xattached(false),
   m_createdpixmap(false),
   m_shmat(false),
@@ -24,7 +21,10 @@ XOutputMechanism::XOutputMechanism(int width, int height, const Camera& camera) 
   m_windowgot(false),
   m_displaygot(false),
   m_colormapgot(false),
-  m_camera(camera)
+  m_camera(camera),
+  m_image(NULL),
+  m_width(width),
+  m_height(height)
 {
  
   if ((m_display = XOpenDisplay(NULL)) == NULL) {

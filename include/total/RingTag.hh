@@ -151,7 +151,7 @@ template<int RING_COUNT,int SECTOR_COUNT,class C> void RingTag<RING_COUNT,SECTOR
   int size = (image.GetWidth() < image.GetHeight()) ? image.GetWidth()/2 : image.GetHeight()/2;
     
   bool setscale = false;
-  float scalefactor;
+  float scalefactor = 0;
 
   if (m_bullseye_outer_radius > m_data_outer_radius) {
     scalefactor = (float)size/m_bullseye_outer_radius;
@@ -479,8 +479,8 @@ template<int RING_COUNT,int SECTOR_COUNT,class C> bool RingTag<RING_COUNT,SECTOR
 
   float* correcttrans = lobj->transform;
   
-  bool left;
-  bool right;
+  bool left = true;
+  bool right = true;
   int k=RING_COUNT-1;
   int j;
   // scan round reading a sector width apart until we read two adjacent cells of different values

@@ -46,6 +46,9 @@ private:
   void Draw(int mode);
 };
 
+/**
+ * \todo currently broken
+ */
 template<int PAYLOAD_SIZE> void GLOutputMechanism::FromTag(const WorldState<PAYLOAD_SIZE>& world) { 
     glMatrixMode(GL_MODELVIEW);
     /* reset modelview matrix to the identity matrix */
@@ -72,12 +75,12 @@ template<int PAYLOAD_SIZE> void GLOutputMechanism::FromTag(const WorldState<PAYL
 	ny/=norm;
 	nz/=norm;
 	
-	float factor = -sqrt(nx*nx+nz*nz);
-	float rotation[] = { nz/factor, 0, -nx/factor, 0, 
-			     -ny*nx/factor, factor, -ny*nz/factor, 0,
-			     nx,ny,nz,0,
-			     0,0,0,1};
-	float angle = -loc->angle/M_PI*180;
+	//float factor = -sqrt(nx*nx+nz*nz);
+	//	float rotation[] = { nz/factor, 0, -nx/factor, 0, 
+	//			     -ny*nx/factor, factor, -ny*nz/factor, 0,
+	//			     nx,ny,nz,0,
+	//			     0,0,0,1};
+	//	float angle = -loc->angle/M_PI*180;
 	
 	glMatrixMode(GL_MODELVIEW);
 	/* reset modelview matrix to the identity matrix */
@@ -89,7 +92,7 @@ template<int PAYLOAD_SIZE> void GLOutputMechanism::FromTag(const WorldState<PAYL
 	/* rotate tag around z axis for angle */
 	//	glRotatef(angle,0.0,0.0,1.0);
 	
-	float tagsizescale=(34-loc->location[2])/20;
+	//	float tagsizescale=(34-loc->location[2])/20;
 	
 	//	glScalef(tagsizescale,tagsizescale,tagsizescale);
 	

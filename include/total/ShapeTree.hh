@@ -17,8 +17,8 @@ class ShapeTree {
 
 public:
   struct Node {
-    S matched;
     const ContourTree::Contour* source_contour;
+    S matched;
     std::vector<Node*> children;
     Node(const ContourTree::Contour* contour) : source_contour(contour), matched(contour->points) {}
     Node(const std::vector<float>& points) : source_contour(NULL), matched(points) {}
@@ -37,8 +37,8 @@ public:
   };
 
 private:
-  int m_node_count;
   Node m_root_node;
+  int m_node_count;
   void walk_tree(Node* current, const ContourTree::Contour* contour);
   bool CheckUnmatchedContours(const ContourTree::Contour* contour, const std::set<const ContourTree::Contour*>& checked) const;
   

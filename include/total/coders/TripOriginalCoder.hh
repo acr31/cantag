@@ -179,7 +179,7 @@ template<int BIT_COUNT, int GRANULARITY, int CHECKSUM_COUNT> bool TripOriginalCo
   BigInt<BIT_COUNT> checksum(0);
   int data_symbol_count = (BIT_COUNT - GRANULARITY*(CHECKSUM_COUNT+1))/GRANULARITY;
 
-  for(unsigned int i=0;i<data_symbol_count;i++) {
+  for(int i=0;i<data_symbol_count;i++) {
     unsigned int symbol = bi % base;
     checksum+=BigInt<BIT_COUNT>(symbol);
     data.PutSymbol(symbol,i+1+CHECKSUM_COUNT,GRANULARITY); 

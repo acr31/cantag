@@ -64,7 +64,6 @@ GLOutputMechanism::GLOutputMechanism(int argc, char* argv[], int width, int heig
     XNextEvent(m_display, &event);
   }
 
-  GLuint i, j;
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   
   displayListInited = GL_FALSE;

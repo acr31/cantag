@@ -58,11 +58,11 @@ float Template::Correlate(const Image& image, const float transform[16], const C
   
   unsigned char readvalues[m_size*m_size];
 
-  for(int i=0;i<m_size;i++) {
-    for(int j=0;j<m_size;j++) {
+  for(unsigned int i=0;i<m_size;i++) {
+    for(unsigned int j=0;j<m_size;j++) {
       float currentvalue  = 0;
-      for(int k=0;k<m_subsample;k++) {
-	for(int l=0;l<m_subsample;l++) {
+      for(unsigned int k=0;k<m_subsample;k++) {
+	for(unsigned int l=0;l<m_subsample;l++) {
 	  float points[] = { i*scalefactor+k*subscalefactor,
 			     j*scalefactor+l*subscalefactor};
 	  ApplyTransform(transform,points,1);
@@ -109,8 +109,8 @@ float Template::Correlate(const unsigned char* readvalues) const {
   float cross1 = 0;
   float cross2 = 0;
   float cross3 = 0;
-  for(int i=0;i<m_size;i++) {
-    for(int j=0;j<m_size;j++) {
+  for(unsigned int i=0;i<m_size;i++) {
+    for(unsigned int j=0;j<m_size;j++) {
       cross0 += (m_values[i*m_size+j] - m_average)*(readvalues[i*m_size+j]-mean);
       cross1 += (m_values[j*m_size+(m_size-i)] - m_average)*(readvalues[i*m_size+j]-mean);
       cross2 += (m_values[(m_size-i)*m_size+(m_size-j)] - m_average)*(readvalues[i*m_size+j]-mean);
@@ -154,13 +154,13 @@ float Template::Correlate(const unsigned char* readvalues) const {
 
 void Template::calculate_mean_sigma(const unsigned char* values, float* sigma, float* mean) const {
   *mean = 0;
-  for(int i=0;i<m_size*m_size;i++) {
+  for(unsigned int i=0;i<m_size*m_size;i++) {
     *mean += (float)values[i];
   }
   *mean /= m_size*m_size;
 
   float diffsq = 0;
-  for(int i=0;i<m_size*m_size;i++) {
+  for(unsigned int i=0;i<m_size*m_size;i++) {
     diffsq += (values[i]- *mean) * (values[i]- *mean);
   }
   

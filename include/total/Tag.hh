@@ -31,7 +31,9 @@ public:
 
   TagPayloadType* m_must_match;
   
-  Tag() : m_must_match(NULL), temp_store(),flag(0) {}
+  Tag() :  temp_store(),flag(0),m_must_match(NULL) {}
+
+  virtual ~Tag() {}
 
   /**
    * Draw this tag onto the image object provided

@@ -136,7 +136,7 @@ void Socket::Recv(unsigned char* buf, size_t len) {
 #ifdef SOCKET_DEBUG
   PROGRESS("Receive unsigned char* size " << len);
 #endif
-  int total = 0;
+  unsigned int total = 0;
   while(total < len) {
     int count = ::recv(m_socket,buf+total,len-total,0);
     if (count == -1) throw "Received error/eof from socket";
@@ -201,7 +201,7 @@ int Socket::Send(const unsigned char* buf, size_t len) {
       sleep(1);
     }
   }
-  int total = 0;
+  unsigned int total = 0;
   while(total != len) {
     int sent = ::send(m_socket,buf+total,len-total,0);
     if (sent == -1) throw "Send yields -1";

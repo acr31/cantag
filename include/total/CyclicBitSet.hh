@@ -106,6 +106,7 @@ template<int BIT_COUNT> int CyclicBitSet<BIT_COUNT>::Save(Socket& socket) const 
     if ((*this)[i]) { buffer[i/8] |= (1 << (i%8)); }
   } 
   count += socket.Send(buffer,BIT_COUNT/8+1);
+  return count;
 }
 
 

@@ -164,7 +164,7 @@ Image* V4LImageSource::Next() {
   // start the device collecting the one we just used
   int rs;
   int retry = 0;
-  while(rs = ioctl(m_handle.Get(),VIDIOCMCAPTURE,&(m_slots[m_current_frame])) == EBUSY && ++retry<=5);
+  while( (rs = ioctl(m_handle.Get(),VIDIOCMCAPTURE,&(m_slots[m_current_frame]))) == EBUSY && ++retry<=5);
   if (rs < 0) {
     throw "Failed to ioctl (VIDIOCMCAPTURE) video device";
   }
@@ -173,7 +173,7 @@ Image* V4LImageSource::Next() {
   m_current_frame%=m_total_frames;
 
   // collect the next image - block until its there
-  while(rs = ioctl(m_handle.Get(),VIDIOCSYNC,&(m_slots[m_current_frame].frame)) == EINTR);
+  while( (rs = ioctl(m_handle.Get(),VIDIOCSYNC,&(m_slots[m_current_frame].frame))) == EINTR);
   if (rs < 0) {
     throw "Failed to ioctl (VIDIOCSYNC) video device";
   }  

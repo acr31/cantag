@@ -65,7 +65,8 @@ void ApplyTransform(const float transform[16], float x, float y, float* projX, f
 
 
 void ApplyTransform(const float transform[16], std::vector<float>& points) {
-  for(int i=0;i<points.size();i+=2) {
+  int numpoints = points.size();
+  for(int i=0;i<numpoints;i+=2) {
     float x = points[i];
     float y = points[i+1];
 

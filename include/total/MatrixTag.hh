@@ -23,8 +23,9 @@
 # define MATRIX_TAG_DEBUG_POINTS
 #endif
 
+#ifdef IMAGE_DEBUG
 static int debug_matrix_image_counter = 0;
-
+#endif
 
 /**
  * An implementation of the Matrix tag found in
@@ -39,7 +40,7 @@ static int debug_matrix_image_counter = 0;
  * \todo regression test with gl harness
  */ 
 template<int SIZE>
-class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*SIZE % 2) >, public virtual Coder<SIZE*SIZE - (SIZE*SIZE % 2)>, public virtual QuadTangleTransform {
+class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*SIZE % 2) >, public virtual Coder<SIZE*SIZE - (SIZE*SIZE % 2)>, protected virtual QuadTangleTransform {
  private:
   float m_cell_width;
   float m_cell_width_2;
@@ -145,10 +146,6 @@ template<int SIZE> void MatrixTag<SIZE>::Draw2D(Image& image, CyclicBitSet<SIZE*
 
   // now draw the code
   EncodePayload(tag_data);
-  float projX0, projY0;
-  float projX1, projY1;
-  float projX2, projY2;
-  float projX3, projY3;
   for(int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);i++) {
     int u0 = (int)((m_cells_corner[2*i]+1)*(float)size);
     int v0 = (int)((m_cells_corner[2*i+1]+1)*(float)size);
@@ -223,7 +220,6 @@ template<int SIZE> bool MatrixTag<SIZE>::DecodeNode( LocatedObject<SIZE*SIZE-(SI
   
   float* transform= lobj->transform;
   CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>* read_code = new CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>();
-  float projX, projY;
   // iterate over the tag reading each section
   for(int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);i++) {
     float pts[] = { m_cells_corner[2*i]+m_cell_width_2,

@@ -5,6 +5,7 @@
 #include <tripover/QuadTangle.hh>
 
 #include <cmath>
+#include <cassert>
 #include <tripover/gaussianelimination.hh>
 #include <iostream>
 #define COMPARE_THRESH 1
@@ -97,7 +98,8 @@ void QuadTangle::CornerFit(const std::vector<float>& points) {
     
     float previous = curve2;
     float currentmax = -10;
-    for(int c=1;c<points.size()/2;++c) {
+    int count = points.size()/2;
+    for(int c=1;c<count;++c) {
       datapointer = MASK(datapointer+1);
       loadpointer = MASK(loadpointer+1);
       xwindow[loadpointer] = *i;
@@ -248,6 +250,7 @@ float QuadTangle::find_angle(float x, float y, float cx, float cy) {
   else if ((x < cx) && (y >= cy)) {
     return M_PI + atan( (y-cy) / (cx-x));
   }
+  assert(false);
 }
 
 void QuadTangle::swap( float *a, float *b) {

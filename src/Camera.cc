@@ -83,7 +83,7 @@ void Camera::NPCFToImage(float* points, int numpoints) const {
     // 1) Compute the distance from the principle point (now 0,0)
     double rpwr2 = x*x + y*y;
     double rpwr4 = rpwr2*rpwr2;
-    double rpwr6 = rpwr4*rpwr2;
+    //double rpwr6 = rpwr4*rpwr2;
     
     double radialcoeff = 1 + m_r2*rpwr2 + m_r4*rpwr4;// + m_r6*rpwr6;
 
@@ -107,7 +107,8 @@ void Camera::NPCFToImage(float* points, int numpoints) const {
  * since inversion of these quantities is not straightforward
  */
 void Camera::NPCFToImage(std::vector<float>& points) const {
-  for(int i=0;i<points.size();i+=2) {
+  int numpoints = points.size();
+  for(int i=0;i<numpoints;i+=2) {
     float x = points[i];
     float y = points[i+1];
 
@@ -117,7 +118,7 @@ void Camera::NPCFToImage(std::vector<float>& points) const {
     // 1) Compute the distance from the principle point (now 0,0)
     double rpwr2 = x*x + y*y;
     double rpwr4 = rpwr2*rpwr2;
-    double rpwr6 = rpwr4*rpwr2;
+    //    double rpwr6 = rpwr4*rpwr2;
     
     double radialcoeff = 1 + m_r2*rpwr2 + m_r4*rpwr4; // + m_r6*rpwr6;
 
@@ -175,7 +176,8 @@ void Camera::ImageToNPCF(float* points, int numpoints) const {
  * \todo currently ignores  tangential parameters
  */
 void Camera::ImageToNPCF(std::vector<float>& points) const {  
-  for(int i=0;i<points.size() ;i+=2) {
+  int numpoints = points.size();
+  for(int i=0;i<numpoints;i+=2) {
     // 1) translate the points back to the principle point
     points[i] -= m_intrinsic[2];
     points[i+1] -= m_intrinsic[5];

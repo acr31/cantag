@@ -7,10 +7,6 @@
 # include <boost/random.hpp>
 #endif
 
-#include <iostream>
-//Image::Image() : m_from_header(false), m_free_contents(false), m_image(NULL) {};
-
-
 Image::Image(int width, int height) : m_width(width),m_height(height), m_contents(new unsigned char[width*height]), m_free_contents(true), m_width_step(m_width), m_binary(false) {
   ConvertScale(0,255);
 };
@@ -19,12 +15,53 @@ Image::Image(const Image& c) : m_width(c.m_width), m_height(c.m_height), m_conte
   memcpy(m_contents,c.m_contents,m_width_step*m_height);
 };
 
-/**
- * \todo implement this!
- */
 Image::Image(char* filename) { 
-  assert(false);
+  Load(filename);
 };
+
+#if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(DISABLED)
+void Image::Load(const char* filename) {
+  
+}
+
+#else
+void Image::Load(const char* filename) {
+  std::ifstream input(filename);
+  char buffer[50];
+  
+  input.getline(buffer,50);
+
+  if (strncmp(buffer,"P2",2) != 0) {
+    throw "Can only load greyscale PNM images (no P2 tag)!";
+  }
+
+  input.getline(buffer,50);
+  
+  input >> m_width;
+  m_width_step = m_width;
+  input >> m_height;
+  int colourdepth;
+  input >> colourdepth;
+
+  if (colourdepth != 255) {
+    throw "Can only load greyscale PNM images (wrong colour depth)!";        
+  }
+
+  m_contents = new unsigned char[m_width*m_height];
+  m_free_contents = true;
+  int ptr = 0;
+  int max = m_width*m_height;
+  while(ptr < max && !input.eof()) {
+    int val;
+    input >> val;
+    m_contents[ptr++] = val;
+  }
+  
+  if (ptr != max) {
+    throw "Incorrect number of datapoints in PNM file";
+  }
+}
+#endif
 
 Image::Image(int width,int height, int width_step, unsigned char* contents) : m_width(width), m_height(height), m_contents(contents),m_free_contents(false),m_width_step(width_step), m_binary(false) {}
 
@@ -34,17 +71,13 @@ Image::~Image() {
   }    
 }
 
-unsigned char Image::GlobalThreshold(const unsigned char threshold) {
-  unsigned char histogram[128] = {0};
-  unsigned int total = 0;
+void Image::GlobalThreshold(const unsigned char threshold) {
   const int width = GetWidth();
   const int height = GetHeight();
   for(int i=0;i<height;++i) {
     unsigned char* data_pointer = GetRow(i);
     for(int j=0;j<width;++j) {
       unsigned char pixel = *data_pointer;
-      //      histogram[pixel]++;
-      total+=pixel;
       *data_pointer = pixel > threshold ? 0 : 1;
       data_pointer++;
     }
@@ -53,10 +86,7 @@ unsigned char Image::GlobalThreshold(const unsigned char threshold) {
   Save("debug-globalthreshold.bmp");
 #endif
 
-  total/=width*height;
   m_binary = true;
-  return total;
-
 }
 
 /**
@@ -248,7 +278,6 @@ void Image::DrawEllipse(float xc, float yc,
 }
 
 Image::Image(Socket& socket) {
-  int count;
   m_width = socket.RecvInt();
   m_height = socket.RecvInt();
   m_width_step = socket.RecvInt();

@@ -6,6 +6,7 @@
 #include <tripover/Ellipse.hh>
 #include <tripover/gaussianelimination.hh>
 #include <cmath>
+#include <cassert>
 #include <iostream>
 #include <tripover/findtransform.hh>
 #include <tripover/polysolve.hh>
@@ -43,7 +44,7 @@ Ellipse::Ellipse(float a, float b, float c, float d, float e, float f) :
   m_a(a), m_b(b), m_c(c), m_d(d), m_e(e), m_f(f), m_fitted(true) { Decompose();}
 
 Ellipse::Ellipse(float x0, float y0, float width, float height, float angle) :
-  m_x0(x0), m_y0(y0), m_width(width),m_height(height),m_angle_radians(angle),m_fitted(true) { Compose(); }
+  m_x0(x0), m_y0(y0),m_angle_radians(angle), m_width(width),m_height(height),m_fitted(true) { Compose(); }
 
 void Ellipse::Draw(Image& image,const Camera& camera) const {
   if (m_fitted) {
@@ -554,7 +555,7 @@ float Ellipse::GetErrorStricker(const std::vector<float>& points) const {
     float f2xtilde = (f1x + f2x)/2-ctilde*(f1x-f2x)/modf1_f2;
     float f2ytilde = (f1y + f2y)/2-ctilde*(f1y-f2y)/modf1_f2;
 
-    float atilde = 0.5*(sqrt( (x-f1x)*(x-f1x) + (y-f1y)*(y-f1y) ) + sqrt( (x-f2x)*(x-f2x) + (y-f2y)*(y-f2y) ));
+    float atilde = 0.5*(sqrt( (x-f1xtilde)*(x-f1xtilde) + (y-f1ytilde)*(y-f1ytilde) ) + sqrt( (x-f2xtilde)*(x-f2xtilde) + (y-f2ytilde)*(y-f2ytilde) ));
 
     float dist = fabs(atilde - a);
     
@@ -755,12 +756,12 @@ bool SimpleEllipse::FitEllipse(const std::vector<float>& points) {
   centrex/=count;
   centrey/=count;
 
-  float majorx;
-  float majory;
+  float majorx = -1;
+  float majory = -1;
   float majorlen = 0;
 
-  float minorx;
-  float minory;
+  float minorx = -1;
+  float minory = -1;
   float minorlen = 1e10;
 
   for(std::vector<float>::const_iterator i = points.begin(); i!= points.end(); ++i) {
@@ -779,6 +780,9 @@ bool SimpleEllipse::FitEllipse(const std::vector<float>& points) {
       minorlen = distsq;
     }
   }
+
+  assert(majorlen != 0);
+  assert(minorlen != 1e10);
 
   majorlen = sqrt(majorlen);
   minorlen = sqrt(minorlen);

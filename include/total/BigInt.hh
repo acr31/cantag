@@ -82,9 +82,9 @@ public:
   friend std::ostream& operator<< <>(std::ostream& s, const BigInt<SIZE>& z);
 };
 
-template<int SIZE> BigInt<SIZE>::BigInt(unsigned int i) : m_gmpint(i), m_backing_store(NULL), m_bit1(1) {};
+template<int SIZE> BigInt<SIZE>::BigInt(unsigned int i) :  m_backing_store(NULL), m_bit1(1), m_gmpint(i) {};
 
-template<int SIZE> BigInt<SIZE>::BigInt(const CyclicBitSet<SIZE>& t) : m_gmpint(0), m_backing_store(NULL), m_bit1(1) {
+template<int SIZE> BigInt<SIZE>::BigInt(const CyclicBitSet<SIZE>& t) : m_backing_store(NULL), m_bit1(1) , m_gmpint(0) {
   for(int i=SIZE-1;i>=0;i--) {
     m_gmpint <<= 1;
     if (t[i]) {
@@ -93,14 +93,14 @@ template<int SIZE> BigInt<SIZE>::BigInt(const CyclicBitSet<SIZE>& t) : m_gmpint(
   }
 }
 
-template<int SIZE> BigInt<SIZE>::BigInt(CyclicBitSet<SIZE>& t) : m_gmpint(0), m_backing_store(&t), m_bit1(1) {
+template<int SIZE> BigInt<SIZE>::BigInt(CyclicBitSet<SIZE>& t) : m_backing_store(&t), m_bit1(1), m_gmpint(0) {
   for(int i=SIZE-1;i>=0;i--) {
     m_gmpint <<= 1;
     if (t[i]) m_gmpint |= m_bit1;
   }
 }
 
-template<int SIZE> BigInt<SIZE>:: BigInt(const BigInt& bi) : m_gmpint(bi.m_gmpint), m_backing_store(NULL), m_bit1(1) {}
+template<int SIZE> BigInt<SIZE>:: BigInt(const BigInt& bi) :m_backing_store(NULL) , m_bit1(1), m_gmpint(bi.m_gmpint) {}
 
 template<int SIZE> BigInt<SIZE>::~BigInt() {
   if (m_backing_store) {
