@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(total,1.0)
-AC_CONFIG_HEADERS(include/tripover/CompilationOptions.h)
+AC_CONFIG_HEADERS(include/total/CompilationOptions.h)
 AC_CONFIG_SRCDIR(src/Makefile.am)
 AM_INIT_AUTOMAKE
 AC_LANG([C++])

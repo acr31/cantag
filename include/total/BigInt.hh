@@ -19,7 +19,7 @@
 #error "This file required libgmpxx.so"
 #endif
 
-#include <tripover/CyclicBitSet.hh>
+#include <total/CyclicBitSet.hh>
 
 #include <gmpxx.h>
 #include <gmp.h>

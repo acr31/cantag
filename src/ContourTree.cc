@@ -378,7 +378,7 @@ namespace Total {
     return CheckImageToNPCF(camera,GetRootContour(),evidence.GetRootContour());
   }
 
-#include <iostream>
+
   bool ContourTree::CheckImageToNPCF(const Camera& camera, const Contour* current, const Contour* evidence_current) const {
     if (current->points.size() != evidence_current->points.size()) return false; 
     if (current->children.size() != evidence_current->children.size()) return false;
