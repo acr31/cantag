@@ -5,6 +5,10 @@
 #ifndef GLOUTPUT_MECHANISM_GUARD
 #define GLOUTPUT_MECHANISM_GUARD
 
+#ifndef HAVELIB_GL
+# error "libGL.so is required for this component"
+#endif
+
 #include <GL/glx.h>
 
 template<int PAYLOAD_SIZE>
@@ -190,7 +194,7 @@ template<int PAYLOAD_SIZE> template<class C> void GLOutputMechanism<PAYLOAD_SIZE
     /* rotate tag around z axis for angle */
     glRotatef(angle,0.0,0.0,1.0);
 
-    float tagsizescale=(50-loc->location[2])/20;
+    float tagsizescale=(34-loc->location[2])/20;
 
     glScalef(tagsizescale,tagsizescale,tagsizescale);
     

@@ -202,7 +202,7 @@ template<int SIZE> bool MatrixTag<SIZE>::DecodeNode(SceneGraphNode< ShapeChain<Q
   quad.GetTransform(transform);
 
 
-  boost::shared_ptr< CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)> > read_code(new CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>());
+  CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>* read_code = new CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>();
   float projX, projY;
   // iterate over the tag reading each section
   for(int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);i++) {
@@ -253,18 +253,19 @@ template<int SIZE> bool MatrixTag<SIZE>::DecodeNode(SceneGraphNode< ShapeChain<Q
 
   if (DecodePayload(*read_code) >= 0) {
 #ifdef MATRIX_TAG_DEBUG
-      PROGRESS("Found code " << *read_code);
+    PROGRESS("Found code " << *read_code);
 #endif	
 
-      /**
-       * \todo load the correct angle here
-       */
-      LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = node->GetLocatedObject();
+    /**
+     * \todo load the correct angle here
+     */
+    LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = node->GetLocatedObject();
     lobj->LoadTransform(transform,1,0,camera);
     lobj->tag_code = read_code;	   
     return true;
   }    
   else {
+    delete read_code;
     node->ClearLocatedObject();
   }
   return false;

@@ -8,7 +8,6 @@
 #include <gmpxx.h>
 #include <gmp.h>
 #include <bitset>
-#include <boost/operators.hpp>
 #include <CyclicBitSet.hh>
 /**
  * Arbitrary precision big integer using a given backing store.
@@ -18,7 +17,7 @@
  * \todo Change the implementation so it actually uses the backing store
  */
 template<int SIZE>
-class BigInt : boost::operators< BigInt<SIZE> > {
+class BigInt  {
 private:
 
   CyclicBitSet<SIZE> *m_backing_store;
@@ -46,6 +45,9 @@ public:
 
   BigInt& operator++();
   BigInt& operator--();
+
+  BigInt operator%(const BigInt& x) const;
+
 
   /**
    * Raise this BigInt to the given power.
@@ -116,6 +118,12 @@ template<int SIZE> BigInt<SIZE>& BigInt<SIZE>::operator/=(const BigInt<SIZE>& x)
 template<int SIZE> BigInt<SIZE>& BigInt<SIZE>::operator%=(const BigInt<SIZE>& x) {
   m_gmpint %= x.m_gmpint;
   return *this;
+}
+
+template<int SIZE> BigInt<SIZE> BigInt<SIZE>::operator%(const BigInt<SIZE>& x) const {
+  BigInt result = *this;
+  result%=x;
+  return x;
 }
 
 template<int SIZE> BigInt<SIZE>& BigInt<SIZE>::operator|=(const BigInt<SIZE>& x) {

@@ -134,7 +134,7 @@ template<int BIT_COUNT, int GRANULARITY, int CHECKSUM_COUNT> int TripOriginalCod
       PROGRESS("Accumulated checksum "<< checksum_count % checksum_mod);	
 #endif
       // now check the checksum
-      if (checksum == checksum_count % checksum_mod) {
+      if (checksum == (checksum_count % checksum_mod)) {
 	return i;
       }
       else {

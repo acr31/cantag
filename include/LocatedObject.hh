@@ -8,7 +8,6 @@
 #include <Image.hh>
 #include <CyclicBitSet.hh>
 #include <findtransform.hh>
-#include <boost/shared_ptr.hpp>
 #include <Camera.hh>
 
 /**
@@ -52,9 +51,11 @@ public:
   /**
    * The code stored on the tag.
    */
-  boost::shared_ptr< CyclicBitSet<PAYLOAD_SIZE> > tag_code;
+  CyclicBitSet<PAYLOAD_SIZE>* tag_code;
 
   void LoadTransform(float transform[16],float tag_size, float agle, const Camera& camera);
+
+  ~LocatedObject();
 };
 
 #include <iostream>
@@ -68,6 +69,12 @@ template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(float
   GetLocation(transform,location,tag_size);
   camera.CameraToWorld(location,1);
   
+}
+
+template<int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>::~LocatedObject() {
+  if (tag_code) {
+    delete tag_code;
+  }
 }
 
 #endif//LOCATED_OBJECT_GUARD

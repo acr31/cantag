@@ -7,7 +7,6 @@
 
 #include <Config.hh>
 #include <ImageSource.hh>
-#include <boost/scoped_array.hpp>
 
 extern "C" {
 # include <linux/videodev.h> // for Video4Linux
@@ -45,8 +44,8 @@ private:
   int m_total_frames;
   int m_image_width;
   int m_image_height;
-  boost::scoped_array<video_mmap> m_slots;
-  boost::scoped_array<Image> m_images;
+  video_mmap* m_slots;
+  Image* m_images;
 
 public:
 

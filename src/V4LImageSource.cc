@@ -11,7 +11,6 @@
 #include <unistd.h>     // for mmap()
 #include <sys/mman.h>   // for mmap()
 #include <cerrno>
-
 #define V4L_DEBUG
 
 /**
@@ -19,10 +18,12 @@
  * and the channel. The channel is the index of the channel in the
  * list of channels returned by the video card.
  */
-V4LImageSource::V4LImageSource(const char* device, const int channel) : m_handle(-1), m_mmap((uchar*)MAP_FAILED,-1) {
+V4LImageSource::V4LImageSource(const char* device, const int channel) : 
+  m_handle(-1), m_mmap((uchar*)MAP_FAILED,-1),
+  m_slots(NULL),m_images(NULL)
+{
   // open the video device, store the handle in the wrapper object.
   // When this instance is free'd the video port will be closed
-
 
   if ((m_handle.SetHandle(open(device,O_RDWR))).Get() < 0) {
     throw "Failed to open video port";
@@ -104,10 +105,11 @@ V4LImageSource::V4LImageSource(const char* device, const int channel) : m_handle
   // configure the device to give us greyscale images
   struct video_picture p;
   if (ioctl(m_handle.Get(),VIDIOCGPICT,&p) < 0) {
-    throw "Failed to ioctl (VIDIOCGPICT) video device";
+      throw "Failed to ioctl (VIDIOCGPICT) video device";
   }
   
   p.palette = VIDEO_PALETTE_GREY;
+  p.depth = 8;
   if (ioctl(m_handle.Get(),VIDIOCSPICT,&p) < 0) {
     throw "Failed to ioctl (VIDIOCSPICT) video device";
   } 
@@ -119,10 +121,8 @@ V4LImageSource::V4LImageSource(const char* device, const int channel) : m_handle
   // create a (scoped) array of video_mmap structs - we use these when
   // we ask the capture card to asynchronously fetch the images for
   // us.
-  boost::scoped_array<video_mmap> temp(new struct video_mmap[m_total_frames]);
-  m_slots.swap(temp);
-  boost::scoped_array<Image> temp2(new Image[m_total_frames]) ;
-  m_images.swap(temp2);
+  m_slots = new struct video_mmap[m_total_frames];
+  m_images = new Image[m_total_frames];
 
   // populate the arrays
   for(int i=0;i<m_total_frames;i++) {
@@ -155,6 +155,8 @@ V4LImageSource::~V4LImageSource() {
 #ifdef V4L_DEBUG
   PROGRESS("Destroying image source");
 #endif
+  if (m_images) delete[] m_images;
+  if (m_slots) delete[] m_slots;
 }
 
 Image* V4LImageSource::Next() {  

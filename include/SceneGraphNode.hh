@@ -170,7 +170,7 @@ template<class S, int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>*  SceneGraphNode
 
 template<class S, int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>* SceneGraphNode<S,PAYLOAD_SIZE>::Find(const CyclicBitSet<PAYLOAD_SIZE>& code) {
   if ((m_located != NULL) &&
-      (m_located->tag_code.get()) &&
+      (m_located->tag_code) &&
       *(m_located->tag_code) == code) {
     return m_located;
   }

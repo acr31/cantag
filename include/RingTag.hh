@@ -406,9 +406,9 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
     
     // if we read a full 360 degrees then we stop and ask it for the
     // code
-    boost::shared_ptr<  CyclicBitSet<RING_COUNT*SECTOR_COUNT> > read_code[READING_COUNT];
+    CyclicBitSet<RING_COUNT*SECTOR_COUNT>*  read_code[READING_COUNT];
     for(int b=0;b<READING_COUNT;b++) { 
-      read_code[b] = boost::shared_ptr<  CyclicBitSet<RING_COUNT*SECTOR_COUNT> >(new CyclicBitSet<RING_COUNT*SECTOR_COUNT>());
+      read_code[b] = new CyclicBitSet<RING_COUNT*SECTOR_COUNT>();
     };
 
     for(int j=0;j<SECTOR_COUNT*READING_COUNT;j++) {
@@ -475,9 +475,17 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
       LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj = node->GetLocatedObject();
       lobj->LoadTransform(correcttrans,1,angle,camera);
       lobj->tag_code = read_code[code_ptr];	   
+      for(int i=0;i<READING_COUNT;++i) {
+	if (i != code_ptr) {
+	  delete read_code[i];
+	}
+      }
       return true;
     }
     else {
+      for(int i=0;i<READING_COUNT;++i) {
+	delete read_code[i];
+      } 
 #ifdef RING_TAG_DEBUG
       PROGRESS("Failed to decode two identical readings");
 #endif
@@ -490,7 +498,7 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
 #ifdef RING_TAG_DEBUG
     PROGRESS("Failed to find a valid transformation");
 #endif
-  }
+  }  
   node->ClearLocatedObject();
   return false;
 };  

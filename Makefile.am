@@ -1,3 +1,3 @@
-SUBDIRS = src gltest unit tests
+SUBDIRS = src unit tests
 
 AM_CPPFLAGS=

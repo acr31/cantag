@@ -368,6 +368,7 @@ public:
   void AddNoise(float mean, float stddev);
 
 
+
 private:
   int AdaptiveWidthStep(int moving_average,int* previous_line,unsigned int i, unsigned int j,unsigned int s, int t);
 };

@@ -8,6 +8,41 @@ dnl Checks for programs.
 AM_PROG_LIBTOOL
 AC_PROG_CXX
 
+dnl Checks for header files.
+AC_CHECK_HEADER(opencv/cv.h,
+	[],
+	[AC_MSG_ERROR([opencv/cv.h not found in include path])])
+
+AC_CHECK_HEADER(opencv/highgui.h,
+        [],
+        [AC_MSG_ERROR([opencv/highgui.h not found in include path])])
+
+AC_CHECK_HEADER(GL/gl.h,
+	[],
+	[])
+
+AC_CHECK_HEADER(GL/osmesa.h,
+	[],
+	[])
+
+AC_CHECK_HEADER(boost/random.hpp,
+	[
+AC_DEFINE(HAVE_BOOST_RANDOM)
+AM_CONDITIONAL(BUILD_RANDOM_INCLUDE,true)],
+	[
+AM_CONDITIONAL(BUILD_RANDOM_INCLUDE,false)
+AC_MSG_NOTICE([boost/random.hh not found in include path])])
+
+AC_CHECK_HEADER(boost/test/unit_test.hpp,
+	[AM_CONDITIONAL(BUILD_TEST_FRAMEWORK_INCLUDE,true)],
+	[
+AM_CONDITIONAL(BUILD_TEST_FRAMEWORK_INCLUDE,false)
+AC_MSG_NOTICE([boost/test/unit_test.hpp not found in include path])])
+AC_CHECK_HEADER(gmpxx.h,
+	[],
+	[])
+
+
 dnl Checks for libraries.
 AC_CHECK_LIB(opencv,
 	[cvGetErrStatus],
@@ -15,65 +50,90 @@ AC_CHECK_LIB(opencv,
 	[AC_MSG_ERROR([libopencv.so not found])])
 
 AC_CHECK_LIB(highgui,
-	[cvGetWindowName],
-	[],
-	[AC_MSG_ERROR([libhighgui.so not found])])
+        [cvGetWindowName],
+        [],
+        [AC_MSG_ERROR([libhighgui.so not found])])
 
 AC_CHECK_LIB(GL,
 	[glFinish],
-	[],
-	[AC_MSG_ERROR([libGL.so not found])])
+	[
+LIBS="-lGL $LIBS"
+AC_DEFINE(HAVELIB_GL)
+AM_CONDITIONAL(BUILD_GL_LIB,true)
+],
+	[
+AM_CONDITIONAL(BUILD_GL_LIB,false)
+AC_MSG_NOTICE([libGL.so not found])
+])
 
 AC_CHECK_LIB(OSMesa,
 	[OSMesaGetCurrentContext],
-	[],
-	[AC_MSG_ERROR([libOSMesa.so not found])])
+	[
+LIBS="-lOSMesa $LIBS"
+AC_DEFINE(HAVELIB_OSMESA)
+AM_CONDITIONAL(BUILD_OSMESA_LIB,true)
+],
+	[
+AM_CONDITIONAL(BUILD_OSMESA_LIB,false)
+AC_MSG_NOTICE([libOSMesa.so not found])
+])
 
 AC_CHECK_LIB(GLU,
 	[gluNewTess],
-	[],
-	[AC_MSG_ERROR([libGLU.so not found])])
+	[
+LIBS="-lGLU $LIBS"
+AC_DEFINE(HAVELIB_GLU)
+AM_CONDITIONAL(BUILD_GLU_LIB,true)
+],
+	[
+AM_CONDITIONAL(BUILD_GLU_LIB,false)
+AC_MSG_NOTICE([libGLU.so not found])
+])
 
 AC_CHECK_LIB(glut,
 	[glXChooseVisual],
-	[],
-	[AC_MSG_ERROR([libglut.so not found])])
+	[
+LIBS="-lglut $LIBS"
+AC_DEFINE(HAVELIB_GLUT)
+AM_CONDITIONAL(BUILD_GLUT_LIB,true)
+],
+	[
+AM_CONDITIONAL(BUILD_GLUT_LIB,false)
+AC_MSG_NOTICE([libglut.so not found])
+])
 
 AC_CHECK_LIB(gmp,
 	[__gmpz_init],
 	[],
-	[AC_MSG_ERROR([libgmp.so not found])])
+	[])
 
 AC_CHECK_LIB(gmpxx,
 	[__gmpz_set],
 	[],
-	[AC_MSG_ERROR([libgmpxx.so not found])])
+	[])
 
-#AC_CHECK_LIB(boost_unit_test_framework-gcc-1_31,
-#	[jam],
-#	[],
-#	[AC_MSG_ERROR([libboost_unit_test_framework-gcc-1_31.so not found])])
-
-dnl Checks for header files.
-AC_CHECK_HEADER(opencv/cv.h,
-	[],
-	[AC_MSG_ERROR([opencv/cv.h not found in include path])])
-AC_CHECK_HEADER(opencv/highgui.h,
-	[],
-	[AC_MSG_ERROR([opencv/highgui.h not found in include path])])
-AC_CHECK_HEADER(GL/gl.h,
-	[],
-	[AC_MSG_ERROR([GL/gl.h not found in include path])])
-AC_CHECK_HEADER(GL/osmesa.h,
-	[],
-	[AC_MSG_ERROR([GL/osmesa.h not found in include path])])
-AC_CHECK_HEADER(boost/random.hpp,
-	[],
-	[AC_MSG_ERROR([boost/random.hpp not found in include path])])
-AC_CHECK_HEADER(gmpxx.h,
-	[],
-	[AC_MSG_ERROR([gmpxx.h not found in include path])])
-
+LIBSSAVEACR31="$LIBS"
+LIBS="-lboost_unit_test_framework-gcc-1_31 $LIBS"
+AC_LINK_IFELSE(
+AC_LANG_SOURCE([[
+#ifdef __cplusplus
+ extern "C"
+#endif
+int main();
+int init_unit_test_suite(int, char**) {
+    main();
+   ;
+   return 0;
+}
+]]),
+[
+AC_DEFINE_UNQUOTED(AS_TR_CPP(HAVE_LIBBOOST_UNIT_TEST_FRAMEWORK))
+AM_CONDITIONAL(BUILD_TEST_FRAMEWORK_LIB,true)
+AC_MSG_NOTICE([found boost])],
+[
+AM_CONDITIONAL(BUILD_TEST_FRAMEWORK_LIB,false)
+AC_MSG_NOTICE([boost unit test framework not found - disabling unit tests])])
+LIBS="$LIBSSAVEACR31"
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST

@@ -16,4 +16,4 @@ endif
 
 
 AM_CPPFLAGS=-I../include
-AM_LDFLAGS=-L../src -ltripover
+AM_LDFLAGS=-L../src -ltripover -lboost_unit_test_framework-gcc-1_31
