@@ -38,7 +38,7 @@ private:
 public:
   SceneGraphNode(float* points, int numpoints) : m_inspected(false), m_located(NULL), m_matcher(points,numpoints), m_children() {};
 
-  SceneGraphNode() : m_inspected(false), m_located(NULL), m_matcher(NULL,0), m_children() {};
+  SceneGraphNode() : m_inspected(false), m_located(NULL), m_matcher(), m_children() {};
 
   ~SceneGraphNode() {
     for(typename std::vector< SceneGraphNode<S,PAYLOAD_SIZE>* >::iterator i = m_children.begin();

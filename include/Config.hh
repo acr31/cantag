@@ -5,7 +5,7 @@
 #define CONFIG_GUARD
 
 #define TEXT_DEBUG
-#define IMAGE_DEBUG
+//#define IMAGE_DEBUG
 
 #ifdef TEXT_DEBUG
 #include <iostream>
