@@ -45,6 +45,7 @@ public:
   Ellipse(const std::vector<float>& points); 
   Ellipse(const std::vector<float>& points, bool prev_fit); 
   Ellipse(float a, float b, float c, float d, float e, float f);
+  Ellipse(float x0, float y0,float width, float height, float angle);
   ~Ellipse();
   inline bool IsFitted() const { return m_fitted; }
   bool Compare(const Ellipse& o) const;
@@ -210,6 +211,7 @@ public:
    *
    */
   virtual void Decompose();
+  void Compose();
 
   int Save(Socket& socket) const;
   Ellipse(Socket& socket);
@@ -217,6 +219,7 @@ public:
   bool Check(const std::vector<float>& points) const;
 
 private:
+  bool FitEllipseSimple(const std::vector<float>& points);
   bool FitEllipse(const std::vector<float>& points);
 
 };

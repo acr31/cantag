@@ -30,7 +30,7 @@ private:
   Colormap m_colormap;
   Window m_window;
   bool displayListInited;
-
+  
 public:
   GLOutputMechanism(int argc, char* argv[],int width,int height);
   ~GLOutputMechanism();
@@ -85,13 +85,13 @@ template<int PAYLOAD_SIZE> void GLOutputMechanism::FromTag(const WorldState<PAYL
 	/* move the camera back three units */
 	glTranslatef(0.0, 0.0, -3.0);
 	
-	glMultMatrixf(rotation);
+	glMultMatrixf(loc->transform);
 	/* rotate tag around z axis for angle */
-	glRotatef(angle,0.0,0.0,1.0);
+	//	glRotatef(angle,0.0,0.0,1.0);
 	
 	float tagsizescale=(34-loc->location[2])/20;
 	
-	glScalef(tagsizescale,tagsizescale,tagsizescale);
+	//	glScalef(tagsizescale,tagsizescale,tagsizescale);
 	
 	Draw(1);
 	return;

@@ -12,7 +12,7 @@
 #include <tripover/ShapeChain.hh>
 #include <tripover/Ellipse.hh>
 #include <tripover/findtransform.hh>
-
+#include <iostream>
 #ifdef TEXT_DEBUG
 # define RING_TAG_DEBUG
 #endif
@@ -37,7 +37,7 @@ static int debug_image_counter = 0;
  * \todo regression test with gl harness
  */
 #define READING_COUNT 20
-#define MAX_CHILD_DISTANCE 10
+#define MAX_CHILD_DISTANCE 0.1
 template<int RING_COUNT, int SECTOR_COUNT>
 class RingTag : public virtual Tag< ShapeChain<Ellipse>, RING_COUNT*SECTOR_COUNT >, 
 		protected virtual Coder<RING_COUNT*SECTOR_COUNT> {
@@ -233,7 +233,7 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
   /**
    * \todo this check will not work for the SplitRing tags and it didn;t work for ring tags either
    */
-  if (node->children.size() == 0) {
+  if (node->children.size() == 0 && false) {
 #ifdef RING_TAG_DEBUG
     PROGRESS("This node has " << node->children.size() << " children.  Skipping it");
 #endif
@@ -470,21 +470,9 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
     PROGRESS("Found a concentric inner circle with matching contour");
 #endif
     // we've found a good transform
-
-    // scan round reading a sector width apart until we read two adjacent cells of different values
     
-    // then do a binary chop between them, select the middle point and
-    // whichever edge value has the opposite colour and repeat chopping
-    
-    /**
-     * \todo assume this is the edge of a sector so roll a rotation of the required amount to centre us on the middle of each sector into the transform
-     */
-    //    for(int j=0;j<SECTOR_COUNT*READING_COUNT;j++) {
-    //      
-    //    }
-
     LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj = new LocatedObject<RING_COUNT*SECTOR_COUNT>();
-    lobj->LoadTransform(correcttrans,1,camera);
+    lobj->LoadTransform(correcttrans,1, camera);
     return lobj;
   }
   return NULL;
@@ -494,100 +482,129 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
 
   float* correcttrans = lobj->transform;
   
+  bool left;
+  bool right;
+  int k=0;
+  int j;
+  // scan round reading a sector width apart until we read two adjacent cells of different values
+  for(j=0;j<SECTOR_COUNT*READING_COUNT;j+=READING_COUNT) {
+    float tpt[]=  {  m_cos_read_angles[j] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
+		     m_sin_read_angles[j] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
+    ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
+    camera.NPCFToImage(tpt,1);
+    right = image.Sample(tpt[0],tpt[1]) != 0;
+    if ((j>0) && (left != right)) break;
+    left = right;
+  }
+  
+  if (left == right) {
+    return false;
+  }
+  
+  int leftindex = j-READING_COUNT;
+  int rightindex = j;
+  while(rightindex - leftindex > 1) {
+    int centre = (leftindex + rightindex) / 2;
+    float tpt[]=  {  m_cos_read_angles[centre] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
+		     m_sin_read_angles[centre] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
+    ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
+    camera.NPCFToImage(tpt,1);
+    bool sample = image.Sample(tpt[0],tpt[1]) != 0;
+    if (sample) {
+      if (left && !right) {
+	leftindex = centre;
+      }
+      else if (!left && right) {
+	rightindex = centre;
+      }
+      else {
+	assert(false);
+      }
+    }
+    else {
+      if (left && !right) {
+	rightindex = centre;
+      }
+      else if (!left && right) {
+	leftindex = centre;
+      }
+      else {
+	assert(false);
+      }
+    }
+  }
 
-
-  // loop round reading chunks and passing them to the decoder
-  
-  // if it returns false on any insert then we might be misaligned
-  // so rotate a little bit round and try again
-  
-  // if it throws an InvalidSymbol exception then we stop trying
-  
-  // if we read a full 360 degrees then we stop and ask it for the
-  // code
-  CyclicBitSet<RING_COUNT*SECTOR_COUNT>*  read_code[READING_COUNT];
-  for(int b=0;b<READING_COUNT;b++) { 
-    read_code[b] = new CyclicBitSet<RING_COUNT*SECTOR_COUNT>();
-  };
-  
-  for(int j=0;j<SECTOR_COUNT*READING_COUNT;j++) {
+  CyclicBitSet<RING_COUNT*SECTOR_COUNT>* read_code = new CyclicBitSet<RING_COUNT*SECTOR_COUNT>();  
+  int index = 0;
+  int readindex = (leftindex + READING_COUNT/2) % (SECTOR_COUNT * READING_COUNT);
+  for(int j=0;j<SECTOR_COUNT;++j) {
     // read a chunk by sampling each ring and shifting and adding
-    int currentcode = j%READING_COUNT;      
     for(int k=RING_COUNT-1;k>=0;k--) {
-      float tpt[]=  {  m_cos_read_angles[j] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
-		       m_sin_read_angles[j] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
+      float tpt[]=  {  m_cos_read_angles[readindex] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
+		       m_sin_read_angles[readindex] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
       ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
       camera.NPCFToImage(tpt,1);
       bool sample = image.Sample(tpt[0],tpt[1]) != 0;
-      (*read_code[currentcode])[j/READING_COUNT * RING_COUNT + k] = sample;
+      (*read_code)[index++] = sample;      
     }
+    readindex+=READING_COUNT;
+    readindex %= SECTOR_COUNT * READING_COUNT;
   }
-  
+
 #ifdef RING_TAG_DEBUG
-  for(int i=0;i<READING_COUNT;i++) {
-    PROGRESS("Code candidate " << i << " is " << *read_code[i]);
-  }
+  PROGRESS("Code candidate is " << *read_code);
 #endif
   
-  // scan round decoding candidates until we find two successful reads that are the same
-  CyclicBitSet<RING_COUNT*SECTOR_COUNT>* last_read = NULL;
-  int orientation;
-  int code_ptr;
-  for(code_ptr=0;code_ptr<READING_COUNT;code_ptr++) {
-    if ((orientation = DecodePayload(*read_code[code_ptr])) >= 0) {
-      if ((last_read != NULL) && (*last_read == *read_code[code_ptr])) {
-	break;
-      }
-      last_read = &(*read_code[code_ptr]);
-    }
-  }
+  int orientation = DecodePayload(*read_code);
   
-  
-  if (code_ptr < READING_COUNT) {
+  if (orientation >= 0) {
     // we now know that we had to rotate the code by "orientation"
     // bits in order to align it.  This corresponds to a rotation of
-    // orientation/ring_count sectors.  Which corresponds to a
-    // rotation of orientation/ring_count*sector_count/360 degrees.
-    // we also know that this reading was made starting from m_read_angles[code_ptr]
-    // this gives the final rotation as 
-    // m_read_angles[code_ptr] + orientation/ring_count*sector_count/2/M_PI
+    // orientation/ring_count sectors. 
     
-    float angle = m_read_angles[code_ptr-1] + orientation/RING_COUNT*2*M_PI/SECTOR_COUNT;
+    int index = (leftindex + (orientation/RING_COUNT) * READING_COUNT) % (SECTOR_COUNT * READING_COUNT);
     
+    float rotation[16] = { m_cos_read_angles[index], -m_sin_read_angles[index],0,0,
+			   m_sin_read_angles[index], m_cos_read_angles[index],0,0,
+			   0,0,1,0,
+			   0,0,0,1};
+    
+    
+    float finaltrans[16] = {0};
+    // premultiply rotations by transforms
+    for(int row=0;row<4;row++) {
+      for(int col=0;col<4;col++) {
+	for(int k=0;k<4;k++) {
+	  finaltrans[row*4+col] += correcttrans[row*4+k] * rotation[k*4+col];
+	}
+      }
+    }
+
 #ifdef RING_TAG_IMAGE_DEBUG
-    draw_read(image,camera,correcttrans,code_ptr);
+    draw_read(image,camera,finaltrans);
 #endif
 #ifdef RING_TAG_DEBUG
-    PROGRESS("Found code " << *read_code[code_ptr]);
+    PROGRESS("Found code " << *read_code);
 #endif	
 #ifdef RING_TAG_DEBUG
 #ifdef TEXT_DEBUG
     float temp[2] = {0,0};
     ApplyTransform(correcttrans,temp[0],temp[1],temp,temp+1);
     camera.NPCFToImage(temp,1);
-    PROGRESS("Found code " << *read_code[code_ptr] << " at " << temp[0] << "," << temp[1]);
+    PROGRESS("Found code " << *read_code << " at " << temp[0] << "," << temp[1]);
 #endif
 #endif
-    /**
-     * \todo alter the transform to include the rotation required to line up the code
-     */
-    lobj->tag_codes.push_back(read_code[code_ptr]);
-    for(int i=0;i<READING_COUNT;++i) {
-      if (i != code_ptr) {
-	delete read_code[i];
-      }
-    }
+    lobj->LoadTransform(finaltrans,1,camera);
+    lobj->tag_codes.push_back(read_code);
     return true;
   }
   else {
-    for(int i=0;i<READING_COUNT;++i) {
-      delete read_code[i];
-    } 
+    delete read_code;
 #ifdef RING_TAG_DEBUG
     PROGRESS("Failed to decode two identical readings");
 #endif
 #ifdef RING_TAG_IMAGE_DEBUG
-    draw_read(image,camera,correcttrans,0);
+    draw_read(image,camera,correcttrans);
 #endif
     return false;
   }

@@ -388,7 +388,7 @@ public:
    * otherwise changed to 1.  Note that this method is also inverting
    * the image in addition to binarizing it.
    */
-  void AdaptiveThreshold(unsigned int window_size, unsigned char offset);
+  void AdaptiveThreshold(const unsigned int window_size, const unsigned char offset);
   void AdaptiveThreshold2(unsigned int window_size, unsigned char offset);
 
   /**

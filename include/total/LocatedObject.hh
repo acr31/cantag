@@ -49,7 +49,7 @@ public:
    */
   std::vector<CyclicBitSet<PAYLOAD_SIZE>*> tag_codes;
 
-  void LoadTransform(float transform[16],float tag_size, const Camera& camera);
+  void LoadTransform(const float transform[16],float tag_size, const Camera& camera);
 
   LocatedObject();
   ~LocatedObject();
@@ -83,7 +83,7 @@ template<int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>::LocatedObject(Socket& so
 
 template<int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>::LocatedObject() : tag_codes() {}
 
-template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(float t[16],float tag_size,  const Camera& camera) {
+template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(const float t[16],float tag_size,  const Camera& camera) {
   for(int i=0;i<16;i++) {
     transform[i] = t[i];
   }

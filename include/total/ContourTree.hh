@@ -22,7 +22,7 @@
 class ContourTree {
 public:
   enum topology_t {ALL,CONCAVE_ONLY, CONVEX_ONLY};
-  enum bordertype_t { OUTER_BORDER = 1, HOLE_BORDER = 0};
+  enum bordertype_t { UNKNOWN = 2, OUTER_BORDER = 1, HOLE_BORDER = 0};
 
   struct Contour {
     int nbd;
@@ -31,7 +31,7 @@ public:
     std::vector<float> points;
     std::vector<Contour*> children;
     bool weeded;
-    Contour(int id) : nbd(id),parent_id(id),points(),children(),weeded(false) {}
+    Contour(int id) : nbd(id),bordertype(UNKNOWN),parent_id(id),points(),children(),weeded(false) {}
     Contour(Socket& socket);
     Contour(const Contour& contour);
     ~Contour();
