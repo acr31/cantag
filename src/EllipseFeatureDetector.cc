@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/02/06 21:11:44  acr31
+ * adding ellipse fitting
+ *
  * Revision 1.1  2004/02/01 14:26:24  acr31
  * moved rectangle2d to quadtangle2d and refactored implmentations
  *
@@ -51,6 +54,7 @@
 #include <opencv/cv.h>
 #include <cmath>
 #include <vector>
+#include <fitellipse.hh>
 
 #undef FILENAME
 #define FILENAME "EllipseFeatureDetector.cc"
@@ -81,6 +85,7 @@ void EllipseFeatureDetector::FindFeatures(Image *image) {
 
   CvPoint points[MAXLENGTH];
   CvPoint2D32f fpoints[MAXLENGTH];
+  float flpoints[MAXLENGTH*2];
   CvBox2D current;
   CvSeq* c;
   while ((c = cvFindNextContour(scanner)) != NULL) {
@@ -94,12 +99,22 @@ void EllipseFeatureDetector::FindFeatures(Image *image) {
       /* Copy the points into floating point versions for the
 	 ellipse fitter */
       cvCvtSeqToArray( c, points ,cvSlice(0,count));
+      int pointer = 0;
       for( int pt = 0; pt < count; pt++ ) {
 	fpoints[pt].x = (float)points[pt].x;
 	fpoints[pt].y = (float)points[pt].y;
+	flpoints[pointer++] = (float)points[pt].x;
+	flpoints[pointer++] = (float)points[pt].y;	
       }
 
-      cvFitEllipse( fpoints, count,&current);
+      //      cvFitEllipse( fpoints, count,&current);
+      Ellipse2D e2d = fitellipse(flpoints,count);
+      current.center.x = e2d.m_x;
+      current.center.y = e2d.m_y;      
+      current.size.width=e2d.m_width;
+      current.size.height=e2d.m_height;
+      current.angle = e2d.m_angle_radians;
+
       PROGRESS("Ellipse has centre "<< current.center.x <<" " << current.center.y << " dims " << current.size.width << " " << current.size.height);
       if (calcerror(&current,fpoints,count)) {
 #ifdef IMAGE_DEBUG

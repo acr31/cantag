@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/02/06 21:11:38  acr31
+ * adding ellipse fitting
+ *
  * Revision 1.2  2004/01/27 18:06:58  acr31
  * changed inheriting classes to inherit publicly from their parents
  *
@@ -44,6 +47,7 @@ public:
   float m_angle_radians;
 
   Ellipse2D(float width);
+  Ellipse2D(float a,float b,float c,float d, float e,float f);
   Ellipse2D(float x, float y, float width, float height, float angle_radians);
   void ProjectPoint(float angle_radians, float radius, float *projX, float *projY) const;
 };

@@ -3,6 +3,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/02/06 21:11:44  acr31
+ * adding ellipse fitting
+ *
  * Revision 1.3  2004/02/03 16:25:11  acr31
  * more work on template tags and some function signature changes
  *
@@ -28,7 +31,6 @@ TemplateTag::TemplateTag(char* tagdirectory, int size, int subsample) : m_templa
 	char filename[255];
 	snprintf(filename,255,"%s/%s",tagdirectory,ptr->d_name);
 	m_templates.push_back(new Template(filename,size,subsample));
-	free(ptr);
       }
     }    
   }

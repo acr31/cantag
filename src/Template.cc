@@ -20,17 +20,19 @@ Template::Template(char* filename, int size=16,int subsample=4) :
   m_filename = new char[strlen(filename)];
   strncpy(m_filename,filename,strlen(filename));
   PROGRESS("Filename "<<filename);
-  m_original = LoadImage(filename);  
+  Image *loaded = LoadImage(filename);  
 
-  assert(m_original->width == m_original->height);
+  assert(loaded->width == loaded->height);
 
-  if (m_original->nChannels==3) {
-    Image* t = cvCreateImage(cvSize(m_original->width,m_original->height),IPL_DEPTH_8U,1);
-    cvCvtColor(m_original,t,CV_RGB2GRAY);
-    FreeImage(&m_original);
-    m_original = t;
+  m_original = cvCreateImage(cvSize(loaded->width,loaded->height),IPL_DEPTH_8U,1);
+  if (loaded->nChannels==3) {
+    cvCvtColor(loaded,m_original,CV_RGB2GRAY);
   }
-  
+  else {
+    cvCopy(loaded,m_original,NULL);
+  }
+  cvReleaseImage(&loaded);
+
   Image* dest = cvCreateImage(cvSize(size,size),IPL_DEPTH_8U,1);
   cvResize(m_original,dest);
 
@@ -91,7 +93,6 @@ float Template::Correlate(Image* image, const QuadTangle2D* q) const {
       DrawPixel(d,i,j,readvalues[i*m_size+j]);
     }
   }
-  cvSaveImage("debug-save.jpg",d);
   cvReleaseImage(&d);
 
   float sigma;
