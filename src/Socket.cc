@@ -104,6 +104,9 @@ void Socket::SoftConnect(const char* host, int port) {
 }
 
 void Socket::Listen() {
+#ifdef SOCKET_DEBUG
+  PROGRESS("Listen");
+#endif
   // listen
   if (::listen(m_socket,0) != 0) {
     perror(NULL);
@@ -123,6 +126,9 @@ Socket* Socket::Accept() {
     perror(NULL);
     throw "Failed to accept connection";
   }
+#ifdef SOCKET_DEBUG
+  PROGRESS("Accepted connection");
+#endif
   return new Socket(accepted);
 }
 
@@ -184,6 +190,9 @@ int Socket::Send(const unsigned char* buf, size_t len) {
   PROGRESS("Send unsigned char* size " << len);
 #endif
   while (m_soft_connect) {
+#ifdef SOCKET_DEBUG
+    PROGRESS("Connect needed");
+#endif
     try {
       Connect(m_host,m_port);
       m_soft_connect = false;
@@ -248,7 +257,13 @@ SingleSocket::~SingleSocket() {
 };
 
 void SingleSocket::Recv(unsigned char* buf, size_t len) {
+#ifdef SOCKET_DEBUG
+  PROGRESS("SingleSocket receive");
+#endif
   if (!m_accepted) {
+#ifdef SOCKET_DEBUG
+    PROGRESS("SingleSocket not connected so calling accept");
+#endif
     m_accepted = Socket::Accept();
   }
   m_accepted->Recv(buf,len);
