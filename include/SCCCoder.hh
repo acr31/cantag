@@ -19,8 +19,8 @@ namespace cbc20 {
 
 #define RINGS 5
 #define SECTORS 31
-#define ERRORS 5  // this gives 11 hamming distance
-//#define ERRORS 1 // this gives 3 hamming distance
+  //#define ERRORS 5  // this gives 11 hamming distance
+#define ERRORS 1 // this gives 3 hamming distance
 #define START 6
 #define SYMBOL_POLY 37
 #define LOCATOR_POLY 32
