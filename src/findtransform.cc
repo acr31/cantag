@@ -164,8 +164,8 @@ void GetNormalVector(const float transform[16], float normal[3]) {
   float v2y = proj3y/proj2h - proj0y/proj0h;
   float v2z = proj3z/proj2h - proj0z/proj0h;
 
-  /*
 
+  /*
   normal[0] = proj1x/proj1h - proj0x/proj0h;
   normal[1] = proj1y/proj1h - proj0y/proj0h;
   normal[2] = proj1z/proj1h - proj0z/proj0h;
@@ -176,7 +176,7 @@ void GetNormalVector(const float transform[16], float normal[3]) {
   normal[0] = v1y * v2z - v1z * v2y;
   normal[1] = v1z * v2x - v1x * v2z;
   normal[2] = v1x * v2y - v1y * v2x;
-
+  
 
   //  float modulus = sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
   
