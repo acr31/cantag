@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(tripover,1.0)
+AC_INIT(total,1.0)
 AC_CONFIG_HEADERS(include/tripover/CompilationOptions.h)
 AC_CONFIG_SRCDIR(src/Makefile.am)
 AM_INIT_AUTOMAKE
@@ -13,7 +13,7 @@ AC_CHECK_PROG(magicconfig,[Magick++-config --version],yes,no)
 
 if test $magicconfig = "yes"; then
    CPPFLAGS="$CPPFLAGS `Magick-config --cppflags`"
-   CXXFLAGS="$CXXFLAGS `Magick-config --cflags`"
+#   CXXFLAGS="$CXXFLAGS `Magick-config --cflags`"
    LDFLAGS="$LDFLAGS `Magick-config --ldflags`"
 fi
 
@@ -27,14 +27,14 @@ AC_ARG_ENABLE([text-debug],
 	AC_DEFINE([TEXT_DEBUG],[],[enable printing of debug information]),
 	[])
 	
-AC_DEFUN([TRIPOVER_CHECK_HEADER],
+AC_DEFUN([TOTAL_CHECK_HEADER],
          [AC_CHECK_HEADER([$1],
                          [AC_DEFINE([$2],[],[Define this to 1 if you have the <$1> header file])
                           $3=yes],
 			 [$3=no],[$4])
           AM_CONDITIONAL([$2], [test X@S|@$3 = Xyes])])
 
-AC_DEFUN([TRIPOVER_CHECK_LIB],
+AC_DEFUN([TOTAL_CHECK_LIB],
          [AC_CHECK_LIB([$1],[$2],
 	               [LIBS="-l$1 $LIBS"
                         AC_DEFINE([$3],[],[Define this to 1 if you have the lib$1.so library file])
@@ -44,20 +44,20 @@ AC_DEFUN([TRIPOVER_CHECK_LIB],
 
 dnl Checks for header files.
 
-TRIPOVER_CHECK_HEADER(Magick++.h,HAVE_MAGICKXX,have_magickxx_h)
-TRIPOVER_CHECK_HEADER(opencv/cv.h,HAVE_OPENCV_CV_H,have_opencv_cv_h)
-TRIPOVER_CHECK_HEADER(opencv/highgui.h,HAVE_OPENCV_HIGHGUI_H,have_opencv_highgui_h)
-TRIPOVER_CHECK_HEADER(GL/gl.h,HAVE_GL_GL_H,have_gl_gl_h)
-TRIPOVER_CHECK_HEADER(GL/glu.h,HAVE_GL_GLU_H,have_gl_glu_h)
-TRIPOVER_CHECK_HEADER(GL/osmesa.h,HAVE_GL_OSMESA_H,have_gl_osmesa_h)
-TRIPOVER_CHECK_HEADER(boost/random.hpp,HAVE_BOOST_RANDOM_H,have_boost_random_h)
-TRIPOVER_CHECK_HEADER(boost/test/unit_test.hpp,HAVE_BOOST_TEST_UNITTEST_H,have_boost_test_unittest_h)
-TRIPOVER_CHECK_HEADER(gmpxx.h,HAVE_GMPXX_H,have_gmpxx_h)
-TRIPOVER_CHECK_HEADER(asm/types.h,HAVE_ASM_TYPES_H,have_asm_types_h)
-TRIPOVER_CHECK_HEADER(linux/videodev.h,HAVE_LINUX_VIDEODEV_H,have_linux_videodev_h,)
-TRIPOVER_CHECK_HEADER(X11/Xlib.h,HAVE_X11_XLIB_H,have_x11_xlib_h)
-TRIPOVER_CHECK_HEADER(X11/Xutil.h,HAVE_X11_XUTIL_H,have_x11_xutil_h)
-TRIPOVER_CHECK_HEADER(X11/extensions/XShm.h,HAVE_X11_EXTENSIONS_XSHM_H,have_x11_extensions_xshm_h,
+TOTAL_CHECK_HEADER(Magick++.h,HAVE_MAGICKXX,have_magickxx_h)
+TOTAL_CHECK_HEADER(opencv/cv.h,HAVE_OPENCV_CV_H,have_opencv_cv_h)
+TOTAL_CHECK_HEADER(opencv/highgui.h,HAVE_OPENCV_HIGHGUI_H,have_opencv_highgui_h)
+TOTAL_CHECK_HEADER(GL/gl.h,HAVE_GL_GL_H,have_gl_gl_h)
+TOTAL_CHECK_HEADER(GL/glu.h,HAVE_GL_GLU_H,have_gl_glu_h)
+TOTAL_CHECK_HEADER(GL/osmesa.h,HAVE_GL_OSMESA_H,have_gl_osmesa_h)
+TOTAL_CHECK_HEADER(boost/random.hpp,HAVE_BOOST_RANDOM_H,have_boost_random_h)
+TOTAL_CHECK_HEADER(boost/test/unit_test.hpp,HAVE_BOOST_TEST_UNITTEST_H,have_boost_test_unittest_h)
+TOTAL_CHECK_HEADER(gmpxx.h,HAVE_GMPXX_H,have_gmpxx_h)
+TOTAL_CHECK_HEADER(asm/types.h,HAVE_ASM_TYPES_H,have_asm_types_h)
+TOTAL_CHECK_HEADER(linux/videodev.h,HAVE_LINUX_VIDEODEV_H,have_linux_videodev_h,)
+TOTAL_CHECK_HEADER(X11/Xlib.h,HAVE_X11_XLIB_H,have_x11_xlib_h)
+TOTAL_CHECK_HEADER(X11/Xutil.h,HAVE_X11_XUTIL_H,have_x11_xutil_h)
+TOTAL_CHECK_HEADER(X11/extensions/XShm.h,HAVE_X11_EXTENSIONS_XSHM_H,have_x11_extensions_xshm_h,
 [
 #ifdef HAVE_X11_XLIB_H
 #include <X11/Xlib.h>
@@ -67,16 +67,16 @@ TRIPOVER_CHECK_HEADER(X11/extensions/XShm.h,HAVE_X11_EXTENSIONS_XSHM_H,have_x11_
 
 dnl Checks for libraries.
 dnl new version of opencv needs check for cvGetErrStatus in cxcore and cvAdd in cv
-TRIPOVER_CHECK_LIB(Magick,MagickError,HAVELIB_MAGICK,havelib_magick)
-TRIPOVER_CHECK_LIB(Magick++,MagickPlusPlusDestroyMagick,HAVELIB_MAGICKXX,havelib_magickxx)
-TRIPOVER_CHECK_LIB(opencv,cvGetErrStatus,HAVELIB_OPENCV,havelib_opencv)
-TRIPOVER_CHECK_LIB(highgui,cvGetWindowName,HAVELIB_HIGHGUI,havelib_highgui)
-TRIPOVER_CHECK_LIB(GL,glFinish,HAVELIB_GL,havelib_gl)
-TRIPOVER_CHECK_LIB(OSMesa,OSMesaGetCurrentContext,HAVELIB_OSMESA,havelib_osmesa)
-TRIPOVER_CHECK_LIB(GLU,gluNewTess,HAVELIB_GLU,havelib_glu)
-TRIPOVER_CHECK_LIB(glut,fgActivateMenu,HAVELIB_GLUT,havelib_glut)
-TRIPOVER_CHECK_LIB(gmp,__gmpz_init,HAVELIB_GMP,havelib_gmp)
-TRIPOVER_CHECK_LIB(gmpxx,__gmpz_set,HAVELIB_GMPXX,havelib_gmpxx)
+TOTAL_CHECK_LIB(Magick,MagickError,HAVELIB_MAGICK,havelib_magick)
+TOTAL_CHECK_LIB(Magick++,MagickPlusPlusDestroyMagick,HAVELIB_MAGICKXX,havelib_magickxx)
+TOTAL_CHECK_LIB(opencv,cvGetErrStatus,HAVELIB_OPENCV,havelib_opencv)
+TOTAL_CHECK_LIB(highgui,cvGetWindowName,HAVELIB_HIGHGUI,havelib_highgui)
+TOTAL_CHECK_LIB(GL,glFinish,HAVELIB_GL,havelib_gl)
+TOTAL_CHECK_LIB(OSMesa,OSMesaGetCurrentContext,HAVELIB_OSMESA,havelib_osmesa)
+TOTAL_CHECK_LIB(GLU,gluNewTess,HAVELIB_GLU,havelib_glu)
+TOTAL_CHECK_LIB(glut,fgActivateMenu,HAVELIB_GLUT,havelib_glut)
+TOTAL_CHECK_LIB(gmp,__gmpz_init,HAVELIB_GMP,havelib_gmp)
+TOTAL_CHECK_LIB(gmpxx,__gmpz_set,HAVELIB_GMPXX,havelib_gmpxx)
 
 LIBSSAVEACR31="$LIBS"
 LIBS="-lboost_unit_test_framework-gcc-1_32 $LIBS"
