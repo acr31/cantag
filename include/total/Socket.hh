@@ -51,6 +51,7 @@ public:
   int Send(const float* buf, size_t len);
   int Send(const std::vector<float>& vec);
   virtual inline int GetByteCount() { return m_byte_count; }
+  inline const char* GetHostName() const { return m_host; } 
 };
 
 /**
