@@ -21,14 +21,14 @@ template<int SIZE>
 class BigInt : boost::operators< BigInt<SIZE> > {
 private:
 
-  std::bitset<SIZE> *m_backing_store;
+  CyclicBitSet<SIZE> *m_backing_store;
   mpz_class m_bit1;
 
 public:
   mpz_class m_gmpint;
   BigInt(unsigned int i) : m_gmpint(i), m_backing_store(NULL), m_bit1(1) {}
 
-  BigInt(const std::bitset<SIZE>& t) : m_gmpint(0), m_backing_store(NULL), m_bit1(1) {
+  BigInt(const CyclicBitSet<SIZE>& t) : m_gmpint(0), m_backing_store(NULL), m_bit1(1) {
     for(int i=SIZE-1;i>=0;i--) {
       m_gmpint <<= 1;
       if (t[i]) {
@@ -37,7 +37,7 @@ public:
     }
   }
 
-  BigInt(std::bitset<SIZE>& t) : m_gmpint(0), m_backing_store(&t), m_bit1(1) {
+  BigInt(CyclicBitSet<SIZE>& t) : m_gmpint(0), m_backing_store(&t), m_bit1(1) {
     for(int i=SIZE-1;i>=0;i--) {
       m_gmpint <<= 1;
       if (t[i]) m_gmpint |= m_bit1;

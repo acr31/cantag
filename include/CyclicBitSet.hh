@@ -13,14 +13,18 @@
  * operations.
  */
 template<int BIT_COUNT>
-class CyclicBitSet : public std::bitset<BIT_COUNT> {
+class CyclicBitSet : std::bitset<BIT_COUNT> {
 private:
   size_t m_rotation;
 
 public:
   CyclicBitSet() : std::bitset<BIT_COUNT>(), m_rotation(0) {};
   CyclicBitSet(unsigned long val) : std::bitset<BIT_COUNT>(val), m_rotation(0) {};
-  CyclicBitSet(const std::bitset<BIT_COUNT>& o) : std::bitset<BIT_COUNT>(o), m_rotation(0) {};
+  CyclicBitSet(const CyclicBitSet<BIT_COUNT>& o) : std::bitset<BIT_COUNT>(o), m_rotation(o.m_rotation) {};
+
+  void reset() {
+    std::bitset<BIT_COUNT>::reset();
+  }
 
   /**
    * Rotate the bit field so that the bit at position i goes to
@@ -37,7 +41,7 @@ public:
    */
   void RotateRight(size_t count) {
     m_rotation -= count;
-    if (m_rotation < 0) m_rotation+=BIT_COUNT;
+    while (m_rotation < 0) m_rotation+=BIT_COUNT;
   }
 
   /**
@@ -55,7 +59,7 @@ public:
   size_t MinRotate(size_t n) {
     size_t minindex = 0;
     for(size_t i=n;i<BIT_COUNT;i+=n) {
-      if (this->LessRotate(i,minindex)) {
+      if (LessRotate(i,minindex)) {
 	minindex=i;
       }
     }
@@ -68,10 +72,10 @@ public:
    * Return true if this bit set rotated left by rot1 is less than
    * this bitset rotated left by rot2.
    */
-  bool LessRotate(size_t rot1, size_t rot2) {
+  bool LessRotate(size_t rot1, size_t rot2) const {
     for(size_t i=BIT_COUNT;i>0;i--) {
-      int rot1_index = i-1+rot1 % BIT_COUNT;
-      int rot2_index = i-1+rot2 % BIT_COUNT;
+      int rot1_index = (i-1+rot1) % BIT_COUNT;
+      int rot2_index = (i-1+rot2) % BIT_COUNT;
       if ( !(*this)[rot1_index] && (*this)[rot2_index] ) {
 	return true;
       }
@@ -122,11 +126,11 @@ public:
   }
 
   bool operator[](size_t n) const {
-    return std::bitset<BIT_COUNT>::operator[] (n+m_rotation % BIT_COUNT);
+    return std::bitset<BIT_COUNT>::operator[]((n+m_rotation) % BIT_COUNT);
   }
 
   typename std::bitset<BIT_COUNT>::reference operator[](size_t n) {
-    return std::bitset<BIT_COUNT>::operator[](n+m_rotation % BIT_COUNT);
+    return std::bitset<BIT_COUNT>::operator[]((n+m_rotation) % BIT_COUNT);
   }
 
   bool operator<(const CyclicBitSet<BIT_COUNT>& o) const {
@@ -147,6 +151,10 @@ public:
       }
     }
     return true;
+  }
+
+  bool operator!=(const CyclicBitSet<BIT_COUNT>& o) const {
+    return !(*this == o);
   }
 
   CyclicBitSet& operator<<=(size_t shift) {
@@ -172,6 +180,15 @@ public:
   CyclicBitSet& operator>>(size_t shift) const {
     return CyclicBitSet<BIT_COUNT>(*this)>>=shift;
   }
+
+};
+
+template<int PAYLOAD_SIZE>
+std::ostream& operator<<(std::ostream& os, const CyclicBitSet<PAYLOAD_SIZE>& x) {
+  for(size_t i=0;i<PAYLOAD_SIZE;i++) {
+      os << x[PAYLOAD_SIZE-1-i];
+  }
+  return os;
 };
 
 #endif//CYCLIC_BIT_SET

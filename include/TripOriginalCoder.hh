@@ -49,6 +49,11 @@ public:
 
   };
 
+  virtual bool IsErrorCorrecting() const { return false; }
+  virtual int GetSymbolSize() const { return GRANULARITY; }
+  virtual int GetHammingDistanceBits() const { return 2; }
+  virtual int GetHammingDistanceSymbols() const { return 2; }
+
 
   /**
    * Take the bit pattern from the tag and decode the value stored

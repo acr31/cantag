@@ -17,8 +17,8 @@ namespace cbc20 {
 
 #define RINGS 5
 #define SECTORS 31
-  //#define ERRORS 5  // this gives 11 hamming distance
-#define ERRORS 1 // this gives 3 hamming distance
+#define ERRORS 5  // this gives 11 hamming distance
+  //#define ERRORS 1 // this gives 3 hamming distance
 #define START 6
 #define SYMBOL_POLY 37
 #define LOCATOR_POLY 32
@@ -639,30 +639,31 @@ class SCCCoder : public virtual Coder<BIT_COUNT> {
 public:
 
   SCCCoder() {}
+
+  virtual bool IsErrorCorrecting() const { return true; }
+  virtual int GetSymbolSize() const { return GRANULARITY; }
+  virtual int GetHammingDistanceBits() const { return 11; }
+  virtual int GetHammingDistanceSymbols() const { return 11; }
   
   virtual bool EncodePayload(CyclicBitSet<BIT_COUNT>& data) const {
     cbc20::tag_data_copy = data; // copy    
-    for(int i=0;i<BIT_COUNT;i+=GRANULARITY) {
-      cbc20::m[i/GRANULARITY] = data.GetSymbol(i,GRANULARITY);
+    for(int i=0;i<BIT_COUNT/GRANULARITY;i++) {
+      cbc20::m[i] = data.GetSymbol(i,GRANULARITY);
     }
 
     cbc20::encode_M_to_R();
     for(int i=0;i<BIT_COUNT/GRANULARITY;i++) {
-      int symbol = cbc20::R[i];
-      for(int j=GRANULARITY-1;j>=0;j--) {
-	data[GRANULARITY*i+j] = (symbol & 0x1);
-	symbol>>=1;
-      }
+      data.PutSymbol(cbc20::R[i],i,GRANULARITY);
     }
     cbc20::payload_copy = data;//copy
     return true;    
   }
 
-  virtual int DecodePayload(std::bitset<BIT_COUNT>& data, Payload<BIT_COUNT>& payload) const {
+  virtual int DecodePayload(CyclicBitSet<BIT_COUNT>& data) const {
     // copy the payload into cbc20:R which holds the thing to be decoded
     // each set of GRANULARITY bits are combined to make a symbol
-    for(int i=0;i<BIT_COUNT;i+=GRANULARITY) {
-      cbc20::R[i/GRANULARITY] = data.GetSymbol(i,GRANULARITY);
+    for(int i=0;i<BIT_COUNT/GRANULARITY;i++) {
+      cbc20::R[i] = data.GetSymbol(i,GRANULARITY);
     }
 
     // this returns the amount of rotation required to read the
@@ -671,17 +672,12 @@ public:
 
     // copy the corrected code back to the payload
     for(int i=0;i<BIT_COUNT/GRANULARITY;i++) {
-      int symbol = cbc20::R[i];
-      for(int j=GRANULARITY-1;j>=0;j--) {
-	data[GRANULARITY*i+j] = (symbol & 0x1);
-	symbol>>=1;
-      }
+      data.PutSymbol(cbc20::R[i],i,GRANULARITY);
     }
 
     if (rotation >= 0) {
       // rotate the payload back by the given number of symbols
-      data.RotateRight(rotation*GRANULARITY);
-
+      data.RotateLeft(rotation*GRANULARITY);
       // if the payload is the same as the thing we sent then copy back the tag data
       if (data == cbc20::payload_copy) {
 	for(int i=0;i<BIT_COUNT;i++) {

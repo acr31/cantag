@@ -44,6 +44,11 @@ AC_CHECK_LIB(gmpxx,
 	[],
 	[AC_MSG_ERROR([libgmpxx.so not found])])
 
+#AC_CHECK_LIB(boost_unit_test_framework-gcc-1_31,
+#	[jam],
+#	[],
+#	[AC_MSG_ERROR([libboost_unit_test_framework-gcc-1_31.so not found])])
+
 dnl Checks for header files.
 AC_CHECK_HEADER(opencv/cv.h,
 	[],

@@ -19,6 +19,12 @@ class SymbolChunkCoder : public virtual Coder<BIT_COUNT> {
 public:
   SymbolChunkCoder() {};
 
+  virtual bool IsErrorCorrecting() const { return false; }
+  virtual int GetSymbolSize() const { return GRANULARITY; }
+  virtual int GetHammingDistanceBits() const { return 2; }
+  virtual int GetHammingDistanceSymbols() const { return 0; }
+
+
   virtual int DecodePayload(CyclicBitSet<BIT_COUNT>& data) const {
     // rotate the code by increments of GRANULARITY until the first bit is a 1
     int rotation = 0;

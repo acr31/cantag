@@ -10,6 +10,8 @@
 template <int PAYLOAD_SIZE>
 class Coder {
 public:  
+
+  static const int PayloadSize = PAYLOAD_SIZE;
   
   /**
    * Alters the passed payload inorder to encode it.
@@ -27,6 +29,33 @@ public:
    *
    */
   virtual int DecodePayload(CyclicBitSet<PAYLOAD_SIZE>& data) const =0;
+
+  /**
+   * Return true if this code is error correcting or false if it only
+   * detects errors.
+   */
+  virtual bool IsErrorCorrecting() const = 0;
+
+  /**
+   * Return the number of bits per symbol.  The code could be rotated
+   * by any multiple of the symbol size.
+   */
+  virtual int GetSymbolSize() const = 0;
+
+  /**
+   * Return the codes minimum hamming distance in bits.  This is the
+   * minimum number of bits that you need to change to go from one
+   * code word to another one.
+   */
+  virtual int GetHammingDistanceBits() const = 0;
+
+  /**
+   * Return the codes minimum hamming distance in bits.  This is the
+   * minimum number of symbols that you need to change to go from one
+   * code word to another one.
+   */
+  virtual int GetHammingDistanceSymbols() const = 0;
+
 
 };
 
