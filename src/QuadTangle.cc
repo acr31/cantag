@@ -36,7 +36,7 @@ QuadTangle::QuadTangle(float* points, int numpoints, bool prev_fitted) {
     CvMemStorage* store = cvCreateMemStorage(0);
     CvSeq *result = cvApproxPoly( contour, sizeof(CvContour), store,
 				  CV_POLY_APPROX_DP, 
-				  cvContourPerimeter(contour)*0.02, 0 );
+				  cvContourPerimeter(contour)*0.1, 0 );
     
     //    CvPoint poly[result->total];
     //    cvCvtSeqToArray( result, poly , cvSlice(0,result->total));

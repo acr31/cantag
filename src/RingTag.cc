@@ -8,7 +8,7 @@
 
 #define RING_TAG_DEBUG
 #define RING_TAG_IMAGE_DEBUG
-#define DRAW_FIELD_DEBUG
+#undef DRAW_FIELD_DEBUG
 RingTag::RingTag(int ring_count,
 		 int sector_count,
 		 float bullseye_inner_radius,

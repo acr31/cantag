@@ -1,17 +1,31 @@
 /**
  * $Header$
  */
+
 #ifndef TRIP_ORIGINAL_CODER_GUARD
 #define TRIP_ORIGINAL_CODER_GUARD
 
-#include "Config.hh"
-#include "Coder.hh"
+#include <Config.hh>
+#include <Coder.hh>
+#include <TagPayload.hh>
 #include <cmath>
 
-#undef TRIP_ORIGINAL_CODER_DEBUG
+#define TRIP_ORIGINAL_CODER_DEBUG
 
-template<int CHECKSUM_COUNT=2>	 
-class TripOriginalCoder : public virtual Coder {
+/**
+ * A generalised coding scheme based on the one used in TRIP.  This
+ * scheme encodes a fixed number of bits using 4 or more symbols
+ * (i.e. 2 or more bits per symbol).  One symbol (with highest value)
+ * is reserved for synchronization and not used again.  The remainder
+ * of the code consists of a number of checksum symbols followed by
+ * the coded value.  The template should be initialised with the
+ * number of bits that this tag should store, the granularity, and the
+ * number of checksum symbols to use.  The granularity specifies the
+ * symmetry of the tag you are encoding.  It is the minimum number of
+ * bits you could rotate the code by to get another possible reading.
+ */ 
+template<int BIT_COUNT, int GRANULARITY, int CHECKSUM_COUNT=2>	 
+class TripOriginalCoder : public virtual Coder<BIT_COUNT> {
 private:
   unsigned int m_bitcount;
   unsigned int m_granularity;
@@ -20,21 +34,7 @@ private:
   unsigned int m_mask;
 
 public:
-  /**
-   * bitcount is the number of bits we can store on the tag
-   * granularity is the degree of symmetry in our representation
-   * - granularity 1 means that we are encoding a bit at a time and so
-   *   to generate all the possible reading of the code you
-   *   repeatedly rotate by 1 bit
-   * - granularity 2 means that we are encoding base 4 (two bits at a
-   *   time), so rotate by two bits at a time to get possible readings
-   *   of the code
-   *
-   * The significance of this is that the sync sector must be read
-   * uniquely whatever the rotation of the reading so we need to use a
-   * number of bits < the granularity to encode it
-   */
-  TripOriginalCoder(int bitcount, int granularity) : 
+  TripOriginalCoder() : 
     m_bitcount(bitcount),
     m_granularity(granularity),
     m_codingbase((1<<granularity) -1), // we encode base 2^n -1 (one of the values must be the sync sector)
@@ -52,14 +52,17 @@ public:
   /**
    * Take the bit pattern from the tag and decode the value stored
    */
-  virtual unsigned long long DecodeTag(unsigned long long value) {
+  virtual int DecodeTag(Payload& payload) {
+    std::bitset<GRANULARITY> sync_sector_mask;
+    sync_sector_mask.flip();
     // try all possible rotations...
-    for(int i=0;i<m_bitcount;i+=m_granularity) {
-      // have we found sync sector
+    for(int i=0;i<BIT_COUNT;i+=GRANULARITY) {
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
-      PROGRESS(value  << " " <<m_mask << " " <<(value &m_mask));
+      PROGRESS("Current rotation is "<< payload.to_string());
 #endif
-      if ((value & m_mask) == m_mask) {
+      // have we found sync sector
+
+      if (payload.Match(sync_sector_mask)) {
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
 	PROGRESS("Found sync sector");
 #endif
