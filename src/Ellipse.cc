@@ -517,6 +517,24 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   PROGRESS("                 " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];");
 #endif
 
+  int count = 0;
+  for(int i=0;i<3;i++) {
+    if (eigvals[4*i] < 0) { ++count; }
+  }
+
+  if (count > 1) {
+    for(int i=0;i<3;i++) {
+      eigvals[4*i]*=-1;
+    }
+#ifdef CIRCLE_TRANSFORM_DEBUG
+    PROGRESS("Two of the eigenvalues are less than zero - reversing ellipse equation");    
+    PROGRESS("Eigen Values: v=[" << eigvals[0] << "," << eigvals[1] << "," << eigvals[2] << ";");
+    PROGRESS("                 " << eigvals[3] << "," << eigvals[4] << "," << eigvals[5] << ";");
+    PROGRESS("                 " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];");
+#endif
+  }
+
+
   // bubble sort the vectors (based on their eigenvalue)...I'm so embarresed ;-)
   for(int i=0;i<4;i++) {
     for(int j=1;j<3;j++) {
@@ -536,20 +554,57 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
     }
   }
 
+  /*
+    int max[3] = {0};
+  for(int i=1;i<3;i++) { 
+    if (eigvects[3*i] > eigvects[max[0]]) {
+      max[0] = 3*i;
+    }
+    
+    if (eigvects[3*i+1] > eigvects[max[1]]) {
+      max[1] = 3*i+1;
+    }
+    
+    if (eigvects[3*i+2] > eigvects[max[2]]) {
+      max[2] = 3*i+2;
+    }
+  }
+
+  for(int i=0;i<3;i++) {
+    if ((eigvects[max[i]] < 0 && eigvals[4*i] > 0) ||
+	(eigvects[max[i]] > 0 && eigvals[4*i] < 0)) {
+      eigvects[i] *= -1;
+      eigvects[3+i] *= -1;
+      eigvects[6+i] *= -1;
+    }
+  }
+  */
+  
+
+  for(int i=0;i<3;i++) {
+    if (((eigvects[4*i] < 0) && (eigvals[4*i] > 0)) ||
+	((eigvects[4*i] > 0) && (eigvals[4*i] <= 0))) {
+      eigvects[i] *= -1;
+      eigvects[3+i] *= -1;
+      eigvects[6+i] *= -1;
+    }
+  }
+  
   // we'd like our tag to still face the same way
-  //  if (((eigvects[8] < 0) && (eigvals[8] > 0)) ||  
+  //  if (eigvects[8] < 0) && (eigvals[8] > 0)) ||  
   //      ((eigvects[8] > 0) && (eigvals[8] < 0))) {
-    eigvects[2] *= -1;
-    eigvects[5] *= -1;
-    eigvects[8] *= -1;
+  //    eigvects[2] *= -1;
+  //    eigvects[5] *= -1;
+  //    eigvects[8] *= -1;
     //  }
 
-  //  if (((eigvects[4] < 0) && (eigvals[4] > 0)) ||
-  //      ((eigvects[4] > 0) && (eigvals[4] < 0))) {
-    eigvects[1] *= -1;
-    eigvects[4] *= -1;
-    eigvects[7] *= -1;
-    //  }
+  //   if (((eigvects[4] < 0) && (eigvals[4] > 0)) ||
+  //        ((eigvects[4] > 0) && (eigvals[4] < 0))) {
+  //  if (eigvects[4] <0) {
+  //     eigvects[1] *= -1;
+  //     eigvects[4] *= -1;
+  //     eigvects[7] *= -1;
+  //  }
 
     //  if (((eigvects[0] < 0) && (eigvals[0] > 0)) ||
     //      ((eigvects[0] > 0) && (eigvals[0] < 0))) {
@@ -602,7 +657,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
 #endif
     //eigvects[0] *= -1;
     //eigvects[3] *= -1;
-    //    eigvects[6] *= -1;
+    //eigvects[6] *= -1;
   }
 
   double r1[] = { eigvects[0], eigvects[1], eigvects[2], 0,
