@@ -202,6 +202,10 @@ public:
    */
   inline void DrawPoint(int x,int y, unsigned char colour, unsigned int size) {
     DrawPixel(x,y,colour);
+    DrawPixel(x+1,y,colour);
+    DrawPixel(x,y+1,colour);
+    DrawPixel(x-1,y,colour);
+    DrawPixel(x,y-1,colour);
   }
 
   /**
