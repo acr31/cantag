@@ -253,10 +253,9 @@ void Image::ellipse_polygon_approx(float* points, int startindex, int length, fl
   for(int i=2*startindex;i<2*(length+startindex);i+=2) {
     float cost = cos(currentAngle);
     float sint = sin(currentAngle);
-    // remember that y increases down from the top of the image so we
-    // do yc minus point rather than yc + point
+
     points[i] = Round(xc + a*cosa*cost + b*sina*sint);
-    points[i+1] = Round(yc + a*sina*cost - b*cosa*sint);
+    points[i+1] = Round(yc + a*sina*cost + b*cosa*sint);
     currentAngle += STEPSIZE;
   }
 
