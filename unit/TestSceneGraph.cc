@@ -5,7 +5,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
-#include <SceneGraph.hh>
+#include <tripover/SceneGraph.hh>
 #include <iostream>
 #include <ctime>
 

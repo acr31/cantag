@@ -5,10 +5,10 @@
  *
  * $Header$
  */
-#include <polysolve.hh>
+#include <tripover/polysolve.hh>
 #include <cmath>
 #include <cassert>
-#include <gaussianelimination.hh>
+#include <tripover/gaussianelimination.hh>
 
 /**
  * Only solves a polynomial if three roots exist

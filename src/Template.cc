@@ -1,8 +1,8 @@
-#include <Config.hh>
-#include <Template.hh>
+#include <tripover/Config.hh>
+#include <tripover/Template.hh>
 
 #include <cstring>
-#include <findtransform.hh>
+#include <tripover/findtransform.hh>
 
 /**
  * Load the image file given from disk.  Subsample it to produce a

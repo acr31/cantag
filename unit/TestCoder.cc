@@ -5,13 +5,13 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
 
-#include <Coder.hh>
-#include <TripOriginalCoder.hh>
-#include <ParityCoder.hh>
-#include <SymbolChunkCoder.hh>
-#include <SCCCoder.hh>
+#include <tripover/Coder.hh>
+#include <tripover/TripOriginalCoder.hh>
+#include <tripover/ParityCoder.hh>
+#include <tripover/SymbolChunkCoder.hh>
+#include <tripover/SCCCoder.hh>
 
-#include <CyclicBitSet.hh>
+#include <tripover/CyclicBitSet.hh>
 #include <iostream>
 
 using boost::unit_test_framework::test_suite;

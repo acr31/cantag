@@ -1,6 +1,6 @@
 #include <cstdio>
 
-#include <moreau-basis.hh>
+#include <tripover/moreau-basis.hh>
 extern int eigen(
            int     vec,           /* switch for computing evectors ...*/
            int     ortho,         /* orthogonal Hessenberg reduction? */

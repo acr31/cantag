@@ -6,7 +6,7 @@
  *
  * $Header$
  */
-#include <GF4Poly.hh>
+#include <tripover/GF4Poly.hh>
 
 
 /**

@@ -1,5 +1,5 @@
-#include <Config.hh>
-#include <Camera.hh>
+#include <tripover/Config.hh>
+#include <tripover/Camera.hh>
 
 Camera::Camera() :
   m_r2(0),m_r4(0),m_r6(0),

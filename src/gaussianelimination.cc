@@ -2,8 +2,8 @@
  *  $Header$
  */
 
-#include <Config.hh>
-#include <gaussianelimination.hh>
+#include <tripover/Config.hh>
+#include <tripover/gaussianelimination.hh>
 #include <cmath>
 
 #ifdef TEXT_DEBUG

@@ -5,7 +5,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
-#include <ImageSegmentor.hh>
+#include <tripover/ImageSegmentor.hh>
 #include <iostream>
 #include <ctime>
 

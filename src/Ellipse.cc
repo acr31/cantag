@@ -2,13 +2,13 @@
  * $Header$
  */
 
-#include <Config.hh>
-#include <Ellipse.hh>
-#include <gaussianelimination.hh>
+#include <tripover/Config.hh>
+#include <tripover/Ellipse.hh>
+#include <tripover/gaussianelimination.hh>
 #include <cmath>
 #include <iostream>
-#include <findtransform.hh>
-#include <polysolve.hh>
+#include <tripover/findtransform.hh>
+#include <tripover/polysolve.hh>
 
 #ifdef TEXT_DEBUG
 # undef ELLIPSE_DEBUG

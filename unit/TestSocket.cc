@@ -4,8 +4,8 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
-#include <Socket.hh>
-#include <Image.hh>
+#include <tripover/Socket.hh>
+#include <tripover/Image.hh>
 #include <iostream>
 #define PORT 56789
 

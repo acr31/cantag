@@ -2,7 +2,7 @@
  * $Header$
  */
 
-#include <V4LImageSource.hh>
+#include <tripover/V4LImageSource.hh>
 
 #include <sys/types.h>  // for open()
 #include <sys/stat.h>   // for open()

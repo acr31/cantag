@@ -1,11 +1,11 @@
 /**
  * $Header$
  */
-#include <Config.hh>
-#include <QuadTangle.hh>
+#include <tripover/Config.hh>
+#include <tripover/QuadTangle.hh>
 #include <opencv/cv.h>
 #include <cmath>
-#include <gaussianelimination.hh>
+#include <tripover/gaussianelimination.hh>
 
 #define COMPARE_THRESH 1
 

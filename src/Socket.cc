@@ -2,7 +2,7 @@
  * $Header$
  */
 
-#include <Socket.hh>
+#include <tripover/Socket.hh>
 #include <cerrno>
 
 extern "C" {
@@ -10,9 +10,11 @@ extern "C" {
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <netdb.h>  
+#include <arpa/inet.h>
 }
 
-Socket::Socket() : m_byte_count(0) {
+Socket::Socket() : m_byte_count(0), m_host(NULL), m_port(0), m_soft_connect(false) {
   m_socket = ::socket(PF_INET,SOCK_STREAM,0);
   
   if (m_socket == -1) {
@@ -21,26 +23,41 @@ Socket::Socket() : m_byte_count(0) {
   }
 }
 
-Socket::Socket(int handle) : m_socket(handle) , m_byte_count(0) {
+Socket::Socket(int handle) : m_socket(handle) , m_byte_count(0), m_host(NULL), m_port(0),m_soft_connect(false) {
 }
 
 Socket::~Socket() {
   if (m_socket != -1) {
     ::close(m_socket);
   }
+  if (m_host) {
+    delete m_host;
+  }
 }
 
 void Socket::Bind(const char* host, int port) {
+  struct hostent* hostdetails;
+  if ((hostdetails = gethostbyname(host)) == NULL) {
+    throw "Failed to lookup address";
+  }
+
+  char* address = hostdetails->h_addr_list[0];
+  unsigned int q0 = address[0];
+  unsigned int q1 = address[1];
+  unsigned int q2 = address[2];
+  unsigned int q3 = address[3];
+
   // lookup address
   struct sockaddr_in s;
   memset(&s,0,sizeof(sockaddr));
   s.sin_family = AF_INET;
   s.sin_port = htons(port);
-  int status = inet_pton(AF_INET,host,&s.sin_addr);
-  if (status <= 0) {
-    perror(NULL);
-    throw "Failed to get address for chosen machine!";
-  }
+  s.sin_addr.s_addr = q0 | (q1 << 8) | (q2 << 16) | (q3 << 24);
+  //  int status = inet_pton(AF_INET,host,&s.sin_addr);
+  //  if (status <= 0) {
+  //   perror(NULL);
+  //   throw "Failed to get address for chosen machine!";
+  //  }
   // connect to remote machine
   if (::bind(m_socket,(struct sockaddr*)&s,sizeof(struct sockaddr)) != 0) {
     perror(NULL);
@@ -64,6 +81,13 @@ void Socket::Connect(const char* host, int port) {
     perror(NULL);
     throw "Failed to connect to remote machine!";
   } 
+}
+
+void Socket::SoftConnect(const char* host, int port) {
+  m_host = new char[strlen(host)];
+  strcpy(m_host,host);
+  m_port = port;
+  m_soft_connect = true;
 }
 
 void Socket::Listen() {
@@ -118,6 +142,10 @@ void Socket::Recv(std::vector<float>& vec) {
 }
 
 int Socket::Send(const unsigned char* buf, size_t len) {
+  if (m_soft_connect) {
+    Connect(m_host,m_port);
+    m_soft_connect = false;
+  }
   int total = 0;
   while(total != len) {
     int sent = ::send(m_socket,buf+total,len-total,0);

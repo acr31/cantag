@@ -2,7 +2,7 @@
  * $Header$
  */
 
-#include <ContourTree.hh>
+#include <tripover/ContourTree.hh>
 
 #undef CONTOUR_TREE_DEBUG
 #undef  CONTOUR_TREE_DEBUG_SAVE

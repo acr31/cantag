@@ -4,7 +4,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
-#include <polysolve.hh>
+#include <tripover/polysolve.hh>
 #include <iostream>
 
 using boost::unit_test_framework::test_suite;

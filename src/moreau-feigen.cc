@@ -2,8 +2,8 @@
  * Reference: "Numerical Algorithms with C by G. Engeln-Mueller and   *
  *             F. Uhlig, Springer-Verlag, 1996"                       *
  * ------------------------------------------------------------------ */
-#include <moreau-basis.hh>
-#include <moreau-vmblock.hh>
+#include <tripover/moreau-basis.hh>
+#include <tripover/moreau-vmblock.hh>
 
 
 #define MAXIT 50                      /*  Maximal number of           */

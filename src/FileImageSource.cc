@@ -1,7 +1,7 @@
 /**
  * $Header$
  */
-#include <FileImageSource.hh>
+#include <tripover/FileImageSource.hh>
 
 FileImageSource::FileImageSource(char* filename) : m_original(new Image(filename)), m_buffer(new Image(filename)) {}    
 

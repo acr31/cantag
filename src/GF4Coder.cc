@@ -6,6 +6,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2005/02/03 11:21:30  acr31
+ * moved include files into tripover subdirectory
+ *
  * Revision 1.2  2004/01/30 16:54:27  acr31
  * changed the Coder api -reimplemented various bits
  *
@@ -27,7 +30,7 @@
  *
  */
 
-#include <GF4Coder.hh>
+#include <tripover/GF4Coder.hh>
 
 #undef FILENAME
 #define FILENAME "GF4Coder.cc"

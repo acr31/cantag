@@ -4,8 +4,8 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
-#include <ContourTree.hh>
-#include <Image.hh>
+#include <tripover/ContourTree.hh>
+#include <tripover/Image.hh>
 
 #define IMAGE_WIDTH 1000
 #define IMAGE_HEIGHT 600

@@ -7,8 +7,8 @@
  **********************************************************/
 #include <malloc.h>
 
-#include <moreau-basis.hh>
-#include <moreau-vmblock.hh>
+#include <tripover/moreau-basis.hh>
+#include <tripover/moreau-vmblock.hh>
 /***********************************************************************
 *                                                                      *
 * Management of a set of dynamically allocated vectors and matrices    *

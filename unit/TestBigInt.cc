@@ -4,7 +4,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
-#include <BigInt.hh>
+#include <tripover/BigInt.hh>
 
 using boost::unit_test_framework::test_suite;
  

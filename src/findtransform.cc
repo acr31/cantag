@@ -2,9 +2,9 @@
  * $Header$
  */
 
-#include <findtransform.hh>
-#include <polysolve.hh>
-#include <gaussianelimination.hh>
+#include <tripover/findtransform.hh>
+#include <tripover/polysolve.hh>
+#include <tripover/gaussianelimination.hh>
 #include <cmath>
 
 #undef SQUARE_TRANSFORM_DEBUG

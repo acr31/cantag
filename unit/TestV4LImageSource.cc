@@ -3,7 +3,7 @@
  */
 
 #include <boost/test/unit_test.hpp>
-#include <V4LImageSource.hh>
+#include <tripover/V4LImageSource.hh>
 #include <ctime>
 #include <iostream>
 
