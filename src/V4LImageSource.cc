@@ -88,7 +88,7 @@ V4LImageSource::V4LImageSource(const char* device, const int channel) : m_handle
   // the video device will read into n different frames sequentially
   // however the _total_ amount of memory needed for all of these
   // frames if given by mbuf.size
-  if ((m_mmap.SetHandle((uchar*)mmap(0,mbuf.size,PROT_READ,MAP_SHARED,m_handle.Get(),0),mbuf.size)).Get() == (uchar*)MAP_FAILED) {
+  if ((m_mmap.SetHandle((uchar*)mmap(0,mbuf.size,PROT_READ | PROT_WRITE,MAP_SHARED,m_handle.Get(),0),mbuf.size)).Get() == (uchar*)MAP_FAILED) {
     throw "Failed to mmap suitable buffer size";
   }
   m_total_frames = mbuf.frames;
@@ -125,7 +125,14 @@ V4LImageSource::V4LImageSource(const char* device, const int channel) : m_handle
     m_slots[i].frame = i;
     m_slots[i].width = m_image_width;
     m_slots[i].height = m_image_height;
-    m_images[i] = Image(m_image_width,m_image_height,m_handle.Get()+(uchar*)mbuf.offsets[i]);
+    m_images[i] = Image(m_image_width,m_image_height,m_mmap.Get()+mbuf.offsets[i]);
+    // start the device asynchronously fetching the frame
+    if (i>0) { // dont start capturing for this one because we'll
+	       // start it when we first call next
+      if (ioctl(m_handle.Get(),VIDIOCMCAPTURE,&(m_slots[i])) < 0) {
+	throw "Failed to ioctl (VIDIOCMCAPTURE) video device";
+      }
+    }
   }
 
 #ifdef V4L_DEBUG
@@ -133,11 +140,7 @@ V4LImageSource::V4LImageSource(const char* device, const int channel) : m_handle
 #endif
 
   m_current_frame = 0;
-  // start the device asynchronously fetching the next frame
-  if (ioctl(m_handle.Get(),VIDIOCMCAPTURE,&(m_slots[0])) < 0) {
-    throw "Failed to ioctl (VIDIOCMCAPTURE) video device";
-  }
-
+  
 #ifdef V4L_DEBUG
   PROGRESS("Initiated asynchronous capture");
 #endif
@@ -150,6 +153,14 @@ V4LImageSource::~V4LImageSource() {
 }
 
 Image* V4LImageSource::Next() {  
+  // start the device collecting the one we just used
+  if (ioctl(m_handle.Get(),VIDIOCMCAPTURE,&(m_slots[m_current_frame])) < 0) {
+    throw "Failed to ioctl (VIDIOCMCAPTURE) video device";
+  }
+
+  m_current_frame++;
+  m_current_frame%=m_total_frames;
+
   // collect the next image - block until its there
   if (ioctl(m_handle.Get(),VIDIOCSYNC,&(m_slots[m_current_frame].frame)) < 0) {
     throw "Failed to ioctl (VIDIOCSYNC) video device";
@@ -157,13 +168,6 @@ Image* V4LImageSource::Next() {
 
   Image* result = &m_images[m_current_frame];
 
-  m_current_frame++;
-  m_current_frame%=m_total_frames;
-
-  // start the device collecting the next one
-  if (ioctl(m_handle.Get(),VIDIOCMCAPTURE,&(m_slots[m_current_frame])) < 0) {
-    throw "Failed to ioctl (VIDIOCMCAPTURE) video device";
-  }
   return result;
 }
 

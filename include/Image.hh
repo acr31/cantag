@@ -23,8 +23,8 @@ private:
 		       // point to an existing buffer of data
   
 public:
-  // SceneGraph.hh currently needs this
-  IplImage* m_image;
+  IplImage* m_image; // this is public for the benefit of SceneGraph
+
   Image();
   Image(int width, int height);
   Image(int width, int height, uchar* contents);

@@ -45,6 +45,9 @@ void Camera::SetTangential(float d1, float d2) {
   m_d2 = d2;
 }
 
+/**
+ * \todo currently ignores radial and tangential parameters
+ */
 void Camera::NPCFToImage(float* points, int numpoints) const {
   for(int i=0;i<numpoints*2;i+=2) {
     float x = points[i];
@@ -68,12 +71,18 @@ void Camera::NPCFToImage(float* points, int numpoints) const {
     double xd1 = radialcoeff*x+dxx;
     double xd2 = radialcoeff*y+dxy;
 
+    xd1 = x;
+    xd2 = y;
+
     // 4) rescale and return to image co-ordinates
     points[i] = m_intrinsic[0]*(xd1+m_intrinsic[1]*xd2)+m_intrinsic[2];
     points[i+1] = m_intrinsic[4]*xd2+m_intrinsic[5];
   }      
 }
 
+/**
+ * \todo currently ignores radial and tangential parameters
+ */
 void Camera::ImageToNPCF(float* points, int numpoints) const {
   for(int i=0;i<numpoints*2 ;i+=2) {
     // 1) translate the points back to the principle point
@@ -84,7 +93,7 @@ void Camera::ImageToNPCF(float* points, int numpoints) const {
     points[i] /= m_intrinsic[0];
     points[i+1] /= m_intrinsic[4];
 
-    for(int j=0;j<10;j++) {
+    for(int j=0;j<0;j++) {
       double x = points[i];
       double y = points[i+1];
       // 1) Compute the distance from the principle point (now 0,0)
