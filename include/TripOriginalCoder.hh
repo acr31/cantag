@@ -8,8 +8,7 @@
 #include "Coder.hh"
 #include <cmath>
 
-#undef FILENAME
-#define FILENAME "TripOriginalCoder.hh"
+#undef TRIP_ORIGINAL_CODER_DEBUG
 
 template<int CHECKSUM_COUNT=2>	 
 class TripOriginalCoder : public virtual Coder {
@@ -39,7 +38,7 @@ public:
     m_bitcount(bitcount),
     m_granularity(granularity),
     m_codingbase((1<<granularity) -1), // we encode base 2^n -1 (one of the values must be the sync sector)
-    m_symbol_count((int)pow(m_codingbase,bitcount-1-CHECKSUM_COUNT)),
+    m_symbol_count(bitcount-granularity*(1+CHECKSUM_COUNT)),
     m_mask(( 1<<granularity) - 1)
   {
 
@@ -57,9 +56,13 @@ public:
     // try all possible rotations...
     for(int i=0;i<m_bitcount;i+=m_granularity) {
       // have we found sync sector
+#ifdef TRIP_ORIGINAL_CODER_DEBUG
       PROGRESS(value  << " " <<m_mask << " " <<(value &m_mask));
+#endif
       if ((value & m_mask) == m_mask) {
+#ifdef TRIP_ORIGINAL_CODER_DEBUG
 	PROGRESS("Found sync sector");
+#endif
 	// yes
 	value >>= m_granularity; // shift off the sync sector
 	unsigned long checksum = 0;
@@ -68,8 +71,10 @@ public:
 	  checksum += (value & m_mask)*pwr;
 	  value >>= m_granularity;
 	}
+#ifdef TRIP_ORIGINAL_CODER_DEBUG
 	PROGRESS("Read checksum "<< checksum);
 	PROGRESS("Remaining code is "<<value);
+#endif
 	unsigned long long code = 0;
 	unsigned long checksum_check = 0;
 	for(int i=0;i<m_symbol_count;i++) {
@@ -84,17 +89,23 @@ public:
 	  return code;		  
 	}
 	else {
+#ifdef TRIP_ORIGINAL_CODER_DEBUG
 	  PROGRESS("Failed. Checksum on tag was "<<checksum<< " and we have "<< (checksum_check % (unsigned long)pow(m_codingbase,CHECKSUM_COUNT)));
+#endif
 	  throw InvalidCheckSum();
 	}
       }
       else {
 	// sync sector not found yet
 	value = (value << m_granularity) & (((unsigned long long)1<<m_bitcount)-1) | (value >> (m_bitcount-m_granularity));
+#ifdef TRIP_ORIGINAL_CODER_DEBUG
 	PROGRESS("Rotated value to "<< value);
+#endif
       }
     }
+#ifdef TRIP_ORIGINAL_CODER_DEBUG
     PROGRESS("Failed to find a sync sector");
+#endif
     throw InvalidCode();
   }
 
@@ -104,8 +115,10 @@ public:
    */
   virtual unsigned long long EncodeTag(unsigned long long value) {
     // check to see if the value is too large
+#ifdef TRIP_ORIGINAL_CODER_DEBUG
     PROGRESS("Encode called with " << value);
     PROGRESS("Maximum value is "<< (unsigned long long)pow(m_codingbase,m_symbol_count) -1 );
+#endif
     if (value > (unsigned long long)pow(m_codingbase,m_symbol_count) -1) {
       throw ValueTooLarge();
     }
@@ -121,9 +134,13 @@ public:
       result |= store;
       checksum+=store;
     }
+#ifdef TRIP_ORIGINAL_CODER_DEBUG
     PROGRESS("Coded value is "<<result);
+#endif
     checksum %= (unsigned long)pow(m_codingbase,CHECKSUM_COUNT);
+#ifdef TRIP_ORIGINAL_CODER_DEBUG
     PROGRESS("Now storing checksum " << checksum);
+#endif
 
     // now store the checksum
     for(int i=CHECKSUM_COUNT-1;i>=0;i--) {
@@ -137,7 +154,9 @@ public:
     result <<= m_granularity;
     result |= (1<<m_granularity)-1;
 
+#ifdef TRIP_ORIGINAL_CODER_DEBUG
     PROGRESS("Final bit pattern is "<<result);
+#endif
     return result;
   }
 

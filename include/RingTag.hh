@@ -13,7 +13,7 @@
 #include <ShapeChain.hh>
 #include <Ellipse.hh>
 
-#define Ellipse LinearEllipse
+//#define Ellipse LinearEllipse
 
 class RingTag : public virtual Tag< ShapeChain<Ellipse> >, protected virtual Coder {
 private:

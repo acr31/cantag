@@ -4,29 +4,6 @@
  * Copyright Chris Cain <cbc20@cam.ac.uk> 
  *
  * $Header$
- *
- * $Log$
- * Revision 1.7  2004/02/24 20:46:36  acr31
- * *** empty log message ***
- *
- * Revision 1.6  2004/02/21 20:33:12  acr31
- * removed a load of obsolete files - factored in some more code to the new framework
- *
- * Revision 1.5  2004/02/21 10:05:57  acr31
- * got it working!
- *
- * Revision 1.4  2004/02/18 15:58:53  acr31
- * fixes to the pose extraction
- *
- * Revision 1.3  2004/02/17 08:01:29  acr31
- * *** empty log message ***
- *
- * Revision 1.2  2004/02/16 16:02:28  acr31
- * *** empty log message ***
- *
- * Revision 1.1  2004/02/13 21:47:39  acr31
- * work on ellipse fitting
- *
  */
 #include <cmath>
 

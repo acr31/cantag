@@ -6,7 +6,6 @@
 #include <eigenvv.hh>
 #include <gaussianelimination.hh>
 
-#define CIRCLE_TRANSFORM_DEBUG
 #define SQUARE_TRANSFORM_DEBUG
 #undef APPLY_TRANSFORM_DEBUG
 
@@ -157,8 +156,8 @@ void GetNormalVector(const float transform[16], float normal[3]) {
   normal[1]/=modulus;
   normal[2]/=modulus;
 
-  //#ifdef APPLY_TRANSFORM_DEBUG
+#ifdef APPLY_TRANSFORM_DEBUG
   PROGRESS("Found normal vector ("<<normal[0]<<","<<normal[1]<<","<<normal[2]<<")");
-  //#endif
+#endif
 
 }

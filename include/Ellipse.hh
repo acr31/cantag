@@ -63,6 +63,11 @@ public:
    *
    * with the constraint that
    *   b**2 - 4ac < 0
+
+   * We need to ensure that our matrix has a positive trace and determinant
+   * i.e.
+   * a+c>0 and b>0
+   * Which we can do by multiplying through by -1 if necessary   
    *
    * Re-write the conic equation in vector form as:
    *

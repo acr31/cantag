@@ -275,7 +275,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
    *                       ( d/2   e/2    f   )
    */
   eigensolve(a,b/2, d/2,
-	     c,e,
+	     c,e/2,
 	     f,
 	     eigvects, eigvals);
 
@@ -509,9 +509,11 @@ void LinearEllipse::GetTransform(float transform1[16], float transform2[16]) con
   float e = GetE();
   float f = GetF();
   
-  // it turns out to be really important to the decomposition
-  // that our conic has a negative sense!
-  if (f > 0) {
+#ifdef DECOMPOSE_DEBUG
+  PROGRESS("a+c = " << a+c);
+  PROGRESS("b = " << b);
+#endif
+  if (a+c < 0) {
     a*=-1;
     b*=-1;
     c*=-1;

@@ -53,7 +53,7 @@ public:
   }
    
   inline void DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigned int thickness) {
-    cvLine(m_image,cvPoint(x0,y0),cvPoint(x1,y1),colour,thickness);
+    cvLineAA(m_image,cvPoint(x0,y0),cvPoint(x1,y1),colour,0);
   }
 
   inline void DrawLine(float x0,float y0, float x1,float y1, unsigned char colour, unsigned int thickness) {

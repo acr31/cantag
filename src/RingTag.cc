@@ -8,7 +8,7 @@
 
 #define RING_TAG_DEBUG
 #define RING_TAG_IMAGE_DEBUG
-
+#define DRAW_FIELD_DEBUG
 RingTag::RingTag(int ring_count,
 		 int sector_count,
 		 float bullseye_inner_radius,
@@ -200,11 +200,16 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
     float error1 = (*i)->GetShapes().GetShape().GetError(projected1,count);
     float error2 = (*i)->GetShapes().GetShape().GetError(projected2,count);
 
+#ifdef RING_TAG_DEBUG
+    PROGRESS("Error 1 " << error1);
+    PROGRESS("Error 2 " << error2);    
+#endif
+
     if ((error1 < error2) && (error1 < 0.001)) {
 #ifdef RING_TAG_DEBUG
       PROGRESS("Chose orientation 1 with error "<<error1<<" instead of orientation 2 with error "<<error2);
 #endif
-      correcttrans = transform2;
+      correcttrans = transform1;
       break;
     }
 
@@ -212,7 +217,7 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
 #ifdef RING_TAG_DEBUG
       PROGRESS("Chose orientation 2 with error "<<error2<<" instead of orientation 1 with error "<<error1);
 #endif
-      correcttrans = transform1;
+      correcttrans = transform2;
       break;
     }
   }
@@ -283,7 +288,12 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
 #ifdef RING_TAG_DEBUG
 	PROGRESS("Found code " << code);
 #endif	
-
+	projected1[0] = 0;
+	projected1[1] = 0;
+	ApplyTransform(correcttrans,projected1[0],projected1[1],projected1,projected1+1);
+	camera.NPCFToImage(projected1,1);
+	PROGRESS("Ellipse position is "<<projected1[0]<<","<<projected1[1]);
+	
 	LocatedObject* lobj = node->GetLocatedObject();
 	for(int i=0;i<16;i++) {
 	  lobj->transform[i] = correcttrans[i];
@@ -336,6 +346,21 @@ void RingTag::draw_read(const Image& image, const Camera& camera, float l[16], i
   debug0.ConvertScale(-1,255);
   debug0.ConvertScale(0.5,128);
   
+#ifdef DRAW_FIELD_DEBUG
+  float step = 0.2;
+  float max = (m_bullseye_outer_radius < m_data_outer_radius ? m_data_outer_radius : m_bullseye_outer_radius) / m_bullseye_inner_radius / 2;
+
+  for(float k=-1;k<=1;k+=step) {
+      float pts[] = { -max,k*max,
+		      max,k*max,
+		      k*max,-max,
+		      k*max,max };
+      ApplyTransform(l,pts,4);
+      camera.NPCFToImage(pts,4);
+      debug0.DrawLine(pts[0],pts[1],pts[2],pts[3],COLOUR_BLACK,1);
+      debug0.DrawLine(pts[4],pts[5],pts[6],pts[7],COLOUR_BLACK,1);
+  }
+#else
   draw_circle(debug0,camera,l,m_bullseye_inner_radius / m_bullseye_outer_radius);
   draw_circle(debug0,camera,l,1);
   draw_circle(debug0,camera,l,m_data_inner_radius / m_bullseye_outer_radius);
@@ -343,7 +368,6 @@ void RingTag::draw_read(const Image& image, const Camera& camera, float l[16], i
   for(int r=0;r<m_ring_count;r++) {
     draw_circle(debug0,camera,l,m_data_ring_outer_radii[r] / m_bullseye_outer_radius);
   }
-  
   
   int counter=0;
   for(int k=0;k<m_sector_count;k++) {
@@ -357,9 +381,10 @@ void RingTag::draw_read(const Image& image, const Camera& camera, float l[16], i
       int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
       // or pick the colour to be on a gradient so we see the order it samples in
       //int colour = (int)((double)counter/(double)m_sector_count*255);
-      //debug0.DrawPoint(pts[0],pts[1],colour,4);
+      debug0.DrawPoint(pts[0],pts[1],colour,4);
     }
     counter++;
   }
+#endif
   debug0.Save("debug-decode.bmp");
 }
