@@ -19,11 +19,11 @@
 
 namespace Total {
 
+#if defined(HAVE_GMPXX_H) && defined(HAVELIB_GMP) && defined(HAVELIB_GMPXX)
   /**
    * Something very like an original TRIP tag.  17 sectors and 2 rings
    * using the TripOriginal coding scheme with 2 sectors of checksum.
    */
-#if defined(HAVE_GMPXX_H) && defined(HAVELIB_GMP) && defined(HAVELIB_GMPXX)
   class TripTag : public RingTag<2,17,Ellipse>, protected virtual TripOriginalCoder<34,2,2>, private virtual FullEllipseTransform {
   public:
     TripTag();
@@ -52,6 +52,12 @@ namespace Total {
     SplitTarget();
   };
 #endif
+
+  class SimpleSquare : public MatrixTag<10>, private virtual SymbolChunkCoder<100,25>, private virtual ProjectiveQuadTangleTransform {};
+  class SimpleCircle : public RingTag<4,25,Ellipse>, private virtual SymbolChunkCoder<100,4>, private virtual FullEllipseTransform {
+  public:
+    SimpleCircle() : RingTag<4,25,Ellipse>(0.2,0.4,0.6,1.0) {};
+  };
 
 }
 #endif//TAGS_GUARD
