@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/02/16 16:02:28  acr31
+ * *** empty log message ***
+ *
  * Revision 1.4  2004/02/16 08:02:03  acr31
  * *** empty log message ***
  *
@@ -260,7 +263,7 @@ unsigned long long RingTag::Decode(Image *image, Camera* camera, const Ellipse2D
 #ifdef IMAGE_DEBUG
       Image* debug0 = cvCloneImage(image);
       cvConvertScale(debug0,debug0,0.5,128); 
-      
+      /*      
       DrawEllipse(debug0,
 		  l->m_x,
 		  l->m_y,
@@ -280,27 +283,24 @@ unsigned long long RingTag::Decode(Image *image, Camera* camera, const Ellipse2D
 		    0,
 		    1);	
       }
-      
+      */
       for(int k=0;k<m_sector_count;k++) {
 	for(int r=0;r<m_ring_count;r++) {
 	  float pts[2];
-	  l->ProjectPoint(m_read_angles[5*k+((i+3)%5)],
-			  m_data_ring_outer_radii[r]/m_bullseye_outer_radius,
-			  pts,
-			  pts+1);
-	  camera->NPCFToImage(pts,1);
-	  cvLine(debug0,
-		 cvPoint(cvRound(l->m_x),cvRound(l->m_y)),
-		 cvPoint(cvRound(pts[0]),cvRound(pts[1])),
-		 0,1);
-	  
 	  l->ProjectPoint(m_read_angles[5*k+((i+1)%5)],
 			  m_data_ring_centre_radii[r]/m_bullseye_outer_radius,
 			  pts,
 			  pts+1);
 	  camera->NPCFToImage(pts,1);
 	  cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), SampleImage(image,pts[0],pts[1]) < 128 ? 255 : 0,3);
-	  
+
+	  l->ProjectPoint(m_read_angles[5*k+((i+1)%5)],
+			  0,
+			  pts,
+			  pts+1);
+	  camera->NPCFToImage(pts,1);
+	  cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), SampleImage(image,pts[0],pts[1]) < 128 ? 255 : 0,3);
+
 	  
 	}
       }
@@ -315,46 +315,22 @@ unsigned long long RingTag::Decode(Image *image, Camera* camera, const Ellipse2D
   Image* debug0 = cvCloneImage(image);
   cvConvertScale(debug0,debug0,0.5,128); 
       
-  DrawEllipse(debug0,
-	      l->m_x,
-	      l->m_y,
-	      l->m_width*m_data_inner_radius/m_bullseye_outer_radius,
-	      l->m_height*m_data_inner_radius/m_bullseye_outer_radius,
-	      l->m_angle_radians,
-	      0,
-	      1);
-      
-  for(int r=0;r<m_ring_count;r++) {
-    DrawEllipse(debug0,
-		l->m_x,
-		l->m_y,
-		l->m_width*m_data_ring_outer_radii[r]/m_bullseye_outer_radius,
-		l->m_height*m_data_ring_outer_radii[r]/m_bullseye_outer_radius,
-		l->m_angle_radians,
-		0,
-		1);	
-  }
-      
   for(int k=0;k<m_sector_count;k++) {
     for(int r=0;r<m_ring_count;r++) {
-      float x;
-      float y;
-      l->ProjectPoint(m_read_angles[5*k],
-		      m_data_ring_outer_radii[r]/m_bullseye_outer_radius,
-		      &x,
-		      &y);
-      cvLine(debug0,
-	     cvPoint(cvRound(l->m_x),cvRound(l->m_y)),
-	     cvPoint(cvRound(x),cvRound(y)),
-	     0,1);
-	  
+      float pts[2];
       l->ProjectPoint(m_read_angles[5*k],
 		      m_data_ring_centre_radii[r]/m_bullseye_outer_radius,
-		      &x,
-		      &y);
-      cvLine(debug0,cvPoint(cvRound(x),cvRound(y)),cvPoint(cvRound(x),cvRound(y)), SampleImage(image,x,y) < 128 ? 255 : 0,3);
-	  
-	  
+		      pts,
+		      pts+1);
+      camera->NPCFToImage(pts,1);
+      cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), SampleImage(image,pts[0],pts[1]) < 128 ? 255 : 0,3);
+      
+      l->ProjectPoint(m_read_angles[5*k],
+		      0,
+		      pts,
+		      pts+1);
+      camera->NPCFToImage(pts,1);
+      cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), SampleImage(image,pts[0],pts[1]) < 128 ? 255 : 0,3);
     }
   }
   cvSaveImage("debug-decode.jpg",debug0);	  	

@@ -6,6 +6,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/02/16 16:02:28  acr31
+ * *** empty log message ***
+ *
  * Revision 1.1  2004/02/13 21:47:39  acr31
  * work on ellipse fitting
  *
@@ -14,7 +17,7 @@
 
 #include <eigenvv.hh>
 
-#undef EIGEN_DEBUG
+#define EIGEN_DEBUG
 
 #ifdef EIGEN_DEBUG
 #include <iostream>
@@ -26,6 +29,7 @@ void eigensolve(double a, double b, double f,
 		/*               */ double e,
 		double* eigenvects,
 		double* eigenvals) {
+
   // Matrix is:
 
   // a b f
@@ -70,7 +74,7 @@ void eigensolve(double a, double b, double f,
   
   while((fabs(d)>fabs(c)*1e-9)&&(iters<100))
     {
-      shift = 3;
+      shift = e;
       a -= shift;
       c -= shift;
       e -= shift;
@@ -195,7 +199,7 @@ void eigensolve(double a, double b, double f,
       std::cout << "Trace =  "<< (a+c+e)  << std::endl;
       std::cout << "Iterations = "<< iters << std::endl;
 
-      std::cout << "Evals " << a << " " << c << " " << e << std::endl;
+      std::cout << "Evals " << c << " " << a << " " << e << std::endl;
       std::cout << "Evecs " << q11 << " " << q12 << " " << q13 << std::endl;
       std::cout << "      " << q21 << " " << q22 << " " << q23 << std::endl;
       std::cout << "      " << q31 << " " << q32 << " " << q33 << std::endl;
@@ -205,8 +209,8 @@ void eigensolve(double a, double b, double f,
       eigenvects[3] = q21;  eigenvects[4] = q22;  eigenvects[5] = q23;
       eigenvects[6] = q31;  eigenvects[7] = q32;  eigenvects[8] = q33;
 
-      eigenvals[0] = a;     eigenvals[1] = 0;     eigenvals[2] = 0;
-      eigenvals[3] = 0;     eigenvals[4] = c;     eigenvals[5] = 0;
+      eigenvals[0] = c;     eigenvals[1] = 0;     eigenvals[2] = 0;
+      eigenvals[3] = 0;     eigenvals[4] = a;     eigenvals[5] = 0;
       eigenvals[6] = 0;     eigenvals[7] = 0;     eigenvals[8] = e;
     }
 }  

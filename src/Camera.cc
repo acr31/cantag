@@ -16,16 +16,16 @@ Camera::Camera() :
 
 Camera::~Camera() {};
 
-void Camera::SetExtrinsic(float extrinsic[9]) {
-  m_extrinsic[0] = extrinsic[0];    m_extrinsic[1] = extrinsic[1];    m_extrinsic[2] = extrinsic[2];  
-  m_extrinsic[3] = extrinsic[3];    m_extrinsic[4] = extrinsic[4];    m_extrinsic[5] = extrinsic[5];  
-  m_extrinsic[6] = extrinsic[6];    m_extrinsic[7] = extrinsic[7];    m_extrinsic[8] = extrinsic[8];  
+void Camera::SetExtrinsic(float extrinsic[16]) {
+  for(int i=0;i<16;i++) {
+    m_extrinsic[i] = extrinsic[i];
+  }
 }
 
 void Camera::SetIntrinsic(float intrinsic[9]) {
-  m_intrinsic[0] = intrinsic[0];    m_intrinsic[1] = intrinsic[1];    m_intrinsic[2] = intrinsic[2];  
-  m_intrinsic[3] = intrinsic[3];    m_intrinsic[4] = intrinsic[4];    m_intrinsic[5] = intrinsic[5];  
-  m_intrinsic[6] = intrinsic[6];    m_intrinsic[7] = intrinsic[7];    m_intrinsic[8] = intrinsic[8];  
+  for(int i=0;i<9;i++) {
+    m_intrinsic[i] = intrinsic[i];
+  }
 }
 
 void Camera::SetIntrinsic(float xscale, float yscale, float principlex, float principley, float skew) {
@@ -64,6 +64,10 @@ void Camera::NPCFToImage(float* points, int numpoints) {
     double dxx = 2*m_d1*x*y + m_d2*(rpwr2+2*x*x);
     double dxy = m_d1*(rpwr2+2*y*y)+2*m_d2*x*y;
 
+    radialcoeff =1;
+    dxx = 0;
+    dxy=0;
+
     // 3) Compute the new values of x and y
     double xd1 = radialcoeff*x+dxx;
     double xd2 = radialcoeff*y+dxy;
@@ -84,7 +88,7 @@ void Camera::ImageToNPCF(float* points, int numpoints) {
     points[i] /= m_intrinsic[0];
     points[i+1] /= m_intrinsic[4];
 
-
+    /*
     float x = points[i];
     float y = points[i+1];
 
@@ -96,7 +100,8 @@ void Camera::ImageToNPCF(float* points, int numpoints) {
     NPCFToImage(points+i,1);
 
     points[i] = x-points[i];
-    points[i+1] = y-points[i+1];    
+    points[i+1] = y-points[i+1]; 
+    */   
   }
 }
 

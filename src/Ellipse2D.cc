@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.11  2004/02/16 16:02:27  acr31
+ * *** empty log message ***
+ *
  * Revision 1.10  2004/02/13 21:47:39  acr31
  * work on ellipse fitting
  *
@@ -98,16 +101,21 @@ void Ellipse2D::ProjectPoint(float angle_radians, float radius, float *projX, fl
   float x = radius*cos(angle_radians);
   float y = radius*sin(angle_radians);
   float z = 1;
-
+  float h = 1;
   
-  *projX = m_transform[0]*x + m_transform[1]*y + m_transform[2]*z;
-  *projY = m_transform[3]*x + m_transform[4]*y + m_transform[5]*z;
-  float projZ = m_transform[6]*x + m_transform[7]*y + m_transform[8]*z;
+  *projX = m_transform[0]*x + m_transform[1]*y + m_transform[2]*z + m_transform[3]*h;
+  *projY = m_transform[4]*x + m_transform[5]*y + m_transform[6]*z + m_transform[7]*h;
+  float projZ = m_transform[8]*x + m_transform[9]*y + m_transform[10]*z + m_transform[11]*h;
+  float projH = m_transform[12]*x + m_transform[13]*y + m_transform[14]*z + m_transform[15]*h;
   
-  // now do an idealised perspective projection to get back to the image
+  // now do a perspective transform - note that the homogenous
+  // parameter H that we need to divide through by cancels out: X/H /
+  // (Z/H) = X/H /Z * H = X/Z
   *projX /= projZ;
   *projY /= projZ;
   
+
+
   PROGRESS("Projecting point radius "<<radius<<" angle "<<angle_radians<<" on to ("<< *projX <<","<< *projY <<")");
 }
 
@@ -171,7 +179,7 @@ void Ellipse2D::FromGeneralConic() {
 
     this expands to: (where A = R'DR) - note A is symmetric so v'Ax = x'Av
 
-     x'Ax - 2x'Av - v'Av - z = 0
+     x'Ax - 2x'Av + v'Av - z = 0
 
     Thus we know that t = Av (by equating the co-efficients of the terms only in x)
 
@@ -221,7 +229,7 @@ void Ellipse2D::FromGeneralConic() {
 
       lambda = ( (a+c) +/- sqrt( (a+c)^2 - 4*ac + b^2 ) ) / 2
   */
-  float tmproot = sqrt( m_a*m_a - 2*m_a*m_c + m_c*m_c + m_b*m_b );
+  float tmproot = sqrt( (m_a-m_c)*(m_a-m_c) + m_b*m_b );
   float lambda1 = m_a+m_c + tmproot/2;
   float lambda2 = m_a+m_c - tmproot/2;
   
@@ -382,9 +390,10 @@ void Ellipse2D::ComputePose() {
 #endif
       
 
-  double tcos = ( eigvals[8] - eigvals[4] ) / ( eigvals[8] - eigvals[4]);
-  double tsin = ( eigvals[4] - eigvals[0] ) / ( eigvals[8] - eigvals[4]);
-
+  double tcosn = ( eigvals[8] - eigvals[4] );
+  double tsinn = ( eigvals[4] - eigvals[0] );
+  double denom = ( eigvals[8] - eigvals[0] );
+  
   /*
   if (fabs(cc) < 0.0001) {
     cc = 0;
@@ -393,34 +402,65 @@ void Ellipse2D::ComputePose() {
     s = 0;
   }
   */
-  tcos = sqrt(tcos);
-  tsin = sqrt(tsin);
+  double tcosn2 = sqrt(tcosn);
+  double tsinn2 = sqrt(tsinn);
+  double denom2 = sqrt(denom);
 
-
-  float r2[] = { tcos, 0, tsin,
+  float r2[] = { tcosn2/denom2, 0, tsinn/denom2,
 		 0   , 1, 0,
-		 -tsin,0, tcos};
+		 -tsinn2/denom2,0, tcosn2/denom2};
 
 #ifdef POSE_DEBUG  
   std::cout << "Rotation 2: " << r2[0] << " " << r2[1] << " " << r2[2] << std::endl;
   std::cout << "            " << r2[3] << " " << r2[4] << " " << r2[5] << std::endl;
   std::cout << "            " << r2[6] << " " << r2[7] << " " << r2[8] << std::endl;
 #endif
-  
-  // multiply r1 and t2
-  for(int i=0;i<3;i++) {
-    for(int j=0;j<3;j++) {
-      m_transform[i*3+j] = 0;
+
+  double rtot[16];
+  // multiply r1 (eigvects) and r2
+  for(int row=0;row<3;row++) {
+    for(int col=0;col<3;col++) {
+      rtot[row*4+col] = 0;
       for(int k=0;k<3;k++) {
-	m_transform[i*3+j] += eigvects[i*3+k] * r2[k*3+j];
+	rtot[row*4+col] += eigvects[row*3+k] * r2[k*3+col];
       }
     }
   }
+  rtot[3] = rtot[7] = rtot[11] = 0;
+  rtot[12]=rtot[13]=rtot[14]=0;
+  rtot[15] = 1;
+
+  // now incorporate the scale factor 
+  double scale = sqrt(tsinn*tcosn/eigvals[4] - ( (eigvals[8]*eigvals[8] - eigvals[0]*eigvals[0])/denom ) + eigvals[4]);
+  // this multiplies columns 0 and 1 of the transform by scale
+  for(int row=0;row<4;row++) {
+    rtot[row*4] *= scale;
+    rtot[row*4+1] *= scale;
+  }
+
+  // apply the relevant translation
+  double tx = tsinn2*tcosn2/eigvals[4];
+  double trans[16] = { 1,0,0,tx,
+		       0,1,0,0,
+		       0,0,1,0,
+		       0,0,0,1 };
+
+  for(int row=0;row<4;row++) {
+    for(int col=0;col<4;col++) {
+      m_transform[row*4+col] = 0;
+      for(int k=0;k<4;k++) {
+	m_transform[row*4+col] += rtot[row*4+k] * trans[k*4+col];
+      }
+    }
+  }
+  
+  
 
 #ifdef POSE_DEBUG  
-  std::cout << "M_Transform: " << m_transform[0] << " " << m_transform[1] << " " << m_transform[2] << std::endl;
-  std::cout << "             " << m_transform[3] << " " << m_transform[4] << " " << m_transform[5] << std::endl;
-  std::cout << "             " << m_transform[6] << " " << m_transform[7] << " " << m_transform[8] << std::endl;
+  std::cout << "M_Transform: " << m_transform[0] << " " << m_transform[1] << " " << m_transform[2] << " " << m_transform[3] << std::endl;
+  std::cout << "             " << m_transform[4] << " " << m_transform[5] << " " << m_transform[6] << " " << m_transform[7] << std::endl;
+  std::cout << "             " << m_transform[8] << " " << m_transform[9] << " " << m_transform[10] << " " << m_transform[11] << std::endl;
+  std::cout << "             " << m_transform[12] << " " << m_transform[13] << " " << m_transform[14] << " " << m_transform[15] << std::endl;
 #endif
 
   // store the eigenvalues in the position field - we'll need them to
@@ -465,7 +505,6 @@ void Ellipse2D::ComputePosition(double radius) {
 #endif
 }
 
-
 Ellipse2DChain::Ellipse2DChain(Ellipse2D *cur) : current(cur), nextchain(NULL) {};
 
 Ellipse2DChain::~Ellipse2DChain() {
@@ -477,3 +516,4 @@ std::ostream& operator<<(std::ostream& s, const Ellipse2D& z) {
   s<< "Position ("<<z.m_x<<","<<z.m_y<<"), Size ("<<z.m_width<<","<<z.m_height<<")";
   return s;
 }
+

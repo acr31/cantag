@@ -7,7 +7,7 @@
 template <class C>
 class FeatureDetector : protected virtual Tag<C>, protected virtual ImageFilter {
 public:
-  virtual void FindFeatures(Image* buffer) =0;
+  virtual void FindFeatures(Image* buffer, Camera* camera) =0;
 };
 
 #endif//FEATURE_DETECTOR_GUARD

@@ -27,10 +27,10 @@ public:
 
   /** 
    * Set the extrinsic parameters for this camera - this is a 3d
-   * transformation matrix from camera co-ordinates to world
+   * (homogenous) transformation matrix from camera co-ordinates to world
    * co-ordinates
    */ 
-  void SetExtrinsic(float extrinsic[9]);
+  void SetExtrinsic(float extrinsic[16]);
 
   /**
    * Set the intrinsic parameters for this camera. This is a matrix

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.6  2004/02/16 16:02:27  acr31
+ * *** empty log message ***
+ *
  * Revision 1.5  2004/02/16 08:02:03  acr31
  * *** empty log message ***
  *
@@ -118,6 +121,7 @@ void EllipseFeatureDetector::FindFeatures(Image *image,Camera* camera) {
 	flpoints[pointer++] = (float)points[pt].y;	
       }
 
+      camera->ImageToNPCF(flpoints,count);
       Ellipse2D* e2d = fitellipse(flpoints,count);
 
       if (e2d) {

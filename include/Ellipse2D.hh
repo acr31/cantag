@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/02/16 16:02:27  acr31
+ * *** empty log message ***
+ *
  * Revision 1.4  2004/02/13 21:47:36  acr31
  * work on ellipse fitting
  *
@@ -57,8 +60,8 @@ private:
   float m_ny;
   float m_nz;
 
-  /* 3D transformation matrix to map from object co-ordinates to camera co-ordinates */
-  float m_transform[9];
+  /* 3D transformation matrix to map from object plane co-ordinates to camera co-ordinates */
+  double m_transform[16];
 
 public:
   float m_x;
@@ -67,10 +70,34 @@ public:
   float m_height;
   float m_angle_radians;
 
+  /**
+   * Create a circle centred on the origin with diameter given.
+   */
   Ellipse2D(float width);
+
+  /**
+   * Create an ellipse from the co-efficients of the generalised conic
+   * equation
+   */
   Ellipse2D(float a,float b,float c,float d, float e,float f);
+
+  /**
+   * Create an ellipse with the given centre, size and angle
+   */
   Ellipse2D(float x, float y, float width, float height, float angle_radians);
+
+  /**
+   * Project the point on a circle of given radius and angle onto its
+   * NPCF co-ordinates
+   */
   void ProjectPoint(float angle_radians, float radius, float *projX, float *projY) const;
+
+  /**
+   * Return true if this ellipse is a good match for this set of
+   * points.  Points is a list of pairs of x and y points i.e. it has
+   * length count*2
+   */
+  bool CheckFit(float* points, int count);
 
 private:
   /**
