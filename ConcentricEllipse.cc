@@ -6,10 +6,10 @@
 #define MAX_X_OFFSET 4
 #define MAX_Y_OFFSET 4
 #define MAX_RATIO_DIFF 0.1
-#define MAX_ITERATOR_DEPTH 10
+#define MAX_ITERATOR_DEPTH 20
 
 void
-findTags(IplImage* input, std::vector<Tag> *result)
+findTags(IplImage* input, IplImage* jam, std::vector<Tag> *result)
 {
   /* Follow edges in the image and recover contours */
   CvMemStorage *store = cvCreateMemStorage(0);
@@ -24,13 +24,14 @@ findTags(IplImage* input, std::vector<Tag> *result)
     CvTreeNodeIterator i;
     cvInitTreeNodeIterator(&i,seq,MAX_ITERATOR_DEPTH);
     
-    CvBox2D boxes[MAX_ITERATOR_DEPTH];
+    CvBox2D boxes[MAX_ITERATOR_DEPTH+1];
     
     /* TreeNodeIterator does a depth first search so we know that we
        will find any concentric ellipses from consecutive contours */
     while(cvNextTreeNode(&i)) {
       CvSeq* c = (CvSeq*)i.node;
       if (c != NULL) {
+	cvDrawContours(jam,c,16776960,16776960,0,1);
 	int count = c->total;
 	if (count > 6) {
 	  /* Copy the points into floating point versions for the
@@ -44,7 +45,8 @@ findTags(IplImage* input, std::vector<Tag> *result)
 	  }
 	  
 	  cvFitEllipse( fpoints, count, boxes+i.level );
-	  
+	  int color = CV_RGB( rand(), rand(), rand() );
+	  cvEllipseBox( jam, boxes[i.level],color,3);
 	  /* Work out the error for this fit.  This just tries every
 	     point on the contour with the ellipse function from the
 	     fitter and accumulates the difference 
@@ -96,11 +98,11 @@ findTags(IplImage* input, std::vector<Tag> *result)
 		(fabs(boxes[i.level].center.y - boxes[i.level-1].center.y) < MAX_Y_OFFSET) &&
 		(fabs((double)boxes[i.level].size.height/(double)boxes[i.level-1].size.width - 
 		      (double)boxes[i.level].size.height/(double)boxes[i.level-1].size.width) < MAX_RATIO_DIFF)) {
+	      
+	      identifyTag(input,boxes+i.level-1,result);
 
-	      if (identifyTag(input,boxes+i.level-1,result)) {
-		int color = CV_RGB( rand(), rand(), rand() );
-		cvEllipseBox( input, boxes[i.level-1],color,3);
-	      }
+	      int color = CV_RGB( rand(), rand(), rand() );
+	      //	      cvEllipseBox( jam, boxes[i.level-1],color,3);
 	      
 	      /* We can now push the iterator on to get the next sibling of the parent */
 	      int target_level = i.level-1;

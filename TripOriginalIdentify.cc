@@ -46,6 +46,7 @@ identifyTag(IplImage *image, CvBox2D* ellipse, std::vector<Tag> *result)
     /* Step 2.  We found a sync sector, now sample the code */ 
     Tag t;
     t.code =0;
+    t.box = *ellipse;
     for(int ring=0;ring<RING_COUNT;ring++) {
       for(int sector=1;sector<SECTOR_COUNT;sector++) {
 	t.code <<= 1;
