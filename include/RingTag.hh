@@ -13,6 +13,8 @@
 #include <ShapeChain.hh>
 #include <Ellipse.hh>
 
+#define Ellipse LinearEllipse
+
 class RingTag : public virtual Tag< ShapeChain<Ellipse> >, protected virtual Coder {
 private:
   int m_ring_count;

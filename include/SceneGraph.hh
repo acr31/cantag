@@ -46,7 +46,7 @@ public:
     IplImage *copy = cvCloneImage(image.m_image); // the find contours process changes the image ;-(
     CvMemStorage* store = cvCreateMemStorage(0);
     CvSeq* root;
-    cvFindContours(copy,store,&root,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_SIMPLE);
+    cvFindContours(copy,store,&root,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_NONE);
     cvReleaseImage(&copy);
 
 #ifdef IMAGE_DEBUG
@@ -66,7 +66,7 @@ public:
     do {
       CvSeq *c = (CvSeq*)treeiter.node;
 
-      if ((c != NULL) && (fabs(cvContourArea(c,CV_WHOLE_SEQ))>10)) {
+      if ((c != NULL) && (fabs(cvContourArea(c,CV_WHOLE_SEQ))>100)) {
 #ifdef IMAGE_DEBUG
 	// draw found contours
 	cvDrawContours(debug0,c,0,0,0,2,8);

@@ -80,9 +80,9 @@ public:
    *  D = ( a 0 )   R = ( cos(theta) -sin(theta) )   v = ( x0 )
    *      ( 0 b )       ( sin(theta) cos(theta)  )       ( y0 )
    *
-   * [x'-v']R'DR[x-v]-z=0
+   * [x'-v']D^(-2)R'[x-v]-z=0
    *
-   * this expands to: (where A = R'DR) - note A is symmetric so v'Ax = x'Av
+   * this expands to: (where A = RD^(-2)R') - note A is symmetric so v'Ax = x'Av
    *
    *  x'Ax - 2x'Av + v'Av - z = 0
    *
@@ -112,8 +112,8 @@ public:
    * (0,1) would be scaled to (a,0) and (0,b) - i.e. they are D's
    * eigenvectors and a and b are D's eigenvalues.  Since R is only a
    * rotation we know that the eigenvectors will be different but the
-   * eigenvalues will be unchanged.  So the eigenvalues of R'DR are the
-   * same as the eigenvalues of D which are a and b.
+   * eigenvalues will be unchanged.  So the eigenvalues of RD^(-2)R' are the
+   * same as the eigenvalues of D^(-2} which are 1/width^2 and 1/height^2.
    *
    * The eigenvalues of a matrix are given by
    *
@@ -139,19 +139,19 @@ public:
    *
    * r = sqrt(z) = sqrt(v'Av - f)
    *
-   * And since A = R'DR, and R'R=I => R'=R^, => RA=DR, therefore
+   * And since A = RD^(-2)R', and R'R=I => R'=R^(-1), => AR=RD, therefore
    *
-   *   ( r11 r12 ) * ( a11 a12 )  =  ( d11 d12 ) * ( r11 r12 )
-   *   ( r21 r22 )   ( a21 a22 )     ( d21 d22 )   ( r21 r22 )
+   *   ( a11 a12 ) * ( r11 r12 )  =  ( r11 r12 ) * ( d11 d12 )
+   *   ( a21 a22 )   ( r21 r22 )     ( r21 r22 )   ( d21 d22 )
    *
-   *   r11.a11 + r12.a21 = d11.r11 + d12.r21
+   *   a11.r11 + a12.r21 = r11.d11 + r12.d21
    *
    * since this is a rotation matrix, r11=cos(theta), r12=-sin(theta) r21=sin(theta) r22=cos(theta)
    * and since d is a scale matrix, d12=0:
    *
-   *   tan(theta) = (a11-d11)/(a21)
+   *   tan(theta) = (d11-a11)/(a21)
    *
-   *              = (a - lambda1)/(b/2)
+   *              = (lambda1-a)/(b/2)
    *
    * (we use the same eigenvalue as the width of the ellipse because by
    *  convention that is the one that defines the angle)

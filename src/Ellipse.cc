@@ -511,7 +511,7 @@ void LinearEllipse::GetTransform(float transform1[16], float transform2[16]) con
   
   // it turns out to be really important to the decomposition
   // that our conic has a negative sense!
-  if (f < 0) {
+  if (f > 0) {
     a*=-1;
     b*=-1;
     c*=-1;
@@ -540,14 +540,17 @@ void LinearEllipse::GetTransform(float transform1[16], float transform2[16]) con
   float tmproot = sqrt( (a-c)*(a-c) + b*b );
   float lambda1 = (a+c + tmproot)/2;
   float lambda2 = (a+c - tmproot)/2;
-  
+  float lambda1t = lambda1;
+  lambda1 = 1/sqrt(lambda1);
+  lambda2 = 1/sqrt(lambda2);
+
 #ifdef DECOMPOSE_DEBUG
   PROGRESS("tmproot= " << tmproot);
   PROGRESS("lambda1= " << lambda1);
   PROGRESS("lambda2= " << lambda2);
 #endif
   
-  float scale_factor = sqrt( -f + a*x0*x0 + b*x0*y0 + c*y0*y0 );
+  float scale_factor = sqrt( -f + a*x0*x0 + b*x0*y0 + c*y0*y0);
 
 #ifdef DECOMPOSE_DEBUG
   PROGRESS("scale= " << scale_factor);
@@ -561,12 +564,12 @@ void LinearEllipse::GetTransform(float transform1[16], float transform2[16]) con
   PROGRESS("height= " <<height);
 #endif
 
-  float angle_radians = atan( (a-lambda1)/(0.5*b) );
-  angle_radians=0;
+  float angle_radians = atan( -(a-lambda1t)/(0.5*b) );
+
 #ifdef DECOMPOSE_DEBUG
   PROGRESS("angle= " << angle_radians);
 #endif
-
+  /*
   // copied and pasted from tngtrip - I have no idea why my method fails or what this method does ;-)
   f -= a*x0*x0 + b*x0*y0+ c*y0*y0 ;
   float lump_1 = a + c;
@@ -576,8 +579,8 @@ void LinearEllipse::GetTransform(float transform1[16], float transform2[16]) con
   height = -(float)sqrt((float)-2.0*f/(lump_1 - lump_2));
 
   angle_radians = M_PI/2 -(float)0.5*(float)atan(2*b/(c-a));
-  angle_radians = (float)0.5*(float)atan(2*b/(c-a));
-
+  //  angle_radians = (float)0.5*(float)atan(2*b/(c-a));
+  */
   transform1[0] = width*cos(angle_radians);
   transform1[1] = -height*sin(angle_radians); 
   transform1[2] = 0;
