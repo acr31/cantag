@@ -37,6 +37,10 @@ public:
     return (uchar*)(y*m_image->widthStep+m_image->imageData);
   }
 
+  inline unsigned char* GetDataPointer() {
+    return (uchar*)m_image->imageData;
+  }
+
   /**
    * Read the pixel at the given x and y co-ordinates. Includes a
    * bounds check---returns 0 if out of range.

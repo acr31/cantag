@@ -302,18 +302,19 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
   PROGRESS("Following contour");
 #endif	 
 
-  points_buffer[0] = start_x;
-  points_buffer[1] = start_y;
-  int pointer = 1;  // our index into the points buffer
+  //  points_buffer[0] = start_x;
+  //  points_buffer[1] = start_y;
+  int pointer = -1;  // our index into the points buffer
+  int image_width = image.GetWidth();
+  uchar* data_pointer = image.GetDataPointer() + start_x + start_y *image_width;
 
   // first scan around clockwise from the requested position looking for a 1-element
-  const int offset_x_clockwise[] = { -1,-1,0,1,1,1,0,-1};
-  const int offset_y_clockwise[] = { 0,-1,-1,-1,0,1,1,1};
+  const int offset_clockwise[] = { -1,-image_width-1,-image_width,1-image_width,1,1+image_width,image_width,image_width-1};
   bool found = false;
+  uchar* sample_pointer;
   for(int i=0;i<8;i++) {
-    int clock_sample_x = start_x+offset_x_clockwise[position];
-    int clock_sample_y = start_y+offset_y_clockwise[position];
-    if (image.Sample(clock_sample_x,clock_sample_y)) {
+    sample_pointer = data_pointer + offset_clockwise[position];
+    if (*sample_pointer) {
       found = true;
       break;
     }
@@ -322,10 +323,13 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
   }
 
   if (!found) {
+#ifdef SCENE_GRAPH_DEBUG
+    PROGRESS("Failed to find any adjoining 1-elements - returning single pixel contour");
+#endif
     // if we dont find a 1-element then record the nbd in this pixel
     // and that it is an exit pixel and then return this single pixel contour
-    image.DrawPixel(start_x,start_y, nbd<<1 | 0x1);
-    return 1;
+    *sample_pointer = nbd<<1 | 0x1;
+    return 0;
   }
 
   // if we found the 1-element a position n clockwise then we resume
@@ -358,9 +362,10 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
   
   // these two arrays store the offsets for each of the eight regions
   // around the target pixel
-  const int offset_x[] = {-1,-1,0,1,1,1,0,-1};
-  const int offset_y[] = {0,1,1,1,0,-1,-1,-1};
-
+  const int offset[] = {-1,image_width-1,image_width,image_width+1,1,1-image_width,-image_width,-image_width-1};
+  const int offset_x[] = { -1, -1, 0, 1,1,1,0,-1};
+  const int offset_y[] = { 0, 1,1,1,0,-1,-1,-1};
+  
   bool cell4_is_0 = false; // will be set to true when we search a region if we pass cell4 and cell4 is a 0-element
 
   statistics.length = 0; // the contour length
@@ -372,26 +377,25 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
 
   int nbd_shifted = nbd<<1;
 
-  while(pointer < maxcount*2) {
+  while(pointer < MAXLENGTH) {
     // work out the pixel co-ordinates for the position of interest
-    int sample_x = start_x+offset_x[position];
-    int sample_y = start_y+offset_y[position];
-    int sample = image.Sample(sample_x,sample_y);
+    sample_pointer = data_pointer+offset[position];
+    int sample = *sample_pointer;
     if (sample) {  // if the pixel is a 1-element
 #ifdef SCENE_GRAPH_DEBUG
-      PROGRESS("Found 1-element at " << sample_x << "," << sample_y << " position " << position);
+      PROGRESS("Found 1-element at position " << position);
 #endif
       // we now need to mark this pixel
       // 1) if the pixel sample_x+1,sample_y (cell 4) is a 0-element and we
       // have examined it whilst looking for this 1-element then this
       // is an exit pixel.  Write (NBD,r).
       if (cell4_is_0) {
-	image.DrawPixel(start_x,start_y,nbd_shifted | 0x1);
+	*data_pointer = nbd_shifted | 0x1;
       }
       // 2) else if sample_x,sample_y is unmarked write
       // (NBD,l).
       else if (!(sample>>1)) {
-	image.DrawPixel(start_x,start_y,nbd_shifted);
+	*data_pointer = nbd_shifted;
       }
 
       // update the length
@@ -408,11 +412,11 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
       //      }
 
       // store this point in the pixel chain and update the start position
-      points_buffer[++pointer] = start_x ;
-      start_x = sample_x;
+      points_buffer[++pointer] = start_x;
       points_buffer[++pointer] = start_y;
-      start_y = sample_y;
-
+      start_x+= offset_x[position];
+      start_y+= offset_y[position];
+      data_pointer = sample_pointer;
       cell4_is_0=false;
 
       // if we find the 1-element at position n anti-clockwise then we
@@ -463,8 +467,8 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
     // notice it can unroll this loop a couple of times and remove
     // this comparison?
     if ((pointer > 4) && 
-	(points_buffer[2] == start_x) &&
-	(points_buffer[3] == start_y) &&
+	(points_buffer[2] == points_buffer[pointer-1]) &&
+	(points_buffer[3] == points_buffer[pointer]) &&
 	(points_buffer[0] == points_buffer[pointer-3]) &&
 	(points_buffer[1] == points_buffer[pointer-2])) {
       break;
