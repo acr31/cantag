@@ -26,6 +26,9 @@ public:
   
   Tag() : m_must_match(NULL) {}
 
+  /**
+   * Draw this tag onto the image object provided
+   */
   virtual void Draw2D(Image& image, TagPayloadType& tag_data) const = 0;
     
   /**
@@ -34,10 +37,10 @@ public:
   virtual bool DecodeNode(SceneGraphNode<C,PAYLOAD_SIZE>* node, const Camera& camera, const Image& image) const =0;
 
   void WalkSceneGraph(SceneGraphNode<C,PAYLOAD_SIZE>* root_node, const Camera& camera, const Image& image) const;
-
+  
 };
 
-template<class C, int PAYLOAD_SIZE> void Tag<C,PAYLOAD_SIZE>:: WalkSceneGraph(SceneGraphNode<C,PAYLOAD_SIZE>* root_node, const Camera& camera, const Image& image) const {
+template<class C, int PAYLOAD_SIZE> void Tag<C,PAYLOAD_SIZE>::WalkSceneGraph(SceneGraphNode<C,PAYLOAD_SIZE>* root_node, const Camera& camera, const Image& image) const {
     // walk the tree finding all the tags
     // if we find a Tag then decode node returns true so we know not to inspect any child contours
     if (!DecodeNode(root_node,camera,image)) {

@@ -83,7 +83,7 @@ public:
 
   inline const S& GetShapes() const;
 
-  LocatedObject<PAYLOAD_SIZE>* Find(const CyclicBitSet<PAYLOAD_SIZE>& code) const;
+  LocatedObject<PAYLOAD_SIZE>* Find(const CyclicBitSet<PAYLOAD_SIZE>& code);
 };
 
 template<class S, int PAYLOAD_SIZE> SceneGraphNode<S,PAYLOAD_SIZE>::SceneGraphNode(float* points, int numpoints) : m_inspected(false), m_located(NULL), m_matcher(points,numpoints), m_children() {};
@@ -144,7 +144,7 @@ template<class S, int PAYLOAD_SIZE> const S& SceneGraphNode<S,PAYLOAD_SIZE>::Get
   return m_matcher;
 } 
 
-template<class S, int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>* SceneGraphNode<S,PAYLOAD_SIZE>::Find(const CyclicBitSet<PAYLOAD_SIZE>& code) const {
+template<class S, int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>* SceneGraphNode<S,PAYLOAD_SIZE>::Find(const CyclicBitSet<PAYLOAD_SIZE>& code) {
   if ((m_located != NULL) &&
       (m_located->tag_code.get()) &&
       *(m_located->tag_code) == code) {
@@ -154,7 +154,7 @@ template<class S, int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>* SceneGraphNode<
   for(typename std::vector<SceneGraphNode<S,PAYLOAD_SIZE>*>::iterator step = GetChildren().begin(); 
       step != GetChildren().end(); 
       step++) {
-    LocatedObject<PAYLOAD_SIZE>* res = (*step)->Check(code);
+    LocatedObject<PAYLOAD_SIZE>* res = (*step)->Find(code);
     if (res != NULL) {
       return res;
     }

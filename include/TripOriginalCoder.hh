@@ -12,7 +12,7 @@
 #include <BigInt.hh>
 
 #ifdef TEXT_DEBUG
-#define TRIP_ORIGINAL_CODER_DEBUG
+# define TRIP_ORIGINAL_CODER_DEBUG
 #endif
 /**
  * A generalised coding scheme based on the one used in TRIP.  This

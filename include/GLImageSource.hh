@@ -137,7 +137,7 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(60.0, (GLfloat)m_width/(GLfloat)m_height,0,100.0);
-    gluLookAt(0.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0);
+    gluLookAt(-centre_x,-centre_y,-centre_z,-centre_x,-centre_y,-centre_z+1,0.0,-1.0,0.0);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -163,7 +163,6 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz
     // turn this on to do spot light stuff
     //    glEnable(GL_LIGHTING);
     //    glEnable(GL_LIGHT0);
-    glTranslatef(centre_x,centre_y,centre_z);
 
     //    float factor = sqrt(nz*nz+ny*ny);
     
@@ -178,17 +177,23 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz
     //			 nx,ny,nz,0,
     //			 0,0,0,1};
 
-    float factor = sqrt(1-ny*ny);
+    float norm = sqrt(nx*nx+ny*ny+nz*nz);
+    nx/=norm;
+    ny/=norm;
+    nz/=norm;
 
-    float rotation[] = { -nz/factor, 0, nx/factor, 0, 
+    //    float factor = sqrt(1-ny*ny);
+    float factor = -sqrt(nx*nx+nz*nz);
+    // column major representation 
+    float rotation[] = { nz/factor, 0, -nx/factor, 0, 
 			 -ny*nx/factor, factor, -ny*nz/factor, 0,
 			 nx,ny,nz,0,
 			 0,0,0,1};
+    float tagsizescale =1;
 
+    glScalef(tagsizescale,tagsizescale,1);
     glMultMatrixf(rotation);
 
-    float tagsizescale =1;
-    glScalef(tagsizescale,tagsizescale,1);
 
 #ifdef GLIMAGESOURCE_DEBUG
     PROGRESS("Rotation is [ " << rotation[0] << " " << rotation[4] << " " << rotation[8] << " " << rotation[12]);
@@ -230,7 +235,7 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz
     // this is a back facing polygon that exactly lies over the
     // previous polygon that is plain white
     glBegin(GL_QUADS);
-    glColor3f(0.0,0.0,0.0);
+    glColor3f(1.0,0.0,0.0);
     glVertex3f(-0.5, 0.5, 0.0); 
     glVertex3f(0.5, 0.5, 0.0);
     glVertex3f(0.5, -0.5, 0.0);

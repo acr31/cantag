@@ -334,7 +334,61 @@ void eigensolve(double a, double b, double f,
       eigenvals[6] = 0;     eigenvals[7] = 0;     eigenvals[8] = e;
       }*/
 }  
+#include <moreau-basis.hh>
+
+extern int eigen(
+           int     vec,           /* switch for computing evectors ...*/
+           int     ortho,         /* orthogonal Hessenberg reduction? */
+           int     ev_norm,       /* normalize Eigenvectors? .........*/
+           int     n,             /* size of matrix ..................*/
+           REAL ** mat,           /* input matrix ....................*/
+           REAL ** eivec,         /* Eigenvectors ....................*/
+           REAL  * valre,         /* real parts of eigenvalues .......*/
+           REAL  * valim,         /* imaginary parts of eigenvalues ..*/
+           int   * cnt            /* Iteration counter ...............*/
+	   );
+
+
 bool eigensolve(double a, double b, double c,
+		double d, double e, double f,
+		double g, double h, double i,
+		double *eigenvects, double* eigenvals) {
+  
+  REAL** A = new REAL*[3];
+  REAL** eigvec = new REAL*[3];
+  REAL* valre = new REAL[3];
+  REAL* valim = new REAL[3];
+  for(int z=0;z<3;++z) {
+    A[z] = new REAL[3];
+    eigvec[z] = new REAL[3];
+  }
+        
+  A[0][0] = a; A[0][1] = b; A[0][2] = c; 
+  A[1][0] = d; A[1][1] = e; A[1][2] = f; 
+  A[2][0] = g; A[2][1] = h; A[2][2] = i; 
+  
+  int* cnt = new int[3];
+
+  int res = eigen(1,1,1,3,A,eigvec,valre,valim,cnt);
+
+  if (res == 0) {
+
+    for(int z=0;z<3;++z) {
+      for(int j=0;j<3;++j) {
+	eigenvects[z*3+j] = eigvec[z][j];
+      }
+      eigenvals[z*4] = valre[z];
+    }
+    return true;
+  }
+  else {
+    return false;
+  }
+
+}
+
+
+bool __eigensolve(double a, double b, double c,
 		double d, double e, double f,
 		double g, double h, double i,
 		double *eigenvects, double* eigenvals) {

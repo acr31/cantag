@@ -37,16 +37,15 @@ int debug_matrix_image_counter = 0;
  * \todo regression test with gl harness
  */ 
 template<int SIZE>
-class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*SIZE % 2) >,
-		  protected virtual Coder<SIZE*SIZE - (SIZE*SIZE % 2)> {
-		  private:
+class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*SIZE % 2) >, public virtual Coder<SIZE*SIZE - (SIZE*SIZE % 2)> {
+ private:
   float m_cell_width;
   float m_cell_width_2;
   float *m_cells_corner;
 
-		  public:
+ public:
   MatrixTag();
-
+  
   virtual ~MatrixTag();
 
   virtual void Draw2D(Image& image, CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>& tag_data) const;
@@ -261,6 +260,10 @@ template<int SIZE> bool MatrixTag<SIZE>::DecodeNode(SceneGraphNode< ShapeChain<Q
     for(int i=0;i<16;i++) {
       lobj->transform[i] = transform[i];
     }	
+
+    float normal[3];
+    GetNormalVector(transform,normal);
+    lobj->xn = normal[0]; lobj->yn = normal[1]; lobj->zn = normal[2];
     lobj->tag_code = read_code;	   
     return true;
   }    

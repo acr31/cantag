@@ -253,7 +253,7 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
 #ifdef RING_TAG_DEBUG
       PROGRESS("Distance is " << dist);
 #endif
-      if (dist < 0.0001) {
+      if (dist < 0.005) {
 	found = true;
 	break;
       }
@@ -284,7 +284,7 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
   el.GetTransform(transform1,transform2);
   
   // project some points for the inner circle using both interpretations and check which one fits  
-  int count = 4;
+  int count = 200;
   float projected1[count*2];
   float projected2[count*2];
   for(int i=0;i<count*2;i+=2) {
@@ -295,6 +295,7 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
   }     
   // get the children of this node and check for a good match with either interpretation
   float* correcttrans = NULL;
+  float* correctnormal = NULL;
   float normal1[3];
   GetNormalVector(transform1,normal1);
   float normal2[3];
@@ -309,34 +310,53 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
     PROGRESS("Chose orientation 1 because it points towards the camera and orientation 2 doesnt");
 #endif
     correcttrans = transform1;
+    correctnormal = normal1;
   }
   else if ((normal1[2] > 0) && (normal2[2] < 0)) {
 #ifdef RING_TAG_DEBUG
     PROGRESS("Chose orientation 2 because it points towards the camera and orientation 1 doesnt");
 #endif
     correcttrans = transform2;
+    correctnormal = normal2;
   }
   else {
+    // find out where the centre of each of the projected ellipses would be
+    /*
+      float points1[2];
+      float points2[2];
+      ApplyTransform(transform1,0,0,points1,points1+1);
+      ApplyTransform(transform2,0,0,points2,points2+1);
+    */
+
     for(typename std::vector< SceneGraphNode< ShapeChain<Ellipse>,  RING_COUNT*SECTOR_COUNT >* >::iterator i = node->GetChildren().begin(); i!=node->GetChildren().end();i++) {
-      
+      /*
+	Ellipse child = (*i)->GetShapes().GetShape();
+	LinearEllipse le(child.GetA(),child.GetB(),child.GetC(),child.GetD(),child.GetE(),child.GetF());
+	le.Decompose();
+	float error1 = (le.GetX0()-points1[0])*(le.GetX0()-points1[0]) + (le.GetY0()-points1[1])*(le.GetY0()-points1[1]);
+	float error2 = (le.GetX0()-points2[0])*(le.GetX0()-points2[0]) + (le.GetY0()-points2[1])*(le.GetY0()-points2[1]);
+      */
+
       float error1 = (*i)->GetShapes().GetShape().GetError(projected1,count);
       float error2 = (*i)->GetShapes().GetShape().GetError(projected2,count);
 #ifdef RING_TAG_DEBUG
       PROGRESS("Error 1 " << error1);
       PROGRESS("Error 2 " << error2);   
 #endif
-      if ((error1 < error2) && (error1 < 0.001)) {
+      if ((error1 < error2) && (error1 < 0.01)) {
 #ifdef RING_TAG_DEBUG
 	PROGRESS("Chose orientation 1 with error "<<error1<<" instead of orientation 2 with error "<<error2);
 #endif
 	correcttrans = transform1;
+	correctnormal = normal1;
 	break;
       }
-      else if ((error2 <= error1) && (error2 < 0.001)) {
+      else if ((error2 <= error1) && (error2 < 0.01)) {
 #ifdef RING_TAG_DEBUG
 	PROGRESS("Chose orientation 2 with error "<<error2<<" instead of orientation 1 with error "<<error1);
 #endif
 	correcttrans = transform2;
+	correctnormal = normal2;
 	break;
       }
     }
@@ -349,6 +369,7 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
     //    node->ClearLocatedObject();
     //    return false;
     correcttrans = transform1;
+    correctnormal = normal1;
   }
 
   if (correcttrans != NULL) {
@@ -427,6 +448,9 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
       for(int i=0;i<16;i++) {
 	lobj->transform[i] = correcttrans[i];
       }		
+      lobj->xn = correctnormal[0];
+      lobj->yn = correctnormal[1];
+      lobj->zn = correctnormal[2];
       lobj->tag_code = read_code[code_ptr];	   
       return true;
     }
@@ -508,7 +532,7 @@ template<int RING_COUNT,int SECTOR_COUNT>  void RingTag<RING_COUNT,SECTOR_COUNT>
       int colour = image.Sample(pts[0],pts[1]) ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
       // or pick the colour to be on a gradient so we see the order it samples in
       //int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
-      debug0.DrawPoint(pts[0],pts[1],colour,1);
+      debug0.DrawPoint(pts[0],pts[1],colour,3);
     }
     counter++;
   }

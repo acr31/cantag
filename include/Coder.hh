@@ -56,8 +56,28 @@ public:
    */
   virtual int GetHammingDistanceSymbols() const = 0;
 
+  /**
+   * Encode the provided tag_data and then decode it again.  Any parts
+   * of the original tag_data that could not be encoded will thus be
+   * thrown away and you are left with the value that you can actually
+   * encode on the tag.  Returns true if the process is successful or
+   * false if this payload could not be encoded or decoded
+   * successfully.
+   */
+  bool EncodedValue(CyclicBitSet<PAYLOAD_SIZE>& tag_data) const;
 
 };
 
+template<int PAYLOAD_SIZE> bool Coder<PAYLOAD_SIZE>::EncodedValue(CyclicBitSet<PAYLOAD_SIZE>& tag_data) const {
+  if (!EncodePayload(tag_data)) {
+    return false;
+  }
+  
+  if (DecodePayload(tag_data) == -1) {
+    return false;
+  }
+
+  return true;
+}
 
 #endif//CODER_GUARD

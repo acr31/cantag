@@ -169,12 +169,17 @@ void GetTransform(const QuadTangle& ellipse, float transform1[16]);
  *
  * \todo make a transform class with this method in
  */
+void ApplyTransform(const float transform[16], float x0, float y0, float z0, float* projX, float* projY);
+
 void ApplyTransform(const float transform[16], float x0, float y0, float* projX, float* projY);
+
 
 /**
  * \todo make a transform class with this method in
  */
 void ApplyTransform(const float transform[16], float* points, int numpoints);
+
+void ApplyTransform3D(const float transform[16], float* points, int numpoints);
 
 /**
  * \todo make a transform class with this method in

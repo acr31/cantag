@@ -113,12 +113,11 @@ void GetTransform(const QuadTangle& quad, float transform[16]) {
 }
 
 
-
-void ApplyTransform(const float transform[16], float x, float y, float* projX, float* projY) {
-  *projX = transform[0]*x + transform[1]*y + transform[2] + transform[3];
-  *projY = transform[4]*x + transform[5]*y + transform[6] + transform[7];
-  float projZ = transform[8]*x + transform[9]*y + transform[10] + transform[11];
-  float projH = transform[12]*x + transform[13]*y + transform[14] + transform[15];
+void ApplyTransform(const float transform[16], float x, float y, float z, float* projX, float* projY) {
+  *projX = transform[0]*x + transform[1]*y + transform[2]*z + transform[3];
+  *projY = transform[4]*x + transform[5]*y + transform[6]*z + transform[7];
+  float projZ = transform[8]*x + transform[9]*y + transform[10]*z + transform[11];
+  float projH = transform[12]*x + transform[13]*y + transform[14]*z + transform[15];
 
 #ifdef APPLY_TRANSFORM_DEBUG
   PROGRESS("Transformed ("<<x<<","<<y<<","<<"0) on to ("<<*projX<<","<<*projY<<","<<projZ<<","<<projH<<")");
@@ -127,7 +126,7 @@ void ApplyTransform(const float transform[16], float x, float y, float* projX, f
   *projX /= projH;
   *projY /= projH;
   projZ /= projH;
-
+  
   *projX /= projZ;
   *projY /= projZ;
 
@@ -137,9 +136,21 @@ void ApplyTransform(const float transform[16], float x, float y, float* projX, f
 
 }
 
+
+void ApplyTransform(const float transform[16], float x, float y, float* projX, float* projY) {
+  ApplyTransform(transform,x,y,1,projX,projY);
+}
+
+
 void ApplyTransform(const float transform[16], float* points, int numpoints) {
   for(int i=0;i<numpoints*2;i+=2) {
-    ApplyTransform(transform,points[i],points[i+1],points+i,points+i+1);
+    ApplyTransform(transform,points[i],points[i+1],1,points+i,points+i+1);
+  }
+}
+
+void ApplyTransform3D(const float transform[16], float* points, int numpoints) {
+  for(int i=0;i<numpoints*3;i+=3) {
+    ApplyTransform(transform,points[i],points[i+1],points[i+2],points+i,points+i+1);
   }
 }
 
@@ -147,21 +158,25 @@ void ApplyTransform(const float transform[16], float* points, int numpoints) {
 void GetNormalVector(const float transform[16], float normal[3]) {
   // project (0,0,0) and (0,0,1).  Take the difference between them and normalize it
 
+  // (0,0,0)
   float proj0x = transform[3];
   float proj0y = transform[7];
   float proj0z = transform[11];
   float proj0h = transform[15];
 
+  // (0,0,1)
   float proj1x = transform[2] + transform[3];
   float proj1y = transform[6] + transform[7];
   float proj1z = transform[10] + transform[11];
   float proj1h = transform[14] + transform[15];
 
+  // (1,0,0)
   float proj2x = transform[0] + transform[3];
   float proj2y = transform[4] + transform[7];
   float proj2z = transform[8] + transform[11];
   float proj2h = transform[12] + transform[15];
 
+  // (0,1,0)
   float proj3x = transform[1] + transform[3];
   float proj3y = transform[5] + transform[7];
   float proj3z = transform[9] + transform[11];
@@ -176,20 +191,19 @@ void GetNormalVector(const float transform[16], float normal[3]) {
   float v2z = proj3z/proj2h - proj0z/proj0h;
 
 
-  /*
+  /*  
   normal[0] = proj1x/proj1h - proj0x/proj0h;
   normal[1] = proj1y/proj1h - proj0y/proj0h;
   normal[2] = proj1z/proj1h - proj0z/proj0h;
-
   */
+  
   
   // normal vector is the cross product
   normal[0] = v1y * v2z - v1z * v2y;
   normal[1] = v1z * v2x - v1x * v2z;
   normal[2] = v1x * v2y - v1y * v2x;
-  
 
-  float modulus = sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
+  float modulus = -sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
   
   normal[0]/=modulus;
   normal[1]/=modulus;

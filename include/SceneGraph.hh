@@ -59,7 +59,7 @@ public:
    * Return the first tag found in the scene graph that has this code
    * or NULL if none do.
    */
-  inline LocatedObject<PAYLOAD_SIZE>* Find(const CyclicBitSet<PAYLOAD_SIZE>& code ) const;
+  inline LocatedObject<PAYLOAD_SIZE>* Find(const CyclicBitSet<PAYLOAD_SIZE>& code );
 };
 
 template<class S,int PAYLOAD_SIZE> SceneGraph<S,PAYLOAD_SIZE>::SceneGraph() : m_root(new SceneGraphNode<S,PAYLOAD_SIZE>()) { 
@@ -179,7 +179,7 @@ template<class S,int PAYLOAD_SIZE> SceneGraphNode<S,PAYLOAD_SIZE>* SceneGraph<S,
   return m_root;
 }
 
-template<class S,int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>* SceneGraph<S,PAYLOAD_SIZE>::Find(const CyclicBitSet<PAYLOAD_SIZE>& code) const {
+template<class S,int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>* SceneGraph<S,PAYLOAD_SIZE>::Find(const CyclicBitSet<PAYLOAD_SIZE>& code) {
     return m_root->Find(code);
 }
 

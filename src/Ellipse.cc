@@ -19,6 +19,7 @@
 
 #define MAXFITERROR 0.05
 #define COMPARETHRESH 0.0001
+#define MAXDISTANCE
 
 static void print(const char* label, double* array, int rows, int cols);
 static void print(const char* label, double** array, int rows, int cols);
@@ -212,43 +213,60 @@ bool Ellipse::FitEllipse(const float* points, int numpoints) {
 }
 
 float Ellipse::GetError(const float* points, int count) const {
-  return GetErrorAlgebraic(points,count);
+  return GetErrorGradient(points,count);
 }
 
 float Ellipse::GetErrorAlgebraic(const float* points, int count) const {
   // calculate the algebraic distance
   float total=0;
+  float maxdist = 0;
   for (int pt=0;pt<count*2;pt+=2) {
     float x = points[pt];
     float y = points[pt+1];
-    float dist = m_a*x*x+m_b*x*y+m_c*y*y+m_d*x+m_e*y+m_f;
-    total+= fabs(dist);
+    float dist = fabs(m_a*x*x+m_b*x*y+m_c*y*y+m_d*x+m_e*y+m_f);
+    if (dist > maxdist) { maxdist = dist; }
+    total+= dist;
   }
 #ifdef ELLIPSE_DEBUG
-  PROGRESS("Total error from Algebraic method is "<< total/count);
+  PROGRESS("Total error from Algebraic method is "<< total/count << " maximimum distance was " << maxdist);
 #endif
+
+#ifdef MAXDISTANCE
+  return maxdist;
+#else
   return total/count;
+#endif
 }
 
 float Ellipse::GetErrorGradient(const float* points, int count) const {
   // calculate the algebraic distance inversly weighted by the
   // gradient
   float total=0;
+  float maxdist = 0;
   for (int pt=0;pt<count*2;pt+=2) {
     float x = points[pt];
     float y = points[pt+1];
-    float dist = m_a*x*x+m_b*x*y+m_c*y*y+m_d*x+m_e*y+m_f;
+    float dist = fabs(m_a*x*x+m_b*x*y+m_c*y*y+m_d*x+m_e*y+m_f);
     
     float dx = 2*m_a*x+m_b*y+m_d;
     float dy = m_b*x+2*m_c*y+m_e;
 
     float norm = dx*dx + dy*dy;
-    total+= dist/sqrt(norm);
+
+    dist /= sqrt(norm);
+
+    if (dist > maxdist) { maxdist = dist; }
+    total+= dist;
   }
 #ifdef ELLIPSE_DEBUG
-  PROGRESS("Total error from Gradient method is "<< total/count);
+  PROGRESS("Total error from Gradient method is "<< total/count << " maximimum distance was " << maxdist);
 #endif
+
+#ifdef MAXDISTANCE
+  return maxdist;
+#else
   return total/count;
+#endif
 }
 
 float Ellipse::GetErrorNakagawa(const float* points, int count) const {
@@ -257,6 +275,7 @@ float Ellipse::GetErrorNakagawa(const float* points, int count) const {
   l.Decompose();
 
   float total=0;
+  float max_dist =0 ;
   for(int pt=0;pt<count*2;pt+=2) {
     float xi = points[pt];
     float yi = points[pt+1];
@@ -294,14 +313,20 @@ float Ellipse::GetErrorNakagawa(const float* points, int count) const {
       iy = y0 - a*b*k/rt;
     }
     
-    float d = (ix-xi)*(ix-xi) + (iy-yi)*(iy-yi);
-    total+=fabs(d);
+    float d = fabs((ix-xi)*(ix-xi) + (iy-yi)*(iy-yi));
+    if (d > max_dist) { max_dist = d; }
+    total+=d;
   }
   
 #ifdef ELLIPSE_DEBUG
-  PROGRESS("Total error from Nakagawa Method is "<< total/count);
+  PROGRESS("Total error from Nakagawa Method is "<< total/count<< " maximimum distance was " << max_dist);
 #endif
+
+#ifdef MAXDISTANCE
+  return max_dist;
+#else
   return total/count;
+#endif
 }
 
 float Ellipse::GetErrorSafaeeRad(const float* points, int count) const {
@@ -313,6 +338,7 @@ float Ellipse::GetErrorSafaeeRad(const float* points, int count) const {
   l.Decompose();
 
   float total=0;
+  float max_dist = 0;
   for(int pt=0;pt<count*2;pt+=2) {
     float xi = points[pt];
     float yi = points[pt+1];
@@ -355,13 +381,20 @@ float Ellipse::GetErrorSafaeeRad(const float* points, int count) const {
     float n = sqrt((ix-xi)*(ix-xi)+(iy-yi)*(iy-yi));
     float q = m_a*xi*xi+m_b*xi*yi+m_c*yi*yi+m_d*xi+m_e*yi+m_f;
 
-    total += fabs(m*(1+ n/2/a)/(1+ n/2/m)*q);
+    float dist =  fabs(m*(1+ n/2/a)/(1+ n/2/m)*q);
+    if (dist > max_dist) { max_dist = dist; }
+    total += dist;
   }
 
 #ifdef ELLIPSE_DEBUG
-  PROGRESS("Total error from SafaeeRad Method is "<< total/count);
+  PROGRESS("Total error from SafaeeRad Method is "<< total/count<< " maximimum distance was " << max_dist);
 #endif
+
+#ifdef MAXDISTANCE
+  return max_dist;
+#else
   return total/count;
+#endif
 }
 
 float Ellipse::GetErrorSafaeeRad2(const float* points, int count) const {
@@ -369,6 +402,7 @@ float Ellipse::GetErrorSafaeeRad2(const float* points, int count) const {
   l.Decompose();
 
   float total=0;
+  float max_dist = 0;
   for(int pt=0;pt<count*2;pt+=2) {
     float xi = points[pt];
     float yi = points[pt+1];
@@ -410,13 +444,20 @@ float Ellipse::GetErrorSafaeeRad2(const float* points, int count) const {
     float m = sqrt((x0-ix)*(x0-ix)+(y0-iy)*(y0-iy));
     float q = m_a*xi*xi+m_b*xi*yi+m_c*yi*yi+m_d*xi+m_e*yi+m_f;
 
-    total += fabs(m*q);
+    float dist = fabs(m*q);
+
+    if (dist > max_dist) { max_dist = dist; }
+    total += dist;
   }
 
 #ifdef ELLIPSE_DEBUG
-  PROGRESS("Total error from SafaeeRad2 Method is "<< total/count);
+  PROGRESS("Total error from SafaeeRad2 Method is "<< total/count<< " maximimum distance was " << max_dist);
 #endif
+#ifdef MAXDISTANCE
+  return max_dist;
+#else
   return total/count;
+#endif
 }
 
 float Ellipse::GetErrorStricker(const float* points, int count) const {
@@ -449,6 +490,7 @@ float Ellipse::GetErrorStricker(const float* points, int count) const {
   float modf1_f2 = sqrt( (f1x-f2x)*(f1x-f2x) + (f1y-f2y)*(f1y-f2y) );
 
   float total =0;
+  float max_dist =0 ;
   for(int pt=0;pt<count*2;pt+=2) {
     float x = points[pt];
     float y = points[pt+1];
@@ -468,15 +510,21 @@ float Ellipse::GetErrorStricker(const float* points, int count) const {
 
     float atilde = 0.5*(sqrt( (x-f1x)*(x-f1x) + (y-f1y)*(y-f1y) ) + sqrt( (x-f2x)*(x-f2x) + (y-f2y)*(y-f2y) ));
 
-    total += fabs(atilde - a);
+    float dist = fabs(atilde - a);
+    
+    if (dist > max_dist) { max_dist = dist; }
+    total += dist;
   }
 
 #ifdef ELLIPSE_DEBUG
-  PROGRESS("Total error from Stricker Method is "<< total/count);
+  PROGRESS("Total error from Stricker Method is "<< total/count<< " maximimum distance was " << max_dist);
 #endif
+#ifdef MAXDISTANCE
+  return max_dist;
+#else
   return total/count;
+#endif
 }
-#include <iostream>
 
 void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   float a = GetA();
@@ -689,12 +737,12 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
 
   // here is our first ambiguity choice point.  We need to decide plus or minus theta
 
-  float r2c1[] = { pmcos, 0, -pmsin, 0,
+  double r2c1[] = { pmcos, 0, -pmsin, 0,
 		   0,     1, 0,     0, 
 		   pmsin, 0, pmcos, 0,
 		   0,     0, 0,     1 };
   
-  float r2c2[] = { pmcos, 0, pmsin, 0,
+  double r2c2[] = { pmcos, 0, pmsin, 0,
 		   0,     1, 0,     0, 
 		   -pmsin, 0, pmcos, 0,
 		   0,     0, 0,     1 };
@@ -729,7 +777,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   
   // apply the relevant translation - we have to choose again here based on our choice of theta
   double tx = sqrt((eigvals[4]-eigvals[0])*(eigvals[8]-eigvals[4]))/eigvals[4];
-  //  double tx = sqrt((eigvals[8]-eigvals[0])*(eigvals[0]-eigvals[4]))/eigvals[4];
+  //  double tx = sqrt( eigvals[0] - (eigvals[4] + eigvals[0]*eigvals[8]/eigvals[4]) + eigvals[8] );
 
 #ifdef CIRCLE_TRANSFORM_DEBUG
   PROGRESS("Translation tx = "<<tx);
