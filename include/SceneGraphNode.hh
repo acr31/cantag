@@ -121,7 +121,10 @@ template<class S, int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>* SceneGraphNode<
 }
 
 template<class S, int PAYLOAD_SIZE> void SceneGraphNode<S,PAYLOAD_SIZE>::ClearLocatedObject() {
-  delete(m_located);
+  if (m_located) {
+    delete(m_located);
+  }
+  m_located = NULL;
 }
 
 template<class S, int PAYLOAD_SIZE> bool SceneGraphNode<S,PAYLOAD_SIZE>::IsInspected() const { return m_inspected; }

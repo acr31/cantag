@@ -186,4 +186,6 @@ void ApplyTransform3D(const float transform[16], float* points, int numpoints);
  */
 void GetNormalVector(const float transform[16], float normal[3]);
 
+void GetLocation(const float transform[16], float location[3], float tag_size);
+
 #endif//FIND_TRANSFORM_GUARD

@@ -75,7 +75,16 @@ template<class S,int PAYLOAD_SIZE> SceneGraph<S,PAYLOAD_SIZE>::~SceneGraph() {
 
 template<class S, int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(const Image& image, const Camera& camera) {
   CvSeq* root;
-  cvFindContours(image.m_image,store,&root,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_NONE);
+  int num_contours = cvFindContours(image.m_image,store,&root,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_NONE);
+
+  if (root == NULL || num_contours == 0) {
+    // no contours were found
+#ifdef SCENE_GRAPH_DEBUG
+    PROGRESS("No Contours found");
+#endif
+    return;
+
+  }
 
 #ifdef IMAGE_DEBUG
   IplImage *debug0 = cvCloneImage(image.m_image);

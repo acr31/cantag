@@ -26,6 +26,12 @@ private:
   float m_e;
   float m_f;
 
+  float m_x0;
+  float m_y0;
+  float m_angle_radians;
+  float m_width;
+  float m_height;
+
   bool m_fitted;
 
 public:
@@ -43,6 +49,12 @@ public:
   inline float GetE() const { return m_e; }
   inline float GetF() const { return m_f; }
 
+  inline float GetX0() const { return m_x0; }
+  inline float GetY0() const { return m_y0; }
+  inline float GetWidth() const { return m_width; }
+  inline float GetHeight() const { return m_height; }
+  inline float GetAngle() const { return m_angle_radians; }
+
   float GetError(const float* points, int numpoints) const;
   float GetErrorAlgebraic(const float* points, int count) const;
   float GetErrorGradient(const float* points, int count) const;
@@ -51,36 +63,32 @@ public:
   float GetErrorSafaeeRad2(const float* points, int numpoints) const;
   float GetErrorStricker(const float* points, int numpoints) const;
 
-  virtual void GetTransform(float transform1[16], float transform2[16]);
+  void GetTransform(float transform1[16], float transform2[16]);
 
-private:
-  bool FitEllipse(const float* points, int numpoints);
-};
-
-/**
- * Another ellipse class, functionally identical.  Use this one if you
- * want the get transform method to give you linear scalings of the
- * ellipse rather than the proper pose based transform
- */
-class LinearEllipse : public Ellipse {
-private:
-  float x0;
-  float y0;
-  float width;
-  float height;
-  float angle_radians;
-
-public:
-  LinearEllipse();
-  LinearEllipse(float* points, int numpoints);
-  LinearEllipse(float* points, int numpoints, bool prev_fit);
-  LinearEllipse(float a, float b, float c, float d, float e, float f);
-
-  inline float GetX0() { return x0; }
-  inline float GetY0() { return y0; }
-  inline float GetWidth() { return width; }
-  inline float GetHeight() { return height; }
-  inline float GetAngle() { return angle_radians; }
+  /*
+   * We then build the transformation matrix that transforms the unit circle onto the ellipse
+   *
+   * This is a scale factor   ( width 0      0 0 )
+   *                          ( 0     height 0 0 ) 
+   *                          ( 0     0      1 0 )
+   *                          ( 0     0      0 1 )
+   *
+   * premultiplied by a rotation around the z axis  ( cos(theta)  -sin(theta) 0 0 )
+   *                                                ( sin(theta)  cos(theta)  0 0 )
+   *                                                ( 0           0           1 0 )
+   *                                                ( 0           0           0 1 )
+   *
+   *
+   * premultiplied by a translation in x and y ( 1 0 0 x0 )
+   *                                           ( 0 1 0 y0 )
+   *                                           ( 0 0 1 1  )
+   *                                           ( 0 0 0 1  ) 
+   *
+   * (translate by 1 in z so that the perspective transform doesn't do
+   * anything when we apply it later)
+   *
+   */
+  void GetTransformLinear(float transform1[16], float transform2[16]);
 
   /**
    * Calculate the ellipse transform based on decomposing the general
@@ -195,30 +203,10 @@ public:
   virtual void Decompose();
   
 
-  /*
-   * We then build the transformation matrix that transforms the unit circle onto the ellipse
-   *
-   * This is a scale factor   ( width 0      0 0 )
-   *                          ( 0     height 0 0 ) 
-   *                          ( 0     0      1 0 )
-   *                          ( 0     0      0 1 )
-   *
-   * premultiplied by a rotation around the z axis  ( cos(theta)  -sin(theta) 0 0 )
-   *                                                ( sin(theta)  cos(theta)  0 0 )
-   *                                                ( 0           0           1 0 )
-   *                                                ( 0           0           0 1 )
-   *
-   *
-   * premultiplied by a translation in x and y ( 1 0 0 x0 )
-   *                                           ( 0 1 0 y0 )
-   *                                           ( 0 0 1 1  )
-   *                                           ( 0 0 0 1  ) 
-   *
-   * (translate by 1 in z so that the perspective transform doesn't do
-   * anything when we apply it later)
-   *
-   */
-  virtual void GetTransform(float transform1[16], float transform2[16]);
+private:
+  bool FitEllipse(const float* points, int numpoints);
 };
+
+
 
 #endif//ELLIPSE_GUARD

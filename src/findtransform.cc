@@ -154,6 +154,12 @@ void ApplyTransform3D(const float transform[16], float* points, int numpoints) {
   }
 }
 
+void GetLocation(const float transform[16], float location[3], float tag_size) {
+  location[0] = tag_size*transform[3]/transform[15];
+  location[1] = tag_size*transform[7]/transform[15];
+  location[2] = tag_size*transform[11]/transform[15];
+}
+
 
 void GetNormalVector(const float transform[16], float normal[3]) {
   // project (0,0,0) and (0,0,1).  Take the difference between them and normalize it

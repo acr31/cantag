@@ -7,7 +7,7 @@
 #include <Config.hh>
 #include <Image.hh>
 #include <CyclicBitSet.hh>
-
+#include <findtransform.hh>
 #include <boost/shared_ptr.hpp>
 
 /**
@@ -29,35 +29,19 @@ public:
    */
   float transform[16];
 
-  /**
-   * Centre x co-ordinate (camera)
-   */
-  float xc;
 
   /**
-   * Centre y co-ordinate (camera)
+   * A 3x1 matrix containing this located object's normal vector in
+   * camera co-ordinates
    */
-  float yc;
+  float normal[3];
+
 
   /**
-   * Centre z co-ordinate (camera)
+   * A 3x1 matrix containing this located object's position in camera
+   * co-ordinates.
    */
-  float zc;
-
-  /**
-   * x component of the object's normal vector
-   */
-  float xn;
-
-  /**
-   * y component of the object's normal vector
-   */
-  float yn;
-
-  /**
-   * z component of the object's normal vector
-   */
-  float zn;
+  float location[3];
 
   /**
    * The angle of this object relative to the camera co-ordinate x axis.
@@ -70,6 +54,19 @@ public:
   boost::shared_ptr< CyclicBitSet<PAYLOAD_SIZE> > tag_code;
 
   void Refresh(Image& image) {};
+
+  void LoadTransform(float transform[16],float tag_size);
 };
+
+
+template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(float t[16],float tag_size) {
+  for(int i=0;i<16;i++) {
+    transform[i] = t[i];
+  }
+  
+  GetNormalVector(transform,normal);
+  GetLocation(transform,location,tag_size);
+  
+}
 
 #endif//LOCATED_OBJECT_GUARD

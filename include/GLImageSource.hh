@@ -55,7 +55,7 @@ public:
   
 };
 
-
+#include <iostream>
 template<class TAG> GLImageSource<TAG>::GLImageSource(int height, int width, CyclicBitSet<TAG::TagPayloadSize>& code, const TAG& t) : 
     m_height(height),
     m_width(width),

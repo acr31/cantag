@@ -257,13 +257,7 @@ template<int SIZE> bool MatrixTag<SIZE>::DecodeNode(SceneGraphNode< ShapeChain<Q
 #endif	
 
     LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = node->GetLocatedObject();
-    for(int i=0;i<16;i++) {
-      lobj->transform[i] = transform[i];
-    }	
-
-    float normal[3];
-    GetNormalVector(transform,normal);
-    lobj->xn = normal[0]; lobj->yn = normal[1]; lobj->zn = normal[2];
+    lobj->LoadTransform(transform,1);
     lobj->tag_code = read_code;	   
     return true;
   }    

@@ -28,7 +28,9 @@
 
 int debug_image_counter = 0;
 
-//#define Ellipse LinearEllipse
+#undef LINEAR_ELLIPSE
+
+
 /**
  * The number of readings to make from a tag.  We then look for pairs
  * of reading that are the same in order to guess the correct angle of
@@ -240,16 +242,11 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
     return false;
   }
 
-  // find a concentric child
-  LinearEllipse le(el.GetA(),el.GetB(),el.GetC(),el.GetD(),el.GetE(),el.GetF());
-  le.Decompose();
   bool found = false;
   for(typename std::vector< SceneGraphNode< ShapeChain<Ellipse>,  RING_COUNT*SECTOR_COUNT >* >::iterator i = node->GetChildren().begin(); i!=node->GetChildren().end();i++) {
     Ellipse c1 = (*i)->GetShapes().GetShape();
     if (c1.IsFitted()) {
-      LinearEllipse lc(c1.GetA(),c1.GetB(),c1.GetC(),c1.GetD(),c1.GetE(),c1.GetF());
-      lc.Decompose();
-      float dist = (lc.GetX0()-le.GetX0())*(lc.GetX0()-le.GetX0()) + (lc.GetY0()-le.GetY0())*(lc.GetY0()-le.GetY0());
+      float dist = (c1.GetX0()-el.GetX0())*(c1.GetX0()-el.GetX0()) + (c1.GetY0()-el.GetY0())*(c1.GetY0()-el.GetY0());
 #ifdef RING_TAG_DEBUG
       PROGRESS("Distance is " << dist);
 #endif
@@ -281,7 +278,12 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
   // extract its pose
   float transform1[16];
   float transform2[16];
+
+#ifdef LINEAR_ELLIPSE
+  el.GetTransformLinear(transform1,transform2);
+#else
   el.GetTransform(transform1,transform2);
+#endif
   
   // project some points for the inner circle using both interpretations and check which one fits  
   int count = 200;
@@ -321,19 +323,25 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
   }
   else {
     // find out where the centre of each of the projected ellipses would be
-    /*
-      float points1[2];
-      float points2[2];
-      ApplyTransform(transform1,0,0,points1,points1+1);
-      ApplyTransform(transform2,0,0,points2,points2+1);
-    */
+    float points1[2];
+    float points2[2];
+    ApplyTransform(transform1,0,0,points1,points1+1);
+    ApplyTransform(transform2,0,0,points2,points2+1);
+
+    // now work out the direction of the vector that would run from
+    // the centre of the main ellipse to the centre of each projeted
+    // ellipse.
+    //    float direction1 = atan((el.GetY0()-points1[1])/(el.GetX0()-points1[0]));
+    //    float direction2 = atan((el.GetY0()-points2[1])/(el.GetX0()-points2[0]));
 
     for(typename std::vector< SceneGraphNode< ShapeChain<Ellipse>,  RING_COUNT*SECTOR_COUNT >* >::iterator i = node->GetChildren().begin(); i!=node->GetChildren().end();i++) {
+      
+      Ellipse child = (*i)->GetShapes().GetShape();
+
+
+      //      float test_dir
       /*
-	Ellipse child = (*i)->GetShapes().GetShape();
-	LinearEllipse le(child.GetA(),child.GetB(),child.GetC(),child.GetD(),child.GetE(),child.GetF());
-	le.Decompose();
-	float error1 = (le.GetX0()-points1[0])*(le.GetX0()-points1[0]) + (le.GetY0()-points1[1])*(le.GetY0()-points1[1]);
+      float error1 = (le.GetX0()-points1[0])*(le.GetX0()-points1[0]) + (le.GetY0()-points1[1])*(le.GetY0()-points1[1]);
 	float error2 = (le.GetX0()-points2[0])*(le.GetX0()-points2[0]) + (le.GetY0()-points2[1])*(le.GetY0()-points2[1]);
       */
 
@@ -432,25 +440,20 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
 #ifdef RING_TAG_DEBUG
       PROGRESS("Found code " << *read_code[code_ptr]);
 #endif	
+#ifdef TEXT_DEBUG
       projected1[0] = 0;
       projected1[1] = 0;
       ApplyTransform(correcttrans,projected1[0],projected1[1],projected1,projected1+1);
       camera.NPCFToImage(projected1,1);
-#ifdef TEXT_DEBUG
       std::cout << "Found code " << *read_code[code_ptr] << " at " << projected1[0] << "," << projected1[1] << std::endl;
 #endif
 #ifdef RING_TAG_DEBUG
 
       PROGRESS("Ellipse position is "<<projected1[0]<<","<<projected1[1]);
 #endif
-      
+      std::cout << "!!" << el.GetX0() << " " << el.GetY0() << " " << el.GetHeight() << " " << el.GetWidth() << " " << el.GetAngle() << std::endl;
       LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj = node->GetLocatedObject();
-      for(int i=0;i<16;i++) {
-	lobj->transform[i] = correcttrans[i];
-      }		
-      lobj->xn = correctnormal[0];
-      lobj->yn = correctnormal[1];
-      lobj->zn = correctnormal[2];
+      lobj->LoadTransform(correcttrans,1);
       lobj->tag_code = read_code[code_ptr];	   
       return true;
     }

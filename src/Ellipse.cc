@@ -28,11 +28,13 @@ Ellipse::Ellipse(): m_fitted(false) {}
 
 Ellipse::Ellipse(const float* points, int numpoints) {
   m_fitted = FitEllipse(points,numpoints);
+  if (m_fitted) { Decompose(); }
 }
 
 Ellipse::Ellipse(const float* points, int numpoints, bool prev_fit) {
   if (!prev_fit) {
     m_fitted = FitEllipse(points,numpoints);
+    if (m_fitted) { Decompose(); }
   }
   else {
     m_fitted =false;
@@ -40,7 +42,7 @@ Ellipse::Ellipse(const float* points, int numpoints, bool prev_fit) {
 }
 
 Ellipse::Ellipse(float a, float b, float c, float d, float e, float f) :
-  m_a(a), m_b(b), m_c(c), m_d(d), m_e(e), m_f(f), m_fitted(true) {}
+  m_a(a), m_b(b), m_c(c), m_d(d), m_e(e), m_f(f), m_fitted(true) { Decompose();}
 
 bool Ellipse::Compare(const Ellipse& o) const {
   /**
@@ -271,20 +273,17 @@ float Ellipse::GetErrorGradient(const float* points, int count) const {
 
 float Ellipse::GetErrorNakagawa(const float* points, int count) const {
   
-  LinearEllipse l(GetA(),GetB(),GetC(),GetD(),GetE(),GetF());
-  l.Decompose();
-
   float total=0;
   float max_dist =0 ;
   for(int pt=0;pt<count*2;pt+=2) {
     float xi = points[pt];
     float yi = points[pt+1];
 
-    float a = l.GetWidth();
-    float b = l.GetHeight();
-    float theta  = l.GetAngle();
-    float x0 = l.GetX0();
-    float y0 = l.GetY0();
+    float a = GetWidth();
+    float b = GetHeight();
+    float theta  = GetAngle();
+    float x0 = GetX0();
+    float y0 = GetY0();
     float k = (y0-yi)/(x0-xi);
 
     float sint = sin(theta);
@@ -334,20 +333,17 @@ float Ellipse::GetErrorSafaeeRad(const float* points, int count) const {
   // intersecting the ellipse at Ij.  The lengths of the bisected
   // portions of the ray mj and nj are determined
 
-  LinearEllipse l(GetA(),GetB(),GetC(),GetD(),GetE(),GetF());
-  l.Decompose();
-
   float total=0;
   float max_dist = 0;
   for(int pt=0;pt<count*2;pt+=2) {
     float xi = points[pt];
     float yi = points[pt+1];
 
-    float a = l.GetWidth();
-    float b = l.GetHeight();
-    float theta  = l.GetAngle();
-    float x0 = l.GetX0();
-    float y0 = l.GetY0();
+    float a = GetWidth();
+    float b = GetHeight();
+    float theta  = GetAngle();
+    float x0 = GetX0();
+    float y0 = GetY0();
     float k = (y0-yi)/(x0-xi);
 
     float sint = sin(theta);
@@ -398,20 +394,17 @@ float Ellipse::GetErrorSafaeeRad(const float* points, int count) const {
 }
 
 float Ellipse::GetErrorSafaeeRad2(const float* points, int count) const {
-  LinearEllipse l(GetA(),GetB(),GetC(),GetD(),GetE(),GetF());
-  l.Decompose();
-
   float total=0;
   float max_dist = 0;
   for(int pt=0;pt<count*2;pt+=2) {
     float xi = points[pt];
     float yi = points[pt+1];
 
-    float a = l.GetWidth();
-    float b = l.GetHeight();
-    float theta  = l.GetAngle();
-    float x0 = l.GetX0();
-    float y0 = l.GetY0();
+    float a = GetWidth();
+    float b = GetHeight();
+    float theta  = GetAngle();
+    float x0 = GetX0();
+    float y0 = GetY0();
     float k = (y0-yi)/(x0-xi);
 
     float sint = sin(theta);
@@ -461,14 +454,11 @@ float Ellipse::GetErrorSafaeeRad2(const float* points, int count) const {
 }
 
 float Ellipse::GetErrorStricker(const float* points, int count) const {
-  LinearEllipse l(GetA(),GetB(),GetC(),GetD(),GetE(),GetF());
-  l.Decompose();
-
-  float a = l.GetWidth();
-  float b = l.GetHeight();
-  float x0 = l.GetX0();
-  float y0 = l.GetY0();
-  float theta = l.GetAngle();
+  float a = GetWidth();
+  float b = GetHeight();
+  float x0 = GetX0();
+  float y0 = GetY0();
+  float theta = GetAngle();
 
   // we need a^2-b^2 to be >0 so check that
   if (a < b) {
@@ -890,12 +880,7 @@ static void print(const char* label, double** array, int rows, int cols) {
 }
 
 
-LinearEllipse::LinearEllipse() : Ellipse() {};
-LinearEllipse::LinearEllipse(float* points, int numpoints) : Ellipse(points,numpoints) {};
-LinearEllipse::LinearEllipse(float* points, int numpoints, bool prev_fit): Ellipse(points,numpoints,prev_fit) {};
-LinearEllipse::LinearEllipse(float a, float b, float c, float d, float e,float f): Ellipse(a,b,c,d,e,f) {};
-
-void LinearEllipse::Decompose() {
+void Ellipse::Decompose() {
   float a = GetA();
   float b = GetB();
   float c = GetC();
@@ -925,8 +910,8 @@ void LinearEllipse::Decompose() {
     PROGRESS("Constraint Error: this is not an ellipse");
 #endif
 
-  x0 = (2*c*d - b*e) / disc;
-  y0 = (2*a*e - b*d) / disc;
+  m_x0 = (2*c*d - b*e) / disc;
+  m_y0 = (2*a*e - b*d) / disc;
 
 #ifdef DECOMPOSE_DEBUG
   PROGRESS("X= " << x0);
@@ -946,38 +931,37 @@ void LinearEllipse::Decompose() {
   PROGRESS("lambda2= " << lambda2);
 #endif
   
-  float scale_factor = sqrt( -f + a*x0*x0 + b*x0*y0 + c*y0*y0);
+  float scale_factor = sqrt( -f + a*m_x0*m_x0 + b*m_x0*m_y0 + c*m_y0*m_y0);
 
 #ifdef DECOMPOSE_DEBUG
   PROGRESS("scale= " << scale_factor);
 #endif
 
-  width = lambda1 * scale_factor;
-  height = lambda2 * scale_factor;
+  m_width = lambda1 * scale_factor;
+  m_height = lambda2 * scale_factor;
 
 #ifdef DECOMPOSE_DEBUG
-  PROGRESS("width= " << width);
-  PROGRESS("height= " <<height);
+  PROGRESS("width= " << m_width);
+  PROGRESS("height= " <<m_height);
 #endif
 
-  angle_radians = atan( -(a-lambda1t)/(0.5*b) );
-
+  m_angle_radians = atan( -(a-lambda1t)/(0.5*b) );
+  
 #ifdef DECOMPOSE_DEBUG
-  PROGRESS("angle= " << angle_radians);
+  PROGRESS("angle= " << m_angle_radians);
 #endif
   
 }
 
-void LinearEllipse::GetTransform(float transform1[16], float transform2[16]) {
-  Decompose();
-  transform1[0] = width*cos(angle_radians);
-  transform1[1] = -height*sin(angle_radians); 
+void Ellipse::GetTransformLinear(float transform1[16], float transform2[16]) {
+  transform1[0] = m_width*cos(m_angle_radians);
+  transform1[1] = -m_height*sin(m_angle_radians); 
   transform1[2] = 0;
-  transform1[3] = x0;
-  transform1[4] = width*sin(angle_radians);
-  transform1[5] = height*cos(angle_radians); 
+  transform1[3] = m_x0;
+  transform1[4] = m_width*sin(m_angle_radians);
+  transform1[5] = m_height*cos(m_angle_radians); 
   transform1[6] = 0;
-  transform1[7] = y0;
+  transform1[7] = m_y0;
   transform1[8] = 0;
   transform1[9] = 0;
   transform1[10] = 1;

@@ -371,20 +371,29 @@ bool eigensolve(double a, double b, double c,
 
   int res = eigen(1,1,1,3,A,eigvec,valre,valim,cnt);
 
+  bool result;
   if (res == 0) {
-
     for(int z=0;z<3;++z) {
       for(int j=0;j<3;++j) {
 	eigenvects[z*3+j] = eigvec[z][j];
       }
       eigenvals[z*4] = valre[z];
     }
-    return true;
+    result = true;
   }
   else {
-    return false;
+    result = false;
   }
 
+  for(int z=0;z<3;++z) {
+    delete[] A[z];
+    delete[] eigvec[z];
+  }
+  delete[] A;
+  delete[] eigvec;
+  delete[] valre;
+  delete[] valim;
+  delete[] cnt;
 }
 
 
