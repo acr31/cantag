@@ -337,7 +337,7 @@ void QuadTangle::GetTransform(float transform[16]) const {
   transform[0] = result[0];  transform[1] = result[1];  transform[2] = final[0];  transform[3] = result[2];
   transform[4] = result[3];  transform[5] = result[4];  transform[6] = final[1];  transform[7] = result[5];
   transform[8] = result[6];  transform[9] = result[7];  transform[10]= final[2];  transform[11]= scalefactor;
-  transform[12]= 0;          transform[13]= 0;          transform[14]= 0;  transform[15]= scalefactor;
+  transform[12]= 0;          transform[13]= 0;          transform[14]= 0;  transform[15]= 1;
 
 #ifdef SQUARE_TRANSFORM_DEBUG
   PROGRESS("Final trans=[" << transform[0] << "," << transform[1] << "," << transform[2] << ","<<transform[3] <<";");

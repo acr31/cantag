@@ -292,9 +292,6 @@ Image::Image(Socket& socket) {
   int width = socket.RecvInt();
   int height = socket.RecvInt();
   int size = socket.RecvInt();
-  std::cout << "width " << width << std::endl;
-  std::cout << "height " << height << std::endl;
-  std::cout << "size " << size << std::endl;
   m_image = cvCreateImageHeader(cvSize(width,height),IPL_DEPTH_8U, 1);
   m_contents = new unsigned char[size];
   m_image->imageData = m_image->imageDataOrigin = (char*)m_contents;
@@ -307,9 +304,6 @@ int Image::Save(Socket& socket) const {
   int count = socket.Send(m_image->width);
   count += socket.Send(m_image->height);
   count += socket.Send(m_image->imageSize);
-  std::cout << "width " << m_image->width << std::endl;
-  std::cout << "height " << m_image->height << std::endl;
-  std::cout << "size " << m_image->imageSize << std::endl;
   count += socket.Send((unsigned char*)m_image->imageData,m_image->imageSize);
   return count;
 }

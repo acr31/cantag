@@ -53,6 +53,13 @@ void ApplyTransform(const float transform[16], std::vector<float>& points);
  */ 
 void ApplyTransform3D(const float transform[16], float* points, int numpoints);
 
+
+/**
+ * Transform the object co-ordinates given as an array of x,y,z values
+ * in repeating sequence into Camera co-ordinates 
+
+void ApplyTransformCamera(const float transform[16], float* points, int numpoints);
+*/
 /**
  * Calculate the normal vector for this transform by computing the
  * camera co-ordinates of (0,0,0),(0,1,0),(1,0,0), converting these to

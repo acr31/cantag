@@ -4,7 +4,7 @@
 
 #include <Socket.hh>
 #include <cerrno>
-#include <iostream>
+
 extern "C" {
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -89,7 +89,7 @@ Socket* Socket::Accept() {
 void Socket::Recv(unsigned char* buf, size_t len) {
   int total = 0;
   while(total < len) {
-    int count = ::recv(m_socket,buf,len,0);
+    int count = ::recv(m_socket,buf+total,len-total,0);
     if (count == -1) throw "Received error/eof from socket";
     total += count;
   }
@@ -117,11 +117,9 @@ void Socket::Recv(std::vector<float>& vec) {
 }
 
 int Socket::Send(const unsigned char* buf, size_t len) {
-  std::cout << "Sending " << len << " bytes" << std::endl;
   int total = 0;
   while(total != len) {
     int sent = ::send(m_socket,buf+total,len-total,0);
-    std::cout << "Sent returns " << sent << std::endl;
     if (sent == -1) throw "Send yields -1";
     total+=sent;
   }

@@ -393,9 +393,15 @@ int ContourTree::Save(Socket& socket) const {
 
 ContourTree::Contour::Contour(Socket& socket) : points() {
   nbd = socket.RecvInt();
-  bordertype = (bordertype_t)socket.RecvInt();
-  parent_id = socket.RecvInt();
-  socket.Recv(points);
+  if (nbd == -1) {
+    weeded = true; 
+  }
+  else {
+    weeded = false;
+    bordertype = (bordertype_t)socket.RecvInt();
+    parent_id = socket.RecvInt();
+    socket.Recv(points);
+  }
   int count = socket.RecvInt();
   for(int i=0;i<count;++i) {
     children.push_back(new Contour(socket));
@@ -410,13 +416,18 @@ int ContourTree::Contour::Save(Socket& socket) const {
     byte_count += socket.Send(parent_id);
     byte_count += socket.Send(points);
   }
+  else {
+    byte_count += socket.Send(-1);
+  }
   int counter = 0;
   for(std::vector<Contour*>::const_iterator i = children.begin(); i!= children.end(); ++i) {
     if (!(*i)->weeded) counter++;
   }
   byte_count+= socket.Send(counter);
   for(std::vector<Contour*>::const_iterator i = children.begin(); i!= children.end(); ++i) {
-    byte_count += (*i)->Save(socket);
+    if (!(*i)->weeded) {
+      byte_count += (*i)->Save(socket);
+    }
   }
   return byte_count;
 }
