@@ -11,13 +11,13 @@
 #include <findtransform.hh>
 
 #ifdef TEXT_DEBUG
-# define ELLIPSE_DEBUG
+# undef ELLIPSE_DEBUG
 # undef ELLIPSE_DEBUG_DUMP_POINTS
 # undef CIRCLE_TRANSFORM_DEBUG
 # undef DECOMPOSE_DEBUG
 #endif
 
-#define MAXFITERROR 0.01
+#define MAXFITERROR 0.00001
 #define COMPARETHRESH 0.0001
 
 static void print(const char* label, double* array, int rows, int cols);
@@ -188,9 +188,9 @@ bool Ellipse::FitEllipse(const float* points, int numpoints) {
       m_a = eigvects[i];
       m_b = eigvects[i+3];
       m_c = eigvects[i+6];
-      m_d = t[0][0]*eigvects[i]+t[1][0]*eigvects[i+3]+t[2][0]*eigvects[i+6];
-      m_e = t[0][1]*eigvects[i]+t[1][1]*eigvects[i+3]+t[2][1]*eigvects[i+6];
-      m_f = t[0][2]*eigvects[i]+t[1][2]*eigvects[i+3]+t[2][2]*eigvects[i+6];
+      m_d = t[0][0]*eigvects[i]+t[0][1]*eigvects[i+3]+t[0][2]*eigvects[i+6];
+      m_e = t[1][0]*eigvects[i]+t[1][1]*eigvects[i+3]+t[1][2]*eigvects[i+6];
+      m_f = t[2][0]*eigvects[i]+t[2][1]*eigvects[i+3]+t[2][2]*eigvects[i+6];
 
      
 #ifdef ELLIPSE_DEBUG
@@ -234,6 +234,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
 
   // it turns out to be really important to the pose extraction
   // that our conic has a positive sense!
+  /*
   if (f > 0) {
     a*=-1;
     b*=-1;
@@ -245,7 +246,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
     PROGRESS("Corrected for negative scale factor");
 #endif
   }
-  
+  */
 
 #ifdef CIRCLE_TRANSFORM_DEBUG
   PROGRESS("Ellipse params (a-f) are ["<<
