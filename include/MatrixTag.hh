@@ -114,7 +114,6 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
     // now draw the code
     Payload< SIZE*SIZE - (SIZE*SIZE % 2) > payload;
     EncodePayload(tag_data,payload);
-
     float projX0, projY0;
     float projX1, projY1;
     float projX2, projY2;
@@ -129,13 +128,35 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
       int u3 = (int)(m_cells_corner[2*i]*(float)size);
       int v3 = (int)((m_cells_corner[2*i+1]+m_cell_width)*(float)size);
       int colour = payload[i] ? COLOUR_BLACK : COLOUR_WHITE;
-      //int colour = (int)((float)i/(float)(SIZE*SIZE - (SIZE*SIZE % 2)) * 255);
+      //int colour = (int)((float)i/(float)(SIZE*SIZE - (SIZE*SIZE % 2)) * 128)+128;
       image.DrawFilledQuadTangle(u0,v0,
 				 u1,v1,
 				 u2,v2,
 				 u3,v3,
 				 colour);
     }
+    /*
+    int counter = 0;
+    for(int i=0;i<SIZE;i++) {
+      for(int j=0;j<SIZE;j++) {
+	int u0 = (int)((float)(i+1)/(SIZE+2)*size);
+	int v0 = (int)((float)(j+1)/(SIZE+2)*size);
+	int u1 = (int)((float)(i+2)/(SIZE+2)*size);
+	int v1 = (int)((float)(j+1)/(SIZE+2)*size);
+	int u2 = (int)((float)(i+2)/(SIZE+2)*size);
+	int v2 = (int)((float)(j+2)/(SIZE+2)*size);
+	int u3 = (int)((float)(i+1)/(SIZE+2)*size);
+	int v3 = (int)((float)(j+2)/(SIZE+2)*size);
+	int colour = (int)((float)counter/SIZE/SIZE * 128)+128;
+	counter++;
+	image.DrawFilledQuadTangle(u0,v0,
+				   u1,v1,
+				   u2,v2,
+				   u3,v3,
+				   colour);
+      }
+    }
+    */
   }
 
 

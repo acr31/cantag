@@ -153,7 +153,9 @@ public:
 	// pick the colour based on the value we encode - sensible
 	int colour = payload[j*RING_COUNT+i] ? COLOUR_BLACK : COLOUR_WHITE;
 	// or pick the colour based on which sector we are encoding - useful for debugging
-	//int colour = (int)((float)(i+j*RING_COUNT) / (float)(RING_COUNT*SECTOR_COUNT) * 255);
+	//int colour = (int)((float)(i+j*RING_COUNT) / (float)(RING_COUNT*SECTOR_COUNT) * 128)+128;
+	// or pick the colour as if we were reading the tag in the wrong order - useful for pictures
+	//int colour = (int)((float)(i*SECTOR_COUNT+j) / (float)(RING_COUNT*SECTOR_COUNT) * 128)+128;
 	image.DrawSector(x0,y0,scalefactor*m_data_ring_outer_radii[i],m_sector_angles[j],m_sector_angles[j+1],colour);
       }
     }
