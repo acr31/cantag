@@ -5,7 +5,7 @@
 #ifndef BIGINT_GUARD
 #define BIGINT_GUARD
 
-#include <tripover/Config.hh>
+#include <total/Config.hh>
 
 #ifndef HAVE_GMPXX_H
 #error "This version has been configured without GNU MP Bignum C++ library"
