@@ -33,97 +33,101 @@ private:
 
   std::vector<SceneGraphNode<S,PAYLOAD_SIZE>* > m_children;
 
-  int m_contour_id;
-
 public:
-  SceneGraphNode(float* points, int numpoints) : m_inspected(false), m_located(NULL), m_matcher(points,numpoints), m_children() {};
-
-  SceneGraphNode() : m_inspected(false), m_located(NULL), m_matcher(), m_children() {};
-
-  ~SceneGraphNode() {
-    for(typename std::vector< SceneGraphNode<S,PAYLOAD_SIZE>* >::iterator i = m_children.begin();
-	i != m_children.end();
-	i++) {
-      delete (*i);
-    }
-  }
-
-  inline int GetContourID() const {
-    return m_contour_id;
-  }
-
-  inline int SetContourID(int contour_id) {
-    m_contour_id = contour_id;
-  }
-
-  inline SceneGraphNode* GetChildByContourID(int contour_id) {
-    for(typename std::vector< SceneGraphNode<S,PAYLOAD_SIZE>* >::iterator i = m_children.begin();
-	i != m_children.end();
-	i++) {
-      if ( (*i)->GetContourID() == contour_id) {
-	return *i;
-      }
-    }
-    return NULL;
-  }
-
+  SceneGraphNode(float* points, int numpoints);
+  SceneGraphNode();
+  ~SceneGraphNode();
+  
   /**
    * Compare this node with the given node.  Return true if they
    * represent the same shape.
    */
-  inline bool Compare(const SceneGraphNode<S,PAYLOAD_SIZE>& node) const {
-    return m_matcher.Compare(node.m_matcher);
-  }
+  inline bool Compare(const SceneGraphNode<S,PAYLOAD_SIZE>& node) const;
 
   /**
    * Refresh the located object because it hasn't moved
    */
-  inline void RefreshLocatedObject(Image* image) {
-    m_located.Refresh(image);
-  }
+  inline void RefreshLocatedObject(Image* image);
 
   /**
    * Replace the current located object with a new one
    */
-  inline LocatedObject<PAYLOAD_SIZE>* GetLocatedObject() {
-    if (m_located == NULL) {
-      m_located = new LocatedObject<PAYLOAD_SIZE>();
-    }
-    return m_located;
-  }
+  inline LocatedObject<PAYLOAD_SIZE>* GetLocatedObject();
 
   /**
    * Remove the current located object
    */
-  inline void ClearLocatedObject() {
-    delete(m_located);
-  }
+  inline void ClearLocatedObject();
 
   /**
    * Return true if this node has already been inspected
    */
-  inline bool IsInspected() const { return m_inspected; }
+  inline bool IsInspected() const;
 
   /**
    * Set this node as inspected
    */ 
-  inline bool SetInspected() { m_inspected = true; }
+  inline void SetInspected();
 
-  inline void AddChild(SceneGraphNode<S,PAYLOAD_SIZE>* child) {
-    m_children.push_back(child);
-  }
+  inline void AddChild(SceneGraphNode<S,PAYLOAD_SIZE>* child);
 
-  inline bool HasChildren() {
-    return !m_children.empty();
-  }
+  inline bool HasChildren() const;
 
-  inline std::vector<SceneGraphNode<S,PAYLOAD_SIZE>* >& GetChildren() {
-    return m_children;
-  }
+  inline std::vector<SceneGraphNode<S,PAYLOAD_SIZE>* >& GetChildren();
 
-  inline const S& GetShapes() const {
-    return m_matcher;
-  } 
+  inline const S& GetShapes() const;
 };
+
+template<class S, int PAYLOAD_SIZE> SceneGraphNode<S,PAYLOAD_SIZE>::SceneGraphNode(float* points, int numpoints) : m_inspected(false), m_located(NULL), m_matcher(points,numpoints), m_children() {};
+
+template<class S, int PAYLOAD_SIZE> SceneGraphNode<S,PAYLOAD_SIZE>::SceneGraphNode() : m_inspected(false), m_located(NULL), m_matcher(), m_children() {};
+
+template<class S, int PAYLOAD_SIZE> SceneGraphNode<S,PAYLOAD_SIZE>::~SceneGraphNode() {
+  for(typename std::vector< SceneGraphNode<S,PAYLOAD_SIZE>* >::iterator i = m_children.begin();
+      i != m_children.end();
+      i++) {
+    delete (*i);
+  }
+}
+
+template<class S, int PAYLOAD_SIZE> bool SceneGraphNode<S,PAYLOAD_SIZE>::Compare(const SceneGraphNode<S,PAYLOAD_SIZE>& node) const {
+  return m_matcher.Compare(node.m_matcher);
+}
+
+template<class S, int PAYLOAD_SIZE> void SceneGraphNode<S,PAYLOAD_SIZE>::RefreshLocatedObject(Image* image) {
+  m_located.Refresh(image);
+}
+
+template<class S, int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>* SceneGraphNode<S,PAYLOAD_SIZE>::GetLocatedObject() {
+  if (m_located == NULL) {
+    m_located = new LocatedObject<PAYLOAD_SIZE>();
+  }
+  return m_located;
+}
+
+template<class S, int PAYLOAD_SIZE> void SceneGraphNode<S,PAYLOAD_SIZE>::ClearLocatedObject() {
+  delete(m_located);
+}
+
+template<class S, int PAYLOAD_SIZE> bool SceneGraphNode<S,PAYLOAD_SIZE>::IsInspected() const { return m_inspected; }
+
+template<class S, int PAYLOAD_SIZE> void SceneGraphNode<S,PAYLOAD_SIZE>::SetInspected() { m_inspected = true; }
+
+template<class S, int PAYLOAD_SIZE> void SceneGraphNode<S,PAYLOAD_SIZE>::AddChild(SceneGraphNode<S,PAYLOAD_SIZE>* child) {
+  m_children.push_back(child);
+}
+
+template<class S, int PAYLOAD_SIZE> bool SceneGraphNode<S,PAYLOAD_SIZE>::HasChildren() const {
+  return !m_children.empty();
+}
+
+template<class S, int PAYLOAD_SIZE> std::vector<SceneGraphNode<S,PAYLOAD_SIZE>* >& SceneGraphNode<S,PAYLOAD_SIZE>::GetChildren() {
+  return m_children;
+}
+
+template<class S, int PAYLOAD_SIZE> const S& SceneGraphNode<S,PAYLOAD_SIZE>::GetShapes() const {
+  return m_matcher;
+} 
+
 
 #endif//SCENE_GRAPH_NODE_GUARD

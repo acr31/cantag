@@ -17,15 +17,28 @@
 template<int BIT_COUNT, int GRANULARITY>
 class SymbolChunkCoder : public virtual Coder<BIT_COUNT> {
 public:
-  SymbolChunkCoder() {};
-
-  virtual bool IsErrorCorrecting() const { return false; }
-  virtual int GetSymbolSize() const { return GRANULARITY; }
-  virtual int GetHammingDistanceBits() const { return 2; }
-  virtual int GetHammingDistanceSymbols() const { return 0; }
+  virtual bool IsErrorCorrecting() const;
+  virtual int GetSymbolSize() const;
+  virtual int GetHammingDistanceBits() const;
+  virtual int GetHammingDistanceSymbols() const;
 
 
-  virtual int DecodePayload(CyclicBitSet<BIT_COUNT>& data) const {
+  virtual int DecodePayload(CyclicBitSet<BIT_COUNT>& data) const;
+  
+  virtual bool EncodePayload(CyclicBitSet<BIT_COUNT>& data) const;
+};
+
+
+template<int BIT_COUNT,int GRANULARITY> bool SymbolChunkCoder<BIT_COUNT,GRANULARITY>::IsErrorCorrecting() const { return false; }
+
+template<int BIT_COUNT,int GRANULARITY> int SymbolChunkCoder<BIT_COUNT,GRANULARITY>::GetSymbolSize() const { return GRANULARITY; }
+
+template<int BIT_COUNT,int GRANULARITY> int SymbolChunkCoder<BIT_COUNT,GRANULARITY>::GetHammingDistanceBits() const { return 2; }
+
+template<int BIT_COUNT,int GRANULARITY> int SymbolChunkCoder<BIT_COUNT,GRANULARITY>::GetHammingDistanceSymbols() const { return 0; }
+
+
+template<int BIT_COUNT,int GRANULARITY> int SymbolChunkCoder<BIT_COUNT,GRANULARITY>::DecodePayload(CyclicBitSet<BIT_COUNT>& data) const {
     // rotate the code by increments of GRANULARITY until the first bit is a 1
     int rotation = 0;
     while(!data[0] && rotation < BIT_COUNT) {
@@ -68,8 +81,8 @@ public:
       return -1;
     }
   }
-  
-  virtual bool EncodePayload(CyclicBitSet<BIT_COUNT>& data) const {
+
+template<int BIT_COUNT,int GRANULARITY> bool SymbolChunkCoder<BIT_COUNT,GRANULARITY>::EncodePayload(CyclicBitSet<BIT_COUNT>& data) const {
     CyclicBitSet<BIT_COUNT> data_copy(data);
     data.reset();
     // we encode BIT_COUNT/GRANULARITY symbols, each one containing GRANULARITY-2 bits of payload
@@ -85,6 +98,5 @@ public:
     }
     return true;
   }
-};
 
 #endif//SYMBOL_CHUNK_CODER

@@ -27,7 +27,17 @@ public:
   Tag() : m_must_match(NULL) {}
 
   virtual void Draw2D(Image& image, TagPayloadType& tag_data) const = 0;
-  void WalkSceneGraph(SceneGraphNode<C,PAYLOAD_SIZE>* root_node, const Camera& camera, const Image& image) const {
+    
+  /**
+   * Decode the passed node. Return true if you find a valid tag there or false otherwise
+   */
+  virtual bool DecodeNode(SceneGraphNode<C,PAYLOAD_SIZE>* node, const Camera& camera, const Image& image) const =0;
+
+  void WalkSceneGraph(SceneGraphNode<C,PAYLOAD_SIZE>* root_node, const Camera& camera, const Image& image) const;
+
+};
+
+template<class C, int PAYLOAD_SIZE> void Tag<C,PAYLOAD_SIZE>:: WalkSceneGraph(SceneGraphNode<C,PAYLOAD_SIZE>* root_node, const Camera& camera, const Image& image) const {
     // walk the tree finding all the tags
     // if we find a Tag then decode node returns true so we know not to inspect any child contours
     if (!DecodeNode(root_node,camera,image)) {
@@ -39,12 +49,6 @@ public:
 	}
       }
     }
-  }
-  
-  /**
-   * Decode the passed node. Return true if you find a valid tag there or false otherwise
-   */
-  virtual bool DecodeNode(SceneGraphNode<C,PAYLOAD_SIZE>* node, const Camera& camera, const Image& image) const =0;
-};
+}
 
 #endif//TAG_GUARD

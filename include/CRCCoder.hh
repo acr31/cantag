@@ -33,32 +33,37 @@ class CRCCoder : public Coder<PAYLOAD_SIZE> {
 public:
   CRCCoder() {};
   
-  virtual bool EncodePayload(const std::bitset<PAYLOAD_SIZE>& tag_data, Payload<PAYLOAD_SIZE>& payload) const {
-    boost::crc_basic<CRC_SIZE> crc(TRUNC_POLY, INIT_REM, FINAL_XOR, REFLECT_IN, REFLECT_REM);
-    for(unsigned int i=0;i<PAYLOAD_SIZE-CRC_SIZE;i++) {
-      crc.process_bit(tag_data[i]);
-      payload[CRC_SIZE+i] = tag_data[i];
-    }
-    for(unsigned int i=0;i<CRC_SIZE;i++) {
-      crc.process_bit(0);
-    }
-    payload |= crc.checksum();
-    payload.MinRotate();
-  }
+  virtual bool EncodePayload(const std::bitset<PAYLOAD_SIZE>& tag_data, Payload<PAYLOAD_SIZE>& payload) const;
 
-  virtual int DecodePayload(std::bitset<PAYLOAD_SIZE>& data, Payload<PAYLOAD_SIZE>& payload) const {
-    int rotation = payload.MinRotate();
-    boost::crc_basic<CRC_SIZE> crc(TRUNC_POLY, INIT_REM, FINAL_XOR, REFLECT_IN, REFLECT_REM);
-    for(unsigned int i=0;i<PAYLOAD_SIZE;i++) {
-      crc.process_bit(payload[i]);
-    }
-    if (crc.checksum() == 0) {
-      data = (payload>>CRC_SIZE);    
-      return rotation;
-    }
-    else {
-      return -1;
-    }
+  virtual int DecodePayload(std::bitset<PAYLOAD_SIZE>& data, Payload<PAYLOAD_SIZE>& payload) const;
+};
+
+template<int PAYLOAD_SIZE, int CRC_SIZE> bool CRCCoder<PAYLOAD_SIZE,CRC_SIZE>::EncodePayload(const std::bitset<PAYLOAD_SIZE>& tag_data, Payload<PAYLOAD_SIZE>& payload) const {
+  boost::crc_basic<CRC_SIZE> crc(TRUNC_POLY, INIT_REM, FINAL_XOR, REFLECT_IN, REFLECT_REM);
+  for(unsigned int i=0;i<PAYLOAD_SIZE-CRC_SIZE;i++) {
+    crc.process_bit(tag_data[i]);
+    payload[CRC_SIZE+i] = tag_data[i];
+  }
+  for(unsigned int i=0;i<CRC_SIZE;i++) {
+    crc.process_bit(0);
+  }
+  payload |= crc.checksum();
+  payload.MinRotate();
+};
+
+
+template<int PAYLOAD_SIZE, int CRC_SIZE> bool CRCCoder<PAYLOAD_SIZE,CRC_SIZE>::DecodePayload(std::bitset<PAYLOAD_SIZE>& data, Payload<PAYLOAD_SIZE>& payload) const {
+  int rotation = payload.MinRotate();
+  boost::crc_basic<CRC_SIZE> crc(TRUNC_POLY, INIT_REM, FINAL_XOR, REFLECT_IN, REFLECT_REM);
+  for(unsigned int i=0;i<PAYLOAD_SIZE;i++) {
+    crc.process_bit(payload[i]);
+  }
+  if (crc.checksum() == 0) {
+    data = (payload>>CRC_SIZE);    
+    return rotation;
+  }
+  else {
+    return -1;
   }
 };
 

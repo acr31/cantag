@@ -32,38 +32,55 @@ private:
   S m_next;
 
 public:
-  ShapeChain() : m_shape(), m_next() {};
-  ShapeChain(float* points, int numpoints) : 
+  ShapeChain();
+  ShapeChain(float* points, int numpoints);
+  ShapeChain(float* points, int numpoints, bool prev_fitted);
+
+  inline bool IsFitted() const;
+
+  inline bool IsChainFitted() const;
+
+  inline const S Next() const;
+
+  inline const M GetShape() const;
+
+  inline bool Compare(ShapeChain<M,S> o) const;
+
+};
+
+template<class M, class S> ShapeChain<M,S>::ShapeChain() : m_shape(), m_next() {};
+
+template<class M, class S> ShapeChain<M,S>::ShapeChain(float* points, int numpoints) : 
     m_shape(points,numpoints,false),
     m_next(points,numpoints,m_shape.IsFitted()) {};
-  ShapeChain(float* points, int numpoints, bool prev_fitted) :
+
+template<class M, class S> ShapeChain<M,S>::ShapeChain(float* points, int numpoints, bool prev_fitted) :
     m_shape(points,numpoints,prev_fitted),
     m_next(points,numpoints,prev_fitted) {};
 
-  inline bool IsFitted() const {
+
+template<class M, class S> bool ShapeChain<M,S>::IsFitted() const {
     return m_shape.IsFitted();
   }
 
-  inline bool IsChainFitted() const {
+template<class M, class S> bool ShapeChain<M,S>::IsChainFitted() const {
     return m_shape.IsFitted() ||
       m_next.IsChainFitted();
   }
 
-  inline const S Next() const {
+template<class M, class S> const S ShapeChain<M,S>::Next() const {
     return m_next;
   }
 
-  inline const M GetShape() const {
-    return m_shape;
-  }
+template<class M, class S> const M ShapeChain<M,S>::GetShape() const {
+  return m_shape;
+}
 
-  inline bool Compare(ShapeChain<M,S> o) const {
+template<class M, class S> bool ShapeChain<M,S>::Compare(ShapeChain<M,S> o) const {
     return 
       m_shape.Compare(o.m_shape) &&
       m_next.Compare(o.m_next);      
   }
-
-};
 
 
 
