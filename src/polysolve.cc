@@ -144,6 +144,22 @@ bool eigensolve(double a, double b, double c,
     } while(isnan(R[0]) ||  isnan(R[1]));
   }
 
+  // normalize
+  double mods[3] = {0};
+  for(int j=0;j<3;++j) {
+    for(int i=0;i<3;++i) {
+      mods[i] += eigenvects[3*j+i] * eigenvects[3*j+i];
+    }
+  }
+  for(int i=0;i<3;++i) {
+    mods[i] = sqrt(mods[i]);
+  }
+  for(int j=0;j<3;++j) {
+    for(int i=0;i<3;++i) {
+      eigenvects[3*j+i] /= mods[i];
+    }
+  }
+
   //  check_eigen(a,b,c,d,e,f,g,h,i,eigenvects,eigenvals);
 
   return 1;
