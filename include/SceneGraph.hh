@@ -168,7 +168,7 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
   std::map<int,Contour> node_hash;
   delete m_root;
   m_root = new SceneGraphNode<S,PAYLOAD_SIZE>();
-  node_hash[1] = Contour(m_root,HOLE_BORDER);
+  node_hash[1] = Contour(1,m_root,HOLE_BORDER);
 
   float points_buffer[MAXLENGTH*2];
   data_pointer = image.GetDataPointer();
@@ -221,7 +221,10 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	debug.DrawPolygon(points_buffer,contour_length,0,1);
 #endif
 	SceneGraphNode<S,PAYLOAD_SIZE>* next_node;
-	if (contour_length > 10) {
+	if ((contour_length > 40) &&
+	    ((contour_statistics.max_x - contour_statistics.min_x) > 30) &&
+	    ((contour_statistics.max_y - contour_statistics.min_y) > 30))
+	{
 	  camera.ImageToNPCF(points_buffer,contour_length);
 	  next_node = new SceneGraphNode<S,PAYLOAD_SIZE>(points_buffer,contour_length);
 	  if (next_node->GetShapes().IsChainFitted()) {
