@@ -1,3 +1,12 @@
+/**
+ * $Header$
+ *
+ * $Log$
+ * Revision 1.2  2004/01/21 11:52:29  acr31
+ * added keywords
+ *
+ */
+
 #ifndef RING_TAG_GUARD
 #define RING_TAG_GUARD
 
