@@ -1,6 +1,7 @@
 #include <tripover/Config.hh>
 #include <tripover/Camera.hh>
 
+
 Camera::Camera() :
   m_r2(0),m_r4(0),m_r6(0),
   m_d1(0),m_d2(0)
@@ -62,8 +63,10 @@ void Camera::CameraToWorld(float* points, int numpoints) const {
   }
 }
 
+
 /**
- * \todo currently ignores radial and tangential parameters
+ * \todo currently ignores tangential parameters and r^6 coeff.
+ * since inversion of these quantities is not straightforward
  */
 void Camera::NPCFToImage(float* points, int numpoints) const {
   for(int i=0;i<numpoints*2;i+=2) {
@@ -78,18 +81,18 @@ void Camera::NPCFToImage(float* points, int numpoints) const {
     double rpwr4 = rpwr2*rpwr2;
     double rpwr6 = rpwr4*rpwr2;
     
-    double radialcoeff = 1 + m_r2*rpwr2 + m_r4*rpwr4 + m_r6*rpwr6;
+    double radialcoeff = 1 + m_r2*rpwr2 + m_r4*rpwr4;// + m_r6*rpwr6;
 
     // 2) Compute the tangential offset
-    double dxx = 2*m_d1*x*y + m_d2*(rpwr2+2*x*x);
-    double dxy = m_d1*(rpwr2+2*y*y)+2*m_d2*x*y;
+    double dxx = 0; //2*m_d1*x*y + m_d2*(rpwr2+2*x*x);
+    double dxy = 0; //m_d1*(rpwr2+2*y*y)+2*m_d2*x*y;
 
     // 3) Compute the new values of x and y
     double xd1 = radialcoeff*x+dxx;
     double xd2 = radialcoeff*y+dxy;
 
-    xd1 = x;
-    xd2 = y;
+    //  xd1 = x;
+    //	xd2 = y;
 
     // 4) rescale and return to image co-ordinates
     points[i] = m_intrinsic[0]*(xd1+m_intrinsic[1]*xd2)+m_intrinsic[2];
@@ -99,7 +102,8 @@ void Camera::NPCFToImage(float* points, int numpoints) const {
 
 
 /**
- * \todo currently ignores radial and tangential parameters
+ * \todo currently ignores tangential parameters and r^6 coeff.
+ * since inversion of these quantities is not straightforward
  */
 void Camera::NPCFToImage(std::vector<float>& points) const {
   for(int i=0;i<points.size();i+=2) {
@@ -114,18 +118,18 @@ void Camera::NPCFToImage(std::vector<float>& points) const {
     double rpwr4 = rpwr2*rpwr2;
     double rpwr6 = rpwr4*rpwr2;
     
-    double radialcoeff = 1 + m_r2*rpwr2 + m_r4*rpwr4 + m_r6*rpwr6;
+    double radialcoeff = 1 + m_r2*rpwr2 + m_r4*rpwr4; // + m_r6*rpwr6;
 
     // 2) Compute the tangential offset
-    double dxx = 2*m_d1*x*y + m_d2*(rpwr2+2*x*x);
-    double dxy = m_d1*(rpwr2+2*y*y)+2*m_d2*x*y;
+    double dxx = 0; //2*m_d1*x*y + m_d2*(rpwr2+2*x*x);
+    double dxy = 0; //m_d1*(rpwr2+2*y*y)+2*m_d2*x*y;
 
     // 3) Compute the new values of x and y
     double xd1 = radialcoeff*x+dxx;
     double xd2 = radialcoeff*y+dxy;
 
-    xd1 = x;
-    xd2 = y;
+    //  xd1 = x;
+    //  xd2 = y;
 
     // 4) rescale and return to image co-ordinates
     points[i] = m_intrinsic[0]*(xd1+m_intrinsic[1]*xd2)+m_intrinsic[2];
@@ -134,7 +138,20 @@ void Camera::NPCFToImage(std::vector<float>& points) const {
 }
 
 /**
- * \todo currently ignores radial and tangential parameters
+ * \todo currently ignores  tangential parameters
+ * Uses an approximation to the inverse distrortion calculation.
+ * It is based on the first and second terms of a taylor expansion
+ * of the distortion equeation. Neglection of the higher order terms
+ * reduces accuracy, but not noticeably AFAICT. This model assumes 
+ * only 4th order radial distortion (i.e. no r^n for n>4) and will
+ * ignore the 6th order term if set. Similarly the approximation
+ * cannot cope with tangential distortion. It is however, fast to compute
+ * and should suffice since 99.99% of digital cameras really only have
+ * 2nd order radial distortion.
+ *
+ * More details in "Precise Radial Un-distortion of Images",
+ * John Mallon and  Paul F. Whelan, 7th International Conf. on
+ * Pattern Recognition (ICPR'04), Cambridge, UK. August 2004
  */
 void Camera::ImageToNPCF(float* points, int numpoints) const {
   for(int i=0;i<numpoints*2 ;i+=2) {
@@ -145,34 +162,41 @@ void Camera::ImageToNPCF(float* points, int numpoints) const {
     // 2) remove the x and y scaling
     points[i] /= m_intrinsic[0];
     points[i+1] /= m_intrinsic[4];
-    /*
-    for(int j=0;j<0;j++) {
-      double x = points[i];
-      double y = points[i+1];
-      // 1) Compute the distance from the principle point (now 0,0)
-      double rpwr2 = x*x + y*y;
-      double rpwr4 = rpwr2*rpwr2;
-      double rpwr6 = rpwr4*rpwr2;
-      
-      double radialcoeff = 1 - m_r2*rpwr2 - m_r4*rpwr4 - m_r6*rpwr6;
-      
-      // 2) Compute the tangential offset
-      double dxx = 2*m_d1*x*y + m_d2*(rpwr2+2*x*x);
-      double dxy = m_d1*(rpwr2+2*y*y)+2*m_d2*x*y;
-      
-      // 3) Compute the new values of x and y
-      double xd1 = radialcoeff*x-dxx;
-      double xd2 = radialcoeff*y-dxy;
-      
-      points[i] = xd1;
-      points[i+1] = xd2;
-    }
-    */
+  
+    double x = points[i];
+    double y = points[i+1];
+
+    // 1) Compute the distance from the principle point (now 0,0)
+    double rd2 = x*x + y*y;
+    
+    float factor_num = m_r2*rd2 + m_r4*rd2*rd2 + m_r2*m_r2*rd2*rd2 + m_r4*m_r4*rd2*rd2*rd2*rd2 +2*m_r2*m_r4*rd2*rd2*rd2;
+    float factor_denom = 1 + 4*m_r2*rd2 + 6*m_r4*rd2*rd2;
+    
+    
+    // 3) Compute the new values of x and y
+    double xd1 = x- x*factor_num/factor_denom;
+    double xd2 = y- y*factor_num/factor_denom;
+    
+    points[i] = xd1;
+    points[i+1] = xd2;
   }
 }
 
 /**
- * \todo currently ignores radial and tangential parameters
+ * \todo currently ignores  tangential parameters
+ * Uses an approximation to the inverse distrortion calculation.
+ * It is based on the first and second terms of a taylor expansion
+ * of the distortion equeation. Neglection of the higher order terms
+ * reduces accuracy, but not noticeably AFAICT. This model assumes 
+ * only 4th order radial distortion (i.e. no r^n for n>4) and will
+ * ignore the 6th order term if set. Similarly the approximation
+ * cannot cope with tangential distortion. It is however, fast to compute
+ * and should suffice since 99.99% of digital cameras really only have
+ * 2nd order radial distortion.
+ *
+ * More details in "Precise Radial Un-distortion of Images",
+ * John Mallon and  Paul F. Whelan, 7th International Conf. on
+ * Pattern Recognition (ICPR'04), Cambridge, UK. August 2004
  */
 void Camera::ImageToNPCF(std::vector<float>& points) const {  
   for(int i=0;i<points.size() ;i+=2) {
@@ -183,31 +207,26 @@ void Camera::ImageToNPCF(std::vector<float>& points) const {
     // 2) remove the x and y scaling
     points[i] /= m_intrinsic[0];
     points[i+1] /= m_intrinsic[4];
-    /*
-    for(int j=0;j<0;j++) {
-      double x = points[i];
-      double y = points[i+1];
-      // 1) Compute the distance from the principle point (now 0,0)
-      double rpwr2 = x*x + y*y;
-      double rpwr4 = rpwr2*rpwr2;
-      double rpwr6 = rpwr4*rpwr2;
-      
-      double radialcoeff = 1 - m_r2*rpwr2 - m_r4*rpwr4 - m_r6*rpwr6;
-      
-      // 2) Compute the tangential offset
-      double dxx = 2*m_d1*x*y + m_d2*(rpwr2+2*x*x);
-      double dxy = m_d1*(rpwr2+2*y*y)+2*m_d2*x*y;
-      
-      // 3) Compute the new values of x and y
-      double xd1 = radialcoeff*x-dxx;
-      double xd2 = radialcoeff*y-dxy;
-      
-      points[i] = xd1;
-      points[i+1] = xd2;
-    }
-    */
+
+    double x = points[i];
+    double y = points[i+1];
+    
+    // 1) Compute the distance from the principle point (now 0,0)
+    double rd2 = x*x + y*y;
+    
+    float factor_num = m_r2*rd2 + m_r4*rd2*rd2 + m_r2*m_r2*rd2*rd2 + m_r4*m_r4*rd2*rd2*rd2*rd2 +2*m_r2*m_r4*rd2*rd2*rd2;
+    float factor_denom = 1 + 4*m_r2*rd2 + 6*m_r4*rd2*rd2;
+    
+    
+    // 3) Compute the new values of x and y
+    double xd1 = x- x*factor_num/factor_denom;
+    double xd2 = y- y*factor_num/factor_denom;
+
+    points[i] = xd1;
+    points[i+1] = xd2;
   }
 }
+
 
 void Camera::UnDistortImage(Image& image) const {
   const Image source(image);
