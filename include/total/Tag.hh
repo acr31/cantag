@@ -51,7 +51,7 @@ public:
    * unaltered - this typically indicates that this is not actually a
    * tag but just a likely looking shape in the image.
    */
-  virtual void DecodeNode(LocatedObject<PAYLOAD_SIZE>* lobj,
+  virtual bool DecodeNode(LocatedObject<PAYLOAD_SIZE>* lobj,
 			  const Camera& camera, const Image& image) const =0;
 
   /**
@@ -83,7 +83,7 @@ public:
    * objects should be checked to see that they do indeed correspond (by
    * calling CheckTransform).  If check_negative is true then all nodes not
    * corresponding to located objects are checked to see that they
-   * cannot be interprested to do so.
+   * cannot be interpreted to do so.
    */
   bool CheckGraph(typename ShapeTree<C>::Node* root_node, const WorldState<PAYLOAD_SIZE>* worldstate, const Camera& camera, const Image& image, bool check_negative) const;
 
@@ -95,13 +95,11 @@ public:
 };
 
 template<class C, int PAYLOAD_SIZE> void Tag<C,PAYLOAD_SIZE>::WalkGraph(typename ShapeTree<C>::Node* root_node, WorldState<PAYLOAD_SIZE>* worldstate, const Camera& camera, const Image& image) const {
-  PROGRESS("Walk graph");
   int setflag = 0;
   if (!flag) { temp_store.clear(); flag =1; setflag = 1;}
   // walk the tree finding all the tags
   // if we find a Tag then decode node returns true so we know not to inspect any child contours
   if (root_node->matched.IsFitted()) {
-    PROGRESS("Found matched node");
     LocatedObject<PAYLOAD_SIZE>* lobj = GetTransform(root_node,camera,image);
     if (lobj) {      
       temp_store[root_node] = lobj;

@@ -53,7 +53,7 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
 
   virtual LocatedObject<SIZE*SIZE-(SIZE*SIZE % 2)>* GetTransform(ShapeTree< ShapeChain<QuadTangle> >::Node* node, 
 								 const Camera& camera, const Image& image) const;
-  virtual void DecodeNode(LocatedObject<SIZE*SIZE-(SIZE*SIZE % 2)>* lobj,
+  virtual bool DecodeNode(LocatedObject<SIZE*SIZE-(SIZE*SIZE % 2)>* lobj,
 			  const Camera& camera, const Image& image) const;
 
   /**
@@ -197,7 +197,7 @@ template<int SIZE> LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* MatrixTag<SIZE>::GetT
 
   const QuadTangle quad = node->matched.GetShape();
 
-  assert(quad.IsFitted());
+  if (!quad.IsFitted()) return false;
 
 #ifdef MATRIX_TAG_DEBUG
   PROGRESS("QuadTangle: " << 
@@ -218,7 +218,7 @@ template<int SIZE> LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* MatrixTag<SIZE>::GetT
   return lobj;
 }
 
-template<int SIZE> void MatrixTag<SIZE>::DecodeNode( LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* lobj, const Camera& camera, const Image& image) const {
+template<int SIZE> bool MatrixTag<SIZE>::DecodeNode( LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* lobj, const Camera& camera, const Image& image) const {
   
   float* transform= lobj->transform;
   CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>* read_code = new CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>();
@@ -285,9 +285,11 @@ template<int SIZE> void MatrixTag<SIZE>::DecodeNode( LocatedObject<SIZE*SIZE-(SI
      * \todo alter the transform here to include the correct rotation
      */
     lobj->tag_codes.push_back(read_code);
+    return true;
   }    
   else {
     delete read_code;
+    return false;
   }
 }
 
