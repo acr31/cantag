@@ -264,56 +264,59 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
   }     
   // get the children of this node and check for a good match with either interpretation
   float* correcttrans = NULL;
-  for(typename std::vector< SceneGraphNode< ShapeChain<Ellipse>,  RING_COUNT*SECTOR_COUNT >* >::iterator i = node->GetChildren().begin(); i!=node->GetChildren().end();i++) {
-    float error1 = (*i)->GetShapes().GetShape().GetError(projected1,count);
-    float error2 = (*i)->GetShapes().GetShape().GetError(projected2,count);
-
-#ifdef RING_TAG_DEBUG
-    PROGRESS("Error 1 " << error1);
-    PROGRESS("Error 2 " << error2);    
-#endif
-
-    if ((error1 < error2) && (error1 < 0.001)) {
-#ifdef RING_TAG_DEBUG
-      PROGRESS("Chose orientation 1 with error "<<error1<<" instead of orientation 2 with error "<<error2);
-#endif
-      correcttrans = transform1;
-      break;
-    }
-
-    if ((error2 <= error1) && (error2 < 0.001)) {
-#ifdef RING_TAG_DEBUG
-      PROGRESS("Chose orientation 2 with error "<<error2<<" instead of orientation 1 with error "<<error1);
-#endif
-      correcttrans = transform2;
-      break;
-    }
-  }
-    
-#ifdef RING_TAG_DEBUG
   float normal1[3];
   GetNormalVector(transform1,normal1);
-  PROGRESS("Normal vector for transform1 " << normal1[0] << " " << normal1[1] << " " << normal1[2]);
-    
   float normal2[3];
   GetNormalVector(transform2,normal2);
+#ifdef RING_TAG_DEBUG
+  PROGRESS("Normal vector for transform1 " << normal1[0] << " " << normal1[1] << " " << normal1[2]);
   PROGRESS("Normal vector for transform2 " << normal2[0] << " " << normal2[1] << " " << normal2[2]);
-#endif    
-
-  /*
-    if ((normal1[1] < 0) && (normal2[2] > 0)) {
+#endif
+  
+  if ((normal1[2] < 0) && (normal2[2] > 0)) {
+#ifdef RING_TAG_DEBUG
+    PROGRESS("Chose orientation 1 because it points towards the camera and orientation 2 doesnt");
+#endif
     correcttrans = transform2;
-    }
-    else {
+  }
+  else if ((normal1[2] > 0) && (normal2[2] < 0)) {
+#ifdef RING_TAG_DEBUG
+    PROGRESS("Chose orientation 2 because it points towards the camera and orientation 1 doesnt");
+#endif
     correcttrans = transform1;
+  }
+  else {
+    for(typename std::vector< SceneGraphNode< ShapeChain<Ellipse>,  RING_COUNT*SECTOR_COUNT >* >::iterator i = node->GetChildren().begin(); i!=node->GetChildren().end();i++) {
+      
+      float error1 = (*i)->GetShapes().GetShape().GetError(projected1,count);
+      float error2 = (*i)->GetShapes().GetShape().GetError(projected2,count);
+#ifdef RING_TAG_DEBUG
+      PROGRESS("Error 1 " << error1);
+      PROGRESS("Error 2 " << error2);   
+#endif
+      if ((error1 < error2) && (error1 < 0.001)) {
+#ifdef RING_TAG_DEBUG
+	PROGRESS("Chose orientation 1 with error "<<error1<<" instead of orientation 2 with error "<<error2);
+#endif
+	correcttrans = transform1;
+	break;
+      }
+      else if ((error2 <= error1) && (error2 < 0.001)) {
+#ifdef RING_TAG_DEBUG
+	PROGRESS("Chose orientation 2 with error "<<error2<<" instead of orientation 1 with error "<<error1);
+#endif
+	correcttrans = transform2;
+	break;
+      }
     }
-  */
+  }
 
   if (correcttrans == NULL) {
 #ifdef RING_TAG_DEBUG
     PROGRESS("Failed to find a valid transform - just selecting one arbitrarily!");
 #endif
-    correcttrans = transform1;
+    node->ClearLocatedObject();
+    return false;
   }
 
   if (correcttrans != NULL) {
@@ -467,9 +470,9 @@ template<int RING_COUNT,int SECTOR_COUNT>  void RingTag<RING_COUNT,SECTOR_COUNT>
       ApplyTransform(l,pts,1);
       camera.NPCFToImage(pts,1);
       // pick the colour to be the opposite of the sampled point so we can see the dot
-      int colour = image.Sample(pts[0],pts[1]) ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
+      //      int colour = image.Sample(pts[0],pts[1]) ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
       // or pick the colour to be on a gradient so we see the order it samples in
-      //int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
+      int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
       debug0.DrawPoint(pts[0],pts[1],colour,3);
     }
     counter++;

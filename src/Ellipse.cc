@@ -520,6 +520,13 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   PROGRESS("                 " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];");
 #endif
 
+  // if more than one of the eigenvalues is less than one then
+  // multiply them all by -1.  We can do this because the ellipse
+  // equation is only defined up to a scale factor.  we do this to
+  // defeat any floating point problems: if an eigenvalue is close to
+  // 0 it may get squashed by a larger one in the maths that follows.
+  // In this case we want the eigenvector associated with it to have
+  // positive sense.
   int count = 0;
   for(int i=0;i<3;i++) {
     if (eigvals[4*i] < 0) { ++count; }
@@ -557,112 +564,40 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
     }
   }
 
-  /*
-    int max[3] = {0};
-  for(int i=1;i<3;i++) { 
-    if (eigvects[3*i] > eigvects[max[0]]) {
-      max[0] = 3*i;
-    }
-    
-    if (eigvects[3*i+1] > eigvects[max[1]]) {
-      max[1] = 3*i+1;
-    }
-    
-    if (eigvects[3*i+2] > eigvects[max[2]]) {
-      max[2] = 3*i+2;
-    }
-  }
+  // arrange that the axis component of each eigenvector has the same
+  // sign as the corresponding eigenvalue.  Except for the z axis
+  // which we want to point towards us.
 
-  for(int i=0;i<3;i++) {
-    if ((eigvects[max[i]] < 0 && eigvals[4*i] > 0) ||
-	(eigvects[max[i]] > 0 && eigvals[4*i] < 0)) {
-      eigvects[i] *= -1;
-      eigvects[3+i] *= -1;
-      eigvects[6+i] *= -1;
-    }
-  }
-  */
-  
-
-  for(int i=0;i<3;i++) {
-    if (((eigvects[4*i] < 0) && (eigvals[4*i] > 0)) ||
-	((eigvects[4*i] > 0) && (eigvals[4*i] <= 0))) {
-      eigvects[i] *= -1;
-      eigvects[3+i] *= -1;
-      eigvects[6+i] *= -1;
-    }
-  }
-  
-  // we'd like our tag to still face the same way
-  //  if (eigvects[8] < 0) && (eigvals[8] > 0)) ||  
-  //      ((eigvects[8] > 0) && (eigvals[8] < 0))) {
-  //    eigvects[2] *= -1;
-  //    eigvects[5] *= -1;
-  //    eigvects[8] *= -1;
-    //  }
-
-  //   if (((eigvects[4] < 0) && (eigvals[4] > 0)) ||
-  //        ((eigvects[4] > 0) && (eigvals[4] < 0))) {
-  //  if (eigvects[4] <0) {
-  //     eigvects[1] *= -1;
-  //     eigvects[4] *= -1;
-  //     eigvects[7] *= -1;
-  //  }
-
-    //  if (((eigvects[0] < 0) && (eigvals[0] > 0)) ||
-    //      ((eigvects[0] > 0) && (eigvals[0] < 0))) {
-    //    eigvects[0] *= -1;
-    //    eigvects[3] *= -1;
-    //    eigvects[6] *= -1;
-    //  }
-  // our eigenvectors might incorporate reflections about various axes
-  // so we need to check that we still have a right handed frame. In a
-  // righthanded frame v1 x v2 = v3 so we cross v1 and v2 and check
-  // the sign compared with v3 if they are different we multiply v3 by
-  // -1 so this is v1 cross v2 dot v3 - if this is +ve v3 is parallel
-  // with where it should be for a right handed axis if not then we
-  // scale it
-  
-  // cross product of u and v 
-  /*   ( ux )    ( vx )     ( uy*vz - uz*vy )
-   *   ( uy ) x  ( vy )  =  ( uz*vx - ux*vz )
-   *   ( uz )    ( vz )     ( ux*vy - uy*vx )
-   *
-   * now dot product with w
-   *
-   *  ( uy*vz - uz*vy )   ( wx )   
-   *  ( uz*vx - ux*vz ) . ( wy ) = (uy*vz - uz*vy)*wx + (uz*vx - ux*vz)*wy + (ux*vy - uy*vx)*wz
-   *  ( ux*vy - uy*vx )   ( wz )
-   * 
-   * we cross the y axis (eigvects[1,4,7]) with z axis
-   * (eigvects[2,5,8]) and dot with the x axis (eigvects[0,3,6])
-   * changing the sign of the x axis if we are wrong so we dont
-   * interfere with the direction of the z axis
-   */
-  double crossx = eigvects[4]*eigvects[8] - eigvects[7]*eigvects[5];
-  double crossy = eigvects[7]*eigvects[2] - eigvects[1]*eigvects[8];
-  double crossz = eigvects[1]*eigvects[5] - eigvects[4]*eigvects[2];
-  
-  
+  if (((eigvects[0] < 0) && (eigvals[0] > 0)) ||
+      ((eigvects[0] > 0) && (eigvals[0] < 0))) {
 #ifdef CIRCLE_TRANSFORM_DEBUG
-  PROGRESS("Cross = " << crossx <<"," << crossy << "," << crossz);
+    PROGRESS("Swapped x eigenvector");
 #endif
-
-  double dotcross = crossx*eigvects[0] + crossy*eigvects[3] + crossz*eigvects[6];
-
-#ifdef CIRCLE_TRANSFORM_DEBUG
-  PROGRESS("Dotcross = " << dotcross);
-#endif
-
-  if (dotcross < 0) {
-#ifdef CIRCLE_TRANSFORM_DEBUG
-    PROGRESS("Reversing vectors to create right handed axis");
-#endif
-    //eigvects[0] *= -1;
-    //eigvects[3] *= -1;
-    //eigvects[6] *= -1;
+    eigvects[0] *= -1;
+    eigvects[3] *= -1;
+    eigvects[6] *= -1;
   }
 
+  if (((eigvects[4] < 0) && (eigvals[4] > 0)) ||
+      ((eigvects[4] > 0) && (eigvals[4] < 0))) {
+#ifdef CIRCLE_TRANSFORM_DEBUG
+    PROGRESS("Swapped y eigenvector");
+#endif
+    eigvects[1] *= -1;
+    eigvects[4] *= -1;
+    eigvects[7] *= -1;
+  }
+
+  if (((eigvects[8] < 0) && (eigvals[0] > 8)) ||
+      ((eigvects[8] > 0) && (eigvals[0] < 8))) {
+#ifdef CIRCLE_TRANSFORM_DEBUG
+    PROGRESS("Swapped z eigenvector");
+#endif
+    eigvects[2] *= -1;
+    eigvects[5] *= -1;
+    eigvects[8] *= -1;
+  }
+  
   double r1[] = { eigvects[0], eigvects[1], eigvects[2], 0,
 		  eigvects[3], eigvects[4], eigvects[5], 0,
 		  eigvects[6], eigvects[7], eigvects[8], 0,
