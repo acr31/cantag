@@ -3,94 +3,152 @@
  */
 #include <tripover/Config.hh>
 #include <tripover/QuadTangle.hh>
-#include <opencv/cv.h>
+
 #include <cmath>
 #include <tripover/gaussianelimination.hh>
-
+#include <iostream>
 #define COMPARE_THRESH 1
 
 #undef QUADTANGLE_DEBUG
+
+#define LOGMAXWINDOW 5
+#define CURVTHRESH -0.8
+
+#define MASK(x) ((x) & ((1<<LOGMAXWINDOW)-1))
 
 QuadTangle::QuadTangle() {
   m_fitted = false;
 }
 
-QuadTangle::QuadTangle(const std::vector<float>& points, bool prev_fitted) {
+static void compute(const float* xwindow, const float* ywindow, int datapointer, int k, float* lik, float* rik) {
+  float chordx = xwindow[MASK(datapointer+k)] - xwindow[MASK(datapointer-k)];
+  float chordy = ywindow[MASK(datapointer+k)] - ywindow[MASK(datapointer-k)];
   
-  if (!prev_fitted) {
-    CvMemStorage* seqstore = cvCreateMemStorage(0);
-    CvSeq* contour = cvCreateSeq(CV_SEQ_POLYGON,sizeof(CvSeq),sizeof(CvPoint),seqstore);
-    for(int i=0;i<points.size();i+=2) {
-      CvPoint p = cvPoint((int)(points[i]*1000),(int)(points[i+1]*1000));
-      cvSeqPush(contour,&p);    
+  *lik = sqrt(chordx*chordx + chordy*chordy);
+  
+  float apx = xwindow[MASK(datapointer-k)] - xwindow[datapointer];
+  float apy = ywindow[MASK(datapointer-k)] - ywindow[datapointer];
+
+  float modchord = *lik;
+
+  if (modchord < 1e-5) { *rik = 0; return; }
+  
+  float denom = fabs((chordx*apy - apx*chordy));
+  
+  *rik = denom/modchord/modchord;
+
+}
+
+static bool check(const float* xwindow, const float* ywindow, int datapointer, int k) {
+  if (k+1 == (1<<(LOGMAXWINDOW-1))) return false;
+
+  float lik,rik,lik1,rik1;
+  compute(xwindow,ywindow,datapointer,k,&lik,&rik);
+  compute(xwindow,ywindow,datapointer,k+1,&lik1,&rik1);
+
+  bool result = (lik < lik1) && (rik < rik1);
+
+  return result;
+}
+
+static float curvature(const float* xwindow, const float* ywindow, int datapointer, int k) {
+  float ax = xwindow[MASK(datapointer+k)] - xwindow[datapointer];
+  float ay = ywindow[MASK(datapointer+k)] - ywindow[datapointer];
+
+  float bx = xwindow[MASK(datapointer-k)] - xwindow[datapointer];
+  float by = ywindow[MASK(datapointer-k)] - ywindow[datapointer];
+
+  float moda = sqrt(ax*ax+ay*ay);
+  float modb = sqrt(bx*bx+by*by);
+
+  float result = (ax*bx+ay*by)/moda/modb;
+
+  return result;
+}
+
+QuadTangle::CornerFit(const std::vector<float>& points) {
+  if (points.size() > (2<<LOGMAXWINDOW) && points.size() > 50) {
+    float xcorners[4];
+    float ycorners[4];
+    float curvecorners[4];
+    int indexcorners[4];
+    int corner_counter = 0;
+    float xwindow[1<<LOGMAXWINDOW];
+    float ywindow[1<<LOGMAXWINDOW];
+    
+    int loadpointer = 0;
+    std::vector<float>::const_iterator i = points.begin();
+    for(;loadpointer < (1<<LOGMAXWINDOW);++loadpointer) {
+      xwindow[loadpointer] = *i;
+      ++i;
+      ywindow[loadpointer] = *i;
+      ++i;
     }
-
-    //CvPoint poly2[contour->total];
-    //    cvCvtSeqToArray( contour, poly2 , cvSlice(0,contour->total));
-    //for( int pt = 0; pt < contour->total; pt++ ) {
-    //      std::cerr << poly2[pt].x << " " << poly2[pt].y << std::endl;
-    //    }
-
-#ifdef QUADTANGLE_DEBUG
-    PROGRESS("Copied points back into opencv sequence");
-#endif
-    CvMemStorage* store = cvCreateMemStorage(0);
-    CvSeq *result = cvApproxPoly( contour, sizeof(CvContour), store,
-				  CV_POLY_APPROX_DP, 
-				  cvContourPerimeter(contour)*0.02, 0 );
+    int datapointer = 1<<(LOGMAXWINDOW-1);
     
-    //    CvPoint poly[result->total];
-    //    cvCvtSeqToArray( result, poly , cvSlice(0,result->total));
-    //    for( int pt = 0; pt < result->total; pt++ ) {
-    //      std::cerr << "0 0 " << poly[pt].x << " " << poly[pt].y << std::endl;
-    //    }
-    //    std::cerr<<"-"<<std::endl;
-
-#ifdef QUADTANGLE_DEBUG
-    PROGRESS("Applied polygon approximation");
-    PROGRESS("Vertices = " << result->total);
-    PROGRESS("Convex = " << (cvCheckContourConvexity(result) ? "yes" : "no"));
-    PROGRESS("Area = " << fabs(cvContourArea(result,CV_WHOLE_SEQ)));
-#endif
-
-    // Check for 4 vertices
-    // Check for a convex contour
+    float curve2 = curvature(xwindow,ywindow,datapointer,10);
+    if (curve2 > CURVTHRESH) {
+      xcorners[0] = xwindow[datapointer];
+      ycorners[0] = ywindow[datapointer];
+      curvecorners[0] = curve2;
+      indexcorners[0] = 0;
+      ++corner_counter;
+    }
     
-    if( result->total == 4 &&
-	cvCheckContourConvexity(result) &&
-	fabs(cvContourArea(result,CV_WHOLE_SEQ)) > 1000) {    
-      CvPoint corners[4];
-      cvCvtSeqToArray(result,corners,cvSlice(0,4));
-#ifdef QUADTANGLE_DEBUG
-      PROGRESS("Accepting polygon with points " <<
-	       "("<<corners[0].x<<","<<corners[0].y<<") "<<
-	       "("<<corners[1].x<<","<<corners[1].y<<") "<<
-	       "("<<corners[2].x<<","<<corners[2].y<<") "<<
-	       "("<<corners[3].x<<","<<corners[3].y<<")");
-
-#endif
-
-      m_x0 = (float)corners[0].x/1000.f;
-      m_y0 = (float)corners[0].y/1000.f;
-      m_x1 = (float)corners[1].x/1000.f;
-      m_y1 = (float)corners[1].y/1000.f;
-      m_x2 = (float)corners[2].x/1000.f;
-      m_y2 = (float)corners[2].y/1000.f;
-      m_x3 = (float)corners[3].x/1000.f;
-      m_y3 = (float)corners[3].y/1000.f;
+    float previous = curve2;
+    float currentmax = -10;
+    for(int c=1;c<points.size()/2;++c) {
+      datapointer = MASK(datapointer+1);
+      loadpointer = MASK(loadpointer+1);
+      xwindow[loadpointer] = *i;
+      ++i;
+      ywindow[loadpointer] = *i;
+      ++i;
+      
+      if (i == points.end()) { i = points.begin(); }
+      
+      float curve = curvature(xwindow,ywindow,datapointer,10);
+      curve = -fabs(curve);
+      if (curve < CURVTHRESH) { 
+	if (previous > CURVTHRESH) {
+	  ++corner_counter;
+	  currentmax = -10;
+	  if (corner_counter > 4) { m_fitted = false; return; }
+	}
+      }
+      else {
+	if (curve > currentmax && corner_counter < 4) { 
+	  currentmax = curve;
+	  xcorners[corner_counter] = xwindow[datapointer];
+	  ycorners[corner_counter] = ywindow[datapointer];
+	}
+      }
+      previous = curve;
+    }
+    
+    if (corner_counter == 4) {
+      m_x0 = xcorners[0];
+      m_y0 = ycorners[0];
+      m_x1 = xcorners[1];
+      m_y1 = ycorners[1];
+      m_x2 = xcorners[2];
+      m_y2 = ycorners[2];
+      m_x3 = xcorners[3];
+      m_y3 = ycorners[3];
       compute_central_point();
       sort_points();
       m_fitted = true;
+      return;
     }
-    else {
-#ifdef QUADTANGLE_DEBUG
-      PROGRESS("Rejecting polygon");
-#endif
-      m_fitted = false;
-    }
+  }
+  m_fitted = false;
+  return;
+}
+
+QuadTangle::QuadTangle(const std::vector<float>& points, bool prev_fitted) {
   
-    cvReleaseMemStorage(&seqstore);
-    cvReleaseMemStorage(&store);
+  if (!prev_fitted) {
+    CornerFit(points);
   }
   else {
     m_fitted = false;
@@ -227,6 +285,8 @@ void QuadTangle::sort_points()
     m_x3= x1; m_y3=y1;
  }
 }
+
+
 
 void QuadTangle::GetTransform(float transform[16]) const {
   // see the header file for a full explanation of what's going on here

@@ -214,7 +214,7 @@ private:
   void sort_points();
   void swap(float *a, float *b);
   float find_angle(float x, float y, float cx, float cy);
-
+  void CornerFit(const std::vector<float>& points);
 
 };
 #else
