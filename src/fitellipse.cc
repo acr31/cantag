@@ -88,14 +88,14 @@ Ellipse2D fitellipse(float* points, int numpoints) {
 
   // Compute
 
-  // T = -inv(S3) * S2
+  // T = -inv(S3) * S2'
 
   double t[9];
   for(int i=0;i<3;i++) {
     for(int j=0;j<3;j++) {
       t[i*3+j] = -s3inv[i*3]*s2[j*3];
       for(int k=1;k<3;k++) {
-	t[i*3+j] -= s3inv[i*3+k] * s2[j*3+k];
+	t[i*3+j] -= s3inv[i*3+k] * s2[j*3+k]; // <-cunning
       }
     }
   }
