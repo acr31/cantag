@@ -198,11 +198,17 @@ public:
   inline float GetY2() const { return m_y2; }
   inline float GetX3() const { return m_x3; }
   inline float GetY3() const { return m_y3; }
+
+
+  QuadTangle(Socket& socket);
+  int Save(Socket& socket) const;
 private:
   inline void compute_central_point();
   void sort_points();
   void swap(float *a, float *b);
   float find_angle(float x, float y, float cx, float cy);
+
+
 };
 #else
 class QuadTangle;

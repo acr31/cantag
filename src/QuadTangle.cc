@@ -344,3 +344,32 @@ void QuadTangle::GetTransform(float transform[16]) const {
 #endif
 
 }
+
+QuadTangle::QuadTangle(Socket& socket) {
+  m_x0 = socket.RecvFloat();
+  m_y0 = socket.RecvFloat();
+  m_x1 = socket.RecvFloat();
+  m_y1 = socket.RecvFloat();
+  m_x2 = socket.RecvFloat();
+  m_y2 = socket.RecvFloat();
+  m_x3 = socket.RecvFloat();
+  m_y3 = socket.RecvFloat();
+  m_xc = socket.RecvFloat();
+  m_yc = socket.RecvFloat();
+  m_fitted = (bool)socket.RecvInt();
+}
+
+int QuadTangle::Save(Socket& socket) const {
+  int count = socket.Send(m_x0);
+  count += socket.Send(m_y0);
+  count += socket.Send(m_x1);
+  count += socket.Send(m_y1);
+  count += socket.Send(m_x2);
+  count += socket.Send(m_y2);
+  count += socket.Send(m_x3);
+  count += socket.Send(m_y3);
+  count += socket.Send(m_xc);
+  count += socket.Send(m_yc);
+  count += socket.Send((int)m_fitted);
+  return count;
+}

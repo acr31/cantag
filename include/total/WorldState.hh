@@ -42,7 +42,7 @@ template<int PAYLOAD_SIZE> void WorldState<PAYLOAD_SIZE>::Add(LocatedObject<PAYL
 }
 
 template<int PAYLOAD_SIZE> int WorldState<PAYLOAD_SIZE>::Save(Socket& socket) const {
-  int count = socket.Send(nodes.size());
+  int count = socket.Send((int)nodes.size());
   for(typename std::vector<LocatedObject<PAYLOAD_SIZE>*>::const_iterator i = nodes.begin();i!=nodes.end();++i) {
     count += (*i)->Save(socket);
   }

@@ -98,8 +98,13 @@ public:
 };
 
 template<int BIT_COUNT> int CyclicBitSet<BIT_COUNT>::Save(Socket& socket) const {
-  int count = socket.Send(m_rotation);
-  count += socket.Send(*this);
+  int count = socket.Send((int)m_rotation);
+  unsigned char* buffer = new unsigned char[BIT_COUNT / 8 + 1];
+  for(int i=0;i<BIT_COUNT;++i) {
+    if (i%8==0) { buffer[i/8] = 0;}
+    if ((*this)[i]) { buffer[i/8] |= (1 << (i%8)); }
+  } 
+  count += socket.Send(buffer,BIT_COUNT/8+1);
 }
 
 

@@ -11,7 +11,7 @@
 #include <tripover/polysolve.hh>
 
 #ifdef TEXT_DEBUG
-# define ELLIPSE_DEBUG
+# undef ELLIPSE_DEBUG
 # undef ELLIPSE_DEBUG_DUMP_POINTS
 # undef CIRCLE_TRANSFORM_DEBUG
 # undef DECOMPOSE_DEBUG
@@ -1035,7 +1035,7 @@ void Ellipse::GetTransformLinear(float transform1[16], float transform2[16]) {
     transform2[i] = transform1[i];
   }  
 }
-#include <iostream>
+
 int Ellipse::Save(Socket& socket) const {
   int count = socket.Send(m_a);
   count += socket.Send(m_b);

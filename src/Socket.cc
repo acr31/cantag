@@ -34,7 +34,6 @@ Socket::~Socket() {
     delete m_host;
   }
 }
-
 void Socket::Bind(const char* host, int port) {
   struct hostent* hostdetails;
   if ((hostdetails = gethostbyname(host)) == NULL) {
@@ -120,6 +119,10 @@ void Socket::Recv(unsigned char* buf, size_t len) {
   }
 }
 
+void Socket::Recv(float* buf, size_t len) {
+  Recv((unsigned char*)buf,sizeof(float)*len);
+}
+
 int Socket::RecvInt() {
   int result;
   Recv((unsigned char*)&result,sizeof(int));
@@ -156,6 +159,10 @@ int Socket::Send(const unsigned char* buf, size_t len) {
   return total;
 }
 
+int Socket::Send(const float* buf, size_t len) {
+  return Send((unsigned char*)buf, sizeof(float)*len);
+}
+
 int Socket::Send(int message) {
   return Send((unsigned char*)&message,sizeof(int));
 }
@@ -174,4 +181,16 @@ int Socket::Send(const std::vector<float>& vec) {
   count += Send( (unsigned char*)points, vec.size() * sizeof(float) );
   delete[] points;
   return count;
+}
+
+SingleSocket::SingleSocket() : Socket(), m_accepted(NULL) {}
+SingleSocket::~SingleSocket() {
+  if (m_accepted) delete m_accepted;
+};
+
+void SingleSocket::Recv(unsigned char* buf, size_t len) {
+  if (!m_accepted) {
+    m_accepted = Socket::Accept();
+  }
+  m_accepted->Recv(buf,len);
 }
