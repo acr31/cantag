@@ -33,7 +33,7 @@ int debug_image_counter= 0;
  *
  * \todo regression test with gl harness
  */
-#define READING_COUNT 1
+#define READING_COUNT 10
 template<int RING_COUNT, int SECTOR_COUNT>
 class RingTag : public virtual Tag< ShapeChain<Ellipse>, RING_COUNT*SECTOR_COUNT >, 
 		protected virtual Coder<RING_COUNT*SECTOR_COUNT> {
@@ -306,7 +306,10 @@ public:
     
       // if we read a full 360 degrees then we stop and ask it for the
       // code
-      boost::shared_ptr<  CyclicBitSet<RING_COUNT*SECTOR_COUNT> > read_code[READING_COUNT] = { boost::shared_ptr<  CyclicBitSet<RING_COUNT*SECTOR_COUNT> >(new CyclicBitSet<RING_COUNT*SECTOR_COUNT>() ) };
+      boost::shared_ptr<  CyclicBitSet<RING_COUNT*SECTOR_COUNT> > read_code[READING_COUNT];
+      for(int b=0;b<READING_COUNT;b++) { 
+	read_code[b] = boost::shared_ptr<  CyclicBitSet<RING_COUNT*SECTOR_COUNT> >(new CyclicBitSet<RING_COUNT*SECTOR_COUNT>());
+      };
 
       for(int j=0;j<SECTOR_COUNT*READING_COUNT;j++) {
 	// read a chunk by sampling each ring and shifting and adding
@@ -323,18 +326,18 @@ public:
     
 #ifdef RING_TAG_DEBUG
       for(int i=0;i<READING_COUNT;i++) {
-	PROGRESS("Code candidate " << i << " is " << read_code[i]);
+	PROGRESS("Code candidate " << i << " is " << *read_code[i]);
       }
 #endif
 
       for(unsigned int code_ptr=0;code_ptr<READING_COUNT;code_ptr++) {
-	if ((read_code[code_ptr] == read_code[(code_ptr+1) % READING_COUNT])) {
+	if ((*read_code[code_ptr] == *read_code[(code_ptr+1) % READING_COUNT])) {
 	  if (DecodePayload(*read_code[code_ptr]) >= 0) {
 #ifdef RING_TAG_IMAGE_DEBUG
 	    draw_read(image,camera,correcttrans,(code_ptr+1)%READING_COUNT);
 #endif
 #ifdef RING_TAG_DEBUG
-	    PROGRESS("Found code " << read_code[code_ptr]);
+	    PROGRESS("Found code " << *read_code[code_ptr]);
 #endif	
 	    projected1[0] = 0;
 	    projected1[1] = 0;
@@ -434,9 +437,9 @@ private:
 	ApplyTransform(l,pts,1);
 	camera.NPCFToImage(pts,1);
 	// pick the colour to be the opposite of the sampled point so we can see the dot
-	int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
+	//int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
 	// or pick the colour to be on a gradient so we see the order it samples in
-	//int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
+	int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
 	debug0.DrawPoint(pts[0],pts[1],colour,4);
       }
       counter++;

@@ -53,7 +53,6 @@ void Camera::NPCFToImage(float* points, int numpoints) const {
     // there is no need to translate these points or apply a scaling -
     // that has been done already
 
-    /*    
     // 1) Compute the distance from the principle point (now 0,0)
     double rpwr2 = x*x + y*y;
     double rpwr4 = rpwr2*rpwr2;
@@ -68,10 +67,7 @@ void Camera::NPCFToImage(float* points, int numpoints) const {
     // 3) Compute the new values of x and y
     double xd1 = radialcoeff*x+dxx;
     double xd2 = radialcoeff*y+dxy;
-    */
 
-    float xd1 = x;
-    float xd2 = y;
     // 4) rescale and return to image co-ordinates
     points[i] = m_intrinsic[0]*(xd1+m_intrinsic[1]*xd2)+m_intrinsic[2];
     points[i+1] = m_intrinsic[4]*xd2+m_intrinsic[5];
@@ -88,20 +84,27 @@ void Camera::ImageToNPCF(float* points, int numpoints) const {
     points[i] /= m_intrinsic[0];
     points[i+1] /= m_intrinsic[4];
 
-    /*
-    float x = points[i];
-    float y = points[i+1];
-
-    NPCFToImage(points+i,1);
-
-    points[i] = x-points[i];
-    points[i+1] = y-points[i+1];
-
-    NPCFToImage(points+i,1);
-
-    points[i] = x-points[i];
-    points[i+1] = y-points[i+1]; 
-    */   
+    for(int j=0;j<10;j++) {
+      double x = points[i];
+      double y = points[i+1];
+      // 1) Compute the distance from the principle point (now 0,0)
+      double rpwr2 = x*x + y*y;
+      double rpwr4 = rpwr2*rpwr2;
+      double rpwr6 = rpwr4*rpwr2;
+      
+      double radialcoeff = 1 - m_r2*rpwr2 - m_r4*rpwr4 - m_r6*rpwr6;
+      
+      // 2) Compute the tangential offset
+      double dxx = 2*m_d1*x*y + m_d2*(rpwr2+2*x*x);
+      double dxy = m_d1*(rpwr2+2*y*y)+2*m_d2*x*y;
+      
+      // 3) Compute the new values of x and y
+      double xd1 = radialcoeff*x-dxx;
+      double xd2 = radialcoeff*y-dxy;
+      
+      points[i] = xd1;
+      points[i+1] = xd2;
+    }
   }
 }
 

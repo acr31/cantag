@@ -16,7 +16,7 @@
 # undef DECOMPOSE_DEBUG
 #endif
 
-#define MAXFITERROR 0.0001
+#define MAXFITERROR 0.000001
 #define COMPARETHRESH 0.0001
 
 static void print(const char* label, double* array, int rows, int cols);
@@ -428,8 +428,9 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
     transc1[col*4] *= scale;
     transc1[col*4+1] *= scale;
 
-    transc2[col*4] *= scale;
-    transc2[col*4+1] *= -scale;
+    transc2[col*4] *= -scale;
+    transc2[col*4+1] *= scale;
+    transc2[col*4+2] *= -1;
   }
     
   double rtotc1[16];
@@ -457,6 +458,8 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
       }
     }
   }
+
+
 
 #ifdef CIRCLE_TRANSFORM_DEBUG  
   PROGRESS("M_Transform: mt=[" << transform1[0] << "," << transform1[1] << "," << transform1[2] << "," << transform1[3] << ";");

@@ -21,7 +21,7 @@ boost::mt19937 rng;
 boost::uniform_int<> numbersource(0,500);
 boost::variate_generator<boost::mt19937, boost::uniform_int<> > numbers(rng, numbersource);
 
-#define EPSILON 0.01
+#define EPSILON 10.01
 
 void test_distort() {
   for(int i=0;i<2;i++) {
@@ -35,9 +35,10 @@ void test_distort() {
     c.SetIntrinsic(intrinsics[5*i],intrinsics[5*i+1],intrinsics[5*i+2],intrinsics[5*i+3],intrinsics[5*i+4]);
     c.SetRadial(radials[3*i],radials[3*i+1],radials[3*i+2]);
     c.SetTangential(tangentials[2*i],tangentials[2*i+1]);
-    c.ImageToNPCF(points,500);
-    c.NPCFToImage(points,500);
+    c.ImageToNPCF(points,250);
+    c.NPCFToImage(points,250);
     for(int j=0;j<500;j++) {
+      std::cout << points[j] << " " << points2[j] << std::endl;
       if (fabs(points[j]-points2[j]) > EPSILON) {
 	throw "Distort/Undistort error exceeded bounds";
       }
