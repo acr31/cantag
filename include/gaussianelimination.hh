@@ -5,7 +5,7 @@
  * Solve the equation A*R = X for R.
  *
  * A is a square matrix stored as an array of pointers to arrays
- * holding the _columns_ of the matrix.  R is an vector of matching
+ * holding the _rows_ of the matrix.  R is an vector of matching
  * height to A which will contain the results of the elimination.  X
  * is a vector of matching height to A that holds the RHS of the
  * equation.  This function works by reducing A to an upper triangular
@@ -19,11 +19,6 @@
  * the matrix).  This cost is incurred for each row and then an
  * additional N*N/2 subtractions and multiplications to back
  * substitute the final values.
- *
- * \todo make this work for row major matrices and reenable pivoting
- *
- * \todo regression test by generating a system of equations from its
- * solution and then solving
  */
 void solve_simultaneous(double* X, double** A, double* R, int size);
 
@@ -34,14 +29,11 @@ void solve_simultaneous(double* X, double** A, double* R, int size);
  * This function performs a full gaussian elimination on A to reduce
  * it to an identity matrix.  Simultaneously solves Ar(i)=b(i) for
  * r(i) where b(i) is the ith column of a appropriatly sized identity
- * matrix.  The inverse of A is then the matrix made up with columns
+ * matrix.  The inverse of A is then the matrix made up with rows
  * r(i). This function overwrites the contents of A and R (the
  * result). The matrix A is expected to be an array of arrays
- * containing _columns_.  The result R is an array of arrays
- * containing _columns_ of the result.
- *
- * \todo regression test produce a matrix, get its inversion, multiply
- * them together get identity
+ * containing _rows_.  The result R is an array of arrays
+ * containing _rows_ of the result.
  *
  */
 void invert_matrix(double** A, double **R, int size);
@@ -49,16 +41,13 @@ void invert_matrix(double** A, double **R, int size);
 /**
  * Takes a matrix A and a matrix B and returns inv(A)*B stored in B.
  *
- * A and B be in column major format (array of arrays of columns) and
+ * A and B be in row major format (array of arrays of rows) and
  * The parameter size is the size of the square matrix A, matrix B has
  * the same number of rows as A and a number of columns given by cols.
  * This function performs a gaussian elimination on A to find x in
  * inv(A)*B = X by solving A*X(i)=B(i) for each column in B
  * simultaneously.  This function destroys the contents of A and B.
  *
- * \todo regression test - give it the same matrix for A and B get
- * back an identity. Also give it two matrices and then repeat with
- * them swapped.  Then multiply one by the other, should get identity
  */
 void predivide(double** A, double **B, int size, int cols);
 

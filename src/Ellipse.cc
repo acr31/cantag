@@ -11,13 +11,13 @@
 #include <findtransform.hh>
 
 #ifdef TEXT_DEBUG
-# undef ELLIPSE_DEBUG
+# define ELLIPSE_DEBUG
 # undef ELLIPSE_DEBUG_DUMP_POINTS
-# define CIRCLE_TRANSFORM_DEBUG
+# undef CIRCLE_TRANSFORM_DEBUG
 # undef DECOMPOSE_DEBUG
 #endif
 
-#define MAXFITERROR 0.000001
+#define MAXFITERROR 0.01
 #define COMPARETHRESH 0.0001
 
 static void print(const char* label, double* array, int rows, int cols);
@@ -85,21 +85,21 @@ bool Ellipse::FitEllipse(const float* points, int numpoints) {
   double s30[3] = {0};
   double s31[3] = {0};
   double s32[3] = {0};
-  double* s3[] = { s30,s31,s32};  // store s3 in col major format so we can use it for gaussian elimination
+  double* s3[] = { s30,s31,s32};  // store s3 in row major format so we can use it for gaussian elimination
 
-  for(int j=0;j<numpoints;j++) {
-    double d1col[] = {points[2*j] * points[2*j],
-		      points[2*j] * points[2*j+1],
-		      points[2*j+1] * points[2*j+1]};
-    double d2col[] = {points[2*j],
-		      points[2*j+1],
+  for(int j=0;j<numpoints*2;j+=2) {
+    double d1col[] = {points[j] * points[j],
+		      points[j] * points[j+1],
+		      points[j+1] * points[j+1]};
+    double d2col[] = {points[j],
+		      points[j+1],
 		      1};
     
-    for(int k=0;k<2;k++) {
-      for(int l=0;l<2;l++) {
+    for(int k=0;k<3;k++) {
+      for(int l=0;l<3;l++) {
 	s1[k*3+l] += d1col[k] * d1col[l];
 	s2[k*3+l] += d1col[k] * d2col[l];
-	s3[l][k] += d2col[k] * d2col[l];
+	s3[k][l] += d2col[k] * d2col[l];
       }
     }
   }
@@ -113,10 +113,10 @@ bool Ellipse::FitEllipse(const float* points, int numpoints) {
 
   // T = -inv(S3) * S2'
   
-  // this is column major representation => this is -S2 transpose.
-  double t0[] = { -s2[0], -s2[1], -s2[2]};
-  double t1[] = { -s2[3], -s2[4], -s2[5]};
-  double t2[] = { -s2[6], -s2[7], -s2[8]};
+  // this is row major representation => this is -S2 transpose.
+  double t0[] = { -s2[0], -s2[3], -s2[6]};
+  double t1[] = { -s2[1], -s2[4], -s2[7]};
+  double t2[] = { -s2[2], -s2[5], -s2[8]};
   double* t[] = { t0,t1,t2 };
   
   predivide(s3,t,3,3);
@@ -134,7 +134,7 @@ bool Ellipse::FitEllipse(const float* points, int numpoints) {
     for(int j=0;j<3;j++) {
       m[i*3+j] = s1[i*3+j];
       for(int k=0;k<3;k++) {
-	m[i*3+j] += s2[i*3+k] * t[j][k]; // ith row, kth column of s2 * kth row,jth column of t
+	m[i*3+j] += s2[i*3+k] * t[k][j]; // ith row, kth column of s2 * kth row,jth column of t
       }
     }
   }
@@ -513,7 +513,7 @@ static void print(const char* label, double* array, int rows, int cols) {
   std::cout << label << "= [ ";
   for(int i=0;i<rows;i++) {
     for(int j=0;j<cols;j++) {
-      std::cout << array[i*cols+j] << "\t";
+      std::cout << array[i*rows+j] << "\t";
     }
     std::cout << ";" << std::endl;
   }
@@ -525,7 +525,7 @@ static void print(const char* label, double** array, int rows, int cols) {
   std::cout << label << "= [ ";
   for(int i=0;i<rows;i++) {
     for(int j=0;j<cols;j++) {
-      std::cout << array[j][i] << "\t";
+      std::cout << array[i][j] << "\t";
     }
     std::cout << ";" << std::endl;
   }

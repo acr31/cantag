@@ -146,6 +146,56 @@ public:
    * Return the root node for this graph
    */
   SceneGraphNode<S,PAYLOAD_SIZE>* GetRootNode() const { return m_root; };
+
+
+private:
+
+  /**
+   * An implementation of Suzuki's topological structural analysis algorithm
+   *
+   * @Article{a:cvgip85:suzuki,
+   *  author        = "S. Suzuki and K. Abe",
+   *  title         = "Topological Structural Analysis of Digitized Binary Images by Border Following",
+   *  journal       = "Computer Vision, Graphics, and Image Processing",
+   *  year          = "1985",
+   *  volume        = "30",
+   *  number        = "1",
+   *  pages         = "32--46"}
+   *
+   */
+  void FollowContours(const Image& image) {
+
+    int NBD = 1;
+    int LNBD;
+
+    for(int raster_y = 0; raster_y < image.GetHeight(); raster_y++) {
+      LNBD=1;      
+      for(int raster_x = 1; raster_x < image.GetWidth(); raster_x++) {
+	unsigned char image_value = image.GetPixelNoCheck(raster_x,raster_y);
+	int follow_x;
+	int follow_y;
+	if (image_value == 1 && image.GetPixelNoCheck(raster_x-1,raster_y) == 0) {
+	  // this is the border following starting point of an outer border
+	  NBD++;
+	  
+	  follow_x = raster_x-1;
+	  follow_y = raster_y;
+	  
+	  // identify the parent of the current borde
+	  
+	}
+	else if (image_value >= 1 && image.GetPixelNoCheck(raster_x+1,raster_y) == 0) {
+	  // this is the border following starting point of a hole border
+	  NBD++;
+	  follow_x = raster_x+1;
+	  follow_y = raster_y;
+	  LNBD = image_value;
+	}
+      }
+      
+    }
+
+  }
 };
 
 #endif//SCENE_GRAPH_GUARD

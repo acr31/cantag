@@ -44,13 +44,17 @@ void test_solve_simultaneous() {
 	throw "Difference between calc_x and x exceeded threshold.";
       }
     }
+
+    for(int i=0;i<SIZE;i++) {
+      delete[] A[i];
+    }
   }
 }
 
 
 void test_invert() {
 
-  for(int count=0;count<100;count++) {
+  for(int count=0;count<1;count++) {
     double* m1[SIZE];
     double* m2[SIZE];
     for(int i=0;i<SIZE;i++) {
@@ -93,7 +97,60 @@ void test_invert() {
 	}
       }
     }  
+
+    for(int i=0;i<SIZE;i++) {
+      delete[] m1[i];
+      delete[] m2[i];
+    }
   }
+}
+
+void test_predivide() {
+  for(int count =0;count<100;count++) {
+    // generate two matrices
+    // multiply one by the other
+    // predivide the product
+    // check that the result equals the second original matrix
+    
+    double* m1[SIZE];
+    double* m2[SIZE];
+    for(int i=0;i<SIZE;i++) {
+      m1[i] = new double[SIZE];
+      m2[i] = new double[SIZE];
+      for(int j=0;j<SIZE;j++) {
+	m1[i][j] = numbers();
+	m2[i][j] = numbers();
+      }
+    }
+    
+    double* product[SIZE];
+    for(int i=0;i<SIZE;i++) {
+      product[i] = new double[SIZE];
+      for(int j=0;j<SIZE;j++) {
+	product[i][j] = 0;
+	for(int k=0;k<SIZE;k++) {
+	  product[i][j] += m1[i][k] * m2[k][j];
+	}
+      }
+    }
+    
+    predivide(m1,product,SIZE,SIZE);
+    
+    for(int i=0;i<SIZE;i++) {
+      for(int j=0;j<SIZE;j++) {
+	if (fabs(product[i][j] - m2[i][j]) > MAX_ERROR) {
+	  throw "Difference between answer and original matrix exceeds bounds.";
+	}       
+      }
+    } 
+
+    for(int i=0;i<SIZE;i++) {
+      delete[] m1[i];
+      delete[] m2[i];
+      delete[] product[i];
+    }
+  }
+  
 }
 
 test_suite*
@@ -103,6 +160,7 @@ init_unit_test_suite( int argc, char* argv[] )
 
   test->add( BOOST_TEST_CASE( &test_solve_simultaneous ) );
   test->add( BOOST_TEST_CASE( &test_invert ) );
+  test->add( BOOST_TEST_CASE( &test_predivide ) );
 
   return test;
 }

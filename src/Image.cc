@@ -26,14 +26,14 @@ Image::Image(int width,int height, uchar* contents) : m_from_header(true) {
 }
 
 Image::~Image() {
-  if (m_from_header) {
-    /*
-     * \todo work out why this results in unknown error code -49 in opencv
-     */
-    //    cvReleaseImageHeader(&m_image);
-  }
-  else {
-    if (m_image != NULL) {
+  if (m_image != NULL) {
+    if (m_from_header) {
+      /*
+       * \todo work out why this results in unknown error code -49 in opencv
+       */
+      //cvReleaseImageHeader(&m_image);
+    }
+    else {
       cvReleaseImage(&m_image);
     }
   }
