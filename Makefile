@@ -23,6 +23,11 @@ clean:
 	-rm -f TripOriginalTag.o tripover.o tripover DrawTripOriginal.o DrawTripOriginal Tag.o
 
 depend:
-	makedepend ${OPENCVINC} ${CPPFLAGS} *.cc
+	makedepend -Y. ${CPPFLAGS} *.cc 2>/dev/null
 
 # DO NOT DELETE THIS LINE
+
+concentricellipse.o: concentricellipse.hh
+DrawTripOriginal.o: TripOriginalTag.hh Tag.hh concentricellipse.hh
+Tag.o: Tag.hh
+tripover.o: TripOriginalTag.hh Tag.hh concentricellipse.hh
