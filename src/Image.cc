@@ -1,5 +1,9 @@
 #include <Image.hh>
 #include <iostream>
+
+#include <boost/random.hpp>
+
+
 Image::Image(int width, int height) : m_image(cvCreateImage(cvSize(width,height), IPL_DEPTH_8U, 1)) {
   cvConvertScale(m_image,m_image,0,255);
 };
@@ -24,10 +28,19 @@ void Image::GlobalThreshold(unsigned char threshold) {
 #endif
 }
 
+/**
+ * An implementation of Pierre Wellner's Adaptive Thresholding
+ *  @TechReport{t:europarc93:wellner,
+ *     author       = "Pierre Wellner",
+ *     title        = "Adaptive Thresholding for the {D}igital{D}esk",
+ *     institution  = "EuroPARC",
+ *     year         = "1993",
+ *     number       = "EPC-93-110",
+ *     comment      = "Nice introduction to global and adaptive thresholding.  Presents an efficient and effective adaptive thresholding technique and demonstrates on lots of example images.",
+ *     file         = "ar/ddesk-threshold.pdf"
+ *   }
+ */
 void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
-  //  assert(window_size%2==1); // window size must be an odd number
-  //  cvAdaptiveThreshold(m_image,m_image,255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY_INV,window_size,offset);
-
   float moving_average = 127;
   unsigned int s = window_size;
   float t = (float)offset/255;
@@ -35,7 +48,6 @@ void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
   for(unsigned int i=0;i<m_image->height;i+=2) {
     for(unsigned int j=0;j<m_image->width;j++) {
       AdaptiveWidthStep(&moving_average,previous_line,i,j,s,t);
-      //      std::cout << moving_average/s << std::endl;
     }
     for(unsigned int j=m_image->width;j>0;j--) {
       AdaptiveWidthStep(&moving_average,previous_line,i+1,j-1,s,t);
@@ -52,10 +64,10 @@ void Image::AdaptiveWidthStep(float* moving_average, float* previous_line, unsig
   float current_thresh = (*moving_average + (i==0 ? 0 : previous_line[j]))/2;
   previous_line[j] = *moving_average;
   if (Sample(j,i) < *moving_average/s * t) {
-    DrawPixel(j,i,255);
+    DrawPixel(j,i,COLOUR_WHITE);
   }
   else {
-    DrawPixel(j,i,0);
+    DrawPixel(j,i,COLOUR_BLACK);
   }
 }
 
@@ -74,4 +86,32 @@ void Image::HomogenousTransform() {
 #ifdef IMAGE_DEBUG
   cvSaveImage("debug-homogenoustransform.jpg",m_image);
 #endif
+}
+
+
+/**
+ * Add noise to the image in an attempt to simulate that of a real
+ * camera.
+ */
+void Image::AddNoise(float mean, float stddev) {
+  assert(mean >= 0 && mean < 256);
+  assert(stddev >= 0);
+  // the first source of noise is dark noise and low level CCD noise sources
+  // this manifests itself as gaussian noise with some non-zero mean
+
+  // the second source of noise is shot noise
+
+  boost::normal_distribution<float> normal_dist(mean,stddev);
+  boost::rand48 rand_generator((unsigned long long)time(0));
+  boost::variate_generator<boost::rand48&, boost::normal_distribution<float> > normal(rand_generator,normal_dist);
+  for(int i=0;i<m_image->height;i++) {
+    for(int j=0;j<m_image->width;j++) {
+      float randomval = normal();
+      int sample = ((uchar*)(m_image->imageData + i * m_image->widthStep))[j];
+      sample += cvRound(normal());
+      if (sample < 0) { sample = 0; }
+      else if (sample > 255) { sample = 255; }
+      ((uchar*)(m_image->imageData + i * m_image->widthStep))[j] = sample;
+    }
+  }
 }

@@ -103,7 +103,7 @@ public:
   void Next(float x_radians, float y_radians, float z_radians, 
 	    float centre_x, float centre_y, float centre_z) {
 
-    glClearColor(0.0,0.0,0.0,0.0);
+    glClearColor(1.0,1.0,1.0,0.0);
     glShadeModel(GL_SMOOTH);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1.0,1.0,1.0);
@@ -195,6 +195,7 @@ public:
     glDisable(GL_TEXTURE_2D);
     
     // add some occlusion
+    /*
     glLoadIdentity();
     glBegin(GL_QUADS);
     glColor3f(1.0,1.0,1.0);
@@ -204,7 +205,7 @@ public:
     glVertex3f(0.5, 1,1.0);
     glEnd();
     glFlush();
-
+    */
     int pointer = 0;
     for(int i=m_height-1;i>=0;i--) {
       for(int j=0;j<m_width;j++) {

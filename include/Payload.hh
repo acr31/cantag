@@ -32,6 +32,8 @@ public:
     }
   }
   
+  Payload(std::bitset<BITCOUNT> value) : std::bitset<BITCOUNT>(value) {};
+
   /**
    * Rotate the bit field so that no other rotation has a smaller
    * value.

@@ -21,6 +21,8 @@
 /**
  * A scene graph.  This class maintains a logical view of the current
  * image in terms of a hierachy of recognised shapes.
+ *
+ * \todo square matching is currently requiring that you change APPROX_NONE to APPROX_SIMPLE.  Fix the square fitter.
  */
 template<class S>
 class SceneGraph {
@@ -62,7 +64,7 @@ public:
     IplImage *copy = cvCloneImage(image.m_image); // the find contours process changes the image ;-(
     CvMemStorage* store = cvCreateMemStorage(0);
     CvSeq* root;
-    cvFindContours(copy,store,&root,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_NONE);
+    cvFindContours(copy,store,&root,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_SIMPLE);
     cvReleaseImage(&copy);
 
 #ifdef IMAGE_DEBUG

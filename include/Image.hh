@@ -225,6 +225,12 @@ public:
    */
   void HomogenousTransform();
 
+  /**
+   * Apply noise to the image as if it had been acquired through a CCD array
+   */
+  void AddNoise(float mean, float stddev);
+
+
 private:
   void AdaptiveWidthStep(float* moving_average,float* previous_line,unsigned int i, unsigned int j,unsigned int s, float t);
 };

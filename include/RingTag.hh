@@ -31,7 +31,7 @@ int debug_image_counter= 0;
  * of reading that are the same in order to guess the correct angle of
  * the tag.
  */
-#define READING_COUNT 10
+#define READING_COUNT 1
 template<int RING_COUNT, int SECTOR_COUNT>
 class RingTag : public virtual Tag< ShapeChain<Ellipse>, RING_COUNT*SECTOR_COUNT >, protected virtual Coder<RING_COUNT*SECTOR_COUNT> {
 private:
@@ -333,9 +333,13 @@ public:
       // read_code[2] == read_code[3] == read_code[4]
       // read_code[3] == read_code[4] == read_code[0]
       // read_code[4] == read_code[0] == read_code[1]
-    
+
+#if READING_COUNT > 1    
       for(int i=0;i<READING_COUNT;i++) {
-	if ((read_code[i] == read_code[(i+1) % READING_COUNT])) { 
+	if ((read_code[i] == read_code[(i+1) % READING_COUNT])) {
+#else
+	  int i=0;
+#endif
 	  std::bitset<RING_COUNT*SECTOR_COUNT> code;
 	  if (DecodePayload(code,read_code[i]) >= 0) {
 #ifdef RING_TAG_IMAGE_DEBUG
@@ -357,8 +361,12 @@ public:
 	    for(int i=0;i<16;i++) {
 	      lobj->transform[i] = correcttrans[i];
 	    }		
-	    lobj->is_valid = true;
-	    lobj->is_correct = (m_must_match == NULL) || (*m_must_match == code);
+	    lobj->is_valid = true;	    
+	    Payload<RING_COUNT*SECTOR_COUNT> p(code);
+	    Payload<RING_COUNT*SECTOR_COUNT> p2(*m_must_match);
+	    p.MinRotate();
+	    p2.MinRotate();
+	    lobj->is_correct = (m_must_match == NULL) || (p==p2);//|| (*m_must_match == code);
 	    node->SetInspected();
 	    return true;
 	  }
@@ -367,8 +375,10 @@ public:
 	    PROGRESS("Read consistant code but it turned out invalid");
 #endif
 	  }
+#if READING_COUNT > 1
 	}
       }
+#endif
     
 #ifdef RING_TAG_DEBUG
       PROGRESS("Failed to read code");    

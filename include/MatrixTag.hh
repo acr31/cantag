@@ -15,7 +15,7 @@
 #include <findtransform.hh>
 #include <bitset>
 #include <Payload.hh>
-
+#include <iostream>
 #ifdef TEXT_DEBUG
 #define  MATRIX_TAG_DEBUG
 #undef  MATRIX_TAG_DEBUG_POINTS
@@ -30,6 +30,9 @@
  *  booktitle     = "Proceedings of Asia Pacific Computer Human Interaction",
  *  year          = "1998",
  * }
+ *
+ * \todo contains one of the vile hacks about checking if the code is
+ * correct
  */ 
 template<int SIZE>
 class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*SIZE % 2) >, protected virtual Coder<SIZE*SIZE - (SIZE*SIZE % 2)> {
@@ -127,15 +130,15 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
       int v2 = (int)((m_cells_corner[2*i+1]+m_cell_width)*(float)size);
       int u3 = (int)(m_cells_corner[2*i]*(float)size);
       int v3 = (int)((m_cells_corner[2*i+1]+m_cell_width)*(float)size);
-      //int colour = payload[i] ? COLOUR_BLACK : COLOUR_WHITE;
-      int colour = (int)((float)i/(float)(SIZE*SIZE - (SIZE*SIZE % 2)) * 128)+128;
+      int colour = payload[i] ? COLOUR_BLACK : COLOUR_WHITE;
+      //int colour = (int)((float)i/(float)(SIZE*SIZE - (SIZE*SIZE % 2)) * 128)+128;
       image.DrawFilledQuadTangle(u0,v0,
 				 u1,v1,
 				 u2,v2,
 				 u3,v3,
 				 colour);
     }
-    /*
+    /* draw a false ordering for pretty picture
     int counter = 0;
     for(int i=0;i<SIZE;i++) {
       for(int j=0;j<SIZE;j++) {
@@ -223,9 +226,9 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
       ApplyTransform(transform,pts[0],pts[1],pts,pts+1);
       camera.NPCFToImage(pts,1);
       // pick the colour to be the opposite of the sampled point so we can see the dot
-      //int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
+      int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
       // or pick the colour to be on a gradient so we see the order it samples in
-      int colour = (int)((double)i/(double)(SIZE*SIZE - (SIZE*SIZE %2))*255);
+      //int colour = (int)((double)i/(double)(SIZE*SIZE - (SIZE*SIZE %2))*255);
       debug0.DrawPoint(pts[0],pts[1],colour,4);
     }
 
@@ -235,19 +238,25 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
     node->SetInspected();
     LocatedObject* lobj = node->GetLocatedObject();
     std::bitset<SIZE*SIZE-(SIZE*SIZE%2)> tagcode(0);
-    if ((DecodePayload(tagcode,read_code) >= 0) &&
-	((m_must_match == NULL) || *m_must_match == tagcode)) {
+    if (DecodePayload(tagcode,read_code) >= 0) {
       float normal[3];
       GetNormalVector(transform,normal);
-      std::cout << "Normal vector is "<<normal[0]<<" "<<normal[1]<<" "<< normal[2] << std::endl;
+      //std::cout << "Normal vector is "<<normal[0]<<" "<<normal[1]<<" "<< normal[2] << std::endl;
       for(int i=0;i<16;i++) {
 	lobj->transform[i] = transform[i];
       }	
       lobj->is_valid = true;
+      Payload<SIZE*SIZE - (SIZE*SIZE % 2)> p;
+      EncodePayload(*m_must_match,p);
+      p.MinRotate();
+      read_code.MinRotate();
+
+      lobj->is_correct = (m_must_match == NULL) || (p==read_code);//|| (*m_must_match == code);      
       return true;
     }    
     else {
       lobj->is_valid = false;
+      lobj->is_correct = false;
     }
     return false;
   }
