@@ -86,11 +86,13 @@ void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
 */
 inline int Image::AdaptiveWidthStep(int moving_average, int* previous_line, unsigned int i, unsigned int j, unsigned int s, int offset) {
   unsigned char pixel = SampleNoCheck(j,i);
-  moving_average = pixel + moving_average - moving_average/s;
+  //  moving_average = pixel + moving_average - moving_average/s;
+  moving_average = (pixel + (moving_average << s) - moving_average) >> s;
   int current_thresh = (moving_average + (i==0 ? 0 : previous_line[j]))/2;
   //int current_thresh = moving_average;
   previous_line[j] = moving_average;
-  if (pixel*s*255 < current_thresh*(255-offset)) {
+  //  if (pixel*s*255 < current_thresh*(255-offset)) {
+  if (pixel*255 < current_thresh*(255-offset)) {
     DrawPixelNoCheck(j,i,COLOUR_WHITE);
   }
   else {
