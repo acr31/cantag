@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.12  2004/02/17 08:01:29  acr31
+ * *** empty log message ***
+ *
  * Revision 1.11  2004/02/16 16:02:27  acr31
  * *** empty log message ***
  *
@@ -306,17 +309,12 @@ void Ellipse2D::ComputePose() {
   std::cout << "Ellipse params (a-f) are ["<<m_a<<","<<m_b<<","<<m_c<<","<<m_d<<","<<m_e<<","<<m_f<<"];"<<std::endl;
 #endif
 
-
-  double c[] = { m_a,   m_b/2, m_d/2,
-		 m_b/2, m_c,   m_e,
-		 m_d/2, m_e/2, m_f };
-
   double eigvects[9];
   double eigvals[9];
 
   /**
    * Solve eigenvectors of ( m_a     m_2/b    m_d/2 )
-   *                       ( m_b/2   m_c      m_e   )
+   *                       ( m_b/2   m_c      m_e/2 )
    *                       ( m_d/2   m_e/2    m_f   )
    */
   eigensolve(m_a,m_b/2,m_d/2,m_c,m_e/2,m_f, eigvects, eigvals);
@@ -332,28 +330,28 @@ void Ellipse2D::ComputePose() {
 #endif
 
   // normalise the eigen vectors 
-
+  /*
   double dete1 = sqrt(eigvects[0]*eigvects[0] +
-		     eigvects[1]*eigvects[1] +
-		     eigvects[2]*eigvects[2]);
+		     eigvects[3]*eigvects[3] +
+		     eigvects[6]*eigvects[6]);
   eigvects[0] /= dete1;
   eigvects[3] /= dete1;
   eigvects[6] /= dete1;
   
-  double dete2 = sqrt(eigvects[3]*eigvects[3] + 
+  double dete2 = sqrt(eigvects[1]*eigvects[1] + 
 		     eigvects[4]*eigvects[4] +
-		     eigvects[5]*eigvects[5]);
+		     eigvects[7]*eigvects[7]);
   eigvects[1] /= dete2;
   eigvects[4] /= dete2;
   eigvects[7] /= dete2;
   
-  double dete3 = sqrt(eigvects[6]*eigvects[6] + 
-		     eigvects[7]*eigvects[7] + 
+  double dete3 = sqrt(eigvects[2]*eigvects[2] + 
+		     eigvects[5]*eigvects[5] + 
 		     eigvects[8]*eigvects[8]);
   eigvects[2] /= dete3;
   eigvects[5] /= dete3;
   eigvects[8] /= dete3;
-
+  */
 #ifdef POSE_DEBUG
   std::cout << "Normalised Eigen Vectors: " << eigvects[0] << " " << eigvects[1] << " " << eigvects[2] << std::endl;
   std::cout << "                          " << eigvects[3] << " " << eigvects[4] << " " << eigvects[5] << std::endl;
@@ -406,7 +404,7 @@ void Ellipse2D::ComputePose() {
   double tsinn2 = sqrt(tsinn);
   double denom2 = sqrt(denom);
 
-  float r2[] = { tcosn2/denom2, 0, tsinn/denom2,
+  float r2[] = { tcosn2/denom2, 0, tsinn2/denom2,
 		 0   , 1, 0,
 		 -tsinn2/denom2,0, tcosn2/denom2};
 
