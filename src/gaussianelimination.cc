@@ -4,6 +4,9 @@
  *  $Header$
  *
  *  $Log$
+ *  Revision 1.3  2004/02/10 22:22:03  acr31
+ *  added inverting a matrix
+ *
  *  Revision 1.2  2004/02/10 22:19:27  acr31
  *  got gaussian elimination working for inverting matrices
  *
@@ -90,25 +93,11 @@ static inline void subtract_row(float** vals, int size, int r1, int r2, float fa
 /**
  * Print out the column major matrix.
  */
-static void printcmaj(float** vals, int rows,int cols) {
+static void print(float** vals, int rows,int cols) {
   std::cout << std::endl << "[";
   for(int i=0;i<rows;i++) {
     for(int j=0;j<cols;j++) {
       std::cout << vals[j][i] << "\t";
-    }
-    std::cout << ";" << std::endl;
-  }
-  std::cout << std::endl;
-}
-
-/**
- * Print out the row major matrix.
- */
-static void printrmaj(float** vals, int rows,int cols) {
-  std::cout << std::endl << "[";
-  for(int i=0;i<rows;i++) {
-    for(int j=0;j<cols;j++) {
-      std::cout << vals[i][j] << "\t";
     }
     std::cout << ";" << std::endl;
   }
@@ -149,7 +138,7 @@ void solve_simultaneous(float* X, float** A, float* R, int size) {
 #ifdef GAUSSIAN_DEBUG
     std::cout << "-------" << std::endl;
     std::cout << "Row " << i << std::endl;
-    printcmaj(A,size,size);
+    print(A,size,size);
     std::cout << std::endl;
     for(int k=0;k<size;k++) {
       std::cout << X[k]<<";"<<std::endl;
@@ -183,6 +172,7 @@ void solve_simultaneous(float* X, float** A, float* R, int size) {
 #ifdef GAUSSIAN_DEBUG
       std::cout << "Subtract "<<A[i][j]<<" times row " << i << " from row "<<j<<std::endl;
 #endif
+      // order is important here - subtract row will alter A[i][j]
       X[j]-= A[i][j]*X[i]; // perform the same subtraction on the X co-effs
       subtract_row(A,size,j,i,A[i][j],i); // this does rowj -= A[i][j]*rowi starting from col i
     }
@@ -223,19 +213,25 @@ void solve_simultaneous(float* X, float** A, float* R, int size) {
  * r(i). This function overwrites the contents of A and R (the
  * result). The matrix A is expected to be an array of arrays
  * containing _columns_.  The result R is an array of arrays
- * containing _rows_ of the result.
+ * containing _columns_ of the result.
  *
  */
-void invert_matrix(float** A, float** R, int size) {
+void invert_matrix(float** A, float** B, int size) {
+  for(int i=0;i<size;i++) {
+    for(int j=0;j<size;j++) {
+      B[i][j] = i==j?1:0;
+    }
+  }
+  predivide(A,B,size,size);
+
 }
 
 /**
  * Takes a matrix A and a matrix B and returns inv(A)*B.
  *
- * A _must_ be in column major format (array of arrays of columns) and
- * B _must_ be in row major format (array of arrays of rows).  The
- * parameter size is the size of the square matrix A, matrix B has the
- * same number of rows as A and a number of columns given by cols.
+ * A and B be in column major format (array of arrays of columns) and
+ * The parameter size is the size of the square matrix A, matrix B has
+ * the same number of rows as A and a number of columns given by cols.
  * This function performs a gaussian elimination on A to find x in
  * inv(A)*B = X by solving A*X(i)=B(i) for each column in B
  * simultaneously.  This function destroys the contents of A and B.
@@ -245,9 +241,9 @@ void predivide(float** A, float** B, int size, int cols) {
 #ifdef GAUSSIAN_DEBUG
     std::cout << "-------" << std::endl;
     std::cout << "Row " << i << std::endl;
-    printcmaj(A,size,size);
+    print(A,size,size);
     std::cout << std::endl;
-    printcmaj(B,size,cols);
+    print(B,size,cols);
 #endif
 
     // find the column index of the best pivot.
@@ -268,22 +264,22 @@ void predivide(float** A, float** B, int size, int cols) {
 #ifdef GAUSSIAN_DEBUG
     std::cout << "-------" << std::endl;
     std::cout << "After swapping: " << i << std::endl;
-    printcmaj(A,size,size);
+    print(A,size,size);
     std::cout << std::endl;
-    printcmaj(B,size,cols);
+    print(B,size,cols);
     std::cout << "Best Coeff is " << bestcoeff << std::endl;
     std::cout << "Scale row "<<i<< " by "<<(1/bestcoeff)<< std::endl;
 #endif
     if (bestcoeff != 1) {
       scale_row(A,size,i,1/bestcoeff,i); // divide row i by bestcoeff
-      scale_row(B,cols,i,1/bestcoeff,0); // divide column i in B by bestcoeff - do the whole row
+      scale_row(B,cols,i,1/bestcoeff,0); // divide row i in B by bestcoeff - do the whole row
     }
 
 #ifdef GAUSSIAN_DEBUG
     std::cout << "After scaling" << std::endl;
-    printcmaj(A,size,size);
+    print(A,size,size);
     std::cout << std::endl;
-    printcmaj(B,size,cols);
+    print(B,size,cols);
 #endif
 
     // subtract some scale factor of this row from the remaining ones
@@ -294,7 +290,7 @@ void predivide(float** A, float** B, int size, int cols) {
 	std::cout << "Subtract "<<A[i][j]<<" times row " << i << " from row "<<j<<std::endl;
 #endif
 	// the order of these is important - we overwrite A[i][j] in the second one.
-	subtract_row(B,cols,j,i,A[i][j],0); // this does colj -= A[i][j]*coli - do the whole row
+	subtract_row(B,cols,j,i,A[i][j],0); // this does rowj -= A[i][j]*rowi - do the whole row
 
 	// subract_row is call by value and so, even though we
 	// overwrite A[i][j] as the first thing we do in the function
@@ -306,8 +302,8 @@ void predivide(float** A, float** B, int size, int cols) {
 
 #ifdef GAUSSIAN_DEBUG
   std::cout << "--------RESULT--------" << std::endl;
-  printcmaj(A,size,size);
-  printcmaj(B,size,cols);
+  print(A,size,size);
+  print(B,size,cols);
 #endif
   // now A is an identity matrix and B contains inv(A)*B.
 }
