@@ -70,10 +70,10 @@ template<int PAYLOADSIZE> void XOutputStagesMechanism::FromTag(const WorldState<
       i!=world.GetNodes().end();
       ++i) {
     LocatedObject<PAYLOADSIZE>* lobj = *i;
-    float pts[] = {0,0,
-		   0,1,
+    float pts[] = {-1,-1,
+		   -1,1,
 		   1,1,
-		   1,0};
+		   1,-1};
     ApplyTransform(lobj->transform,pts,4);
     m_camera.NPCFToImage(pts,4);
     XDrawLine(m_display,m_window,m_gc,
