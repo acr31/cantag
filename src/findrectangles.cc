@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/26 08:57:53  acr31
+ * removed check for minumum area of contour
+ *
  * Revision 1.1  2004/01/25 14:53:36  acr31
  * moved over to autoconf/automake build system
  *
@@ -49,8 +52,7 @@ void FindRectangles(Image *image, int maxXDiff, int maxYDiff, std::vector<Rectan
     // Check for 4 vertices
     // Check for a convex contour
     if( result->total == 4 &&
-	cvCheckContourConvexity(result) &&
-	(fabs(cvContourArea(result,CV_WHOLE_SEQ)) > 10000)) {
+	cvCheckContourConvexity(result) ) {
 #ifdef IMAGE_DEBUG
       cvDrawContours(debug1,result,0,0,0,3);
 #endif	   
