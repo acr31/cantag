@@ -537,27 +537,26 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   }
 
   // we'd like our tag to still face the same way
-  if (((eigvects[8] < 0) && (eigvals[8] > 0)) ||  
-      ((eigvects[8] > 0) && (eigvals[8] < 0))) {
+  //  if (((eigvects[8] < 0) && (eigvals[8] > 0)) ||  
+  //      ((eigvects[8] > 0) && (eigvals[8] < 0))) {
     eigvects[2] *= -1;
     eigvects[5] *= -1;
     eigvects[8] *= -1;
-  }
- 
-  if (((eigvects[4] < 0) && (eigvals[4] > 0)) ||
-      ((eigvects[4] > 0) && (eigvals[4] < 0))) {
+    //  }
+
+  //  if (((eigvects[4] < 0) && (eigvals[4] > 0)) ||
+  //      ((eigvects[4] > 0) && (eigvals[4] < 0))) {
     eigvects[1] *= -1;
     eigvects[4] *= -1;
     eigvects[7] *= -1;
-  }
+    //  }
 
-  if (((eigvects[0] < 0) && (eigvals[0] > 0)) ||
-      ((eigvects[0] > 0) && (eigvals[0] < 0))) {
-    eigvects[0] *= -1;
-    eigvects[3] *= -1;
-    eigvects[6] *= -1;
-  }
-
+    //  if (((eigvects[0] < 0) && (eigvals[0] > 0)) ||
+    //      ((eigvects[0] > 0) && (eigvals[0] < 0))) {
+    //    eigvects[0] *= -1;
+    //    eigvects[3] *= -1;
+    //    eigvects[6] *= -1;
+    //  }
   // our eigenvectors might incorporate reflections about various axes
   // so we need to check that we still have a right handed frame. In a
   // righthanded frame v1 x v2 = v3 so we cross v1 and v2 and check
@@ -601,9 +600,9 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
 #ifdef CIRCLE_TRANSFORM_DEBUG
     PROGRESS("Reversing vectors to create right handed axis");
 #endif
-    eigvects[0] *= -1;
-    eigvects[3] *= -1;
-    eigvects[6] *= -1;
+    //eigvects[0] *= -1;
+    //eigvects[3] *= -1;
+    //    eigvects[6] *= -1;
   }
 
   double r1[] = { eigvects[0], eigvects[1], eigvects[2], 0,
@@ -689,7 +688,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   // this multiplies cols 0 and 1 of the transform by scale
   for(int col=0;col<4;col++) {
     transc1[col*4] *= scale;
-    transc1[col*4+1] *= -scale;
+    transc1[col*4+1] *= scale;
 
     transc2[col*4] *= scale;
     transc2[col*4+1] *= scale;
