@@ -13,6 +13,8 @@
 #include <tripover/Ellipse.hh>
 #include <tripover/findtransform.hh>
 #include <iostream>
+#include <cassert>
+
 #ifdef TEXT_DEBUG
 # define RING_TAG_DEBUG
 #endif
@@ -36,7 +38,7 @@ static int debug_image_counter = 0;
  *
  * \todo regression test with gl harness
  */
-#define READING_COUNT 20
+#define READING_COUNT 200
 #define MAX_CHILD_DISTANCE 0.1
 template<int RING_COUNT, int SECTOR_COUNT>
 class RingTag : public virtual Tag< ShapeChain<Ellipse>, RING_COUNT*SECTOR_COUNT >, 
@@ -71,7 +73,7 @@ public:
  
 private:
   void draw_circle(Image& debug0, const Camera& camera, float l[16], double radius) const;
-  void draw_read(const Image& image, const Camera& camera, float l[16], int i) const;
+  void draw_read(const Image& image, const Camera& camera, float l[16]) const;
 
 };
 
@@ -232,6 +234,7 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
 
   /**
    * \todo this check will not work for the SplitRing tags and it didn;t work for ring tags either
+   * push the outerborder field for contours onto the shapes
    */
   if (node->children.size() == 0 && false) {
 #ifdef RING_TAG_DEBUG
@@ -484,7 +487,7 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
   
   bool left;
   bool right;
-  int k=0;
+  int k=RING_COUNT-1;
   int j;
   // scan round reading a sector width apart until we read two adjacent cells of different values
   for(j=0;j<SECTOR_COUNT*READING_COUNT;j+=READING_COUNT) {
@@ -539,7 +542,7 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
   int readindex = (leftindex + READING_COUNT/2) % (SECTOR_COUNT * READING_COUNT);
   for(int j=0;j<SECTOR_COUNT;++j) {
     // read a chunk by sampling each ring and shifting and adding
-    for(int k=RING_COUNT-1;k>=0;k--) {
+    for(int k=0;k<RING_COUNT;++k) {
       float tpt[]=  {  m_cos_read_angles[readindex] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
 		       m_sin_read_angles[readindex] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
       ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
@@ -601,10 +604,28 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
   else {
     delete read_code;
 #ifdef RING_TAG_DEBUG
-    PROGRESS("Failed to decode two identical readings");
+    PROGRESS("Failed to decode code");
 #endif
 #ifdef RING_TAG_IMAGE_DEBUG
-    draw_read(image,camera,correcttrans);
+    int index = (leftindex + (orientation/RING_COUNT) * READING_COUNT) % (SECTOR_COUNT * READING_COUNT);
+    
+    float rotation[16] = { m_cos_read_angles[index], -m_sin_read_angles[index],0,0,
+			   m_sin_read_angles[index], m_cos_read_angles[index],0,0,
+			   0,0,1,0,
+			   0,0,0,1};
+    
+    
+    float finaltrans[16] = {0};
+    // premultiply rotations by transforms
+    for(int row=0;row<4;row++) {
+      for(int col=0;col<4;col++) {
+	for(int k=0;k<4;k++) {
+	  finaltrans[row*4+col] += correcttrans[row*4+k] * rotation[k*4+col];
+	}
+      }
+    }
+
+    draw_read(image,camera,finaltrans);
 #endif
     return false;
   }
@@ -627,10 +648,23 @@ template<int RING_COUNT,int SECTOR_COUNT> void RingTag<RING_COUNT,SECTOR_COUNT>:
     debug0.DrawLine(oldpts[0],oldpts[1],pts[0],pts[1],colour,2);
     oldpts[0] = pts[0];
     oldpts[1] = pts[1];
-  }  
+  } 
+
+  oldpts[0] = 0; oldpts[1] = 0;
+  ApplyTransform(l,oldpts,1);
+  camera.NPCFToImage(oldpts,1);
+
+  for(int i=0;i<SECTOR_COUNT*READING_COUNT;i+=READING_COUNT) {
+    pts[0] = m_cos_read_angles[i]*radius;
+    pts[1] = m_sin_read_angles[i]*radius;
+    ApplyTransform(l,pts,1);
+    camera.NPCFToImage(pts,1);
+    debug0.DrawLine(oldpts[0],oldpts[1],pts[0],pts[1],COLOUR_BLACK,2);
+  }
 }
 
-template<int RING_COUNT,int SECTOR_COUNT>  void RingTag<RING_COUNT,SECTOR_COUNT>::draw_read(const Image& image, const Camera& camera, float l[16], int i) const {
+template<int RING_COUNT,int SECTOR_COUNT>  void RingTag<RING_COUNT,SECTOR_COUNT>::draw_read(const Image& image, const Camera& camera, float l[16]) const {
+  int i =0;
   Image debug0(image);
   debug0.ConvertScale(-1,255);
   debug0.ConvertScale(0.5,128);
@@ -659,11 +693,11 @@ template<int RING_COUNT,int SECTOR_COUNT>  void RingTag<RING_COUNT,SECTOR_COUNT>
   }
   
   int counter=0;
-  for(int k=0;k<SECTOR_COUNT;k++) {
+  for(int k=0;k<SECTOR_COUNT*READING_COUNT;k+=READING_COUNT) {
     for(int r=RING_COUNT-1;r>=0;r--) {
       float pts[2];
-      pts[0] = cos( m_read_angles[READING_COUNT*k+((i+1)%READING_COUNT)] ) * m_data_ring_centre_radii[r]/m_bullseye_outer_radius;
-      pts[1] = sin( m_read_angles[READING_COUNT*k+((i+1)%READING_COUNT)] ) * m_data_ring_centre_radii[r]/m_bullseye_outer_radius;
+      pts[0] = cos( m_read_angles[k + READING_COUNT/2] ) * m_data_ring_centre_radii[r]/m_bullseye_outer_radius;
+      pts[1] = sin( m_read_angles[k + READING_COUNT/2] ) * m_data_ring_centre_radii[r]/m_bullseye_outer_radius;
       ApplyTransform(l,pts,1);
       camera.NPCFToImage(pts,1);
       // pick the colour to be the opposite of the sampled point so we can see the dot
