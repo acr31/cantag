@@ -4,7 +4,7 @@
 
 #include <tripover/ContourTree.hh>
 
-#undef CONTOUR_TREE_DEBUG
+#define CONTOUR_TREE_DEBUG
 #undef  CONTOUR_TREE_DEBUG_SAVE
 Image* debug_image;
 
@@ -20,17 +20,17 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
   // edge of the image to make sure that our border follower never
   // goes out of range
   for(int i=0;i<image_width;++i) {
-    *data_pointer = 0;
+    *data_pointer &= 0xFC;
     data_pointer++;
   }
   for(int i=0;i<image_height-2;++i) {
-    *data_pointer = 0;
+    *data_pointer &= 0xFC;
     data_pointer+=image_width_1;
-    *data_pointer = 0;
+    *data_pointer &= 0xFC;
     ++data_pointer;
   }
   for(int i=0;i<image_width;++i) {
-    *data_pointer = 0;
+    *data_pointer &= 0xFC;
     ++data_pointer;
   }  
 
@@ -51,8 +51,8 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
   current = node_hash[NBD];
   
   // we're going to mark the image with contour id's as we find them
-  // the LSB will indicate if we have a exit or an entry pixel
-  // the remainder is the NBD
+  // the LSB will indicate if we have a exit (0) or an entry pixel (1)
+  // the next bit will be 1 to indicate that we've been here before
   // (note that we only ever mark things that are 1-pixels)
 
   for(int raster_y=0;raster_y < image_height; ++raster_y) {
@@ -63,29 +63,26 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
     data_pointer = image.GetRow(raster_y);
     ++data_pointer; // exclude the first pixel on the line
     for(int raster_x=1;raster_x < image_width_1;++raster_x, ++data_pointer) {
-      //      PROGRESS("SCAN " << raster_x << "," << raster_y << " " << *data_pointer << " " << image.Sample(raster_x,raster_y));
-      if (*data_pointer) {  // this pixel is a 1-element or it has been visited before
-	const int cNBD = *data_pointer>>1;   // left shift to discard the pixel value (or exit/entry flag if already marked)
-	if (cNBD) { // this pixel has been seen before and it is not an exit pixel
-	  //	if (cNBD && (*data_pointer & 0x1)) { // this pixel has been seen before and it is not an exit pixel
+      if (*data_pointer & 3) {  // this pixel is a 1-element or it has been visited before
+	const int cNBD = *data_pointer & 2;   // the second pixel will be 1 if we've seen it before and 0 if not
+	if (cNBD) { // this pixel has been seen before
 #ifdef CONTOUR_TREE_DEBUG
-	  //	  PROGRESS("Updating LNBD to " << cNBD);
 	  PROGRESS("Updating LNBD to " << nbd_store[raster_x+raster_y*image.GetWidth()]);
 #endif
-	  //	  LNBD = cNBD;
 	  LNBD = nbd_store[raster_x+raster_y*image.GetWidth()];
-	}
-	
+	  continue;
+	}	
+
 	int contour_length;
 	ContourStatistics contour_statistics;;
-	if (!cNBD && !(*(data_pointer-1))) { // this pixel has not been seen before and the previous pixel is a 0-element
+	if (!cNBD && !(*(data_pointer-1) & 1)) { // this pixel has not been seen before and the previous pixel is a 0-element
 	  current->bordertype = OUTER_BORDER;	  
 #ifdef CONTOUR_TREE_DEBUG
 	  PROGRESS("Found outer border.  Following from " << raster_x << "," << raster_y);
 #endif
 	  contour_length = FollowContour(image, data_pointer, raster_x, raster_y, current->points, contour_statistics,0, NBD,nbd_store);
 	} 
-	else if ((*data_pointer & 0x1) && !(*(data_pointer+1))) { // this pixel has not been seen before or it is not an exit pixel, and the next pixel is a 0-element
+	else if ((!(*data_pointer & 0x2)) && !(*(data_pointer+1) & 0x1)) { // this pixel has not been seen before or it is not an exit pixel, and the next pixel is a 0-element
 	  current->bordertype = HOLE_BORDER;
 #ifdef CONTOUR_TREE_DEBUG
 	  PROGRESS("Found hole border.  Following from " << raster_x << "," << raster_y);
@@ -145,6 +142,10 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
   }
   delete current;
   m_contour_count--;
+  Image image2(image);
+  image2.ConvertScale(0.25,0);
+  image2.ConvertScale(4,0);
+  image2.Save("debug-contours.pnm");
 #ifdef IMAGE_DEBUG
   debug_image->Save("debug-contourtree-contours.pnm");
 #endif
@@ -196,12 +197,10 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
   // contour_0 is the first pixel in the contour
   const unsigned char* contour_0 = data_pointer;
 
-  const int NBD_shift = 1 << 1;
-
   do {
     position = (position - 1) & 0x7;
     sample_pointer = data_pointer+offset[position];
-    if (*sample_pointer) { break; }
+    if (*sample_pointer & 0x1) { break; }
   }
   while (position != start_position);
 
@@ -211,7 +210,7 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 
   if (position == start_position) {
     // one pixel contour
-    *data_pointer = NBD_shift;
+    *data_pointer |= 2;
     nbd_store[start_x+image_width*start_y] = nbd;
     points.push_back(start_x);
     points.push_back(start_y);
@@ -246,7 +245,7 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 #ifdef CONTOUR_TREE_DEBUG
       PROGRESS("Searching position " << position << " value is " << (int)*sample_pointer);
 #endif
-      if (*sample_pointer) {
+      if (*sample_pointer & 3) {
 #ifdef CONTOUR_TREE_DEBUG
 	PROGRESS("Found 1-pixel at position " << position << " around " << start_x << "," << start_y);
 #endif
@@ -261,20 +260,20 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 	// have examined it whilst looking for this 1-element then this
 	// is an exit pixel.  Write (NBD,r).
 	if (cell4_is_0) {
-	  *data_pointer = NBD_shift & 0xFF;
+	  *data_pointer &= 0xFE;
+	  *data_pointer |= 2;
 	  nbd_store[start_x+image_width*start_y] = nbd;
 #ifdef CONTOUR_TREE_DEBUG
-	  PROGRESS("Marked  exit " << start_x << "," << start_y << " with " << NBD_shift);
+	  PROGRESS("Marked  exit " << start_x << "," << start_y << " with 2");
 #endif
 	}
 	// 2) else if sample_x,sample_y is unmarked write
 	// (NBD,l).
-	//	else if (!(*sample_pointer & ~0x1)) {
-	else if (!(*data_pointer & ~0x1)) {
-	  *data_pointer = (NBD_shift | 0x1) & 0xFF;
+	else if (!(*data_pointer & 2)) {
+	  *data_pointer |= 3;
 	  nbd_store[start_x+image_width*start_y] = nbd;
 #ifdef CONTOUR_TREE_DEBUG
-	  PROGRESS("Marked " << start_x << "," << start_y << " with " << (NBD_shift | 0x1));
+	  PROGRESS("Marked " << start_x << "," << start_y << " with 3");
 #endif
 	}
 
