@@ -1,3 +1,7 @@
+/**
+ * $Header$
+ */
+
 #include <tripover/Config.hh>
 #include <tripover/Camera.hh>
 
@@ -91,9 +95,6 @@ void Camera::NPCFToImage(float* points, int numpoints) const {
     double xd1 = radialcoeff*x+dxx;
     double xd2 = radialcoeff*y+dxy;
 
-    //  xd1 = x;
-    //	xd2 = y;
-
     // 4) rescale and return to image co-ordinates
     points[i] = m_intrinsic[0]*(xd1+m_intrinsic[1]*xd2)+m_intrinsic[2];
     points[i+1] = m_intrinsic[4]*xd2+m_intrinsic[5];
@@ -139,19 +140,7 @@ void Camera::NPCFToImage(std::vector<float>& points) const {
 
 /**
  * \todo currently ignores  tangential parameters
- * Uses an approximation to the inverse distrortion calculation.
- * It is based on the first and second terms of a taylor expansion
- * of the distortion equeation. Neglection of the higher order terms
- * reduces accuracy, but not noticeably AFAICT. This model assumes 
- * only 4th order radial distortion (i.e. no r^n for n>4) and will
- * ignore the 6th order term if set. Similarly the approximation
- * cannot cope with tangential distortion. It is however, fast to compute
- * and should suffice since 99.99% of digital cameras really only have
- * 2nd order radial distortion.
- *
- * More details in "Precise Radial Un-distortion of Images",
- * John Mallon and  Paul F. Whelan, 7th International Conf. on
- * Pattern Recognition (ICPR'04), Cambridge, UK. August 2004
+ 
  */
 void Camera::ImageToNPCF(float* points, int numpoints) const {
   for(int i=0;i<numpoints*2 ;i+=2) {
@@ -184,19 +173,6 @@ void Camera::ImageToNPCF(float* points, int numpoints) const {
 
 /**
  * \todo currently ignores  tangential parameters
- * Uses an approximation to the inverse distrortion calculation.
- * It is based on the first and second terms of a taylor expansion
- * of the distortion equeation. Neglection of the higher order terms
- * reduces accuracy, but not noticeably AFAICT. This model assumes 
- * only 4th order radial distortion (i.e. no r^n for n>4) and will
- * ignore the 6th order term if set. Similarly the approximation
- * cannot cope with tangential distortion. It is however, fast to compute
- * and should suffice since 99.99% of digital cameras really only have
- * 2nd order radial distortion.
- *
- * More details in "Precise Radial Un-distortion of Images",
- * John Mallon and  Paul F. Whelan, 7th International Conf. on
- * Pattern Recognition (ICPR'04), Cambridge, UK. August 2004
  */
 void Camera::ImageToNPCF(std::vector<float>& points) const {  
   for(int i=0;i<points.size() ;i+=2) {
