@@ -199,6 +199,14 @@ public:
 #ifdef RING_TAG_DEBUG
       PROGRESS("This node has already been inspected. Skipping it");
 #endif
+      return false;
+    }
+
+    if (!node->HasChildren()) {
+#ifdef RING_TAG_DEBUG
+      PROGRESS("This node has no children.  Skipping it");
+#endif
+      return false;
     }
 
     // get the ellipse this node encompasses

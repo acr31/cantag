@@ -8,11 +8,12 @@
 #include <eigenvv.hh>
 #include <cmath>
 #include <iostream>
+#include <findtransform.hh>
 
 #ifdef TEXT_DEBUG
 # undef ELLIPSE_DEBUG
 # undef ELLIPSE_DEBUG_DUMP_POINTS
-# undef CIRCLE_TRANSFORM_DEBUG
+# define CIRCLE_TRANSFORM_DEBUG
 # undef DECOMPOSE_DEBUG
 #endif
 
@@ -289,7 +290,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
   PROGRESS("                 " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];");
 #endif
 
-  // bubble sort the vectors...I'm so embarresed ;-)
+  // bubble sort the vectors (based on their eigenvalue)...I'm so embarresed ;-)
   for(int i=0;i<4;i++) {
     for(int j=1;j<3;j++) {
       if (eigvals[j*4-4] > eigvals[j*4]) {
@@ -332,8 +333,9 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
   double crossy = eigvects[6]*eigvects[1] - eigvects[0]*eigvects[7];
   double crossz = eigvects[0]*eigvects[4] - eigvects[3]*eigvects[1];
   
+  
 #ifdef CIRCLE_TRANSFORM_DEBUG
-  PROGRESS("Cross = " << crossx <<"," << crossy << "," << crossy);
+  PROGRESS("Cross = " << crossx <<"," << crossy << "," << crossz);
 #endif
 
   double dotcross = crossx*eigvects[2] + crossy*eigvects[5] + crossz*eigvects[8];
@@ -344,13 +346,14 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
 
   if (dotcross < 0) {
 #ifdef CIRCLE_TRANSFORM_DEBUG
-    PROGRESS("Reversing z vector to create right handed axis");
+    PROGRESS("Reversing vectors to create right handed axis");
 #endif
     eigvects[2] *= -1;
     eigvects[5] *= -1;
     eigvects[8] *= -1;
   }
   
+
   double r1[] = { eigvects[0], eigvects[1], eigvects[2], 0,
 		  eigvects[3], eigvects[4], eigvects[5], 0,
 		  eigvects[6], eigvects[7], eigvects[8], 0,
@@ -430,7 +433,6 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
 
     transc2[col*4] *= scale;
     transc2[col*4+1] *= -scale;
-    transc2[col*4+2] *= 1;
   }
     
   double rtotc1[16];
@@ -459,8 +461,6 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
     }
   }
 
-
-
 #ifdef CIRCLE_TRANSFORM_DEBUG  
   PROGRESS("M_Transform: mt=[" << transform1[0] << "," << transform1[1] << "," << transform1[2] << "," << transform1[3] << ";");
   PROGRESS("                 " << transform1[4] << "," << transform1[5] << "," << transform1[6] << "," << transform1[7] << ";");
@@ -472,6 +472,49 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
   PROGRESS("                 " << transform2[8] << "," << transform2[9] << "," << transform2[10] << "," << transform2[11] << ";");
   PROGRESS("                 " << transform2[12] << "," << transform2[13] << "," << transform2[14] << "," << transform2[15] << ";");
 #endif
+
+  // now work out the normal vector of each transform.  if it results in something that points away from the camera then negate it.
+  /*
+  float normal[3];
+  GetNormalVector(transform1,normal);
+  if (normal[2] < 0) {
+    PROGRESS("Swapped transform 1");
+    transform1[0] *= -1;
+    transform1[1] *= -1;
+    transform1[2] *= -1;
+    transform1[3] *= -1;
+
+    transform1[4] *= -1;
+    transform1[5] *= -1;
+    transform1[6] *= -1;
+    transform1[7] *= -1;
+
+    transform1[8] *= -1;
+    transform1[9] *= -1;
+    transform1[10] *= -1;
+    transform1[11] *= -1;
+  }
+
+  GetNormalVector(transform2,normal);
+  if (normal[2] < 0) {
+    PROGRESS("Swapped transform 2");
+    transform2[0] *= -1;
+    transform2[1] *= -1;
+    transform2[2] *= -1;
+    transform2[3] *= -1;
+
+    transform2[4] *= -1;
+    transform2[5] *= -1;
+    transform2[6] *= -1;
+    transform2[7] *= -1;
+
+    transform2[8] *= -1;
+    transform2[9] *= -1;
+    transform2[10] *= -1;
+    transform2[11] *= -1;
+  }
+  */
+
 }
 
 

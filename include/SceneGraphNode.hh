@@ -92,6 +92,10 @@ public:
     m_children.push_back(child);
   }
 
+  inline bool HasChildren() {
+    return !m_children.empty();
+  }
+
   inline std::vector<SceneGraphNode<S,PAYLOAD_SIZE>* >& GetChildren() {
     return m_children;
   }
