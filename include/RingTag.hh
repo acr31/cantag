@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.7  2004/02/16 08:02:02  acr31
+ * *** empty log message ***
+ *
  * Revision 1.6  2004/02/08 20:30:10  acr31
  * changes to interfaces to add the ImageFilter class
  *
@@ -55,6 +58,7 @@
 #include "Tag.hh"
 #include "Coder.hh"
 #include "Ellipse2D.hh"
+#include <Camera.hh>
 
 class RingTag : public virtual Tag<Ellipse2D>, protected virtual Coder {
 private:
@@ -78,6 +82,6 @@ public:
 	  float data_outer_radius);
   virtual ~RingTag();
   virtual void Draw2D(Image* image,  unsigned long long code, int black, int white);
-  virtual unsigned long long Decode(Image *image, const Ellipse2D *l);
+  virtual unsigned long long Decode(Image *image, Camera* camera, const Ellipse2D *l);
 };
 #endif//RING_TAG_GUARD

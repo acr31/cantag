@@ -1,5 +1,5 @@
 #ifndef CAMERA_GUARD
-#define CAMERA_GAURD
+#define CAMERA_GUARD
 
 #include <Drawing.hh>
 

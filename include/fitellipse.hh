@@ -4,6 +4,6 @@
 #include <Config.hh>
 #include <Ellipse2D.hh>
 
-Ellipse2D fitellipse(float* points, int count);
+Ellipse2D* fitellipse(float* points, int count);
 
 #endif//FITELLIPSE_GUARD

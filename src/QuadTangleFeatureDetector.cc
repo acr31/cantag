@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/02/16 08:02:03  acr31
+ * *** empty log message ***
+ *
  * Revision 1.2  2004/02/11 08:23:49  acr31
  * *** empty log message ***
  *
@@ -46,7 +49,7 @@ QuadTangleFeatureDetector::QuadTangleFeatureDetector() {};
 /** 
  * Find rectangular white objects- for black tags you _must_ invert the image.
  */
-void QuadTangleFeatureDetector::FindFeatures(Image *image) {
+void QuadTangleFeatureDetector::FindFeatures(Image *image,Camera* camera) {
   std::vector<QuadTangle2DChain*> results;
   IplImage *copy = cvCloneImage(image);
 
@@ -163,7 +166,7 @@ void QuadTangleFeatureDetector::FindFeatures(Image *image) {
     QuadTangle2DChain *rect = *step;
     do {
       try {
-	std::cout << "Tag:" << Decode(image, rect->current ) << std::endl;
+	std::cout << "Tag:" << Decode(image, camera, rect->current ) << std::endl;
       }
       catch (...) {
 	std::cout << "Caught"<<std::endl;

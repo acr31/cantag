@@ -9,7 +9,7 @@ class QuadTangleFeatureDetector : public virtual FeatureDetector<QuadTangle2D> {
 
 public:
   QuadTangleFeatureDetector();
-  virtual void FindFeatures(Image* buf);
+  virtual void FindFeatures(Image* buf,Camera* camera);
 
 private:
   bool compare(QuadTangle2D *r1, QuadTangle2D *r2);

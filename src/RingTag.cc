@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/02/16 08:02:03  acr31
+ * *** empty log message ***
+ *
  * Revision 1.3  2004/02/03 16:25:11  acr31
  * more work on template tags and some function signature changes
  *
@@ -51,7 +54,7 @@
 #include <Coder.hh>
 #include <Ellipse2D.hh>
 #include <RingTag.hh>
-
+#include <Camera.hh>
 #undef FILENAME
 #define FILENAME "RingTag.cc"
 
@@ -201,7 +204,7 @@ void RingTag::Draw2D(Image* image,unsigned long long code, int black, int white)
   }
 }
 
-unsigned long long RingTag::Decode(Image *image, const Ellipse2D *l) {
+unsigned long long RingTag::Decode(Image *image, Camera* camera, const Ellipse2D *l) {
   // the location we have here locates the outer ring of the
   // bullseye.  Therefore we will need to scale it by the actual
   // size of the bullseye to hit the data sectors properly.
@@ -226,13 +229,13 @@ unsigned long long RingTag::Decode(Image *image, const Ellipse2D *l) {
     // read a chunk by sampling each ring and shifting and adding
     int currentcode = j%5;      
     for(int k=m_ring_count-1;k>=0;k--) {
-      float x;
-      float y;
+      float pt[2];
       l->ProjectPoint(m_read_angles[j],
 		      m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
-		      &x,
-		      &y);
-      bool sample = SampleImage(image,x,y) > 128;
+		      pt,
+		      pt+1);
+      camera->NPCFToImage(pt,1);
+      bool sample = SampleImage(image,pt[0],pt[1]) > 128;
       read_code[currentcode] <<=1;
       read_code[currentcode] |= (sample ? 1:0);
     }
@@ -280,22 +283,23 @@ unsigned long long RingTag::Decode(Image *image, const Ellipse2D *l) {
       
       for(int k=0;k<m_sector_count;k++) {
 	for(int r=0;r<m_ring_count;r++) {
-	  float x;
-	  float y;
+	  float pts[2];
 	  l->ProjectPoint(m_read_angles[5*k+((i+3)%5)],
 			  m_data_ring_outer_radii[r]/m_bullseye_outer_radius,
-			  &x,
-			  &y);
+			  pts,
+			  pts+1);
+	  camera->NPCFToImage(pts,1);
 	  cvLine(debug0,
 		 cvPoint(cvRound(l->m_x),cvRound(l->m_y)),
-		 cvPoint(cvRound(x),cvRound(y)),
+		 cvPoint(cvRound(pts[0]),cvRound(pts[1])),
 		 0,1);
 	  
 	  l->ProjectPoint(m_read_angles[5*k+((i+1)%5)],
 			  m_data_ring_centre_radii[r]/m_bullseye_outer_radius,
-			  &x,
-			  &y);
-	  cvLine(debug0,cvPoint(cvRound(x),cvRound(y)),cvPoint(cvRound(x),cvRound(y)), SampleImage(image,x,y) < 128 ? 255 : 0,3);
+			  pts,
+			  pts+1);
+	  camera->NPCFToImage(pts,1);
+	  cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), SampleImage(image,pts[0],pts[1]) < 128 ? 255 : 0,3);
 	  
 	  
 	}

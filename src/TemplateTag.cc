@@ -3,6 +3,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/02/16 08:02:03  acr31
+ * *** empty log message ***
+ *
  * Revision 1.4  2004/02/06 21:11:44  acr31
  * adding ellipse fitting
  *
@@ -59,7 +62,7 @@ void TemplateTag::Draw2D(Image* image, unsigned long long code, int black, int w
   (m_templates.at(code))->Draw2D(image,black,white);
 }
 
-unsigned long long TemplateTag::Decode(Image* image, const QuadTangle2D *l) {
+unsigned long long TemplateTag::Decode(Image* image, Camera* camera, const QuadTangle2D *l) {
   float best_val;
   int best_index = -1;
   int index =0;

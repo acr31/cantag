@@ -9,7 +9,7 @@ class EllipseFeatureDetector : public virtual FeatureDetector<Ellipse2D> {
 
 public:
   EllipseFeatureDetector();
-  virtual void FindFeatures(Image* buf);
+  virtual void FindFeatures(Image* buf,Camera* camera);
 
 private:
   bool compare(Ellipse2D *e1, Ellipse2D *e2);

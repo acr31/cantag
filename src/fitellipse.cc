@@ -7,6 +7,8 @@
 
 #undef ELLIPSE_DEBUG
 
+#define MAXFITERROR 0.1
+
 static void print(const char* label, double* array, int rows, int cols) {
   std::cout << "-----------------------------------" << std::endl;
   std::cout << label << "= [ ";
@@ -32,7 +34,25 @@ static void print(const char* label, double** array, int rows, int cols) {
 }
 
 
-Ellipse2D fitellipse(float* points, int numpoints) {
+static bool calcerror(float a,
+		      float b,
+		      float c,
+		      float d,
+		      float e,
+		      float f,
+		      float* points, int count) {
+  float total=0;
+  for (int pt=0;pt<count*2;pt+=2) {
+    float x = points[pt];
+    float y = points[pt+1];
+    float dist = a*x*x+b*x*y+c*y*y+d*x+e*y+f;
+    total+= dist;
+  }
+  PROGRESS("Total error was "<< (total/count) << " and threshold is "<<MAXFITERROR);
+  return (total < MAXFITERROR * count);
+}
+
+Ellipse2D* fitellipse(float* points, int numpoints) {
 
   //#ifdef ELLIPSE_DEBUG
   for(int i=0;i<numpoints*2;i+=2) {
@@ -172,20 +192,20 @@ Ellipse2D fitellipse(float* points, int numpoints) {
 
   for(int i = 0; i < 3; i++) {
     if (4*eigvects[i]*eigvects[i+6]-eigvects[i+3]*eigvects[i+3] >= 0.0) {
-      PROGRESS("Fitted ellipse: a="<<
-	       eigvects[i] << "," <<
-	       eigvects[i+3]<< "," <<
-	       eigvects[i+6]<< "," <<
-	       t[0][0]*eigvects[i]+t[1][0]*eigvects[i+3]+t[2][0]*eigvects[i+6]<< "," <<
-	       t[0][1]*eigvects[i]+t[1][1]*eigvects[i+3]+t[2][1]*eigvects[i+6]<< "," <<
-	       t[0][2]*eigvects[i]+t[1][2]*eigvects[i+3]+t[2][2]*eigvects[i+6]);
-      return Ellipse2D(eigvects[i],
-		       eigvects[i+3],
-		       eigvects[i+6],
-		       t[0][0]*eigvects[i]+t[1][0]*eigvects[i+3]+t[2][0]*eigvects[i+6],
-		       t[0][1]*eigvects[i]+t[1][1]*eigvects[i+3]+t[2][1]*eigvects[i+6],
-		       t[0][2]*eigvects[i]+t[1][2]*eigvects[i+3]+t[2][2]*eigvects[i+6]);
+      float a = eigvects[i];
+      float b = eigvects[i+3];
+      float c = eigvects[i+6];
+      float d = t[0][0]*eigvects[i]+t[1][0]*eigvects[i+3]+t[2][0]*eigvects[i+6];
+      float e = t[0][1]*eigvects[i]+t[1][1]*eigvects[i+3]+t[2][1]*eigvects[i+6];
+      float f = t[0][2]*eigvects[i]+t[1][2]*eigvects[i+3]+t[2][2]*eigvects[i+6];
+      PROGRESS("Fitted ellipse: a="<<a<<","<<b<<","<<c<<","<<d<<","<<e<<","<<f);
+      
+      if (calcerror(a,b,c,d,e,f,points,numpoints)) {	
+	return new Ellipse2D(a,b,c,d,e,f);
+      }
+      else {
+	return NULL;
+      }    
     }
-    
   }
 }

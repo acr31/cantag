@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/02/16 08:02:02  acr31
+ * *** empty log message ***
+ *
  * Revision 1.4  2004/02/08 20:30:10  acr31
  * changes to interfaces to add the ImageFilter class
  *
@@ -39,12 +42,13 @@
 
 #include "Config.hh"
 #include "Drawing.hh"
+#include <Camera.hh>
 
 template<class C>
 class Tag {
 public:
   virtual void Draw2D(Image *image, unsigned long long code, int black, int white)= 0;
-  virtual unsigned long long Decode(Image *image, const C *location) =0;
+  virtual unsigned long long Decode(Image *image, Camera* camera, const C *location) =0;
 };
 
 #endif//TAG_GUARD

@@ -12,6 +12,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/02/16 08:02:03  acr31
+ * *** empty log message ***
+ *
  * Revision 1.2  2004/02/03 16:25:10  acr31
  * more work on template tags and some function signature changes
  *
@@ -127,7 +130,7 @@ void MatrixTag::Draw2D(Image* image, unsigned long long code, int black, int whi
 }
 
 
-unsigned long long MatrixTag::Decode(Image *image, const QuadTangle2D *l) { 
+unsigned long long MatrixTag::Decode(Image *image, Camera* camera, const QuadTangle2D *l) { 
 #ifdef IMAGE_DEBUG
   Image* debug0 = cvCloneImage(image);
   cvConvertScale(debug0,debug0,0.5,128);    

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/02/16 08:02:03  acr31
+ * *** empty log message ***
+ *
  * Revision 1.4  2004/02/13 21:47:39  acr31
  * work on ellipse fitting
  *
@@ -73,7 +76,7 @@
 
 EllipseFeatureDetector::EllipseFeatureDetector() {};
 
-void EllipseFeatureDetector::FindFeatures(Image *image) { 
+void EllipseFeatureDetector::FindFeatures(Image *image,Camera* camera) { 
   std::vector<Ellipse2DChain*> results;
 
   image = LoadImage(image);
@@ -115,21 +118,12 @@ void EllipseFeatureDetector::FindFeatures(Image *image) {
 	flpoints[pointer++] = (float)points[pt].y;	
       }
 
-      //      cvFitEllipse( fpoints, count,&current);
-      Ellipse2D e2d = fitellipse(flpoints,count);
-      current.center.x = e2d.m_x;
-      current.center.y = e2d.m_y;      
-      current.size.width=e2d.m_width;
-      current.size.height=e2d.m_height;
-      current.angle = e2d.m_angle_radians;
+      Ellipse2D* e2d = fitellipse(flpoints,count);
 
-      PROGRESS("Ellipse has centre "<< current.center.x <<" " << current.center.y << " dims " << current.size.width << " " << current.size.height);
-      if (calcerror(&current,fpoints,count)) {
+      if (e2d) {
 #ifdef IMAGE_DEBUG
 	DrawEllipse(debug1,
-		    current.center.x,current.center.y,
-		    current.size.width, current.size.height,
-		    current.angle/180*PI,
+		    e2d,
 		    0,3);
 #endif
 	
@@ -138,7 +132,7 @@ void EllipseFeatureDetector::FindFeatures(Image *image) {
 	   with the parent ellipse then we accept them as
 	   concentric */
 
-	Ellipse2D *newbox = &e2d;
+	Ellipse2D *newbox = e2d;
 
 	for(std::vector<Ellipse2DChain*>::const_iterator i = results.begin();i!= results.end();i++) {
 	  if (compare(newbox,(*i)->current)) {
@@ -187,7 +181,7 @@ void EllipseFeatureDetector::FindFeatures(Image *image) {
 
   for(std::vector<Ellipse2DChain*>::const_iterator step = results.begin();step!=results.end();step++) {
     if ((*step)->nextchain != NULL) {
-      std::cout << Decode(image, (*step)->current) << std::endl;
+      std::cout << Decode(image, camera,(*step)->current) << std::endl;
     }
   }
 }
@@ -201,56 +195,4 @@ bool EllipseFeatureDetector::compare(Ellipse2D *e1, Ellipse2D *e2) {
 	   (fabs(e1->m_y - e2->m_y) < MAXYDIFF) &&
 	   (fabs(e1->m_height/e1->m_width -
 		 e2->m_height/e2->m_width)) < MAXRATIODIFF);
-}
-
-bool EllipseFeatureDetector::calcerror(CvBox2D *ellipse, CvPoint2D32f *fpoints, int count) {
-  /* Work out the error for this fit.  This just tries every
-     point on the contour with the ellipse function from the
-     fitter and accumulates the difference 
-     
-     Ellipse eqn:
-     
-     x^2     y^2
-     ---  +  ---  =  1
-     a^2     b^2
-     
-     Translate to correct position:
-     
-     (x-p)^2      (y-q)^2
-     --------  +  --------   =  1
-       a^2           b^2
-   
-     Rotate to the correct orientation:
-     
-     ((x-p)cos(t)+(y-q)sin(t))^2      ((y-q)cos(t)-(x-p)sin(t))^2
-     ---------------------------   +  ---------------------------  =  1
-                a^2                           b^2
-		
-     p = box.center.x;
-     q = box.center.y;
-     a = box.size.width/2;
-     b = box.size.height/2;
-     t = box.angle (convert degrees to radians)
-  */
-  if ((fabs(ellipse->size.width) < 0.00001) ||
-      (fabs(ellipse->size.height) < 0.00001)) {
-    PROGRESS("Aborting error check because ellipse radius is tiny.");
-    return false;
-  }
-  float asq = (float)ellipse->size.width*(float)ellipse->size.width / 4;
-  float bsq = (float)ellipse->size.height*(float)ellipse->size.height / 4;
-  float radians = (float)ellipse->angle / 180 * CV_PI;
-  float sina = sin(radians);
-  float cosa = cos(radians);
-  float total = 0.0;
-  for (int pt=0;pt<count;pt++) {
-    float x = fpoints[pt].x-ellipse->center.x;
-    float y = fpoints[pt].y-ellipse->center.y;
-    float dist = 
-      sqrt( ((x*cosa+y*sina)*(x*cosa+y*sina))/asq +
-	    ((y*cosa-x*sina)*(y*cosa-x*sina))/bsq ) - 1;
-    total+= dist*dist;
-  }
-  PROGRESS("Total error was "<< (total/count) << " and threshold is "<<MAXFITERROR);
-  return (total < MAXFITERROR * count);
 }
