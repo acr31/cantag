@@ -1,13 +1,10 @@
 /**
  * $Header$
- *
- * Contains code contributed by Jon Davies <jjd27@cam.ac.uk>
  */ 
 
 #ifndef X_OUTPUT_MECHANISM_GUARD
 #define X_OUTPUT_MECHANISM_GUARD
 
-#include <ostream>
 #include <tripover/LocatedObject.hh>
 #include <tripover/ContourTree.hh>
 #include <tripover/ShapeTree.hh>
@@ -21,17 +18,9 @@ extern "C" {
 
 class XOutputMechanism {
 private:
-  Display* m_display;
-  GC m_gc;
-  Window m_window;
   XShmSegmentInfo m_shminfo;
-  XImage* m_image;
-  const Camera& m_camera;
   Colormap m_colormap;
 
-  XWindowAttributes m_windowAttributes;
-  int m_width;
-  int m_height;
   bool m_xattached;
   bool m_createdpixmap;
   bool m_shmat;
@@ -42,6 +31,15 @@ private:
   bool m_displaygot;
   bool m_colormapgot;
 
+protected:
+  const Camera& m_camera;
+  Display* m_display;
+  GC m_gc;
+  Window m_window;
+  XImage* m_image;
+  int m_width;
+  int m_height;
+
   int m_redbits;
   int m_bluebits;
   int m_greenbits;
@@ -49,52 +47,20 @@ private:
   int m_blueshift;
   int m_greenshift;
   int m_bytes_per_pixel; 
-  void FromContourTree(const ContourTree::Contour* contour);
-  template<class S> void FromShapeTree(Image& i, const typename ShapeTree<S>::Node* node);
+
 public:
   
   XOutputMechanism(int width,int height,const Camera& camera);
-  ~XOutputMechanism();
+  virtual ~XOutputMechanism();
   void FromImageSource(const Image& image);
-  void FromThreshold(const Image& image);
-  void FromContourTree(const ContourTree& contours);
+  inline void FromThreshold(const Image& image) {};
+  inline void FromContourTree(const ContourTree& contours) {}
   inline void FromRemoveIntrinsic(const ContourTree& contours) {};
-  template<class S> void FromShapeTree(const ShapeTree<S>& shapes);
+  template<class S> inline void FromShapeTree(const ShapeTree<S>& shapes) {};
   template<int PAYLOADSIZE> void FromTag(const WorldState<PAYLOADSIZE>& world);
   void Flush();
 };
 
-template<class S> void XOutputMechanism::FromShapeTree(Image& image,const typename ShapeTree<S>::Node* node) {
-  node->matched.DrawChain(image,m_camera);
-  for(typename std::vector<typename ShapeTree<S>::Node* >::const_iterator i = node->children.begin();
-      i!=node->children.end();
-      ++i) {
-    FromShapeTree<S>(image,*i);
-  }
-};
-
-
-template<class S> void XOutputMechanism::FromShapeTree(const ShapeTree<S>& shapes) {
-  Image image(m_width,m_height);
-  FromShapeTree<S>(image,shapes.GetRootNode());
-
-  // copy the image into the XImage
-  const int midpoint = m_bytes_per_pixel * m_width/2;
-  int row = 0;
-  for (int y=m_height/2; y<m_height; ++y) {
-    const unsigned char* pointer = image.GetRow(row);
-    char* destptr = m_image->data + m_image->bytes_per_line * y + midpoint;
-    row+=2;
-    for (int x=0; x<m_width/2; ++x) {
-      unsigned char data = *pointer;
-      pointer+=2;
-      for(int i=0;i<m_bytes_per_pixel;++i) {
-	*destptr = data == 0 ? 0 : 0xFF;
-	destptr++;
-      }
-    }
-  }
-};
 
 template<int PAYLOADSIZE> void XOutputMechanism::FromTag(const WorldState<PAYLOADSIZE>& world) {
   XShmPutImage(m_display,m_window,m_gc,m_image,0,0,0,0,m_width,m_height,false);
@@ -109,17 +75,17 @@ template<int PAYLOADSIZE> void XOutputMechanism::FromTag(const WorldState<PAYLOA
     ApplyTransform(lobj->transform,pts,4);
     m_camera.NPCFToImage(pts,4);
     XDrawLine(m_display,m_window,m_gc,
-	      (int)(pts[0]/2),(int)(pts[1]/2),
-	      (int)(pts[2]/2),(int)(pts[3]/2));
+	      (int)(pts[0]),(int)(pts[1]),
+	      (int)(pts[2]),(int)(pts[3]));
     XDrawLine(m_display,m_window,m_gc,
-	      (int)(pts[2]/2),(int)(pts[3]/2),
-	      (int)(pts[4]/2),(int)(pts[5]/2));
+	      (int)(pts[2]),(int)(pts[3]),
+	      (int)(pts[4]),(int)(pts[5]));
     XDrawLine(m_display,m_window,m_gc,
-	      (int)(pts[4]/2),(int)(pts[5]/2),
-	      (int)(pts[6]/2),(int)(pts[7]/2));
+	      (int)(pts[4]),(int)(pts[5]),
+	      (int)(pts[6]),(int)(pts[7]));
     XDrawLine(m_display,m_window,m_gc,
-	      (int)(pts[6]/2),(int)(pts[7]/2),
-	      (int)(pts[0]/2),(int)(pts[1]/2));
+	      (int)(pts[6]),(int)(pts[7]),
+	      (int)(pts[0]),(int)(pts[1]));
     XTextItem ti;
     ti.chars=new char[PAYLOADSIZE];
     for(int i=0;i<PAYLOADSIZE;++i) {
@@ -128,7 +94,7 @@ template<int PAYLOADSIZE> void XOutputMechanism::FromTag(const WorldState<PAYLOA
     ti.nchars=PAYLOADSIZE;
     ti.delta=0;
     ti.font=None;
-    XDrawText(m_display,m_window,m_gc,(int)(pts[0]/2),(int)(pts[1]/2),&ti,1);
+    XDrawText(m_display,m_window,m_gc,(int)(pts[0]),(int)(pts[1]),&ti,1);
     delete[] ti.chars;
   }
 }

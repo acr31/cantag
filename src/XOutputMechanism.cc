@@ -7,7 +7,6 @@ extern "C" {
 #include <sys/ipc.h>
 #include <sys/shm.h>
 }
-#include <iostream>
 
 #define XOUTPUT_DEBUG
 
@@ -36,9 +35,10 @@ XOutputMechanism::XOutputMechanism(int width, int height, const Camera& camera) 
   m_window = XCreateSimpleWindow(m_display, DefaultRootWindow(m_display), 0, 0, m_width, m_height, 0, blackColour, blackColour);
   m_windowgot = true;
   XStoreName(m_display, m_window, "TripOver");
-  XGetWindowAttributes(m_display, m_window, &m_windowAttributes);
+  XWindowAttributes windowAttributes;
+  XGetWindowAttributes(m_display, m_window, &windowAttributes);
   int depth;
-  depth = m_windowAttributes.depth;
+  depth = windowAttributes.depth;
   XSelectInput(m_display, m_window, StructureNotifyMask);
   XMapWindow(m_display, m_window);
   m_mapped = true;
@@ -145,13 +145,12 @@ XOutputMechanism::~XOutputMechanism() {
 }
 
 void XOutputMechanism::FromImageSource(const Image& image) {
-  for (int y=0; y<m_height/2; ++y) {
-    const unsigned char* pointer = image.GetRow(2*y);
+  for (int y=0; y<m_height; ++y) {
+    const unsigned char* pointer = image.GetRow(y);
     char* destptr = m_image->data + m_image->bytes_per_line * y;
-    for (int x=0; x<m_width/2; ++x) {
+    for (int x=0; x<m_width; ++x) {
       unsigned char data = *pointer;
-      pointer+=2;
-      
+      pointer++;
       unsigned long rPart = data;
       int diff = m_redbits - 8;
       rPart = diff > 0 ? (rPart << diff) : (rPart >> (-diff));
@@ -177,50 +176,6 @@ void XOutputMechanism::FromImageSource(const Image& image) {
   }
 }
 
-void XOutputMechanism::FromThreshold(const Image& image) {
-  const int midpoint = m_bytes_per_pixel * m_width/2;
-  for (int y=0; y<m_height/2; ++y) {
-    const unsigned char* pointer = image.GetRow(2*y);
-    char* destptr = m_image->data + m_image->bytes_per_line * y + midpoint;
-    for (int x=0; x<m_width/2; ++x) {
-      unsigned char data = *pointer;
-      pointer+=2;
-      for(int i=0;i<m_bytes_per_pixel;++i) {
-	*destptr = data == 0 ? 0xFF : 0;
-	destptr++;
-      }
-    }
-  }
-}
-
-void XOutputMechanism::FromContourTree(const ContourTree& contours) {
-  const int midpoint = m_image->bits_per_pixel/8*m_image->width/2;
-  for(int y=m_height/2;y<m_height;++y) {
-    memset(m_image->data+m_image->bytes_per_line*y,0xFF,midpoint);
-  }
-  FromContourTree(contours.GetRootContour());
-}
-
-void XOutputMechanism::FromContourTree(const ContourTree::Contour* contour) {
-  if (!contour->weeded) {
-    for(std::vector<float>::const_iterator i = contour->points.begin();
-	i != contour->points.end();
-	++i) {
-      const float x = *i;
-      ++i;
-      const float y = *i;
-      XPutPixel(m_image,(int)(x/2),(int)(y/2+m_height/2),0);
-    }
-  }
-  for(std::vector<ContourTree::Contour*>::const_iterator i = contour->children.begin();
-      i != contour->children.end();
-      ++i) {
-    FromContourTree(*i);
-  }
-}
-
-
 void XOutputMechanism::Flush() {
-  //  XShmPutImage(m_display,m_window,m_gc,m_image,0,0,0,0,m_width,m_height,false);
   XFlush(m_display);
 }
