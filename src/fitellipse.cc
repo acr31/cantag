@@ -1,6 +1,8 @@
 #include <Config.hh>
 #include <Drawing.hh>
 #include <opencv/cv.h>
+#include <fitellipse.hh>
+#include <gaussianelimination.hh>
 
 static void print(const char* label, double* array, int rows, int cols) {
   std::cout << "-----------------------------------" << std::endl;
@@ -13,6 +15,19 @@ static void print(const char* label, double* array, int rows, int cols) {
   }
   std::cout << "]" << std::endl;
 }
+
+static void print(const char* label, double** array, int rows, int cols) {
+  std::cout << "-----------------------------------" << std::endl;
+  std::cout << label << "= [ ";
+  for(int i=0;i<rows;i++) {
+    for(int j=0;j<cols;j++) {
+      std::cout << array[j][i] << "\t";
+    }
+    std::cout << ";" << std::endl;
+  }
+  std::cout << "]" << std::endl;
+}
+
 
 Ellipse2D fitellipse(float* points, int numpoints) {
 
@@ -73,32 +88,23 @@ Ellipse2D fitellipse(float* points, int numpoints) {
   print("S3",s3,3,3);
 
   // Compute
-  
-  // S3Inv = inv(S3)
-  
-  double s3inv[9];
-  CvMat S3;
-  CvMat S3Inv;
-  cvInitMatHeader(&S3,3,3,CV_64F,s3);
-  cvInitMatHeader(&S3Inv,3,3,CV_64F,s3inv);
-  cvInvert(&S3,&S3Inv,CV_LU);
-  // do gaussian eliminiation with S3*x1= [1;0;0], S3*x2=[0;1;0], S3*x3=[0;0;1]
-
-  print("S3Inv",s3inv,3,3);
-
-  // Compute
 
   // T = -inv(S3) * S2'
+  
+  // this is column major representation => this is -S2 transpose.
+  double s2trans0[] = { -s2[0], -s2[1], -s2[2]};
+  double s2trans1[] = { -s2[3], -s2[4], -s2[5]};
+  double s2trans2[] = { -s2[6], -s2[7], -s2[8]};
+  double* s2trans[] = { s2trans0,s2trans1,s2trans2 };
+  
+  // this is column major representation => this is S3
+  double t0[] = { s3[0], s3[3], s3[6] };
+  double t1[] = { s3[1], s3[4], s3[7] };
+  double t2[] = { s3[2], s3[5], s3[8] };
+  double* t[] = { t0,t1,t2 };
 
-  double t[9];
-  for(int i=0;i<3;i++) {
-    for(int j=0;j<3;j++) {
-      t[i*3+j] = -s3inv[i*3]*s2[j*3];
-      for(int k=1;k<3;k++) {
-	t[i*3+j] -= s3inv[i*3+k] * s2[j*3+k]; // <-cunning
-      }
-    }
-  }
+  predivide(t,s2trans,3,3);
+
   print("T",t,3,3);
 
   // Compute
@@ -110,7 +116,7 @@ Ellipse2D fitellipse(float* points, int numpoints) {
     for(int j=0;j<3;j++) {
       m[i*3+j] = s1[i*3+j];
       for(int k=0;k<3;k++) {
-	m[i*3+j] += s2[i*3+k] * t[k*3+j];
+	m[i*3+j] += s2[i*3+k] * t[j][k]; // ith row, kth column of s2 * kth row,jth column of t
       }
     }
   }
@@ -136,7 +142,7 @@ Ellipse2D fitellipse(float* points, int numpoints) {
 
   print("M2",m2,3,3);
 
-
+  /*
   CvMat M2;
   cvInitMatHeader(&M2,3,3,CV_64F,m2);
 
@@ -168,6 +174,7 @@ Ellipse2D fitellipse(float* points, int numpoints) {
 		       t[6]*eigvects[i]+t[7]*eigvects[i+1]+t[8]*eigvects[i+2]);
       
     }
-    
+  
   }
+  */
 }

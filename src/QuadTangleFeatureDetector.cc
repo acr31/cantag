@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/02/11 08:23:49  acr31
+ * *** empty log message ***
+ *
  * Revision 1.1  2004/02/01 14:26:24  acr31
  * moved rectangle2d to quadtangle2d and refactored implmentations
  *
@@ -30,13 +33,10 @@
  *
  */
 #include <QuadTangleFeatureDetector.hh>
-
+#include <fitquadtangle.hh>
 #include <opencv/cv.h>
 #include <cmath>
 #include <vector>
-
-#undef FILENAME
-#define FILENAME "QuadTangleFeatureDetector.cc"
 
 #define MAXXDIFF 10
 #define MAXYDIFF 10
@@ -59,7 +59,7 @@ void QuadTangleFeatureDetector::FindFeatures(Image *image) {
 
   CvMemStorage* store = cvCreateMemStorage(0);
   PROGRESS("Initializing contour scanner");
-  CvContourScanner scanner = cvStartFindContours(copy,store,sizeof(CvContour),CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE );
+  CvContourScanner scanner = cvStartFindContours(copy,store,sizeof(CvContour),CV_RETR_TREE, CV_CHAIN_APPROX_NONE );
   CvSeq* c;
   CvPoint points[4];
 
@@ -69,6 +69,7 @@ void QuadTangleFeatureDetector::FindFeatures(Image *image) {
 #ifdef IMAGE_DEBUG
     cvDrawContours(debug0,c,0,0,0,3,8);
 #endif
+    /*
     CvSeq *result = cvApproxPoly( c, sizeof(CvContour), store,
 				  CV_POLY_APPROX_DP, 
 				  cvContourPerimeter(c)*0.02, 0 );
@@ -86,7 +87,18 @@ void QuadTangleFeatureDetector::FindFeatures(Image *image) {
 					    points[1].x,points[1].y,
 					    points[2].x,points[2].y,
 					    points[3].x,points[3].y);
-					   
+    */
+    if (count>1) {
+      CvPoint points[count];
+      cvCvtSeqToArray(c,points,cvSlice(0,count));
+      unsigned int pointsarray[4*count];
+      for(int i=0;i<count*2;i++) {
+	pointsarray[i*2] = points[i%count].x;
+	pointsarray[i*2+1] = points[i%count].y;
+      }
+      QuadTangle2D foundbox = fitquadtangle(pointsarray,count*2);
+      QuadTangle2D* newbox = &foundbox;
+
       for(std::vector<QuadTangle2DChain*>::const_iterator i = results.begin();i!= results.end();i++) {
 	if (compare(newbox,(*i)->current)) {
 	  PROGRESS("Found concentric partner");

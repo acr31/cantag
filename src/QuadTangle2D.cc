@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/02/11 08:23:49  acr31
+ * *** empty log message ***
+ *
  * Revision 1.3  2004/02/10 18:12:43  acr31
  * moved gaussian elimination functionality around a bit
  *
@@ -141,7 +144,7 @@ Location3D* QuadTangle2D::EstimatePose(float width, float height) {
 }
 
 void QuadTangle2D::compute_alpha() {
-  PROGRESS(m_x0<<","<<m_y0<< " " <<m_x1<<","<<m_y1<< " " <<m_x2<<","<<m_y2<< " " <<m_x3<<","<<m_y3);
+  //PROGRESS(m_x0<<","<<m_y0<< " " <<m_x1<<","<<m_y1<< " " <<m_x2<<","<<m_y2<< " " <<m_x3<<","<<m_y3);
   /*
    * Taken from:
    *
@@ -245,15 +248,15 @@ void QuadTangle2D::compute_alpha() {
   // we particularly want coeffs to be an array of pointers to arrays
   // containing the columns of the matrix - then we can swap columns
   // conveniently by swapping pointers
-  float coeffs0[] = {1,1,0,0,0,0,0,0};
-  float coeffs1[] = {1,0,0,1,0,0,0,0};
-  float coeffs2[] = {1,1,1,1,0,0,0,0};
-  float coeffs3[] = {0,0,0,0,1,1,0,0};
-  float coeffs4[] = {0,0,0,0,1,0,0,1};
-  float coeffs5[] = {0,0,0,0,1,1,1,1};
-  float coeffs6[] = {-m_x1,-m_x0,0,0,-m_y1,-m_y0,0,0};
-  float coeffs7[] = {-m_x1,0,0,-m_x2,-m_y1,0,0,-m_y2};
-  float* coeffs[] = {coeffs0,
+  double coeffs0[] = {1,1,0,0,0,0,0,0};
+  double coeffs1[] = {1,0,0,1,0,0,0,0};
+  double coeffs2[] = {1,1,1,1,0,0,0,0};
+  double coeffs3[] = {0,0,0,0,1,1,0,0};
+  double coeffs4[] = {0,0,0,0,1,0,0,1};
+  double coeffs5[] = {0,0,0,0,1,1,1,1};
+  double coeffs6[] = {-m_x1,-m_x0,0,0,-m_y1,-m_y0,0,0};
+  double coeffs7[] = {-m_x1,0,0,-m_x2,-m_y1,0,0,-m_y2};
+  double* coeffs[] = {coeffs0,
 		     coeffs1,
 		     coeffs2,
 		     coeffs3,
@@ -262,7 +265,7 @@ void QuadTangle2D::compute_alpha() {
 		     coeffs6,
 		     coeffs7};
 		     
-  float xvals[] = { m_x1,
+  double xvals[] = { m_x1,
 		    m_x0,
 		    m_x3,
 		    m_x2,
@@ -372,12 +375,12 @@ void QuadTangle2D::sort_points()
   angles[1] = find_angle(m_x1,m_y1,m_xc,m_yc);
   angles[2] = find_angle(m_x2,m_y2,m_xc,m_yc);
   angles[3] = find_angle(m_x3,m_y3,m_xc,m_yc);
-  PROGRESS("Centre (" << m_xc << "," << m_yc <<")");
-  PROGRESS("Original order " << std::endl <<
-	   "(" << m_x0 << "," << m_y0 << ") @ "<< angles[0] << std::endl <<
-	   "(" << m_x1 << "," << m_y1 << ") @ "<< angles[1] << std::endl <<
-	   "(" << m_x2 << "," << m_y2 << ") @ "<< angles[2] << std::endl <<
-	   "(" << m_x3 << "," << m_y3 << ") @ "<< angles[3]);
+  //  PROGRESS("Centre (" << m_xc << "," << m_yc <<")");
+  //  PROGRESS("Original order " << std::endl <<
+  //	   "(" << m_x0 << "," << m_y0 << ") @ "<< angles[0] << std::endl <<
+  //	   "(" << m_x1 << "," << m_y1 << ") @ "<< angles[1] << std::endl <<
+  //	   "(" << m_x2 << "," << m_y2 << ") @ "<< angles[2] << std::endl <<
+  //	   "(" << m_x3 << "," << m_y3 << ") @ "<< angles[3]);
   float tx,ty; 
   for(int i=0;i<4;i++) {
     if (angles[0] > angles[1]) {
@@ -399,11 +402,11 @@ void QuadTangle2D::sort_points()
     }
   }
   
-  PROGRESS("Final order " << std::endl <<
-	   "(" << m_x0 << "," << m_y0 << ") @ "<< angles[0] << std::endl <<
-	   "(" << m_x1 << "," << m_y1 << ") @ "<< angles[1] << std::endl <<
-	   "(" << m_x2 << "," << m_y2 << ") @ "<< angles[2] << std::endl <<
-	   "(" << m_x3 << "," << m_y3 << ") @ "<< angles[3]);
+  //  PROGRESS("Final order " << std::endl <<
+  //	   "(" << m_x0 << "," << m_y0 << ") @ "<< angles[0] << std::endl <<
+  //	   "(" << m_x1 << "," << m_y1 << ") @ "<< angles[1] << std::endl <<
+  //	   "(" << m_x2 << "," << m_y2 << ") @ "<< angles[2] << std::endl <<
+  //	   "(" << m_x3 << "," << m_y3 << ") @ "<< angles[3]);
 }
 
   

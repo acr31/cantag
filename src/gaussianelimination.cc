@@ -4,6 +4,9 @@
  *  $Header$
  *
  *  $Log$
+ *  Revision 1.4  2004/02/11 08:23:49  acr31
+ *  *** empty log message ***
+ *
  *  Revision 1.3  2004/02/10 22:22:03  acr31
  *  added inverting a matrix
  *
@@ -18,7 +21,7 @@
 #include <Config.hh>
 #include <gaussianelimination.hh>
 
-#define GAUSSIAN_DEBUG
+#undef GAUSSIAN_DEBUG
 
 /**
  * Pick the most well conditioned co-efficient from the matrix.
@@ -30,8 +33,8 @@
  *
  * Returns the column number (from zero) of the best co-efficient.
  */
-static inline int find_best_coefficient(float** vals, int size, int row, int startcolumn) {
-  float max = fabs(vals[startcolumn][row]);
+static inline int find_best_coefficient(double** vals, int size, int row, int startcolumn) {
+  double max = fabs(vals[startcolumn][row]);
   int maxcol = startcolumn;
   if (max == 1) { 
     return startcolumn;
@@ -59,8 +62,8 @@ static inline int find_best_coefficient(float** vals, int size, int row, int sta
 /**
  * Swap the columns c1 and c2.
  */
-static inline void swap_columns(float** vals, int c1, int c2) {
-  float* p = vals[c1];
+static inline void swap_columns(double** vals, int c1, int c2) {
+  double* p = vals[c1];
   vals[c1] = vals[c2];
   vals[c2] = p;
 }
@@ -71,7 +74,7 @@ static inline void swap_columns(float** vals, int c1, int c2) {
  * Multiply each element in the selected row by the given factor
  * starting from column startcolumn and continuing until column index = size.
  */
-static inline void scale_row(float** vals, int size, int row, float factor, int startcolumn) {
+static inline void scale_row(double** vals, int size, int row, double factor, int startcolumn) {
   for(int i=startcolumn;i<size;i++) {
     vals[i][row] *= factor;
   }
@@ -84,7 +87,7 @@ static inline void scale_row(float** vals, int size, int row, float factor, int 
  * the result in r1.  Start from column startcolumn and continue until
  * column index=size.  i.e. r1 -= factor*r2
  */
-static inline void subtract_row(float** vals, int size, int r1, int r2, float factor, int startcolumn) {
+static inline void subtract_row(double** vals, int size, int r1, int r2, double factor, int startcolumn) {
   for(int i=startcolumn;i<size;i++) {
     vals[i][r1] -= factor*vals[i][r2];
   }
@@ -93,7 +96,7 @@ static inline void subtract_row(float** vals, int size, int r1, int r2, float fa
 /**
  * Print out the column major matrix.
  */
-static void print(float** vals, int rows,int cols) {
+static void print(double** vals, int rows,int cols) {
   std::cout << std::endl << "[";
   for(int i=0;i<rows;i++) {
     for(int j=0;j<cols;j++) {
@@ -123,13 +126,13 @@ static void print(float** vals, int rows,int cols) {
  * additional N*N/2 subtractions and multiplications to back
  * substitute the final values.
  */
-void solve_simultaneous(float* X, float** A, float* R, int size) {
+void solve_simultaneous(double* X, double** A, double* R, int size) {
 
   // create alphas which we will store the result in.  When we swap
   // columns we also need to swap the corresponding values in R -
   // we'll do this by swapping the pointers in alphas around instead
   // so that the caller gets R back in the right order
-  float* alphas[size];
+  double* alphas[size];
   for(int i=0;i<size;i++) {
     alphas[i] = R+i;
   }
@@ -156,7 +159,7 @@ void solve_simultaneous(float* X, float** A, float* R, int size) {
     swap_columns(alphas,i,bestcolumn);
     
     // scale row so that it has a one on the leading diagonal
-    float bestcoeff = A[i][i];
+    double bestcoeff = A[i][i];
 #ifdef GAUSSIAN_DEBUG
     std::cout << "Best Coeff is " << bestcoeff << std::endl;
     std::cout << "Scale row "<<i<< " by "<<(1/bestcoeff)<< std::endl;
@@ -216,7 +219,7 @@ void solve_simultaneous(float* X, float** A, float* R, int size) {
  * containing _columns_ of the result.
  *
  */
-void invert_matrix(float** A, float** B, int size) {
+void invert_matrix(double** A, double** B, int size) {
   for(int i=0;i<size;i++) {
     for(int j=0;j<size;j++) {
       B[i][j] = i==j?1:0;
@@ -227,7 +230,7 @@ void invert_matrix(float** A, float** B, int size) {
 }
 
 /**
- * Takes a matrix A and a matrix B and returns inv(A)*B.
+ * Takes a matrix A and a matrix B and returns inv(A)*B stored in A.
  *
  * A and B be in column major format (array of arrays of columns) and
  * The parameter size is the size of the square matrix A, matrix B has
@@ -236,7 +239,7 @@ void invert_matrix(float** A, float** B, int size) {
  * inv(A)*B = X by solving A*X(i)=B(i) for each column in B
  * simultaneously.  This function destroys the contents of A and B.
  */
-void predivide(float** A, float** B, int size, int cols) {
+void predivide(double** A, double** B, int size, int cols) {
   for(int i=0;i<size;i++) {
 #ifdef GAUSSIAN_DEBUG
     std::cout << "-------" << std::endl;
@@ -260,7 +263,7 @@ void predivide(float** A, float** B, int size, int cols) {
     
 
     // scale row so that it has a one on the leading diagonal
-    float bestcoeff = A[i][i];
+    double bestcoeff = A[i][i];
 #ifdef GAUSSIAN_DEBUG
     std::cout << "-------" << std::endl;
     std::cout << "After swapping: " << i << std::endl;

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/02/11 08:23:49  acr31
+ * *** empty log message ***
+ *
  * Revision 1.1  2004/02/01 14:25:33  acr31
  * moved Rectangle2D to QuadTangle2D and refactored implementations around
  * the place
@@ -33,7 +36,7 @@
 
 class QuadTangle2D {
 private:
-  float m_alpha[8];
+  double m_alpha[8];
 
 public:
   float m_x0;
