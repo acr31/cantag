@@ -6,6 +6,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/23 22:35:04  acr31
+ * changed coder to use unsigned long long
+ *
  * Revision 1.3  2004/01/23 11:49:53  acr31
  * Finished integrating the GF4 coder - I've ripped out the error correcting stuff for now and its just looking for a match but it doesn't seem to work.  I need to spend some time to understand the division and mod operations in the GF4Poly to progress
  *
@@ -39,7 +42,7 @@ GF4Coder::GF4Coder(int symbol_range,  int symbol_count) :
   assert(symbol_count < 21);
 }
 
-void GF4Coder::Set(unsigned long value) {
+void GF4Coder::Set(unsigned long long value) {
   PROGRESS("Encoder set with value "<<value);
   m_encoded = GF4Poly(value)*m_genpoly;
   m_current_chunk = 0;
@@ -69,7 +72,7 @@ bool GF4Coder::LoadChunk(unsigned int chunk) {
 
 }
 
-unsigned long GF4Coder::Decode()  { 
+unsigned long long GF4Coder::Decode()  { 
   PROGRESS("Encoded value = "<<m_encoded.GetValue());
   for(int i=0;i<m_symbol_count;i++) {
     GF4Poly syndrome = m_encoded % m_genpoly;

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/01/23 22:35:04  acr31
+ * changed coder to use unsigned long long
+ *
  * Revision 1.4  2004/01/23 18:18:12  acr31
  * added Matrix Tag and a test program and the beginning of the CRC coder
  *
@@ -26,7 +29,7 @@ class TripOriginalCoder : Coder {
 private:
   int m_symbol_range;
   int m_symbol_count;
-  unsigned long m_accum_code;
+  unsigned long long m_accum_code;
   unsigned int m_accum_checksum;
   unsigned int m_accum_checksum_check;
   state_t m_state;
@@ -50,10 +53,10 @@ public:
     m_base = symbol_range - 1;    
   };
   
-  void Set(unsigned long value) {
+  void Set(unsigned long long value) {
     PROGRESS("Encoder set with value "<<value);
-    unsigned long code = 0;
-    unsigned long checksum = 0;
+    unsigned long long code = 0;
+    unsigned long long checksum = 0;
     
     int max = (m_symbol_count-CHECKSUM_COUNT-1);
 
@@ -150,7 +153,7 @@ public:
     }
   }
 
-  virtual unsigned long Decode() {
+  virtual unsigned long long Decode() {
     PROGRESS("Decode called");
     int check = m_accum_checksum_check % (int)pow(m_base,CHECKSUM_COUNT);
     if (check == m_accum_checksum) {

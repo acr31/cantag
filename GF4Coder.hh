@@ -4,6 +4,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/23 22:35:04  acr31
+ * changed coder to use unsigned long long
+ *
  * Revision 1.3  2004/01/23 11:49:53  acr31
  * Finished integrating the GF4 coder - I've ripped out the error correcting stuff for now and its just looking for a match but it doesn't seem to work.  I need to spend some time to understand the division and mod operations in the GF4Poly to progress
  *
@@ -30,7 +33,7 @@ class GF4Coder : Coder {
 private:
   int m_symbol_range;
   int m_symbol_count;
-  unsigned long m_accum_code;
+  unsigned long long m_accum_code;
   int m_current_chunk;
   int m_base;
   
@@ -42,11 +45,11 @@ private:
 public:
   GF4Coder(int symbol_range,int symbol_count);
   
-  virtual void Set(unsigned long value);
+  virtual void Set(unsigned long long value);
   virtual unsigned int NextChunk();
   virtual void Reset();
   virtual bool LoadChunk(unsigned int chunk);
-  virtual unsigned long Decode();
+  virtual unsigned long long  Decode();
 };
 
 #endif//GF4_CODER_GUARD
