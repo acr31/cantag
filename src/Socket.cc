@@ -198,7 +198,6 @@ int Socket::Send(const unsigned char* buf, size_t len) {
       m_soft_connect = false;
     }
     catch (const char*) {
-      std::cout << "retry"<<std::endl;
       sleep(1);
     }
   }
