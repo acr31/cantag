@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.6  2004/02/01 21:29:53  acr31
+ * added template tags initial implementation
+ *
  * Revision 1.5  2004/02/01 14:26:24  acr31
  * moved rectangle2d to quadtangle2d and refactored implmentations
  *
@@ -65,15 +68,25 @@ Ellipse2D::Ellipse2D(float x, float y, float width, float height, float angle_ra
 
 
 void Ellipse2D::ProjectPoint(float angle_radians, float radius, float *projX, float *projY) const {
-  float x = radius*cos(angle_radians)*m_width*0.5;
-  float y = radius*sin(angle_radians)*m_height*0.5;
-  float ix = x*m_cost-y*m_sint + m_x;
-  float iy = x*m_sint+y*m_cost + m_y;
+  float x = radius*cos(angle_radians);
+  float y = radius*sin(angle_radians);
+
+  // scale to correct dimensions 
+  x*=m_width/2;
+  y*=m_height/2;
+  
+  // rotate to correct angle    
+  float ix = x*m_cost-y*m_sint;
+  float iy = x*m_sint+y*m_cost;
+
+  // translate to the right origin
+  ix+=m_x;
+  iy+=m_y;
 
   *projX = ix;
   *projY = iy;
   
-  //  PROGRESS("Projecting point radius "<<radius<<" angle "<<angle_radians<<" on to ("<< *projX <<","<< *projY <<")");
+  PROGRESS("Projecting point radius "<<radius<<" angle "<<angle_radians<<" on to ("<< *projX <<","<< *projY <<")");
 }
 
 

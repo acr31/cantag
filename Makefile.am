@@ -1,3 +1,3 @@
-SUBDIRS = src tests gltest
+SUBDIRS = src gltest
 
 AM_CPPFLAGS=-g

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.9  2004/02/01 21:29:53  acr31
+ * added template tags initial implementation
+ *
  * Revision 1.8  2004/02/01 14:25:32  acr31
  * moved Rectangle2D to QuadTangle2D and refactored implementations around
  * the place
@@ -186,5 +189,9 @@ inline void FreeImage(Image** image) {
 
 inline void SaveImage(const char* filename, Image* image) {
   cvSaveImage(filename,image);
+}
+
+inline Image* LoadImage(const char* filename) {
+  return cvLoadImage(filename);
 }
 #endif//DRAWING_GUARD
