@@ -8,6 +8,9 @@
 #include <total/Config.hh>
 #include <total/QuadTangle.hh>
 
+#include <total/NLNonLinearModel.hh>
+#include <total/NLNLMAPExceptions.hh>
+
 namespace Total {
   class QuadTangleTransform {
   public:
@@ -169,5 +172,61 @@ namespace Total {
      */
     void TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const;
   };
+
+
+
+
+
+
+
+  class NonLinearQuadTangleTransform  : public virtual QuadTangleTransform {
+  public:
+
+
+
+    class NLQuadData : public FitData {
+    public:
+      /*
+       * Feed in the corner data. Each corner estimate
+       * is accurate to ~ a pixel. In NPCF ~1000 pixels 
+       * is scaled to 1.0.  Hence estimate the measurement 
+       * error to be 0.001
+       */
+      NLQuadData(const QuadTangle& q);
+      virtual ~NLQuadData() {};
+      const QuadTangle * GetQuadTangle() { return mQuad; }
+    private:
+      const QuadTangle *mQuad;
+    };
+
+
+
+
+    class NLQuadFunction :  public FitFunction {
+    public:
+      NLQuadFunction() : FitFunction(6){};
+      virtual ~NLQuadFunction() {};
+      virtual void  InitialiseParameters(FitData *fd);
+      virtual REAL  Evaluate(const int i, REAL *p, FitData *fd);
+      void GetPoint3D(REAL u, REAL v, REAL w, REAL *xo, REAL *yo, REAL *zo);
+      void GetPointProj(REAL u, REAL v, REAL w, REAL *xo, REAL *yo);
+    private:
+      int mXseq[4];
+      int mYseq[4];
+    };
+
+
+
+    /*
+     * Fit the quadtangle to a _guaranteed_ square by fitting the corners
+     * to a square of side 2 at parameterised position (x,y,z) and pose (alpha, 
+     * beta,gamma).
+     *
+     * Alpha, beta, gamma are the euler angles (i.e. rotate alpha about z, then
+     * beta about the new x, finally gamma about the new z). They allow arbitrary
+     * pose.
+     */
+    void TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const;
+  }; 
 }
 #endif//QUADTANGLE_TRANSFORM_GUARD
