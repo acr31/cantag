@@ -85,7 +85,7 @@ void Camera::UnDistortPoints(float* points, int numpoints) {
     float y = points[i+1];
 
     DistortPoints(points+i,1);
-    
+
     points[i] = x-points[i];
     points[i+1] = y-points[i+1];
 
@@ -94,4 +94,16 @@ void Camera::UnDistortPoints(float* points, int numpoints) {
     points[i] = x-points[i];
     points[i+1] = y-points[i+1];    
   }
+}
+
+void Camera::UnDistortImage(Image* image) {
+  Image* source = cvCloneImage(image);
+  for(int i=0;i<image->height;i++) {
+    for(int j=0;j<image->width;j++) {
+      float points[] = {i,j};
+      DistortPoints(points,1);
+      DrawPixel(image,i,j,SampleImage(source,points[0],points[1]));
+    }
+  }
+  cvReleaseImage(&source);
 }

@@ -1,6 +1,8 @@
 #ifndef CAMERA_GUARD
 #define CAMERA_GAURD
 
+#include <Drawing.hh>
+
 class Camera {
 private:
   float m_extrinsic[9];
@@ -26,6 +28,9 @@ public:
 
   void DistortPoints(float* points, int num_points);
   void UnDistortPoints(float* points, int num_points);  
+
+  void UnDistortImage(Image* image);
+ 
 };
 
 #endif//CAMERA_GAURD
