@@ -211,7 +211,7 @@ void Image::AddNoise(float mean, float stddev) {
 }
 #endif
 
-#define STEPSIZE 0.001f
+#define STEPSIZE 0.1f
 void Image::ellipse_polygon_approx(CvPoint* points, int startindex, int length, float xc, float yc, float width, float height,  float angle_radians, int color, int thickness, float start_angle) {
   /**
    * The parametric equation for an ellipse

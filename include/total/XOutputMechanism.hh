@@ -9,78 +9,114 @@
 
 #include <ostream>
 #include <tripover/LocatedObject.hh>
+#include <tripover/ContourTree.hh>
+#include <tripover/ShapeTree.hh>
+#include <tripover/WorldState.hh>
+
+extern "C" {
 #include <X11/Xlib.h>
-template<int PAYLOAD_SIZE> 
+#include <X11/Xutil.h>
+#include <X11/extensions/XShm.h>
+}
+
 class XOutputMechanism {
 private:
   Display* m_display;
-  Pixmap m_pixmap;
   GC m_gc;
   Window m_window;
+  XShmSegmentInfo m_shminfo;
+  XImage* m_image;
+  const Camera& m_camera;
+
   XWindowAttributes m_windowAttributes;
   int m_width;
   int m_height;
+  bool m_xattached;
+  bool m_createdpixmap;
+  bool m_shmat;
+  bool m_shmgot;
 
+  void FromContourTree(const ContourTree::Contour* contour);
+  template<class S> void FromShapeTree(Image& i, const typename ShapeTree<S>::Node* node);
 public:
   
-  XOutputMechanism(int width,int height);
-  void NewData(const Image* newdata);
-  template<class C> void Output(SceneGraph<C,PAYLOAD_SIZE>& sg);
-
+  XOutputMechanism(int width,int height,const Camera& camera);
+  ~XOutputMechanism();
+  void FromImageSource(const Image& image);
+  void FromThreshold(const Image& image);
+  void FromContourTree(const ContourTree& contours);
+  inline void FromRemoveIntrinsic(const ContourTree& contours) {};
+  template<class S> void FromShapeTree(const ShapeTree<S>& shapes);
+  template<int PAYLOADSIZE> void FromTag(const WorldState<PAYLOADSIZE>& world);
+  void Flush();
 };
 
-template<int PAYLOAD_SIZE> XOutputMechanism<PAYLOAD_SIZE>::XOutputMechanism(int width, int height) :
-  m_width(width),
-  m_height(height) {
- 
-  if ((m_display = XOpenDisplay(NULL)) == NULL) {
-    throw "Failed to open display.\n";
+template<class S> void XOutputMechanism::FromShapeTree(Image& image,const typename ShapeTree<S>::Node* node) {
+  node->matched.DrawChain(image,m_camera);
+  for(typename std::vector<typename ShapeTree<S>::Node* >::const_iterator i = node->children.begin();
+      i!=node->children.end();
+      ++i) {
+    FromShapeTree<S>(image,*i);
   }
+};
 
-    // Get default colo
-  int blackColour = BlackPixel(m_display, DefaultScreen(m_display));
-  int whiteColour = WhitePixel(m_display, DefaultScreen(m_display));
 
-  m_window = XCreateSimpleWindow(m_display, DefaultRootWindow(m_display), 0, 0, m_width, m_height, 0, blackColour, blackColour);
-  XStoreName(m_display, m_window, "TripOver");
-  XGetWindowAttributes(m_display, m_window, &m_windowAttributes);
-  int depth;
-  depth = m_windowAttributes.depth;
-  XSelectInput(m_display, m_window, StructureNotifyMask);
-  XMapWindow(m_display, m_window);
-  m_gc = XCreateGC(m_display, m_window, 0, 0);
-  XSetForeground(m_display, m_gc, whiteColour);
-  // Wait for MapNotify
-  while (1) {
-    XEvent e;
-    XNextEvent(m_display, &e);
-    if (e.type == MapNotify) {
-      break;
+template<class S> void XOutputMechanism::FromShapeTree(const ShapeTree<S>& shapes) {
+  if (!m_image) { throw "Noimage"; }
+  for(int x=m_width/2;x<m_width;++x) {
+    for(int y=m_height/2;y<m_height;++y) {
+      XPutPixel(m_image,x,y,(1<<16)-1);
     }
   }
-
-  m_pixmap = XCreatePixmap(m_display, m_window, width, height, depth);
-}
-
-
-template<int PAYLOAD_SIZE> template<class C> void XOutputMechanism<PAYLOAD_SIZE>::Output(SceneGraph<C,PAYLOAD_SIZE>& sg) {
-  XCopyArea(m_display, m_pixmap, m_window, m_gc, 0, 0, m_width, m_height, 0, 0);
-  XFlush(m_display);
-}
-
-template<int PAYLOAD_SIZE> void XOutputMechanism<PAYLOAD_SIZE>::NewData(const Image* newdata) {
-  const unsigned char* pointer = newdata->GetDataPointer();
-  for (int y=0; y<m_height; ++y) {
-      for (int x=0; x<m_width; ++x) {
-	unsigned char data = *(pointer++);
-	unsigned char rPart = data >> 3;
-	unsigned char gPart = data >> 2;
-	unsigned char bPart = data >> 3;
-
-	unsigned long colourPixel = rPart<<11 | gPart<<5 | bPart;
-	XSetForeground(m_display, m_gc, colourPixel); // in RGB565 format
-	XDrawPoint(m_display, m_pixmap, m_gc, x, y);
+  Image image(m_width,m_height);
+  FromShapeTree<S>(image,shapes.GetRootNode());
+  int row = 0;
+  for (int y=m_height/2; y<m_height; ++y) {
+    const unsigned char* pointer = image.GetRow(row);
+    row+=2;
+    for (int x=m_width/2; x<m_width; ++x) {
+      unsigned char data = *pointer;
+      pointer+=2;
+      unsigned long colourPixel = data == 0 ? 0 : ((1<<16)-1);
+      XPutPixel(m_image,x,y,colourPixel);
     }
+  }
+};
+
+template<int PAYLOADSIZE> void XOutputMechanism::FromTag(const WorldState<PAYLOADSIZE>& world) {
+  XShmPutImage(m_display,m_window,m_gc,m_image,0,0,0,0,m_width,m_height,false);
+  for(typename std::vector<LocatedObject<PAYLOADSIZE>*>::const_iterator i = world.GetNodes().begin();
+      i!=world.GetNodes().end();
+      ++i) {
+    LocatedObject<PAYLOADSIZE>* lobj = *i;
+    float pts[] = {0,0,
+		   0,1,
+		   1,1,
+		   1,0};
+    ApplyTransform(lobj->transform,pts,4);
+    m_camera.NPCFToImage(pts,4);
+    XDrawLine(m_display,m_window,m_gc,
+	      (int)(pts[0]/2),(int)(pts[1]/2),
+	      (int)(pts[2]/2),(int)(pts[3]/2));
+    XDrawLine(m_display,m_window,m_gc,
+	      (int)(pts[2]/2),(int)(pts[3]/2),
+	      (int)(pts[4]/2),(int)(pts[5]/2));
+    XDrawLine(m_display,m_window,m_gc,
+	      (int)(pts[4]/2),(int)(pts[5]/2),
+	      (int)(pts[6]/2),(int)(pts[7]/2));
+    XDrawLine(m_display,m_window,m_gc,
+	      (int)(pts[6]/2),(int)(pts[7]/2),
+	      (int)(pts[0]/2),(int)(pts[1]/2));
+    XTextItem ti;
+    ti.chars=new char[PAYLOADSIZE];
+    for(int i=0;i<PAYLOADSIZE;++i) {
+      ti.chars[i] = (*(lobj->tag_code))[i] ? '1' : '0';
+    }
+    ti.nchars=PAYLOADSIZE;
+    ti.delta=0;
+    ti.font=None;
+    XDrawText(m_display,m_window,m_gc,(int)(pts[0]/2),(int)(pts[1]/2),&ti,1);
+    delete[] ti.chars;
   }
 }
 

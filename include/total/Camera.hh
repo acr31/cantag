@@ -5,6 +5,7 @@
 #define CAMERA_GUARD
 
 #include <tripover/Image.hh>
+#include <tripover/Ellipse.hh>
 #include <vector>
 
 /**
@@ -111,6 +112,12 @@ public:
    * Convert these camera coordinates to world coordinates
    */
   void CameraToWorld(float x, float y, float z, float* rx, float* ry, float *rz) const;
-};
 
+  /**
+   * Draw this ellipse on the image given after removing the NPCF scale factors from it
+   */
+  void DrawEllipse(Image& image, const Ellipse& ellipse) const;
+};
+#else
+class Camera;
 #endif//CAMERA_GAURD

@@ -6,6 +6,8 @@
 #define SHAPE_CHAIN_GUARD
 
 #include <tripover/Socket.hh>
+#include <tripover/Camera.hh>
+#include <tripover/Image.hh>
 
 /**
  * Placeholder for end of shape chain list
@@ -16,7 +18,7 @@ public:
   ShapeChainEOL(const std::vector<float>& points) {};
   ShapeChainEOL(const std::vector<float>& points,bool fitted) {};
   inline bool IsChainFitted() const { return false; }
-  inline void DrawChain(Image& image) const {};
+  inline void DrawChain(Image& image, const Camera& camera) const {};
   ShapeChainEOL(Socket& socket) {};
   int Save(Socket& socket) const { return 0; };
 
@@ -52,7 +54,7 @@ public:
 
   inline bool Compare(ShapeChain<M,S> o) const;
 
-  void DrawChain(Image& image) const;
+  void DrawChain(Image& image, const Camera& camera) const;
 
   int Save(Socket& socket) const;
   ShapeChain(Socket& socket);
@@ -103,9 +105,9 @@ template<class M, class S> bool ShapeChain<M,S>::Compare(ShapeChain<M,S> o) cons
       m_next.Compare(o.m_next);      
   }
 
-template<class M, class S> void ShapeChain<M,S>::DrawChain(Image& image) const {
-  m_shape.Draw(image);
-  m_next.DrawChain(image);
+template<class M, class S> void ShapeChain<M,S>::DrawChain(Image& image, const Camera& camera) const {
+  m_shape.Draw(image,camera);
+  m_next.DrawChain(image,camera);
 }
 
 

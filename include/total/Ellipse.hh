@@ -8,6 +8,7 @@
 #include <vector>
 #include <tripover/Image.hh>
 #include <tripover/Socket.hh>
+#include <tripover/Camera.hh>
 
 /**
  * A class to represent ellipses in the image and fit one to a set of points.
@@ -47,7 +48,7 @@ public:
   inline bool IsFitted() const { return m_fitted; }
   bool Compare(const Ellipse& o) const;
 
-  void Draw(Image& image) const;
+  void Draw(Image& image,const Camera& camera) const;
   
   inline float GetA() const { return m_a; }
   inline float GetB() const { return m_b; }
@@ -216,5 +217,6 @@ private:
   bool FitEllipse(const std::vector<float>& points);
 
 };
-
+#else
+class Ellipse;
 #endif//ELLIPSE_GUARD

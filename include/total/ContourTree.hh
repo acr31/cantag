@@ -113,6 +113,7 @@ public:
   ContourTree(Socket& socket);
   void ImageToNPCF(const Camera& camera);
   inline Contour* GetRootContour() { return m_root_contour; }
+  inline const Contour* GetRootContour() const { return m_root_contour; }
   ~ContourTree();
 
   int Save(Socket& socket) const;

@@ -47,6 +47,7 @@ public:
    */
   ShapeTree(const ContourTree::Contour& contour);
   Node* GetRootNode() { return &m_root_node; }
+  const Node* GetRootNode() const { return &m_root_node; }
 
   int Save(Socket& socket) const;
   ShapeTree(Socket& socket);

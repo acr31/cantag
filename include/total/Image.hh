@@ -44,6 +44,10 @@ public:
     return (uchar*)(y*m_image->widthStep+m_image->imageData);
   }
 
+  inline const unsigned char* GetRow(unsigned int y) const {
+    return (const uchar*)(y*m_image->widthStep+m_image->imageData);
+  }
+
   inline unsigned int GetWidthStep() {
     return m_image->widthStep;
   }

@@ -93,7 +93,6 @@ public:
     
   int Save(Socket& socket) const;
   CyclicBitSet(Socket& socket);
-
 };
 
 template<int BIT_COUNT> int CyclicBitSet<BIT_COUNT>::Save(Socket& socket) const {

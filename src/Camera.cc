@@ -223,3 +223,11 @@ void Camera::UnDistortImage(Image& image) const {
     }
   }
 }
+
+void Camera::DrawEllipse(Image& image, const Ellipse& ellipse) const {
+  float x0 = (ellipse.GetX0()*m_intrinsic[0]) + m_intrinsic[2];
+  float y0 = (ellipse.GetY0()*m_intrinsic[4]) + m_intrinsic[5];
+  float width = (ellipse.GetWidth()*m_intrinsic[0]);
+  float height = (ellipse.GetHeight()*m_intrinsic[4]);
+  image.DrawEllipse(x0,y0,width*2,height*2,ellipse.GetAngle(),COLOUR_BLACK,2);
+}

@@ -11,7 +11,7 @@
 #include <tripover/polysolve.hh>
 
 #ifdef TEXT_DEBUG
-# undef ELLIPSE_DEBUG
+# define ELLIPSE_DEBUG
 # undef ELLIPSE_DEBUG_DUMP_POINTS
 # undef CIRCLE_TRANSFORM_DEBUG
 # undef DECOMPOSE_DEBUG
@@ -46,9 +46,9 @@ Ellipse::Ellipse(const std::vector<float>& points, bool prev_fit) {
 Ellipse::Ellipse(float a, float b, float c, float d, float e, float f) :
   m_a(a), m_b(b), m_c(c), m_d(d), m_e(e), m_f(f), m_fitted(true) { Decompose();}
 
-void Ellipse::Draw(Image& image) const {
+void Ellipse::Draw(Image& image,const Camera& camera) const {
   if (m_fitted) {
-    image.DrawEllipse(GetX0(),GetY0(),GetWidth()*2,GetHeight()*2,GetAngle(),COLOUR_BLACK,1);
+    camera.DrawEllipse(image,*this);
   }
 }
 
