@@ -45,7 +45,7 @@
 
 #define GLIMAGESOURCE_DEBUG
 
-namespace TOTAL {
+namespace Total {
 
   /**
    * An image source that synthesizes the view based on an OpenGL
