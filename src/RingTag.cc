@@ -119,12 +119,11 @@ void RingTag::Draw2D(Image& image,unsigned long long code) {
   
   for(int i=m_ring_count-1;i>=0;i--) {
     unsigned long long working = encoded;
-    for(int j=m_sector_count-1;j>=0;j--) {	
+    for(int j=0;j<m_sector_count;j++) {	
       // pick the colour based on the value we encode - sensible
       int colour = ((working & (1<<i)) == (1<<i)) ? COLOUR_BLACK : COLOUR_WHITE;
       // or pick the colour based on which sector we are encoding - useful for debugging
-      //int colour = (int)((double)(i*m_sector_count+j) / (double)(m_ring_count*m_sector_count) * 255);
-
+      //int colour = (int)((float)(i*m_sector_count+j) / (float)(m_ring_count*m_sector_count) * 255);
       working >>= m_ring_count;
       image.DrawSector(x0,y0,scalefactor*m_data_ring_outer_radii[i],m_sector_angles[j],m_sector_angles[j+1],colour);
     }
@@ -154,13 +153,21 @@ void RingTag::Draw2D(Image& image,unsigned long long code) {
   }
 }
 
-void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Camera& camera, const Image& image) {
+void RingTag::DecodeNode(SceneGraphNode< ShapeChain<LinearEllipse> >* node, const Camera& camera, const Image& image) {
 #ifdef RING_TAG_DEBUG
   PROGRESS("DecodeNode called");
 #endif
 
   // get the ellipse this node encompasses
-  const Ellipse el = node->GetShapes().GetShape();
+  const LinearEllipse el = node->GetShapes().GetShape();
+
+  if (!el.IsFitted()) {
+#ifdef RING_TAG_DEBUG
+    PROGRESS("Discarding unfitted ellipse.");
+#endif
+    return;
+  }
+
 #ifdef RING_TAG_DEBUG
   PROGRESS("Ellipse is a=["<<
 	   el.GetA()<<","<<
@@ -174,7 +181,7 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
   // extract its pose
   float transform1[16];
   float transform2[16];
-  GetTransform(el,transform1,transform2);
+  el.GetTransform(transform1,transform2);
   
   // project some points for the inner circle using both interpretations and check which one fits  
   int count = 10;
@@ -189,7 +196,7 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
 
   // get the children of this node and check for a good match with either interpretation
   float* correcttrans = NULL;
-  for(std::vector< SceneGraphNode< ShapeChain<Ellipse> >* >::iterator i = node->GetChildren().begin(); i!=node->GetChildren().end();i++) {
+  for(std::vector< SceneGraphNode< ShapeChain<LinearEllipse> >* >::iterator i = node->GetChildren().begin(); i!=node->GetChildren().end();i++) {
     float error1 = (*i)->GetShapes().GetShape().GetError(projected1,count);
     float error2 = (*i)->GetShapes().GetShape().GetError(projected2,count);
 
@@ -208,6 +215,11 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
       correcttrans = transform2;
       break;
     }
+  }
+
+  if (correcttrans == NULL) {
+    PROGRESS("Failed to find a valid transform - just selecting one arbitrarily!");
+    correcttrans = transform1;
   }
 
   if (correcttrans != NULL) {
@@ -276,6 +288,7 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
 	  lobj->transform[i] = correcttrans[i];
 	}		
 	node->SetInspected();
+	exit(0);
 	return;
       }
     }
@@ -287,6 +300,7 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
     draw_read(image,camera,correcttrans,0);
 #endif
     node->SetInspected();
+    exit(0);
     return;
   }
   else {
@@ -308,7 +322,9 @@ void RingTag::draw_circle(Image& debug0, const Camera& camera, float l[16], doub
     pts[1] = sin( (float)step*2*PI/(float)count ) * radius;
     ApplyTransform(l,pts,1);
     camera.NPCFToImage(pts,1);
-    debug0.DrawLine(oldpts[0],oldpts[1],pts[0],pts[1],COLOUR_BLACK,1);
+    int colour = COLOUR_BLACK;
+    //int colour = (int)((float)step/(float)count * 255);
+    debug0.DrawLine(oldpts[0],oldpts[1],pts[0],pts[1],colour,1);
     oldpts[0] = pts[0];
     oldpts[1] = pts[1];
   }  
@@ -344,5 +360,5 @@ void RingTag::draw_read(const Image& image, const Camera& camera, float l[16], i
     }
     counter++;
   }
-  debug0.Save("debug-decode.jpg");
+  debug0.Save("debug-decode.bmp");
 }

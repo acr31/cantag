@@ -64,7 +64,7 @@ public:
     m_root = m_parents[0];
     do {
       CvSeq *c = (CvSeq*)treeiter.node;
-      if ((c != NULL) && (fabs(cvContourArea(c,CV_WHOLE_SEQ))>100)) {
+      if ((c != NULL) && (fabs(cvContourArea(c,CV_WHOLE_SEQ))>10)) {
 #ifdef IMAGE_DEBUG
 	// draw found contours
 	cvDrawContours(debug0,c,0,0,0,2,8);

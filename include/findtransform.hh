@@ -8,7 +8,6 @@
 #include <Ellipse.hh>
 #include <QuadTangle.hh>
 
-void GetTransform(const Ellipse& ellipse, float transform1[16], float transform2[16]);
 
 /*
  * Taken from:
