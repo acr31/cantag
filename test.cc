@@ -2,6 +2,7 @@
 #include <highgui.h>
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 using namespace std;
 
@@ -55,28 +56,21 @@ main(int argc,char* argv[])
       seq = seq->h_next;
     }
 
-  int first=1;
   for(vector<CvBox2D>::const_iterator step = boxes.begin();step != boxes.end();step++) {
     for(vector<CvBox2D>::const_iterator search = boxes.begin();search != boxes.end();search++) {
       if ((search != step) && 
-	  (fabs(step->center.x - search->center.x) + fabs(step->center.y - search->center.y) < 10) &&
+	  (fabs(step->center.x - search->center.x) + fabs(step->center.y - search->center.y) < 50) &&
 	  (step->size.width > search->size.width) &&
 	  (step->size.height > search->size.height))
 	{
-	  if (first == 1 || 1) {
-	    int color = CV_RGB( rand(), rand(), rand() );
-	    cvEllipseBox(img,*step,color,5);
-	    cvEllipseBox(img,*search,color,5);
-	    first = 0;
-	  }
-
+	  int color = CV_RGB( rand(), rand(), rand() );
+	  cvEllipseBox(img,*step,color,5);
+	  cvEllipseBox(img,*search,color,5);	   
 	}
     }
   }
 
-  cvNamedWindow(argv[1],1);
-  cvShowImage(argv[1],img);
-  cvWaitKey(0);
+  cvSaveImage(argv[2],img);
   cvReleaseImage(&img);
   cvReleaseImage(&gray);
   return 0;
