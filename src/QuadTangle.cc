@@ -66,7 +66,7 @@ static float curvature(const float* xwindow, const float* ywindow, int datapoint
   return result;
 }
 
-QuadTangle::CornerFit(const std::vector<float>& points) {
+void QuadTangle::CornerFit(const std::vector<float>& points) {
   if (points.size() > (2<<LOGMAXWINDOW) && points.size() > 50) {
     float xcorners[4];
     float ycorners[4];
