@@ -1,5 +1,5 @@
 #include <GlobalThreshold.hh>
-#include <cv/opencv.h>
+#include <opencv/cv.h>
 
 GlobalThreshold::GlobalThreshold(int threshold=128): m_image(NULL), m_threshold(threshold) {};
 
