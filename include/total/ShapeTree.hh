@@ -69,7 +69,7 @@ template<class S> ShapeTree<S>::ShapeTree(const ContourTree::Contour& contour) :
 
 template<class S> void ShapeTree<S>::walk_tree(Node* current, const ContourTree::Contour* contour) {
   // try to match this contour using 
-  if (!contour->weeded && contour->bordertype == ContourTree::OUTER_BORDER) {
+  if (!contour->weeded) { // && contour->bordertype == ContourTree::OUTER_BORDER) {
     Node* n = new Node(contour);    
     m_node_count++;
     if (n->matched.IsChainFitted()) {
