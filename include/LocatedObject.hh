@@ -58,6 +58,11 @@ public:
    */
   bool is_valid;
 
+  /**
+   * If we knew in advance which tag we were looking for..did this one match it?
+   */
+  bool is_correct;
+
   LocatedObject();
   ~LocatedObject();
   void Refresh(Image& image);

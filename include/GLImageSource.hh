@@ -81,6 +81,7 @@ public:
      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, source.GetHeight(),source.GetWidth(),
 		  0, GL_RGBA, GL_UNSIGNED_BYTE, m_tmap);    
      
+    
   }
 
   ~GLImageSource() {
@@ -102,14 +103,15 @@ public:
   void Next(float x_radians, float y_radians, float z_radians, 
 	    float centre_x, float centre_y, float centre_z) {
 
-    glClearColor(1.0,1.0,1.0,0.0);
-    glShadeModel(GL_FLAT);
+    glClearColor(0.0,0.0,0.0,0.0);
+    glShadeModel(GL_SMOOTH);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glColor3f(0.0,0.0,0.0);
+    glColor3f(1.0,1.0,1.0);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(60.0, (GLfloat)m_width/(GLfloat)m_height,0,50.0);
+    gluLookAt(0.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -117,18 +119,29 @@ public:
     glEnable(GL_POINT_SMOOTH);
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_POLYGON_SMOOTH); 
+    
     float xrot = x_radians/M_PI*180;
     float yrot = y_radians/M_PI*180;
     float zrot = z_radians/M_PI*180;
   	  
     // select the modelview matrix - transforms object co-ordinates to eye co-ordinates
     glMatrixMode(GL_MODELVIEW);
-
-    // initialize the matrix to the identity transform
     glLoadIdentity();
+    GLfloat spot_position[] = {1,0,1,1};
+    GLfloat spot_direction[] = {0,0,1};
+    GLfloat ambient_light[] = {0.2,0.2,0.2,1.0};
+    glLightfv(GL_LIGHT0, GL_POSITION,spot_position);
+    glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION,spot_direction);
+    //    glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION,2.0);
+    //    glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION,1.0);
+    //    glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION,0.5);
+    glLightf(GL_LIGHT0, GL_SPOT_CUTOFF,45);
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient_light);
+    
+    // turn this on to do spot light stuff
+    //    glEnable(GL_LIGHTING);
+    //    glEnable(GL_LIGHT0);
 
-    gluLookAt(0.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0);
-  
     float tagsizescale=1;
     glScalef(tagsizescale,tagsizescale,1);
     glTranslatef(centre_x,centre_y,centre_z);
@@ -148,10 +161,13 @@ public:
     
     // set the texturing to be DECAL - use directly as colours and
     // painted on the surface
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     
     // activate the texture object for the tag
     glBindTexture(GL_TEXTURE_2D, m_textureid);
+    GLfloat mat_colour[] = {1.0,1.0,1.0,1.0};
+    glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,mat_colour);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT,mat_colour);
     
     // define our shape - QUADS => quadruples of vertices interpreted as four-sided polygons
     // this is a front facing polygon that we map our texture to
@@ -178,6 +194,17 @@ public:
     glDisable(GL_CULL_FACE);
     glDisable(GL_TEXTURE_2D);
     
+    // add some occlusion
+    glLoadIdentity();
+    glBegin(GL_QUADS);
+    glColor3f(1.0,1.0,1.0);
+    glVertex3f(0.5, -1, 1.0); 
+    glVertex3f(0.3, -1, 1.0);
+    glVertex3f(0.3, 1,1.0);
+    glVertex3f(0.5, 1,1.0);
+    glEnd();
+    glFlush();
+
     int pointer = 0;
     for(int i=m_height-1;i>=0;i--) {
       for(int j=0;j<m_width;j++) {

@@ -430,7 +430,6 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
 
     transc2[col*4] *= scale;
     transc2[col*4+1] *= -scale;
-    transc2[col*4+2] *= 1;
   }
     
   double rtotc1[16];
@@ -571,18 +570,7 @@ void LinearEllipse::GetTransform(float transform1[16], float transform2[16]) con
 #ifdef DECOMPOSE_DEBUG
   PROGRESS("angle= " << angle_radians);
 #endif
-  /*
-  // copied and pasted from tngtrip - I have no idea why my method fails or what this method does ;-)
-  f -= a*x0*x0 + b*x0*y0+ c*y0*y0 ;
-  float lump_1 = a + c;
-  float lump_2 = (float)sqrt(a*a + b*b + c*c - 2*a*c);
-
-  width = (float)sqrt((float)-2.0*f/(lump_1 + lump_2));
-  height = -(float)sqrt((float)-2.0*f/(lump_1 - lump_2));
-
-  angle_radians = M_PI/2 -(float)0.5*(float)atan(2*b/(c-a));
-  //  angle_radians = (float)0.5*(float)atan(2*b/(c-a));
-  */
+  
   transform1[0] = width*cos(angle_radians);
   transform1[1] = -height*sin(angle_radians); 
   transform1[2] = 0;

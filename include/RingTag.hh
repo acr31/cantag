@@ -260,14 +260,17 @@ public:
       }
     }
     
-    /*
-      // uncomment this in order to force the selection of the upwards facing transform
+#ifdef RING_TAG_DEBUG
     float normal1[3];
     GetNormalVector(transform1,normal1);
-
+    PROGRESS("Normal vector for transform1 " << normal1[0] << " " << normal1[1] << " " << normal1[2]);
+    
     float normal2[3];
     GetNormalVector(transform2,normal2);
-    
+    PROGRESS("Normal vector for transform2 " << normal2[0] << " " << normal2[1] << " " << normal2[2]);
+#endif    
+
+    /*
     if ((normal1[1] < 0) && (normal2[2] > 0)) {
       correcttrans = transform2;
     }
@@ -334,8 +337,7 @@ public:
       for(int i=0;i<READING_COUNT;i++) {
 	if ((read_code[i] == read_code[(i+1) % READING_COUNT])) { 
 	  std::bitset<RING_COUNT*SECTOR_COUNT> code;
-	  if ((DecodePayload(code,read_code[i]) >= 0) &&
-	      ((m_must_match == NULL) || *m_must_match == code)) {
+	  if (DecodePayload(code,read_code[i]) >= 0) {
 #ifdef RING_TAG_IMAGE_DEBUG
 	    draw_read(image,camera,correcttrans,(i+1)%READING_COUNT);
 #endif
@@ -356,6 +358,7 @@ public:
 	      lobj->transform[i] = correcttrans[i];
 	    }		
 	    lobj->is_valid = true;
+	    lobj->is_correct = (m_must_match == NULL) || (*m_must_match == code);
 	    node->SetInspected();
 	    return true;
 	  }
@@ -382,6 +385,7 @@ public:
 
     node->SetInspected();
     node->GetLocatedObject()->is_valid = false;
+    node->GetLocatedObject()->is_correct = false;
     return false;
   };  
 
@@ -432,7 +436,7 @@ private:
     draw_circle(debug0,camera,l,m_data_inner_radius / m_bullseye_outer_radius);
     
     for(int r=0;r<RING_COUNT;r++) {
-      //      draw_circle(debug0,camera,l,m_data_ring_outer_radii[r] / m_bullseye_outer_radius);
+      draw_circle(debug0,camera,l,m_data_ring_outer_radii[r] / m_bullseye_outer_radius);
     }
   
     int counter=0;
@@ -447,7 +451,7 @@ private:
 	int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
 	// or pick the colour to be on a gradient so we see the order it samples in
 	//int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
-	//	debug0.DrawPoint(pts[0],pts[1],colour,1);
+	debug0.DrawPoint(pts[0],pts[1],colour,1);
       }
       counter++;
     }

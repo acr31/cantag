@@ -115,6 +115,21 @@ public:
     return false;
   }
 
+  bool IsCorrect() const {
+    if (m_located != NULL && m_located->is_correct) {
+      return true;
+    }
+    
+    for(typename std::vector<SceneGraphNode<S>* >::const_iterator step = m_children.begin(); 
+	step != m_children.end(); 
+	step++) {
+      if ((*step)->IsCorrect()) {
+	return true;
+      }
+    }
+    return false;
+  }
+ 
 };
 
 #endif//SCENE_GRAPH_NODE_GUARD

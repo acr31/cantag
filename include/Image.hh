@@ -23,6 +23,16 @@ public:
   Image(char* filename);
   ~Image();
 
+  inline unsigned char Sample(unsigned int x, unsigned int y) const {
+    if ((x < m_image->width) &&
+	(y < m_image->height)) {
+      return ((uchar*)(m_image->imageData + m_image->widthStep*y))[x];
+    }
+    else {
+      return 0;
+    }
+  }
+
   inline unsigned char Sample(int x, int y) const {
     if ((x >= 0) && (x < m_image->width) &&
 	(y >= 0) && (y < m_image->height)) {
@@ -51,6 +61,14 @@ public:
       ((uchar*)(m_image->imageData+m_image->widthStep*y))[x] = colour;
     }
   }
+
+  inline void DrawPixel(unsigned int x,unsigned int y, unsigned char colour) {
+    if ((x < m_image->width) &&
+	(y < m_image->height)) {
+      ((uchar*)(m_image->imageData+m_image->widthStep*y))[x] = colour;
+    }
+  }
+
 
   inline void DrawPixel(float x,float y, unsigned char colour) {
     DrawPixel(cvRound(x),cvRound(y),colour);
@@ -206,6 +224,9 @@ public:
    * detect filter.  Suitable for finding edges but not for reading the tag.
    */
   void HomogenousTransform();
+
+private:
+  void AdaptiveWidthStep(float* moving_average,float* previous_line,unsigned int i, unsigned int j,unsigned int s, float t);
 };
 
 

@@ -7,6 +7,9 @@
 
 /**
  * A class to represent ellipses in the image and fit one to a set of points.
+ *
+ * \todo{sometimes one orientation is not possible based on the
+ * physical constraints of the camera - check for this}
  */
 class Ellipse {
 private:
