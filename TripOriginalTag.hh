@@ -379,9 +379,7 @@ public:
   static double TagRadius() {
     return Radius(RING_COUNT);
   }
-
-}
- 
+  
 private:
   CvBox2D m_ellipse;
   unsigned long m_code;
