@@ -6,7 +6,7 @@
 #include <tripover/polysolve.hh>
 #include <tripover/Ellipse.hh>
 
-#undef ELLIPSE_TRANSFORM_DEBUG
+#define ELLIPSE_TRANSFORM_DEBUG
 
 void FullEllipseTransform::TransformEllipse(const Ellipse& ellipse, float transform1[16], float transform2[16]) const {
   float a = ellipse.GetA();
@@ -106,33 +106,6 @@ void FullEllipseTransform::TransformEllipse(const Ellipse& ellipse, float transf
       }
     }
   }
-  /*
-  float tx1 = eigvals[0];
-  float te1 = eigvects[0];
-  float te2 = eigvects[3];
-  float te3 = eigvects[6];
-
-  eigvals[0] = eigvals[4];
-  eigvals[4] = eigvals[8];
-  for(int i=0;i<3;i++) {
-    eigvects[3*i] = eigvects[3*i+1];
-    eigvects[3*i+1] = eigvects[3*i+2];
-  }
-
-  eigvals[8] = tx1;
-  eigvects[2] = te1;
-  eigvects[5] = te2;
-  eigvects[8] = te3;
-  */
-  
-  // testing degrees of freedom
-  //  eigvects[0] *= -1;
-  //  eigvects[3] *= -1;
-  //  eigvects[6] *= -1;
-  //  eigvects[2] *= -1;
-  //  eigvects[5] *= -1;
-  //  eigvects[8] *= -1;
-
 
   // make sure the normal vector will point in the right direction
   if (eigvects[8] < 0) {
@@ -221,17 +194,7 @@ void FullEllipseTransform::TransformEllipse(const Ellipse& ellipse, float transf
 		   0,     1, 0,     0, 
 		   -pmsin, 0, pmcos, 0,
 		   0,     0, 0,     1 };
-  /*
-  float r2c1[] = { 1,     0,     0,    0,
-		   0,     pmcos, -pmsin,0, 
-		   0,     pmsin,pmcos,0,
-		   0,     0,     0,    1 };
 
-  float r2c2[] = { 1,     0,     0,    0,
-		   0,     pmcos,pmsin,0, 
-		   0,     -pmsin, pmcos,0,
-		   0,     0,     0,    1 };
-  */
 #ifdef ELLIPSE_TRANSFORM_DEBUG  
   PROGRESS("Rotation 2(1): r2c1=[" << r2c1[0] << "," << r2c1[1] << "," << r2c1[2] << "," << r2c1[3] << ";");
   PROGRESS("                " << r2c1[4] << "," << r2c1[5] << "," << r2c1[6] << "," << r2c1[7] << ";");
@@ -333,18 +296,27 @@ void FullEllipseTransform::TransformEllipse(const Ellipse& ellipse, float transf
 }
 
 void LinearEllipseTransform::TransformEllipse(const Ellipse& ellipse, float transform1[16], float transform2[16]) const {
+  //  wc  hs  0  x0
+  //  ws  hc  0  y0
+  //  0   0   1  0
+  //  0   0   0  1
+
+
   transform1[0] = ellipse.GetWidth()*cos(ellipse.GetAngle());
   transform1[1] = -ellipse.GetHeight()*sin(ellipse.GetAngle()); 
   transform1[2] = 0;
   transform1[3] = ellipse.GetX0();
+
   transform1[4] = ellipse.GetWidth()*sin(ellipse.GetAngle());
   transform1[5] = ellipse.GetHeight()*cos(ellipse.GetAngle()); 
   transform1[6] = 0;
   transform1[7] = ellipse.GetY0();
+
   transform1[8] = 0;
   transform1[9] = 0;
   transform1[10] = 1;
-  transform1[11] = 0;
+  transform1[11] = 1;
+
   transform1[12] = 0;
   transform1[13] = 0;
   transform1[14] = 0;
