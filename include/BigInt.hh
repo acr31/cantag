@@ -22,9 +22,9 @@ private:
 
   CyclicBitSet<SIZE> *m_backing_store;
   mpz_class m_bit1;
+  mpz_class m_gmpint;
 
 public:
-  mpz_class m_gmpint;
   BigInt(unsigned int i);
   BigInt(const CyclicBitSet<SIZE>& t);
   BigInt(CyclicBitSet<SIZE>& t);
@@ -55,7 +55,9 @@ public:
   BigInt& Pwr(unsigned int exponent);
 
   operator unsigned int() const;
-
+  
+  friend std::ostream& operator<<<SIZE>(std::ostream& s, const BigInt<SIZE>& z);
+  
 };
 
 template<int SIZE> BigInt<SIZE>::BigInt(unsigned int i) : m_gmpint(i), m_backing_store(NULL), m_bit1(1) {};
@@ -121,9 +123,9 @@ template<int SIZE> BigInt<SIZE>& BigInt<SIZE>::operator%=(const BigInt<SIZE>& x)
 }
 
 template<int SIZE> BigInt<SIZE> BigInt<SIZE>::operator%(const BigInt<SIZE>& x) const {
-  BigInt result = *this;
+  BigInt result(*this);
   result%=x;
-  return x;
+  return result;
 }
 
 template<int SIZE> BigInt<SIZE>& BigInt<SIZE>::operator|=(const BigInt<SIZE>& x) {
