@@ -7,6 +7,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/01/23 11:59:25  acr31
+ * removed my attempt at the Order function because it causes triptest to spin forever
+ *
  * Revision 1.4  2004/01/23 11:57:07  acr31
  * moved Location2D to Ellipse2D in preparation for Square Tags
  *
@@ -313,23 +316,26 @@ GF4Poly& GF4Poly::Rotate(unsigned int rotation, unsigned int length)
 
 /**
  * Compute the order of this polynomial - i.e. the highest power that
- * has non-zero co-efficient
+ * has non-zero co-efficient.  
  */
 unsigned int GF4Poly::Order() const
 {
+
+  /*
   int res = 32;
   while( (val >> (--res*2)) & 3 ) {};
   return res+1;
-
+  */
   /*
     I can't understand how this returns the highest non-zero power,
     surely it returns the lowest non-zero power?
+  */
   int res = 0;
  
   while (val >> ((res + 1) * 2))
     res ++;
 
-    return res; */
+  return res; 
 }
 
 unsigned int GF4Poly::Weight() const
