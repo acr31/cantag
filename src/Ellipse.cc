@@ -1048,7 +1048,7 @@ int Ellipse::Save(Socket& socket) const {
   count += socket.Send(m_angle_radians);
   count += socket.Send(m_width);
   count += socket.Send(m_height);
-  std::cout << "Save ellipse " << m_a << "," << m_b << "," << m_c << "," << m_d << "," <<m_e << "," <<m_f << std::endl;
+  count += socket.Send((int)m_fitted);
   return count;
 }
 
@@ -1064,5 +1064,5 @@ Ellipse::Ellipse(Socket& socket) {
     m_angle_radians = socket.RecvFloat();
     m_width = socket.RecvFloat();
     m_height = socket.RecvFloat();    
-    std::cout << "Loaded ellipse " << m_a << "," << m_b << "," << m_c << "," << m_d << "," <<m_e << "," <<m_f << std::endl;
+    m_fitted = (bool)socket.RecvInt();    
 }
