@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/28 17:19:42  acr31
+ * providing my own implementation of draw ellipse
+ *
  * Revision 1.1  2004/01/25 14:53:35  acr31
  * moved over to autoconf/automake build system
  *
@@ -15,9 +18,9 @@ Location3D::Location3D(float x, float y, float z, float normal_x, float normal_y
   m_x(x),
   m_y(y),
   m_z(z),
-  m_normal_x(x),
-  m_normal_y(y),
-  m_normal_z(z) {}
+  m_normal_x(normal_x),
+  m_normal_y(normal_y),
+  m_normal_z(normal_z) {}
 
 
 std::ostream& operator<<(std::ostream& s, const Location3D& z) { 

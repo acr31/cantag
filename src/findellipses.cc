@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/01/28 17:19:43  acr31
+ * providing my own implementation of draw ellipse
+ *
  * Revision 1.4  2004/01/28 16:34:38  acr31
  * some debugging code for drawing lines onto ellipses
  *
@@ -83,89 +86,12 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
       PROGRESS("Ellipse has centre "<< current.center.x <<" " << current.center.y << " dims " << current.size.width << " " << current.size.height);
       if (calcerror(&current,fpoints,count,maxFitError)) {
 #ifdef IMAGE_DEBUG
-	//	cvEllipseBox(debug1,current,0,3);
-	while(current.angle >= 360) { 
-	  current.angle -= 360; 
-	}
-	std::cout << "###########  " << current.angle << std::endl;
-	if ((current.angle >= 0) && (current.angle < 90)) {
-	  std::cout << "option 1 "<< std::endl;
-	  cvLine(debug1,
-		 cvPoint(cvRound((float)current.center.x - (float)current.size.width/2*cos(current.angle/180*PI)),
-			 cvRound((float)current.center.y + (float)current.size.width/2*sin(current.angle/180*PI))),
-		 cvPoint(cvRound((float)current.center.x + (float)current.size.width/2*cos(current.angle/180*PI)),
-			 cvRound((float)current.center.y - (float)current.size.width/2*sin(current.angle/180*PI))),
-		 0,
-		 3);
-	  cvLine(debug1,
-		 cvPoint(cvRound((float)current.center.x - (float)current.size.height/2*sin(current.angle/180*PI)),
-			 cvRound((float)current.center.y + (float)current.size.height/2*cos(current.angle/180*PI))),
-		 cvPoint(cvRound((float)current.center.x + (float)current.size.height/2*sin(current.angle/180*PI)),
-			 cvRound((float)current.center.y - (float)current.size.height/2*cos(current.angle/180*PI))),
-		 0,
-		 3);
-	}
-	else if ((current.angle >= 90) && (current.angle < 180)) {
-	  std::cout << "option 2 "<< std::endl;
-
-	  cvLine(debug1,
-		 cvPoint(cvRound((float)current.center.x + (float)current.size.width/2*sin((current.angle-90)/180*PI)),
-			 cvRound((float)current.center.y + (float)current.size.width/2*cos((current.angle-90)/180*PI))),
-		 cvPoint(cvRound((float)current.center.x - (float)current.size.width/2*sin((current.angle-90)/180*PI)),
-			 cvRound((float)current.center.y - (float)current.size.width/2*cos((current.angle-90)/180*PI))),
-		 0,
-		 3);
-	  cvLine(debug1,
-		 cvPoint(cvRound((float)current.center.x + (float)current.size.height/2*cos((current.angle-90)/180*PI)),
-			 cvRound((float)current.center.y + (float)current.size.height/2*sin((current.angle-90)/180*PI))),
-		 cvPoint(cvRound((float)current.center.x - (float)current.size.height/2*cos((current.angle-90)/180*PI)),
-			 cvRound((float)current.center.y - (float)current.size.height/2*sin((current.angle-90)/180*PI))),
-		 0,
-		 3);
-	}
-	else if ((current.angle >= 180) && (current.angle < 270)) {
-	  std::cout << "option 3 "<< std::endl;
-
-	  cvLine(debug1,
-		 cvPoint(cvRound((float)current.center.x + (float)current.size.width/2*cos((current.angle-180)/180*PI)),
-			 cvRound((float)current.center.y - (float)current.size.width/2*sin((current.angle-180)/180*PI))),
-		 cvPoint(cvRound((float)current.center.x - (float)current.size.width/2*cos((current.angle-180)/180*PI)),
-			 cvRound((float)current.center.y + (float)current.size.width/2*sin((current.angle-180)/180*PI))),
-		 0,
-		 3);
-	  cvLine(debug1,
-		 cvPoint(cvRound((float)current.center.x + (float)current.size.height/2*sin((current.angle-180)/180*PI)),
-			 cvRound((float)current.center.y - (float)current.size.height/2*cos((current.angle-180)/180*PI))),
-		 cvPoint(cvRound((float)current.center.x - (float)current.size.height/2*sin((current.angle-180)/180*PI)),
-			 cvRound((float)current.center.y + (float)current.size.height/2*cos((current.angle-180)/180*PI))),
-		 0,
-		 3);
-	}
-	else { // if ((current.angle >= 270) && (current.angle < 360)) {
-	  std::cout << "option 4 "<< std::endl;
-
-	  cvLine(debug1,
-		 cvPoint(cvRound((float)current.center.x + (float)current.size.width/2*sin((current.angle-270)/180*PI)),
-			 cvRound((float)current.center.y - (float)current.size.width/2*cos((current.angle-270)/180*PI))),
-		 cvPoint(cvRound((float)current.center.x - (float)current.size.width/2*sin((current.angle-270)/180*PI)),
-			 cvRound((float)current.center.y + (float)current.size.width/2*cos((current.angle-270)/180*PI))),
-		 0,
-		 3);	  	  
-	  cvLine(debug1,
-		 cvPoint(cvRound((float)current.center.x + (float)current.size.height/2*cos((current.angle-270)/180*PI)),
-			 cvRound((float)current.center.y - (float)current.size.height/2*sin((current.angle-270)/180*PI))),
-		 cvPoint(cvRound((float)current.center.x - (float)current.size.height/2*cos((current.angle-270)/180*PI)),
-			 cvRound((float)current.center.y + (float)current.size.height/2*sin((current.angle-270)/180*PI))),
-		 0,
-		 3);	  	  
-	}
+	DrawEllipse(debug1,
+		    current.center.x,current.center.y,
+		    current.size.width, current.size.height,
+		    current.angle/180*PI,
+		    0,3);
 #endif
-	/*
-	  The contour followed is the outside edge of the circle so
-	  our estimate is out by 2 pixels.
-	*/
-	//current.size.width -=2;
-	//	current.size.height -=2;
 	
 	/* We accept this ellipse as a good fit */
 	/* If our ellipse shares aspect ratio and center points
