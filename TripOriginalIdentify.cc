@@ -5,8 +5,8 @@
 bool
 sample(IplImage *image, CvBox2D* ellipse, double sina, double cosa, double angle, int ring,int sync) 
 {
-  double x = radii[ring]*cos(angle)*ellipse->size.width/2;
-  double y = radii[ring]*sin(angle)*ellipse->size.height/2;
+  double x = radii_centre[ring]*cos(angle)*ellipse->size.width/2;
+  double y = radii_centre[ring]*sin(angle)*ellipse->size.height/2;
   double ix = x*cosa-y*sina + ellipse->center.x;
   double iy = x*sina+y*cosa + ellipse->center.y;
   
