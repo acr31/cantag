@@ -306,12 +306,13 @@ void QuadTangle::GetTransform(float transform[16]) const {
 #endif
 
   double scalefactor = sqrt(result[1]*result[1]+result[4]*result[4]+result[7]*result[7]);
+  double c8 = 1.0/scalefactor;
 #ifdef SQUARE_TRANSFORM_DEBUG
   PROGRESS("Scale factor is "<<scalefactor);
 #endif
 
   for(int i=0;i<8;i++) {
-    result[i] *= scalefactor;
+    result[i] *= c8;
   }
 
 #ifdef SQUARE_TRANSFORM_DEBUG
@@ -350,7 +351,7 @@ void QuadTangle::GetTransform(float transform[16]) const {
   
   transform[0] = result[0]/2; transform[1] = result[1]/2; transform[2] = final[0];  transform[3] = (result[0]+result[1])/2+result[2];
   transform[4] = result[3]/2; transform[5] = result[4]/2; transform[6] = final[1];  transform[7] = (result[3]+result[4])/2+result[5];
-  transform[8] = result[6]/2; transform[9] = result[7]/2; transform[10] = final[2]; transform[11] = (result[6]+result[7])/2+scalefactor;
+  transform[8] = result[6]/2; transform[9] = result[7]/2; transform[10] = final[2]; transform[11] = (result[6]+result[7])/2+c8;
   transform[12] = 0;          transform[13] = 0;          transform[14] = 0;  transform[15] = 1;
 
 
