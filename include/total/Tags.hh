@@ -32,7 +32,7 @@ public:
  * Another tag using the same coding structure as a TRIP tag but with
  * the data sectors inside the target
  */
-class OuterRing : public RingTag<2,17,SimpleEllipse>, protected virtual TripOriginalCoder<34,2,2>, private virtual FullEllipseTransform {
+class OuterRing : public RingTag<2,17,Ellipse>, protected virtual TripOriginalCoder<34,2,2>, private virtual FullEllipseTransform {
 public:
   OuterRing();
 };
