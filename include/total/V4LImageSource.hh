@@ -33,13 +33,13 @@ private:
 
   class MMapHandle {
   private:
-    uchar* m_mmap_start;
+    unsigned char* m_mmap_start;
     int m_size;
   public:
-    MMapHandle(uchar* mmap_start, int size);
+    MMapHandle(unsigned char* mmap_start, int size);
     ~MMapHandle();
-    uchar* Get();
-    MMapHandle& SetHandle(uchar*,int);
+    unsigned char* Get();
+    MMapHandle& SetHandle(unsigned char*,int);
   };
 
   VideoDevHandle m_handle;
