@@ -8,6 +8,7 @@
 #include <tripover/Config.hh>
 #include <tripover/Socket.hh>
 
+#include <cassert>
 #include <bitset>
 /**
  * A simple extension of the STL bitset that supports some cyclic
