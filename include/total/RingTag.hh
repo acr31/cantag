@@ -63,7 +63,7 @@ public:
   virtual void Draw2D(Image& image, CyclicBitSet<RING_COUNT*SECTOR_COUNT>& tag_data) const;
   virtual LocatedObject<RING_COUNT*SECTOR_COUNT>* GetTransform(ShapeTree<ShapeChain<Ellipse> >::Node* node, 
 							       const Camera& camera, const Image& image) const;
-  virtual void DecodeNode(LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj,
+  virtual bool DecodeNode(LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj,
 			  const Camera& camera, const Image& image) const;
 
   virtual bool CheckTransform(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, ShapeTree<ShapeChain<Ellipse> >::Node* node) const;
@@ -231,9 +231,9 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
 #endif
 
   /**
-   * \todo this check will not work for the SplitRing tags
+   * \todo this check will not work for the SplitRing tags and it didn;t work for ring tags either
    */
-  if (node->children.size() != 1) {
+  if (node->children.size() == 0) {
 #ifdef RING_TAG_DEBUG
     PROGRESS("This node has " << node->children.size() << " children.  Skipping it");
 #endif
@@ -244,7 +244,7 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
   ShapeChain<Ellipse> sce = node->matched;
   Ellipse el = sce.GetShape();
 
-  assert(el.IsFitted());
+  if (!el.IsFitted()) { return false; }
 
   bool found = false;
   for(typename std::vector< ShapeTree<ShapeChain<Ellipse> >::Node* >::iterator i = node->children.begin(); 
@@ -490,7 +490,7 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
   return NULL;
 }
 
-template<int RING_COUNT,int SECTOR_COUNT> void RingTag<RING_COUNT,SECTOR_COUNT>::DecodeNode(LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj,const Camera& camera, const Image& image) const {
+template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>::DecodeNode(LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj,const Camera& camera, const Image& image) const {
 
   float* correcttrans = lobj->transform;
   
@@ -577,6 +577,7 @@ template<int RING_COUNT,int SECTOR_COUNT> void RingTag<RING_COUNT,SECTOR_COUNT>:
 	delete read_code[i];
       }
     }
+    return true;
   }
   else {
     for(int i=0;i<READING_COUNT;++i) {
@@ -588,6 +589,7 @@ template<int RING_COUNT,int SECTOR_COUNT> void RingTag<RING_COUNT,SECTOR_COUNT>:
 #ifdef RING_TAG_IMAGE_DEBUG
     draw_read(image,camera,correcttrans,0);
 #endif
+    return false;
   }
 };  
 
