@@ -45,8 +45,8 @@ AC_DEFUN([TOTAL_CHECK_LIB],
 dnl Checks for header files.
 
 TOTAL_CHECK_HEADER(Magick++.h,HAVE_MAGICKXX,have_magickxx_h)
-TOTAL_CHECK_HEADER(opencv/cv.h,HAVE_OPENCV_CV_H,have_opencv_cv_h)
-TOTAL_CHECK_HEADER(opencv/highgui.h,HAVE_OPENCV_HIGHGUI_H,have_opencv_highgui_h)
+dnl TOTAL_CHECK_HEADER(opencv/cv.h,HAVE_OPENCV_CV_H,have_opencv_cv_h)
+dnl TOTAL_CHECK_HEADER(opencv/highgui.h,HAVE_OPENCV_HIGHGUI_H,have_opencv_highgui_h)
 TOTAL_CHECK_HEADER(GL/gl.h,HAVE_GL_GL_H,have_gl_gl_h)
 TOTAL_CHECK_HEADER(GL/glu.h,HAVE_GL_GLU_H,have_gl_glu_h)
 TOTAL_CHECK_HEADER(GL/osmesa.h,HAVE_GL_OSMESA_H,have_gl_osmesa_h)
@@ -69,8 +69,8 @@ dnl Checks for libraries.
 dnl new version of opencv needs check for cvGetErrStatus in cxcore and cvAdd in cv
 TOTAL_CHECK_LIB(Magick,MagickError,HAVELIB_MAGICK,havelib_magick)
 TOTAL_CHECK_LIB(Magick++,MagickPlusPlusDestroyMagick,HAVELIB_MAGICKXX,havelib_magickxx)
-TOTAL_CHECK_LIB(opencv,cvGetErrStatus,HAVELIB_OPENCV,havelib_opencv)
-TOTAL_CHECK_LIB(highgui,cvGetWindowName,HAVELIB_HIGHGUI,havelib_highgui)
+dnl TOTAL_CHECK_LIB(opencv,cvGetErrStatus,HAVELIB_OPENCV,havelib_opencv)
+dnl TOTAL_CHECK_LIB(highgui,cvGetWindowName,HAVELIB_HIGHGUI,havelib_highgui)
 TOTAL_CHECK_LIB(GL,glFinish,HAVELIB_GL,havelib_gl)
 TOTAL_CHECK_LIB(OSMesa,OSMesaGetCurrentContext,HAVELIB_OSMESA,havelib_osmesa)
 TOTAL_CHECK_LIB(GLU,gluNewTess,HAVELIB_GLU,havelib_glu)
