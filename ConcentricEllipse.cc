@@ -31,7 +31,6 @@ findTags(IplImage* input, std::vector<Tag> *result)
     while(cvNextTreeNode(&i)) {
       CvSeq* c = (CvSeq*)i.node;
       if (c != NULL) {
-	//cvDrawContours(jam,c,16776960,16776960,0,1);
 	int count = c->total;
 	if (count > 6) {
 	  /* Copy the points into floating point versions for the
@@ -85,9 +84,7 @@ findTags(IplImage* input, std::vector<Tag> *result)
 		    (y*cosa-x*sina)*(y*cosa-x*sina)/bsq ) - 1;
 	    total+= dist*dist;
 	  }
-	  int color = CV_RGB( rand(), rand(), rand() );
-	  //cvEllipseBox( jam, boxes[i.level],color,3);
-	  //	  cvDrawContours(jam,c,16776960,16776960,0,1);
+	  
 	  if (total < MAX_FIT_ERROR * count) {
 	    /* We accept this ellipse as a good fit */
 	    
