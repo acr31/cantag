@@ -26,13 +26,13 @@ main(int argc,char* argv[])
   cvAdaptiveThreshold(gray,gray,255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY,window_size,40);
 
   std::vector<Tag> result;
-    findTags(gray,img,&result);
+    findTags(gray,&result);
  
   for(std::vector<Tag>::const_iterator search = result.begin();search != result.end();search++) {
     std::cout << search->code << std::endl;
   }
 
-  cvSaveImage(argv[2],img);
+  cvSaveImage(argv[2],gray);
   cvReleaseImage(&img);
   cvReleaseImage(&gray);
   return 0;

@@ -7,6 +7,6 @@
 
 #include "Tag.hh"
 
-void findTags(IplImage *image, IplImage *jam,std::vector<Tag> *concentrics);
+void findTags(IplImage *image, std::vector<Tag> *concentrics);
 
 #endif//FIND_TAGS_GUARD

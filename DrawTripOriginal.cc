@@ -8,11 +8,12 @@
 #define WHITE 255
 #define BLACK 0
 
+
 bool
 allset(long long value, int sector) {
   bool result = 1;
   for(int i=0;i<RING_COUNT;i++) {
-    result &= 1<<sector+i*SECTOR_COUNT;
+    result = result && (value & 1<<sector+i*SECTOR_COUNT);
   }
   return result;
 }
@@ -40,7 +41,7 @@ main(int argc, char* argv[]) {
     exit(-1);
   }
 
-  for(int i=0;i<SECTOR_COUNT;i++) {
+  for(int i=1;i<SECTOR_COUNT;i++) {
     if (allset(value,i)) {
       std::cout << "!!! Code must not contain any fully set sectors excluding the synchronization sector" << std::endl;
       exit(-1);
@@ -66,6 +67,9 @@ main(int argc, char* argv[]) {
 
   CvSize s;
   
+  /* cvEllipse doesn't work if the start angle is greater than the end
+     angle or if the angles are negative */
+
   for(int j=RING_COUNT-1;j>=0;j--) {
     s.width=(int)(radii_outer[j]*r);
     s.height=(int)(radii_outer[j]*r);
@@ -75,9 +79,8 @@ main(int argc, char* argv[]) {
       double a2 = sector_angles[i+1]/M_PI*180;
       if (a1<0) { a1+=360; }
       if (a2<0) { a2+=360; }
-      
       cvEllipse(image,p,s,0,
-		a1,a2,
+		360-a2,360-a1,
 		(value & 1) ? BLACK : WHITE, -1);
       value >>= 1;
     }
@@ -89,18 +92,18 @@ main(int argc, char* argv[]) {
     if (a2<a1) { a2+=360; }
 
     cvEllipse(image,p,s,0,
-	      a1,a2,
+	      360-a2,360-a1,
 	      (value & 1) ? BLACK : WHITE, -1);
     value >>= 1;
     cvCircle(image,p,(int)(radii_inner[j]*r),255,-1);
   }
-
 
   cvCircle(image,p,(int)r,BLACK,-1);
   cvCircle(image,p,(int)(0.6*r),WHITE,-1);
   cvCircle(image,p,(int)(0.2*r),BLACK,-1);
 
   cvSaveImage(argv[3],image);
+  std::cout << "Done.  Tag written to "<<argv[3]<<std::endl;
 }
 
 

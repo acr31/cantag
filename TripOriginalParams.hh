@@ -6,7 +6,7 @@
    the code ring */
 double radii_centre[] = {1.2,1.8};
 double radii_outer[] = {1.4,2};
-double radii_inner[] = {1,1.4};
+double radii_inner[] = {1.1,1.5};
 
 /* The angle of each sector in radians */
 #define SECTOR_COUNT 16

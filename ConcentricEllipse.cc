@@ -1,15 +1,15 @@
 #include "ConcentricEllipse.hh"
-
+#include <iostream>
 #include "TripOriginalIdentify.hh"
 
-#define MAX_FIT_ERROR 0.01
+#define MAX_FIT_ERROR 0.001
 #define MAX_X_OFFSET 4
 #define MAX_Y_OFFSET 4
 #define MAX_RATIO_DIFF 0.1
 #define MAX_ITERATOR_DEPTH 20
 
 void
-findTags(IplImage* input, IplImage* jam, std::vector<Tag> *result)
+findTags(IplImage* input, std::vector<Tag> *result)
 {
   /* Follow edges in the image and recover contours */
   CvMemStorage *store = cvCreateMemStorage(0);
@@ -31,7 +31,7 @@ findTags(IplImage* input, IplImage* jam, std::vector<Tag> *result)
     while(cvNextTreeNode(&i)) {
       CvSeq* c = (CvSeq*)i.node;
       if (c != NULL) {
-	cvDrawContours(jam,c,16776960,16776960,0,1);
+	//cvDrawContours(jam,c,16776960,16776960,0,1);
 	int count = c->total;
 	if (count > 6) {
 	  /* Copy the points into floating point versions for the
@@ -45,15 +45,13 @@ findTags(IplImage* input, IplImage* jam, std::vector<Tag> *result)
 	  }
 	  
 	  cvFitEllipse( fpoints, count, boxes+i.level );
-	  int color = CV_RGB( rand(), rand(), rand() );
-	  cvEllipseBox( jam, boxes[i.level],color,3);
 	  /* Work out the error for this fit.  This just tries every
 	     point on the contour with the ellipse function from the
 	     fitter and accumulates the difference 
 	     
 	     Ellipse eqn:  x^2     y^2
-	     ---  +  ---  =  1
-	     a^2     b^2
+       	                   ---  +  ---  =  1
+			   a^2     b^2
 	     
 	     Translate to correct position:
 	     
@@ -63,7 +61,7 @@ findTags(IplImage* input, IplImage* jam, std::vector<Tag> *result)
 	     
 	     Rotate to the correct orientation:
 	     
-	     ((x-p)cos(t)+(y-q)sin(t))^2      ((y-q)sin(t)-(x-p)cos(t))^2
+	     ((x-p)cos(t)+(y-q)sin(t))^2      ((y-q)cos(t)-(x-p)sin(t))^2
              ---------------------------   +  ---------------------------  =  1
 	            a^2                           b^2
 
@@ -87,6 +85,9 @@ findTags(IplImage* input, IplImage* jam, std::vector<Tag> *result)
 		    (y*cosa-x*sina)*(y*cosa-x*sina)/bsq ) - 1;
 	    total+= dist*dist;
 	  }
+	  int color = CV_RGB( rand(), rand(), rand() );
+	  //cvEllipseBox( jam, boxes[i.level],color,3);
+	  //	  cvDrawContours(jam,c,16776960,16776960,0,1);
 	  if (total < MAX_FIT_ERROR * count) {
 	    /* We accept this ellipse as a good fit */
 	    
@@ -98,11 +99,8 @@ findTags(IplImage* input, IplImage* jam, std::vector<Tag> *result)
 		(fabs(boxes[i.level].center.y - boxes[i.level-1].center.y) < MAX_Y_OFFSET) &&
 		(fabs((double)boxes[i.level].size.height/(double)boxes[i.level-1].size.width - 
 		      (double)boxes[i.level].size.height/(double)boxes[i.level-1].size.width) < MAX_RATIO_DIFF)) {
-	      
-	      identifyTag(input,boxes+i.level-1,result);
 
-	      int color = CV_RGB( rand(), rand(), rand() );
-	      //	      cvEllipseBox( jam, boxes[i.level-1],color,3);
+	      identifyTag(input,boxes+i.level-1,result);
 	      
 	      /* We can now push the iterator on to get the next sibling of the parent */
 	      int target_level = i.level-1;
