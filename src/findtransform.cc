@@ -178,11 +178,11 @@ void GetNormalVector(const float transform[16], float normal[3]) {
   normal[2] = v1x * v2y - v1y * v2x;
   
 
-  //  float modulus = sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
+  float modulus = sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
   
-  //  normal[0]/=modulus;
-  //  normal[1]/=modulus;
-  //  normal[2]/=modulus;
+  normal[0]/=modulus;
+  normal[1]/=modulus;
+  normal[2]/=modulus;
 
 #ifdef APPLY_TRANSFORM_DEBUG
   PROGRESS("Found normal vector ("<<normal[0]<<","<<normal[1]<<","<<normal[2]<<")");

@@ -13,11 +13,11 @@
 #ifdef TEXT_DEBUG
 # undef ELLIPSE_DEBUG
 # undef ELLIPSE_DEBUG_DUMP_POINTS
-# undef CIRCLE_TRANSFORM_DEBUG
+# define CIRCLE_TRANSFORM_DEBUG
 # undef DECOMPOSE_DEBUG
 #endif
 
-#define MAXFITERROR 0.00001
+#define MAXFITERROR 0.001
 #define COMPARETHRESH 0.0001
 
 static void print(const char* label, double* array, int rows, int cols);
@@ -482,23 +482,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   float d = GetD();
   float e = GetE();
   float f = GetF();
-
-  // it turns out to be really important to the pose extraction
-  // that our conic has a positive sense!
-  /*
-    if (f > 0) {
-    a*=-1;
-    b*=-1;
-    c*=-1;
-    d*=-1;
-    e*=-1;
-    f*=-1;
-    #ifdef ELLIPSE_DEBUG
-    PROGRESS("Corrected for negative scale factor");
-    #endif
-    }
-  */
-
+  
 #ifdef CIRCLE_TRANSFORM_DEBUG
   PROGRESS("Ellipse params (a-f) are ["<<
 	   a << "," <<
@@ -551,15 +535,15 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
       }
     }
   }
-
+ 
   // our eigenvectors might incorporate reflections about various axes
-  // so we need to check that we still have a right handed frame in a
+  // so we need to check that we still have a right handed frame. In a
   // righthanded frame v1 x v2 = v3 so we cross v1 and v2 and check
   // the sign compared with v3 if they are different we multiply v3 by
   // -1 so this is v1 cross v2 dot v3 - if this is +ve v3 is parallel
   // with where it should be for a right handed axis if not then we
   // scale it
-
+  
   // cross product of u and v 
   /*   ( ux )    ( vx )     ( uy*vz - uz*vy )
    *   ( uy ) x  ( vy )  =  ( uz*vx - ux*vz )
@@ -595,7 +579,6 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
     eigvects[5] *= -1;
     eigvects[8] *= -1;
   }
-  
 
   double r1[] = { eigvects[0], eigvects[1], eigvects[2], 0,
 		  eigvects[3], eigvects[4], eigvects[5], 0,
@@ -619,6 +602,12 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
    
   double pmcos = sqrt(cossq);
   double pmsin = sqrt(sinsq);
+
+  //  double theta = atan(sqrt(( eigvals[4] - eigvals[0] ) / ( eigvals[8] - eigvals[4] )));
+  //  double pmcos = cos(theta);
+  //  double pmsin = sin(theta);
+
+  //std::cout << "theta = " << theta << std::endl;
 
   // here is our first ambiguity choice point.  We need to decide plus or minus theta
   float r2c1[] = { pmcos, 0, pmsin, 0,
@@ -655,22 +644,14 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   PROGRESS("Translation tx = "<<tx);
 #endif
 
-  // check if the original r1 transform will result in a circle that points away from us
-  double yfactor;
-  if (eigvects[8] < 0) {
-    yfactor = -1;
-  }
-  else {
-    yfactor = 1;
-  }
-
+  
   double transc1[] = {1,0,0,tx,
-		      0,yfactor,0,0,
+		      0,1,0,0,
 		      0,0,1,0,
 		      0,0,0,1};
   
   double transc2[] = {1,0,0,-tx,
-		      0,yfactor,0,0,
+		      0,1,0,0,
 		      0,0,1,0,
 		      0,0,0,1};
 
@@ -685,7 +666,8 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
     transc1[col*4+1] *= scale;
 
     transc2[col*4] *= scale;
-    transc2[col*4+1] *= -scale;
+    transc2[col*4+1] *= scale;
+
   }
     
   double rtotc1[16];
@@ -726,48 +708,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   PROGRESS("                 " << transform2[12] << "," << transform2[13] << "," << transform2[14] << "," << transform2[15] << ";");
 #endif
 
-  // now work out the normal vector of each transform.  if it results in something that points away from the camera then negate it.
-  /*
-    float normal[3];
-    GetNormalVector(transform1,normal);
-    if (normal[2] < 0) {
-    PROGRESS("Swapped transform 1");
-    transform1[0] *= -1;
-    transform1[1] *= -1;
-    transform1[2] *= -1;
-    transform1[3] *= -1;
-
-    transform1[4] *= -1;
-    transform1[5] *= -1;
-    transform1[6] *= -1;
-    transform1[7] *= -1;
-
-    transform1[8] *= -1;
-    transform1[9] *= -1;
-    transform1[10] *= -1;
-    transform1[11] *= -1;
-    }
-
-    GetNormalVector(transform2,normal);
-    if (normal[2] < 0) {
-    PROGRESS("Swapped transform 2");
-    transform2[0] *= -1;
-    transform2[1] *= -1;
-    transform2[2] *= -1;
-    transform2[3] *= -1;
-
-    transform2[4] *= -1;
-    transform2[5] *= -1;
-    transform2[6] *= -1;
-    transform2[7] *= -1;
-
-    transform2[8] *= -1;
-    transform2[9] *= -1;
-    transform2[10] *= -1;
-    transform2[11] *= -1;
-    }
-  */
-
+ 
 }
 
 
