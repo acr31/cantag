@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/21 12:01:41  acr31
+ * moved Location2DChain definition to Location2D.hh and added a destructor
+ *
  * Revision 1.2  2004/01/21 11:55:09  acr31
  * added keywords for substitution
  *
@@ -76,16 +79,14 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 	    while(toadd->next != NULL) {
 	      toadd = toadd->next;
 	    }
-	    toadd->next = new Location2DChain();
-	    toadd->next->current = newbox;
+	    toadd->next = new Location2DChain(newbox);
 	    newbox = NULL;
 	  }
 	}
 
 	if (newbox != NULL) {
 	  PROGRESS("No concentric partner found");
-	  Location2DChain *toadd = new Location2DChain();
-	  toadd->current = newbox;
+	  Location2DChain *toadd = new Location2DChain(newbox);
 	  results->push_back(toadd);
 	}
       }

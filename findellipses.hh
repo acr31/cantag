@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/21 12:01:41  acr31
+ * moved Location2DChain definition to Location2D.hh and added a destructor
+ *
  * Revision 1.2  2004/01/21 11:55:09  acr31
  * added keywords for substitution
  *
@@ -13,11 +16,6 @@
 #include "Location2D.hh"
 #include "Drawing.hh"
 #include <vector>
-
-struct Location2DChain {
-  Location2D* current;
-  Location2DChain* next;
-};
 
 void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, float maxYDiff, float maxRatioDiff, float maxFitError, std::vector<Location2DChain*> *results);
 
