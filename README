@@ -1,0 +1,10 @@
+TripOver
+
+Depending on the state of the distribution you may need to run
+
+autoconf
+automake -a
+aclocal
+./configure
+make
+make install
