@@ -10,7 +10,7 @@
 #include <SceneGraphNode.hh>
 #include <map>
 
-#undef SCENE_GRAPH_DEBUG
+#define SCENE_GRAPH_DEBUG
 
 
 #define MAXLENGTH 10000
@@ -161,23 +161,26 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 
     int NBD = 2;  // the next border ID to issue is stored in NBD
 
-    for(int raster_y=0;raster_y < image.GetHeight(); raster_y++) {
+    for(int raster_y=0;raster_y < image.GetHeight(); ++raster_y) {
       int LNBD = 1; // we've just "seen" the frame border so set the last seen border id to match
-      for(int raster_x=1;raster_x < image.GetWidth()-1;raster_x++) {
+      for(int raster_x=1;raster_x < image.GetWidth()-1;++raster_x) {
 
 	// the sampled value with either be:
 	//  0  => 0-element
 	//  1  => 1-element that we havn't visited before
 	//  >1 => 1-element that we have visited before.  In this case the low bit will be set if this is an exit pixel and the remaining bits encode the NBD
 
-	const unsigned char current = image.SampleNoCheck(raster_x,raster_y);
-	const unsigned char current_nbd = current >> 1;
+	const int current = image.SampleNoCheck(raster_x,raster_y);
+	const int current_nbd = current >> 1;
 	const bool current_not_visited = current_nbd == 0;  // this will be true if this is an element that has not been visited before
 	const bool current_exit_pixel = current_nbd && (current & 0x1);
 
 	if (current) { // the current pixel is a 1-element (possibly visited before)
-	  const unsigned char previous = image.SampleNoCheck(raster_x-1,raster_y);
-	  const unsigned char next = image.SampleNoCheck(raster_x+1,raster_y);
+#ifdef SCENE_GRAPH_DEBUG
+	  PROGRESS("Pixel value is " << (int)current);
+#endif
+	  const int previous = image.SampleNoCheck(raster_x-1,raster_y);
+	  const int next = image.SampleNoCheck(raster_x+1,raster_y);
 	  int contour_length;
 	  bordertype_t border_type;
 	  ContourStatistics st;
@@ -264,9 +267,9 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 		node_hash[parent_id].node->AddChild(next_node);
 		node_hash[NBD] = Contour(parent_id,next_node,border_type);					
 		
-		NBD++;
+		++NBD;
 		NBD &= 127;
-		if (NBD==0) { NBD++; }	      
+		if (NBD==0) { ++NBD; }	      
 	      }
 	      else {
 		delete next_node;
@@ -297,121 +300,121 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
 #ifdef SCENE_GRAPH_DEBUG
   PROGRESS("Following contour");
 #endif	 
-  
+  // these two arrays store the offsets for each of the eight regions
+  // around the target pixel
+  const int offset_x[] = {-1,-1,0,1,1,1,0,-1};
+  const int offset_y[] = {0,1,1,1,0,-1,-1,-1};
 
-    // these two arrays store the offsets for each of the eight regions
-    // around the target pixel
-    const int offset_x[] = {-1,-1,0,1,1,1,0,-1};
-    const int offset_y[] = {0,1,1,1,0,-1,-1,-1};
+  bool cell4_is_0 = false; // will be set to true when we search a region if we pass cell4 and cell4 is a 0-element
+  int start_position = position; // if, when we are searching for a 1-pixel, we get all the way round to the start position again then we stop.  In particular this deals with the one pixel contour case.
 
-    bool cell4_is_0 = false; // will be set to true when we search a region if we pass cell4 and cell4 is a 0-element
-    int start_position = position; // if, when we are searching for a 1-pixel, we get all the way round to the start position again then we stop.  In particular this deals with the one pixel contour case.
+  points_buffer[0] = start_x;
+  points_buffer[1] = start_y;
+  int pointer = 1;  // our index into the points buffer
 
-    points_buffer[0] = start_x;
-    points_buffer[1] = start_y;
-    int pointer = 2;  // our index into the points buffer
+  statistics.length = 0; // the contour length
+  statistics.min_x = start_x; // bounding box
+  statistics.max_x = start_x; // bounding box
+  statistics.min_y = start_y; // bounding box
+  statistics.max_y = start_y; // bounding box
+  statistics.convex = true; // true if this contour is convex
 
-    statistics.length = 0; // the contour length
-    statistics.min_x = start_x; // bounding box
-    statistics.max_x = start_x; // bounding box
-    statistics.min_y = start_y; // bounding box
-    statistics.max_y = start_y; // bounding box
-    statistics.convex = true; // true if this contour is convex
+  int nbd_shifted = nbd<<1;
 
-    int nbd_shifted = nbd<<1;
-
-    while(pointer < maxcount*2) {
-      // work out the pixel co-ordinates for the position of interest
-      int sample_x = start_x+offset_x[position];
-      int sample_y = start_y+offset_y[position];
-      unsigned char sample = image.Sample(sample_x,sample_y);
-      if (sample) {  // if the pixel is a 1-element
+  while(pointer < maxcount*2) {
+    // work out the pixel co-ordinates for the position of interest
+    int sample_x = start_x+offset_x[position];
+    int sample_y = start_y+offset_y[position];
+    int sample = image.Sample(sample_x,sample_y);
+    if (sample) {  // if the pixel is a 1-element
 #ifdef SCENE_GRAPH_DEBUG
-	PROGRESS("Found 1-element at " << sample_x << "," << sample_y << " position " << position);
+      PROGRESS("Found 1-element at " << sample_x << "," << sample_y << " position " << position);
 #endif
-	// we now need to mark this pixel
-	unsigned char value;
-	// 1) if the pixel sample_x+1,sample_y (cell 4) is a 0-element and we
-	// have examined it whilst looking for this 1-element then this
-	// is an exit pixel.  Write (NBD,r).
-	if (cell4_is_0) {
-	  value = nbd_shifted| 0x1;
-	}
-	// 2) else if sample_x,sample_y is unmarked write
-	// (NBD,l).
-	else if (!(sample>>1)) {
-	  value = nbd_shifted;
-	}
-	else {
-	  value = sample;
-	}
-	image.DrawPixel(start_x,start_y,value);
-
-	// store this point in the pixel chain and update the start position
-	points_buffer[pointer++] = start_x = sample_x;
-	points_buffer[pointer++] = start_y = sample_y;
-
-	// update the length
-	statistics.length += (position & 0x1 ? 45 : 32);
-	// update the bounding box
-	if (start_x < statistics.min_x) { statistics.min_x = start_x; }
-	else if (start_x > statistics.max_x) { statistics.max_x = start_x; }
-	if (start_y < statistics.min_y) { statistics.min_y = start_y; }
-	else if (start_y > statistics.max_y) { statistics.max_y = start_y; }
-
-	//      if (previous_position != position) {
-	// we've made a turn
-	//	if (position = 
-	//      }
-
-	// adding 5 to our position (mod 8) will put our start
-	// position one further round than the previous central point.
-	cell4_is_0=false;
-	position+=5;
-	start_position = 10;  // disable the check for failed search - we know we'll always find one
+      // we now need to mark this pixel
+      int value;
+      // 1) if the pixel sample_x+1,sample_y (cell 4) is a 0-element and we
+      // have examined it whilst looking for this 1-element then this
+      // is an exit pixel.  Write (NBD,r).
+      if (cell4_is_0) {
+	value = nbd_shifted| 0x1;
       }
-      else {  // the pixel is a 0-element
-#ifdef SCENE_GRAPH_DEBUG
-	PROGRESS("Pixel is 0-element.  Advancing search position " << position);
-#endif
-	if (position == 4) {  // if we are at cell4 (this is a 0-element) then set the cell4_is_0 flag
-	  cell4_is_0 = true; 
-	}
-
-	// advance the position
-	position++; 
+      // 2) else if sample_x,sample_y is unmarked write
+      // (NBD,l).
+      else if (!(sample>>1)) {
+	value = nbd_shifted;
       }
-
-      position &= 0x7;
-    
-      if(position==start_position) { // we have searched all the way round this pixel and not found a 1-pixel
-	return 1;
+      else {
+	value = sample;
       }
+      //std::cout << start_x << " " << start_y << " " << value << std::endl;
 
-      // if our current pixel matches the _second_ pixel found in the
-      // chain and the previous pixel we found matches the first then we
-      // are done.  we have to wait until pointer>4 in order to make
-      // sure we dont immediatly stop.  I wonder if the compiler will
-      // notice it can unroll this loop a couple of times and remove
-      // this comparison?
-      if ((pointer > 4) && 
-	  (points_buffer[2] == sample_x) &&
-	  (points_buffer[3] == sample_y) &&
-	  (points_buffer[0] == points_buffer[pointer-4]) &&
-	  (points_buffer[1] == points_buffer[pointer-3])) {
-	break;
-      }
+      image.DrawPixel(start_x,start_y,value);
+
+      // store this point in the pixel chain and update the start position
+
+      points_buffer[++pointer] = start_x = sample_x;
+      points_buffer[++pointer] = start_y = sample_y;
+      // update the length
+      statistics.length += (position & 0x1 ? 45 : 32);
+      // update the bounding box
+      if (start_x < statistics.min_x) { statistics.min_x = start_x; }
+      else if (start_x > statistics.max_x) { statistics.max_x = start_x; }
+      if (start_y < statistics.min_y) { statistics.min_y = start_y; }
+      else if (start_y > statistics.max_y) { statistics.max_y = start_y; }
+
+      //      if (previous_position != position) {
+      // we've made a turn
+      //	if (position = 
+      //      }
+
+      // adding 5 to our position (mod 8) will put our start
+      // position one further round than the previous central point.
+      cell4_is_0=false;
+      position+=5;
+      start_position = 10;  // disable the check for failed search - we know we'll always find one
     }
+    else {  // the pixel is a 0-element
+#ifdef SCENE_GRAPH_DEBUG
+      PROGRESS("Pixel is 0-element.  Advancing search position " << position);
+#endif
+      if (position == 4) {  // if we are at cell4 (this is a 0-element) then set the cell4_is_0 flag
+	cell4_is_0 = true; 
+      }
+
+      // advance the position
+      ++position;
+    }
+
+    position &= 0x7;
+    
+    if(position==start_position) { // we have searched all the way round this pixel and not found a 1-pixel
+      return 1;
+    }
+
+    // if our current pixel matches the _second_ pixel found in the
+    // chain and the previous pixel we found matches the first then we
+    // are done.  we have to wait until pointer>4 in order to make
+    // sure we dont immediatly stop.  I wonder if the compiler will
+    // notice it can unroll this loop a couple of times and remove
+    // this comparison?
+    if ((pointer > 4) && 
+	(points_buffer[2] == sample_x) &&
+	(points_buffer[3] == sample_y) &&
+	(points_buffer[0] == points_buffer[pointer-3]) &&
+	(points_buffer[1] == points_buffer[pointer-2])) {
+      break;
+    }
+  }
   
-    // discard the last two pixels because they are overlap on the
-    // beginning of the chain
+  // discard the last two pixels because they are overlap on the
+  // beginning of the chain
 
 #ifdef SCENE_GRAPH_DEBUG
-    PROGRESS("Returning contour of length " << (pointer-4)/2);
+  PROGRESS("Returning contour of length " << (pointer-3)/2);
 #endif	 
 
-    statistics.length >>= 5;
-    return (pointer-4)/2;
+  statistics.length >>= 5;
+  return (pointer-3)/2;
 }
 
 #endif//SCENE_GRAPH_GUARD
