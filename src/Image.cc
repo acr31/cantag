@@ -278,6 +278,7 @@ void Image::ConvertScale(float scalefactor, int offset) {
 }
 
 void Image::DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigned int thickness) {
+  colour = COLOUR_BLACK;
   if (x1 < x0 || (x0 == x1 && y1 < y0)) {
     DrawLine(x1,y1,x0,y0,colour,thickness);
   }
@@ -292,7 +293,7 @@ void Image::DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigne
     DrawPixel(x,y,colour);
 
     if (dy > 0 && dy > dx) { // NE or N
-      int d = (int)(a*(x+0.5)+b*(y+1)+c);
+      int d = (int)((a*(x+0.5)+b*(y+1)+c));
       while (y < y1) {
 	++y;
 	if (d>0) {
@@ -306,7 +307,7 @@ void Image::DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigne
       }
     }
     else if (dy > 0 && dx > dy) { // E or NE
-      int d = (int)(a*(x+1)+b*(y+0.5)+c);
+      int d = (int)((a*(x+1)+b*(y+0.5)+c));
       while (x < x1) {
 	++x;
 	if (d<0) {
@@ -319,8 +320,8 @@ void Image::DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigne
 	DrawPixel(x,y,colour);
       }
     }
-    else if (dy < 0 && dx > -dy) { // E or SE
-      int d = (int)(a*(x+1)+b*(y-0.5)+c);
+    else if (dy <= 0 && dx > -dy) { // E or SE
+      int d = (int)((a*(x+1)+b*(y-0.5)+c));
       while (x<x1) {
 	++x;
 	if (d>0) {
@@ -334,7 +335,7 @@ void Image::DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigne
       }
     }
     else { // SE or S
-      int d = (int)(a*(x+0.5)+b*(y-1)+c);
+      int d = (int)((a*(x+0.5)+b*(y-1)+c));
       while (y > y1) {
 	--y;
 	if (d<0) {
