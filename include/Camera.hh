@@ -12,8 +12,6 @@
  * \todo fix the distortion removing functions - they dont work at the moment
  *
  * \todo add loading the camera parameters from disk
- *
- * \todo regression test add and remove distortion for various models
  */
 class Camera {
 private:
