@@ -389,6 +389,7 @@ public:
    * the image in addition to binarizing it.
    */
   void AdaptiveThreshold(unsigned int window_size, unsigned char offset);
+  void AdaptiveThreshold2(unsigned int window_size, unsigned char offset);
 
   /**
    * Apply a homogonous transform based image segmentation technique.

@@ -61,6 +61,56 @@ void Image::GlobalThreshold(unsigned char threshold) {
 }
 
 /**
+ * 
+ * Adapted to use a more efficient calculation for the moving
+ * average. the window used is now 2^window_size
+ *
+ */
+void Image::AdaptiveThreshold2(unsigned int window_size, unsigned char offset) {
+  int moving_average = 127;
+  int previous_line[m_image->width];
+  for(int i=0;i<m_image->width;++i) { previous_line[i] = 127; }
+
+  for(int i=0;i<m_image->height-1;) { // use height-1 so we dont overrun the image if its height is an odd number
+    unsigned char* data_pointer = GetRow(i);
+    for(int j=0;j<m_image->width;j++) {
+      unsigned char pixel = *data_pointer;
+      moving_average = (pixel + (moving_average << window_size) - moving_average) >> window_size;
+      int current_thresh = (moving_average + previous_line[j])/2;
+      previous_line[j] = moving_average;
+      if (pixel*255 < current_thresh*(255-offset)) {
+	*data_pointer = 1;
+      }
+      else {
+	*data_pointer = 0;
+      }
+      data_pointer++;
+    }
+
+    i++;
+    data_pointer = GetRow(i) + m_image->width-1;
+    for(int j=m_image->width-1;j>=0;j--) {
+      unsigned char pixel = *data_pointer;
+      moving_average = (pixel + (moving_average << window_size) - moving_average) >> window_size;
+      int current_thresh = (moving_average + previous_line[j])/2;
+      previous_line[j] = moving_average;
+      if (pixel*255 < current_thresh*(255-offset)) {
+	*data_pointer = 1;
+      }
+      else {
+	*data_pointer = 0;
+      }
+      data_pointer--;
+    }
+    i++;
+  }  
+
+#ifdef IMAGE_DEBUG
+  cvSaveImage("debug-adaptivethreshold2.bmp",m_image);
+#endif
+}
+
+/**
  * An implementation of Pierre Wellner's Adaptive Thresholding
  *  @TechReport{t:europarc93:wellner,
  *     author       = "Pierre Wellner",
@@ -72,11 +122,6 @@ void Image::GlobalThreshold(unsigned char threshold) {
  *     file         = "ar/ddesk-threshold.pdf"
  *   }
  *
- *
- * Adapted to use a more efficient calculation for the moving
- * average. the window used is now 2^window_size
- *
- * \todo Doesnt work properly on noisy images
  */
 
 void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
