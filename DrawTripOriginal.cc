@@ -27,12 +27,12 @@ main(int argc, char* argv[]) {
     }
   }
 
-  CvPoint p;
+  CvPoint2D32f p;
   p.x=width/2;
   p.y=width/2;
 
-  double r = width / 2 / radii_outer[RING_COUNT-1];
-  CvSize s;
+  double r = width / 4;
+  CvSize2D32f s;
   s.width=r;
   s.height=r;
 
@@ -43,7 +43,7 @@ main(int argc, char* argv[]) {
   box.angle=0.0;
   
   TripOriginalTag t(box,value);
-  t.Synthesize(image);
+  t.Synthesize(image,255,0);
 
   cvSaveImage(argv[3],image);
 

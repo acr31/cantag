@@ -241,13 +241,13 @@ void TripOriginalTag::Show(IplImage *image) {
   cvEllipseBox(image,m_ellipse,CV_RGB(255,255,0),2);
 }
 
-void TripOriginalTag::Synthesise(IplImage *image, int white, int black) {
+void TripOriginalTag::Synthesize(IplImage *image, int white, int black) {
   
   for(int i=RING_COUNT-1;i>=0;i--) {
     cvEllipse(image,
-	      m_ellipse.center,
-	      CvSize(m_ellipse.size.width*radii_outer[i],
-		     m_ellipse.size.height*radii_outer[i]),
+	      cvPointFrom32f(m_ellipse.center),
+	      cvSize(cvRound(m_ellipse.size.width*radii_outer[i]/2),
+		     cvRound(m_ellipse.size.height*radii_outer[i]/2)),
 	      m_ellipse.angle,
 	      0,
 	      360,
@@ -259,8 +259,8 @@ void TripOriginalTag::Synthesise(IplImage *image, int white, int black) {
 
     for(int j=SECTOR_COUNT-1;j>=0;j--) {
       double pwr = pow(base,j);
-      int value = (trunc(code/pwr) & (1<<i)) ? black : white;
-      code = code % pwr;
+      int value = ( (int)(trunc(code/pwr)) & (1<<i)) ? black : white;
+      code = code % (int)(trunc(pwr));
       
       // convert angles to degrees
       double a1 = sector_angles[j]/M_PI*180;
@@ -274,9 +274,9 @@ void TripOriginalTag::Synthesise(IplImage *image, int white, int black) {
       if (a2<a1) a2+=360;
 
       cvEllipse(image,
-		m_ellipse.center,
-		CvSize(m_ellipse.size.width*radii_outer[i],
-		       m_ellipse.size.height*radii_outer[i]),
+		cvPointFrom32f(m_ellipse.center),
+		cvSize(cvRound( m_ellipse.size.width*radii_outer[i]/2),
+		       cvRound( m_ellipse.size.height*radii_outer[i]/2)),
 		m_ellipse.angle,
 		a1,
 		a2,
@@ -285,9 +285,9 @@ void TripOriginalTag::Synthesise(IplImage *image, int white, int black) {
     }
 
     cvEllipse(image,
-	      m_ellipse.center,
-	      CvSize(m_ellipse.size.width*radii_inner[i],
-		     m_ellipse.size.height*radii_inner[i]),
+	      cvPointFrom32f(m_ellipse.center),
+	      cvSize(cvRound( m_ellipse.size.width*radii_inner[i]/2),
+		     cvRound( m_ellipse.size.height*radii_inner[i]/2)),
 	      m_ellipse.angle,
 	      0,
 	      360,

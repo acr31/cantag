@@ -2,7 +2,7 @@ OPENCVINC=`params --opencv-inc`
 OPENCVLIB=`params --opencv-lib`
 OPENCVLINK=`params --opencv-link`
 CPPFLAGS=`params --opencv-cxx-flags`
-FLAGS=-g
+FLAGS=-g -o3
 
 
 all: tripover DrawTripOriginal
@@ -12,7 +12,7 @@ tripover: tripover.o Tag.o TripOriginalTag.o concentricellipse.o
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $^ ${OPENCVLINK}
 
 
-DrawTripOriginal: DrawTripOriginal.o
+DrawTripOriginal: DrawTripOriginal.o TripOriginalTag.o concentricellipse.o Tag.o
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $^ ${OPENCVLINK}
 
 

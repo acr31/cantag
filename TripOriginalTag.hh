@@ -60,7 +60,7 @@ public:
   static void Process(IplImage *image,std::vector<Tag*> *result);
   virtual std::ostream& Print(std::ostream& s) const;
   virtual void Show(IplImage *image);
-  virtual void Synthesise(IplImage *image);
+  virtual void Synthesize(IplImage *image,int white,int black);
   
 private:
   CvBox2D m_ellipse;
