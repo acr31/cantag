@@ -224,7 +224,6 @@ float Ellipse::GetError(const float* points, int count) const {
     float dy = m_b*x+2*m_c*y+m_e;
 
     float norm = dx*dx + dy*dy;
-
     total+= dist*dist/norm;
   }
 #ifdef ELLIPSE_DEBUG

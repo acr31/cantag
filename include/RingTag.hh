@@ -182,10 +182,16 @@ public:
     }
   }
 
-  virtual void DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Camera& camera, const Image& image) {
+  virtual bool DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Camera& camera, const Image& image) {
 #ifdef RING_TAG_DEBUG
     PROGRESS("DecodeNode called");
 #endif
+
+    if (node->IsInspected()) {
+#ifdef RING_TAG_DEBUG
+      PROGRESS("This node has already been inspected. Skipping it");
+#endif
+    }
 
     // get the ellipse this node encompasses
     const Ellipse el = node->GetShapes().GetShape();
@@ -194,7 +200,7 @@ public:
 #ifdef RING_TAG_DEBUG
       PROGRESS("Discarding unfitted ellipse.");
 #endif
-      return;
+      return false;
     }
 
 #ifdef RING_TAG_DEBUG
@@ -213,7 +219,7 @@ public:
     el.GetTransform(transform1,transform2);
   
     // project some points for the inner circle using both interpretations and check which one fits  
-    int count = 10;
+    int count = 30;
     float projected1[count*2];
     float projected2[count*2];
     for(int i=0;i<count*2;i+=2) {
@@ -222,9 +228,9 @@ public:
       ApplyTransform(transform1,x,y,projected1+i,projected1+i+1);
       ApplyTransform(transform2,x,y,projected2+i,projected2+i+1);
     }     
-
     // get the children of this node and check for a good match with either interpretation
     float* correcttrans = NULL;
+    /*
     for(std::vector< SceneGraphNode< ShapeChain<Ellipse> >* >::iterator i = node->GetChildren().begin(); i!=node->GetChildren().end();i++) {
       float error1 = (*i)->GetShapes().GetShape().GetError(projected1,count);
       float error2 = (*i)->GetShapes().GetShape().GetError(projected2,count);
@@ -249,6 +255,19 @@ public:
 	correcttrans = transform2;
 	break;
       }
+    }
+    */
+    float normal1[3];
+    GetNormalVector(transform1,normal1);
+
+    float normal2[3];
+    GetNormalVector(transform2,normal2);
+    
+    if ((normal1[1] < 0) && (normal2[2] > 0)) {
+      correcttrans = transform2;
+    }
+    else {
+      correcttrans = transform1;
     }
 
 
@@ -325,7 +344,7 @@ public:
 #ifdef RING_TAG_DEBUG
 	    PROGRESS("Ellipse position is "<<projected1[0]<<","<<projected1[1]);
 #endif
-	    std::cout << "Normal vector is "<<normal[0]<<" "<<normal[1]<<" "<< normal[2] << std::endl;
+	    //	    std::cout << "Normal vector is "<<normal[0]<<" "<<normal[1]<<" "<< normal[2];
 
 	    LocatedObject* lobj = node->GetLocatedObject();
 	    for(int i=0;i<16;i++) {
@@ -333,14 +352,13 @@ public:
 	    }		
 	    lobj->is_valid = true;
 	    node->SetInspected();
-	    return;
+	    return true;
 	  }
 	  else {
 #ifdef RING_TAG_DEBUG
 	    PROGRESS("Read consistant code but it turned out invalid");
 #endif
 	  }
-	  break;
 	}
       }
     
@@ -359,6 +377,7 @@ public:
 
     node->SetInspected();
     node->GetLocatedObject()->is_valid = false;
+    return false;
   };  
 
 private:
@@ -423,7 +442,7 @@ private:
 	int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
 	// or pick the colour to be on a gradient so we see the order it samples in
 	//int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
-	debug0.DrawPoint(pts[0],pts[1],colour,4);
+	debug0.DrawPoint(pts[0],pts[1],colour,1);
       }
       counter++;
     }

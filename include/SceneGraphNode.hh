@@ -81,7 +81,7 @@ public:
   /**
    * Return true if this node has already been inspected
    */
-  inline bool IsInspected() { return m_inspected; }
+  inline bool IsInspected() const { return m_inspected; }
 
   /**
    * Set this node as inspected

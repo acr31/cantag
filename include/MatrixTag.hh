@@ -139,7 +139,7 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
   }
 
 
-  virtual void DecodeNode(SceneGraphNode< ShapeChain<QuadTangle> >* node, const Camera& camera, const Image& image) {
+  virtual bool DecodeNode(SceneGraphNode< ShapeChain<QuadTangle> >* node, const Camera& camera, const Image& image) {
 #ifdef MATRIX_TAG_DEBUG
     PROGRESS("Decode node called");
 #endif
@@ -150,7 +150,7 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
 #ifdef MATRIX_TAG_DEBUG
       PROGRESS("Ignoring unfitted quadtangle");
 #endif
-      return;
+      return false;
     }
 #ifdef MATRIX_TAG_DEBUG
     PROGRESS("QuadTangle: " << 
@@ -223,10 +223,12 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
 	lobj->transform[i] = transform[i];
       }	
       lobj->is_valid = true;
+      return true;
     }    
     else {
       lobj->is_valid = false;
     }
+    return false;
   }
 };
 

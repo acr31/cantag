@@ -25,17 +25,22 @@ public:
   virtual void Draw2D(Image& image, const std::bitset<PAYLOAD_SIZE>& tag_data) const = 0;
   void WalkSceneGraph(SceneGraphNode<C>* root_node, const Camera& camera, const Image& image) {
     // walk the tree finding all the tags
-    DecodeNode(root_node,camera,image);
-    for(typename std::vector<SceneGraphNode<C>* >::iterator step = root_node->GetChildren().begin(); 
-	step != root_node->GetChildren().end(); 
-	step++) {
-      if (!(*step)->IsInspected()) {
-	WalkSceneGraph(*step,camera,image);
+    // if we find a Tag then decode node returns true so we know not to inspect any child contours
+    if (!DecodeNode(root_node,camera,image)) {
+      for(typename std::vector<SceneGraphNode<C>* >::iterator step = root_node->GetChildren().begin(); 
+	  step != root_node->GetChildren().end(); 
+	  step++) {
+	if (!(*step)->IsInspected()) {
+	  WalkSceneGraph(*step,camera,image);
+	}
       }
     }
   }
 
-  virtual void DecodeNode(SceneGraphNode<C>* node, const Camera& camera, const Image& image) =0;
+  /**
+   * Decode the passed node. Return true if you find a valid tag there or false otherwise
+   */
+  virtual bool DecodeNode(SceneGraphNode<C>* node, const Camera& camera, const Image& image) =0;
 };
 
 #endif//TAG_GUARD
