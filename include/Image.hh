@@ -41,6 +41,9 @@ public:
     return (uchar*)m_image->imageData;
   }
 
+  inline const unsigned char* GetDataPointer() const {
+    return (const uchar*)m_image->imageData;
+  }
   /**
    * Read the pixel at the given x and y co-ordinates. Includes a
    * bounds check---returns 0 if out of range.
