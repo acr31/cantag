@@ -35,6 +35,7 @@ FindConcentricEllipses(CvSeq *contourTree,
 	}
 	
 	cvFitEllipse( fpoints, count, boxes+i.level );
+	
 	/* Work out the error for this fit.  This just tries every
 	   point on the contour with the ellipse function from the
 	   fitter and accumulates the difference 
@@ -79,6 +80,15 @@ FindConcentricEllipses(CvSeq *contourTree,
 	}
 	
 	if (total < maxFitError * count) {
+	    /*
+	      The contour followed is the outside edge of the circle so
+	      our estimate is out by 2 pixels.
+	    */
+	    boxes[i.level].size.width -=2;
+	    boxes[i.level].size.height -=2;
+	    
+
+
 	  //	  std::cout << "erro " << total/count << " " << count << " " << boxes[i.level].center.x << " " << boxes[i.level].center.y << " " << ((double)boxes[i.level].size.height/(double)boxes[i.level].size.width) << std::endl;
 	  
 	  /* We accept this ellipse as a good fit */

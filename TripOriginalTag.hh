@@ -8,8 +8,8 @@
 #include "Tag.hh"
 #include "concentricellipse.hh"
 
-#define IMAGEDEBUG
-#define TEXTDEBUG
+//#define IMAGEDEBUG
+//#define TEXTDEBUG
 
 #ifdef TEXTDEBUG
 #include <iostream>
