@@ -20,8 +20,8 @@ private:
   bool m_fitted;
 
 public:
-  Ellipse(float* points, int numpoints); 
-  Ellipse(float* points, int numpoints, bool prev_fit); 
+  Ellipse(const float* points, int numpoints); 
+  Ellipse(const float* points, int numpoints, bool prev_fit); 
   Ellipse(float a, float b, float c, float d, float e, float f);
   inline bool IsFitted() const { return m_fitted; }
   bool Compare(const Ellipse& o) const;
@@ -33,12 +33,12 @@ public:
   inline float GetE() const { return m_e; }
   inline float GetF() const { return m_f; }
 
-  float GetError(float* points, int numpoints) const;
+  float GetError(const float* points, int numpoints) const;
 
   virtual void GetTransform(float transform1[16], float transform2[16]) const;
 
 private:
-  void FitEllipse(float* points, int numpoints);
+  void FitEllipse(const float* points, int numpoints);
 };
 
 /**

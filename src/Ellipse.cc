@@ -19,11 +19,11 @@
 static void print(const char* label, double* array, int rows, int cols);
 static void print(const char* label, double** array, int rows, int cols);
 
-Ellipse::Ellipse(float* points, int numpoints) {
+Ellipse::Ellipse(const float* points, int numpoints) {
   FitEllipse(points,numpoints);
 }
 
-Ellipse::Ellipse(float* points, int numpoints, bool prev_fit) {
+Ellipse::Ellipse(const float* points, int numpoints, bool prev_fit) {
   if (!prev_fit) {
     FitEllipse(points,numpoints);
   }
@@ -48,7 +48,7 @@ bool Ellipse::Compare(const Ellipse& o) const {
 	  (fabs(m_f - o.m_f) < COMPARETHRESH));
 }
 
-void Ellipse::FitEllipse(float* points, int numpoints) {
+void Ellipse::FitEllipse(const float* points, int numpoints) {
   if (numpoints < 6) {
     m_fitted = false;
     return;
@@ -208,7 +208,7 @@ void Ellipse::FitEllipse(float* points, int numpoints) {
   }
 }
 
-float Ellipse::GetError(float* points, int count) const {
+float Ellipse::GetError(const float* points, int count) const {
   // calculate the algebraic distance inversly weighted by the
   // gradient
   float total=0;

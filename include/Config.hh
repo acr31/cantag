@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/03/07 17:23:21  acr31
+ * *** empty log message ***
+ *
  * Revision 1.3  2004/03/07 11:10:49  acr31
  * *** empty log message ***
  *
@@ -18,8 +21,8 @@
 #ifndef CONFIG_GUARD
 #define CONFIG_GUARD
 
-#undef TEXT_DEBUG
-#undef IMAGE_DEBUG
+#define TEXT_DEBUG
+#define IMAGE_DEBUG
 
 #ifdef TEXT_DEBUG
 #include <iostream>

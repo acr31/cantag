@@ -10,8 +10,10 @@
 #include <Payload.hh>
 #include <cmath>
 #include <BigInt.hh>
-#undef TRIP_ORIGINAL_CODER_DEBUG
 
+#ifdef TEXT_DEBUG
+#define TRIP_ORIGINAL_CODER_DEBUG
+#endif
 /**
  * A generalised coding scheme based on the one used in TRIP.  This
  * scheme encodes a fixed number of bits using 4 or more symbols

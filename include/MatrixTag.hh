@@ -13,10 +13,13 @@
 #include <Camera.hh>
 #include <ShapeChain.hh>
 #include <findtransform.hh>
+#include <bitset>
+#include <Payload.hh>
 
-#define MATRIX_TAG_DEBUG
-#define MATRIX_TAG_DEBUG_POINTS
-
+#ifdef TEXT_DEBUG
+#define  MATRIX_TAG_DEBUG
+#undef  MATRIX_TAG_DEBUG_POINTS
+#endif
 
 /**
  * An implementation of the Matrix tag found in
@@ -31,14 +34,12 @@
 template<int SIZE>
 class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*SIZE % 2) >, protected virtual Coder<SIZE*SIZE - (SIZE*SIZE % 2)> {
  private:
-  int m_length;
   float m_cell_width;
   float m_cell_width_2;
   float *m_cells_corner;
 
  public:
   MatrixTag() :
-    m_length(SIZE*SIZE - (SIZE*SIZE % 2)),
     m_cell_width(1/(float)(SIZE+2)),
     m_cell_width_2(0.5/(float)(SIZE+2))
     {
@@ -82,7 +83,7 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
       }
     
 #ifdef MATRIX_TAG_DEBUG_POINTS
-      for (int i=0;i<m_length;i++) {
+      for (int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);i++) {
 	std::cout << m_cells_corner[2*i] << " " << m_cells_corner[2*i+1] << std::endl;
       }
 #endif
@@ -90,7 +91,7 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
 
   virtual ~MatrixTag() {}
 
-  virtual void Draw2D(Image& image, unsigned long long code) {
+  virtual void Draw2D(Image& image, const std::bitset< SIZE*SIZE - (SIZE*SIZE % 2)>& tag_data) {
 #ifdef MATRIX_TAG_DEBUG
     PROGRESS("Draw2D called");
 #endif
@@ -111,12 +112,14 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
 			       x3, y3,COLOUR_BLACK);
 			  
     // now draw the code
-    unsigned long long value = EncodeTag(code);
+    Payload< SIZE*SIZE - (SIZE*SIZE % 2) > payload;
+    EncodePayload(tag_data,payload);
+
     float projX0, projY0;
     float projX1, projY1;
     float projX2, projY2;
     float projX3, projY3;
-    for(int i=0;i<m_length;i++) {
+    for(int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);i++) {
       int u0 = (int)(m_cells_corner[2*i]*(float)size);
       int v0 = (int)(m_cells_corner[2*i+1]*(float)size);
       int u1 = (int)((m_cells_corner[2*i]+m_cell_width)*(float)size);
@@ -125,16 +128,17 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
       int v2 = (int)((m_cells_corner[2*i+1]+m_cell_width)*(float)size);
       int u3 = (int)(m_cells_corner[2*i]*(float)size);
       int v3 = (int)((m_cells_corner[2*i+1]+m_cell_width)*(float)size);
-      int colour = (value & 1) == 1 ? COLOUR_BLACK : COLOUR_WHITE;
-      //int colour = (float)i/(float)m_length * 255;
+      int colour = payload[i] ? COLOUR_BLACK : COLOUR_WHITE;
+      //int colour = (int)((float)i/(float)(SIZE*SIZE - (SIZE*SIZE % 2)) * 255);
       image.DrawFilledQuadTangle(u0,v0,
 				 u1,v1,
 				 u2,v2,
 				 u3,v3,
 				 colour);
-      value >>=1;
     }
   }
+
+
   virtual void DecodeNode(SceneGraphNode< ShapeChain<QuadTangle> >* node, const Camera& camera, const Image& image) {
 #ifdef MATRIX_TAG_DEBUG
     PROGRESS("Decode node called");
@@ -161,17 +165,16 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
   
     GetTransform(quad,transform);
 
+    Payload<SIZE*SIZE - (SIZE*SIZE % 2)> read_code;
     float projX, projY;
-    unsigned long long code = 0;
     // iterate over the tag reading each section
-    for(int i=m_length-1;i>=0;i--) {
+    for(int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);i++) {
       float pts[] = { m_cells_corner[2*i]+m_cell_width_2,
 		      m_cells_corner[2*i+1]+m_cell_width_2 };
       ApplyTransform(transform,pts[0],pts[1],pts,pts+1);
       camera.NPCFToImage(pts,1);
       bool sample = image.Sample(pts[0],pts[1]) > 128;
-      code <<= 1;
-      code |= sample ? 1 : 0;
+      read_code[i] = sample;
     }
 
 #ifdef IMAGE_DEBUG
@@ -193,27 +196,34 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
       debug0.DrawLine(pts[4],pts[5],pts[6],pts[7],COLOUR_BLACK,1);
     }
   
-    for(int i=m_length-1;i>=0;i--) {
+    for(int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);i++) {
       float pts[] = { m_cells_corner[2*i]+m_cell_width_2,
 		      m_cells_corner[2*i+1]+m_cell_width_2 };
       ApplyTransform(transform,pts[0],pts[1],pts,pts+1);
       camera.NPCFToImage(pts,1);
       // pick the colour to be the opposite of the sampled point so we can see the dot
-      int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
+      //int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
       // or pick the colour to be on a gradient so we see the order it samples in
-      //int colour = (int)((double)k/(double)m_sector_count*255);
+      int colour = (int)((double)i/(double)(SIZE*SIZE - (SIZE*SIZE %2))*255);
       debug0.DrawPoint(pts[0],pts[1],colour,4);
     }
 
-    debug0.Save("debug-decode.jpg");
+    debug0.Save("debug-decode.bmp");
 #endif
-    unsigned long long result = DecodeTag(code);
-    LocatedObject* lobj = node->GetLocatedObject();
-    for(int i=0;i<16;i++) {
-      lobj->transform[i] = transform[i];
-    }	
+
     node->SetInspected();
-  }    
+    LocatedObject* lobj = node->GetLocatedObject();
+    std::bitset<SIZE*SIZE-(SIZE*SIZE%2)> tagcode(0);
+    if (DecodePayload(tagcode,read_code) >= 0) {
+      for(int i=0;i<16;i++) {
+	lobj->transform[i] = transform[i];
+      }	
+      lobj->is_valid = true;
+    }    
+    else {
+      lobj->is_valid = false;
+    }
+  }
 };
 
 #endif//MATRIX_TAG_GUARD
