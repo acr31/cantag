@@ -1,47 +1,40 @@
 /**
  * $Header$
- *
- * $Log$
- * Revision 1.2  2004/01/27 18:06:58  acr31
- * changed inheriting classes to inherit publicly from their parents
- *
- * Revision 1.1  2004/01/25 14:54:35  acr31
- * moved over to automake/autoconf build system
- *
- * Revision 1.2  2004/01/23 22:35:04  acr31
- * changed coder to use unsigned long long
- *
- * Revision 1.1  2004/01/23 18:18:11  acr31
- * added Matrix Tag and a test program and the beginning of the CRC coder
- *
- *
  */
 
 #ifndef CRC_CODER_GUARD
 #define CRC_CODER_GUARD
 
-#include "Config.hh"
-#include "Coder.hh"
+#include <Config.hh>
+#include <Coder.hh>
 
-
-#undef FILENAME
-#define FILENAME "CRCCoder.hh"
-
-class CRCCoder : public Coder {
+/**
+ * A CRC based coding scheme.  The generator polynomials used are:
+ *
+ * CRC-32 = x^32+x^26+x^23+x^22+x^16+x^12+x^11+x^10+x^8+x^7+x^5+x^4+x^2+x+1
+ * CRC-24 = x^24+x^23+x^14+x^12+x^8+1
+ * CRC-16 = x^16+x^15+x^2+1
+ * CRC-8  = x^8+x^7+x^6+x^4+x^2+1
+ * CRC-4  = x^4+x^3+x^2+x+1
+ */
+template<int PAYLOAD_SIZE, int CRC_SIZE>
+class CRCCoder : public Coder<PAYLOAD_SIZE> {
 private:
-  int m_symbol_range;
-  int m_symbol_count;
-  unsigned long long m_encoded;
-  int m_counter;
 
 public:
-  CRCCoder(int symbol_range,int symbol_count);
+  CRCCoder();
   
-  virtual void Set(unsigned long long value);
-  virtual unsigned int NextChunk();
-  virtual void Reset();
-  virtual bool LoadChunk(unsigned int chunk);
-  virtual unsigned long long Decode();
+  virtual bool EncodePayload(const std::bitset<PAYLOAD_SIZE>& tag_data, Payload<PAYLOAD_SIZE>& payload) const {
+    payload = tag_data<<CRC_SIZE;
+    
+    
+  }
+  virtual int DecodePayload(std::bitset<PAYLOAD_SIZE>& data, Payload<PAYLOAD_SIZE>& payload) const;
+
+private:
+  void ShiftRegister(Payload<PAYLOAD_SIZE>& payload) const {
+    
+  }
 };
 
 

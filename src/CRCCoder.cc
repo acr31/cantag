@@ -1,24 +1,9 @@
 /**
- * This will be a CRC encoder but for now its just binary with no check
- *
  * $Header$
- *
- * $Log$
- * Revision 1.1  2004/01/25 14:53:34  acr31
- * moved over to autoconf/automake build system
- *
- * Revision 1.2  2004/01/23 22:35:04  acr31
- * changed coder to use unsigned long long
- *
- * Revision 1.1  2004/01/23 18:18:11  acr31
- * added Matrix Tag and a test program and the beginning of the CRC coder
- *
  */
 
 #include <CRCCoder.hh>
 
-#undef FILENAME
-#define FILENAME "CRCCoder.cc"
 
 
 CRCCoder::CRCCoder(int symbol_range,  int symbol_count) : 
