@@ -2,6 +2,10 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/02/01 14:25:33  acr31
+ * moved Rectangle2D to QuadTangle2D and refactored implementations around
+ * the place
+ *
  * Revision 1.4  2004/01/30 16:54:17  acr31
  * changed the Coder api -reimplemented various bits
  *
@@ -42,7 +46,7 @@
 #define FILENAME "TripOriginalCoder.hh"
 
 template<int CHECKSUM_COUNT=2>	 
-class TripOriginalCoder : public Coder {
+class TripOriginalCoder : public virtual Coder {
 private:
   unsigned int m_bitcount;
   unsigned int m_granularity;
@@ -82,7 +86,7 @@ public:
   /**
    * Take the bit pattern from the tag and decode the value stored
    */
-  virtual unsigned long long Decode(unsigned long long value) {
+  virtual unsigned long long DecodeTag(unsigned long long value) {
     // try all possible rotations...
     for(int i=0;i<m_bitcount;i+=m_granularity) {
       // have we found sync sector
@@ -131,7 +135,7 @@ public:
    * This method encodes the given value and returns the bit pattern
    * to store on the tag
    */
-  virtual unsigned long long Encode(unsigned long long value) {
+  virtual unsigned long long EncodeTag(unsigned long long value) {
     // check to see if the value is too large
     PROGRESS("Encode called with " << value);
     PROGRESS("Maximum value is "<< (unsigned long long)pow(m_codingbase,m_symbol_count) -1 );

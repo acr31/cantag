@@ -2,6 +2,10 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/02/01 14:25:32  acr31
+ * moved Rectangle2D to QuadTangle2D and refactored implementations around
+ * the place
+ *
  * Revision 1.2  2004/01/30 16:54:17  acr31
  * changed the Coder api -reimplemented various bits
  *
@@ -32,7 +36,7 @@ public:
    *
    * Throws ValueToLarge if this value it too big to be 
    */
-  virtual unsigned long long  Encode(unsigned long long value) = 0;
+  virtual unsigned long long EncodeTag(unsigned long long value) = 0;
   
   class ValueTooLarge : Exception {
   public:
@@ -47,7 +51,7 @@ public:
    * Throws InvalidSymbol if the code contains invalid symbols
    * Throws InvalidCode if the code is invalid for some other reason
    */
-  virtual unsigned long long Decode(unsigned long long value)  =0;
+  virtual unsigned long long DecodeTag(unsigned long long value)  =0;
     
   class InvalidCheckSum: Exception {
   public:

@@ -2,6 +2,10 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.8  2004/02/01 14:25:32  acr31
+ * moved Rectangle2D to QuadTangle2D and refactored implementations around
+ * the place
+ *
  * Revision 1.7  2004/01/30 16:54:17  acr31
  * changed the Coder api -reimplemented various bits
  *
@@ -38,7 +42,7 @@
 
 #include "Config.hh"
 #include "Ellipse2D.hh"
-#include "Rectangle2D.hh"
+#include "QuadTangle2D.hh"
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 typedef IplImage Image;
@@ -107,7 +111,7 @@ inline void DrawFilledQuadTangle(Image *image,
 }
 
 inline void DrawFilledQuadTangle(Image* image,
-				 Rectangle2D* r,
+				 QuadTangle2D* r,
 				 int colour) {
   DrawFilledQuadTangle(image,
 		       r->m_x0,r->m_y0,
@@ -152,7 +156,7 @@ inline void DrawQuadTangle(Image* image,
 }
 
 inline void DrawQuadTangle(Image* image,
-			   const Rectangle2D* r,
+			   const QuadTangle2D* r,
 			   int colour,
 			   int thickness) {
   DrawQuadTangle(image,

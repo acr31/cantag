@@ -2,6 +2,10 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/02/01 14:25:33  acr31
+ * moved Rectangle2D to QuadTangle2D and refactored implementations around
+ * the place
+ *
  * Revision 1.1  2004/01/25 14:54:37  acr31
  * moved over to automake/autoconf build system
  *
@@ -35,6 +39,7 @@ class Tag {
 public:
   virtual void Draw2D(Image *image, const C *location, unsigned long long code, int black, int white)= 0;
   virtual unsigned long long Decode(Image *image, const C *location) =0;
+
 };
 
 #endif//TAG_GUARD

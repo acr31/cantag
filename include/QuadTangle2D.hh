@@ -2,6 +2,10 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.1  2004/02/01 14:25:33  acr31
+ * moved Rectangle2D to QuadTangle2D and refactored implementations around
+ * the place
+ *
  * Revision 1.3  2004/01/30 08:05:23  acr31
  * changed rectangle2d to use gaussian elimination
  *
@@ -19,15 +23,15 @@
  *
  *
  */
-#ifndef RECTANGLE_2D_GUARD
-#define RECTANGLE_2D_GUARD
+#ifndef QUADTANGLE_2D_GUARD
+#define QUADTANGLE_2D_GUARD
 
 #include <ostream>
 
 #include "Config.hh"
 #include "Location3D.hh"
 
-class Rectangle2D {
+class QuadTangle2D {
 private:
   float m_alpha[8];
 
@@ -47,10 +51,10 @@ public:
   float m_xc;
   float m_yc;
   
-  Rectangle2D(float size); // construct a rectangle 2d centred on the
+  QuadTangle2D(float size); // construct a quadtangle 2d centred on the
 			   // origin, no bigger than the given size
-  Rectangle2D(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3);
-  Rectangle2D(float* coords);
+  QuadTangle2D(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3);
+  QuadTangle2D(float* coords);
   void ProjectPoint(float rectx, float recty, float *projX, float *projY) const;
   Location3D* EstimatePose(float width, float height);
 
@@ -62,15 +66,15 @@ private:
   float find_angle(float x, float y, float cx, float cy);
 };
 
-class Rectangle2DChain {
+class QuadTangle2DChain {
 public:
-  Rectangle2D* current;
-  Rectangle2DChain* nextchain;
+  QuadTangle2D* current;
+  QuadTangle2DChain* nextchain;
 
-  Rectangle2DChain(Rectangle2D* current);
-  ~Rectangle2DChain();
+  QuadTangle2DChain(QuadTangle2D* current);
+  ~QuadTangle2DChain();
 };
 
-std::ostream& operator<<(std::ostream& s, const Rectangle2D& z);
+std::ostream& operator<<(std::ostream& s, const QuadTangle2D& z);
 
-#endif//RECTANGLE_2D_GUARD
+#endif//QUADTANGLE_2D_GUARD
