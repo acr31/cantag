@@ -33,6 +33,24 @@ public:
   }
   
   /**
+   * Rotate the bit field so that no other rotation has a smaller
+   * value.
+   */
+  int MinRotate() {
+    Payload<BITCOUNT> currentMin = *this; // copy
+    int minindex = 0;
+    for(int i=1;i<BITCOUNT;i++) {
+      RotateLeft(1);
+      if (*this<currentMin) {
+	currentMin = *this;
+	minindex=i;
+      }
+    }
+    RotateLeft(minindex+1);
+    return minindex;
+  }
+
+  /**
    * Rotate the bit field so that the bit at position i goes to
    * position (i + count) % BITCOUNT.
    */
@@ -87,6 +105,17 @@ public:
       bool value = (symbol & 0x1 == 0x1);
       (*this)[index*count+i] = value;
       symbol>>=1;
+    }
+  }
+
+  bool operator<(const Payload<BITCOUNT>& o) const {
+    for(unsigned int i=0;i<BITCOUNT;i++) {
+      if ( (*this)[i] && !o[i] ) {
+	return true;
+      }
+      else if ( !(*this)[i] && o[i] ) {
+	return false;
+      }
     }
   }
 

@@ -127,8 +127,8 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
       int v2 = (int)((m_cells_corner[2*i+1]+m_cell_width)*(float)size);
       int u3 = (int)(m_cells_corner[2*i]*(float)size);
       int v3 = (int)((m_cells_corner[2*i+1]+m_cell_width)*(float)size);
-      int colour = payload[i] ? COLOUR_BLACK : COLOUR_WHITE;
-      //int colour = (int)((float)i/(float)(SIZE*SIZE - (SIZE*SIZE % 2)) * 128)+128;
+      //int colour = payload[i] ? COLOUR_BLACK : COLOUR_WHITE;
+      int colour = (int)((float)i/(float)(SIZE*SIZE - (SIZE*SIZE % 2)) * 128)+128;
       image.DrawFilledQuadTangle(u0,v0,
 				 u1,v1,
 				 u2,v2,
