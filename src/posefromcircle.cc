@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/26 10:13:51  acr31
+ * added missing #include
+ *
  * Revision 1.1  2004/01/25 14:53:36  acr31
  * moved over to autoconf/automake build system
  *
@@ -17,6 +20,7 @@
  */
 
 #include <posefromcircle.hh>
+#include <opencv/cv.h>
 
 #undef FILENAME
 #define FILENAME "posefromcircle.cc"
