@@ -14,6 +14,7 @@
 #include <total/QuadTangle.hh>
 
 // coders
+#include <total/RawCoder.hh>
 #include <total/SCCCoder.hh>
 #include <total/ParityCoder.hh>
 #include <total/SCCCoder.hh>
