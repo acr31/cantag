@@ -47,7 +47,7 @@ public:
   virtual void GetTransform(float transform1[16], float transform2[16]) const;
 
 private:
-  void FitEllipse(const float* points, int numpoints);
+  bool FitEllipse(const float* points, int numpoints);
 };
 
 /**

@@ -41,6 +41,7 @@ public:
 
   ~SceneGraph() {
     cvReleaseMemStorage(&store);
+    delete m_root;
   }
   /**
    * Update the scene graph with the given image

@@ -102,6 +102,10 @@ V4LImageSource::V4LImageSource(const char* device, const int channel) : m_handle
 
   // configure the device to give us greyscale images
   struct video_picture p;
+  if (ioctl(m_handle.Get(),VIDIOCGPICT,&p) < 0) {
+    throw "Failed to ioctl (VIDIOCGPICT) video device";
+  }
+  
   p.palette = VIDEO_PALETTE_GREY;
   if (ioctl(m_handle.Get(),VIDIOCSPICT,&p) < 0) {
     throw "Failed to ioctl (VIDIOCSPICT) video device";

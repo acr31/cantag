@@ -24,12 +24,12 @@ static void print(const char* label, double* array, int rows, int cols);
 static void print(const char* label, double** array, int rows, int cols);
 
 Ellipse::Ellipse(const float* points, int numpoints) {
-  FitEllipse(points,numpoints);
+  m_fitted = FitEllipse(points,numpoints);
 }
 
 Ellipse::Ellipse(const float* points, int numpoints, bool prev_fit) {
   if (!prev_fit) {
-    FitEllipse(points,numpoints);
+    m_fitted = FitEllipse(points,numpoints);
   }
   else {
     m_fitted =false;
@@ -52,10 +52,9 @@ bool Ellipse::Compare(const Ellipse& o) const {
 	  (fabs(m_f - o.m_f) < COMPARETHRESH));
 }
 
-void Ellipse::FitEllipse(const float* points, int numpoints) {
+bool Ellipse::FitEllipse(const float* points, int numpoints) {
   if (numpoints < 6) {
-    m_fitted = false;
-    return;
+    return false;
   }
 
 #ifdef ELLIPSE_DEBUG_DUMP_POINTS
@@ -64,56 +63,47 @@ void Ellipse::FitEllipse(const float* points, int numpoints) {
   }
 #endif
 
-  double d1[numpoints*3];
-  double d2[numpoints*3];
   
-  // Compute
-
-  // D1 = [ x.^2 , x.*y , y.^2 ]
-  // D2 = [ x , y , 1]
-
-  int pointer = 0;
-  for(int i=0;i<numpoints*2;i+=2) {
-    d1[pointer] = points[i]*points[i];
-    d2[pointer++] = points[i];
-
-    d1[pointer] = points[i]*points[i+1];
-    d2[pointer++] = points[i+1];
-
-    d1[pointer] = points[i+1]*points[i+1];
-    d2[pointer++] = 1;
-  }
-
-#ifdef ELLIPSE_DEBUG_DUMP_POINTS
-  print("D1",d1,numpoints,3);
-  print("D2",d2,numpoints,3);
-#endif
-
-  double s1[9];
-  double s2[9];
-  double s30[3];
-  double s31[3];
-  double s32[3];
-  double* s3[] = { s30,s31,s32};  // store s3 in col major format so we can use it for gaussian elimination
-
   // Compute
 
   // S1 = D1' * D1
   // S2 = D1' * D2
   // S3 = D2' * D2
 
-  for(int i=0;i<3;i++) { // rows
-    for(int j=0;j<3;j++) { // cols
-      s1[i*3+j] = d1[i]*d1[j];
-      s2[i*3+j] = d1[i]*d2[j];
-      s3[j][i] = d2[i]*d2[j];
-      for(int k=1;k<numpoints;k++) {
-	s1[i*3+j] += d1[i+k*3] * d1[j+k*3];
-	s2[i*3+j] += d1[i+k*3] * d2[j+k*3];
-	s3[j][i] += d2[i+k*3] * d2[j+k*3];
+  // D1 is [ x.^2 , x.*y, y.^2 ]
+  // d1(i,0) = points[2*i]*points[2*i]
+  // d1(i,1) = points[2*i]*points[2*i+1]
+  // d1(i,2) = points[2*i+1]*points[2*i+1]
+
+  // D2 is [x,y,1]
+  // d2(i,0) = points[2*i]
+  // d2(i,1) = points[2*i+1]
+  // d2(i,2) = 1
+
+  double s1[9] = {0};
+  double s2[9] = {0};
+  double s30[3] = {0};
+  double s31[3] = {0};
+  double s32[3] = {0};
+  double* s3[] = { s30,s31,s32};  // store s3 in col major format so we can use it for gaussian elimination
+
+  for(int j=0;j<numpoints;j++) {
+    double d1col[] = {points[2*j] * points[2*j],
+		      points[2*j] * points[2*j+1],
+		      points[2*j+1] * points[2*j+1]};
+    double d2col[] = {points[2*j],
+		      points[2*j+1],
+		      1};
+    
+    for(int k=0;k<2;k++) {
+      for(int l=0;l<2;l++) {
+	s1[k*3+l] += d1col[k] * d1col[l];
+	s2[k*3+l] += d1col[k] * d2col[l];
+	s3[l][k] += d2col[k] * d2col[l];
       }
     }
   }
+
 #ifdef ELLIPSE_DEBUG
   print("S1",s1,3,3);
   print("S2",s2,3,3);
@@ -207,9 +197,10 @@ void Ellipse::FitEllipse(const float* points, int numpoints) {
       PROGRESS("Fitted ellipse: a="<<m_a<<","<<m_b<<","<<m_c<<","<<m_d<<","<<m_e<<","<<m_f);
 #endif      
 
-      m_fitted = (GetError(points,numpoints) < MAXFITERROR);
+      return (GetError(points,numpoints) < MAXFITERROR);
     }
   }
+  return false;
 }
 
 float Ellipse::GetError(const float* points, int count) const {

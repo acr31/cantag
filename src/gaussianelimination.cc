@@ -5,32 +5,35 @@
 #include <Config.hh>
 #include <gaussianelimination.hh>
 #include <iostream>
-#undef GAUSSIAN_DEBUG
+
+#ifdef TEXT_DEBUG
+# undef GAUSSIAN_DEBUG
+#endif
 
 /**
  * Pick the most well conditioned co-efficient from the matrix.
  *
- * Scan along the given row in the square matrix of given size
- * starting from the given start column looking for the best
+ * Scan along the given column in the square matrix of given size
+ * starting from the given start row looking for the best
  * co-efficient to pivot on.  This is either the largest value or
  * (preferentially) 1.
  *
  * Returns the column number (from zero) of the best co-efficient.
  */
-static inline int find_best_coefficient(double** vals, int size, int row, int startcolumn) {
-  double max = fabs(vals[startcolumn][row]);
-  int maxcol = startcolumn;
+static inline int find_best_coefficient(double** vals, int size, int column, int startrow) {
+  double max = fabs(vals[startrow][column]);
+  int maxrow = startrow;
   if (max == 1) { 
-    return startcolumn;
+    return maxrow;
   }
-  for(int i=startcolumn+1;i<size;i++) {
-    if (vals[i][row] == 1) {
+  for(int i=startrow+1;i<size;i++) {
+    if (vals[i][column] == 1) {
       return i;
     }
     
-    if (fabs(vals[i][row]) > max) {
-      max = fabs(vals[i][row]);
-      maxcol = i;
+    if (fabs(vals[i][column]) > max) {
+      max = fabs(vals[i][column]);
+      maxrow = i;
     }    
   }
 
@@ -40,26 +43,26 @@ static inline int find_best_coefficient(double** vals, int size, int row, int st
   }
 #endif
 
-  return maxcol;
-}
-
-/**
- * Swap the columns c1 and c2.
- */
-static inline void swap_columns(double** vals, int c1, int c2) {
-  double* p = vals[c1];
-  vals[c1] = vals[c2];
-  vals[c2] = p;
+  return maxrow;
 }
 
 /**
  * Swap the rows r1 and r2.
  */
-static inline void swap_rows(double** vals, int r1, int r2,int size) {
+static inline void swap_rows(double** vals, int r1, int r2) {
+  double* p = vals[r1];
+  vals[r1] = vals[r2];
+  vals[r2] = p;
+}
+
+/**
+ * Swap the rows c1 and c2.
+ */
+static inline void swap_columns(double** vals, int c1, int c2,int size) {
   for(int i=0;i<size;i++) {
-    double t = vals[i][r1];
-    vals[i][r1] = vals[i][r2];
-    vals[i][r2] = t;
+    double t = vals[i][c1];
+    vals[i][c1] = vals[i][c2];
+    vals[i][c2] = t;
   }
 }
 
@@ -71,7 +74,7 @@ static inline void swap_rows(double** vals, int r1, int r2,int size) {
  */
 static inline void scale_row(double** vals, int size, int row, double factor, int startcolumn) {
   for(int i=startcolumn;i<size;i++) {
-    vals[i][row] *= factor;
+    vals[row][i] *= factor;
   }
 }
 
@@ -84,18 +87,18 @@ static inline void scale_row(double** vals, int size, int row, double factor, in
  */
 static inline void subtract_row(double** vals, int size, int r1, int r2, double factor, int startcolumn) {
   for(int i=startcolumn;i<size;i++) {
-    vals[i][r1] -= factor*vals[i][r2];
+    vals[r1][i] -= factor*vals[r2][i];
   }
 }
 
 /**
- * Print out the column major matrix.
+ * Print out the row major matrix.
  */
 static void print(double** vals, int rows,int cols) {
   std::cout << std::endl << "[";
   for(int i=0;i<rows;i++) {
     for(int j=0;j<cols;j++) {
-      std::cout << vals[j][i] << "\t";
+      std::cout << vals[i][j] << "\t";
     }
     std::cout << ";" << std::endl;
   }
@@ -105,19 +108,10 @@ static void print(double** vals, int rows,int cols) {
 
 void solve_simultaneous(double* X, double** A, double* R, int size) {
 
-  // create alphas which we will store the result in.  When we swap
-  // columns we also need to swap the corresponding values in R -
-  // we'll do this by swapping the pointers in alphas around instead
-  // so that the caller gets R back in the right order
-  double* alphas[size];
-  for(int i=0;i<size;i++) {
-    alphas[i] = R+i;
-  }
-
   for(int i=0;i<size;i++) {
 #ifdef GAUSSIAN_DEBUG
     std::cout << "-------" << std::endl;
-    std::cout << "Row " << i << std::endl;
+    std::cout << "Column " << i << std::endl;
     print(A,size,size);
     std::cout << std::endl;
     for(int k=0;k<size;k++) {
@@ -125,16 +119,18 @@ void solve_simultaneous(double* X, double** A, double* R, int size) {
     }
 #endif
 
-    // find the column index of the best pivot.
-    int bestcolumn = find_best_coefficient(A,size,i,i);
+    // find the row index of the best pivot.
+    int bestrow = find_best_coefficient(A,size,i,i);
 #ifdef GAUSSIAN_DEBUG
-    std::cout << "Best Column is " << bestcolumn << std::endl;
+    std::cout << "Best Row is " << bestrow << std::endl;
 #endif
 
-    // swap the columns and the pointers accordingly
-    swap_columns(A,i,bestcolumn);
-    swap_columns(alphas,i,bestcolumn);
-    
+    // swap the rows and the pointers accordingly
+    swap_rows(A,i,bestrow);
+    double t = X[i];
+    X[i] = X[bestrow];
+    X[bestrow] = t;
+
     // scale row so that it has a one on the leading diagonal
     double bestcoeff = A[i][i];
 #ifdef GAUSSIAN_DEBUG
@@ -150,11 +146,11 @@ void solve_simultaneous(double* X, double** A, double* R, int size) {
     // to zero out the lower triangle of the matrix
     for(int j=i+1;j<size;j++) {
 #ifdef GAUSSIAN_DEBUG
-      std::cout << "Subtract "<<A[i][j]<<" times row " << i << " from row "<<j<<std::endl;
+      std::cout << "Subtract "<<A[j][i]<<" times row " << i << " from row "<<j<<std::endl;
 #endif
-      // order is important here - subtract row will alter A[i][j]
-      X[j]-= A[i][j]*X[i]; // perform the same subtraction on the X co-effs
-      subtract_row(A,size,j,i,A[i][j],i); // this does rowj -= A[i][j]*rowi starting from col i
+      // order is important here - subtract row will alter A[j][i]
+      X[j]-= A[j][i]*X[i]; // perform the same subtraction on the X co-effs
+      subtract_row(A,size,j,i,A[j][i],i); // this does rowj -= A[i][j]*rowi starting from col i
     }
   }
 
@@ -172,9 +168,9 @@ void solve_simultaneous(double* X, double** A, double* R, int size) {
   // r1+a*r2+b*r3+c*r4 = x4
 
   for(int i=size-1;i>=0;i--) {
-    *alphas[i] = X[i];
+    R[i] = X[i];
     for(int j=i+1;j<size;j++) {
-      *alphas[i] -= A[j][i] * *alphas[j];
+      R[i] -= A[i][j] * R[j];
     }
   }
 
@@ -206,17 +202,16 @@ void predivide(double** A, double** B, int size, int cols) {
 #endif
 
     // find the column index of the best pivot.
-    int bestcolumn = find_best_coefficient(A,size,i,i);
+    int bestrow = find_best_coefficient(A,size,i,i);
 #ifdef GAUSSIAN_DEBUG
-    std::cout << "Best Column is " << bestcolumn << std::endl;
+    std::cout << "Best Row is " << bestrow << std::endl;
 #endif
 
     // swap the columns and the pointers accordingly
-    //swap_columns(A,i,bestcolumn);
-
-    //    swap_rows(B,i,bestcolumn,cols);
+    swap_rows(A,i,bestrow);
+    swap_rows(B,i,bestrow);
+    //    swap_columns(B,i,bestrow,cols);
     
-
     // scale row so that it has a one on the leading diagonal
     double bestcoeff = A[i][i];
 #ifdef GAUSSIAN_DEBUG
@@ -245,15 +240,15 @@ void predivide(double** A, double** B, int size, int cols) {
     for(int j=0;j<size;j++) {
       if (j != i) {
 #ifdef GAUSSIAN_DEBUG
-	std::cout << "Subtract "<<A[i][j]<<" times row " << i << " from row "<<j<<std::endl;
+	std::cout << "Subtract "<<A[j][i]<<" times row " << i << " from row "<<j<<std::endl;
 #endif
 	// the order of these is important - we overwrite A[i][j] in the second one.
-	subtract_row(B,cols,j,i,A[i][j],0); // this does rowj -= A[i][j]*rowi - do the whole row
+	subtract_row(B,cols,j,i,A[j][i],0); // this does rowj -= A[i][j]*rowi - do the whole row
 
 	// subract_row is call by value and so, even though we
 	// overwrite A[i][j] as the first thing we do in the function
 	// the rest of it works.
-	subtract_row(A,size,j,i,A[i][j],i); // this does rowj -= A[i][j]*rowi starting from col i
+	subtract_row(A,size,j,i,A[j][i],i); // this does rowj -= A[i][j]*rowi starting from col i
       }
     }
   }

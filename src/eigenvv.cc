@@ -244,7 +244,9 @@ void eigensolve(double a, double b, double c,
   double t,x,y,z,w,eta,v1,v2,v3,w2,w3;
   double q11,q12,q13,q21,q22,q23,q31,q32,q33;
   int count,cnt,iters,max;
-
+  v1 =0;
+  v2=0;
+  v3 =0;
   count=0;
 
 #ifdef EIGEN_DEBUG
@@ -523,6 +525,17 @@ void eigensolve(double a, double b, double c,
 	      m33 = (e-v3)*(a-v3);
 	    }
 	}
+      else {
+	m11 =0;
+	m21 =0;
+	m31 =0;
+	m12 =0;
+	m22 =0;
+	m32 =0;
+	m13 =0;
+	m23 =0;
+	m33 =0;
+      }
 
 #ifdef EIGEN_DEBUG      
       if(t<0) std::cout << "Complex evals, ignore the following" << std::endl;
