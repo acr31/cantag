@@ -286,7 +286,8 @@ float Ellipse::GetErrorNakagawa(const float* points, int count) const {
     
     // compute iy
     float iy;
-    if (yi > y0) {
+    if ((yi >= y0 && k > 0) ||
+	(yi < y0 && k < 0)) {
       iy = y0 + a*b*k/rt;
     }
     else {
@@ -294,7 +295,7 @@ float Ellipse::GetErrorNakagawa(const float* points, int count) const {
     }
     
     float d = (ix-xi)*(ix-xi) + (iy-yi)*(iy-yi);
-    total+=d;
+    total+=fabs(d);
   }
   
 #ifdef ELLIPSE_DEBUG
@@ -342,18 +343,19 @@ float Ellipse::GetErrorSafaeeRad(const float* points, int count) const {
 
     // compute iy
     float iy;
-    if (yi > y0) {
+    if ((yi >= y0 && k > 0) ||
+	(yi < y0 && k < 0)) {
       iy = y0 + a*b*k/rt;
     }
     else {
       iy = y0 - a*b*k/rt;
     }
 
-    float m = sqrt((x0-ix)*(x0-ix)+(y0-ix)*(y0-ix));
+    float m = sqrt((x0-ix)*(x0-ix)+(y0-iy)*(y0-iy));
     float n = sqrt((ix-xi)*(ix-xi)+(iy-yi)*(iy-yi));
     float q = m_a*xi*xi+m_b*xi*yi+m_c*yi*yi+m_d*xi+m_e*yi+m_f;
 
-    total += m*(1+ n/2/a)/(1+ n/2/m)*q;   
+    total += fabs(m*(1+ n/2/a)/(1+ n/2/m)*q);
   }
 
 #ifdef ELLIPSE_DEBUG
@@ -397,17 +399,18 @@ float Ellipse::GetErrorSafaeeRad2(const float* points, int count) const {
 
     // compute iy
     float iy;
-    if (yi > y0) {
+    if ((yi >= y0 && k > 0) ||
+	(yi < y0 && k < 0)) {
       iy = y0 + a*b*k/rt;
     }
     else {
       iy = y0 - a*b*k/rt;
     }
 
-    float m = sqrt((x0-ix)*(x0-ix)+(y0-ix)*(y0-ix));
+    float m = sqrt((x0-ix)*(x0-ix)+(y0-iy)*(y0-iy));
     float q = m_a*xi*xi+m_b*xi*yi+m_c*yi*yi+m_d*xi+m_e*yi+m_f;
 
-    total += m*q;   
+    total += fabs(m*q);
   }
 
 #ifdef ELLIPSE_DEBUG
@@ -432,7 +435,7 @@ float Ellipse::GetErrorStricker(const float* points, int count) const {
     a=b;
     b=swap;
     
-    theta=2*M_PI-theta;
+    theta=M_PI/2-theta;
   }
 
   float c = sqrt(a*a-b*b);
@@ -443,19 +446,19 @@ float Ellipse::GetErrorStricker(const float* points, int count) const {
   float f2x = x0 - c*cos(theta);
   float f2y = x0 - c*sin(theta);
 
+  float modf1_f2 = sqrt( (f1x-f2x)*(f1x-f2x) + (f1y-f2y)*(f1y-f2y) );
+
   float total =0;
   for(int pt=0;pt<count*2;pt+=2) {
     float x = points[pt];
     float y = points[pt+1];
 
-    float aest = 0.5 * sqrt( (x-f1x)*(x-f1x) + (y-f1y)*(y-f1y) ) + sqrt( (x-f2x)*(x-f2x) + (y-f2y)*(y-f2y));
+    float aest = 0.5 * (sqrt( (x-f1x)*(x-f1x) + (y-f1y)*(y-f1y) ) + sqrt( (x-f2x)*(x-f2x) + (y-f2y)*(y-f2y)));
     float best = sqrt(aest*aest - a*a + b*b);
 
     float dest = 0.5*(aest - a + best - b);
 
     float ctilde = sqrt( (a+dest)*(a+dest) - (b+dest)*(b+dest) );
-
-    float modf1_f2 = sqrt( (f1x-f2x)*(f1x-f2x) + (f1y-f2y)*(f1y-f2y) );
 
     float f1xtilde = (f1x + f2x)/2+ctilde*(f1x-f2x)/modf1_f2;
     float f1ytilde = (f1y + f2y)/2+ctilde*(f1y-f2y)/modf1_f2;
@@ -465,7 +468,7 @@ float Ellipse::GetErrorStricker(const float* points, int count) const {
 
     float atilde = 0.5*(sqrt( (x-f1x)*(x-f1x) + (y-f1y)*(y-f1y) ) + sqrt( (x-f2x)*(x-f2x) + (y-f2y)*(y-f2y) ));
 
-    total += atilde - a;   
+    total += fabs(atilde - a);
   }
 
 #ifdef ELLIPSE_DEBUG

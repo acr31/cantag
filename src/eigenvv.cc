@@ -9,7 +9,9 @@
 
 #include <eigenvv.hh>
 #include <opencv/cv.h>
-#define EIGEN_DEBUG
+#ifdef TEXT_DEBUG
+# define EIGEN_DEBUG
+#endif
 
 #ifdef EIGEN_DEBUG
 #include <iostream>
