@@ -52,10 +52,11 @@ void Image::GlobalThreshold(unsigned char threshold) {
  *
  * \todo Doesnt work properly on noisy images
  */
+
 void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
   int moving_average = 127;
   int previous_line[m_image->width];
-  for(unsigned int i=0;i<m_image->height;i+=2) {
+  for(unsigned int i=0;i<m_image->height-1;i+=2) {
     for(unsigned int j=0;j<m_image->width;j++) {
       moving_average = AdaptiveWidthStep(moving_average,previous_line,i,j,window_size,offset);
     }
@@ -69,12 +70,18 @@ void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
 #endif
 }
 
+/*
+void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
+  assert(window_size%2==1);
+  cvAdaptiveThreshold(m_image,m_image,255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY_INV,window_size,offset);
+}
+*/
 inline int Image::AdaptiveWidthStep(int moving_average, int* previous_line, unsigned int i, unsigned int j, unsigned int s, int offset) {
   moving_average = SampleNoCheck(j,i) + moving_average - moving_average/s;
-  //  int current_thresh = (moving_average + (i==0 ? 0 : previous_line[j]))/2;
-  int current_thresh = moving_average;
+  int current_thresh = (moving_average + (i==0 ? 0 : previous_line[j]))/2;
+  //int current_thresh = moving_average;
   previous_line[j] = moving_average;
-  if (Sample(j,i)*s*255 < moving_average*(255-offset)) {
+  if (Sample(j,i)*s*255 < current_thresh*(255-offset)) {
     DrawPixelNoCheck(j,i,COLOUR_WHITE);
   }
   else {
