@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/26 08:55:36  acr31
+ * added some new drawing method for Ellipse2D's and Rectangle2D's
+ *
  * Revision 1.1  2004/01/25 14:54:36  acr31
  * moved over to automake/autoconf build system
  *
@@ -19,6 +22,8 @@
 #define DRAWING_GUARD
 
 #include "Config.hh"
+#include "Ellipse2D.hh"
+#include "Rectangle2D.hh"
 #include <opencv/cv.h>
 
 typedef IplImage Image;
@@ -36,6 +41,12 @@ inline int SampleImage(Image *image,float x, float y) {
   return (int)(((uchar*)(image->imageData + image->widthStep*(int)y))[(int)x]);
 }
 
+/**
+ * Draw an ellipse with centre x,y and given width and height - note
+ * width and height are twice the size of the major and minor axes
+ * they represent.  angle_radians is the angle between the horizontal
+ * and the axis given by width
+ */
 inline void DrawEllipse(Image *image, float x, float y, float width, float height, float angle_radians, float start_angle, float end_angle, int color, int thickness) {
   PROGRESS("Drawing ellipse. Centre ("<<x<<","<<y<<") Size ("<<width<<","<<height<<") Angle "<<angle_radians<<" Arc ("<<start_angle<<"->"<<end_angle<<") in Colour "<<color);
   cvEllipse(image,
@@ -46,6 +57,22 @@ inline void DrawEllipse(Image *image, float x, float y, float width, float heigh
 	    360-end_angle*180/CV_PI,
 	    color,
 	    thickness);
+}
+
+inline void DrawEllipse(Image *image, Ellipse2D *ellipse, float start_angle, float end_angle, int colour, int thickness) {
+  DrawEllipse(image,ellipse->m_x,ellipse->m_y,ellipse->m_width,ellipse->m_height,ellipse->m_angle_radians,start_angle,end_angle,colour,thickness);
+}
+
+inline void DrawEllipse(Image *image, Ellipse2D *ellipse, int colour, int thickness) {
+  DrawEllipse(image,ellipse->m_x,ellipse->m_y,ellipse->m_width,ellipse->m_height,ellipse->m_angle_radians,0,2*PI,colour,thickness);
+}
+
+inline void DrawFilledEllipse(Image *image, Ellipse2D *ellipse, float start_angle, float end_angle, int colour) {
+  DrawEllipse(image,ellipse->m_x,ellipse->m_y,ellipse->m_width,ellipse->m_height,ellipse->m_angle_radians,start_angle,end_angle,colour,-1);
+}
+
+inline void DrawFilledEllipse(Image *image, Ellipse2D *ellipse, int colour) {
+  DrawEllipse(image,ellipse->m_x,ellipse->m_y,ellipse->m_width,ellipse->m_height,ellipse->m_angle_radians,0,2*PI,colour,-1);
 }
 
 inline void DrawEllipse(Image *image, float x, float y, float width, float height, float angle_radians, int color, int thickness) {
@@ -72,6 +99,17 @@ inline void DrawFilledQuadTangle(Image *image,
 		   cvPoint((int)x2,(int)y2),
 		   cvPoint((int)x3,(int)y3) };
   cvFillConvexPoly(image,p,4,color);
+}
+
+inline void DrawFilledQuadTangle(Image* image,
+				 Rectangle2D* r,
+				 int colour) {
+  DrawFilledQuadTangle(image,
+		       r->m_x0,r->m_y0,
+		       r->m_x1,r->m_y1,
+		       r->m_x2,r->m_y2,
+		       r->m_x3,r->m_y3,
+		       colour);
 }
 			   
 #endif//DRAWING_GUARD
