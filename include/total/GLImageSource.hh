@@ -251,7 +251,7 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz
     ny/=norm;
     nz/=norm;
 
-    //    float factor = sqrt(1-ny*ny);
+    //float factor = -sqrt(1-ny*ny);
     float factor = -sqrt(nx*nx+nz*nz);
     // column major representation 
     float rotation[] = { nz/factor, 0, -nx/factor, 0, 
@@ -294,11 +294,6 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz
     // this is a front facing polygon that we map our texture to
     glBegin(GL_QUADS);
     // set the current texture co-ordinate and then the vertex that we want it to map to 
-    /*    glTexCoord2f(0.0, 0.0); glVertex3f(-0.5, -0.5, 0.0);
-    glTexCoord2f(1.0, 0.0); glVertex3f(0.5, -0.5, 0.0);
-    glTexCoord2f(1.0, 1.0); glVertex3f(0.5, 0.5, 0.0);
-    glTexCoord2f(0.0, 1.0); glVertex3f(-0.5, 0.5, 0.0); */
-
     glTexCoord2f(0.0, 0.0); glVertex3f(-1, -1, 0.0);
     glTexCoord2f(1.0, 0.0); glVertex3f(1, -1, 0.0);
     glTexCoord2f(1.0, 1.0); glVertex3f(1, 1, 0.0);
@@ -311,10 +306,10 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz
     // previous polygon that is plain white
     glBegin(GL_QUADS);
     glColor3f(1.0,0.0,0.0);
-    glVertex3f(-0.5, 0.5, 0.0); 
-    glVertex3f(0.5, 0.5, 0.0);
-    glVertex3f(0.5, -0.5, 0.0);
-    glVertex3f(-0.5, -0.5, 0.0);
+    glVertex3f(-1, 1, 0.0); 
+    glVertex3f(1, 1, 0.0);
+    glVertex3f(1, -1, 0.0);
+    glVertex3f(-1, -1, 0.0);
     glEnd();
     glFlush();
     
