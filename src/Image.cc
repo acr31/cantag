@@ -108,7 +108,7 @@ void Image::GlobalThreshold(const unsigned char threshold) {
     }
   }
 #ifdef IMAGE_DEBUG
-  Save("debug-globalthreshold.bmp");
+  Save("debug-globalthreshold.pnm");
 #endif
 
   m_binary = true;
@@ -167,7 +167,7 @@ void Image::AdaptiveThreshold(const unsigned int window_size, const unsigned cha
   m_binary = true;
 
 #ifdef IMAGE_DEBUG
-  Save("debug-adaptivethreshold.bmp");
+  Save("debug-adaptivethreshold.pnm");
 #endif
 }
 
@@ -192,7 +192,7 @@ void Image::HomogenousTransform() {
   m_binary = true;
 
 #ifdef IMAGE_DEBUG
-  Save("debug-homogenoustransform.jpg");
+  Save("debug-homogenoustransform.pnm");
 #endif
 }
 
@@ -543,8 +543,8 @@ void Image::Save(const char* filename) const {
     i.modifyImage();
     for(int y=0;y<GetHeight();++y) {
       const unsigned char* row = GetRow(y);
-      for(int x=0;x<GetWidth();++x) {
-	Magick::ColorRGB color((double)*row/255,(double)*row/255,(double)*row/255);
+      for(int x=0;x<GetWidth();++x) {	
+	Magick::ColorGray color(m_binary ? (*row ? 1.0 : 0.0) : (double)*row/255);
 	i.pixelColor(x,y,color);
 	++row;
       }
