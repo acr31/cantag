@@ -79,6 +79,7 @@ void Image::AdaptiveThreshold(const unsigned int window_size, const unsigned cha
   int moving_average = 127;
   const int image_width = GetWidth();
   const int image_height = GetHeight();
+ const int useoffset = 255-offset;
 
   int previous_line[image_width];
   // intentionally uninitialised
@@ -91,7 +92,7 @@ void Image::AdaptiveThreshold(const unsigned int window_size, const unsigned cha
       moving_average = pixel + moving_average - (moving_average >> window_size);
       int current_thresh = (moving_average + previous_line[j])>>1;
       previous_line[j] = moving_average;
-      *data_pointer = (pixel << window_size) < current_thresh ? 1 : 0;
+      *data_pointer = (pixel << window_size+8) < (current_thresh * useoffset) ? 1 : 0;
       ++data_pointer;
     }
 
@@ -102,7 +103,7 @@ void Image::AdaptiveThreshold(const unsigned int window_size, const unsigned cha
       moving_average = pixel + moving_average - (moving_average >> window_size);
       int current_thresh = (moving_average + previous_line[j])>>1;
       previous_line[j] = moving_average;
-      *data_pointer = (pixel << window_size) < current_thresh  ? 1 : 0;
+      *data_pointer = (pixel << window_size+8) < (current_thresh * useoffset)  ? 1 : 0;
       --data_pointer;
     }
     ++i;
@@ -291,7 +292,7 @@ void Image::DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigne
     DrawPixel(x,y,colour);
 
     if (dy > 0 && dy > dx) { // NE or N
-      int d = a*(x+0.5)+b*(y+1)+c;
+      int d = (int)(a*(x+0.5)+b*(y+1)+c);
       while (y < y1) {
 	++y;
 	if (d>0) {
@@ -305,7 +306,7 @@ void Image::DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigne
       }
     }
     else if (dy > 0 && dx > dy) { // E or NE
-      int d = a*(x+1)+b*(y+0.5)+c;
+      int d = (int)(a*(x+1)+b*(y+0.5)+c);
       while (x < x1) {
 	++x;
 	if (d<0) {
@@ -319,7 +320,7 @@ void Image::DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigne
       }
     }
     else if (dy < 0 && dx > -dy) { // E or SE
-      int d = a*(x+1)+b*(y-0.5)+c;
+      int d = (int)(a*(x+1)+b*(y-0.5)+c);
       while (x<x1) {
 	++x;
 	if (d>0) {
@@ -333,7 +334,7 @@ void Image::DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigne
       }
     }
     else { // SE or S
-      int d = a*(x+0.5)+b*(y-1)+c;
+      int d = (int)(a*(x+0.5)+b*(y-1)+c);
       while (y > y1) {
 	--y;
 	if (d<0) {
