@@ -89,7 +89,7 @@ template<class S> void ShapeTree<S>::walk_tree(Node* current, const ContourTree:
 template<class S> void ShapeTree<S>::Node::Save(Socket& socket) const {
     matched.Save(socket);
     socket.Send(children.size());
-    for(std::vector<Node*>::const_iterator i = children.begin(); i!=children.end(); ++i) {
+    for(typename std::vector<Node*>::const_iterator i = children.begin(); i!=children.end(); ++i) {
 	(*i)->Save(socket);
     }
 }

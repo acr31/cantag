@@ -55,6 +55,7 @@ public:
 
   void LoadTransform(float transform[16],float tag_size, float agle, const Camera& camera);
 
+  LocatedObject();
   ~LocatedObject();
 
     void Save(Socket& socket) const;
@@ -68,12 +69,14 @@ template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::Save(Socket& socket
     tag_code->Save(socket);
 }
 
-template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LocatedObject(Socket& socket) {
+template<int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>::LocatedObject(Socket& socket) {
     socket.Recv(transform,16);
     socket.Recv(location,3);
     socket.Recv(angle);
     tag_code = new CyclicBitSet<PAYLOAD_SIZE>(socket);
 }
+
+template<int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>::LocatedObject() : tag_code(NULL) {}
 
 template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(float t[16],float tag_size, float agle, const Camera& camera) {
   for(int i=0;i<16;i++) {

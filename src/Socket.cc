@@ -3,7 +3,14 @@
  */
 
 #include <Socket.hh>
-#include <cerror>
+#include <cerrno>
+
+extern "C" {
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+}
 
 Socket::Socket() {
   m_socket = ::socket(PF_INET,SOCK_STREAM,0);
@@ -28,7 +35,7 @@ void Socket::Bind(const char* host, int port) {
   struct sockaddr_in s;
   memset(&s,0,sizeof(sockaddr));
   s.sin_family = AF_INET;
-  s.sin_port = htons(m_port);
+  s.sin_port = htons(port);
   int status = inet_pton(AF_INET,host,&s.sin_addr);
   if (status <= 0) {
     perror(NULL);
@@ -49,7 +56,7 @@ void Socket::Listen() {
   }
 }
 
-Socket& Socket::Accept() {
+Socket Socket::Accept() {
   struct sockaddr_in s;
   memset(&s,0,sizeof(sockaddr));
   socklen_t len = sizeof(struct sockaddr);
@@ -72,11 +79,17 @@ void Socket::Recv(unsigned char* buf, size_t len) {
 
 int Socket::RecvInt() {
   int result;
-  Recv(&result,sizeof(int));
+  Recv((unsigned char*)&result,sizeof(int));
   return result;
 }
 
-void Recv(std::vector<float>& vec) {
+float Socket::RecvFloat() {
+  float result;
+  Recv((unsigned char*)&result,sizeof(float));
+  return result;
+}
+
+void Socket::Recv(std::vector<float>& vec) {
   int size = RecvInt();
   float* data = new float[size];
   Recv( (unsigned char*)data, size * sizeof(float));
@@ -91,16 +104,20 @@ void Socket::Send(const unsigned char* buf, size_t len) {
 }
 
 void Socket::Send(int message) {
-  Send(&message,sizeof(int));
+  Send((unsigned char*)&message,sizeof(int));
+}
+
+void Socket::Send(float message) {
+  Send((unsigned char*)&message,sizeof(float));
 }
 
 void Socket::Send(const std::vector<float>& vec) {
-  float* points = new float[points.size()];
+  float* points = new float[vec.size()];
   float* pointsptr = points;
-  for(std::vector<float>::const_iterator i = points.begin();i!=points.end();++i) {
+  for(std::vector<float>::const_iterator i = vec.begin();i!=vec.end();++i) {
     *(pointsptr++) = *i;
   }
-  Send(points.size());
-  Send( (unsigned char*)points, points.size() * sizeof(float) );
+  Send((int)vec.size());
+  Send( (unsigned char*)points, vec.size() * sizeof(float) );
   delete[] points;
 }

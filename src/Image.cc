@@ -299,9 +299,9 @@ Image::Image(Socket& socket) {
   socket.Recv(m_contents,size);
 }
 
-int Image::Send(Socket& socket) const {
+int Image::Save(Socket& socket) const {
   socket.Send(m_image->width);
   socket.Send(m_image->height);
   socket.Send(m_image->imageSize);
-  socket.Send(m_image->imageData,m_image->imageSize);
+  socket.Send((unsigned char*)m_image->imageData,m_image->imageSize);
 }

@@ -58,7 +58,7 @@ public:
     ShapeChain(Socket& socket);
 };
 
-template<class M, class S> void ShapeChain<M,S>::Save(Socket& socket) {
+template<class M, class S> void ShapeChain<M,S>::Save(Socket& socket) const {
     m_shape.Save(socket);
     m_next.Save(socket);
 }
