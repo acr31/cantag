@@ -1,5 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(tripover,1.0)
+AC_CONFIG_HEADERS(include/tripover/CompilationOptions.h)
 AC_CONFIG_SRCDIR(src/Makefile.am)
 AM_INIT_AUTOMAKE
 AC_LANG([C++])
@@ -7,6 +8,17 @@ AC_LANG([C++])
 dnl Checks for programs.
 AM_PROG_LIBTOOL
 AC_PROG_CXX
+
+AC_ARG_ENABLE([image-debug],
+	AS_HELP_STRING([--enable-image-debug],[enable drawing and saving to disk of debug images (disabled by default)]),
+	AC_DEFINE([IMAGE_DEBUG],[],[enable drawing and saving to disk of debug images]),
+	[])
+	
+AC_ARG_ENABLE([text-debug],
+	AS_HELP_STRING([--enable-text-debug],[enable printing of debug information (disabled by default)]),
+	AC_DEFINE([TEXT_DEBUG],[],[enable printing of debug information]),
+	[])
+	
 
 dnl Checks for header files.
 AC_CHECK_HEADER(opencv/cv.h,
@@ -26,7 +38,7 @@ AC_CHECK_HEADER(GL/osmesa.h,
 	[])
 
 AC_CHECK_HEADER(boost/random.hpp,
-	[AC_DEFINE(HAVE_BOOST_RANDOM)
+	[AC_DEFINE([HAVE_BOOST_RANDOM],[],[Have boost random.hpp])
          AM_CONDITIONAL(BUILD_RANDOM_INCLUDE,true)],
 	[AM_CONDITIONAL(BUILD_RANDOM_INCLUDE,false)
          AC_MSG_NOTICE([boost/random.hh not found in include path])])
@@ -67,7 +79,7 @@ AC_CHECK_LIB(GL,
 	[glFinish],
 	[
 LIBS="-lGL $LIBS"
-AC_DEFINE(HAVELIB_GL)
+AC_DEFINE([HAVELIB_GL],[],[Include OpenGL support])
 AM_CONDITIONAL(BUILD_GL_LIB,true)
 ],
 	[
@@ -79,7 +91,7 @@ AC_CHECK_LIB(OSMesa,
 	[OSMesaGetCurrentContext],
 	[
 LIBS="-lOSMesa $LIBS"
-AC_DEFINE(HAVELIB_OSMESA)
+AC_DEFINE([HAVELIB_OSMESA],[],[Include MESA support - for offscreen rendering])
 AM_CONDITIONAL(BUILD_OSMESA_LIB,true)
 ],
 	[
@@ -91,7 +103,7 @@ AC_CHECK_LIB(GLU,
 	[gluNewTess],
 	[
 LIBS="-lGLU $LIBS"
-AC_DEFINE(HAVELIB_GLU)
+AC_DEFINE([HAVELIB_GLU],[],[GLU is present])
 AM_CONDITIONAL(BUILD_GLU_LIB,true)
 ],
 	[
@@ -103,7 +115,7 @@ AC_CHECK_LIB(glut,
 	[glXChooseVisual],
 	[
 LIBS="-lglut $LIBS"
-AC_DEFINE(HAVELIB_GLUT)
+AC_DEFINE([HAVELIB_GLUT],[],[GLUT is present])
 AM_CONDITIONAL(BUILD_GLUT_LIB,true)
 ],
 	[
@@ -136,7 +148,7 @@ int init_unit_test_suite(int, char**) {
 }
 ]]),
 [
-AC_DEFINE_UNQUOTED(AS_TR_CPP(HAVE_LIBBOOST_UNIT_TEST_FRAMEWORK))
+AC_DEFINE_UNQUOTED(AS_TR_CPP(HAVE_LIBBOOST_UNIT_TEST_FRAMEWORK),[],[Have boost unit test framework])
 AM_CONDITIONAL(BUILD_TEST_FRAMEWORK_LIB,true)
 AC_MSG_NOTICE([found boost])],
 [

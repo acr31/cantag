@@ -37,9 +37,7 @@ private:
   Node m_root_node;
   void walk_tree(Node* current, const ContourTree::Contour* contour);
 
-#ifdef IMAGE_DEBUG
-  Image* debug_image;
-#endif
+
 public:
   /**
    * Walk the contour tree starting at this contour attempting to
@@ -54,14 +52,7 @@ public:
 };
 
 template<class S> ShapeTree<S>::ShapeTree(const ContourTree::Contour& contour) : m_root_node() {
-#ifdef IMAGE_DEBUG
-  debug_image = new Image(1000,1000);
-#endif
   walk_tree(&m_root_node,&contour);
-#ifdef IMAGE_DEBUG
-  debug_image->Save("debug-shapetree.bmp");
-  delete debug_image;
-#endif
 }
 
 template<class S> void ShapeTree<S>::walk_tree(Node* current, const ContourTree::Contour* contour) {
@@ -69,9 +60,6 @@ template<class S> void ShapeTree<S>::walk_tree(Node* current, const ContourTree:
   if (!contour->weeded) {
     Node* n = new Node(contour->points);    
     if (n->matched.IsChainFitted()) {
-#ifdef IMAGE_DEBUG
-      n->matched.DrawChain(*debug_image);
-#endif
       current->children.push_back(n);
       current = n;
     }
