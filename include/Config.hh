@@ -4,7 +4,7 @@
 #ifndef CONFIG_GUARD
 #define CONFIG_GUARD
 
-//#define TEXT_DEBUG
+#define TEXT_DEBUG
 #define IMAGE_DEBUG
 
 #ifdef TEXT_DEBUG

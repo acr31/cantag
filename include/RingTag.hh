@@ -22,6 +22,8 @@
 #undef   DRAW_FIELD_DEBUG
 #endif
 
+int debug_image_counter= 0;
+
 //#define Ellipse LinearEllipse
 
 /**
@@ -29,7 +31,7 @@
  * of reading that are the same in order to guess the correct angle of
  * the tag.
  */
-#define READING_COUNT 5
+#define READING_COUNT 10
 template<int RING_COUNT, int SECTOR_COUNT>
 class RingTag : public virtual Tag< ShapeChain<Ellipse>, RING_COUNT*SECTOR_COUNT >, protected virtual Coder<RING_COUNT*SECTOR_COUNT> {
 private:
@@ -232,7 +234,6 @@ public:
     }     
     // get the children of this node and check for a good match with either interpretation
     float* correcttrans = NULL;
-    /*
     for(std::vector< SceneGraphNode< ShapeChain<Ellipse> >* >::iterator i = node->GetChildren().begin(); i!=node->GetChildren().end();i++) {
       float error1 = (*i)->GetShapes().GetShape().GetError(projected1,count);
       float error2 = (*i)->GetShapes().GetShape().GetError(projected2,count);
@@ -258,7 +259,9 @@ public:
 	break;
       }
     }
-    */
+    
+    /*
+      // uncomment this in order to force the selection of the upwards facing transform
     float normal1[3];
     GetNormalVector(transform1,normal1);
 
@@ -271,7 +274,7 @@ public:
     else {
       correcttrans = transform1;
     }
-
+    */
 
     /*    if (correcttrans == NULL) {
 #ifdef RING_TAG_DEBUG
@@ -429,27 +432,30 @@ private:
     draw_circle(debug0,camera,l,m_data_inner_radius / m_bullseye_outer_radius);
     
     for(int r=0;r<RING_COUNT;r++) {
-      draw_circle(debug0,camera,l,m_data_ring_outer_radii[r] / m_bullseye_outer_radius);
+      //      draw_circle(debug0,camera,l,m_data_ring_outer_radii[r] / m_bullseye_outer_radius);
     }
   
     int counter=0;
     for(int k=0;k<SECTOR_COUNT;k++) {
       for(int r=RING_COUNT-1;r>=0;r--) {
 	float pts[2];
-	pts[0] = cos( m_read_angles[5*k+((i+1)%5)] ) * m_data_ring_centre_radii[r]/m_bullseye_outer_radius;
-	pts[1] = sin( m_read_angles[5*k+((i+1)%5)] ) * m_data_ring_centre_radii[r]/m_bullseye_outer_radius;
+	pts[0] = cos( m_read_angles[READING_COUNT*k+((i+1)%READING_COUNT)] ) * m_data_ring_centre_radii[r]/m_bullseye_outer_radius;
+	pts[1] = sin( m_read_angles[READING_COUNT*k+((i+1)%READING_COUNT)] ) * m_data_ring_centre_radii[r]/m_bullseye_outer_radius;
 	ApplyTransform(l,pts,1);
 	camera.NPCFToImage(pts,1);
 	// pick the colour to be the opposite of the sampled point so we can see the dot
 	int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
 	// or pick the colour to be on a gradient so we see the order it samples in
 	//int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
-	debug0.DrawPoint(pts[0],pts[1],colour,1);
+	//	debug0.DrawPoint(pts[0],pts[1],colour,1);
       }
       counter++;
     }
 #endif
-    debug0.Save("debug-decode.bmp");
+    char filename[256];
+    snprintf(filename,255,"debug-decode-%d.bmp",debug_image_counter++);
+    filename[255]=0;
+    debug0.Save(filename);
   }
 };
 #endif//RING_TAG_GUARD
