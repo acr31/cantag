@@ -142,10 +142,6 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
   }
   delete current;
   m_contour_count--;
-  Image image2(image);
-  image2.ConvertScale(0.25,0);
-  image2.ConvertScale(4,0);
-  image2.Save("debug-contours.pnm");
 #ifdef IMAGE_DEBUG
   debug_image->Save("debug-contourtree-contours.pnm");
 #endif
