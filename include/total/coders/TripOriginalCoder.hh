@@ -11,6 +11,7 @@
 #include <tripover/BigInt.hh>
 
 #include <cmath>
+#include <cassert>
 
 #ifdef TEXT_DEBUG
 # define TRIP_ORIGINAL_CODER_DEBUG
