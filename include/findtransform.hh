@@ -8,8 +8,14 @@
 #include <Ellipse.hh>
 #include <QuadTangle.hh>
 #include <Camera.hh>
+#include <vector>
 
 
+/**
+ * Transform the object co-ordinates x0,y0 onto the image points
+ * (NPCF co-ordinates) and append them to points
+ */
+void ApplyTransform(const float transform[16], float x0, float y0, std::vector<float>& points);
 
 /**
  * Transform the object co-ordinates x0,y0,z0 onto the image points
@@ -31,6 +37,13 @@ void ApplyTransform(const float transform[16], float x0, float y0, float* projX,
  * array _not_ the number of elements.
  */
 void ApplyTransform(const float transform[16], float* points, int numpoints);
+
+/**
+ * Transform the points (given as an array alternating x and y values)
+ * to NPCF co-ordinates.  numpoints in the number of points in the
+ * array _not_ the number of elements.
+ */
+void ApplyTransform(const float transform[16], std::vector<float>& points);
 
 /**
  * Transform the object co-ordinates (given as an array containing

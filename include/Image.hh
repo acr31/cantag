@@ -67,6 +67,7 @@ public:
    * bounds check---returns 0 if out of range.
    */
   inline unsigned char Sample(int x, int y) const {
+    PROGRESS("aSample "<<x<<","<<y);
     if ((x >= 0) && (x < m_image->width) &&
 	(y >= 0) && (y < m_image->height)) {
       return ((uchar*)(m_image->imageData + m_image->widthStep*y))[x];
@@ -370,10 +371,20 @@ public:
    */
   void AddNoise(float mean, float stddev);
 
+  /**
+   * Draw an ellipse with centre x,y and given width and height - note
+   * width and height are twice the size of the major and minor axes
+   * they represent.  angle_radians is the angle between the horizontal
+   * and the axis given by width
+   */
+  void DrawEllipseArc(float xc, float yc, float width, float height, float angle_radians, float start_angle, float end_angle, int color, int thickness);
+  
+  void DrawEllipse(float xc, float yc, float width, float height, float angle_radians, int color, int thickness);
 
 
 private:
   int AdaptiveWidthStep(int moving_average,int* previous_line,unsigned int i, unsigned int j,unsigned int s, int t);
+  void ellipse_polygon_approx(CvPoint* points, int startindex, int length, float xc, float yc, float width, float height,  float angle_radians, int color, int thickness, float start_angle);
 };
 
 

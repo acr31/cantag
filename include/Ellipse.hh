@@ -5,6 +5,8 @@
 #ifndef ELLIPSE_GUARD
 #define ELLIPSE_GUARD
 #include <Config.hh>
+#include <vector>
+#include <Image.hh>
 /**
  * A class to represent ellipses in the image and fit one to a set of points.
  *
@@ -36,11 +38,14 @@ private:
 
 public:
   Ellipse();
-  Ellipse(const float* points, int numpoints); 
-  Ellipse(const float* points, int numpoints, bool prev_fit); 
+  Ellipse(const std::vector<float>& points); 
+  Ellipse(const std::vector<float>& points, bool prev_fit); 
   Ellipse(float a, float b, float c, float d, float e, float f);
+  ~Ellipse();
   inline bool IsFitted() const { return m_fitted; }
   bool Compare(const Ellipse& o) const;
+
+  void Draw(Image& image) const;
   
   inline float GetA() const { return m_a; }
   inline float GetB() const { return m_b; }
@@ -55,13 +60,13 @@ public:
   inline float GetHeight() const { PROGRESS(m_height);return m_height; }
   inline float GetAngle() const { PROGRESS(m_angle_radians);return m_angle_radians; }
 
-  float GetError(const float* points, int numpoints) const;
-  float GetErrorAlgebraic(const float* points, int count) const;
-  float GetErrorGradient(const float* points, int count) const;
-  float GetErrorNakagawa(const float* points, int numpoints) const;
-  float GetErrorSafaeeRad(const float* points, int numpoints) const;
-  float GetErrorSafaeeRad2(const float* points, int numpoints) const;
-  float GetErrorStricker(const float* points, int numpoints) const;
+  float GetError(const std::vector<float>& points) const;
+  float GetErrorAlgebraic(const std::vector<float>& points) const;
+  float GetErrorGradient(const std::vector<float>& points) const;
+  float GetErrorNakagawa(const std::vector<float>& points) const;
+  float GetErrorSafaeeRad(const std::vector<float>& points) const;
+  float GetErrorSafaeeRad2(const std::vector<float>& points) const;
+  float GetErrorStricker(const std::vector<float>& points) const;
 
   void GetTransform(float transform1[16], float transform2[16]);
 
@@ -204,7 +209,7 @@ public:
   
 
 private:
-  bool FitEllipse(const float* points, int numpoints);
+  bool FitEllipse(const std::vector<float>& points);
 };
 
 

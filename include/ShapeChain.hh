@@ -11,9 +11,10 @@
 class ShapeChainEOL {
 public:
   ShapeChainEOL() {};
-  ShapeChainEOL(float* points, int numpoints) {};
-  ShapeChainEOL(float* points, int numpoints,bool fitted) {};
+  ShapeChainEOL(const std::vector<float>& points) {};
+  ShapeChainEOL(const std::vector<float>& points,bool fitted) {};
   inline bool IsChainFitted() const { return false; }
+  inline void DrawChain(Image& image) const {};
 };
 
 
@@ -33,9 +34,9 @@ private:
 
 public:
   ShapeChain();
-  ShapeChain(float* points, int numpoints);
-  ShapeChain(float* points, int numpoints, bool prev_fitted);
-
+  ShapeChain(const std::vector<float>& points);
+  ShapeChain(const std::vector<float>& points, bool prev_fitted);
+  ~ShapeChain();
   inline bool IsFitted() const;
 
   inline bool IsChainFitted() const;
@@ -46,17 +47,21 @@ public:
 
   inline bool Compare(ShapeChain<M,S> o) const;
 
+  void DrawChain(Image& image) const;
+  
 };
 
+
 template<class M, class S> ShapeChain<M,S>::ShapeChain() : m_shape(), m_next() {};
+template<class M, class S> ShapeChain<M,S>::~ShapeChain() {};
 
-template<class M, class S> ShapeChain<M,S>::ShapeChain(float* points, int numpoints) : 
-    m_shape(points,numpoints,false),
-    m_next(points,numpoints,m_shape.IsFitted()) {};
+template<class M, class S> ShapeChain<M,S>::ShapeChain(const std::vector<float>& points) : 
+    m_shape(points,false),
+    m_next(points,m_shape.IsFitted()) {};
 
-template<class M, class S> ShapeChain<M,S>::ShapeChain(float* points, int numpoints, bool prev_fitted) :
-    m_shape(points,numpoints,prev_fitted),
-    m_next(points,numpoints,prev_fitted) {};
+template<class M, class S> ShapeChain<M,S>::ShapeChain(const std::vector<float>& points, bool prev_fitted) :
+    m_shape(points,prev_fitted),
+    m_next(points,prev_fitted) {};
 
 
 template<class M, class S> bool ShapeChain<M,S>::IsFitted() const {
@@ -82,6 +87,10 @@ template<class M, class S> bool ShapeChain<M,S>::Compare(ShapeChain<M,S> o) cons
       m_next.Compare(o.m_next);      
   }
 
+template<class M, class S> void ShapeChain<M,S>::DrawChain(Image& image) const {
+  m_shape.Draw(image);
+  m_next.DrawChain(image);
+}
 
 
 #endif//SHAPE_CHAIN_GUARD

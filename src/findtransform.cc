@@ -8,9 +8,32 @@
 #include <cmath>
 
 #define SQUARE_TRANSFORM_DEBUG
-#undef APPLY_TRANSFORM_DEBUG
+#define APPLY_TRANSFORM_DEBUG
 
 
+void ApplyTransform(const float transform[16], float x, float y, std::vector<float>& points) {
+  float projX = transform[0]*x + transform[1]*y + transform[3];
+  float projY = transform[4]*x + transform[5]*y + transform[7];
+  float projZ = transform[8]*x + transform[9]*y + transform[11];
+  float projH = transform[12]*x + transform[13]*y + transform[15];
+
+#ifdef APPLY_TRANSFORM_DEBUG
+  PROGRESS("Transformed ("<<x<<","<<y<<","<<"0) on to ("<<projX<<","<<projY<<","<<projZ<<","<<projH<<")");
+#endif
+  
+  projX /= projH;
+  projY /= projH;
+  projZ /= projH;
+  
+  projX /= projZ;
+  projY /= projZ;
+
+  points.push_back(projX);
+  points.push_back(projY);
+#ifdef APPLY_TRANSFORM_DEBUG
+  PROGRESS("Projected ("<<x<<","<<y<<","<<"0) on to ("<<projX<<","<<projY<<")");
+#endif
+}
 
 void ApplyTransform(const float transform[16], float x, float y, float z, float* projX, float* projY) {
   *projX = transform[0]*x + transform[1]*y + transform[2]*z + transform[3];
@@ -40,6 +63,32 @@ void ApplyTransform(const float transform[16], float x, float y, float* projX, f
   ApplyTransform(transform,x,y,0,projX,projY);
 }
 
+
+void ApplyTransform(const float transform[16], std::vector<float>& points) {
+  for(int i=0;i<points.size();i+=2) {
+    float x = points[i];
+    float y = points[i+1];
+
+    float projX = transform[0]*x + transform[1]*y + transform[3];
+    float projY = transform[4]*x + transform[5]*y + transform[7];
+    float projZ = transform[8]*x + transform[9]*y + transform[11];
+    float projH = transform[12]*x + transform[13]*y + transform[15];
+    
+#ifdef APPLY_TRANSFORM_DEBUG
+    PROGRESS("Transformed ("<<x<<","<<y<<","<<"0) on to ("<<projX<<","<<projY<<","<<projZ<<","<<projH<<")");
+#endif
+  
+    projX /= projH;
+    projY /= projH;
+    projZ /= projH;
+    
+    projX /= projZ;
+    projY /= projZ;
+    
+    points[i] = projX;
+    points[i] = projY;
+  }
+}
 
 void ApplyTransform(const float transform[16], float* points, int numpoints) {
   for(int i=0;i<numpoints*2;i+=2) {

@@ -66,6 +66,7 @@ void Camera::CameraToWorld(float* points, int numpoints) const {
  * \todo currently ignores radial and tangential parameters
  */
 void Camera::NPCFToImage(float* points, int numpoints) const {
+  return;
   for(int i=0;i<numpoints*2;i+=2) {
     float x = points[i];
     float y = points[i+1];
@@ -101,6 +102,7 @@ void Camera::NPCFToImage(float* points, int numpoints) const {
  * \todo currently ignores radial and tangential parameters
  */
 void Camera::ImageToNPCF(float* points, int numpoints) const {
+  return;
   for(int i=0;i<numpoints*2 ;i+=2) {
     // 1) translate the points back to the principle point
     points[i] -= m_intrinsic[2];

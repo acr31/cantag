@@ -8,9 +8,10 @@
 #include <Config.hh>
 #include <Image.hh>
 #include <Camera.hh>
-#include <SceneGraphNode.hh>
+#include <ShapeTree.hh>
 #include <vector>
 #include <CyclicBitSet.hh>
+#include <WorldState.hh>
 
 /**
  * Abstract superclass for all tags.
@@ -34,24 +35,28 @@ public:
   /**
    * Decode the passed node. Return true if you find a valid tag there or false otherwise
    */
-  virtual bool DecodeNode(SceneGraphNode<C,PAYLOAD_SIZE>* node, const Camera& camera, const Image& image) const =0;
+  virtual LocatedObject<PAYLOAD_SIZE>* DecodeNode(typename ShapeTree<C>::Node* node, 
+						  const Camera& camera, const Image& image) const =0;
 
-  void WalkSceneGraph(SceneGraphNode<C,PAYLOAD_SIZE>* root_node, const Camera& camera, const Image& image) const;
+  void WalkGraph(typename ShapeTree<C>::Node* root_node, WorldState<PAYLOAD_SIZE>* worldstate, const Camera& camera, const Image& image) const;
   
 };
 
-template<class C, int PAYLOAD_SIZE> void Tag<C,PAYLOAD_SIZE>::WalkSceneGraph(SceneGraphNode<C,PAYLOAD_SIZE>* root_node, const Camera& camera, const Image& image) const {
-    // walk the tree finding all the tags
-    // if we find a Tag then decode node returns true so we know not to inspect any child contours
-    if (!DecodeNode(root_node,camera,image)) {
-      for(typename std::vector<SceneGraphNode<C,PAYLOAD_SIZE>* >::iterator step = root_node->GetChildren().begin(); 
-	  step != root_node->GetChildren().end(); 
-	  step++) {
-	if (!(*step)->IsInspected()) {
-	  WalkSceneGraph(*step,camera,image);
-	}
-      }
+template<class C, int PAYLOAD_SIZE> void Tag<C,PAYLOAD_SIZE>::WalkGraph(typename ShapeTree<C>::Node* root_node, WorldState<PAYLOAD_SIZE>* worldstate, const Camera& camera, const Image& image) const {
+  // walk the tree finding all the tags
+  // if we find a Tag then decode node returns true so we know not to inspect any child contours
+  if (root_node->matched.IsFitted()) {
+    LocatedObject<PAYLOAD_SIZE>* lobj = DecodeNode(root_node,camera,image);
+    if (lobj) {      
+      worldstate->Add(lobj);
     }
+  }
+  
+  for(typename std::vector<typename ShapeTree<C>::Node* >::iterator step = root_node->children.begin(); 
+      step != root_node->children.end(); 
+      step++) {
+    WalkGraph(*step,worldstate, camera,image);
+  }
 }
 
 #endif//TAG_GUARD

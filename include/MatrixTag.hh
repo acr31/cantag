@@ -15,6 +15,7 @@
 #include <findtransform.hh>
 #include <bitset>
 #include <iostream>
+#include <ShapeTree.hh>
 
 #ifdef TEXT_DEBUG
 # define MATRIX_TAG_DEBUG
@@ -50,7 +51,8 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
 
   virtual void Draw2D(Image& image, CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>& tag_data) const;
 
-  virtual bool DecodeNode(SceneGraphNode< ShapeChain<QuadTangle> ,SIZE*SIZE - (SIZE*SIZE % 2)>* node, const Camera& camera, const Image& image) const;
+  virtual LocatedObject<SIZE*SIZE-(SIZE*SIZE % 2)>* DecodeNode(ShapeTree< ShapeChain<QuadTangle> >::Node* node, 
+							      const Camera& camera, const Image& image) const;
 };
 
 template<int SIZE> MatrixTag<SIZE>::MatrixTag() :
@@ -175,19 +177,15 @@ template<int SIZE> void MatrixTag<SIZE>::Draw2D(Image& image, CyclicBitSet<SIZE*
 }
 
 
-template<int SIZE> bool MatrixTag<SIZE>::DecodeNode(SceneGraphNode< ShapeChain<QuadTangle> ,SIZE*SIZE - (SIZE*SIZE % 2)>* node, const Camera& camera, const Image& image) const {
+template<int SIZE> LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* MatrixTag<SIZE>::DecodeNode(ShapeTree< ShapeChain<QuadTangle> >::Node* node, const Camera& camera, const Image& image) const {
 #ifdef MATRIX_TAG_DEBUG
   PROGRESS("Decode node called");
 #endif
 
-  const QuadTangle quad = node->GetShapes().GetShape();
+  const QuadTangle quad = node->matched.GetShape();
 
-  if (!quad.IsFitted()) {
-#ifdef MATRIX_TAG_DEBUG
-    PROGRESS("Ignoring unfitted quadtangle");
-#endif
-    return false;
-  }
+  assert(quad.IsFitted());
+
 #ifdef MATRIX_TAG_DEBUG
   PROGRESS("QuadTangle: " << 
 	   "("<<quad.GetX0()<<","<<quad.GetY0()<<"),"<<
@@ -259,16 +257,15 @@ template<int SIZE> bool MatrixTag<SIZE>::DecodeNode(SceneGraphNode< ShapeChain<Q
     /**
      * \todo load the correct angle here
      */
-    LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = node->GetLocatedObject();
+    LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = new LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>();
     lobj->LoadTransform(transform,1,0,camera);
     lobj->tag_code = read_code;	   
-    return true;
+    return lobj;
   }    
   else {
     delete read_code;
-    node->ClearLocatedObject();
   }
-  return false;
+  return NULL;
 }
 
 

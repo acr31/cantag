@@ -96,7 +96,8 @@ private:
                     std::vector<float>& points,  // the buffer to store the points
                     ContourStatistics& statistics,   // contour statistics structure (can be NULL)
                     int position,  // the position in the 8-connected region to start searching from
-                    int nbd  // the NBD to mark this contour with
+                    int nbd,  // the NBD to mark this contour with
+		    unsigned int* nbd_store
                     );
 public:
 

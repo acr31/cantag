@@ -13,11 +13,11 @@
 #ifdef TEXT_DEBUG
 # define ELLIPSE_DEBUG
 # define ELLIPSE_DEBUG_DUMP_POINTS
-# undef CIRCLE_TRANSFORM_DEBUG
-# define DECOMPOSE_DEBUG
+# define CIRCLE_TRANSFORM_DEBUG
+# undef DECOMPOSE_DEBUG
 #endif
 
-#define MAXFITERROR 0.001
+#define MAXFITERROR 1
 #define COMPARETHRESH 0.0001
 #undef MAXDISTANCE 
 
@@ -26,14 +26,16 @@ static void print(const char* label, double** array, int rows, int cols);
 
 Ellipse::Ellipse(): m_fitted(false) {}
 
-Ellipse::Ellipse(const float* points, int numpoints) {
-  m_fitted = FitEllipse(points,numpoints);
+Ellipse::~Ellipse() {}
+
+Ellipse::Ellipse(const std::vector<float>& points) {
+  m_fitted = FitEllipse(points);
   if (m_fitted) { Decompose(); }
 }
 
-Ellipse::Ellipse(const float* points, int numpoints, bool prev_fit) {
+Ellipse::Ellipse(const std::vector<float>& points, bool prev_fit) {
   if (!prev_fit) {
-    m_fitted = FitEllipse(points,numpoints);
+    m_fitted = FitEllipse(points);
     if (m_fitted) { Decompose(); }
   }
   else {
@@ -43,6 +45,12 @@ Ellipse::Ellipse(const float* points, int numpoints, bool prev_fit) {
 
 Ellipse::Ellipse(float a, float b, float c, float d, float e, float f) :
   m_a(a), m_b(b), m_c(c), m_d(d), m_e(e), m_f(f), m_fitted(true) { Decompose();}
+
+void Ellipse::Draw(Image& image) const {
+  if (m_fitted) {
+    image.DrawEllipse(GetX0(),GetY0(),GetWidth(),GetHeight(),GetAngle(),COLOUR_BLACK,1);
+  }
+}
 
 bool Ellipse::Compare(const Ellipse& o) const {
   /**
@@ -57,7 +65,8 @@ bool Ellipse::Compare(const Ellipse& o) const {
 	  (fabs(m_f - o.m_f) < COMPARETHRESH));
 }
 
-bool Ellipse::FitEllipse(const float* points, int numpoints) {
+bool Ellipse::FitEllipse(const std::vector<float>& points) {
+  int numpoints = points.size()/2;
   if (numpoints < 6) {
     return false;
   }
@@ -92,13 +101,14 @@ bool Ellipse::FitEllipse(const float* points, int numpoints) {
   double s32[3] = {0};
   double* s3[] = { s30,s31,s32};  // store s3 in row major format so we can use it for gaussian elimination
 
-  for(int j=0;j<numpoints*2;j+=2) {
-    double d1col[] = {points[j] * points[j],
-		      points[j] * points[j+1],
-		      points[j+1] * points[j+1]};
-    double d2col[] = {points[j],
-		      points[j+1],
-		      1};
+  for(std::vector<float>::const_iterator i = points.begin();
+      i != points.end();
+      ++i) {
+    float x = *i;
+    ++i;
+    float y = *i;
+    double d1col[] = {x*x, x*y, y*y};
+    double d2col[] = {x,y,1};
     
     for(int k=0;k<3;k++) {
       for(int l=0;l<3;l++) {
@@ -207,46 +217,53 @@ bool Ellipse::FitEllipse(const float* points, int numpoints) {
       PROGRESS("MAXFITERROR is " << MAXFITERROR);
 #endif      
 
-      return (GetErrorGradient(points,numpoints) < MAXFITERROR);
+      return (GetErrorGradient(points) < MAXFITERROR);
     }
   }
   return false;
 }
 
-float Ellipse::GetError(const float* points, int count) const {
-  return GetErrorGradient(points,count);
+float Ellipse::GetError(const std::vector<float>& points) const {
+  return GetErrorGradient(points);
 }
 
-float Ellipse::GetErrorAlgebraic(const float* points, int count) const {
+float Ellipse::GetErrorAlgebraic(const std::vector<float>& points) const {
   // calculate the algebraic distance
   float total=0;
   float maxdist = 0;
-  for (int pt=0;pt<count*2;pt+=2) {
-    float x = points[pt];
-    float y = points[pt+1];
+  for (std::vector<float>::const_iterator i = points.begin();
+       i != points.end();
+       ++i) {
+    float x = *i;
+    ++i;
+    float y = *i;
     float dist = fabs(m_a*x*x+m_b*x*y+m_c*y*y+m_d*x+m_e*y+m_f);
     if (dist > maxdist) { maxdist = dist; }
     total+= dist;
   }
 #ifdef ELLIPSE_DEBUG
-  PROGRESS("Total error from Algebraic method is "<< total/count << " maximimum distance was " << maxdist);
+  PROGRESS("Total error from Algebraic method is "<< total/points.size() << " maximimum distance was " << maxdist);
 #endif
 
 #ifdef MAXDISTANCE
   return maxdist;
 #else
-  return total/count;
+  return total/points.size();
 #endif
 }
 
-float Ellipse::GetErrorGradient(const float* points, int count) const {
+float Ellipse::GetErrorGradient(const std::vector<float>& points) const {
   // calculate the algebraic distance inversly weighted by the
   // gradient
   float total=0;
   float maxdist = 0;
-  for (int pt=0;pt<count*2;pt+=2) {
-    float x = points[pt];
-    float y = points[pt+1];
+
+  for (std::vector<float>::const_iterator i = points.begin();
+       i != points.end();
+       ++i) {  
+    float x = *i;
+    ++i;
+    float y = *i;
     float dist = fabs(m_a*x*x+m_b*x*y+m_c*y*y+m_d*x+m_e*y+m_f);
     
     float dx = 2*m_a*x+m_b*y+m_d;
@@ -260,23 +277,26 @@ float Ellipse::GetErrorGradient(const float* points, int count) const {
     total+= dist;
   }
 #ifdef ELLIPSE_DEBUG
-  PROGRESS("Total error from Gradient method is "<< total/count << " maximimum distance was " << maxdist);
+  PROGRESS("Total error from Gradient method is "<< total/points.size()<< " maximimum distance was " << maxdist);
 #endif
 
 #ifdef MAXDISTANCE
   return maxdist;
 #else
-  return total/count;
+  return total/points.size();
 #endif
 }
 
-float Ellipse::GetErrorNakagawa(const float* points, int count) const {
+float Ellipse::GetErrorNakagawa(const std::vector<float>& points) const {
   
   float total=0;
   float max_dist =0 ;
-  for(int pt=0;pt<count*2;pt+=2) {
-    float xi = points[pt];
-    float yi = points[pt+1];
+  for (std::vector<float>::const_iterator i = points.begin();
+       i != points.end();
+       ++i) {  
+    float xi = *i;
+    ++i;
+    float yi = *i;
 
     float a = GetWidth();
     float b = GetHeight();
@@ -317,27 +337,31 @@ float Ellipse::GetErrorNakagawa(const float* points, int count) const {
   }
   
 #ifdef ELLIPSE_DEBUG
-  PROGRESS("Total error from Nakagawa Method is "<< total/count<< " maximimum distance was " << max_dist);
+  PROGRESS("Total error from Nakagawa Method is "<< total/points.size()<< " maximimum distance was " << max_dist);
 #endif
 
 #ifdef MAXDISTANCE
   return max_dist;
 #else
-  return total/count;
+  return total/points.size();
 #endif
 }
 
-float Ellipse::GetErrorSafaeeRad(const float* points, int count) const {
+float Ellipse::GetErrorSafaeeRad(const std::vector<float>& points) const {
   // draw a ray between each point and the centre of the ellipse C
   // intersecting the ellipse at Ij.  The lengths of the bisected
   // portions of the ray mj and nj are determined
 
   float total=0;
   float max_dist = 0;
-  for(int pt=0;pt<count*2;pt+=2) {
-    float xi = points[pt];
-    float yi = points[pt+1];
-
+  for (std::vector<float>::const_iterator i = points.begin();
+       i != points.end();
+       ++i) {  
+    float xi = *i;
+    ++i;
+    float yi = *i;
+    ++i;
+     
     float a = GetWidth();
     float b = GetHeight();
     float theta  = GetAngle();
@@ -382,22 +406,26 @@ float Ellipse::GetErrorSafaeeRad(const float* points, int count) const {
   }
 
 #ifdef ELLIPSE_DEBUG
-  PROGRESS("Total error from SafaeeRad Method is "<< total/count<< " maximimum distance was " << max_dist);
+  PROGRESS("Total error from SafaeeRad Method is "<< total/points.size()<< " maximimum distance was " << max_dist);
 #endif
 
 #ifdef MAXDISTANCE
   return max_dist;
 #else
-  return total/count;
+  return total/points.size();
 #endif
 }
 
-float Ellipse::GetErrorSafaeeRad2(const float* points, int count) const {
+float Ellipse::GetErrorSafaeeRad2(const std::vector<float>& points) const {
   float total=0;
   float max_dist = 0;
-  for(int pt=0;pt<count*2;pt+=2) {
-    float xi = points[pt];
-    float yi = points[pt+1];
+  for (std::vector<float>::const_iterator i = points.begin();
+       i != points.end();
+       ++i) {  
+    float xi = *i;
+    ++i;
+    float yi = *i;
+    ++i;
 
     float a = GetWidth();
     float b = GetHeight();
@@ -443,16 +471,16 @@ float Ellipse::GetErrorSafaeeRad2(const float* points, int count) const {
   }
 
 #ifdef ELLIPSE_DEBUG
-  PROGRESS("Total error from SafaeeRad2 Method is "<< total/count<< " maximimum distance was " << max_dist);
+  PROGRESS("Total error from SafaeeRad2 Method is "<< total/points.size()<< " maximimum distance was " << max_dist);
 #endif
 #ifdef MAXDISTANCE
   return max_dist;
 #else
-  return total/count;
+  return total/points.size();
 #endif
 }
 
-float Ellipse::GetErrorStricker(const float* points, int count) const {
+float Ellipse::GetErrorStricker(const std::vector<float>& points) const {
   float a = GetWidth();
   float b = GetHeight();
   float x0 = GetX0();
@@ -480,9 +508,12 @@ float Ellipse::GetErrorStricker(const float* points, int count) const {
 
   float total =0;
   float max_dist =0 ;
-  for(int pt=0;pt<count*2;pt+=2) {
-    float x = points[pt];
-    float y = points[pt+1];
+  for (std::vector<float>::const_iterator i = points.begin();
+       i != points.end();
+       ++i) {  
+    float x = *i;
+    ++i;
+    float y = *i;
 
     float aest = 0.5 * (sqrt( (x-f1x)*(x-f1x) + (y-f1y)*(y-f1y) ) + sqrt( (x-f2x)*(x-f2x) + (y-f2y)*(y-f2y)));
     float best = sqrt(aest*aest - a*a + b*b);
@@ -506,12 +537,12 @@ float Ellipse::GetErrorStricker(const float* points, int count) const {
   }
 
 #ifdef ELLIPSE_DEBUG
-  PROGRESS("Total error from Stricker Method is "<< total/count<< " maximimum distance was " << max_dist);
+  PROGRESS("Total error from Stricker Method is "<< total/points.size()<< " maximimum distance was " << max_dist);
 #endif
 #ifdef MAXDISTANCE
   return max_dist;
 #else
-  return total/count;
+  return total/points.size();
 #endif
 }
 
