@@ -278,7 +278,7 @@ public:
    * Draw a circle centred on (x0,y0) with given radius.
    */
   inline void DrawCircle(int x0, int y0, int radius, unsigned char colour, unsigned int thickness) {
-    DrawEllipse(x0,y0,radius,radius,0,colour,thickness);
+    DrawEllipse(x0,y0,2*radius,2*radius,0,colour,thickness);
   }
 
   /**
@@ -286,28 +286,28 @@ public:
    * on them.
    */
   inline void DrawCircle(float x0, float y0, int radius, unsigned char colour, unsigned int thickness) {
-    DrawEllipse(x0,y0,(float)radius,(float)radius,0,colour,thickness);
+    DrawEllipse(x0,y0,(float)(2*radius),(float)(2*radius),0,colour,thickness);
   }
 
   /**
    * Draw a filled circle centred on x0,y0
    */
   inline void DrawFilledCircle(int x0, int y0, int radius, unsigned char colour) {
-    DrawEllipse(x0,y0,radius,radius,0,colour,-1);
+    DrawEllipse(x0,y0,2*radius,2*radius,0,colour,-1);
   }
 
   /**
    * Draw a filled circle centred on x0,y0
    */
   inline void DrawFilledCircle(int x0, int y0, float radius, unsigned char colour) {
-    DrawEllipse((float)x0,(float)y0,radius,radius,0,colour,-1);
+    DrawEllipse((float)x0,(float)y0,2*radius,2*radius,0,colour,-1);
   }
 
   /**
    * Draw a filled circle centred on x0,y0
    */
   inline void DrawFilledCircle(float x0, float y0, float radius, unsigned char colour) {
-    DrawEllipse(x0,y0,radius,radius,0,colour,-1);
+    DrawEllipse(x0,y0,2*radius,2*radius,0,colour,-1);
   }
 
   /**
@@ -317,7 +317,7 @@ public:
    * anti-clockwise direction.
    */
   inline void DrawSector(int x0, int y0, int radius, float start_radians, float end_radians, unsigned char colour) {
-    DrawEllipseArc(x0,y0,radius,radius,0,start_radians,end_radians,colour,-1);
+    DrawEllipseArc(x0,y0,2*radius,2*radius,0,start_radians,end_radians,colour,-1);
   }
 
   /**
