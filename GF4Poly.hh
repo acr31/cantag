@@ -6,6 +6,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/23 09:08:41  acr31
+ * More work integrating the GF4 stuff with tripover
+ *
  * Revision 1.1  2004/01/22 12:02:11  acr31
  * added parts of Ian Caulkins GF4 coding.  Fixed a bug in the weight function (should be +=2 not ++) Need to finish off GF4Coder so it actually does something
  *
@@ -27,6 +30,8 @@ class GF4Poly
 
   GF4Poly operator +(const GF4Poly&) const;
   GF4Poly& operator +=(const GF4Poly&);
+  GF4Poly operator +(int) const;
+  GF4Poly& operator +=(int);
   GF4Poly operator *(const GF4Poly&) const;
   GF4Poly& operator *=(const GF4Poly&);
   GF4Poly operator %(const GF4Poly&) const;
@@ -56,12 +61,14 @@ class GF4Poly
     { return val <= rhs.val; };
 
   operator unsigned long long int() const;
-  operator string() const;
+  //  operator string() const;
 
-  GF4Poly& rotate(unsigned int rotation, unsigned int length);
+  GF4Poly& Rotate(unsigned int rotation, unsigned int length);
 
-  unsigned int order() const;
-  unsigned int weight() const;
+  unsigned int Order() const;
+  unsigned int Weight() const;
+  unsigned int ConstantTerm() const;
+
 
  private:
   unsigned long long int val;

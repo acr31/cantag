@@ -1,11 +1,15 @@
 /**
- * Representation of a Galois Field(4) Polynomial. 
+ * Representation of a Galois Field(4) Polynomial. - i.e. polynomials over Z_2 modulo x^2+x+1
  * 
  * Code almost entirely written by Ian Caulfield
+ * Comments entirely by Andy Rice <acr31@cam.ac.uk> ;-)
  *
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/23 09:08:40  acr31
+ * More work integrating the GF4 stuff with tripover
+ *
  * Revision 1.1  2004/01/22 12:02:10  acr31
  * added parts of Ian Caulkins GF4 coding.  Fixed a bug in the weight function (should be +=2 not ++) Need to finish off GF4Coder so it actually does something
  *
@@ -13,6 +17,50 @@
  */
 #include "GF4Poly.hh"
 
+
+/**
+ * This representation has two bits for each of the elements of the field
+ *
+ * 00 = 0
+ * 01 = 1
+ * 10 = x
+ * 11 = 1+x
+ */
+
+
+/**
+ * Addition corresponds to xor
+ *
+ * Note: 1+1 = x+x = x+1 + x+1 = 0 i.e. addition == subtraction
+ * Note: there is never any carry so xor == addition
+ *
+ *
+ * We have x(x+1)=1 and so
+ *
+ * 0+0 = 0
+ * 0+1 = 1
+ * 0+x = x
+ * 0+1+x = 1+x
+ *
+ * 1+1 = 0
+ * 1+x = 1+x
+ * 1+1+x = 1+1+x+x-x = (1+x)(1+1)-x = -x = x
+ *
+ * x+x = x(1+1) = 0
+ * x+1+x = x+1+x+1-1 = (1+x)(1+1)-1 = -1 = 1
+ *
+ * 1+x+1+x = (1+x)(1+1) = 0
+ *
+ *
+ *       | 0     1    x   x+1
+ *       | 00   01   10   11
+ * ------+---------------------
+ * 0   00| 00   01   10   11
+ * 1   01| 01   00   11   10  
+ * x   10| 10   11   00   01
+ * x+1 11| 11   10   01   00
+ *
+ */
 GF4Poly GF4Poly::operator +(const GF4Poly& rhs) const
 {
   GF4Poly res;
@@ -29,6 +77,79 @@ GF4Poly& GF4Poly::operator +=(const GF4Poly& rhs)
   return *this;
 }
 
+/* add a constant to the polynomial */
+GF4Poly GF4Poly::operator +(int i) const
+{
+
+  GF4Poly res;
+
+  res.val = val ^ (i&3);
+
+  return res;
+}
+
+GF4Poly& GF4Poly::operator +=(int i)
+{
+  val ^= (i&3);
+
+  return *this;
+}
+
+
+/**
+ * Multiplication is tricky
+ *
+ * 0*0 = 0
+ * 0*1 = 0
+ * 0*x = 0
+ * 0+(x+1) = 0
+ *
+ * 1*1 = 1
+ * 1*x = x
+ * 1*(x+1) = x+1
+ *
+ * x*x = x*x+x-x = x(x+1)- x = 1-x = 1+x
+ * x(x+1) = 1
+ *
+ * (x+1)(x+1) = x*x + x + x + 1 = 1+x + x + 1+x = x
+ *
+ *       | 0     1    x   x+1
+ *       | 00   01   10   11
+ * ------+---------------------
+ * 0   00| 00   00   00   00
+ * 1   01| 00   01   10   11  
+ * x   10| 00   10   11   01
+ * x+1 11| 00   11   01   10
+ *
+ *
+ * y*0 = 0
+ * y*1 =           y
+ * y*x =       x
+ * y*(x+1) = y*x + y
+ *
+ * So - we work out how to add y (using xor) and we work out how to
+ * multiply by y and then we do the former, the later, or both
+ * depending on whether there it is *1, or *x, or *(x+1) respectively
+ *
+ * It just so happens that to multiply by x you do the following:
+ *
+ * 1) shift the operand left by one place (throwing away the MSB) - now
+ * the former LSB is in the place of the MSB and the LSB is now 0
+ * 2) take another copy of the operand and copy the MSB onto the LSB
+ * 3) xor (add) these two together
+ *
+ * We have all of our coefficients in the same bit field so we for
+ * step 1 we need to mask out the MSB of each operand and then shift
+ * left - the old MSB (now 0) becomes the LSB of the next operand.
+ * This can be done by shifting and then masking the pattern with
+ * 0xa.... (16 a's infact) which is 1010 (16 more times) in binary.
+ *
+ * For step 2 we mask with the same pattern and then OR the result
+ * with itself shifted right one place.
+ *
+ * The routine below goes through each term of x multiplying it by y
+ * and then adding it to the total
+ */
 GF4Poly GF4Poly::operator *(const GF4Poly& rhs) const
 {
   GF4Poly res;
@@ -41,7 +162,7 @@ GF4Poly GF4Poly::operator *(const GF4Poly& rhs) const
   while (x) {
     y = 0;
 
-    if (x & 2) {
+    if (x & 2) { // do we have an x term
       y = val << 1;
       y &= 0xaaaaaaaaaaaaaaaa;
       m = val & 0xaaaaaaaaaaaaaaaa;
@@ -49,13 +170,13 @@ GF4Poly GF4Poly::operator *(const GF4Poly& rhs) const
       y ^= m;
     }
 
-    if (x & 1)
+    if (x & 1)  // do we have a +1 term
       y ^= val;
 
-    res.val ^= y << (2*i);
+    res.val ^= y << (2*i);  // add this to the running total
 
     i++;
-    x >>= 2;
+    x >>= 2;  // move on to the next term in x
   }
 
   return res;
@@ -161,7 +282,7 @@ GF4Poly& GF4Poly::operator >>=(const unsigned int shift)
   return *this;
 }
 
-GF4Poly& GF4Poly::rotate(unsigned int rotation, unsigned int length)
+GF4Poly& GF4Poly::Rotate(unsigned int rotation, unsigned int length)
 {
   unsigned long long int t;
   unsigned long long int m = 1;
@@ -180,7 +301,7 @@ GF4Poly& GF4Poly::rotate(unsigned int rotation, unsigned int length)
   return *this;
 }
 
-unsigned int GF4Poly::order() const
+unsigned int GF4Poly::Order() const
 {
   int res = 0;
  
@@ -190,7 +311,7 @@ unsigned int GF4Poly::order() const
   return res;
 }
 
-unsigned int GF4Poly::weight() const
+unsigned int GF4Poly::Weight() const
 {
   int res = 0;
 
@@ -206,19 +327,24 @@ GF4Poly::operator unsigned long long int() const
   return val;
 }
 
-GF4Poly::operator string() const
+// GF4Poly::operator string() const
+// {
+//   unsigned long long int x;
+
+//   string res;
+
+//   x = val;
+
+//   while (x) {
+//     res = (char) ((x & 3) + '0') + res;
+
+//     x >>= 2;
+//   }
+
+//   return res;
+// }
+
+unsigned int GF4Poly::Constant() const
 {
-  unsigned long long int x;
-
-  string res;
-
-  x = val;
-
-  while (x) {
-    res = (char) ((x & 3) + '0') + res;
-
-    x >>= 2;
-  }
-
-  return res;
+  return val & 3;
 }

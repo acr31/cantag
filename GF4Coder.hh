@@ -4,6 +4,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/23 09:08:40  acr31
+ * More work integrating the GF4 stuff with tripover
+ *
  * Revision 1.1  2004/01/22 12:02:10  acr31
  * added parts of Ian Caulkins GF4 coding.  Fixed a bug in the weight function (should be +=2 not ++) Need to finish off GF4Coder so it actually does something
  *
@@ -31,6 +34,7 @@ private:
   GF4Poly m_genpoly;
   GF4Poly m_encoded;
 
+  int m_maxerrors;
 
 public:
   GF4Coder(int symbol_range,int symbol_count);
