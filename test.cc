@@ -26,24 +26,28 @@ main(int argc,char* argv[])
   cvAdaptiveThreshold(gray,gray,255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY,window_size,40);
   cvCanny(gray,gray,128,128,3);  
 
-
   CvMemStorage *store = cvCreateMemStorage(0);
   CvSeq *seq = NULL;
-  int num = cvFindContours(gray,store,&seq,sizeof(CvContour),CV_RETR_LIST,CV_CHAIN_APPROX_SIMPLE);
-  //  cvNamedWindow(argv[1],1);
-  //  cvShowImage(argv[1],gray);
-  //  cvWaitKey(0);
-  cvDrawContours(img,seq,16776960,0,5,1,8);
+  int num = cvFindContours(gray,store,&seq,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_TC89_KCOS);
 
   vector<CvBox2D> boxes;
 
-  for(int i=0;i<num;i++) 
+
+  CvTreeNodeIterator i;
+  cvInitTreeNodeIterator(&i,seq,10);
+  
+  while(cvNextTreeNode(&i)) 
     {
-      int count = seq->total;
-      if (count > 6) {
+      CvSeq* c = (CvSeq*)i.node;
+      if (c != NULL) {
+	cvDrawContours(img,c,16776960,16711680,0,1,8);
+
+
+      int count = c->total;
+      if (count > 10) {
 	CvPoint points[count];
 	CvPoint2D32f fpoints[count];
-	cvCvtSeqToArray( seq, points );
+	cvCvtSeqToArray( c, points );
 	for( int i = 0; i < count; i++ )
 	  {
 	    fpoints[i].x = (float)points[i].x;
@@ -53,7 +57,7 @@ main(int argc,char* argv[])
 	cvFitEllipse( fpoints, count, &box );
 	if ((box.size.width < img->width) &&
 	    (box.size.height < img->height)) {
-
+	  
 	  double asq = (double)box.size.width*(double)box.size.width / 4;
 	  double bsq = (double)box.size.height*(double)box.size.height / 4;
 	  double sina = sin((double)box.angle / 180 * M_PI);
@@ -73,9 +77,8 @@ main(int argc,char* argv[])
 	  }
 	}
       }
-      seq = seq->h_next;
     }
-
+    }
   for(vector<CvBox2D>::const_iterator step = boxes.begin();step != boxes.end();step++) {
     for(vector<CvBox2D>::const_iterator search = boxes.begin();search != boxes.end();search++) {
       if ((search != step) && 
