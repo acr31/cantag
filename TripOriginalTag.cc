@@ -59,9 +59,9 @@ const double TripOriginalTag::sync_angles[] = {0,
 					       -0.523598775598299,
 					       -0.261799387799149};
 
-const double TripOriginalTag::radii_outer[] = {1.4,2};
-const double TripOriginalTag::radii_centre[] = {1.2,1.7};
-const double TripOriginalTag::radii_inner[] = {1.1,1.4};
+const double TripOriginalTag::radii_outer[] = {1.5,1.9};
+const double TripOriginalTag::radii_centre[] = {1.3,1.7};
+const double TripOriginalTag::radii_inner[] = {1.1,1.5};
 
 void TripOriginalTag::Process(IplImage *image, 
 			      std::vector<Tag*> *result) 
@@ -142,6 +142,7 @@ void TripOriginalTag::Process(IplImage *image,
 	 aligned in each code ring */
       PROGRESS("Searching for synchronization sector");
       bool search = 0;
+      bool secondtry =0;
       int sync;
 #ifdef IMAGEDEBUG
       IplImage* debug3Clone = cvCloneImage(image);
@@ -162,20 +163,37 @@ void TripOriginalTag::Process(IplImage *image,
 #endif
 	  search &= result;
 	}    
-	if (search) break;
+	if (secondtry) { 
+	  if (!search) secondtry=0;
+	  break; 
+	}
+	if (search) {
+	  secondtry = 1;
+	} 
       }
 #ifdef IMAGEDEBUG
       cvSaveImage("debug-scan.jpg",debug3Clone);
       cvReleaseImage(&debug3Clone);
 #endif      	
       /* ------------ */
-      /* 5.2 - If we found a sync sector read tag */
+      /* 5.2 - If we found a sync sector then read tag */
       int success = 0;
       unsigned long code = 0;
       unsigned long checksum = 0;
       unsigned long target_checksum = 0;
-      if (sync<SYNC_COUNT) {
+      if (sync<SYNC_COUNT+secondtry) {
 	PROGRESS ("Sync Found.  Reading Code");
+	double syncangle;
+	/* If we found the sync sector on two adjacent samples then
+	   take the mid value for the start point */
+	if (secondtry) {
+	  PROGRESS ("Adjusted sync position for sector boundary");
+	  syncangle = (sync_angles[sync-1] + sync_angles[sync])/2;
+	}
+	else {
+	  syncangle = sync_angles[sync-1];
+	}
+
 #ifdef IMAGEDEBUG
 	IplImage* debug4Clone = cvCloneImage(image);
 #endif
@@ -183,8 +201,8 @@ void TripOriginalTag::Process(IplImage *image,
 	for(int sector=1;sector<SECTOR_COUNT;sector++) {
 	  unsigned int sector_value = 0;
 	  for(int ring=RING_COUNT-1;ring>=0;ring--) {
-	    double x = radii_centre[ring]*cos(sector_angles[sector]+sync_angles[sync])*a;
-	    double y = radii_centre[ring]*sin(sector_angles[sector]+sync_angles[sync])*b;
+	    double x = radii_centre[ring]*cos(sector_angles[sector]+syncangle)*a;
+	    double y = radii_centre[ring]*sin(sector_angles[sector]+syncangle)*b;
 	    double ix = x*cost-y*sint + i->center.x;
 	    double iy = x*sint+y*cost + i->center.y;
 	    sector_value <<=1;
@@ -203,7 +221,7 @@ void TripOriginalTag::Process(IplImage *image,
 	    success = 0;
 	    break;
 	  }
-
+	
 	  if (sector < CHECKSUM_COUNT + 1) {
 	    target_checksum += sector_value * (unsigned long)pow((1<<RING_COUNT)-1,sector-1);
 	  }
@@ -216,6 +234,9 @@ void TripOriginalTag::Process(IplImage *image,
 	cvSaveImage("debug-read.jpg",debug4Clone);
 	cvReleaseImage(&debug4Clone);
 #endif	
+      }
+      else {
+	PROGRESS("Failed to find synchronization sector - aborting this tag");
       }
       /* ------------ */
 
@@ -246,7 +267,38 @@ std::ostream& TripOriginalTag::Print(std::ostream& s) const
 }
 
 void TripOriginalTag::Show(IplImage *image) {
-  cvEllipseBox(image,m_ellipse,CV_RGB(255,255,0),2);
+  /*
+    cvEllipseBox(image,m_ellipse,CV_RGB(255,255,0),2);
+    for(int i=0;i<RING_COUNT;i++) {
+      cvEllipse(image,
+      cvPointFrom32f(m_ellipse.center),
+      cvSize(cvRound(m_ellipse.size.height*radii_outer[i]/2),
+      cvRound(m_ellipse.size.width*radii_outer[i]/2)),
+              m_ellipse.angle*180/M_PI,
+	      0,
+	      360,
+	      CV_RGB(255,0,0),
+	      2);
+    }
+  */
+  CvFont font;
+  cvInitFont(&font,CV_FONT_VECTOR0,1,1,0,2);
+  
+  char label[255];
+  snprintf(label,255,"%u",m_code);
+  cvPutText(image,label,cvPointFrom32f(m_ellipse.center),&font,CV_RGB(0,255,0));  
+  for(double theta = 0;theta<2*M_PI;theta+=M_PI/2) {
+    double x = radii_outer[RING_COUNT-1]*cos(theta)*m_ellipse.size.width/2;
+    double y = radii_outer[RING_COUNT-1]*sin(theta)*m_ellipse.size.height/2;
+    double ix = x*cos(m_ellipse.angle*180/M_PI)-y*sin(m_ellipse.angle*180/M_PI) + m_ellipse.center.x;
+    double iy = x*sin(m_ellipse.angle*180/M_PI)+y*cos(m_ellipse.angle*180/M_PI) + m_ellipse.center.y;    
+    CvPoint j;
+    j.x = (int)ix;
+    j.y = (int)iy;
+    cvLine(image,cvPointFrom32f(m_ellipse.center),j,CV_RGB(255,0,255),2);
+  }
+
+  
 }
 
 void TripOriginalTag::PlotSegment(IplImage *image,
@@ -268,9 +320,9 @@ void TripOriginalTag::PlotSegment(IplImage *image,
   
   cvEllipse(image,
 	    cvPointFrom32f(m_ellipse.center),
-	    cvSize(cvRound( m_ellipse.size.width*radii_outer[ring]/2),
-		   cvRound( m_ellipse.size.height*radii_outer[ring]/2)),
-	    m_ellipse.angle,
+	    cvSize(cvRound( m_ellipse.size.height*radii_outer[ring]/2),
+		   cvRound( m_ellipse.size.width*radii_outer[ring]/2)),
+	    m_ellipse.angle*180/M_PI,
 	    a1,
 	    a2,
 	    value,
@@ -283,9 +335,9 @@ void TripOriginalTag::Synthesize(IplImage *image, int white, int black) {
     // Draw a white filled circle to cover this ring
     cvEllipse(image,
 	      cvPointFrom32f(m_ellipse.center),
-	      cvSize(cvRound(m_ellipse.size.width*radii_outer[i]/2),
-		     cvRound(m_ellipse.size.height*radii_outer[i]/2)),
-	      m_ellipse.angle,
+	      cvSize(cvRound(m_ellipse.size.height*radii_outer[i]/2),
+		     cvRound(m_ellipse.size.width*radii_outer[i]/2)),
+	      m_ellipse.angle*180/M_PI,
 	      0,
 	      360,
 	      white,
@@ -329,9 +381,9 @@ void TripOriginalTag::Synthesize(IplImage *image, int white, int black) {
     // White out all of the tag inside this ring ready for drawing again
     cvEllipse(image,
 	      cvPointFrom32f(m_ellipse.center),
-	      cvSize(cvRound( m_ellipse.size.width*radii_inner[i]/2),
-		     cvRound( m_ellipse.size.height*radii_inner[i]/2)),
-	      m_ellipse.angle,
+	      cvSize(cvRound( m_ellipse.size.height*radii_inner[i]/2),
+		     cvRound( m_ellipse.size.width*radii_inner[i]/2)),
+	      m_ellipse.angle*180/M_PI,
 	      0,
 	      360,
 	      white,
@@ -341,9 +393,9 @@ void TripOriginalTag::Synthesize(IplImage *image, int white, int black) {
   // Now draw the central bullseye
   cvEllipse(image,
 	    cvPointFrom32f(m_ellipse.center),
-	    cvSize(cvRound( m_ellipse.size.width/2),
-		   cvRound( m_ellipse.size.height/2)),
-	    m_ellipse.angle,
+	    cvSize(cvRound( m_ellipse.size.height/2),
+		   cvRound( m_ellipse.size.width/2)),
+	    m_ellipse.angle*180/M_PI,
 	    0,
 	    360,
 	    black,
@@ -351,9 +403,9 @@ void TripOriginalTag::Synthesize(IplImage *image, int white, int black) {
 
   cvEllipse(image,
 	    cvPointFrom32f(m_ellipse.center),
-	    cvSize(cvRound( m_ellipse.size.width*0.6/2),
-		   cvRound( m_ellipse.size.height*0.6/2)),
-	    m_ellipse.angle,
+	    cvSize(cvRound( m_ellipse.size.height*0.6/2),
+		   cvRound( m_ellipse.size.width*0.6/2)),
+	    m_ellipse.angle*180/M_PI,
 	    0,
 	    360,
 	    white,

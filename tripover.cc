@@ -15,9 +15,10 @@ main(int argc,char* argv[])
   TripOriginalTag::Process(image,&result);
 
   for(std::vector<Tag*>::const_iterator i = result.begin();i!=result.end();i++) {
+    (*i)->Show(image);
     std::cout << **i << std::endl;
   }
 
-  cvReleaseImage(&image);
-  
+  cvSaveImage(argv[2],image);
+  cvReleaseImage(&image);  
 }
