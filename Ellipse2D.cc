@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/23 22:35:49  acr31
+ * added FILENAME define
+ *
  * Revision 1.1  2004/01/23 12:05:48  acr31
  * moved Tag to CircularTag in preparation for Squaretag
  *
@@ -16,6 +19,9 @@
  *
  */
 #include "Ellipse2D.hh"
+
+#undef FILENAME
+#define FILENAME "Ellipse2D.cc"
 
 Ellipse2D::Ellipse2D(float x, float y, float width, float height, float angle_radians) : 
   m_x(x),
