@@ -12,12 +12,13 @@
 #include <list>
 
 namespace Total {
+
   /**
    * A class to fit points to a quadtangle and encapsulate the result
    *
    * \todo regression test give it sets of points we see if it fits them properly
    */
-  class QuadTangle {
+  class QuadTangle{
   protected:
     float m_x0;
     float m_y0;
@@ -31,13 +32,13 @@ namespace Total {
     float m_xc;
     float m_yc;
 
-    bool m_fitted;
+    
 
   public:
     QuadTangle();
-    QuadTangle(const std::vector<float>& points, bool prev_fitted=false);
+    //  QuadTangle(const std::vector<float>& points, bool prev_fitted=false);
     QuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3);
-    inline bool IsFitted() const { return m_fitted; }
+    
     bool Compare(const QuadTangle& o) const;
     void Draw(Image& image, const Camera& camera) const;
 
@@ -65,22 +66,78 @@ namespace Total {
   protected:
     inline void compute_central_point();
     void sort_points();
-    virtual bool Fit(const std::vector<float>& points) = 0;
+    //   virtual bool Fit(const std::vector<float>& points) = 0;
 
   };
 
-  class CornerQuadTangle : public QuadTangle {
+
+
+
+  class QuadTangleFitter : public QuadTangle {
   public:
-    CornerQuadTangle();
-    CornerQuadTangle(const std::vector<float>& points, bool prev_fitted=false);
+    QuadTangleFitter() : QuadTangle(), m_fitted(false) {};
+
+    inline bool IsFitted() const { return m_fitted; }
+
+    void Draw(Image& image,const Camera& camera) const {
+      if (m_fitted) QuadTangle::Draw(image,camera);
+    }
+
+    bool Fit(const std::vector<float>& points, bool prev_fit) { //, const Image &image) = 0;
+      if (prev_fit) return true;
+      if (FitPoints(points) && Refine(points)) {m_fitted=true; return true;}
+      return false;
+    }
+    
   protected:
-    bool Fit(const std::vector<float>& points);
+    bool m_fitted;
+    virtual bool FitPoints(const std::vector<float>& points) = 0;
+    virtual bool Refine(const std::vector<float>& points) { return true; };
   };
 
-  class RegressionQuadTangle : public QuadTangle {
-  public:
-    RegressionQuadTangle();
-    RegressionQuadTangle(const std::vector<float>& points, bool prev_fitted=false);
+
+
+
+  class CornerQuadTangle : public virtual QuadTangleFitter {
+  protected:
+    bool FitPoints(const std::vector<float>& points);
+  };
+
+  class ConvexHullQuadTangle : public virtual QuadTangleFitter {
+  protected:
+
+    /**
+     * Take the set of points and form a convex hull
+     * to smooth out quantization 'kinks'. Filter out
+     * vertices clearly not corners based on angles.
+     * What remains should be clusters of points at
+     * the true corners. Take one from each cluster
+     * as an _estimate_ of that corner position.
+     */
+    bool FitPoints(const std::vector<float>& points);
+
+  private:
+    
+    /**
+     * Check where a point p lies relative to a line
+     * specified by the points l0 and l1.
+     * >0 means p is on the left
+     * =0 means on the line
+     * <0 means to the right
+     */
+    float isLeft( const std::vector<float> &V, int l0, int l1, int p);
+    
+    /**
+     * Get the convex hull of the n points in V. This assumes
+     * H has been allocated to size n.
+     * The _indexes_ to the points are then returned in H, and
+     * the number of vertices (<=n) is also returned.
+     */
+    int ConvexHull(const std::vector<float> &V, int n, int* H);
+  };
+
+
+  class RegressionQuadTangle : public virtual QuadTangleFitter  {
   protected:
     /**
      * Take the set of points and form a convex hull
@@ -94,31 +151,14 @@ namespace Total {
      * groups linearly and find the intersection of
      * the lines
      */
-    bool Fit(const std::vector<float>& points);
+    bool Refine(const std::vector<float>& points);
 
-  private:
-
-    /**
-     * Check where a point p lies relative to a line
-     * specified by the points l0 and l1.
-     * >0 means p is on the left
-     * =0 means on the line
-     * <0 means to the right
-     */
-    float isLeft( const std::vector<float> &V, int l0, int l1, int p);
-
-    /**
-     * Get the convex hull of the n points in V. This assumes
-     * H has been allocated to size n.
-     * The _indexes_ to the points are then returned in H, and
-     * the number of vertices (<=n) is also returned.
-     */
-    int ConvexHull(const std::vector<float> &V, int n, int* H);
-    
   };
 
 
-  class PolygonQuadTangle : public QuadTangle {
+
+
+  class PolygonQuadTangle : public virtual QuadTangleFitter {
   private:
     /**
      * Compute the cosine of the angle between the vectors pq and qr
@@ -136,7 +176,8 @@ namespace Total {
      * fulllist is the list of all the working vertexes
      * start is an iterator pointing to the start of the list 1 window (inclusive)
      * mid is an iterator pointing at the end of the list 1 window (exclusive)
-     * mid is also an iterator pointing at the start of the list 2 window (inclusive) this must be one place in the list past that pointed to by reverse_mid
+     * mid is also an iterator pointing at the start of the list 2 window (inclusive) 
+     * this must be one place in the list past that pointed to by reverse_mid
      * end is an iterator pointing at the end of the list 2 window (exclusive)
      */
     void DPJoin(std::list<std::pair<float,float> >& fulllist,
@@ -173,13 +214,18 @@ namespace Total {
 		   std::list<std::pair<float,float> >::iterator start,
 		   std::list<std::pair<float,float> >::iterator end);
       
-
-  public:
-    PolygonQuadTangle();
-    PolygonQuadTangle(const std::vector<float>& points, bool prev_fitted=false);
+    
   protected:
-    bool Fit(const std::vector<float>& points);
+    bool FitPoints(const std::vector<float>& points);
   };
+
+
+
+  class RegressConvexHullQuadTangle : public ConvexHullQuadTangle,
+				      public RegressionQuadTangle 
+  {};
+
+
 }
 
 

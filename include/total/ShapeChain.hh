@@ -79,8 +79,8 @@ namespace Total {
   template<class M, class S> ShapeChain<M,S>::~ShapeChain() {};
 
   template<class M, class S> ShapeChain<M,S>::ShapeChain(const std::vector<float>& points) : 
-    m_shape(points,false),
-    m_next(points,m_shape.IsFitted()) {};
+    // m_shape(points,false),
+    m_next(points,m_shape.Fit(points,false)) {};
 
   template<class M, class S> bool ShapeChain<M,S>::Check(const std::vector<float>& points) const {
     if (IsFitted()) {
@@ -92,8 +92,8 @@ namespace Total {
   }
 
   template<class M, class S> ShapeChain<M,S>::ShapeChain(const std::vector<float>& points, bool prev_fitted) :
-    m_shape(points,prev_fitted),
-    m_next(points,prev_fitted) {};
+    //    m_shape(points,prev_fitted),
+    m_next(points,m_shape.Fit(points,prev_fitted)) {};
 
 
   template<class M, class S> bool ShapeChain<M,S>::IsFitted() const {
