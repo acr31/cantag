@@ -104,7 +104,7 @@ void Image::GlobalThreshold(const unsigned char threshold) {
     unsigned char* data_pointer = GetRow(i);
     for(int j=0;j<width;++j) {
       unsigned char pixel = *data_pointer;
-      *data_pointer = pixel > threshold ? 0 : 1;
+      *data_pointer = pixel > threshold ? (pixel & 0xFC) : ((pixel & 0xFC) | 1);
       data_pointer++;
     }
   }
