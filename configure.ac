@@ -35,14 +35,9 @@ AC_DEFUN([TRIPOVER_CHECK_LIB],
           AM_CONDITIONAL([$3], [test X@S|@$4 = Xyes])])
 
 dnl Checks for header files.
-AC_CHECK_HEADER(opencv/cv.h,
- 	[],
- 	[AC_MSG_ERROR([opencv/cv.h not found in include path])])
- 
-AC_CHECK_HEADER(opencv/highgui.h,
-        [],
-        [AC_MSG_ERROR([opencv/highgui.h not found in include path])])
 
+TRIPOVER_CHECK_HEADER(opencv/cv.h,HAVE_OPENCV_CV_H,have_opencv_cv_h)
+TRIPOVER_CHECK_HEADER(opencv/highgui.h,HAVE_OPENCV_HIGHGUI_H,have_opencv_highgui_h)
 TRIPOVER_CHECK_HEADER(GL/gl.h,HAVE_GL_GL_H,have_gl_gl_h)
 TRIPOVER_CHECK_HEADER(GL/osmesa.h,HAVE_GL_OSMESA_H,have_gl_osmesa_h)
 TRIPOVER_CHECK_HEADER(boost/random.hpp,HAVE_BOOST_RANDOM_H,have_boost_random_h)
@@ -61,11 +56,9 @@ TRIPOVER_CHECK_HEADER(X11/extensions/XShm.h,HAVE_X11_EXTENSIONS_XSHM_H,have_x11_
 )
 
 dnl Checks for libraries.
-AC_CHECK_LIB(opencv,[cvGetErrStatus],[],AC_MSG_ERROR([libopencv.so or libcv.so not found]))
 dnl new version of opencv needs check for cvGetErrStatus in cxcore and cvAdd in cv
-
-AC_CHECK_LIB(highgui,[cvGetWindowName],[],[AC_MSG_ERROR([libhighgui.so not found])])
-
+TRIPOVER_CHECK_LIB(opencv,cvGetErrStatus,HAVELIB_OPENCV,havelib_opencv)
+TRIPOVER_CHECK_LIB(highgui,cvGetWindowName,HAVELIB_HIGHGUI,havelib_highgui)
 TRIPOVER_CHECK_LIB(GL,glFinish,HAVELIB_GL,havelib_gl)
 TRIPOVER_CHECK_LIB(OSMesa,OSMesaGetCurrentContext,HAVELIB_OSMESA,havelib_osmesa)
 TRIPOVER_CHECK_LIB(GLU,gluNewTess,HAVELIB_GLU,havelib_glu)
