@@ -49,8 +49,12 @@ AC_CHECK_LIB(opencv,
 	[cvGetErrStatus],
 	[],
 	[
+AC_CHECK_LIB(cxcore,
+        [cvGetErrStatus],
+	[],
+        AC_MSG_ERROR([libcxcore.so not found]))
 AC_CHECK_LIB(cv,
-	[cvGetErrStatus],
+	[cvAdd],
 	[],
 	AC_MSG_ERROR([libopencv.so or libcv.so not found]))])
 
