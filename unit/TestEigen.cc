@@ -103,6 +103,11 @@ void test_check(double matrix[9], double evec[9], double eval[9]) {
 }
 
 void test_random_symmetric() {
+  minsigfig=100;
+  maxsigfig=0;
+  testcounter = 0;
+  totalsig = 0;
+
   for(int count=0;count<10000000;++count) {
     double test1[9];
     for(int i=0;i<9;++i) {
@@ -132,6 +137,11 @@ void test_random_symmetric() {
 }
 
 void test_random() {
+  minsigfig=100;
+  maxsigfig=0;
+  testcounter = 0;
+  totalsig = 0;
+
   int noroot = 0;
   for(int count=0;count<10000000;++count) {
     double test1[9];
@@ -169,7 +179,7 @@ init_unit_test_suite( int argc, char* argv[] )
 {
   test_suite* test= BOOST_TEST_SUITE( "EigenVector routine test" );
 
-  //  test->add( BOOST_TEST_CASE( &test_random_symmetric ) );
+  test->add( BOOST_TEST_CASE( &test_random_symmetric ) );
   test->add( BOOST_TEST_CASE( &test_random ) );
 
   return test;
