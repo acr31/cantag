@@ -4,9 +4,9 @@
 #include <iostream>
 
 #include "Config.hh"
-#include "TripOuterTag.hh"
-#include "TripOriginalCoder.hh"
 #include "Drawing.hh"
+#include "TripOriginalCoder.hh"
+#include "RingTag.hh"
 
 #undef FILENAME
 #define FILENAME "drawtriptag.cc"
@@ -42,8 +42,15 @@ main(int argc, char* argv[]) {
 	       width,
 	       width,
 	       0.4);
-  
-  TripOuterTag<TripOriginalCoder<2,16,2>,2,16,24,2> t;
+
+
+  RingTag<TripOriginalCoder<2> > t(2, //RINGS
+				  16, //SECTORS
+				  24, // SYNC ANGLES
+				  0.3, // BULLSEYE INNER
+				  1.2, // BULLSEYE OUTER
+				  0.4, // DATA INNER
+				  1.1); // DATA OUTER
 
   t.Draw2D(image,&l,value, 0, 255);
 

@@ -5,8 +5,8 @@
 #include "Exception.hh"
 
 class Coder {
-public:
-
+public:  
+  
   /**
    * Set the encoder to encode this value
    *
