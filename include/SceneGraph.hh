@@ -10,9 +10,11 @@
 #include <SceneGraphNode.hh>
 #include <map>
 
+#undef SCENE_GRAPH_DEBUG
+
+
 #define MAXLENGTH 10000
 #define MAXDEPTH 20
-#define SCENE_GRAPH_DEBUG
 #define MINCONTOUR_AREA 100
 /**
  * A scene graph.  This class maintains a logical view of the current
@@ -147,9 +149,8 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
     node_hash[1] = Contour(m_root,HOLE_BORDER);
 
     // we mark the contours in the image with the following coding
-    // bit 1 = image content
-    // bit 2 = l-pixel or r-pixel
-    // bit 3-8 = NBD
+    // bit 1 = l-pixel or r-pixel
+    // bit 2-8 = NBD
 
 #ifdef IMAGE_DEBUG
     Image debug0(image);
@@ -157,113 +158,118 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 #endif
 
     float points_buffer[MAXLENGTH];
-    int NBD = 1;
+    int NBD = 2;
     for(int raster_y=0;raster_y < image.GetWidth(); raster_y++) {
       int LNBD = 1; // we've just "seen" the frame border
       for(int raster_x=1;raster_x < image.GetHeight()-1;raster_x++) {
 	const unsigned char current = image.SampleNoCheck(raster_x,raster_y);
-	const bool current_pixel = current & 0x1;
-	const unsigned char current_id = current >> 2;
+	const unsigned char current_id = current >> 1;
 	const bool current_not_visited = current_id==0;  // this will be true if this is an element that has not been visited before
-	const bool current_exit_pixel = current & 0x2;
-	if (current_pixel) { // the current pixel is a 1-element (possibly visited before)
+	const bool current_exit_pixel = current_id && (current & 0x1);
+	if (current) { // the current pixel is a 1-element (possibly visited before)
 	  const unsigned char previous = image.SampleNoCheck(raster_x-1,raster_y);
 	  const unsigned char next = image.SampleNoCheck(raster_x+1,raster_y);
 	  int contour_length;
 	  bordertype_t border_type;
-	  if (current_not_visited && !(previous & 0x1)) { // the previous pixel is a 0-element
+	  if (current_not_visited && !previous) { // the previous pixel is a 0-element
 #ifdef SCENE_GRAPH_DEBUG
 	    PROGRESS("Found start point for outer border at " <<raster_x << "," << raster_y);
 #endif	    
-	    NBD++;
 	    border_type = OUTER_BORDER;
 	    contour_length = FollowContour(image, raster_x, raster_y, points_buffer, MAXLENGTH, NULL,0, NBD);
 	  }
-	  else if (!current_exit_pixel && !(next& 0x1)) { // the next element is a 0-element 
+	  else if (!current_exit_pixel && !next) { // the next element is a 0-element 
 #ifdef SCENE_GRAPH_DEBUG
 	    PROGRESS("Found start point for hole border " <<raster_x << "," << raster_y);
 #endif	    
-	    NBD++;
 	    contour_length = FollowContour(image,raster_x,raster_y,points_buffer,MAXLENGTH,NULL,4,NBD);
 	    border_type = HOLE_BORDER;
-	    if (current_pixel) {
+	    if (!current_not_visited) {
 	      LNBD = current_id;
 	    }
 	  }
 	  else {
-	    continue;
+	    contour_length =0;
 	  }
 	  
+	  if (contour_length > 10) {
 #ifdef IMAGE_DEBUG
-	  debug0.DrawPolygon(points_buffer,contour_length,0,1);
-	  debug0.Save("countours.bmp");    
-	  image.Save("tracked.bmp");
-	  //	  exit(-1);
+	    debug0.DrawPolygon(points_buffer,contour_length,0,1);
+	    debug0.Save("countours.bmp");    
+	    image.Save("tracked.bmp");
+	    //	    exit(-1);
 #endif
-
-	  // now decide the parent of this border
-	
-	  // NewBorder    LNBDType   Parent
-	  // OUTER        OUTER      Parent of LNBD
-	  // OUTER        HOLE       LNBD
-	  // HOLE         OUTER      LNBD
-	  // HOLE         HOLE       Parent of LNBD
- 
+	    
+	    // now decide the parent of this border
+	    
+	    // NewBorder    LNBDType   Parent
+	    // OUTER        OUTER      Parent of LNBD
+	    // OUTER        HOLE       LNBD
+	    // HOLE         OUTER      LNBD
+	    // HOLE         HOLE       Parent of LNBD
+	    
 #ifdef SCENE_GRAPH_DEBUG
-	  PROGRESS("LNBD is " << LNBD);
-	  PROGRESS("OuterBorder(LNBD) " << node_hash[LNBD].bordertype);
-	  PROGRESS("NBD  is " << NBD);
-	  PROGRESS("OuterBorder(NBD) " << border_type);
+	    PROGRESS("LNBD is " << LNBD);
+	    PROGRESS("OuterBorder(LNBD) " << node_hash[LNBD].bordertype);
+	    PROGRESS("NBD  is " << NBD);
+	    PROGRESS("OuterBorder(NBD) " << border_type);
 #endif
-
-	  int parent_id;
-	  if ( border_type ^ node_hash[LNBD].bordertype ) {
-	    parent_id = LNBD;
-	  }
-	  else {
-	    parent_id = node_hash[LNBD].parent_id;
-	  }
-
+	    
+	    int parent_id;
+	    if ( border_type ^ node_hash[LNBD].bordertype ) {
+	      parent_id = LNBD;
+	    }
+	    else {
+	      parent_id = node_hash[LNBD].parent_id;
+	    }
+	    
 #ifdef SCENE_GRAPH_DEBUG
-	  PROGRESS("parent_id is " << parent_id);
+	    PROGRESS("parent_id is " << parent_id);
 #endif
-
-
-	  // now attempt to fit a shape to this border
-
-	  // if we succeed then create a new scene graph node and insert
-	  // it into the node_hash for this NBD also add this new scene
-	  // graph node as a child of its parent SceneGraphNode which
-	  // will be pointed to by its parent contour ID below
-	
-	  // if we fail then insert another entry in the node_hash for
-	  // the parent SceneGraphNode using this NBD
-	  camera.ImageToNPCF(points_buffer,contour_length);
-	  SceneGraphNode<S,PAYLOAD_SIZE>* next_node = new SceneGraphNode<S,PAYLOAD_SIZE>(points_buffer,contour_length);
-	  if (next_node->GetShapes().IsChainFitted()) {
+	    
+	    
+	    // now attempt to fit a shape to this border
+	    
+	    // if we succeed then create a new scene graph node and insert
+	    // it into the node_hash for this NBD also add this new scene
+	    // graph node as a child of its parent SceneGraphNode which
+	    // will be pointed to by its parent contour ID below
+	    
+	    // if we fail then insert another entry in the node_hash for
+	    // the parent SceneGraphNode using this NBD
+	    camera.ImageToNPCF(points_buffer,contour_length);
+	    SceneGraphNode<S,PAYLOAD_SIZE>* next_node = new SceneGraphNode<S,PAYLOAD_SIZE>(points_buffer,contour_length);
+	    if (next_node->GetShapes().IsChainFitted()) {
 #ifdef SCENE_GRAPH_DEBUG
-	    PROGRESS("Shape matches!");
+	      PROGRESS("Shape matches!");
 #endif
-	    node_hash[parent_id].node->AddChild(next_node);
-	    node_hash[NBD] = Contour(parent_id,next_node,border_type);					
-	  }
-	  else {
-	    delete next_node;
-	    node_hash[NBD] = Contour(parent_id,node_hash[parent_id].node,border_type);
-	  }
-	}
-	
-	if (!current_not_visited) {
-	  LNBD = current_id;
-	}
+	      node_hash[parent_id].node->AddChild(next_node);
+	      node_hash[NBD] = Contour(parent_id,next_node,border_type);					
+	    }
+	    else {
+	      delete next_node;
+	      node_hash[NBD] = Contour(parent_id,node_hash[parent_id].node,border_type);
+	    }
 
+	    NBD++;
+	    NBD &= 127;
+	    if (NBD==0) { NBD++; }
+	  }
+	  
+	  if (!current_not_visited) {
+#ifdef SCENE_GRAPH_DEBUG
+	    PROGRESS("Current node has been visited, setting LNBD to "<< (int)current_id);
+#endif
+	    LNBD = current_id;
+	  }
+	}  
       }
-
+	
     }
 #ifdef IMAGE_DEBUG
-    debug0.Save("countours.bmp");
+      debug0.Save("countours.bmp");
 #endif
-
+      
 }
   
 template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour(Image& image, int start_x, int start_y, float* points_buffer, const int maxcount, ContourStatistics* statistics, int position, const int nbd) {
@@ -278,7 +284,7 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
     const int offset_y[] = {0,1,1,1,0,-1,-1,-1};
 
     bool cell4_is_0 = false; // will be set to true when we search a region if we pass cell4 and cell4 is a 0-element
-
+    int start_position = position; // if, when we are searching for a 1-pixel, we get all the way round to the start position again then we stop.  In particular this deals with the one pixel contour case.
 
     points_buffer[0] = start_x;
     points_buffer[1] = start_y;
@@ -296,20 +302,22 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
       int sample_x = start_x+offset_x[position];
       int sample_y = start_y+offset_y[position];
       unsigned char sample = image.Sample(sample_x,sample_y);
-      if (sample & 0x1) {  // if the pixel is a 1-element
-      
+      if (sample) {  // if the pixel is a 1-element
+#ifdef SCENE_GRAPH_DEBUG
+	PROGRESS("Found 1-element at " << sample_x << "," << sample_y << " position " << position);
+#endif
 	// we now need to mark this pixel
 	unsigned char value;
 	// 1) if the pixel sample_x+1,sample_y (cell 4) is a 0-element and we
 	// have examined it whilst looking for this 1-element then this
-	// is an exit pixel.  Write (NBD,r,0-element).
+	// is an exit pixel.  Write (NBD,r).
 	if (cell4_is_0) {
-	  value = nbd << 2 | 0x3;
+	  value = nbd << 1 | 0x1;
 	}
 	// 2) else if sample_x,sample_y is unmarked write
-	// (NBD,l,1-element).
-	else if (!(sample>>2)) {
-	  value = nbd << 2 | 0x1;
+	// (NBD,l).
+	else if (!(sample>>1)) {
+	  value = nbd << 1;
 	}
 	else {
 	  value = sample;
@@ -337,8 +345,12 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
 	// position one further round than the previous central point.
 	cell4_is_0=false;
 	position+=5;
+	start_position = 10;  // disable the check for failed search - we know we'll always find one
       }
       else {  // the pixel is a 0-element
+#ifdef SCENE_GRAPH_DEBUG
+	PROGRESS("Pixel is 0-element.  Advancing search position " << position);
+#endif
 	if (position == 4) {  // if we are at cell4 (this is a 0-element) then set the cell4_is_0 flag
 	  cell4_is_0 = true; 
 	}
@@ -349,6 +361,10 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
 
       position%=8;	
     
+      if(position==start_position) { // we have searched all the way round this pixel and not found a 1-pixel
+	return 1;
+      }
+
       // if our current pixel matches the _second_ pixel found in the
       // chain and the previous pixel we found matches the first then we
       // are done.  we have to wait until pointer>4 in order to make

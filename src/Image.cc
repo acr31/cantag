@@ -68,15 +68,9 @@ void Image::GlobalThreshold(unsigned char threshold) {
 void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
   int moving_average = 127;
   int previous_line[m_image->width];
-  //  for(int i=0;i<m_image->height;i++) {
-  //    DrawPixelNoCheck(0,i,0);
-  //    DrawPixelNoCheck(m_image->width-1,i,0);
-  //  }
   for(int i=0;i<m_image->width;i++) {
-    //    DrawPixelNoCheck(i,0,0);
-    //    DrawPixelNoCheck(i,m_image->height-1,0);
     previous_line[i] = 127;
-  }
+  }  
   for(int i=0;i<m_image->height-1;) { // use height-1 so we dont overrun the image if its height is an odd number
     for(int j=0;j<m_image->width;j++) {
       unsigned char pixel = SampleNoCheck(j,i);
@@ -113,6 +107,15 @@ void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
     i++;
 
   }  
+  for(int i=0;i<m_image->height;i++) {
+    DrawPixelNoCheck(0,i,0);
+    DrawPixelNoCheck(m_image->width-1,i,0);
+  }
+  for(int i=0;i<m_image->width;i++) {
+    DrawPixelNoCheck(i,0,0);
+    DrawPixelNoCheck(i,m_image->height-1,0);
+  }  
+
 #ifdef IMAGE_DEBUG
   cvSaveImage("debug-adaptivethreshold.bmp",m_image);
 #endif

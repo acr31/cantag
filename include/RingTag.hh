@@ -327,7 +327,7 @@ public:
 			   sin(m_read_angles[j]) * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
 	  ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
 	  camera.NPCFToImage(tpt,1);
-	  bool sample = image.Sample(tpt[0],tpt[1]) & 0x1;
+	  bool sample = image.Sample(tpt[0],tpt[1]);
 	  (*read_code[currentcode])[j/READING_COUNT * RING_COUNT + k] = sample;
 	}
       }
@@ -446,7 +446,7 @@ private:
 	ApplyTransform(l,pts,1);
 	camera.NPCFToImage(pts,1);
 	// pick the colour to be the opposite of the sampled point so we can see the dot
-	int colour = image.Sample(pts[0],pts[1])&0x1 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
+	int colour = image.Sample(pts[0],pts[1]) ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
 	// or pick the colour to be on a gradient so we see the order it samples in
 	//	int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
 	debug0.DrawPoint(pts[0],pts[1],colour,3);
