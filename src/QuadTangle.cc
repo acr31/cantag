@@ -13,7 +13,7 @@
 #define COMPARE_THRESH 1
 
 #undef QUADTANGLE_DEBUG
-#define POLYGON_DEBUG
+#undef POLYGON_DEBUG
 
 #define LOGMAXWINDOW 5
 #define CURVTHRESH -0.8
@@ -581,7 +581,8 @@ namespace Total {
   /**
    * The threshold we use to determine if we should add an extra edge
    */
-#define DPMAX_THRESH 0.00085
+  //#define DPMAX_THRESH 0.00085
+#define DPMAX_THRESH 0.005
 
   float PolygonQuadTangle::DPAngle(const std::pair<float,float>& p, 
 				   const std::pair<float,float>& q,
@@ -593,11 +594,11 @@ namespace Total {
     float by = r.second-q.second;
     
     float dot = ax*bx+ay*by;
-    float denom = sqrt(ax*ax+ay*ay)+sqrt(bx*bx+by*by);
+    float denom = sqrt(ax*ax+ay*ay)*sqrt(bx*bx+by*by);
 
-    float result = (denom < 1e-8) ? -1 : dot/denom;
+    float result = (denom < 1e-15) ? -1 : dot/denom;
 #ifdef POLYGON_DEBUG
-    PROGRESS("Angle between (" << p.first << "," << p.second << "), (" << q.first << "," << q.second << "), (" <<r.first << "," << r.second << ") is " << result);
+    PROGRESS("Angle between (" << p.first << "," << p.second << "), (" << q.first << "," << q.second << "), (" <<r.first << "," << r.second << ") is " << acos(result));
 #endif
     return result;
   }
@@ -792,8 +793,10 @@ namespace Total {
 #ifdef POLYGON_DEBUG
       PROGRESS("DPRecurse Split list");
 #endif
+      std::list<std::pair<float,float> >::iterator newpos = fulllist.insert(split_iterator,*split_iterator);
       DPRecurse(fulllist,start,split_iterator);
       DPRecurse(fulllist,split_iterator,end);
+      fulllist.erase(newpos);
       DPJoin(fulllist,start,split_iterator,end);
     }
     else { // we didn't split the list so we remove everything except the first and last element
@@ -819,7 +822,7 @@ namespace Total {
   }
   
   bool PolygonQuadTangle::Fit(const std::vector<float>& points) {
-    if (points.size() > 20) {
+    if (points.size() > 4) {
 
       std::list<std::pair<float,float> > fulllist;
       
@@ -829,16 +832,12 @@ namespace Total {
       float firstx=*points.begin();
       float firsty=*++points.begin();
     
-      std::cerr << "Size:" << points.size() << std::endl;
-
-      std::cout << "Points"<< std::endl;
       //must copy since we want to modify this datastructure and vector is const!
       int index =0 ;
       for(std::vector<float>::const_iterator i = points.begin(); i != points.end(); ++i) {
 	float x = *i;
 	++i;
 	float y = *i;
-	std::cout << index++ << " " << x << " " << y << std::endl;
 	fulllist.push_back(std::pair<float,float>(x,y));
 	float d = (firstx-x)*(firstx-x)+(firsty-y)*(firsty-y);
 	if (d > maxd) {
@@ -846,10 +845,10 @@ namespace Total {
 	  maxd = d;
 	}
       }
-    
-      ++maxi;
+      fulllist.insert(maxi,*maxi);
       DPRecurse(fulllist,fulllist.begin(),maxi);
       DPRecurse(fulllist,maxi,fulllist.end());
+      maxi = fulllist.erase(maxi);
       DPJoin(fulllist,fulllist.begin(),maxi,fulllist.end());
     
       //Since we now know that this is a closed polygon, must check
@@ -867,23 +866,20 @@ namespace Total {
 	}
       }    
 
-      std::cerr << "Finished:" << fulllist.size() << std::endl;
-
-      for(std::list<std::pair<float,float> >::iterator i=fulllist.begin();
-	  i != fulllist.end(); ++i)
-	std::cout << i->first << " " << i->second << std::endl;
-
-
       if (fulllist.size() == 4) {
 	std::list<std::pair<float,float> >::iterator i = fulllist.begin();
 	m_x0 = i->first;
 	m_y0 = i->second;
-	m_x1 = ++i->first;
+	++i;
+	m_x1 = i->first;
 	m_y1 = i->second;
-	m_x2 = ++i->first;
+	++i;
+	m_x2 = i->first;
 	m_y2 = i->second;
-	m_x3 = ++i->first;
+	++i;
+	m_x3 = i->first;
 	m_y3 = i->second;
+
 	compute_central_point();
 	sort_points();
 	return true;
