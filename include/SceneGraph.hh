@@ -147,7 +147,7 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 
     // the outer border (the frame of the image) is considered to have
     // id 1 and be of type HOLE_BORDER
-    node_hash[1] = Contour(m_root,HOLE_BORDER);
+    node_hash[1] = Contour(1,m_root,HOLE_BORDER);
 
     // we mark the contours in the image with the following coding
     // bit 1 = set if this is an exit pixel (corresponds to -NBD in the paper)
@@ -286,11 +286,12 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	    }
 	  }
 
-	  if (!current_not_visited) {
+	  int new_nbd = (*data_pointer)>>1;
+	  if (new_nbd) {
 #ifdef SCENE_GRAPH_DEBUG
 	    PROGRESS("Current node has been visited, setting LNBD to "<< (int)current_nbd);
 #endif
-	    LNBD = current_nbd;
+	    LNBD = new_nbd;
 	  }
 	}  
 	data_pointer++;
@@ -384,7 +385,7 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
 
   int nbd_shifted = nbd<<1;
 
-  while(pointer < MAXLENGTH) {
+  while(pointer < MAXLENGTH*2) {
     // work out the pixel co-ordinates for the position of interest
     sample_pointer = data_pointer+offset[position];
     int sample = *sample_pointer;
@@ -466,8 +467,9 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
       position = (position+1) & 0x7;
     }
 
-    if ((data_pointer == contour_1) &&
-	(sample_pointer == contour_0)) {
+    if ((pointer > 4) && 
+	(data_pointer == contour_0) &&
+	(sample_pointer == contour_1)) {
       break;
     }
 

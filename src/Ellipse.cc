@@ -409,7 +409,7 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
 
   // check if the original r1 transform will result in a circle that points away from us
   double yfactor;
-  if (eigvects[8] < 0) {
+  if (eigvects[8] > 0) {
     yfactor = -1;
   }
   else {

@@ -356,7 +356,7 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
     }
 #endif
 
-    for(unsigned int code_ptr=0;code_ptr<READING_COUNT;code_ptr++) {
+    for(int code_ptr=0;code_ptr<READING_COUNT;code_ptr++) {
       if ((*read_code[code_ptr] == *read_code[(code_ptr+1) % READING_COUNT])) {
 	if (DecodePayload(*read_code[code_ptr]) >= 0) {
 #ifdef RING_TAG_IMAGE_DEBUG
