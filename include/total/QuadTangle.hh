@@ -64,10 +64,10 @@ public:
    * X = x/z
    * Y = y/z
    *
-   * Since both of the equations are over z we can divide through by c9 to give
+   * Since both of the equations are over z we can divide through by c8 to give
    *
-   *  X = (a0*x + a1*y + a2)/(a6*x+a7*y+1)
-   *  Y = (a3*x + a4*y + a5)/(a6*x+a7*y+1)
+   *  X = (a0*u + a1*v + a2)/(a6*u+a7*v+1)
+   *  Y = (a3*u + a4*v + a5)/(a6*u+a7*v+1)
    *
    * Where a0 = c0/c8, a1 = c1/c8,  etc...
    *
@@ -139,14 +139,14 @@ public:
    *
    * To build a homogenous transform matrix from these parameters we need c0..c8
    *  
-   * We already know a0..a7 which correspond to c1/c9...c8/c9
+   * We already know a0..a7 which correspond to c1/c8...c8/c8
    * We know r = the ratio width/height = 1
    * 
    * x = c0 * u + c1 * v + c2
    * y = c3 * u + c4 * v + c5
    * z = c6 * u + c7 * v + c8 
    *
-   * So to work out c9 we set u=v=0 this gives:
+   * So to work out c8 we set u=v=0 this gives:
    *
    * x0 = c2
    * y0 = c5
@@ -172,8 +172,8 @@ public:
    *
    * So:
    *
-   * c0 = a0 * sqrt(a1^2+a4^2+a7^2)
-   * c1 = a1 * sqrt(a1^2+a4^2+a7^2)
+   * c0 = a0 / sqrt(a1^2+a4^2+a7^2)
+   * c1 = a1 / sqrt(a1^2+a4^2+a7^2)
    * etc...
    *
    * and
@@ -186,6 +186,8 @@ public:
    * (  z  )    ( c6  c7  0 c8 ) ( w )
    * (  w  )    (  0   0  0  1 ) ( 1 )
    *
+   * The final matrix is created using the cross product
+   * of the first two columns to fill in the 3rd
    */
   void GetTransform(float transform1[16]) const;
 
