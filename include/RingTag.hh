@@ -33,7 +33,7 @@ int debug_image_counter= 0;
  *
  * \todo regression test with gl harness
  */
-#define READING_COUNT 10
+#define READING_COUNT 1
 template<int RING_COUNT, int SECTOR_COUNT>
 class RingTag : public virtual Tag< ShapeChain<Ellipse>, RING_COUNT*SECTOR_COUNT >, 
 		protected virtual Coder<RING_COUNT*SECTOR_COUNT> {
@@ -351,6 +351,7 @@ public:
 	    projected1[1] = 0;
 	    ApplyTransform(correcttrans,projected1[0],projected1[1],projected1,projected1+1);
 	    camera.NPCFToImage(projected1,1);
+	    std::cout << "Found code " << *read_code[code_ptr] << " at " << projected1[0] << "," << projected1[1] << std::endl;
 #ifdef RING_TAG_DEBUG
 	    PROGRESS("Ellipse position is "<<projected1[0]<<","<<projected1[1]);
 #endif
@@ -447,7 +448,7 @@ private:
 	// pick the colour to be the opposite of the sampled point so we can see the dot
 	int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
 	// or pick the colour to be on a gradient so we see the order it samples in
-	//int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
+	//	int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
 	debug0.DrawPoint(pts[0],pts[1],colour,3);
       }
       counter++;

@@ -22,6 +22,7 @@ private:
   bool m_from_header;  // set to true if this image is created to
 		       // point to an existing buffer of data
   
+  uchar* m_row_ptr;
 public:
   IplImage* m_image; // this is public for the benefit of SceneGraph
 
@@ -31,6 +32,10 @@ public:
   Image(const Image& c);
   Image(char* filename);
   ~Image();
+
+  inline unsigned char* GetRow(unsigned int y) {
+    return (uchar*)(y*m_image->widthStep+m_image->imageData);
+  }
 
   /**
    * Read the pixel at the given x and y co-ordinates. Includes a

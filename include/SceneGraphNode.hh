@@ -33,6 +33,8 @@ private:
 
   std::vector<SceneGraphNode<S,PAYLOAD_SIZE>* > m_children;
 
+  int m_contour_id;
+
 public:
   SceneGraphNode(float* points, int numpoints) : m_inspected(false), m_located(NULL), m_matcher(points,numpoints), m_children() {};
 
@@ -44,6 +46,25 @@ public:
 	i++) {
       delete (*i);
     }
+  }
+
+  inline int GetContourID() const {
+    return m_contour_id;
+  }
+
+  inline int SetContourID(int contour_id) {
+    m_contour_id = contour_id;
+  }
+
+  inline SceneGraphNode* GetChildByContourID(int contour_id) {
+    for(typename std::vector< SceneGraphNode<S,PAYLOAD_SIZE>* >::iterator i = m_children.begin();
+	i != m_children.end();
+	i++) {
+      if ( (*i)->GetContourID() == contour_id) {
+	return *i;
+      }
+    }
+    return NULL;
   }
 
   /**

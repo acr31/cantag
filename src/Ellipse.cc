@@ -128,60 +128,60 @@ bool Ellipse::FitEllipse(const float* points, int numpoints) {
   // Compute
 
   // M = S1 + S2 * T
+  // leave the result in S1
 
-  double m[9];
   for(int i=0;i<3;i++) {
     for(int j=0;j<3;j++) {
-      m[i*3+j] = s1[i*3+j];
       for(int k=0;k<3;k++) {
-	m[i*3+j] += s2[i*3+k] * t[k][j]; // ith row, kth column of s2 * kth row,jth column of t
+	s1[i*3+j] += s2[i*3+k] * t[k][j]; // ith row, kth column of s2 * kth row,jth column of t
       }
     }
   }
 
 #ifdef ELLIPSE_DEBUG
-  print("M",m,3,3);
+  print("M",s1,3,3);
 #endif
 
-  double m2[9];
   // premultiply M by inv(C1)
   //
   // ( M31/2 M32/2 M33/2 )
   // ( -M21  -M22  -M23  )
   // ( M11/2 M12/2 M13/2 )
-  m2[0] = m[6]/2;
-  m2[1] = m[7]/2;
-  m2[2] = m[8]/2;
-
-  m2[3] = -m[3];
-  m2[4] = -m[4];
-  m2[5] = -m[5];
-  
-  m2[6] = m[0]/2;
-  m2[7] = m[1]/2;
-  m2[8] = m[2]/2;
+  // and find eigenvectors
 
 #ifdef ELLIPSE_DEBUG
+  double m2[9];
+  m2[0] = s1[6]/2;
+  m2[1] = s1[7]/2;
+  m2[2] = s1[8]/2;
+
+  m2[3] = -s1[3];
+  m2[4] = -s1[4];
+  m2[5] = -s1[5];
+  
+  m2[6] = s1[0]/2;
+  m2[7] = s1[1]/2;
+  m2[8] = s1[2]/2;
   print("M2",m2,3,3);
 #endif
 
   double eigvals[9];
   double eigvects[9];
-
-  eigensolve(m2[0],m2[1],m2[2],
-	     m2[3],m2[4],m2[5],
-	     m2[6],m2[7],m2[8],
+  eigensolve(s1[6]/2,s1[7]/2,s1[8]/2,
+	     -s1[3],-s1[4],-s1[5],
+	     s1[0]/2,s1[1]/2,s1[2]/2,
 	     eigvects,
 	     eigvals);
+
 
 #ifdef ELLIPSE_DEBUG
   print("Eigvals",eigvals,3,3);
   print("Eigvects",eigvects,3,3);
 #endif
 
-  for(int i=0;i<9;i++) {
-    eigvects[i] = -eigvects[i];
-  }
+  //  for(int i=0;i<9;i++) {
+  //  eigvects[i] = -eigvects[i];
+  // }
 
   for(int i = 0; i < 3; i++) {
     if (4*eigvects[i]*eigvects[i+6]-eigvects[i+3]*eigvects[i+3] >= 0.0) {
@@ -403,13 +403,23 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) const {
 #ifdef CIRCLE_TRANSFORM_DEBUG
   PROGRESS("Translation tx = "<<tx);
 #endif
+
+  // check if the original r1 transform will result in a circle that points away from us
+  double yfactor;
+  if (eigvects[8] < 0) {
+    yfactor = -1;
+  }
+  else {
+    yfactor = 1;
+  }
+
   double transc1[] = {1,0,0,tx,
-		      0,1,0,0,
+		      0,yfactor,0,0,
 		      0,0,1,0,
 		      0,0,0,1};
   
   double transc2[] = {1,0,0,-tx,
-		      0,1,0,0,
+		      0,yfactor,0,0,
 		      0,0,1,0,
 		      0,0,0,1};
 

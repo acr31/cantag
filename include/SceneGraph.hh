@@ -149,39 +149,79 @@ public:
 
 
 private:
+  void FollowContours(Image& image) {
 
-  /**
-   * An implementation of Suzuki's topological structural analysis algorithm
-   *
-   * @Article{a:cvgip85:suzuki,
-   *  author        = "S. Suzuki and K. Abe",
-   *  title         = "Topological Structural Analysis of Digitized Binary Images by Border Following",
-   *  journal       = "Computer Vision, Graphics, and Image Processing",
-   *  year          = "1985",
-   *  volume        = "30",
-   *  number        = "1",
-   *  pages         = "32--46"}
-   *
-   */
-  void FollowContours(const Image& image) {
+    // we alter the current image to encode
+    // 1 bit of pixel value
+    // 1 bit of edge value
+    // the contour id
+    int contourID = 1;
+    int last_contourID;
 
-    int NBD = 1;
-    int LNBD;
+    // the current scene.  The node at the top of the stack is the
+    // current parent shape
+    std::stack<SceneGraphNode*> node_stack;
+    node_stack.push(m_root);
 
     for(int raster_y = 0; raster_y < image.GetHeight(); raster_y++) {
-      LNBD=1;      
-      for(int raster_x = 1; raster_x < image.GetWidth(); raster_x++) {
-	unsigned char image_value = image.GetPixelNoCheck(raster_x,raster_y);
+      uchar* data = image.GetRow(y);
+      int last_contourID = 1;
+      unsigned char previous_value = image.GetPixelNoCheck(0,raster_y);
+
+      // if we see an exit pixel that has been coloured as a visit by
+      // the parent contour then pop the parent off the stack
+
+      // if we see an entry pixel then it must be either a child of
+      // the parent contour or an ignored contour.  If it is a child
+      // then push the child onto the stack.  If it is a ignored
+      // contour then ignore it.
+
+      // if we see a pixel that is an unmarked edge we pick a new
+      // contour id and follow it round, marking it.  An unmarked edge
+      // is a transition from black to white.
+
+      // we mark with the new id except where we see an exit pixel
+      // (one with a blank pixel on the right of it) 
+
+      // We then try and match the shape, if it matches we add this as
+      // a child of the current parent
+      
+      // Then push it onto the stack 
+
+      // repeat
+
+      // we move a window of 3 pixels across the image
+      for(int raster_x = 0; raster_x < image.GetWidth()-3; raster_x++) {
+	if (data[1] & 0x2) {
+	  if (!data[0] & 0x2) {
+	    // this is an entry pixel
+	    if (data[1] & ~0x2) {
+	      // this is already issued as a contour
+	      SceneGraphNode* child = node_stack.top()->GetChildByContourID(data[1] >> 2);
+	      if (child != NULL) {
+		// this matches a fitted shape
+		node_stack.push(child);
+	      }
+	      else {
+		// this doesn't match a fitted shape so ignore it
+	      }
+	    }
+	    else {
+	      // this doesn't match an existing contour
+	      
+	    }
+	  }
+
 	int follow_x;
 	int follow_y;
-	if (image_value == 1 && image.GetPixelNoCheck(raster_x-1,raster_y) == 0) {
+	if (image_value & 0x1 && !(previous_value & 0x1)) {
 	  // this is the border following starting point of an outer border
 	  NBD++;
 	  
 	  follow_x = raster_x-1;
 	  follow_y = raster_y;
 	  
-	  // identify the parent of the current borde
+	  // identify the parent of the current border
 	  
 	}
 	else if (image_value >= 1 && image.GetPixelNoCheck(raster_x+1,raster_y) == 0) {
