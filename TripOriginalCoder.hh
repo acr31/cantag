@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/23 18:18:12  acr31
+ * added Matrix Tag and a test program and the beginning of the CRC coder
+ *
  * Revision 1.3  2004/01/21 11:55:08  acr31
  * added keywords for substitution
  *
@@ -43,6 +46,7 @@ public:
     m_state(SYNC), 
     m_state_counter(0),
     m_encoded(0) {
+    assert(symbol_range > 2);
     m_base = symbol_range - 1;    
   };
   
@@ -146,7 +150,7 @@ public:
     }
   }
 
-  virtual unsigned long Decode() const  {
+  virtual unsigned long Decode() {
     PROGRESS("Decode called");
     int check = m_accum_checksum_check % (int)pow(m_base,CHECKSUM_COUNT);
     if (check == m_accum_checksum) {

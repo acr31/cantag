@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/23 18:18:12  acr31
+ * added Matrix Tag and a test program and the beginning of the CRC coder
+ *
  * Revision 1.1  2004/01/23 15:42:29  acr31
  * Initial commit of rectangle detection code
  *
@@ -15,6 +18,9 @@
 #include "Config.hh"
 
 class Rectangle2D {
+private:
+  float m_alpha[8];
+
 public:
   float m_x0;
   float m_y0;
@@ -31,12 +37,14 @@ public:
   float m_xc;
   float m_yc;
   
+
   Rectangle2D(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3);
   Rectangle2D(float* coords);
+  void ProjectPoint(float rectx, float recty, float *projX, float *projY) const;
 
 private:
   inline void compute_central_point();
-
+  inline void compute_alpha();
 };
 
 class Rectangle2DChain {
