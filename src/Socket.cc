@@ -74,7 +74,7 @@ void Socket::Bind(const char* host, int port) {
   PopulateSockAddr(host,port,&s);
   // bind socket
   if (::bind(m_socket,(struct sockaddr*)&s,sizeof(struct sockaddr)) != 0) {
-    perror(NULL);
+    //    perror(NULL);
     throw "Failed to bind socket!";
   } 
 }
@@ -88,7 +88,7 @@ void Socket::Connect(const char* host, int port) {
   PopulateSockAddr(host,port,&s);
   // connect to remote machine
   if (::connect(m_socket,(struct sockaddr*)&s,sizeof(struct sockaddr)) != 0) {
-    perror(NULL);
+    //    perror(NULL);
     throw "Failed to connect to remote machine!";
   } 
 }
@@ -109,7 +109,7 @@ void Socket::Listen() {
 #endif
   // listen
   if (::listen(m_socket,0) != 0) {
-    perror(NULL);
+    //    perror(NULL);
     throw "Failed to listen on socket!";
   }
 }
@@ -123,7 +123,7 @@ Socket* Socket::Accept() {
   socklen_t len = sizeof(struct sockaddr);
   int accepted = accept(m_socket,(struct sockaddr*)&s,&len);
   if (accepted == -1) {
-    perror(NULL);
+    //    perror(NULL);
     throw "Failed to accept connection";
   }
 #ifdef SOCKET_DEBUG
