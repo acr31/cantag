@@ -11,35 +11,18 @@
  * A class for storing the data or identifier to be placed on the tag.
  */
 template <int BITCOUNT>
-class Payload : public std::bitset<BITCOUNT> {
+class Payload {
+private:
+  std::bitset<BITCOUNT>* m_data;
 public:
-  Payload() : std::bitset<BITCOUNT>() {
-    this->reset();
-  };
-
-  Payload(unsigned long value) : std::bitset<BITCOUNT>(value) {};
-
-  Payload(char* value) : std::bitset<BITCOUNT>() {
-    unsigned int pointer = 0;
-    while(value) { 
-      char current = *value;
-      do {
-	*this[pointer] = current & 0x1;
-	current >>= 1;
-      }
-      while(current);
-      value++;
-    }
-  }
-  
-  Payload(std::bitset<BITCOUNT> value) : std::bitset<BITCOUNT>(value) {};
+  Payload(std::bitset<BITCOUNT>& data) : m_data(&data) {};
 
   /**
    * Rotate the bit field so that no other rotation has a smaller
    * value.
    */
   int MinRotate() {
-    Payload<BITCOUNT> currentMin = *this; // copy
+    std::bitset<BITCOUNT> currentMin = &m_data; // copy
     int minindex = 0;
     for(int i=1;i<BITCOUNT;i++) {
       RotateLeft(1);
@@ -50,6 +33,13 @@ public:
     }
     RotateLeft(minindex+1);
     return minindex;
+  }
+
+  /** 
+   * Returns true if this 
+   */
+  bool LessThan(int rot1, int rot2) {
+
   }
 
   /**

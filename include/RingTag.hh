@@ -33,7 +33,8 @@ int debug_image_counter= 0;
  */
 #define READING_COUNT 1
 template<int RING_COUNT, int SECTOR_COUNT>
-class RingTag : public virtual Tag< ShapeChain<Ellipse>, RING_COUNT*SECTOR_COUNT >, protected virtual Coder<RING_COUNT*SECTOR_COUNT> {
+class RingTag : public virtual Tag< ShapeChain<Ellipse>, RING_COUNT*SECTOR_COUNT >, 
+		protected virtual Coder<RING_COUNT*SECTOR_COUNT> {
 private:
   float m_bullseye_inner_radius;
   float m_bullseye_outer_radius;
@@ -103,7 +104,10 @@ public:
     delete[] m_read_angles;
   }
 
-  virtual void Draw2D(Image& image, const std::bitset<RING_COUNT*SECTOR_COUNT>& tag_data) const {
+  virtual void Draw2D(Image& image, CyclicBitSet<RING_COUNT*SECTOR_COUNT>& tag_data) const {
+
+    if (!EncodePayload(tag_data)) { return ; }
+      
     // Work from the outside inwards
     
     int x0 = image.GetWidth()/2;
@@ -140,9 +144,7 @@ public:
 #ifdef RING_TAG_DEBUG
     PROGRESS("Drawing data rings");
 #endif
-    Payload<RING_COUNT*SECTOR_COUNT> payload;
-    EncodePayload(tag_data,payload);
-      
+
     if (!setscale) {
       scalefactor = (float)size/m_data_ring_outer_radii[RING_COUNT-1];   
 #ifdef RING_TAG_DEBUG
@@ -153,7 +155,7 @@ public:
     for(int i=RING_COUNT-1;i>=0;i--) {
       for(int j=0;j<SECTOR_COUNT;j++) {	
 	// pick the colour based on the value we encode - sensible
-	int colour = payload[j*RING_COUNT+i] ? COLOUR_BLACK : COLOUR_WHITE;
+	int colour = tag_data[j*RING_COUNT+i] ? COLOUR_BLACK : COLOUR_WHITE;
 	// or pick the colour based on which sector we are encoding - useful for debugging
 	//int colour = (int)((float)(i+j*RING_COUNT) / (float)(RING_COUNT*SECTOR_COUNT) * 128)+128;
 	// or pick the colour as if we were reading the tag in the wrong order - useful for pictures
@@ -186,7 +188,7 @@ public:
     }
   }
 
-  virtual bool DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Camera& camera, const Image& image) {
+  virtual bool DecodeNode(SceneGraphNode<  ShapeChain<Ellipse>, RING_COUNT*SECTOR_COUNT >* node, const Camera& camera, const Image& image) const {
 #ifdef RING_TAG_DEBUG
     PROGRESS("DecodeNode called");
 #endif
@@ -234,7 +236,7 @@ public:
     }     
     // get the children of this node and check for a good match with either interpretation
     float* correcttrans = NULL;
-    for(std::vector< SceneGraphNode< ShapeChain<Ellipse> >* >::iterator i = node->GetChildren().begin(); i!=node->GetChildren().end();i++) {
+    for(typename std::vector< SceneGraphNode< ShapeChain<Ellipse>,  RING_COUNT*SECTOR_COUNT >* >::iterator i = node->GetChildren().begin(); i!=node->GetChildren().end();i++) {
       float error1 = (*i)->GetShapes().GetShape().GetError(projected1,count);
       float error2 = (*i)->GetShapes().GetShape().GetError(projected2,count);
 
@@ -287,9 +289,7 @@ public:
       }*/
 
     if (correcttrans != NULL) {
-      float normal[3];
-      GetNormalVector(correcttrans,normal);
-
+ 
 #ifdef RING_TAG_DEBUG
       PROGRESS("Found a concentric inner circle with matching contour");
 #endif
@@ -304,7 +304,7 @@ public:
     
       // if we read a full 360 degrees then we stop and ask it for the
       // code
-      Payload<RING_COUNT*SECTOR_COUNT> read_code[READING_COUNT] = {Payload<RING_COUNT*SECTOR_COUNT>() };
+      boost::shared_ptr<  CyclicBitSet<RING_COUNT*SECTOR_COUNT> > read_code[READING_COUNT] = { boost::shared_ptr<  CyclicBitSet<RING_COUNT*SECTOR_COUNT> >(new CyclicBitSet<RING_COUNT*SECTOR_COUNT>() ) };
 
       for(int j=0;j<SECTOR_COUNT*READING_COUNT;j++) {
 	// read a chunk by sampling each ring and shifting and adding
@@ -315,38 +315,24 @@ public:
 	  ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
 	  camera.NPCFToImage(tpt,1);
 	  bool sample = image.Sample(tpt[0],tpt[1]) > 128;
-	  read_code[currentcode][j/READING_COUNT * RING_COUNT + k] = sample;
+	  (*read_code[currentcode])[j/READING_COUNT * RING_COUNT + k] = sample;
 	}
       }
     
 #ifdef RING_TAG_DEBUG
       for(int i=0;i<READING_COUNT;i++) {
-	PROGRESS("Code candidate " << i << " is " << read_code[i].to_string());
+	PROGRESS("Code candidate " << i << " is " << read_code[i]);
       }
 #endif
 
-      // we now have 5 readings each a fifth of a sector apart
-      // search for three in a row that read the same
-      // i.e.   
-      // read_code[0] == read_code[1] == read_code[2]
-      // read_code[1] == read_code[2] == read_code[3]
-      // read_code[2] == read_code[3] == read_code[4]
-      // read_code[3] == read_code[4] == read_code[0]
-      // read_code[4] == read_code[0] == read_code[1]
-
-#if READING_COUNT > 1    
-      for(int i=0;i<READING_COUNT;i++) {
-	if ((read_code[i] == read_code[(i+1) % READING_COUNT])) {
-#else
-	  int i=0;
-#endif
-	  std::bitset<RING_COUNT*SECTOR_COUNT> code;
-	  if (DecodePayload(code,read_code[i]) >= 0) {
+      for(unsigned int code_ptr=0;code_ptr<READING_COUNT;code_ptr++) {
+	if ((read_code[code_ptr] == read_code[(code_ptr+1) % READING_COUNT])) {
+	  if (DecodePayload(*read_code[code_ptr]) >= 0) {
 #ifdef RING_TAG_IMAGE_DEBUG
-	    draw_read(image,camera,correcttrans,(i+1)%READING_COUNT);
+	    draw_read(image,camera,correcttrans,(code_ptr+1)%READING_COUNT);
 #endif
 #ifdef RING_TAG_DEBUG
-	    PROGRESS("Found code " << code);
+	    PROGRESS("Found code " << read_code[code_ptr]);
 #endif	
 	    projected1[0] = 0;
 	    projected1[1] = 0;
@@ -355,19 +341,12 @@ public:
 #ifdef RING_TAG_DEBUG
 	    PROGRESS("Ellipse position is "<<projected1[0]<<","<<projected1[1]);
 #endif
-	    //	    std::cout << "Normal vector is "<<normal[0]<<" "<<normal[1]<<" "<< normal[2];
 
-	    LocatedObject* lobj = node->GetLocatedObject();
+	    LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj = node->GetLocatedObject();
 	    for(int i=0;i<16;i++) {
 	      lobj->transform[i] = correcttrans[i];
 	    }		
-	    lobj->is_valid = true;	    
-	    Payload<RING_COUNT*SECTOR_COUNT> p(code);
-	    Payload<RING_COUNT*SECTOR_COUNT> p2(*m_must_match);
-	    p.MinRotate();
-	    p2.MinRotate();
-	    lobj->is_correct = (m_must_match == NULL) || (p==p2);//|| (*m_must_match == code);
-	    node->SetInspected();
+	    lobj->tag_code = read_code[code_ptr];	   
 	    return true;
 	  }
 	  else {
@@ -375,10 +354,8 @@ public:
 	    PROGRESS("Read consistant code but it turned out invalid");
 #endif
 	  }
-#if READING_COUNT > 1
 	}
       }
-#endif
     
 #ifdef RING_TAG_DEBUG
       PROGRESS("Failed to read code");    
@@ -392,16 +369,13 @@ public:
       PROGRESS("Failed to find a valid transformation");
 #endif
     }
-
-    node->SetInspected();
-    node->GetLocatedObject()->is_valid = false;
-    node->GetLocatedObject()->is_correct = false;
+    node->ClearLocatedObject();
     return false;
   };  
 
 private:
 
-  void RingTag::draw_circle(Image& debug0, const Camera& camera, float l[16], double radius) {
+  void RingTag::draw_circle(Image& debug0, const Camera& camera, float l[16], double radius) const {
     float oldpts[2] = { radius ,
 			0 };
     float pts[2];
@@ -421,7 +395,7 @@ private:
     }  
   }
 
-  void RingTag::draw_read(const Image& image, const Camera& camera, float l[16], int i) {
+  void RingTag::draw_read(const Image& image, const Camera& camera, float l[16], int i) const {
     Image debug0(image);
     debug0.ConvertScale(-1,255);
     debug0.ConvertScale(0.5,128);
@@ -461,7 +435,7 @@ private:
 	int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
 	// or pick the colour to be on a gradient so we see the order it samples in
 	//int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
-	debug0.DrawPoint(pts[0],pts[1],colour,1);
+	debug0.DrawPoint(pts[0],pts[1],colour,4);
       }
       counter++;
     }

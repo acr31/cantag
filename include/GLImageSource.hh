@@ -11,6 +11,7 @@
 #include <ImageSource.hh>
 #include <Image.hh>
 #include <Tag.hh>
+#include <CyclicBitSet.hh>
 
 template<class TAG>
 class GLImageSource : public ImageSource {
@@ -27,7 +28,7 @@ private:
   typedef typename TAG::TagShapeType TagShapeType;  // we have to do this to convince the compiler to parse our code before it instantiates the templates
 
 public:
-  GLImageSource(int height, int width, const std::bitset<TAG::TagPayloadSize>& code, const TAG& t) : 
+  GLImageSource(int height, int width, CyclicBitSet<TAG::TagPayloadSize>& code, const TAG& t) : 
     m_height(height),
     m_width(width),
     m_glimage(width,height)

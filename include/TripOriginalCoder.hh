@@ -7,7 +7,7 @@
 
 #include <Config.hh>
 #include <Coder.hh>
-#include <Payload.hh>
+#include <CyclicBitSet.hh>
 #include <cmath>
 #include <BigInt.hh>
 
@@ -53,19 +53,21 @@ public:
   /**
    * Take the bit pattern from the tag and decode the value stored
    */
-  virtual int DecodePayload(std::bitset<BIT_COUNT>& tag_data, Payload<BIT_COUNT>& payload) const {
-    std::bitset<GRANULARITY> sync_sector_mask;
+  virtual int DecodePayload(CyclicBitSet<BIT_COUNT>& data) const {
+    CyclicBitSet<BIT_COUNT> payload(data);
+    data.reset();
+
+    const std::bitset<GRANULARITY> sync_sector_mask((1<<GRANULARITY)-1);
     const BigInt<BIT_COUNT> base((1<<GRANULARITY)-1);
-    BigInt<BIT_COUNT> checksum_mod((1<<GRANULARITY)-1);
-    checksum_mod.Pwr(CHECKSUM_COUNT);
-    sync_sector_mask.flip();
+    const BigInt<BIT_COUNT> checksum_mod( BigInt<BIT_COUNT>((1<<GRANULARITY)-1).Pwr(CHECKSUM_COUNT));
+
     // try all possible rotations...
-    for(unsigned int i=0;i<BIT_COUNT;i+=GRANULARITY) {
+    for(size_t i=0;i<BIT_COUNT;i+=GRANULARITY) {
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
-      PROGRESS("Current rotation is "<< payload.to_string());
+      PROGRESS("Current rotation is "<< payload);
 #endif
       // have we found sync sector
-      if (payload.template Match<GRANULARITY>(sync_sector_mask)) {
+      if (payload.template Equals<GRANULARITY>(sync_sector_mask)) {
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
 	PROGRESS("Found sync sector");
 #endif
@@ -74,7 +76,7 @@ public:
 	BigInt<BIT_COUNT> checksum(0);
 	BigInt<BIT_COUNT> checksum_pwr(1);
 	for(unsigned int c=0;c<CHECKSUM_COUNT;c++) {
-	  unsigned int symbol = payload.Get(c+1,GRANULARITY);
+	  unsigned int symbol = payload.GetSymbol(c+1,GRANULARITY);
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
 	  PROGRESS("Read Symbol "<< symbol);
 #endif
@@ -86,13 +88,12 @@ public:
 	BigInt<BIT_COUNT> checksum_count(0);
 
 	BigInt<BIT_COUNT> pwr(1);
-	tag_data.reset();
-	BigInt<BIT_COUNT> bi(tag_data);
+	BigInt<BIT_COUNT> bi(data);
 	
 	int data_symbol_count = (BIT_COUNT - GRANULARITY*(CHECKSUM_COUNT+1))/GRANULARITY;
 	
 	for(int c=0;c<data_symbol_count;c++) {
-	  unsigned int symbol = payload.Get(c+1+CHECKSUM_COUNT,GRANULARITY);
+	  unsigned int symbol = payload.GetSymbol(c+1+CHECKSUM_COUNT,GRANULARITY);
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
 	  PROGRESS("Read Symbol "<< symbol);
 #endif	  
@@ -133,13 +134,16 @@ public:
    * This method encodes the given value and returns the bit pattern
    * to store on the tag
    */
-  virtual bool EncodePayload(const std::bitset<BIT_COUNT>& tag_data, Payload<BIT_COUNT>& payload) const {
+  virtual bool EncodePayload(CyclicBitSet<BIT_COUNT>& data) const {
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
-    PROGRESS("Encode called with " << tag_data);
+    PROGRESS("Encode called with " << data);
 #endif
+
+    CyclicBitSet<BIT_COUNT> tag_data(data);
+    data.reset();
+
     const BigInt<BIT_COUNT> base((1<<GRANULARITY)-1);
-    BigInt<BIT_COUNT> checksum_mod((1<<GRANULARITY)-1);
-    checksum_mod.Pwr(CHECKSUM_COUNT);
+    const BigInt<BIT_COUNT> checksum_mod( BigInt<BIT_COUNT>((1<<GRANULARITY)-1).Pwr(CHECKSUM_COUNT));
     
     // build the code by taking the remainder of tag_data with
     // (1<<GRANULARITY)-1 to get the next symbol and then dividing
@@ -152,10 +156,11 @@ public:
     BigInt<BIT_COUNT> checksum(0);
     int data_symbol_count = (BIT_COUNT - GRANULARITY*(CHECKSUM_COUNT+1))/GRANULARITY;
 
-    for(int i=0;i<data_symbol_count;i++) {
+    for(unsigned int i=0;i<data_symbol_count;i++) {
+      PROGRESS(i);
       unsigned int symbol = bi % base;
       checksum+=BigInt<BIT_COUNT>(symbol);
-      payload.Put(symbol,i+1+CHECKSUM_COUNT,GRANULARITY); 
+      data.PutSymbol(symbol,i+1+CHECKSUM_COUNT,GRANULARITY); 
       bi/=base;
     }
 
@@ -163,19 +168,19 @@ public:
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
     PROGRESS("Checksum is "<<checksum);
 #endif
-    for(int i=0;i<CHECKSUM_COUNT;i++) {
+    for(unsigned int i=0;i<CHECKSUM_COUNT;i++) {
       unsigned int symbol = checksum % base;
-      payload.Put(symbol,i+1,GRANULARITY);
+      data.PutSymbol(symbol,i+1,GRANULARITY);
       checksum /= base;
     }
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
     PROGRESS("Adding Sync sector");
 #endif
     // sync sector
-    payload.Put( (1<<GRANULARITY)-1 , 0, GRANULARITY);
+    data.PutSymbol( (1<<GRANULARITY)-1 , 0, GRANULARITY);
 
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
-    PROGRESS("Final bit pattern is "<<payload.to_string());
+    PROGRESS("Final bit pattern is " << data);
 #endif
     return true;
   }

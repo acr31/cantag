@@ -6,10 +6,15 @@
 
 #include <Config.hh>
 #include <Image.hh>
+#include <CyclicBitSet.hh>
+
+#include <boost/shared_ptr.hpp>
 
 /**
- * Represents a tag that has been located.  Contains its 3D location, pose and transformation matrix
+ * Represents a tag that has been located.  Contains its 3D location,
+ * pose, transformation matrix and its coded value.
  */
+template<int PAYLOAD_SIZE>
 class LocatedObject {
 public:
   /**
@@ -54,19 +59,11 @@ public:
   float angle;
 
   /**
-   * Is this actually a valid location
+   * The code stored on the tag.
    */
-  bool is_valid;
+  boost::shared_ptr< CyclicBitSet<PAYLOAD_SIZE> > tag_code;
 
-  /**
-   * If we knew in advance which tag we were looking for..did this one match it?
-   */
-  bool is_correct;
-
-  LocatedObject();
-  ~LocatedObject();
-  void Refresh(Image& image);
-
+  void Refresh(Image& image) {};
 };
 
 #endif//LOCATED_OBJECT_GUARD

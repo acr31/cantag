@@ -22,16 +22,17 @@
  * A scene graph.  This class maintains a logical view of the current
  * image in terms of a hierachy of recognised shapes.
  *
- * \todo square matching is currently requiring that you change APPROX_NONE to APPROX_SIMPLE.  Fix the square fitter.
+ * \todo square matching is currently requiring that you change
+ * APPROX_NONE to APPROX_SIMPLE.  Fix the square fitter.
  */
-template<class S>
+template<class S,int PAYLOAD_SIZE>
 class SceneGraph {
 private:
-  SceneGraphNode<S>* m_root;
+  SceneGraphNode<S,PAYLOAD_SIZE>* m_root;
 
   CvPoint m_points[MAXLENGTH];
   float m_fpoints[MAXLENGTH*2];
-  SceneGraphNode<S>* m_parents[MAXDEPTH];
+  SceneGraphNode<S,PAYLOAD_SIZE>* m_parents[MAXDEPTH];
 
 #ifdef ADD_CONTOUR_NOISE
   boost::normal_distribution<float> m_normal_dist;
@@ -75,7 +76,7 @@ public:
     for(int i=0;i<MAXDEPTH;i++) {
       m_parents[i] = NULL;
     }
-    m_parents[0] = new SceneGraphNode<S>();
+    m_parents[0] = new SceneGraphNode<S,PAYLOAD_SIZE>();
     m_root = m_parents[0];
 
     CvTreeNodeIterator treeiter;
@@ -118,7 +119,7 @@ public:
 #endif	
 	}
 	camera.ImageToNPCF(m_fpoints,count);
-	SceneGraphNode<S>* next = new SceneGraphNode<S>(m_fpoints,count);
+	SceneGraphNode<S,PAYLOAD_SIZE>* next = new SceneGraphNode<S,PAYLOAD_SIZE>(m_fpoints,count);
 
 	if (next->GetShapes().IsChainFitted()) {
 	  // now add this node as a child of its parent.  Its parent is
@@ -155,7 +156,7 @@ public:
   /**
    * Return the root node for this graph
    */
-  SceneGraphNode<S>* GetRootNode() const { return m_root; };
+  SceneGraphNode<S,PAYLOAD_SIZE>* GetRootNode() const { return m_root; };
 };
 
 #endif//SCENE_GRAPH_GUARD

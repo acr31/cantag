@@ -12,11 +12,10 @@
 template<int BIT_COUNT>
 class ParityCoder : public virtual Coder<BIT_COUNT> {
 public:
-  virtual bool EncodePayload(const std::bitset<BIT_COUNT>& tag_data, Payload<BIT_COUNT>& payload) const {
+  virtual bool EncodePayload(CyclicBitSet<BIT_COUNT>& data) const {
     bool parity = true;
     for(int i=0;i<BIT_COUNT-1;i++) {
-      payload[i]=tag_data[i];
-      if (tag_data[i]) { 
+      if (data[i]) { 
 	parity = !parity;
       }
     }
@@ -25,29 +24,26 @@ public:
     PROGRESS("Parity is "<<parity);
 #endif 
 
-    payload[BIT_COUNT-1] = !parity;
+    data[BIT_COUNT-1] = !parity;
 
-    payload.MinRotate();
+    data.MinRotate();
+    return true;
   }
 
-  virtual int DecodePayload(std::bitset<BIT_COUNT>& data, Payload<BIT_COUNT>& payload) const {
-    int rotation = payload.MinRotate();
+  virtual int DecodePayload(CyclicBitSet<BIT_COUNT>& data) const {
+    int rotation = data.MinRotate();
     bool parity = true;
-    for(int i=0;i<BIT_COUNT-1;i++) {
-      data[i] = payload[i];
-      if (payload[i]) {
+    for(int i=0;i<BIT_COUNT;i++) {
+      if (data[i]) {
 	parity = !parity;
       }
     }
-
-    if (payload[BIT_COUNT-1]) {
-      parity = !parity;
-    }
+    data[BIT_COUNT] = false;
 
 #ifdef PARITY_DEBUG
     PROGRESS("Parity is "<<parity);
 #endif 
-   
+    
     if (parity) {
       return rotation;
     }

@@ -35,7 +35,8 @@
  * correct
  */ 
 template<int SIZE>
-class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*SIZE % 2) >, protected virtual Coder<SIZE*SIZE - (SIZE*SIZE % 2)> {
+class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*SIZE % 2) >,
+		  protected virtual Coder<SIZE*SIZE - (SIZE*SIZE % 2)> {
  private:
   float m_cell_width;
   float m_cell_width_2;
@@ -94,7 +95,7 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
 
   virtual ~MatrixTag() {}
 
-  virtual void Draw2D(Image& image, const std::bitset< SIZE*SIZE - (SIZE*SIZE % 2)>& tag_data) const {
+  virtual void Draw2D(Image& image, CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>& tag_data) const {
 #ifdef MATRIX_TAG_DEBUG
     PROGRESS("Draw2D called");
 #endif
@@ -115,8 +116,7 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
 			       x3, y3,COLOUR_BLACK);
 			  
     // now draw the code
-    Payload< SIZE*SIZE - (SIZE*SIZE % 2) > payload;
-    EncodePayload(tag_data,payload);
+    EncodePayload(tag_data);
     float projX0, projY0;
     float projX1, projY1;
     float projX2, projY2;
@@ -130,7 +130,7 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
       int v2 = (int)((m_cells_corner[2*i+1]+m_cell_width)*(float)size);
       int u3 = (int)(m_cells_corner[2*i]*(float)size);
       int v3 = (int)((m_cells_corner[2*i+1]+m_cell_width)*(float)size);
-      int colour = payload[i] ? COLOUR_BLACK : COLOUR_WHITE;
+      int colour = tag_data[i] ? COLOUR_BLACK : COLOUR_WHITE;
       //int colour = (int)((float)i/(float)(SIZE*SIZE - (SIZE*SIZE % 2)) * 128)+128;
       image.DrawFilledQuadTangle(u0,v0,
 				 u1,v1,
@@ -163,7 +163,7 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
   }
 
 
-  virtual bool DecodeNode(SceneGraphNode< ShapeChain<QuadTangle> >* node, const Camera& camera, const Image& image) {
+  virtual bool DecodeNode(SceneGraphNode< ShapeChain<QuadTangle> ,SIZE*SIZE - (SIZE*SIZE % 2)>* node, const Camera& camera, const Image& image) const {
 #ifdef MATRIX_TAG_DEBUG
     PROGRESS("Decode node called");
 #endif
@@ -189,7 +189,7 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
   
     GetTransform(quad,transform);
 
-    Payload<SIZE*SIZE - (SIZE*SIZE % 2)> read_code;
+    CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)> read_code;
     float projX, projY;
     // iterate over the tag reading each section
     for(int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);i++) {
@@ -228,35 +228,22 @@ class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*
       // pick the colour to be the opposite of the sampled point so we can see the dot
       int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
       // or pick the colour to be on a gradient so we see the order it samples in
-      //int colour = (int)((double)i/(double)(SIZE*SIZE - (SIZE*SIZE %2))*255);
+      //int colour = (int)((double)i/(double)(SIZE*SIZE - (SIZE*SIZE % 2)))*255);
       debug0.DrawPoint(pts[0],pts[1],colour,4);
     }
 
     debug0.Save("debug-decode.bmp");
 #endif
 
-    node->SetInspected();
-    LocatedObject* lobj = node->GetLocatedObject();
-    std::bitset<SIZE*SIZE-(SIZE*SIZE%2)> tagcode(0);
-    if (DecodePayload(tagcode,read_code) >= 0) {
-      float normal[3];
-      GetNormalVector(transform,normal);
-      //std::cout << "Normal vector is "<<normal[0]<<" "<<normal[1]<<" "<< normal[2] << std::endl;
+    if (DecodePayload(read_code) >= 0) {
+      LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = node->GetLocatedObject();
       for(int i=0;i<16;i++) {
 	lobj->transform[i] = transform[i];
       }	
-      lobj->is_valid = true;
-      Payload<SIZE*SIZE - (SIZE*SIZE % 2)> p;
-      EncodePayload(*m_must_match,p);
-      p.MinRotate();
-      read_code.MinRotate();
-
-      lobj->is_correct = (m_must_match == NULL) || (p==read_code);//|| (*m_must_match == code);      
       return true;
     }    
     else {
-      lobj->is_valid = false;
-      lobj->is_correct = false;
+      node->ClearLocatedObject();
     }
     return false;
   }

@@ -19,19 +19,21 @@ class SymbolChunkCoder : public virtual Coder<BIT_COUNT> {
 public:
   SymbolChunkCoder() {};
 
-  virtual int DecodePayload(std::bitset<BIT_COUNT>& tag_data, Payload<BIT_COUNT>& payload) const {
+  virtual int DecodePayload(CyclicBitSet<BIT_COUNT>& data) const {
     // rotate the code by increments of GRANULARITY until the first bit is a 1
     int rotation = 0;
-    while(!payload[0] && rotation < BIT_COUNT) {
-      payload.RotateLeft(GRANULARITY);
+    while(!data[0] && rotation < BIT_COUNT) {
+      data.RotateLeft(GRANULARITY);
       rotation+=GRANULARITY;
     }
 
-    if (payload[0]) {
+    if (data[0]) {
+      CyclicBitSet<BIT_COUNT> data_copy(data);
+      data.reset();
       int payload_pointer = 0;
       // we've found the first symbol
       for(int i=0;i<BIT_COUNT/GRANULARITY * (GRANULARITY-2);i+=GRANULARITY-2) {
-	bool parity = payload[payload_pointer++]; //read off the orientation bit
+	bool parity = data_copy[payload_pointer++]; //read off the orientation bit
 	if ((payload_pointer > 1) && (parity)) {
 #ifdef SYMBOL_CHUNK_DEBUG
 	  PROGRESS("Orientation bit at position " << (payload_pointer-1) << " is corrupted");
@@ -40,10 +42,10 @@ public:
 	  return -1;
 	}					      
 	for(int j=0;j<GRANULARITY-2;j++) {
-	  tag_data[j+i] = payload[payload_pointer];
-	  if (payload[payload_pointer++]) { parity = !parity; }
+	  data[j+i] = data_copy[payload_pointer];
+	  if (data_copy[payload_pointer++]) { parity = !parity; }
 	}
-	if (payload[payload_pointer++]) { parity = !parity; }
+	if (data_copy[payload_pointer++]) { parity = !parity; }
 	if (!parity) { 
 #ifdef SYMBOL_CHUNK_DEBUG
 	  PROGRESS("Parity check bit at position " << (payload_pointer-1) << " is invalid");
@@ -61,17 +63,19 @@ public:
     }
   }
   
-  virtual bool EncodePayload(const std::bitset<BIT_COUNT>& tag_data, Payload<BIT_COUNT>& payload) const {
+  virtual bool EncodePayload(CyclicBitSet<BIT_COUNT>& data) const {
+    CyclicBitSet<BIT_COUNT> data_copy(data);
+    data.reset();
     // we encode BIT_COUNT/GRANULARITY symbols, each one containing GRANULARITY-2 bits of payload
     int payload_pointer = 0;
     for(int i=0;i<BIT_COUNT/GRANULARITY * (GRANULARITY-2);i+=GRANULARITY-2) {
-      payload[payload_pointer++] = i==0;  // encode a 1 if this is the first symbol
+      data[payload_pointer++] = i==0;  // encode a 1 if this is the first symbol
       bool parity = i==0;
       for(int j=0;j<GRANULARITY-2;j++) {
-	payload[payload_pointer++] = tag_data[i+j];
-	if (tag_data[i+j]) { parity = !parity; }
+	data[payload_pointer++] = data_copy[i+j];
+	if (data_copy[i+j]) { parity = !parity; }
       }
-      payload[payload_pointer++] = !parity; // add the parity bit
+      data[payload_pointer++] = !parity; // add the parity bit
     }
     return true;
   }
