@@ -149,12 +149,16 @@ template<int SIZE> void MatrixTag<SIZE>::Draw2D(Image& image, CyclicBitSet<SIZE*
   for(int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);i++) {
     int u0 = (int)((m_cells_corner[2*i]+1)*(float)size);
     int v0 = (int)((m_cells_corner[2*i+1]+1)*(float)size);
-    int u1 = (int)((m_cells_corner[2*i]+m_cell_width+1)*(float)size);
+
+    int u1 = (int)((m_cells_corner[2*i]+m_cell_width+1)*(float)size)-1;
     int v1 = (int)((m_cells_corner[2*i+1]+1)*(float)size);
-    int u2 = (int)((m_cells_corner[2*i]+m_cell_width+1)*(float)size);
-    int v2 = (int)((m_cells_corner[2*i+1]+m_cell_width+1)*(float)size);
+
+    int u2 = (int)((m_cells_corner[2*i]+m_cell_width+1)*(float)size)-1;
+    int v2 = (int)((m_cells_corner[2*i+1]+m_cell_width+1)*(float)size)-1;
+
     int u3 = (int)((m_cells_corner[2*i]+1)*(float)size);
-    int v3 = (int)((m_cells_corner[2*i+1]+m_cell_width+1)*(float)size);
+    int v3 = (int)((m_cells_corner[2*i+1]+m_cell_width+1)*(float)size)-1;
+
     int colour = tag_data[i] ? COLOUR_BLACK : COLOUR_WHITE;
     //int colour = (int)((float)i/(float)(SIZE*SIZE - (SIZE*SIZE % 2)) * 128)+128;
     image.DrawFilledQuadTangle(u0,v0,
