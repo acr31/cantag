@@ -117,7 +117,7 @@ void jacobi(double a_in, double b_in, double f_in,
 
 
 
-void eigensolve(double a, double b, double f,
+void _eigensolve(double a, double b, double f,
 		/*    */  double c, double d,
 		/*               */ double e,
 		double* eigenvects,
@@ -349,7 +349,7 @@ extern int eigen(
 	   );
 
 
-bool eigensolve(double a, double b, double c,
+bool _eigensolve(double a, double b, double c,
 		double d, double e, double f,
 		double g, double h, double i,
 		double *eigenvects, double* eigenvals) {
@@ -394,6 +394,8 @@ bool eigensolve(double a, double b, double c,
   delete[] valre;
   delete[] valim;
   delete[] cnt;
+
+  return result;
 }
 
 

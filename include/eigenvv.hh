@@ -24,7 +24,7 @@
  *
  * \todo currently doesn't work - I've gone back to the opencv methods
  */ 
-void eigensolve(double a,   double b,   double c,
+void _eigensolve(double a,   double b,   double c,
 		/*     b,*/ double d,   double e,
 		/*     c,          e,*/ double f,
 		double* eigenvects,
@@ -38,7 +38,7 @@ void eigensolve(double a,   double b,   double c,
  * 
  * \todo find out how this works
  */
-bool eigensolve(double m11, double m12, double m13,
+bool _eigensolve(double m11, double m12, double m13,
 		double m21, double m22, double m23,
 		double m31, double m32, double m33,
 		double *eigenvecs, double* eigenvals);
