@@ -136,7 +136,7 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60.0, (GLfloat)m_width/(GLfloat)m_height,0,50.0);
+    gluPerspective(60.0, (GLfloat)m_width/(GLfloat)m_height,0,100.0);
     gluLookAt(0.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
