@@ -228,6 +228,13 @@ int Socket::Send(int message) {
   return Send((unsigned char*)&message,sizeof(int));
 }
 
+int Socket::Send(unsigned int message) {
+#ifdef SOCKET_DEBUG
+  PROGRESS("Send unsigned int");
+#endif
+  return Send((unsigned char*)&message,sizeof(unsigned int));
+}
+
 int Socket::Send(float message) {
 #ifdef SOCKET_DEBUG
   PROGRESS("Send float");

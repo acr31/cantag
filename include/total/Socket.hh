@@ -47,6 +47,7 @@ public:
   float RecvFloat();
   int Send(const unsigned char* buf, size_t len);
   int Send(int item);
+  int Send(unsigned int item);
   int Send(float item);
   int Send(const float* buf, size_t len);
   int Send(const std::vector<float>& vec);
