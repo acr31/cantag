@@ -334,6 +334,7 @@ int Image::Save(Socket& socket) const {
 }
 
 void Image::ConvertScale(float scalefactor, int offset) {
+  m_binary = false;
   for(int i=0;i<GetHeight();++i) {
     unsigned char* ptr = GetRow(i);
     for(int j=0;j<GetWidth();++j) {
@@ -358,7 +359,7 @@ void Image::DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigne
     int y = y0;
     DrawPixel(x,y,colour);
 
-    if (dy > 0 && dy >= dx) { // NE or N
+    if (dy > 0 && dy > dx) { // NE or N
       int d = (int)((a*(x+0.5)+b*(y+1)+c));
       while (y < y1) {
 	++y;
@@ -540,6 +541,9 @@ void Image::Save(const char* filename) const {
   try {
     Magick::Image i(Magick::Geometry(this->GetWidth(),this->GetHeight()),
 		    Magick::ColorRGB(1.0,1.0,1.0));
+    i.type(Magick::GrayscaleType);
+    i.colorSpace(Magick::GRAYColorspace);
+    i.depth(8);
     i.modifyImage();
     for(int y=0;y<GetHeight();++y) {
       const unsigned char* row = GetRow(y);
