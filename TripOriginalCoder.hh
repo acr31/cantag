@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.7  2004/01/24 19:29:24  acr31
+ * removed ellipsetoxy and put the project method in Ellipse2D objects
+ *
  * Revision 1.6  2004/01/24 17:53:22  acr31
  * Extended TripOriginalCoder to deal with base 2 encodings.  MatrixTag
  * implementation now works.
@@ -63,7 +66,7 @@ public:
    */
   void Set(unsigned long long value) {
     m_values[0] = m_symbol_range-1;
-    
+    m_counter = 0;
     int num_syms = m_symbol_count - CHECKSUM_COUNT -1;
     unsigned int checksum = 0;
     for(int i=num_syms-1;i>=0;i--) {

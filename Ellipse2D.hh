@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/24 19:29:24  acr31
+ * removed ellipsetoxy and put the project method in Ellipse2D objects
+ *
  * Revision 1.1  2004/01/23 12:05:48  acr31
  * moved Tag to CircularTag in preparation for Squaretag
  *
@@ -23,6 +26,10 @@
 #include "Config.hh"
 
 class Ellipse2D {
+private:
+  float m_sint;
+  float m_cost;
+
 public:
   float m_x;
   float m_y;
@@ -31,6 +38,7 @@ public:
   float m_angle_radians;
 
   Ellipse2D(float x, float y, float width, float height, float angle_radians);
+  void ProjectPoint(float angle_radians, float radius, float *projX, float *projY) const;
 };
 
 class Ellipse2DChain {

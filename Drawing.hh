@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/24 19:29:23  acr31
+ * removed ellipsetoxy and put the project method in Ellipse2D objects
+ *
  * Revision 1.3  2004/01/23 18:18:11  acr31
  * added Matrix Tag and a test program and the beginning of the CRC coder
  *
@@ -24,6 +27,10 @@ typedef IplImage Image;
 
 inline int SampleImage(Image *image,int x, int y) {
   return (int)(((uchar*)(image->imageData + image->widthStep*y))[x]);
+}
+
+inline int SampleImage(Image *image,float x, float y) {
+  return (int)(((uchar*)(image->imageData + image->widthStep*(int)y))[(int)x]);
 }
 
 inline void DrawEllipse(Image *image, float x, float y, float width, float height, float angle_radians, float start_angle, float end_angle, int color, int thickness) {

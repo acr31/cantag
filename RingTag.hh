@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.9  2004/01/24 19:29:24  acr31
+ * removed ellipsetoxy and put the project method in Ellipse2D objects
+ *
  * Revision 1.8  2004/01/24 10:33:35  acr31
  * changed unsigned long to unsigned long long
  *
@@ -32,7 +35,6 @@
 #include "Drawing.hh"
 #include "Tag.hh"
 #include "Coder.hh"
-#include "ellipsetoxy.hh"
 #include "Ellipse2D.hh"
 
 #undef FILENAME
@@ -223,67 +225,56 @@ public:
     Image* debug0 = cvCloneImage(image);
     cvConvertScale(debug0,debug0,0.5,128);    
 #endif
-
-    for(int i=0;i<m_sync_count;i++) {
-      bool valid = 1;
-      for(int j=0;j<m_sector_count;j++) {
-	// read a chunk by sampling each ring and shifting and adding
-	unsigned int chunk =0;
-	for(int k=m_ring_count-1;k>=0;k--) {
-	  chunk = chunk << 1;
-	  int x;
-	  int y;
-	  EllipseToXY(l->m_x,
-		      l->m_y,
-		      l->m_width/m_bullseye_outer_radius,
-		      l->m_height/m_bullseye_outer_radius,
-		      l->m_angle_radians,
-		      m_sync_angles[i]+m_sector_angles[j],
-		      m_data_ring_centre_radii[k],
-		      &x,&y);
-	  bool sample = SampleImage(image,x,y) < 128;
+    bool valid = 1;
+    for(int j=0;j<m_sector_count;j++) {
+      // read a chunk by sampling each ring and shifting and adding
+      unsigned int chunk =0;
+      for(int k=m_ring_count-1;k>=0;k--) {
+	chunk = chunk << 1;
+	float x;
+	float y;
+	l->ProjectPoint(m_sector_angles[j],
+			m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
+			&x,
+			&y);
+	bool sample = SampleImage(image,x,y) < 128;
 #ifdef IMAGE_DEBUG
-	  cvLine(debug0,cvPoint(x,y),cvPoint(x,y),0,3);
+	cvLine(debug0,cvPoint((int)x,(int)y),cvPoint((int)x,(int)y),0,3);
 #endif
-	  chunk |= (sample ? 1:0);
-	}
-	try {
-	  if (!(m_coder.LoadChunk(chunk))) {
-	    valid =0;
-	    break;
-	  }
-	}
-	catch (Coder::InvalidSymbol &e) {
-#ifdef IMAGE_DEBUG
-	  char filename[255];
-	  snprintf(filename,255,"debug-decode%d.jpg",debug_attempt++);
-	  cvSaveImage(filename,debug0);
-	  cvReleaseImage(&debug0);
-#endif
-	  throw e;
+	chunk |= (sample ? 1:0);
+      }
+      try {
+	if (!(m_coder.LoadChunk(chunk))) {
+	  valid =0;
+	  break;
 	}
       }
-
+      catch (Coder::InvalidSymbol &e) {
 #ifdef IMAGE_DEBUG
-      char filename[255];
-      snprintf(filename,255,"debug-decode%d.jpg",debug_attempt++);
-      cvSaveImage(filename,debug0);
-      cvCopyImage(image,debug0);
-      cvConvertScale(debug0,debug0,0.5,128);    
-#endif
-      if (valid) {
-#ifdef IMAGE_DEBUG
+	char filename[255];
+	snprintf(filename,255,"debug-decode%d.jpg",debug_attempt++);
+	cvSaveImage(filename,debug0);
 	cvReleaseImage(&debug0);
 #endif
-	return m_coder.Decode();
-      }
-      else {
-	// try again with another sync angle
-	m_coder.Reset();
+	throw e;
       }
     }
+    
+#ifdef IMAGE_DEBUG
+    char filename[255];
+    snprintf(filename,255,"debug-decode%d.jpg",debug_attempt++);
+    cvSaveImage(filename,debug0);
+    cvCopyImage(image,debug0);
+    cvConvertScale(debug0,debug0,0.5,128);    
+#endif
+    if (valid) {
+#ifdef IMAGE_DEBUG
+      cvReleaseImage(&debug0);
+#endif
+      return m_coder.Decode();
+    }
+    return 0;
   }
-
 };
 
 #endif//RING_TAG_GUARD
