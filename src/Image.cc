@@ -39,6 +39,9 @@ void Image::GlobalThreshold(unsigned char threshold) {
  *     comment      = "Nice introduction to global and adaptive thresholding.  Presents an efficient and effective adaptive thresholding technique and demonstrates on lots of example images.",
  *     file         = "ar/ddesk-threshold.pdf"
  *   }
+ *
+ *
+ * \todo Doesnt work properly on noisy images
  */
 void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
   float moving_average = 127;
