@@ -64,10 +64,6 @@ void Camera::NPCFToImage(float* points, int numpoints) const {
     double dxx = 2*m_d1*x*y + m_d2*(rpwr2+2*x*x);
     double dxy = m_d1*(rpwr2+2*y*y)+2*m_d2*x*y;
 
-    radialcoeff =1;
-    dxx = 0;
-    dxy=0;
-
     // 3) Compute the new values of x and y
     double xd1 = radialcoeff*x+dxx;
     double xd2 = radialcoeff*y+dxy;
@@ -110,6 +106,10 @@ void Camera::UnDistortImage(Image& image) const {
   for(int i=0;i<image.GetHeight();i++) {
     for(int j=0;j<image.GetWidth();j++) {
       float points[] = {i,j};
+      points[0] -= m_intrinsic[2];
+      points[1] -= m_intrinsic[5];
+      points[0] /= m_intrinsic[0];
+      points[1] /= m_intrinsic[4];
       NPCFToImage(points,1);
       image.DrawPixel(i,j,source.Sample(points[0],points[1]));
     }
