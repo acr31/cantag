@@ -157,7 +157,7 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
     debug0.ConvertScale(0.5,128);
 #endif
 
-    float points_buffer[MAXLENGTH];
+    float points_buffer[MAXLENGTH*2];
     int NBD = 2;
     for(int raster_y=0;raster_y < image.GetWidth(); raster_y++) {
       int LNBD = 1; // we've just "seen" the frame border

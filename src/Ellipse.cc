@@ -23,6 +23,8 @@
 static void print(const char* label, double* array, int rows, int cols);
 static void print(const char* label, double** array, int rows, int cols);
 
+Ellipse::Ellipse(): m_fitted(false) {}
+
 Ellipse::Ellipse(const float* points, int numpoints) {
   m_fitted = FitEllipse(points,numpoints);
 }

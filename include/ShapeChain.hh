@@ -32,7 +32,7 @@ private:
   S m_next;
 
 public:
-  ShapeChain() : m_shape(NULL,0,true), m_next() {};
+  ShapeChain() : m_shape(), m_next() {};
   ShapeChain(float* points, int numpoints) : 
     m_shape(points,numpoints,false),
     m_next(points,numpoints,m_shape.IsFitted()) {};

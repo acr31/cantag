@@ -29,6 +29,7 @@ private:
   bool m_fitted;
 
 public:
+  Ellipse();
   Ellipse(const float* points, int numpoints); 
   Ellipse(const float* points, int numpoints, bool prev_fit); 
   Ellipse(float a, float b, float c, float d, float e, float f);
