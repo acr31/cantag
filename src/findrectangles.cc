@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/01/31 16:48:10  acr31
+ * moved some arguments to #defines
+ *
  * Revision 1.4  2004/01/30 16:54:28  acr31
  * changed the Coder api -reimplemented various bits
  *
@@ -28,10 +31,16 @@
 #include <opencv/cv.h>
 #include <cmath>
 
+#undef FILENAME
+#define FILENAME "findrectangles.cc"
+
+#define MAXXDIFF 10
+#define MAXYDIFF 10
+
 /** 
  * Find rectangular white objects- for black tags you _must_ invert the image.
  */
-void FindRectangles(Image *image, int maxXDiff, int maxYDiff, std::vector<Rectangle2DChain*> *results) { 
+void FindRectangles(Image *image, std::vector<Rectangle2DChain*> *results) { 
   IplImage *copy = cvCloneImage(image);
 
 #ifdef IMAGE_DEBUG
@@ -72,7 +81,7 @@ void FindRectangles(Image *image, int maxXDiff, int maxYDiff, std::vector<Rectan
 					    points[3].x,points[3].y);
 					   
       for(std::vector<Rectangle2DChain*>::const_iterator i = results->begin();i!= results->end();i++) {
-	if (compare(newbox,(*i)->current,maxXDiff,maxYDiff)) {
+	if (compare(newbox,(*i)->current)) {
 	  PROGRESS("Found concentric partner");
 	  Rectangle2DChain *toadd = *i;
 	  while(toadd->nextchain != NULL) {
@@ -132,7 +141,7 @@ void FindRectangles(Image *image, int maxXDiff, int maxYDiff, std::vector<Rectan
   cvReleaseImage(&copy);
 }
 
-static bool compare(Rectangle2D *r1, Rectangle2D *r2, float xdist, float ydist) 
+static bool compare(Rectangle2D *r1, Rectangle2D *r2)
 {
   /*
     Check if the centre points of each rectangle are close
@@ -151,8 +160,8 @@ static bool compare(Rectangle2D *r1, Rectangle2D *r2, float xdist, float ydist)
   
   */
 
-  return ((fabs(r1->m_xc - r2->m_xc) < xdist) &&
-	  (fabs(r1->m_yc - r2->m_yc) < ydist));
+  return ((fabs(r1->m_xc - r2->m_xc) < MAXXDIFF) &&
+	  (fabs(r1->m_yc - r2->m_yc) < MAXYDIFF));
 }
 
   

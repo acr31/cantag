@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.6  2004/01/31 16:48:10  acr31
+ * moved some arguments to #defines
+ *
  * Revision 1.5  2004/01/28 17:19:43  acr31
  * providing my own implementation of draw ellipse
  *
@@ -48,7 +51,13 @@
 #undef FILENAME
 #define FILENAME "findellipses.cc"
 
-void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, float maxYDiff, float maxRatioDiff, float maxFitError, std::vector<Ellipse2DChain*> *results) { 
+#define MAXLENGTH 1000
+#define MAXXDIFF 10
+#define MAXYDIFF 10
+#define MAXRATIODIFF 0.1
+#define MAXFITERROR 0.0001
+
+void FindEllipses(Image *image, std::vector<Ellipse2DChain*> *results) { 
   IplImage *copy = cvCloneImage(image); // the find contours process changes the image ;-(
   
 #ifdef IMAGE_DEBUG
@@ -62,8 +71,8 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
   PROGRESS("Initializing contour scanner");
   CvContourScanner scanner = cvStartFindContours(copy,store,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_SIMPLE);
 
-  CvPoint points[maxLength];
-  CvPoint2D32f fpoints[maxLength];
+  CvPoint points[MAXLENGTH];
+  CvPoint2D32f fpoints[MAXLENGTH];
   CvBox2D current;
   CvSeq* c;
   while ((c = cvFindNextContour(scanner)) != NULL) {
@@ -73,7 +82,7 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 #endif
     if ((CV_IS_SEQ_CURVE(c)) && (count > 6)) {
       PROGRESS("Found contour with "<<count<<" (>6) vertices");
-      if (count > maxLength) { count = maxLength; }
+      if (count > MAXLENGTH) { count = MAXLENGTH; }
       /* Copy the points into floating point versions for the
 	 ellipse fitter */
       cvCvtSeqToArray( c, points ,cvSlice(0,count));
@@ -84,7 +93,7 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 
       cvFitEllipse( fpoints, count,&current);
       PROGRESS("Ellipse has centre "<< current.center.x <<" " << current.center.y << " dims " << current.size.width << " " << current.size.height);
-      if (calcerror(&current,fpoints,count,maxFitError)) {
+      if (calcerror(&current,fpoints,count)) {
 #ifdef IMAGE_DEBUG
 	DrawEllipse(debug1,
 		    current.center.x,current.center.y,
@@ -105,7 +114,7 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 					  (float)current.angle/180*PI);
 
 	for(std::vector<Ellipse2DChain*>::const_iterator i = results->begin();i!= results->end();i++) {
-	  if (compare(newbox,(*i)->current,maxXDiff,maxYDiff,maxRatioDiff)) {
+	  if (compare(newbox,(*i)->current)) {
 	    PROGRESS("Found concentric partner");
 	    Ellipse2DChain *toadd = *i;
 	    while(toadd->nextchain != NULL) {
@@ -150,18 +159,18 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
   cvReleaseImage(&copy);
 }
 
-static inline bool compare(Ellipse2D *e1, Ellipse2D *e2, float maxXDiff, float maxYDiff, float maxRatioDiff) {
+static inline bool compare(Ellipse2D *e1, Ellipse2D *e2) {
   PROGRESS("Comparing ("<<e1->m_x<<","<<e1->m_y<<") ("<<e1->m_height<<","<<e1->m_width<<") with ("<<e2->m_x<<","<<e2->m_y<<") ("<<e2->m_height<<","<<e2->m_width<<")");
-  PROGRESS("      XDIFF = " << (fabs(e1->m_x - e2->m_x)) << " (thresh " << maxXDiff<<")");
-  PROGRESS("      YDIFF = " << (fabs(e1->m_y - e2->m_y)) << " (thresh " << maxYDiff<<")");
-  PROGRESS("      RATIO = " << (fabs(e1->m_height/e1->m_width - e2->m_height/e2->m_width)) << " (thresh " << maxRatioDiff<<")");
-  return ( (fabs(e1->m_x - e2->m_x) < maxXDiff) &&
-	   (fabs(e1->m_y - e2->m_y) < maxYDiff) &&
+  PROGRESS("      XDIFF = " << (fabs(e1->m_x - e2->m_x)) << " (thresh " << MAXXDIFF<<")");
+  PROGRESS("      YDIFF = " << (fabs(e1->m_y - e2->m_y)) << " (thresh " << MAXYDIFF<<")");
+  PROGRESS("      RATIO = " << (fabs(e1->m_height/e1->m_width - e2->m_height/e2->m_width)) << " (thresh " << MAXRATIODIFF<<")");
+  return ( (fabs(e1->m_x - e2->m_x) < MAXXDIFF) &&
+	   (fabs(e1->m_y - e2->m_y) < MAXYDIFF) &&
 	   (fabs(e1->m_height/e1->m_width -
-		 e2->m_height/e2->m_width)) < maxRatioDiff);
+		 e2->m_height/e2->m_width)) < MAXRATIODIFF);
 }
 
-static bool calcerror(CvBox2D *ellipse, CvPoint2D32f *fpoints, int count, float maxFitError) {
+static bool calcerror(CvBox2D *ellipse, CvPoint2D32f *fpoints, int count) {
   /* Work out the error for this fit.  This just tries every
      point on the contour with the ellipse function from the
      fitter and accumulates the difference 
@@ -209,6 +218,6 @@ static bool calcerror(CvBox2D *ellipse, CvPoint2D32f *fpoints, int count, float 
 	    ((y*cosa-x*sina)*(y*cosa-x*sina))/bsq ) - 1;
     total+= dist*dist;
   }
-  PROGRESS("Total error was "<< (total/count) << " and threshold is "<<maxFitError);
-  return (total < maxFitError * count);
+  PROGRESS("Total error was "<< (total/count) << " and threshold is "<<MAXFITERROR);
+  return (total < MAXFITERROR * count);
 }
