@@ -18,7 +18,9 @@ extern "C" {
 #define SOCKET_DEBUG
 
 Socket::Socket() : m_byte_count(0), m_host(NULL), m_port(0), m_soft_connect(false) {
-  PROGRES("Creating socket");
+#ifdef SOCKET_DEBUG
+  PROGRESS("Creating socket");
+#endif
   m_socket = ::socket(PF_INET,SOCK_STREAM,0);
   
   if (m_socket == -1) {
@@ -30,7 +32,9 @@ Socket::Socket(int handle) : m_socket(handle) , m_byte_count(0), m_host(NULL), m
 }
 
 Socket::~Socket() {
+#ifdef SOCKET_DEBUG
   PROGRESS("Closing socket");
+#endif
   if (m_socket != -1) {
     ::close(m_socket);
   }
@@ -63,7 +67,9 @@ void Socket::PopulateSockAddr(const char* host, int port, sockaddr_in* s) {
 }
 
 void Socket::Bind(const char* host, int port) {
+#ifdef SOCKET_DEBUG
   PROGRESS("Binding socket " << host << ":" << port);
+#endif
   struct sockaddr_in s;
   PopulateSockAddr(host,port,&s);
   // bind socket
@@ -74,7 +80,9 @@ void Socket::Bind(const char* host, int port) {
 }
 
 void Socket::Connect(const char* host, int port) {
+#ifdef SOCKET_DEBUG
   PROGRESS("Connecting socket " << host << ":" << port);
+#endif
    // lookup address
   struct sockaddr_in s;
   PopulateSockAddr(host,port,&s);
@@ -86,7 +94,9 @@ void Socket::Connect(const char* host, int port) {
 }
 
 void Socket::SoftConnect(const char* host, int port) {
+#ifdef SOCKET_DEBUG
   PROGRESS("SoftConnect scheduled to " << host << ":" << port);
+#endif
   m_host = new char[strlen(host)+1];
   strcpy(m_host,host);
   m_port = port;
@@ -102,7 +112,9 @@ void Socket::Listen() {
 }
 
 Socket* Socket::Accept() {
+#ifdef SOCKET_DEBUG
   PROGRESS("Accept");
+#endif
   struct sockaddr_in s;
   memset(&s,0,sizeof(sockaddr));
   socklen_t len = sizeof(struct sockaddr);
@@ -115,7 +127,9 @@ Socket* Socket::Accept() {
 }
 
 void Socket::Recv(unsigned char* buf, size_t len) {
+#ifdef SOCKET_DEBUG
   PROGRESS("Receive unsigned char* size " << len);
+#endif
   int total = 0;
   while(total < len) {
     int count = ::recv(m_socket,buf+total,len-total,0);
@@ -123,30 +137,40 @@ void Socket::Recv(unsigned char* buf, size_t len) {
     total += count;
     m_byte_count+= count;
   }
+#ifdef SOCKET_DEBUG
   PROGRESS("Received " << total << " bytes");
+#endif
 }
 
 void Socket::Recv(float* buf, size_t len) {
+#ifdef SOCKET_DEBUG
   PROGRESS("Receive float* size " << len);
+#endif
   Recv((unsigned char*)buf,sizeof(float)*len);
 }
 
 int Socket::RecvInt() {
+#ifdef SOCKET_DEBUG
   PROGRESS("Receive int");
+#endif
   int result;
   Recv((unsigned char*)&result,sizeof(int));
   return result;
 }
 
 float Socket::RecvFloat() {
+#ifdef SOCKET_DEBUG
   PROGRESS("Receive float");
+#endif
   float result;
   Recv((unsigned char*)&result,sizeof(float));
   return result;
 }
 
 void Socket::Recv(std::vector<float>& vec) {
+#ifdef SOCKET_DEBUG
   PROGRESS("Receive vector<float>");
+#endif
   int size = RecvInt();
   float* data = new float[size];
   Recv( (unsigned char*)data, size * sizeof(float));
@@ -156,7 +180,9 @@ void Socket::Recv(std::vector<float>& vec) {
 }
 
 int Socket::Send(const unsigned char* buf, size_t len) {
+#ifdef SOCKET_DEBUG
   PROGRESS("Send unsigned char* size " << len);
+#endif
   while (m_soft_connect) {
     try {
       Connect(m_host,m_port);
@@ -174,27 +200,37 @@ int Socket::Send(const unsigned char* buf, size_t len) {
     total+=sent;
     m_byte_count += sent;
   }
+#ifdef SOCKET_DEBUG
   PROGRESS("Sent " << total << " bytes");
+#endif
   return total;
 }
 
 int Socket::Send(const float* buf, size_t len) {
+#ifdef SOCKET_DEBUG
   PROGRESS("Send float* size " << len);
+#endif
   return Send((unsigned char*)buf, sizeof(float)*len);
 }
 
 int Socket::Send(int message) {
-  PROGRES("Send int");
+#ifdef SOCKET_DEBUG
+  PROGRESS("Send int");
+#endif
   return Send((unsigned char*)&message,sizeof(int));
 }
 
 int Socket::Send(float message) {
+#ifdef SOCKET_DEBUG
   PROGRESS("Send float");
+#endif
   return Send((unsigned char*)&message,sizeof(float));
 }
 
 int Socket::Send(const std::vector<float>& vec) {
+#ifdef SOCKET_DEBUG
   PROGRESS("Send vector<float>");
+#endif
   float* points = new float[vec.size()];
   float* pointsptr = points;
   for(std::vector<float>::const_iterator i = vec.begin();i!=vec.end();++i) {
