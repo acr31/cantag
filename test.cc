@@ -24,11 +24,15 @@ main(int argc,char* argv[])
   int window_size = gray->width/8;
   window_size+= 1-(window_size %2);
   cvAdaptiveThreshold(gray,gray,255,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY,window_size,40);
-  //  cvCanny(gray,gray,128,128,3);  
+  cvCanny(gray,gray,128,128,3);  
+
+
   CvMemStorage *store = cvCreateMemStorage(0);
   CvSeq *seq = NULL;
-  int num = cvFindContours(gray,store,&seq,sizeof(CvContour));
-
+  int num = cvFindContours(gray,store,&seq,sizeof(CvContour),CV_RETR_LIST,CV_CHAIN_APPROX_SIMPLE);
+  //  cvNamedWindow(argv[1],1);
+  //  cvShowImage(argv[1],gray);
+  //  cvWaitKey(0);
   cvDrawContours(img,seq,16776960,0,5,1,8);
 
   vector<CvBox2D> boxes;
@@ -80,7 +84,7 @@ main(int argc,char* argv[])
 	  (fabs( (double)step->size.height/(double)step->size.width - (double)search->size.height/(double)search->size.width) < MAX_RATIO_DIFF))
       {
 	  int color = CV_RGB( rand(), rand(), rand() );
-	  //	  cvEllipseBox( img, *search,color,3);
+	  cvEllipseBox( img, *search,color,3);
       }
     }
   }
