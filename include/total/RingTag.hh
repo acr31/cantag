@@ -492,7 +492,7 @@ template<int RING_COUNT,int SECTOR_COUNT,class C> bool RingTag<RING_COUNT,SECTOR
 		     m_sin_read_angles[j] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
     ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
     camera.NPCFToImage(tpt,1);
-    right = image.Sample(tpt[0],tpt[1]) != 0;
+    right = (image.Sample(tpt[0],tpt[1]) & 1) != 0;
     if ((j>0) && (left != right)) break;
     left = right;
   }
@@ -512,7 +512,7 @@ template<int RING_COUNT,int SECTOR_COUNT,class C> bool RingTag<RING_COUNT,SECTOR
 		     m_sin_read_angles[centre] * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
     ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
     camera.NPCFToImage(tpt,1);
-    bool sample = image.Sample(tpt[0],tpt[1]) != 0;
+    bool sample = (image.Sample(tpt[0],tpt[1]) & 0x1) != 0;
     if (sample) {
       if (left && !right) {
 	leftindex = centre;
@@ -547,7 +547,7 @@ template<int RING_COUNT,int SECTOR_COUNT,class C> bool RingTag<RING_COUNT,SECTOR
 		       m_sin_read_angles[readindex] * m_data_ring_centre_radii[RING_COUNT-1-k]/m_bullseye_outer_radius };
       ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
       camera.NPCFToImage(tpt,1);
-      bool sample = image.Sample(tpt[0],tpt[1]) != 0;
+      bool sample = (image.Sample(tpt[0],tpt[1]) & 1) != 0;
       (*read_code)[index++] = sample;      
     }
     readindex+=READING_COUNT;
@@ -666,6 +666,7 @@ template<int RING_COUNT,int SECTOR_COUNT,class C> void RingTag<RING_COUNT,SECTOR
 template<int RING_COUNT,int SECTOR_COUNT,class C>  void RingTag<RING_COUNT,SECTOR_COUNT,C>::draw_read(const Image& image, const Camera& camera, float l[16]) const {
   int i =0;
   Image debug0(image);
+  debug0.Mask(1);
   debug0.ConvertScale(50,0);
   debug0.ConvertScale(-1,255);
   
@@ -701,7 +702,7 @@ template<int RING_COUNT,int SECTOR_COUNT,class C>  void RingTag<RING_COUNT,SECTO
       ApplyTransform(l,pts,1);
       camera.NPCFToImage(pts,1);
       // pick the colour to be the opposite of the sampled point so we can see the dot
-      int colour = image.Sample(pts[0],pts[1]) ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
+      int colour = image.Sample(pts[0],pts[1]) & 1 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
       // or pick the colour to be on a gradient so we see the order it samples in
       //int colour = (int)((double)counter/(double)(SECTOR_COUNT*RING_COUNT)*255);
       debug0.DrawPoint(pts[0],pts[1],colour,4);
