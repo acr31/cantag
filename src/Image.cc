@@ -40,9 +40,9 @@ Image::~Image() {
 }
 
 void Image::GlobalThreshold(unsigned char threshold) {
-  cvThreshold(m_image,m_image,threshold,255,CV_THRESH_BINARY_INV);
+  cvThreshold(m_image,m_image,threshold,1,CV_THRESH_BINARY_INV);
 #ifdef IMAGE_DEBUG
-  cvSaveImage("debug-globalthreshold.jpg",m_image);
+  cvSaveImage("debug-globalthreshold.bmp",m_image);
 #endif
 }
 
@@ -68,7 +68,13 @@ void Image::GlobalThreshold(unsigned char threshold) {
 void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
   int moving_average = 127;
   int previous_line[m_image->width];
+  //  for(int i=0;i<m_image->height;i++) {
+  //    DrawPixelNoCheck(0,i,0);
+  //    DrawPixelNoCheck(m_image->width-1,i,0);
+  //  }
   for(int i=0;i<m_image->width;i++) {
+    //    DrawPixelNoCheck(i,0,0);
+    //    DrawPixelNoCheck(i,m_image->height-1,0);
     previous_line[i] = 127;
   }
   for(int i=0;i<m_image->height-1;) { // use height-1 so we dont overrun the image if its height is an odd number
@@ -80,10 +86,10 @@ void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
       previous_line[j] = moving_average;
       //      if (pixel*255 < current_thresh*(255-offset)) {
       if (pixel*(1<<window_size)*255 < current_thresh*(255-offset)) {
-	DrawPixelNoCheck(j,i,COLOUR_WHITE);
+	DrawPixelNoCheck(j,i,1);
       }
       else {
-	DrawPixelNoCheck(j,i,COLOUR_BLACK);
+	DrawPixelNoCheck(j,i,0);
       }
     }
 
@@ -97,10 +103,10 @@ void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
      previous_line[j] = moving_average;
      //     if (pixel*255 < current_thresh*(255-offset)) {
      if (pixel*(1<<window_size)*255 < current_thresh*(255-offset)) {
-       DrawPixelNoCheck(j,i,COLOUR_WHITE);
+       DrawPixelNoCheck(j,i,1);
       }
       else {
-	DrawPixelNoCheck(j,i,COLOUR_BLACK);
+	DrawPixelNoCheck(j,i,0);
       }
     }
 
@@ -108,7 +114,7 @@ void Image::AdaptiveThreshold(unsigned int window_size, unsigned char offset) {
 
   }  
 #ifdef IMAGE_DEBUG
-  cvSaveImage("debug-adaptivethreshold.jpg",m_image);
+  cvSaveImage("debug-adaptivethreshold.bmp",m_image);
 #endif
 }
 

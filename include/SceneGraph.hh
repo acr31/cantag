@@ -8,6 +8,7 @@
 #include <ShapeChain.hh>
 #include <Ellipse.hh>
 #include <SceneGraphNode.hh>
+#include <map>
 
 #define MAXLENGTH 10000
 #define MAXDEPTH 20
@@ -25,6 +26,16 @@
  *
  * \todo stop depending on opencv's stuff either implement my own contour follower or move it to the image class
  */
+
+struct ContourStatistics {
+  int length;
+  int minx;
+  int maxx;
+  int miny;
+  int maxy;
+  bool convex;
+};
+
 template<class S,int PAYLOAD_SIZE>
 class SceneGraph {
 private:
@@ -35,226 +46,333 @@ public:
   /**
    * Create a scene graph.
    */ 
-  SceneGraph() : m_root(new SceneGraphNode<S,PAYLOAD_SIZE>()) {
-    store = cvCreateMemStorage(0);
-  };
+  SceneGraph();
+  ~SceneGraph();
 
-  ~SceneGraph() {
-    cvReleaseMemStorage(&store);
-    delete m_root;
-  }
   /**
    * Update the scene graph with the given image
    */
-  void Update(const Image& image, const Camera& camera) {
-    IplImage *copy = cvCloneImage(image.m_image); // the find contours process changes the image ;-(
-    CvSeq* root;
-    cvFindContours(copy,store,&root,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_NONE);
-    cvReleaseImage(&copy);
-
-#ifdef IMAGE_DEBUG
-    IplImage *debug0 = cvCloneImage(image.m_image);
-    cvConvertScale(debug0,debug0,0.5,128);
-#endif
-
-    // this array of pointers to nodes will be used to keep track of
-    // the current parent node
-    SceneGraphNode<S,PAYLOAD_SIZE>* parents[MAXDEPTH] = {0};
-    delete m_root;
-    m_root = new SceneGraphNode<S,PAYLOAD_SIZE>();
-    parents[0] = m_root;
-
-    CvTreeNodeIterator treeiter;
-    cvInitTreeNodeIterator(&treeiter,root,MAXDEPTH);
-
-    do {
-      CvSeq *c = (CvSeq*)treeiter.node;
-
-      if ((c != NULL) && (fabs(cvContourArea(c,CV_WHOLE_SEQ))>MINCONTOUR_AREA)) {
-#ifdef SCENE_GRAPH_DEBUG
-	PROGRESS("Found contour at level "<< treeiter.level);
-#endif
-	int count = c->total;
-	int total_count = count;
-	int step = 1;
-	// halve the length of the contour until it fits in MAXLENGTH,
-	// increase step in tandem so we dont just chop off a load of
-	// points at the end
-	while (count > MAXLENGTH) { 
-	  count>>=1;
-	  step<<=1;
-	}
-
-#ifdef SCENE_GRAPH_DEBUG
-	PROGRESS("Using "<<count<<" points out of " << total_count << " with steps of " << step);
-#endif
-
-	// copy the points out of the sequence into an array so we can use them
-	float fpoints[MAXLENGTH*2];
-	CvSeqReader reader;
-	cvStartReadSeq( c, &reader, 0 );
-	int fpoints_pointer = 0;
-	for(int pt=0;pt<c->total;pt++) {
-	  CvPoint val;
-	  CV_READ_SEQ_ELEM(val,reader);
-	  if (pt % step == 0) {
-	    fpoints[fpoints_pointer++] = (float)val.x;
-	    fpoints[fpoints_pointer++] = (float)val.y;	  
-	  }
-	}
-
-	// normalise the image points
-	camera.ImageToNPCF(fpoints,count);
-
-	SceneGraphNode<S,PAYLOAD_SIZE>* next = new SceneGraphNode<S,PAYLOAD_SIZE>(fpoints,count);
-
-	if (next->GetShapes().IsChainFitted()) {
-#ifdef IMAGE_DEBUG
-	  // draw found contours
-	  cvDrawContours(debug0,c,0,0,0,2,8);
-#endif
-	  // now add this node as a child of its parent.  Its parent is
-	  // the node stored in index level-1 in the parents array. 
-	  for(int i=treeiter.level;i>=0;i--) {
-	    if (parents[i] != NULL) {
-	      parents[i]->AddChild(next);
-#ifdef SCENE_GRAPH_DEBUG
-	      PROGRESS("Added node to parent at level "<<i);
-#endif
-	      break;
-	    }
-	  }
-	  parents[treeiter.level+1] = next;
-	}
-	else {
-#ifdef SCENE_GRAPH_DEBUG
-	  PROGRESS("This contour does not match any shape in the chain---discarding it.");
-#endif
-	  delete next;
-	}
-      }
-    }
-    while(cvNextTreeNode(&treeiter));
-#ifdef IMAGE_DEBUG
-    cvSaveImage("debug-scenegraphcontours.jpg",debug0);
-    cvReleaseImage(&debug0);
-#endif
-   
-  }
+  void Update(Image& image, const Camera& camera);
   
   /**
    * Return the root node for this graph
    */
-  SceneGraphNode<S,PAYLOAD_SIZE>* GetRootNode() const { return m_root; };
+  inline SceneGraphNode<S,PAYLOAD_SIZE>* GetRootNode() const { return m_root; };
 
 
 private:
 
-  // maintain a linked list of pointers to open chains
+  /**
+   * Follows the edge that starts at (start_x,start_y) and stores the
+   * points found in the points_buffer.  The passed NBD is used to mark
+   * the contour in the image.
+   *
+   * If more than maxcount points are found the list is truncated.
+   *
+   * The algorithm works by examining the 8-connected region around the current contour pixel
+   *
+   *   +---+---+---+
+   *   | 7 | 6 | 5 |
+   *   +---+---+---+
+   *   | 0 | X | 4 |
+   *   +---+---+---+
+   *   | 1 | 2 | 3 |
+   *   +---+---+---+
+   *
+   *  We start at position 0 and scan counterclockwise looking for a
+   *  1-element (that lies on the contour).  When we find it we store
+   *  the position in the array and begin searching again with the newly
+   *  found 1-element at the centre of the region.  The search resumes
+   *  after the position of the old contour pixel.
+   *
+   *  This algorithm searches for white objects on a black background!
+   *
+   *  Contour statistics are accumulated during the walk
+   *  1) number of points
+   *  2) contour length - if we select the next point in the contour
+   *     from the 4- region (cells 0,2,4,6) we add one to the length, if we
+   *     select from the other cells we add sqrt(2).  We approximate this
+   *     with integer arithmetic by adding 32 for every 4-connected point
+   *     and 45 (sqrt(2)*32 = 45.255) for every other point and then
+   *     dividing by 32 (or left shifting 5) at the end.
+   *  3) bounding box
+   *  4) convexity
+   */
+  int FollowContour(Image& image, // the image to track the contour in (will be altered)
+		    int start_x,  int start_y, // the start position (must lie on contour)
+		    float* points_buffer,  // the buffer to store the points
+		    const int maxcount, // maximum number of points to return (buffer size must be twice this)
+		    ContourStatistics* statistics,   // contour statistics structure (can be NULL)
+		    int position,  // the position in the 8-connected region to start searching from
+		    int nbd  // the NBD to mark this contour with
+		    );
+  enum bordertype_t { OUTER_BORDER = 1, HOLE_BORDER = 0};
+  struct Contour {
+    int parent_id;
+    SceneGraphNode<S,PAYLOAD_SIZE>* node;
+    bordertype_t bordertype;
+
+    Contour() {};
+    Contour(const Contour& c) : parent_id(c.parent_id), node(c.node), bordertype(c.bordertype) {};
+    Contour(SceneGraphNode<S,PAYLOAD_SIZE>* in_node,bordertype_t border) : node(in_node), bordertype(border) {};
+    Contour(int in_parent_id, SceneGraphNode<S,PAYLOAD_SIZE>* in_node,bordertype_t border) : parent_id(in_parent_id), node(in_node), bordertype(border) {};
+  };
+
   
-  // scan across the line
-  // if you see a white to black transition then 
-  //    scan accross the linked list of pointers looking for an open chain to attach to
-  //    if the item at the head of the list has image column greater than the current position +1 then stop looking
-  //    if you find a chain then add this point to it
-  //    if you dont find a chain then start a new one and insert it into the list at the current position
-  //    every chain you take off the list when looking for the new chain is now closed
-  // if you continue to find black pixels, add them to the chain
-  // if you find a black to white transition then insert this chain into the list again
-  // 
 
-  /*
+};
 
-  void FollowContours(Image& image) {
 
-    // we alter the current image to encode
-    // 1 bit of pixel value
-    // 1 bit of edge value
-    // the contour id
-    int contourID = 1;
-    int last_contourID;
+template<class S,int PAYLOAD_SIZE> SceneGraph<S,PAYLOAD_SIZE>::SceneGraph() : m_root(new SceneGraphNode<S,PAYLOAD_SIZE>()) {
+  store = cvCreateMemStorage(0);
+}
 
-    // the current scene.  The node at the top of the stack is the
-    // current parent shape
-    std::stack<SceneGraphNode*> node_stack;
-    node_stack.push(m_root);
+template<class S,int PAYLOAD_SIZE> SceneGraph<S,PAYLOAD_SIZE>::~SceneGraph() {
+  cvReleaseMemStorage(&store);
+  delete m_root;
+}
 
-    for(int raster_y = 0; raster_y < image.GetHeight(); raster_y++) {
-      uchar* data = image.GetRow(y);
-      int last_contourID = 1;
-      unsigned char previous_value = image.GetPixelNoCheck(0,raster_y);
+template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image& image, const Camera& camera) {
+#ifdef SCENE_GRAPH_DEBUG
+  PROGRESS("Updating Scene Graph");
+#endif
+      // a lookup from contour IDs to the shape assigned to them
+    std::map<int,Contour> node_hash;
+    
+    delete m_root;
+    m_root = new SceneGraphNode<S,PAYLOAD_SIZE>();
 
-      // if we see an exit pixel that has been coloured as a visit by
-      // the parent contour then pop the parent off the stack
+    // the outer border (the frame of the image) is considered to have
+    // id 1 and be of type HOLE_BORDER
+    node_hash[1] = Contour(m_root,HOLE_BORDER);
 
-      // if we see an entry pixel then it must be either a child of
-      // the parent contour or an ignored contour.  If it is a child
-      // then push the child onto the stack.  If it is a ignored
-      // contour then ignore it.
+    // we mark the contours in the image with the following coding
+    // bit 1 = image content
+    // bit 2 = l-pixel or r-pixel
+    // bit 3-8 = NBD
 
-      // if we see a pixel that is an unmarked edge we pick a new
-      // contour id and follow it round, marking it.  An unmarked edge
-      // is a transition from black to white.
+#ifdef IMAGE_DEBUG
+    Image debug0(image);
+    debug0.ConvertScale(0.5,128);
+#endif
 
-      // we mark with the new id except where we see an exit pixel
-      // (one with a blank pixel on the right of it) 
+    float points_buffer[MAXLENGTH];
+    int NBD = 1;
+    for(int raster_y=0;raster_y < image.GetWidth(); raster_y++) {
+      int LNBD = 1; // we've just "seen" the frame border
+      for(int raster_x=1;raster_x < image.GetHeight()-1;raster_x++) {
+	const unsigned char current = image.SampleNoCheck(raster_x,raster_y);
+	const bool current_pixel = current & 0x1;
+	const unsigned char current_id = current >> 2;
+	const bool current_not_visited = !(current & ~0x1);  // this will be true if this is an element that has not been visited before
 
-      // We then try and match the shape, if it matches we add this as
-      // a child of the current parent
-      
-      // Then push it onto the stack 
-
-      // repeat
-
-      // we move a window of 3 pixels across the image
-      for(int raster_x = 0; raster_x < image.GetWidth()-3; raster_x++) {
-	if (data[1] & 0x2) { // this is a edge pixel
-	  if (!data[0] & 0x2) {
-	    // this is an entry pixel
-	    if (data[1] & ~0x2) {
-	      // this is already issued as a contour
-	      SceneGraphNode* child = node_stack.top()->GetChildByContourID(data[1] >> 2);
-	      if (child != NULL) {
-		// this matches a fitted shape
-		node_stack.push(child);
-	      }
-	      else {
-		// this doesn't match a fitted shape so ignore it
-	      }
-	    }
-	    else {
-	      // this doesn't match an existing contour
-	      contourID++;
-	      
+	if (current_pixel) { // the current pixel is a 1-element (possibly visited before)
+	  const unsigned char previous = image.SampleNoCheck(raster_x-1,raster_y);
+	  const unsigned char next = image.SampleNoCheck(raster_x+1,raster_y);
+	  int contour_length;
+	  bordertype_t border_type;
+	  if (current_not_visited && !(previous & 0x1)) { // the previous pixel is a 0-element
+#ifdef SCENE_GRAPH_DEBUG
+	    PROGRESS("Found start point for outer border");
+#endif	    
+	    NBD++;
+	    border_type = OUTER_BORDER;
+	    contour_length = FollowContour(image, raster_x, raster_y, points_buffer, MAXLENGTH, NULL,0, NBD);
+	  }
+	  else if (!(next& 0x1)) { // the next element is a 0-element 
+#ifdef SCENE_GRAPH_DEBUG
+	    PROGRESS("Found start point for hole border");
+#endif	    
+	    NBD++;
+	    contour_length = FollowContour(image,raster_x,raster_y,points_buffer,MAXLENGTH,NULL,4,NBD);
+	    border_type = HOLE_BORDER;
+	    if (current_pixel) {
+	      LNBD = current_id;
 	    }
 	  }
+	  else {
+	    continue;
+	  }
+	  
+#ifdef IMAGE_DEBUG
+	  debug0.DrawPolygon(points_buffer,contour_length,0,1);
+	  debug0.Save("countours.bmp");    
+	  image.Save("tracked.bmp");
+	  exit(-1);
+#endif
 
-	int follow_x;
-	int follow_y;
-	if (image_value & 0x1 && !(previous_value & 0x1)) {
-	  // this is the border following starting point of an outer border
-	  NBD++;
-	  
-	  follow_x = raster_x-1;
-	  follow_y = raster_y;
-	  
-	  // identify the parent of the current border
-	  
+	  // now decide the parent of this border
+	
+	  // NewBorder    LNBDType   Parent
+	  // OUTER        OUTER      Parent of LNBD
+	  // OUTER        HOLE       LNBD
+	  // HOLE         OUTER      LNBD
+	  // HOLE         HOLE       Parent of LNBD
+ 
+#ifdef SCENE_GRAPH_DEBUG
+	  PROGRESS("LNBD is " << LNBD);
+	  PROGRESS("OuterBorder(LNBD) " << node_hash[LNBD].bordertype);
+	  PROGRESS("NBD  is " << NBD);
+	  PROGRESS("OuterBorder(NBD) " << border_type);
+#endif
+
+	  int parent_id;
+	  if ( border_type ^ node_hash[LNBD].bordertype ) {
+	    parent_id = LNBD;
+	  }
+	  else {
+	    parent_id = node_hash[LNBD].parent_id;
+	  }
+
+#ifdef SCENE_GRAPH_DEBUG
+	  PROGRESS("parent_id is " << parent_id);
+#endif
+
+
+	  // now attempt to fit a shape to this border
+
+	  // if we succeed then create a new scene graph node and insert
+	  // it into the node_hash for this NBD also add this new scene
+	  // graph node as a child of its parent SceneGraphNode which
+	  // will be pointed to by its parent contour ID below
+	
+	  // if we fail then insert another entry in the node_hash for
+	  // the parent SceneGraphNode using this NBD
+	  camera.ImageToNPCF(points_buffer,contour_length);
+	  SceneGraphNode<S,PAYLOAD_SIZE>* next_node = new SceneGraphNode<S,PAYLOAD_SIZE>(points_buffer,contour_length);
+	  if (next_node->GetShapes().IsChainFitted()) {
+	    node_hash[parent_id].node->AddChild(next_node);
+	    node_hash[NBD>>1] = Contour(parent_id,next_node,border_type);					
+	  }
+	  else {
+	    delete next_node;
+	    node_hash[NBD>>1] = Contour(parent_id,node_hash[parent_id].node,border_type);
+	  }
 	}
-	else if (image_value >= 1 && image.GetPixelNoCheck(raster_x+1,raster_y) == 0) {
-	  // this is the border following starting point of a hole border
-	  NBD++;
-	  follow_x = raster_x+1;
-	  follow_y = raster_y;
-	  LNBD = image_value;
+	
+	if (!current_not_visited) {
+	  LNBD = current_id;
 	}
+
       }
-      
-    }
 
-  }
-  */
-};
+    }
+#ifdef IMAGE_DEBUG
+    debug0.Save("countours.bmp");
+#endif
+
+}
+  
+template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour(Image& image, int start_x, int start_y, float* points_buffer, const int maxcount, ContourStatistics* statistics, int position, const int nbd) {
+#ifdef SCENE_GRAPH_DEBUG
+  PROGRESS("Following contour");
+#endif	 
+  
+
+    // these two arrays store the offsets for each of the eight regions
+    // around the target pixel
+    const int offset_x[] = {-1,-1,0,1,1,1,0,-1};
+    const int offset_y[] = {0,1,1,1,0,-1,-1,-1};
+
+    bool cell4_is_0 = false; // will be set to true when we search a region if we pass cell4 and cell4 is a 0-element
+
+
+    points_buffer[0] = start_x;
+    points_buffer[1] = start_y;
+    int pointer = 2;  // our index into the points buffer
+
+    int length = 0; // the contour length
+    int min_x = start_x; // bounding box
+    int max_x = start_x; // bounding box
+    int min_y = start_y; // bounding box
+    int max_y = start_y; // bounding box
+    bool convex = true; // true if this contour is convex
+
+    while(pointer < maxcount*2) {
+      // work out the pixel co-oridinates for the position of interest
+      int sample_x = start_x+offset_x[position];
+      int sample_y = start_y+offset_y[position];
+      unsigned char sample = image.Sample(sample_x,sample_y);
+      if (sample & 0x1) {  // if the pixel is a 1-element
+      
+	// we now need to mark this pixel
+	unsigned char value;
+	// 1) if the pixel sample_x+1,sample_y (cell 4) is a 0-element and we
+	// have examined it whilst looking for this 1-element then this
+	// is an exit pixel.  Write (NBD,r,0-element).
+	if (cell4_is_0) {
+	  value = nbd << 2 | 0x3;
+	}
+	// 2) else if sample_x,sample_y is unmarked write
+	// (NBD,l,1-element).
+	else if (!(sample & ~0x2)) {
+	  value = nbd << 2 | 0x1;
+	}
+	else {
+	  value = sample;
+	}
+	value=127;
+	image.DrawPixel(sample_x,sample_y,sample);
+
+	// store this point in the pixel chain and update the start position
+	points_buffer[pointer++] = start_x = sample_x;
+	points_buffer[pointer++] = start_y = sample_y;
+      
+	// update the length
+	length+= (position%2 == 0 ? 32 : 45);
+
+	// update the bounding box
+	if (start_x < min_x) { min_x = start_x; }
+	else if (start_x > max_x) { max_x = start_x; }
+	if (start_y < min_y) { min_y = start_y; }
+	else if (start_y > max_y) { max_y = start_y; }
+
+	//      if (previous_position != position) {
+	// we've made a turn
+	//	if (position = 
+	//      }
+
+	// adding 5 to our position (mod 8) will put our start
+	// position one further round than the previous central point.
+	cell4_is_0=false;
+	position+=5;
+      }
+      else {  // the pixel is a 0-element
+	if (position == 4) {  // if we are at cell4 (this is a 0-element) then set the cell4_is_0 flag
+	  cell4_is_0 = true; 
+	}
+
+	// advance the position
+	position++; 
+      }
+
+      position%=8;	
+    
+      // if our current pixel matches the _second_ pixel found in the
+      // chain and the previous pixel we found matches the first then we
+      // are done.  we have to wait until pointer>4 in order to make
+      // sure we dont immediatly stop.  I wonder if the compiler will
+      // notice it can unroll this loop a couple of times and remove
+      // this comparison?
+      if ((pointer > 4) && 
+	  (points_buffer[2] == sample_x) &&
+	  (points_buffer[3] == sample_y) &&
+	  (points_buffer[0] == points_buffer[pointer-4]) &&
+	  (points_buffer[1] == points_buffer[pointer-3])) {
+	break;
+      }
+    }
+  
+    // discard the last two pixels because they are overlap on the
+    // beginning of the chain
+
+#ifdef SCENE_GRAPH_DEBUG
+    PROGRESS("Returning contour of length " << (pointer-4)/2);
+#endif	 
+
+
+    return (pointer-4)/2;
+}
 
 #endif//SCENE_GRAPH_GUARD
 
