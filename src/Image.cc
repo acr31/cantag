@@ -42,7 +42,7 @@ void Image::Load(const char* filename) {
     Magick::PixelPacket *pixel_cache = i.getPixels(0,0,m_width,m_height);
     int size = m_width*m_height;
     for(int ptr=0;ptr<size;++ptr) {
-      m_contents[ptr] = pixel_cache->red;
+      m_contents[ptr] = pixel_cache->red >> (QuantumDepth - 8);
       ++pixel_cache;
     }
   }
