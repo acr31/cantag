@@ -20,7 +20,7 @@
  * list of channels returned by the video card.
  */
 V4LImageSource::V4LImageSource(char* device, int channel) : 
-  m_handle(-1), m_mmap((uchar*)MAP_FAILED,-1),
+  m_handle(-1), m_mmap((unsigned char*)MAP_FAILED,-1),
   m_slots(NULL),m_images(NULL)
 {
   // open the video device, store the handle in the wrapper object.
@@ -91,7 +91,7 @@ V4LImageSource::V4LImageSource(char* device, int channel) :
   // the video device will read into n different frames sequentially
   // however the _total_ amount of memory needed for all of these
   // frames if given by mbuf.size
-  if ((m_mmap.SetHandle((uchar*)mmap(0,mbuf.size,PROT_READ | PROT_WRITE,MAP_SHARED,m_handle.Get(),0),mbuf.size)).Get() == (uchar*)MAP_FAILED) {
+  if ((m_mmap.SetHandle((unsigned char*)mmap(0,mbuf.size,PROT_READ | PROT_WRITE,MAP_SHARED,m_handle.Get(),0),mbuf.size)).Get() == (unsigned char*)MAP_FAILED) {
     throw "Failed to mmap suitable buffer size";
   }
   m_total_frames = mbuf.frames;
@@ -131,7 +131,7 @@ V4LImageSource::V4LImageSource(char* device, int channel) :
     m_slots[i].frame = i;
     m_slots[i].width = m_image_width;
     m_slots[i].height = m_image_height;
-    m_images[i] = Image(m_image_width,m_image_height,m_mmap.Get()+mbuf.offsets[i]);
+    m_images[i] = Image(m_image_width,m_image_height,m_image_width,m_mmap.Get()+mbuf.offsets[i]);
     // start the device asynchronously fetching the frame
     if (i>0) { // dont start capturing for this one because we'll
 	       // start it when we first call next
@@ -200,10 +200,10 @@ int V4LImageSource::VideoDevHandle::Get() const {
   return m_f_handle; 
 }
 
-V4LImageSource::MMapHandle::MMapHandle(uchar* mmap_start,int size) : m_mmap_start(mmap_start),m_size(size) {};
-V4LImageSource::MMapHandle& V4LImageSource::MMapHandle::SetHandle(uchar* f_handle, int size) { m_mmap_start = f_handle; m_size=size; return *this; }
+V4LImageSource::MMapHandle::MMapHandle(unsigned char* mmap_start,int size) : m_mmap_start(mmap_start),m_size(size) {};
+V4LImageSource::MMapHandle& V4LImageSource::MMapHandle::SetHandle(unsigned char* f_handle, int size) { m_mmap_start = f_handle; m_size=size; return *this; }
 V4LImageSource::MMapHandle::~MMapHandle() { 
-  if (m_mmap_start != (uchar*)MAP_FAILED) { 
+  if (m_mmap_start != (unsigned char*)MAP_FAILED) { 
 #ifdef V4L_DEBUG
     PROGRESS("Unmapping memory");
 #endif
@@ -211,6 +211,6 @@ V4LImageSource::MMapHandle::~MMapHandle() {
   }
 }
 
-uchar* V4LImageSource::MMapHandle::Get() { 
+unsigned char* V4LImageSource::MMapHandle::Get() { 
   return m_mmap_start; 
 }
