@@ -18,6 +18,8 @@ extern "C" {
 
 namespace Total {
   Image::Image(int width, int height) : m_width(width),m_height(height), m_contents(new unsigned char[width*height]), m_free_contents(true), m_width_step(m_width), m_binary(false) {
+    assert(width > 0);
+    assert(height > 0);
     ConvertScale(0,255);
   };
 
