@@ -11,6 +11,7 @@
 class Socket {
 private:
   int m_socket;
+  int m_byte_count;
   Socket(int handle); // private constructor for accepting connections
 public:
   Socket();
@@ -27,6 +28,8 @@ public:
   int Send(int item);
   int Send(float item);
   int Send(const std::vector<float>& vec);
+
+  inline int GetByteCount() { return m_byte_count; }
 };
 
 #endif//SOCKET_GUARD

@@ -12,7 +12,7 @@ extern "C" {
 #include <netinet/in.h>
 }
 
-Socket::Socket() {
+Socket::Socket() : m_byte_count(0) {
   m_socket = ::socket(PF_INET,SOCK_STREAM,0);
   
   if (m_socket == -1) {
@@ -21,7 +21,7 @@ Socket::Socket() {
   }
 }
 
-Socket::Socket(int handle) : m_socket(handle) {
+Socket::Socket(int handle) : m_socket(handle) , m_byte_count(0) {
 }
 
 Socket::~Socket() {
@@ -92,6 +92,7 @@ void Socket::Recv(unsigned char* buf, size_t len) {
     int count = ::recv(m_socket,buf+total,len-total,0);
     if (count == -1) throw "Received error/eof from socket";
     total += count;
+    m_byte_count+= count;
   }
 }
 
@@ -122,6 +123,7 @@ int Socket::Send(const unsigned char* buf, size_t len) {
     int sent = ::send(m_socket,buf+total,len-total,0);
     if (sent == -1) throw "Send yields -1";
     total+=sent;
+    m_byte_count += sent;
   }
   return total;
 }
