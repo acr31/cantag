@@ -22,7 +22,7 @@
 #undef   DRAW_FIELD_DEBUG
 #endif
 
-//#define Ellipse LinearEllipse
+#define Ellipse LinearEllipse
 
 /**
  * The number of readings to make from a tag.  We then look for pairs
