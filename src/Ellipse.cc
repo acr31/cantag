@@ -17,7 +17,7 @@
 # undef DECOMPOSE_DEBUG
 #endif
 
-#define MAXFITERROR 0.001
+#define MAXFITERROR 0.05
 #define COMPARETHRESH 0.0001
 
 static void print(const char* label, double* array, int rows, int cols);
@@ -205,7 +205,7 @@ bool Ellipse::FitEllipse(const float* points, int numpoints) {
       PROGRESS("MAXFITERROR is " << MAXFITERROR);
 #endif      
 
-      return (GetError(points,numpoints) < MAXFITERROR);
+      return (GetErrorGradient(points,numpoints) < MAXFITERROR);
     }
   }
   return false;
@@ -243,7 +243,7 @@ float Ellipse::GetErrorGradient(const float* points, int count) const {
     float dy = m_b*x+2*m_c*y+m_e;
 
     float norm = dx*dx + dy*dy;
-    total+= sqrt(dist*dist/norm);
+    total+= dist/sqrt(norm);
   }
 #ifdef ELLIPSE_DEBUG
   PROGRESS("Total error from Gradient method is "<< total/count);
@@ -522,17 +522,15 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
 
   // if more than one of the eigenvalues is less than one then
   // multiply them all by -1.  We can do this because the ellipse
-  // equation is only defined up to a scale factor.  we do this to
-  // defeat any floating point problems: if an eigenvalue is close to
-  // 0 it may get squashed by a larger one in the maths that follows.
-  // In this case we want the eigenvector associated with it to have
-  // positive sense.
-  int count = 0;
-  for(int i=0;i<3;i++) {
-    if (eigvals[4*i] < 0) { ++count; }
-  }
+  // equation is only defined up to a scale factor.  We do this
+  // because the y axis eigenvalue must have larger magnitude than the
+  // x axis value in order for our next rotation to make sense.
+  //  int count = 0;
+  //  for(int i=0;i<3;i++) {
+  //    if (eigvals[4*i] < 0) { ++count; }
+  //  }
 
-  if (count > 1) {
+  if (fabs(eigvals[0]) > fabs(eigvals[4])) {
     for(int i=0;i<3;i++) {
       eigvals[4*i]*=-1;
     }
@@ -543,8 +541,8 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
     PROGRESS("                 " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];");
 #endif
   }
-
-
+  
+  
   // bubble sort the vectors (based on their eigenvalue)...I'm so embarresed ;-)
   for(int i=0;i<4;i++) {
     for(int j=1;j<3;j++) {
@@ -564,9 +562,9 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
     }
   }
 
+ 
   // arrange that the axis component of each eigenvector has the same
-  // sign as the corresponding eigenvalue.  Except for the z axis
-  // which we want to point towards us.
+  // sign as the corresponding eigenvalue.  
 
   if (((eigvects[0] < 0) && (eigvals[0] > 0)) ||
       ((eigvects[0] > 0) && (eigvals[0] < 0))) {

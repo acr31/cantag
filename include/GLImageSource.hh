@@ -49,7 +49,7 @@ public:
    * \todo find some way of incorporating the lighting and occlusion
    * options.
    */
-  Image* Next(float x_radians, float y_radians, float z_radians, float centre_x, float centre_y, float centre_z);
+  Image* Next(float n_x, float n_y, float n_z, float centre_x, float centre_y, float centre_z);
   
 };
 
@@ -120,11 +120,11 @@ template<class TAG> GLImageSource<TAG>::~GLImageSource() {
 };
 
 template<class TAG> Image* GLImageSource<TAG>::Next() {
-  return Next(0,M_PI,0,0,0,2);
+  return Next(0,0,-1,0,0,2);
 };
 
 
-template<class TAG> Image* GLImageSource<TAG>::Next(float x_radians, float y_radians, float z_radians, 
+template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz, 
 						    float centre_x, float centre_y, float centre_z) {
 
     glClearColor(1.0,1.0,1.0,0.0);
@@ -144,10 +144,6 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float x_radians, float y_rad
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_POLYGON_SMOOTH); 
     
-    float xrot = x_radians/M_PI*180;
-    float yrot = y_radians/M_PI*180;
-    float zrot = z_radians/M_PI*180;
-  	  
     // select the modelview matrix - transforms object co-ordinates to eye co-ordinates
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -168,10 +164,13 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float x_radians, float y_rad
 
     float tagsizescale=1;
     glScalef(tagsizescale,tagsizescale,1);
-    glTranslatef(centre_x,centre_y,centre_z);
-    glRotatef( xrot, 1,0,0);
-    glRotatef( yrot, 0,1,0);
-    glRotatef( zrot, 0,0,1);
+    float factor = sqrt(nz*nz+ny*ny);
+    
+    float rotation[] = { -nz,  ny*nx/factor,                  nx, centre_x,
+			 0,    -nz*nz/factor - nx*nx/factor,  ny, centre_y,
+			 nx,   ny*nz/factor,                  nz, centre_z,
+			 0,    0,                             0,  1 };
+    glMultMatrixf(rotation);
 
 
     // enable texturing mode
