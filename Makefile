@@ -20,7 +20,7 @@ DrawTripOriginal: DrawTripOriginal.o TripOriginalTag.o concentricellipse.o Tag.o
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVINC} -o $@ -c $<
 
 clean:
-	-rm -f TripOriginalTag.o tripover.o tripover DrawTripOriginal.o
+	-rm -f TripOriginalTag.o tripover.o tripover DrawTripOriginal.o DrawTripOriginal
 
 depend:
 	makedepend ${OPENCVINC} ${CPPFLAGS} *.cc

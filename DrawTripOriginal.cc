@@ -31,7 +31,7 @@ main(int argc, char* argv[]) {
   p.x=width/2;
   p.y=width/2;
 
-  double r = width / 2 / TripOriginalTag::radii_outer[RING_COUNT-1];
+  double r = width / TripOriginalTag::radii_outer[RING_COUNT-1];
 
   CvSize2D32f s;
   s.width=r;

@@ -60,7 +60,7 @@ const double TripOriginalTag::sync_angles[] = {0,
 					       -0.261799387799149};
 
 const double TripOriginalTag::radii_outer[] = {1.4,2};
-const double TripOriginalTag::radii_centre[] = {1.2,1.8};
+const double TripOriginalTag::radii_centre[] = {1.2,1.7};
 const double TripOriginalTag::radii_inner[] = {1.1,1.4};
 
 void TripOriginalTag::Process(IplImage *image, 
