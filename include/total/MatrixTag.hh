@@ -236,8 +236,8 @@ template<int SIZE> bool MatrixTag<SIZE>::DecodeNode( LocatedObject<SIZE*SIZE-(SI
 
 #ifdef IMAGE_DEBUG
   Image debug0(image);
+  debug0.ConvertScale(50,0);
   debug0.ConvertScale(-1,255);
-  debug0.ConvertScale(0.5,128);
   for(int i=-SIZE-2;i<=SIZE+2;i+=2) {
     float pts[] = { -1,
 		    (float)i/(float)(SIZE+2),
