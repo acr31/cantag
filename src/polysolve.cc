@@ -22,19 +22,27 @@ static inline int solve_poly3(double *x, double *res) {
   double a1 = x[1]/x[3];
   double a0 = x[0]/x[3];
 
-  double q = (3*a1 -a2*a2)/9;
-  double r = (9*a1*a2-27*a0-2*a2*a2*a2)/54;
-  double d = q*q*q+r*r;
-  
-  if (d>0)
+  double q = (a2*a2-3*a1)/9;
+  double r = (2*a2*a2*a2-9*a1*a2+27*a0)/54;
+
+  //printf("poly=%lf,%lf,%lf\n",a2,a1,a0);
+  //printf("test is %d (r=%e,q=%e)\n", (r*r)>(q*q*q),r,q);
+  if ((r*r)>(q*q*q))
     return 0;
-
-  double theta = acos(r/sqrt(-1*q*q*q));
-
-  res[0] = 2*sqrt(-1*q)*cos(theta/3)-a2/3;
-  res[1] = 2*sqrt(-1*q)*cos((theta+2*M_PI)/3)-a2/3;
-  res[2] = 2*sqrt(-1*q)*cos((theta+4*M_PI)/3)-a2/3;
   
+  double theta = acos(r/sqrt(q*q*q));
+
+  res[0] = -2*sqrt(q)*cos(theta/3)-a2/3;
+  res[1] = 0;
+  res[2] = 0;
+  res[3] = 0;
+  res[4] = -2*sqrt(q)*cos((theta+2*M_PI)/3)-a2/3;
+  res[5] = 0;
+  res[6] = 0;
+  res[7] = 0;
+  res[8] = -2*sqrt(q)*cos((theta-2*M_PI)/3)-a2/3;
+
+  //printf("res=%lf,%lf,%lf\n",res[0],res[1],res[2]);
   return 1;
 }
 
@@ -50,17 +58,23 @@ bool eigensolve(double a, double b, double c,
                 double d, double e, double f,
                 double g, double h, double i,
                 double *eigenvects, double* eigenvals) {
-  
   double x[4];
 
-  //characteristic polynomial for 3-by-3 matrix
-  //maths derived by noting that we want det(A-xI)
-  //and then leaving x undefined, so determinant is a 
-  //cubic equation in terms of x.
+  double A[3][3] = {{a,b,c},{d,e,f},{g,h,i}};
+
+  //http://mathworld.wolfram.com/CharacteristicPolynomial.html
+  //
+  //-x*x*x + Tr(A)*x*x +\sum_ij[0.5*(a_ij*a_ij - a_ii*a_jj)(1-d_ij)*x +det(A)]
+  //where d_ij is the Kronecker Delta (d_ij=0 for i !=j or d_ij=1 for i==j)
   x[3] = -1;
-  x[2] = a+e+i;
-  x[1] = c*g + b*d - e*i - f*h - a*(e+i);
-  x[0] = e*i*a + f*h*a + f*g*b + c*d*h - b*d*i - c*g*e;
+  x[2] = a+e+i; //Tr(A)
+  double total = 0;
+  for (int j=0; j<3; j++)
+    for (int k=0; k<3; k++)
+      if (j != k)
+	total += 0.5*(A[j][k]*A[k][j]-A[j][j]*A[k][k]);
+  x[1] = total;
+  x[0] = (a*e*i+b*f*g+c*d*h)-(a*f*h+b*d*i+c*e*g); //det(A)
 
   //solve cubic to determine eigenvalues
   if (!solve_poly3(x,eigenvals)) {
@@ -96,24 +110,24 @@ bool eigensolve(double a, double b, double c,
       double X[2];
       switch (v) { 
       case 0:
-	B[0][0] = e-eigenvals[j];
+	B[0][0] = e-eigenvals[j*4];
 	B[0][1] = f;
 	B[1][0] = h;
-	B[1][1] = i-eigenvals[j];
+	B[1][1] = i-eigenvals[j*4];
 	X[0] = -1*d; X[1] = -1*g;
 	break;
       case 1:
 	B[0][0] = g;
-	B[0][1] = i-eigenvals[j];
-	B[1][0] = a-eigenvals[j];
+	B[0][1] = i-eigenvals[j*4];
+	B[1][0] = a-eigenvals[j*4];
 	B[1][1] = c;
 	X[0] = -1*h; X[1] = -1*b;
 	break;
       case 2:
-	B[0][0] = a-eigenvals[j];
+	B[0][0] = a-eigenvals[j*4];
 	B[0][1] = b;
 	B[1][0] = d;
-	B[1][1] = e-eigenvals[j];
+	B[1][1] = e-eigenvals[j*4];
 	X[0] = -1*c; X[1] = -1*f;
 	break;
       default:
@@ -122,15 +136,18 @@ bool eigensolve(double a, double b, double c,
 
       solve_simultaneous(X,B,R,2);
 
-      eigenvects[3*j+v] = 1; //i.e. component v is assumed to be 1
-      eigenvects[3*j+(v+1)%3] = R[0];
-      eigenvects[3*j+(v+2)%3] = R[1];
+      eigenvects[j+3*v] = 1; //i.e. component v is assumed to be 1
+      eigenvects[j+3*((v+1)%3)] = R[0];
+      eigenvects[j+3*((v+2)%3)] = R[1];
 
       v++;
     } while(isnan(R[0]) ||  isnan(R[1]));
   }
 
+  //  check_eigen(a,b,c,d,e,f,g,h,i,eigenvects,eigenvals);
+
   return 1;
+ 
 }
 
 void eigensolve(double a, double b, double f,
