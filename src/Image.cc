@@ -1,7 +1,7 @@
 #include <Image.hh>
 #include <iostream>
 
-#include <boost/random.hpp>
+//#include <boost/random.hpp>
 
 Image::Image() : m_from_header(false), m_image(NULL) {};
 
@@ -164,7 +164,7 @@ void Image::HomogenousTransform() {
 /**
  * Add noise to the image in an attempt to simulate that of a real
  * camera.
- */
+
 void Image::AddNoise(float mean, float stddev) {
   assert(mean >= 0 && mean < 256);
   assert(stddev >= 0);
@@ -187,3 +187,4 @@ void Image::AddNoise(float mean, float stddev) {
     }
   }
 }
+*/

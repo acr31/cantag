@@ -5,21 +5,21 @@
 #include <Config.hh>
 #include <Ellipse.hh>
 #include <gaussianelimination.hh>
-#include <eigenvv.hh>
 #include <cmath>
 #include <iostream>
 #include <findtransform.hh>
+#include <polysolve.hh>
 
 #ifdef TEXT_DEBUG
 # define ELLIPSE_DEBUG
-# undef ELLIPSE_DEBUG_DUMP_POINTS
-# define CIRCLE_TRANSFORM_DEBUG
-# undef DECOMPOSE_DEBUG
+# define ELLIPSE_DEBUG_DUMP_POINTS
+# undef CIRCLE_TRANSFORM_DEBUG
+# define DECOMPOSE_DEBUG
 #endif
 
-#define MAXFITERROR 0.01
+#define MAXFITERROR 0.001
 #define COMPARETHRESH 0.0001
-#define MAXDISTANCE 
+#undef MAXDISTANCE 
 
 static void print(const char* label, double* array, int rows, int cols);
 static void print(const char* label, double** array, int rows, int cols);
@@ -202,7 +202,6 @@ bool Ellipse::FitEllipse(const float* points, int numpoints) {
       m_e = t[1][0]*eigvects[i]+t[1][1]*eigvects[i+3]+t[1][2]*eigvects[i+6];
       m_f = t[2][0]*eigvects[i]+t[2][1]*eigvects[i+3]+t[2][2]*eigvects[i+6];
 
-     
 #ifdef ELLIPSE_DEBUG
       PROGRESS("Fitted ellipse: a="<<m_a<<","<<m_b<<","<<m_c<<","<<m_d<<","<<m_e<<","<<m_f);
       PROGRESS("MAXFITERROR is " << MAXFITERROR);
@@ -920,8 +919,8 @@ void Ellipse::Decompose() {
   m_y0 = (2*a*e - b*d) / disc;
 
 #ifdef DECOMPOSE_DEBUG
-  PROGRESS("X= " << x0);
-  PROGRESS("Y= " << y0);
+  PROGRESS("X= " << m_x0);
+  PROGRESS("Y= " << m_y0);
 #endif
   
   float tmproot = sqrt( (a-c)*(a-c) + b*b );

@@ -4,7 +4,7 @@
 
 #ifndef ELLIPSE_GUARD
 #define ELLIPSE_GUARD
-
+#include <Config.hh>
 /**
  * A class to represent ellipses in the image and fit one to a set of points.
  *
@@ -49,11 +49,11 @@ public:
   inline float GetE() const { return m_e; }
   inline float GetF() const { return m_f; }
 
-  inline float GetX0() const { return m_x0; }
-  inline float GetY0() const { return m_y0; }
-  inline float GetWidth() const { return m_width; }
-  inline float GetHeight() const { return m_height; }
-  inline float GetAngle() const { return m_angle_radians; }
+  inline float GetX0() const { PROGRESS(m_x0); return m_x0; }
+  inline float GetY0() const { PROGRESS(m_y0);return m_y0; }
+  inline float GetWidth() const { PROGRESS(m_width);return m_width; }
+  inline float GetHeight() const { PROGRESS(m_height);return m_height; }
+  inline float GetAngle() const { PROGRESS(m_angle_radians);return m_angle_radians; }
 
   float GetError(const float* points, int numpoints) const;
   float GetErrorAlgebraic(const float* points, int count) const;

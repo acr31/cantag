@@ -92,7 +92,8 @@ template<class S, int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(cons
   CvSeq* root;
   cvClearMemStorage(store);
   int num_contours = cvFindContours(image.m_image,store,&root,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_NONE);
-
+ 
+  PROGRESS("SCENE GRAPH");
   if (root == NULL || num_contours == 0) {
     // no contours were found
 #ifdef SCENE_GRAPH_DEBUG
@@ -165,7 +166,7 @@ template<class S, int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(cons
 	if (next->GetShapes().IsChainFitted()) {
 #ifdef IMAGE_DEBUG
 	  // draw found contours
-	  cvDrawContours(debug0,c,0,0,0,2,8);
+	  cvDrawContours(debug0,c,0,0,0,1,8);
 #endif
 	  // now add this node as a child of its parent.  Its parent is
 	  // the node stored in index level-1 in the parents array. 
