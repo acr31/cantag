@@ -5,6 +5,7 @@
 #define CAMERA_GUARD
 
 #include <Image.hh>
+#include <vector>
 
 /**
  * A camera model.  Use this class to convert from NPCF to Image co-ordinates and back again
@@ -71,6 +72,14 @@ public:
    * extrinsic parameters of the camera.
    */
   void ImageToNPCF(float* points, int num_points) const;
+
+  /**
+   * Convert a set of image co-ordinates to normalised principle
+   * co-ordinate frame (NPCF) points.  This involves removing the
+   * distortion predicted by the parameters set and removing the
+   * extrinsic parameters of the camera.
+   */
+  void ImageToNPCF(std::vector<float>& points) const;
 
   /**
    * Convert a set of normalised principle co-ordinate frame (NPCF)

@@ -224,6 +224,9 @@ private:
 };
 
 #ifdef HAVE_BOOST_ARCHIVE
+BOOST_CLASS_IMPLEMENTATION(Ellipse, boost::serialization::object_serializable);
+BOOST_CLASS_TRACKING(Ellipse, boost::serialization::track_never);
+
 template<class Archive> void Ellipse::serialize(Archive & ar, const unsigned int version) {
   ar & m_a;
   ar & m_b;

@@ -68,6 +68,38 @@ private:
 };
 
 #ifdef HAVE_BOOST_ARCHIVE
+//BOOST_CLASS_TRACKING(ShapeChain, boost::serialization::track_never);
+namespace boost { 
+  namespace serialization {
+    template<class M,class S>
+    struct tracking_level<ShapeChain<M,S> >
+    {
+      typedef mpl::integral_c_tag tag;
+      typedef mpl::int_<track_never> type;
+      BOOST_STATIC_CONSTANT(
+			    enum tracking_type, 
+			    value = static_cast<enum tracking_type>(type::value)
+			    );
+    };
+  } // serialization
+} // boost
+
+//BOOST_CLASS_IMPLEMENTATION(ShapeChain, boost::serialization::object_serializable);
+namespace boost { 
+  namespace serialization {
+    template<class M,class S>
+    struct implementation_level<ShapeChain<M,S> >
+    {
+      typedef mpl::integral_c_tag tag;
+      typedef mpl::int_<object_serializable> type;
+      BOOST_STATIC_CONSTANT(
+			    enum level_type,
+			    value = static_cast<enum level_type>(type::value)
+			    );
+    };
+  } // serialization
+} // boost
+
 template<class M, class S> template<class Archive> void ShapeChain<M,S>::serialize(Archive & ar, const unsigned int version) {
   ar & m_shape;
   ar & m_next;

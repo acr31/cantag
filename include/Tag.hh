@@ -43,9 +43,11 @@ public:
 };
 
 template<class C, int PAYLOAD_SIZE> void Tag<C,PAYLOAD_SIZE>::WalkGraph(typename ShapeTree<C>::Node* root_node, WorldState<PAYLOAD_SIZE>* worldstate, const Camera& camera, const Image& image) const {
+  PROGRESS("Walk graph");
   // walk the tree finding all the tags
   // if we find a Tag then decode node returns true so we know not to inspect any child contours
   if (root_node->matched.IsFitted()) {
+    PROGRESS("Founnd matched node");
     LocatedObject<PAYLOAD_SIZE>* lobj = DecodeNode(root_node,camera,image);
     if (lobj) {      
       worldstate->Add(lobj);

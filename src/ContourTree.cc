@@ -39,6 +39,7 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
 #endif
 
   m_root_contour = new Contour(1);
+  m_root_contour->weeded = true;
   Contour* current = m_root_contour;
   current->bordertype=HOLE_BORDER;
   node_hash[1] = current;
@@ -103,15 +104,17 @@ ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constrain
 	// HOLE         OUTER      LNBD
 	// HOLE         HOLE       Parent of LNBD
 	current->parent_id = current->bordertype == node_hash[LNBD]->bordertype ?  node_hash[LNBD]->parent_id : LNBD;
-#ifdef JAM
-	int size = current->points.size();
-	float* pointsarray = new float[size];
-	int ptr = 0;
-	for(std::vector<float>::const_iterator i = current->points.begin();i!=current->points.end(); ++i) {
-	  pointsarray[ptr++] = *i;
+#ifdef IMAGE_DEBUG
+	if (!current->weeded) {
+	  int size = current->points.size();
+	  float* pointsarray = new float[size];
+	  int ptr = 0;
+	  for(std::vector<float>::const_iterator i = current->points.begin();i!=current->points.end(); ++i) {
+	    pointsarray[ptr++] = *i;
+	  }
+	  debug_image->DrawPolygon(pointsarray,size/2,0,1);
+	  delete[] pointsarray;
 	}
-	debug.DrawPolygon(pointsarray,size,0,1);
-	delete[] pointsarray;
 #endif
 	
 	if (current->parent_id != NBD) {
@@ -206,7 +209,7 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
     PROGRESS("Found 1 pixel contour starting from "<< start_x << "," << start_y);
 #endif
 #ifdef IMAGE_DEBUG
-    debug_image->DrawPixel(start_x,start_y,COLOUR_BLACK);
+    //! debug_image->DrawPixel(start_x,start_y,COLOUR_BLACK);
     //! debug_image->Save("debug-contourtree-contours.bmp");
 #endif
     return 1;
@@ -233,7 +236,7 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 	PROGRESS("Found 1-pixel at position " << position << " around " << start_x << "," << start_y);
 #endif
 #ifdef IMAGE_DEBUG
-	debug_image->DrawPixel(start_x,start_y,128);
+	//!     debug_image->DrawPixel(start_x,start_y,128);
 	//!	debug_image->Save("debug-contourtree-contours.bmp");
 #endif
 	// we now need to mark this pixel
@@ -275,7 +278,7 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 	  PROGRESS("Found " << (points.size()>>1) << " pixel contour starting from "<< points[0] << "," << points[1]);
 #endif
 #ifdef IMAGE_DEBUG
-	  debug_image->DrawPixel(start_x,start_y,0);		  
+	  //!     debug_image->DrawPixel(start_x,start_y,0);		  
 	  //!	  debug_image->Save("debug-contourtree-contours.bmp");
 #endif
 	  return points.size()>>1;
@@ -339,5 +342,26 @@ int ContourTree::FollowContour(Image& image, // the image to track the contour i
 ContourTree::~ContourTree() {
   if (m_root_contour != NULL) {
     delete m_root_contour;
+  }
+}
+
+void ContourTree::ImageToNPCF(const Camera& camera) {
+  ImageToNPCF(camera,GetRootContour());
+}
+
+void ContourTree::ImageToNPCF(const Camera& camera, Contour* current) {
+  camera.ImageToNPCF(current->points);
+  for(std::vector<Contour*>::const_iterator i = current->children.begin();
+      i != current->children.end();
+      ++i) {
+    ImageToNPCF(camera,*i);
+  }
+}
+
+ContourTree::Contour::~Contour() {
+  for(std::vector<Contour*>::const_iterator i = children.begin();
+      i!=children.end();
+      ++i) {
+    //delete *i;
   }
 }

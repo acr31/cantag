@@ -69,6 +69,39 @@ private:
 };
 
 #ifdef HAVE_BOOST_ARCHIVE
+//BOOST_CLASS_TRACKING(LocatedObject, boost::serialization::track_never);
+namespace boost { 
+  namespace serialization {
+    template<int PAYLOAD_SIZE>
+    struct tracking_level<LocatedObject<PAYLOAD_SIZE> >
+    {
+      typedef mpl::integral_c_tag tag;
+      typedef mpl::int_<track_never> type;
+      BOOST_STATIC_CONSTANT(
+			    enum tracking_type, 
+			    value = static_cast<enum tracking_type>(type::value)
+			    );
+    };
+  } // serialization
+} // boost
+
+//BOOST_CLASS_IMPLEMENTATION(ShapeTree, boost::serialization::object_serializable);
+namespace boost { 
+  namespace serialization {
+    template<int PAYLOAD_SIZE>
+    struct implementation_level<LocatedObject<PAYLOAD_SIZE> >
+    {
+      typedef mpl::integral_c_tag tag;
+      typedef mpl::int_<object_serializable> type;
+      BOOST_STATIC_CONSTANT(
+			    enum level_type,
+			    value = static_cast<enum level_type>(type::value)
+			    );
+    };
+  } // serialization
+} // boost
+
+
 template<int PAYLOAD_SIZE> template<class Archive> void LocatedObject<PAYLOAD_SIZE>::serialize(Archive & ar, const unsigned int version) {
   ar & transform;
   ar & normal;

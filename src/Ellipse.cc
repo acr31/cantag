@@ -48,7 +48,7 @@ Ellipse::Ellipse(float a, float b, float c, float d, float e, float f) :
 
 void Ellipse::Draw(Image& image) const {
   if (m_fitted) {
-    image.DrawEllipse(GetX0(),GetY0(),GetWidth(),GetHeight(),GetAngle(),COLOUR_BLACK,1);
+    image.DrawEllipse(GetX0(),GetY0(),GetWidth()*2,GetHeight()*2,GetAngle(),COLOUR_BLACK,1);
   }
 }
 

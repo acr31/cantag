@@ -7,8 +7,8 @@
 #include <gaussianelimination.hh>
 #include <cmath>
 
-#define SQUARE_TRANSFORM_DEBUG
-#define APPLY_TRANSFORM_DEBUG
+#undef SQUARE_TRANSFORM_DEBUG
+#undef APPLY_TRANSFORM_DEBUG
 
 
 void ApplyTransform(const float transform[16], float x, float y, std::vector<float>& points) {

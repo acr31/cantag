@@ -48,7 +48,7 @@ Image::~Image() {
   }
   
   if (m_free_contents) {
-    delete m_contents;
+    delete[] m_contents;
   }
 }
 

@@ -220,7 +220,7 @@ template<int RING_COUNT,int SECTOR_COUNT> void RingTag<RING_COUNT,SECTOR_COUNT>:
 }
 
 template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>* RingTag<RING_COUNT,SECTOR_COUNT>::DecodeNode(ShapeTree<ShapeChain<Ellipse> >::Node* node, 
-															      const Camera& camera, const Image& image) const {
+															       const Camera& camera, const Image& image) const {
 #ifdef RING_TAG_DEBUG
   PROGRESS("DecodeNode called");
 #endif
@@ -409,7 +409,6 @@ template<int RING_COUNT,int SECTOR_COUNT> LocatedObject<RING_COUNT*SECTOR_COUNT>
 	ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
 	camera.NPCFToImage(tpt,1);
 	bool sample = image.Sample(tpt[0],tpt[1]) != 0;
-	PROGRESS("Samples " << sample);
 	(*read_code[currentcode])[j/READING_COUNT * RING_COUNT + k] = sample;
       }
     }
@@ -503,7 +502,7 @@ template<int RING_COUNT,int SECTOR_COUNT> void RingTag<RING_COUNT,SECTOR_COUNT>:
     camera.NPCFToImage(pts,1);
     int colour = COLOUR_BLACK;
     //int colour = (int)((float)step/(float)count * 255);
-    debug0.DrawLine(oldpts[0],oldpts[1],pts[0],pts[1],colour,1);
+    debug0.DrawLine(oldpts[0],oldpts[1],pts[0],pts[1],colour,2);
     oldpts[0] = pts[0];
     oldpts[1] = pts[1];
   }  
@@ -525,8 +524,8 @@ template<int RING_COUNT,int SECTOR_COUNT>  void RingTag<RING_COUNT,SECTOR_COUNT>
 		    k*max,max };
     ApplyTransform(l,pts,4);
     camera.NPCFToImage(pts,4);
-    debug0.DrawLine(pts[0],pts[1],pts[2],pts[3],COLOUR_BLACK,1);
-    debug0.DrawLine(pts[4],pts[5],pts[6],pts[7],COLOUR_BLACK,1);
+    debug0.DrawLine(pts[0],pts[1],pts[2],pts[3],COLOUR_BLACK,2);
+    debug0.DrawLine(pts[4],pts[5],pts[6],pts[7],COLOUR_BLACK,2);
   }
 #else
   draw_circle(debug0,camera,l,m_bullseye_inner_radius / m_bullseye_outer_radius);
@@ -549,7 +548,7 @@ template<int RING_COUNT,int SECTOR_COUNT>  void RingTag<RING_COUNT,SECTOR_COUNT>
       int colour = image.Sample(pts[0],pts[1]) ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
       // or pick the colour to be on a gradient so we see the order it samples in
       //int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
-      debug0.DrawPoint(pts[0],pts[1],colour,3);
+      debug0.DrawPoint(pts[0],pts[1],colour,4);
     }
     counter++;
   }

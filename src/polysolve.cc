@@ -65,7 +65,7 @@ bool check_eigen(double a, double b, double c,
   
   //  printf("   Sol: %lf,%lf,%lf\n",u1,u2,u3);
   //accuracy required for the eigenvector
-  double test = 10000;
+  double test = 0.1;
   if (fabs(u1)<test && fabs(u2)<test && fabs(u3)<test)
     return 1;
   else
@@ -176,7 +176,8 @@ bool eigensolve(double a, double b, double c,
 	X[0] = -1*c; X[1] = -1*f;
 	break;
       default:
-	assert(0); //should never get here!
+	//assert(0); //should never get here!
+	return false;
       }
 
       solve_simultaneous(X,B,R,2);

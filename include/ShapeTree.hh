@@ -7,10 +7,10 @@
 
 #include <Config.hh>
 #include <ContourTree.hh>
-#include <Camera.hh>
 
 #ifdef HAVE_BOOST_ARCHIVE
 #include <boost/serialization/access.hpp>
+#include <boost/serialization/level.hpp>
 #endif
 
 /**
@@ -77,7 +77,7 @@ template<class S> ShapeTree<S>::ShapeTree(const ContourTree::Contour& contour) :
 template<class S> void ShapeTree<S>::walk_tree(Node* current, const ContourTree::Contour* contour) {
   // try to match this contour using 
   if (!contour->weeded) {
-    Node* n = new Node(contour->points);
+    Node* n = new Node(contour->points);    
     if (n->matched.IsChainFitted()) {
 #ifdef IMAGE_DEBUG
       n->matched.DrawChain(*debug_image);
@@ -97,6 +97,72 @@ template<class S> void ShapeTree<S>::walk_tree(Node* current, const ContourTree:
 };
 
 #ifdef HAVE_BOOST_ARCHIVE
+
+//BOOST_CLASS_TRACKING(ShapeTree, boost::serialization::track_never);
+namespace boost { 
+  namespace serialization {
+    template<class S>
+    struct tracking_level<ShapeTree<S> >
+    {
+      typedef mpl::integral_c_tag tag;
+      typedef mpl::int_<track_never> type;
+      BOOST_STATIC_CONSTANT(
+			    enum tracking_type, 
+			    value = static_cast<enum tracking_type>(type::value)
+			    );
+    };
+  } // serialization
+} // boost
+
+//BOOST_CLASS_IMPLEMENTATION(ShapeTree, boost::serialization::object_serializable);
+namespace boost { 
+  namespace serialization {
+    template<class S>
+    struct implementation_level<ShapeTree<S> >
+    {
+      typedef mpl::integral_c_tag tag;
+      typedef mpl::int_<object_serializable> type;
+      BOOST_STATIC_CONSTANT(
+			    enum level_type,
+			    value = static_cast<enum level_type>(type::value)
+			    );
+    };
+  } // serialization
+} // boost
+
+//BOOST_CLASS_TRACKING(ShapeTree::Node, boost::serialization::track_never);
+namespace boost { 
+  namespace serialization {
+    template<class S>
+    struct tracking_level<typename ShapeTree<S>::Node >
+    {
+      typedef mpl::integral_c_tag tag;
+      typedef mpl::int_<track_never> type;
+      BOOST_STATIC_CONSTANT(
+			    enum tracking_type, 
+			    value = static_cast<enum tracking_type>(type::value)
+			    );
+    };
+  } // serialization
+} // boost
+
+//BOOST_CLASS_IMPLEMENTATION(ShapeTree::Node, boost::serialization::object_serializable);
+namespace boost { 
+  namespace serialization {
+    template<class S>
+    struct implementation_level<typename ShapeTree<S>::Node >
+    {
+      typedef mpl::integral_c_tag tag;
+      typedef mpl::int_<object_serializable> type;
+      BOOST_STATIC_CONSTANT(
+			    enum level_type,
+			    value = static_cast<enum level_type>(type::value)
+			    );
+    };
+  } // serialization
+} // boost
+
+
 template<class S> template<class Archive> void ShapeTree<S>::Node::serialize(Archive & ar, const unsigned int version) {
   ar & matched;
   ar & children;  

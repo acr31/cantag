@@ -14,7 +14,9 @@
 
 #ifdef HAVE_BOOST_ARCHIVE
 #include <boost/serialization/access.hpp>
+#include <boost/serialization/tracking.hpp>
 #include <boost/serialization/split_member.hpp>
+#include <boost/serialization/level.hpp>
 #endif
 
 /**
@@ -73,7 +75,6 @@ public:
    * bounds check---returns 0 if out of range.
    */
   inline unsigned char Sample(int x, int y) const {
-    PROGRESS("aSample "<<x<<","<<y);
     if ((x >= 0) && (x < m_image->width) &&
 	(y >= 0) && (y < m_image->height)) {
       return ((uchar*)(m_image->imageData + m_image->widthStep*y))[x];
@@ -402,7 +403,11 @@ private:
 #endif
 };
 
+
 #ifdef HAVE_BOOST_ARCHIVE
+BOOST_CLASS_IMPLEMENTATION(Image, boost::serialization::object_serializable);
+BOOST_CLASS_TRACKING(Image, boost::serialization::track_never);
+
 template<class Archive>
 void Image::save(Archive & ar, const unsigned int version) const {
   ar & m_image->width;
