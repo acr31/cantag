@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <fstream>
 #include <cassert>
+#include <list>
 #ifdef HAVE_BOOST_RANDOM
 # include <boost/random.hpp>
 #endif
