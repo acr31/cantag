@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/01/25 15:13:25  acr31
+ * added check for code out of range
+ *
  * Revision 1.1  2004/01/25 14:54:37  acr31
  * moved over to automake/autoconf build system
  *
@@ -68,6 +71,11 @@ public:
    * beginning and then two checksum digits and then the code
    */
   void Set(unsigned long long value) {
+    // check first to see if the value is too largs
+    if (value > (unsigned long long)pow(m_symbol_range-1,m_symbol_count-CHECKSUM_COUNT-1)) {
+      throw ValueTooLarge();
+    }
+
     m_values[0] = m_symbol_range-1;
     m_counter = 0;
     int num_syms = m_symbol_count - CHECKSUM_COUNT -1;
