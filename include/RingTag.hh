@@ -29,7 +29,6 @@
 int debug_image_counter= 0;
 
 //#define Ellipse LinearEllipse
-
 /**
  * The number of readings to make from a tag.  We then look for pairs
  * of reading that are the same in order to guess the correct angle of

@@ -203,9 +203,6 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	  }
 	  
 	  if (contour_length > 0) {
-#ifdef IMAGE_DEBUG
-	    debug0.DrawPolygon(points_buffer,contour_length,0,1);
-#endif
 	    
 	    // now decide the parent of this border
 	    
@@ -240,6 +237,15 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 		(st.length > 40) &&
 		(st.max_x - st.min_x > 20) &&
 		(st.max_y - st.min_y > 20)) {
+#ifdef SCENE_GRAPH_DEBUG
+	      PROGRESS("Contour is a valid candidate for matching");
+#endif
+#ifdef IMAGE_DEBUG
+	      debug0.DrawPolygon(points_buffer,contour_length,0,1);
+	    //	    debug0.Save("temp.bmp");
+	    //	    exit(-1);
+#endif
+
 	      // now attempt to fit a shape to this border
 	      
 	      // if we succeed then create a new scene graph node and insert
@@ -273,7 +279,7 @@ template<class S,int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(Image
 	  }
 	  if (!current_not_visited) {
 #ifdef SCENE_GRAPH_DEBUG
-	    PROGRESS("Current node has been visited, setting LNBD to "<< (int)current_id);
+	    PROGRESS("Current node has been visited, setting LNBD to "<< (int)current_nbd);
 #endif
 	    LNBD = current_nbd;
 	  }
@@ -312,6 +318,8 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
     statistics.max_y = start_y; // bounding box
     statistics.convex = true; // true if this contour is convex
 
+    int nbd_shifted = nbd<<1;
+
     while(pointer < maxcount*2) {
       // work out the pixel co-ordinates for the position of interest
       int sample_x = start_x+offset_x[position];
@@ -327,12 +335,12 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
 	// have examined it whilst looking for this 1-element then this
 	// is an exit pixel.  Write (NBD,r).
 	if (cell4_is_0) {
-	  value = nbd << 1 | 0x1;
+	  value = nbd_shifted| 0x1;
 	}
 	// 2) else if sample_x,sample_y is unmarked write
 	// (NBD,l).
 	else if (!(sample>>1)) {
-	  value = nbd << 1;
+	  value = nbd_shifted;
 	}
 	else {
 	  value = sample;
@@ -342,9 +350,9 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
 	// store this point in the pixel chain and update the start position
 	points_buffer[pointer++] = start_x = sample_x;
 	points_buffer[pointer++] = start_y = sample_y;
-      
+
 	// update the length
-	statistics.length += (position%2 == 0 ? 32 : 45);
+	statistics.length += (position & 0x1 ? 45 : 32);
 	// update the bounding box
 	if (start_x < statistics.min_x) { statistics.min_x = start_x; }
 	else if (start_x > statistics.max_x) { statistics.max_x = start_x; }
@@ -374,7 +382,7 @@ template<class S,int PAYLOAD_SIZE> int SceneGraph<S,PAYLOAD_SIZE>::FollowContour
 	position++; 
       }
 
-      position%=8;	
+      position &= 0x7;
     
       if(position==start_position) { // we have searched all the way round this pixel and not found a 1-pixel
 	return 1;

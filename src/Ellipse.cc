@@ -547,6 +547,7 @@ static void print(const char* label, double** array, int rows, int cols) {
 }
 
 
+LinearEllipse::LinearEllipse() : Ellipse() {};
 LinearEllipse::LinearEllipse(float* points, int numpoints) : Ellipse(points,numpoints) {};
 LinearEllipse::LinearEllipse(float* points, int numpoints, bool prev_fit): Ellipse(points,numpoints,prev_fit) {};
 LinearEllipse::LinearEllipse(float a, float b, float c, float d, float e,float f): Ellipse(a,b,c,d,e,f) {};

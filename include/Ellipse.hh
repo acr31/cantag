@@ -58,6 +58,7 @@ private:
  */
 class LinearEllipse : public Ellipse {
 public:
+  LinearEllipse();
   LinearEllipse(float* points, int numpoints);
   LinearEllipse(float* points, int numpoints, bool prev_fit);
   LinearEllipse(float a, float b, float c, float d, float e, float f);
