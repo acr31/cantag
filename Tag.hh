@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.10  2004/01/23 16:03:52  acr31
+ * moved CircularTag back to Tag - but its now templated on the type of tag - ellipse or rectangle
+ *
  * Revision 1.1  2004/01/23 12:05:47  acr31
  * moved Tag to CircularTag in preparation for Squaretag
  *
@@ -15,19 +18,17 @@
  * added keywords for substitution
  *
  */
-#ifndef CIRCULAR_TAG_GUARD
-#define CIRCULAR_TAG_GUARD
-
-#include <iostream>
+#ifndef TAG_GUARD
+#define TAG_GUARD
 
 #include "Config.hh"
 #include "Drawing.hh"
-#include "Ellipse2D.hh"
 
-class CircularTag {
+template<class C>
+class Tag {
 public:
-  virtual void Draw2D(Image *image, const Ellipse2D *location, unsigned long code, int black, int white)= 0;
-  virtual unsigned long Decode(Image *image, const Ellipse2D *location) =0;
+  virtual void Draw2D(Image *image, const C *location, unsigned long code, int black, int white)= 0;
+  virtual unsigned long Decode(Image *image, const C *location) =0;
 };
 
-#endif//CIRCULAR_TAG_GUARD
+#endif//TAG_GUARD

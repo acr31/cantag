@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.6  2004/01/23 16:03:51  acr31
+ * moved CircularTag back to Tag - but its now templated on the type of tag - ellipse or rectangle
+ *
  * Revision 1.5  2004/01/23 12:05:48  acr31
  * moved Tag to CircularTag in preparation for Squaretag
  *
@@ -29,7 +32,7 @@
 #define FILENAME "RingTag.hh"
 
 template<class C>
-class RingTag : virtual CircularTag {
+class RingTag : virtual Tag<Ellipse2D> {
 private:
   int m_ring_count;
   int m_sector_count;
