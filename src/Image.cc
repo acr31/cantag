@@ -429,7 +429,7 @@ void Image::DrawFilledPolygon(float* points, int numpoints, unsigned char colour
  * we don't need high performance and it works fine!
  */
 void Image::SeedFill(int x, int y,unsigned char colour) {
-  if (x<0 || y<0 || x >=m_width || y >= m_height) return;
+  if (x<0 || y<0 || x >=(int)m_width || y >= (int)m_height) return;
   if (Sample(x,y)==colour) return;
   else {
     DrawPixel(x,y,colour);
