@@ -15,7 +15,7 @@
  */
 class Camera {
 private:
-  float m_extrinsic[9];
+  float m_extrinsic[16];
   float m_intrinsic[9];
   
   // radial distortion co-efficients
@@ -84,7 +84,16 @@ public:
    * Remove radial and tangential distortion from the whole image.
    */
   void UnDistortImage(Image& image) const;
- 
+
+  /**
+   * Convert the camera coordinates (given as an array of triples) to world coordinates
+   */
+  void CameraToWorld(float* points, int num_points) const;
+
+  /**
+   * Convert these camera coordinates to world coordinates
+   */
+  void CameraToWorld(float x, float y, float z, float* rx, float* ry, float *rz) const;
 };
 
 #endif//CAMERA_GAURD

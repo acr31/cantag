@@ -12,6 +12,8 @@
 #include <Image.hh>
 #include <Tag.hh>
 #include <CyclicBitSet.hh>
+#include <Camera.hh>
+#include <cmath>
 
 #define GLIMAGESOURCE_DEBUG
 
@@ -25,6 +27,7 @@ private:
   int m_width;
   int m_height;
   unsigned char* m_buffer;
+  float m_fov;
   Image m_glimage;
   OSMesaContext m_ctx;
   GLubyte* m_tmap;
@@ -38,9 +41,14 @@ public:
    * Create the image source.  It will create images of the given
    * size, with a single tag carrying the given code.
    */
-  GLImageSource(int height, int width, CyclicBitSet<TAG::TagPayloadSize>& code, const TAG& t);
+  GLImageSource(int height, int width, float fov, CyclicBitSet<TAG::TagPayloadSize>& code, const TAG& t);
   ~GLImageSource();
 
+
+  /**
+   * Set the parameters for this camera to correspond to the opengl configuration
+   */
+  void SetCameraParameters(Camera& cam);
   
   Image* Next();
 
@@ -55,11 +63,44 @@ public:
   
 };
 
-#include <iostream>
-template<class TAG> GLImageSource<TAG>::GLImageSource(int height, int width, CyclicBitSet<TAG::TagPayloadSize>& code, const TAG& t) : 
-    m_height(height),
-    m_width(width),
-    m_glimage(width,height)
+template<class TAG> void GLImageSource<TAG>::SetCameraParameters(Camera& cam) {
+  // focal length
+
+  // if we point the camera at a tag of size 1 and we want it to
+  // appear as size 1 we must place it at a particular distance
+  // determined by the field of view
+
+  // tan(fov/2) = (size/2)/distance
+
+  // d = 0.5/tan(fov/2)
+
+  // however, we'd actually like the system to report the distance as 1
+  // so set the focal length to d
+
+  float invd = tan(m_fov/2/180*M_PI)*2;
+
+  cam.SetIntrinsic(m_height/invd,m_height/invd,m_width/2,m_height/2,0);
+
+  
+  // we want the tag to have size 1 at distance 1 in the camera co-ordinates.  However its actual size will be
+  // 2*tan(fov/2) - therefore we need to translate the camera so its z-origin is at 2*tan(fov/2) so that when we do a perspective 
+
+  float extrinsic[] = {
+    1,0,0,0,
+    0,1,0,0,
+    0,0,1,0,
+    0,0,0,1
+  };
+
+  cam.SetExtrinsic(extrinsic);
+}
+
+
+template<class TAG> GLImageSource<TAG>::GLImageSource(int height, int width, float fov, CyclicBitSet<TAG::TagPayloadSize>& code, const TAG& t) : 
+  m_height(height),
+  m_width(width),
+  m_glimage(width,height),
+  m_fov(fov)
 {
   m_ctx = OSMesaCreateContext( GL_RGB, NULL );
   m_buffer = (unsigned char*)malloc(m_width*m_height*3);     
@@ -136,7 +177,7 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60.0, (GLfloat)m_width/(GLfloat)m_height,0,100.0);
+    gluPerspective((GLfloat)m_fov, (GLfloat)m_width/(GLfloat)m_height,0,100.0);
     gluLookAt(-centre_x,-centre_y,-centre_z,-centre_x,-centre_y,-centre_z+1,0.0,-1.0,0.0);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
@@ -225,10 +266,16 @@ template<class TAG> Image* GLImageSource<TAG>::Next(float nx, float ny, float nz
     // this is a front facing polygon that we map our texture to
     glBegin(GL_QUADS);
     // set the current texture co-ordinate and then the vertex that we want it to map to 
-    glTexCoord2f(0.0, 0.0); glVertex3f(-0.5, -0.5, 0.0);
+    /*    glTexCoord2f(0.0, 0.0); glVertex3f(-0.5, -0.5, 0.0);
     glTexCoord2f(1.0, 0.0); glVertex3f(0.5, -0.5, 0.0);
     glTexCoord2f(1.0, 1.0); glVertex3f(0.5, 0.5, 0.0);
-    glTexCoord2f(0.0, 1.0); glVertex3f(-0.5, 0.5, 0.0); 
+    glTexCoord2f(0.0, 1.0); glVertex3f(-0.5, 0.5, 0.0); */
+
+    glTexCoord2f(0.0, 0.0); glVertex3f(-1, -1, 0.0);
+    glTexCoord2f(1.0, 0.0); glVertex3f(1, -1, 0.0);
+    glTexCoord2f(1.0, 1.0); glVertex3f(1, 1, 0.0);
+    glTexCoord2f(0.0, 1.0); glVertex3f(-1, 1, 0.0); 
+
     glEnd();
     glFlush();
     

@@ -12,7 +12,7 @@
 
 #define MAXLENGTH 10000
 #define MAXDEPTH 20
-#undef SCENE_GRAPH_DEBUG
+#define SCENE_GRAPH_DEBUG
 #define MINCONTOUR_AREA 10
 #define MINCONTOUR_LENGTH 10
 
@@ -178,7 +178,7 @@ template<class S, int PAYLOAD_SIZE> void SceneGraph<S,PAYLOAD_SIZE>::Update(cons
   char filename[256];
   snprintf(filename,255,"camgrab-%d.bmp",debug_contour_count++);
   filename[255]=0;
-  //    cvSaveImage(filename,debug0);
+  cvSaveImage(filename,debug0);
   cvReleaseImage(&debug0);
 #endif
 }

@@ -11,13 +11,13 @@
 #include <findtransform.hh>
 
 #ifdef TEXT_DEBUG
-# undef ELLIPSE_DEBUG
+# define ELLIPSE_DEBUG
 # undef ELLIPSE_DEBUG_DUMP_POINTS
 # define CIRCLE_TRANSFORM_DEBUG
 # undef DECOMPOSE_DEBUG
 #endif
 
-#define MAXFITERROR 0.05
+#define MAXFITERROR 10
 #define COMPARETHRESH 0.0001
 #define MAXDISTANCE
 

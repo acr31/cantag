@@ -9,6 +9,7 @@
 #include <CyclicBitSet.hh>
 #include <findtransform.hh>
 #include <boost/shared_ptr.hpp>
+#include <Camera.hh>
 
 /**
  * Represents a tag that has been located.  Contains its 3D location,
@@ -32,13 +33,13 @@ public:
 
   /**
    * A 3x1 matrix containing this located object's normal vector in
-   * camera co-ordinates
+   * world co-ordinates
    */
   float normal[3];
 
 
   /**
-   * A 3x1 matrix containing this located object's position in camera
+   * A 3x1 matrix containing this located object's position in world
    * co-ordinates.
    */
   float location[3];
@@ -55,17 +56,19 @@ public:
 
   void Refresh(Image& image) {};
 
-  void LoadTransform(float transform[16],float tag_size);
+  void LoadTransform(float transform[16],float tag_size, const Camera& camera);
 };
 
+#include <iostream>
 
-template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(float t[16],float tag_size) {
+template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(float t[16],float tag_size, const Camera& camera) {
   for(int i=0;i<16;i++) {
     transform[i] = t[i];
   }
   
-  GetNormalVector(transform,normal);
+  GetNormalVector(transform,camera,normal);
   GetLocation(transform,location,tag_size);
+  camera.CameraToWorld(location,1);
   
 }
 

@@ -39,6 +39,7 @@ int debug_image_counter = 0;
  * \todo regression test with gl harness
  */
 #define READING_COUNT 10
+#define MAX_CHILD_DISTANCE 1
 template<int RING_COUNT, int SECTOR_COUNT>
 class RingTag : public virtual Tag< ShapeChain<Ellipse>, RING_COUNT*SECTOR_COUNT >, 
 		protected virtual Coder<RING_COUNT*SECTOR_COUNT> {
@@ -250,7 +251,7 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
 #ifdef RING_TAG_DEBUG
       PROGRESS("Distance is " << dist);
 #endif
-      if (dist < 0.005) {
+      if (dist < MAX_CHILD_DISTANCE) {
 	found = true;
 	break;
       }
@@ -299,9 +300,9 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
   float* correcttrans = NULL;
   float* correctnormal = NULL;
   float normal1[3];
-  GetNormalVector(transform1,normal1);
+  GetNormalVector(transform1,camera,normal1);
   float normal2[3];
-  GetNormalVector(transform2,normal2);
+  GetNormalVector(transform2,camera,normal2);
 #ifdef RING_TAG_DEBUG
   PROGRESS("Normal vector for transform1 " << normal1[0] << " " << normal1[1] << " " << normal1[2]);
   PROGRESS("Normal vector for transform2 " << normal2[0] << " " << normal2[1] << " " << normal2[2]);
@@ -451,9 +452,9 @@ template<int RING_COUNT,int SECTOR_COUNT> bool RingTag<RING_COUNT,SECTOR_COUNT>:
 
       PROGRESS("Ellipse position is "<<projected1[0]<<","<<projected1[1]);
 #endif
-      std::cout << "!!" << el.GetX0() << " " << el.GetY0() << " " << el.GetHeight() << " " << el.GetWidth() << " " << el.GetAngle() << std::endl;
+      //      std::cout << "!!" << el.GetX0() << " " << el.GetY0() << " " << el.GetHeight() << " " << el.GetWidth() << " " << el.GetAngle() << std::endl;
       LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj = node->GetLocatedObject();
-      lobj->LoadTransform(correcttrans,1);
+      lobj->LoadTransform(correcttrans,1,camera);
       lobj->tag_code = read_code[code_ptr];	   
       return true;
     }

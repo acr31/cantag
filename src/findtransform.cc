@@ -10,108 +10,6 @@
 #define SQUARE_TRANSFORM_DEBUG
 #undef APPLY_TRANSFORM_DEBUG
 
-void GetTransform(const QuadTangle& quad, float transform[16]) {
-  // see the header file for a full explanation of what's going on here
-#ifdef SQUARE_TRANSFORM_DEBUG
-  PROGRESS("Calculating transform for :"
-	   "("<<quad.GetX0()<<","<<quad.GetY0()<<"),"<<
-	   "("<<quad.GetX1()<<","<<quad.GetY1()<<"),"<<
-	   "("<<quad.GetX2()<<","<<quad.GetY2()<<"),"<<
-	   "("<<quad.GetX3()<<","<<quad.GetY3()<<"),");	   
-#endif
-
-  // we particularly want coeffs to be an array of pointers to arrays
-  // containing the rows of the matrix - then we can swap rows
-  // conveniently by swapping pointers
-  double coeffs0[] = {1,1,1,0,0,0,-quad.GetX1(),-quad.GetX1() };
-  double coeffs1[] = {1,0,1,0,0,0,-quad.GetX0(),0             };
-  double coeffs2[] = {0,0,1,0,0,0,0            ,0             };
-  double coeffs3[] = {0,1,1,0,0,0,0            ,-quad.GetX2() };
-  double coeffs4[] = {0,0,0,1,1,1,-quad.GetY1(),-quad.GetY1() };
-  double coeffs5[] = {0,0,0,1,0,1,-quad.GetY0(),0             };
-  double coeffs6[] = {0,0,0,0,0,1,0            ,0             };
-  double coeffs7[] = {0,0,0,0,1,1,0            ,-quad.GetY2() };
-  /*
-  double coeffs0[] = {1,1,0,0,0,0,0,0};
-  double coeffs1[] = {1,0,0,1,0,0,0,0};
-  double coeffs2[] = {1,1,1,1,0,0,0,0};
-  double coeffs3[] = {0,0,0,0,1,1,0,0};
-  double coeffs4[] = {0,0,0,0,1,0,0,1};
-  double coeffs5[] = {0,0,0,0,1,1,1,1};
-  double coeffs6[] = {-quad.GetX1(),-quad.GetX0(),0,0,-quad.GetY1(),-quad.GetY0(),0,0};
-  double coeffs7[] = {-quad.GetX1(),0,0,-quad.GetX2(),-quad.GetY1(),0,0,-quad.GetY2()};
-  */
-  double* coeffs[] = {coeffs0,
-		      coeffs1,
-		      coeffs2,
-		      coeffs3,
-		      coeffs4,
-		      coeffs5,
-		      coeffs6,
-		      coeffs7};
-		     
-  double xvals[] = { quad.GetX1(),
-		     quad.GetX0(),
-		     quad.GetX3(),
-		     quad.GetX2(),
-		     quad.GetY1(),
-		     quad.GetY0(),
-		     quad.GetY3(),
-		     quad.GetY2() };
-  double result[8];
-
-  solve_simultaneous(xvals,coeffs,result,8);
-
-#ifdef SQUARE_TRANSFORM_DEBUG
-  PROGRESS("Computed a0 "<<result[0]);
-  PROGRESS("         a1 "<<result[1]);
-  PROGRESS("         a2 "<<result[2]);
-  PROGRESS("         a3 "<<result[3]);
-  PROGRESS("         a4 "<<result[4]);
-  PROGRESS("         a5 "<<result[5]);
-  PROGRESS("         a6 "<<result[6]);
-  PROGRESS("         a7 "<<result[7]);
-#endif
-
-  double scalefactor = sqrt(result[1]*result[1]+result[4]*result[4]+result[7]*result[7]);
-#ifdef SQUARE_TRANSFORM_DEBUG
-  PROGRESS("Scale factor is "<<scalefactor);
-#endif
-
-  //  for(int i=0;i<8;i++) {
-  //    result[i] *= scalefactor;
-  //  }
-
-#ifdef SQUARE_TRANSFORM_DEBUG
-  PROGRESS("Scaled   a0 "<<result[0]);
-  PROGRESS("         a1 "<<result[1]);
-  PROGRESS("         a2 "<<result[2]);
-  PROGRESS("         a3 "<<result[3]);
-  PROGRESS("         a4 "<<result[4]);
-  PROGRESS("         a5 "<<result[5]);
-  PROGRESS("         a6 "<<result[6]);
-  PROGRESS("         a7 "<<result[7]);
-#endif
- 
-  // the final vector for the transform is simply the cross product of the first two
-  double final[] = { result[3]*result[7] - result[6]*result[4],
-		     result[6]*result[1] - result[0]*result[7],
-		     result[0]*result[4] - result[3]*result[1] };
-  
-
-  transform[0] = result[0];  transform[1] = result[1];  transform[2] = final[0];  transform[3] = result[2];
-  transform[4] = result[3];  transform[5] = result[4];  transform[6] = final[1];  transform[7] = result[5];
-  transform[8] = result[6];  transform[9] = result[7];  transform[10]= final[2];  transform[11]= 1;
-  transform[12]= 0;          transform[13]= 0;          transform[14]= 0;  transform[15]= 1;
-
-#ifdef SQUARE_TRANSFORM_DEBUG
-  PROGRESS("Final trans=[" << transform[0] << "," << transform[1] << "," << transform[2] << ","<<transform[3] <<";");
-  PROGRESS("             " << transform[4] << "," << transform[5] << "," << transform[6] << ","<<transform[7] <<";");
-  PROGRESS("             " << transform[8] << "," << transform[9] << "," << transform[10]<< ","<<transform[11]<<";");
-  PROGRESS("             " << transform[12]<< "," << transform[13]<< "," << transform[14]<< ","<<transform[15]<<"];");
-#endif
-
-}
 
 
 void ApplyTransform(const float transform[16], float x, float y, float z, float* projX, float* projY) {
@@ -162,7 +60,7 @@ void GetLocation(const float transform[16], float location[3], float tag_size) {
 }
 
 
-void GetNormalVector(const float transform[16], float normal[3]) {
+void GetNormalVector(const float transform[16], const Camera& cam, float normal[3]) {
   // project (0,0,0) and (0,0,1).  Take the difference between them and normalize it
 
   // (0,0,0)
@@ -170,32 +68,37 @@ void GetNormalVector(const float transform[16], float normal[3]) {
   float proj0y = transform[7];
   float proj0z = transform[11];
   float proj0h = transform[15];
+  cam.CameraToWorld(proj0x/proj0h,proj0y/proj0h,proj0z/proj0h,&proj0x,&proj0y,&proj0z);
 
   // (0,0,1)
   float proj1x = transform[2] + transform[3];
   float proj1y = transform[6] + transform[7];
   float proj1z = transform[10] + transform[11];
   float proj1h = transform[14] + transform[15];
+  cam.CameraToWorld(proj1x/proj1h,proj1y/proj1h,proj1z/proj1h,&proj1x,&proj1y,&proj1z);
 
   // (1,0,0)
   float proj2x = transform[0] + transform[3];
   float proj2y = transform[4] + transform[7];
   float proj2z = transform[8] + transform[11];
   float proj2h = transform[12] + transform[15];
+  cam.CameraToWorld(proj2x/proj2h,proj2y/proj2h,proj2z/proj2h,&proj2x,&proj2y,&proj2z);
 
   // (0,1,0)
   float proj3x = transform[1] + transform[3];
   float proj3y = transform[5] + transform[7];
   float proj3z = transform[9] + transform[11];
   float proj3h = transform[13] + transform[15];
+  cam.CameraToWorld(proj3x/proj3h,proj3y/proj3h,proj3z/proj3h,&proj3x,&proj3y,&proj3z);
 
-  float v1x = proj2x/proj2h - proj0x/proj0h;
-  float v1y = proj2y/proj2h - proj0y/proj0h;
-  float v1z = proj2z/proj2h - proj0z/proj0h;
 
-  float v2x = proj3x/proj2h - proj0x/proj0h;
-  float v2y = proj3y/proj2h - proj0y/proj0h;
-  float v2z = proj3z/proj2h - proj0z/proj0h;
+  float v1x = proj2x - proj0x;
+  float v1y = proj2y - proj0y;
+  float v1z = proj2z - proj0z;
+
+  float v2x = proj3x - proj0x;
+  float v2y = proj3y - proj0y;
+  float v2z = proj3z - proj0z;
 
 
   /*  

@@ -45,6 +45,22 @@ void Camera::SetTangential(float d1, float d2) {
   m_d2 = d2;
 }
 
+
+void Camera::CameraToWorld(float x, float y, float z, float *rx, float *ry, float* rz) const {
+  float rh = m_extrinsic[12]*x+m_extrinsic[13]*y+m_extrinsic[14]*z+m_extrinsic[15];
+
+  *rx = (m_extrinsic[0]*x+m_extrinsic[1]*y+m_extrinsic[2]*z+m_extrinsic[3])/rh;
+  *ry = (m_extrinsic[4]*x+m_extrinsic[5]*y+m_extrinsic[6]*z+m_extrinsic[7])/rh;
+  *rz = (m_extrinsic[8]*x+m_extrinsic[9]*y+m_extrinsic[10]*z+m_extrinsic[11])/rh;
+
+}
+
+void Camera::CameraToWorld(float* points, int numpoints) const {
+  for(int i=0;i<numpoints*3;i+=3) {
+    CameraToWorld(points[i],points[i+1],points[i+2],points+i,points+i+1,points+i+2);
+  }
+}
+
 /**
  * \todo currently ignores radial and tangential parameters
  */
