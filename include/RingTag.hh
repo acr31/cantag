@@ -1,56 +1,6 @@
 /**
  * $Header$
  *
- * $Log$
- * Revision 1.8  2004/02/18 09:22:21  acr31
- * *** empty log message ***
- *
- * Revision 1.7  2004/02/16 08:02:02  acr31
- * *** empty log message ***
- *
- * Revision 1.6  2004/02/08 20:30:10  acr31
- * changes to interfaces to add the ImageFilter class
- *
- * Revision 1.5  2004/02/03 16:24:56  acr31
- * various function signature changes and use of __FILE__ and __LINE__ in debug macros
- *
- * Revision 1.4  2004/02/01 14:25:33  acr31
- * moved Rectangle2D to QuadTangle2D and refactored implementations around
- * the place
- *
- * Revision 1.3  2004/01/30 16:54:17  acr31
- * changed the Coder api -reimplemented various bits
- *
- * Revision 1.2  2004/01/27 18:06:58  acr31
- * changed inheriting classes to inherit publicly from their parents
- *
- * Revision 1.1  2004/01/25 14:54:37  acr31
- * moved over to automake/autoconf build system
- *
- * Revision 1.9  2004/01/24 19:29:24  acr31
- * removed ellipsetoxy and put the project method in Ellipse2D objects
- *
- * Revision 1.8  2004/01/24 10:33:35  acr31
- * changed unsigned long to unsigned long long
- *
- * Revision 1.7  2004/01/23 16:08:55  acr31
- * remove spurious #include
- *
- * Revision 1.6  2004/01/23 16:03:51  acr31
- * moved CircularTag back to Tag - but its now templated on the type of tag - ellipse or rectangle
- *
- * Revision 1.5  2004/01/23 12:05:48  acr31
- * moved Tag to CircularTag in preparation for Squaretag
- *
- * Revision 1.4  2004/01/23 11:57:08  acr31
- * moved Location2D to Ellipse2D in preparation for Square Tags
- *
- * Revision 1.3  2004/01/21 13:41:36  acr31
- * added pose from circle to triptest - (pose from circle is unstable at the moment)
- *
- * Revision 1.2  2004/01/21 11:52:29  acr31
- * added keywords
- *
  */
 
 #ifndef RING_TAG_GUARD
@@ -58,12 +8,13 @@
 
 #include "Config.hh"
 #include "Drawing.hh"
-#include "Tag.hh"
+#include <Tag.hh>
 #include "Coder.hh"
-#include "Ellipse2D.hh"
 #include <Camera.hh>
+#include <ShapeChain.hh>
+#include <Ellipse.hh>
 
-class RingTag : public virtual Tag<Ellipse2D>, protected virtual Coder {
+class RingTag : public virtual Tag< ShapeChain<Ellipse> >, protected virtual Coder {
 private:
   int m_ring_count;
   int m_sector_count;
@@ -85,9 +36,11 @@ public:
 	  float data_outer_radius);
   virtual ~RingTag();
   virtual void Draw2D(Image* image,  unsigned long long code, int black, int white);
-  virtual unsigned long long Decode(Image *image, Camera* camera, const Ellipse2D *l);
+  virtual void DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Camera& camera, const Image& image);
+  //  virtual unsigned long long Decode(Image *image, Camera* camera, const Ellipse2D *l);
 
 private:
-  void draw_read(Image* image, Camera* camera, const Ellipse2D* l, int i);
+  void draw_circle(Image* image, const Camera& camera, float l[16], double radius);
+  void draw_read(const Image& image, const Camera& camera, float l[16], int i);
 };
 #endif//RING_TAG_GUARD

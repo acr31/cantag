@@ -45,7 +45,7 @@ void Camera::SetTangential(float d1, float d2) {
   m_d2 = d2;
 }
 
-void Camera::NPCFToImage(float* points, int numpoints) {
+void Camera::NPCFToImage(float* points, int numpoints) const {
   for(int i=0;i<numpoints*2;i+=2) {
     float x = points[i];
     float y = points[i+1];
@@ -78,7 +78,7 @@ void Camera::NPCFToImage(float* points, int numpoints) {
   }      
 }
 
-void Camera::ImageToNPCF(float* points, int numpoints) {
+void Camera::ImageToNPCF(float* points, int numpoints) const {
   for(int i=0;i<numpoints*2 ;i+=2) {
     // 1) translate the points back to the principle point
     points[i] -= m_intrinsic[2];
@@ -105,7 +105,7 @@ void Camera::ImageToNPCF(float* points, int numpoints) {
   }
 }
 
-void Camera::UnDistortImage(Image* image) {
+void Camera::UnDistortImage(Image* image) const {
   Image* source = cvCloneImage(image);
   for(int i=0;i<image->height;i++) {
     for(int j=0;j<image->width;j++) {

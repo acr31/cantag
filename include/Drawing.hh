@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.11  2004/02/20 22:25:54  acr31
+ * major reworking of matching algorithms and architecture
+ *
  * Revision 1.10  2004/02/03 07:48:25  acr31
  * added template tag
  *
@@ -76,6 +79,20 @@ inline int SampleImage(Image *image,int x, int y) {
   else {
     return 0;
   }
+}
+
+inline int SampleImage(const Image& image,int x, int y) {
+  if ((x >= 0) && (x < image.width) &&
+      (y >= 0) && (y < image.height)) {
+    return (int)(((uchar*)(image.imageData + image.widthStep*y))[x]);
+  }
+  else {
+    return 0;
+  }
+}
+
+inline int SampleImage(const Image& image,float x, float y) {
+  return SampleImage(image,cvRound(x),cvRound(y));
 }
 
 inline int SampleImage(Image *image,float x, float y) {

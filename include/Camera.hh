@@ -60,7 +60,7 @@ public:
    * distortion predicted by the parameters set and removing the
    * extrinsic parameters of the camera.
    */
-  void ImageToNPCF(float* points, int num_points);
+  void ImageToNPCF(float* points, int num_points) const;
 
   /**
    * Convert a set of normalised principle co-ordinate frame (NPCF)
@@ -68,12 +68,12 @@ public:
    * distortion predicted by the camera parameters and applying the
    * extrinsic parameters of the camera.
    */
-  void NPCFToImage(float* points, int num_points);  
+  void NPCFToImage(float* points, int num_points) const;  
 
   /**
    * Remove radial and tangential distortion from the whole image.
    */
-  void UnDistortImage(Image* image);
+  void UnDistortImage(Image* image) const;
  
 };
 
