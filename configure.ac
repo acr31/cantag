@@ -29,6 +29,11 @@ AC_CHECK_LIB(OSMesa,
 	[],
 	[AC_MSG_ERROR([libOSMesa.so not found])])
 
+AC_CHECK_LIB(GLU,
+	[gluNewTess],
+	[],
+	[AC_MSG_ERROR([libGLU.so not found])])
+
 dnl Checks for header files.
 AC_CHECK_HEADER(opencv/cv.h,
 	[],
