@@ -2,4 +2,4 @@
 
 LocatedObject::LocatedObject() {}
 LocatedObject::~LocatedObject() {}
-void LocatedObject::Refresh(Image* image) {};
+void LocatedObject::Refresh(Image& image) {};

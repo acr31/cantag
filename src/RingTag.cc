@@ -2,14 +2,10 @@
  * $Header$
  */
 
-#include <Config.hh>
-#include <Drawing.hh>
-#include <Coder.hh>
-#include <Ellipse2D.hh>
 #include <RingTag.hh>
-#include <Camera.hh>
 #include <circletransform.hh>
 #include <vector>
+
 #define RING_TAG_DEBUG
 #define RING_TAG_IMAGE_DEBUG
 
@@ -75,92 +71,86 @@ RingTag::~RingTag() {
   delete[] m_read_angles;
 }
 
-void RingTag::Draw2D(Image* image,unsigned long long code, int black, int white) {
-  Ellipse2D l(image->width/2, image->height/2,image->width,image->height,0);
-  PROGRESS("Draw2D called for ellipse centre (" << l.m_x << "," << l.m_y<< "), size ("<<l.m_width<<","<<l.m_height<<"), code "<<code);
-  
+void RingTag::Draw2D(Image& image,unsigned long long code) {
   // Work from the outside inwards
   
+  int x0 = image.GetWidth()/2;
+  int y0 = image.GetHeight()/2;
+  int size = (image.GetWidth() < image.GetHeight()) ? image.GetWidth()/2 : image.GetHeight()/2;
+
+  bool setscale = false;
+  float scalefactor;
+
   if (m_bullseye_outer_radius > m_data_outer_radius) {
+    scalefactor = (float)size/m_bullseye_outer_radius;
+    setscale = true;
+#ifdef RING_TAG_DEBUG
     PROGRESS("Drawing outer bullseye edge");
-    DrawFilledEllipse(image, 
-		      l.m_x, 
-		      l.m_y,
-		      l.m_width*m_bullseye_outer_radius, 
-		      l.m_height*m_bullseye_outer_radius,
-		      l.m_angle_radians, 
-		      black);
+    PROGRESS("Set scale factor to : "<<scalefactor);
+#endif
+    image.DrawFilledCircle(x0,y0,scalefactor*m_bullseye_outer_radius,COLOUR_BLACK);
   }
   
   if (m_bullseye_inner_radius > m_data_outer_radius) {
+#ifdef RING_TAG_DEBUG
     PROGRESS("Drawing inner bullseye edge");
-    DrawFilledEllipse(image, 
-		      l.m_x, 
-		      l.m_y,
-		      l.m_width*m_bullseye_inner_radius, 
-		      l.m_height*m_bullseye_inner_radius,
-		      l.m_angle_radians, 
-		      white);
+#endif
+    if (!setscale) {
+      scalefactor = (float)size/m_bullseye_inner_radius;
+      setscale=true;
+#ifdef RING_TAG_DEBUG
+      PROGRESS("Set scale factor to: " <<scalefactor);
+#endif
+    }
+    image.DrawFilledCircle(x0,y0,scalefactor*m_bullseye_inner_radius,COLOUR_WHITE);
   }
-  
+
+#ifdef RING_TAG_DEBUG
   PROGRESS("Drawing data rings");
+#endif
   unsigned long long encoded = EncodeTag(code);
+
+  if (!setscale) {
+    scalefactor = (float)size/m_data_ring_outer_radii[m_ring_count-1];   
+#ifdef RING_TAG_DEBUG
+      PROGRESS("Set scale factor to: " <<scalefactor);
+#endif
+  }
   
   for(int i=m_ring_count-1;i>=0;i--) {
     unsigned long long working = encoded;
     for(int j=m_sector_count-1;j>=0;j--) {	
       // pick the colour based on the value we encode - sensible
-      int colour = ((working & (1<<i)) == (1<<i)) ? black : white;
-
-      // or pick the colour based on which sector we are encoding - useful for debuggin
-      //      int colour = (int)((double)(i*m_sector_count+j) / (double)(m_ring_count*m_sector_count) * 255);
+      int colour = ((working & (1<<i)) == (1<<i)) ? COLOUR_BLACK : COLOUR_WHITE;
+      // or pick the colour based on which sector we are encoding - useful for debugging
+      //int colour = (int)((double)(i*m_sector_count+j) / (double)(m_ring_count*m_sector_count) * 255);
 
       working >>= m_ring_count;
-      DrawFilledEllipse(image,
-			l.m_x,
-			l.m_y,
-			l.m_width*m_data_ring_outer_radii[i],
-			l.m_height*m_data_ring_outer_radii[i],
-			l.m_angle_radians,
-			m_sector_angles[j],
-			m_sector_angles[j+1],
-			colour);	
+      image.DrawSector(x0,y0,scalefactor*m_data_ring_outer_radii[i],m_sector_angles[j],m_sector_angles[j+1],colour);
     }
   }
-  
+
+#ifdef RING_TAG_DEBUG  
   PROGRESS("Blanking out inside of data rings");
+#endif
   if (m_data_inner_radius != 0) {
-    DrawFilledEllipse(image,
-		      l.m_x,
-		      l.m_y,
-		      l.m_width*m_data_inner_radius,
-		      l.m_height*m_data_inner_radius,
-		      l.m_angle_radians,
-		      (m_bullseye_inner_radius < m_data_inner_radius &&
-		       m_bullseye_outer_radius > m_data_inner_radius) ? black : white);
+        image.DrawFilledCircle(x0,y0,m_data_inner_radius*scalefactor,
+			       (m_bullseye_inner_radius < m_data_inner_radius &&
+				m_bullseye_outer_radius > m_data_inner_radius) ? COLOUR_BLACK : COLOUR_WHITE);
   }
   
-  
   if (m_bullseye_outer_radius < m_data_inner_radius) {
+#ifdef RING_TAG_DEBUG
     PROGRESS("Drawing outer bullseye edge");
-    DrawFilledEllipse(image, 
-		      l.m_x, 
-		      l.m_y,
-		      l.m_width*m_bullseye_outer_radius, 
-		      l.m_height*m_bullseye_outer_radius,
-		      l.m_angle_radians, 
-		      black);
+#endif
+    image.DrawFilledCircle(x0,y0,m_bullseye_outer_radius*scalefactor, COLOUR_BLACK);
   }
   
   if (m_bullseye_inner_radius < m_data_inner_radius) {
+#ifdef RING_TAG_DEBUG
     PROGRESS("Drawing inner bullseye edge");	   
-    DrawFilledEllipse(image, 
-		      l.m_x, 
-		      l.m_y,
-		      l.m_width*m_bullseye_inner_radius, 
-		      l.m_height*m_bullseye_inner_radius,
-		      l.m_angle_radians, 
-		      white);
+#endif
+    image.DrawFilledCircle(x0,y0,m_bullseye_inner_radius*scalefactor,COLOUR_WHITE);
   }
 }
 
@@ -245,7 +235,7 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
 			 sin(m_read_angles[j]) * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
 	ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
 	camera.NPCFToImage(tpt,1);
-	bool sample = SampleImage(image,tpt[0],tpt[1]) > 128;
+	bool sample = image.Sample(tpt[0],tpt[1]) > 128;
 	read_code[currentcode] <<=1;
 	read_code[currentcode] |= (sample ? 1:0);
       }
@@ -296,7 +286,7 @@ void RingTag::DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Came
   }
 };  
 
-void RingTag::draw_circle(Image* debug0, const Camera& camera, float l[16], double radius) {
+void RingTag::draw_circle(Image& debug0, const Camera& camera, float l[16], double radius) {
   float oldpts[2] = { radius ,
 		      0 };
   float pts[2];
@@ -308,16 +298,16 @@ void RingTag::draw_circle(Image* debug0, const Camera& camera, float l[16], doub
     pts[1] = sin( (float)step*2*PI/(float)count ) * radius;
     ApplyTransform(l,pts,1);
     camera.NPCFToImage(pts,1);
-    cvLine(debug0,cvPoint(cvRound(oldpts[0]),cvRound(oldpts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), 0,1);	
+    debug0.DrawLine(oldpts[0],oldpts[1],pts[0],pts[1],COLOUR_BLACK,1);
     oldpts[0] = pts[0];
     oldpts[1] = pts[1];
   }  
 }
 
 void RingTag::draw_read(const Image& image, const Camera& camera, float l[16], int i) {
-  Image* debug0 = cvCloneImage(&image);
-  cvConvertScale(debug0,debug0,-1,255); 
-  cvConvertScale(debug0,debug0,0.5,128); 
+  Image debug0(image);
+  debug0.ConvertScale(-1,255);
+  debug0.ConvertScale(0.5,128);
   
   draw_circle(debug0,camera,l,m_bullseye_inner_radius / m_bullseye_outer_radius);
   draw_circle(debug0,camera,l,1);
@@ -335,13 +325,11 @@ void RingTag::draw_read(const Image& image, const Camera& camera, float l[16], i
       ApplyTransform(l,pts,1);
       camera.NPCFToImage(pts,1);
       // pick the colour to be the opposite of the sampled point so we can see the dot
-      int colour = SampleImage(image,pts[0],pts[1]) < 128 ? 0: 255; // our debug image is inverted 255 : 0;
+      int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
       // or pick the colour to be on a gradient so we see the order it samples in
       //int colour = (int)((double)k/(double)m_sector_count*255);
-      cvLine(debug0,cvPoint(cvRound(pts[0]),cvRound(pts[1])),cvPoint(cvRound(pts[0]),cvRound(pts[1])), colour,4);
-      
+      debug0.DrawPoint(pts[0],pts[1],colour,4);
     }
   }
-  cvSaveImage("debug-decode.jpg",debug0);	  	
-  cvReleaseImage(&debug0);
+  debug0.Save("debug-decode.jpg");
 }

@@ -1,8 +1,14 @@
+/**
+ * $Header$
+ */
 #ifndef CAMERA_GUARD
 #define CAMERA_GUARD
 
-#include <Drawing.hh>
+#include <Image.hh>
 
+/**
+ * A camera model.  Use this class to convert from NPCF to Image co-ordinates and back again
+ */
 class Camera {
 private:
   float m_extrinsic[9];
@@ -73,7 +79,7 @@ public:
   /**
    * Remove radial and tangential distortion from the whole image.
    */
-  void UnDistortImage(Image* image) const;
+  void UnDistortImage(Image& image) const;
  
 };
 

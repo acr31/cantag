@@ -105,14 +105,13 @@ void Camera::ImageToNPCF(float* points, int numpoints) const {
   }
 }
 
-void Camera::UnDistortImage(Image* image) const {
-  Image* source = cvCloneImage(image);
-  for(int i=0;i<image->height;i++) {
-    for(int j=0;j<image->width;j++) {
+void Camera::UnDistortImage(Image& image) const {
+  const Image source(image);
+  for(int i=0;i<image.GetHeight();i++) {
+    for(int j=0;j<image.GetWidth();j++) {
       float points[] = {i,j};
       NPCFToImage(points,1);
-      DrawPixel(image,i,j,SampleImage(source,points[0],points[1]));
+      image.DrawPixel(i,j,source.Sample(points[0],points[1]));
     }
   }
-  cvReleaseImage(&source);
 }

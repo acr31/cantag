@@ -6,10 +6,9 @@
 #ifndef RING_TAG_GUARD
 #define RING_TAG_GUARD
 
-#include "Config.hh"
-#include "Drawing.hh"
+#include <Config.hh>
 #include <Tag.hh>
-#include "Coder.hh"
+#include <Coder.hh>
 #include <Camera.hh>
 #include <ShapeChain.hh>
 #include <Ellipse.hh>
@@ -35,12 +34,11 @@ public:
 	  float data_inner_radius,
 	  float data_outer_radius);
   virtual ~RingTag();
-  virtual void Draw2D(Image* image,  unsigned long long code, int black, int white);
+  virtual void Draw2D(Image& image,  unsigned long long code);
   virtual void DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Camera& camera, const Image& image);
-  //  virtual unsigned long long Decode(Image *image, Camera* camera, const Ellipse2D *l);
 
 private:
-  void draw_circle(Image* image, const Camera& camera, float l[16], double radius);
+  void draw_circle(Image& image, const Camera& camera, float l[16], double radius);
   void draw_read(const Image& image, const Camera& camera, float l[16], int i);
 };
 #endif//RING_TAG_GUARD

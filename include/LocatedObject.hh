@@ -4,7 +4,12 @@
 #ifndef LOCATED_OBJECT_GUARD
 #define LOCATED_OBJECT_GUARD
 
-#include <Drawing.hh>
+#include <Config.hh>
+#include <Image.hh>
+
+/**
+ * Represents a tag that has been located.  Contains its 3D location, pose and transformation matrix
+ */
 class LocatedObject {
 public:
   /**
@@ -50,7 +55,7 @@ public:
 
   LocatedObject();
   ~LocatedObject();
-  void Refresh(Image* image);
+  void Refresh(Image& image);
 
 };
 

@@ -5,8 +5,8 @@
 #ifndef TAG_GUARD
 #define TAG_GUARD
 
-#include "Config.hh"
-#include "Drawing.hh"
+#include <Config.hh>
+#include <Image.hh>
 #include <Camera.hh>
 #include <SceneGraphNode.hh>
 #include <vector>
@@ -14,7 +14,7 @@
 template<class C>
 class Tag {
 public:
-  virtual void Draw2D(Image* image, unsigned long long code, int black, int white)= 0;
+  virtual void Draw2D(Image& image, unsigned long long code)= 0;
   void WalkSceneGraph(SceneGraphNode<C>* root_node, const Camera& camera, const Image& image) {
     // walk the tree finding all the tags
     DecodeNode(root_node,camera,image);

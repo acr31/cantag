@@ -5,6 +5,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/02/21 20:33:10  acr31
+ * removed a load of obsolete files - factored in some more code to the new framework
+ *
  * Revision 1.1  2004/02/20 22:25:55  acr31
  * major reworking of matching algorithms and architecture
  *
@@ -51,7 +54,7 @@ public:
    * Update the scene graph with the given image
    */
   void Update(const Image& image, const Camera& camera) {
-    IplImage *copy = cvCloneImage(&image); // the find contours process changes the image ;-(
+    IplImage *copy = cvCloneImage(image.m_image); // the find contours process changes the image ;-(
     
     CvMemStorage* store = cvCreateMemStorage(0);
     CvSeq* root;
@@ -59,7 +62,7 @@ public:
     cvReleaseImage(&copy);
 
 #ifdef IMAGE_DEBUG
-    IplImage *debug0 = cvCloneImage(&image);
+    IplImage *debug0 = cvCloneImage(image.m_image);
     cvConvertScale(debug0,debug0,0.5,128);
     // draw found contours
     cvDrawContours(debug0,root,0,0,MAXDEPTH,2,8);
