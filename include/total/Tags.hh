@@ -26,7 +26,7 @@ namespace Total {
    */
   class TripTag : public RingTag<2,17,Ellipse>, protected virtual TripOriginalCoder<34,2,2>, private virtual FullEllipseTransform {
   public:
-    TripTag();
+    TripTag() : RingTag<2,17,Ellipse>(0.2,0.4,0.6,1.0) {}
   };
 
   /**
@@ -35,13 +35,13 @@ namespace Total {
    */
   class OuterRing : public RingTag<2,17,Ellipse>, protected virtual TripOriginalCoder<34,2,2>, private virtual FullEllipseTransform {
   public:
-    OuterRing();
+    OuterRing() : RingTag<2,17,Ellipse>(0.8,1.0,0.2,0.6)  {}
   };
 
   /**
    * A tag much like Rekimoto's Matrix Tag but using a Trip coding scheme
    */
-  class MatrixSquare : public MatrixTag<6>,  protected virtual TripOriginalCoder<36,3,2>, private virtual ProjectiveQuadTangleTransform {};
+  class MatrixSquare : public MatrixTag<6,CornerQuadTangle>,  protected virtual TripOriginalCoder<36,3,2>, private virtual ProjectiveQuadTangleTransform {};
 
   /**
    * Another tag that uses the same coding structure as TRIP but with
@@ -49,11 +49,11 @@ namespace Total {
    */
   class SplitTarget : public RingTag<2,17,Ellipse>, protected virtual TripOriginalCoder<34,2,2>, private virtual FullEllipseTransform {
   public:
-    SplitTarget();
+    SplitTarget() : RingTag<2,17,Ellipse>(0.2,1.0,0.4,0.8) {}
   };
 #endif
 
-  class SimpleSquare : public MatrixTag<10>, private virtual SymbolChunkCoder<100,25>, private virtual ProjectiveQuadTangleTransform {};
+  class SimpleSquare : public MatrixTag<10,CornerQuadTangle>, private virtual SymbolChunkCoder<100,25>, private virtual ProjectiveQuadTangleTransform {};
   class SimpleCircle : public RingTag<4,25,Ellipse>, private virtual SymbolChunkCoder<100,4>, private virtual FullEllipseTransform {
   public:
     SimpleCircle() : RingTag<4,25,Ellipse>(0.2,0.4,0.6,1.0) {};
