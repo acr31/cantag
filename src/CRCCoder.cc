@@ -4,6 +4,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.1  2004/01/25 14:53:34  acr31
+ * moved over to autoconf/automake build system
+ *
  * Revision 1.2  2004/01/23 22:35:04  acr31
  * changed coder to use unsigned long long
  *
@@ -12,7 +15,7 @@
  *
  */
 
-#include "CRCCoder.hh"
+#include <CRCCoder.hh>
 
 #undef FILENAME
 #define FILENAME "CRCCoder.cc"

@@ -2,12 +2,15 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.1  2004/01/25 14:53:35  acr31
+ * moved over to autoconf/automake build system
+ *
  * Revision 1.2  2004/01/21 11:55:08  acr31
  * added keywords for substitution
  *
  */
-#include "adaptivethreshold.hh"
-#include "cv.h"
+#include <adaptivethreshold.hh>
+#include <opencv/cv.h>
 
 #undef FILENAME
 #define FILENAME "adaptivethreshold.cc"

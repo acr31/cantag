@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.1  2004/01/25 14:53:36  acr31
+ * moved over to autoconf/automake build system
+ *
  * Revision 1.2  2004/01/23 22:38:26  acr31
  * renamed debug images.  Now throws away outer most contour - edge of image.
  * And filters on block size.
@@ -11,9 +14,9 @@
  *
  *
  */
-#include "findrectangles.hh"
+#include <findrectangles.hh>
 
-#include <cv.h>
+#include <opencv/cv.h>
 #include <cmath>
 
 void FindRectangles(Image *image, int maxXDiff, int maxYDiff, std::vector<Rectangle2DChain*> *results) { 

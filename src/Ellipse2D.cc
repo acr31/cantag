@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.1  2004/01/25 14:53:35  acr31
+ * moved over to autoconf/automake build system
+ *
  * Revision 1.3  2004/01/24 19:29:23  acr31
  * removed ellipsetoxy and put the project method in Ellipse2D objects
  *
@@ -21,7 +24,7 @@
  * added keywords for substitution
  *
  */
-#include "Ellipse2D.hh"
+#include <Ellipse2D.hh>
 
 #undef FILENAME
 #define FILENAME "Ellipse2D.cc"

@@ -7,6 +7,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.1  2004/01/25 14:53:35  acr31
+ * moved over to autoconf/automake build system
+ *
  * Revision 1.6  2004/01/24 17:53:22  acr31
  * Extended TripOriginalCoder to deal with base 2 encodings.  MatrixTag
  * implementation now works.
@@ -28,7 +31,7 @@
  *
  *
  */
-#include "GF4Poly.hh"
+#include <GF4Poly.hh>
 
 
 /**

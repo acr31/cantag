@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.1  2004/01/25 14:53:36  acr31
+ * moved over to autoconf/automake build system
+ *
  * Revision 1.4  2004/01/23 11:57:09  acr31
  * moved Location2D to Ellipse2D in preparation for Square Tags
  *
@@ -13,7 +16,7 @@
  *
  */
 
-#include "posefromcircle.hh"
+#include <posefromcircle.hh>
 
 #undef FILENAME
 #define FILENAME "posefromcircle.cc"

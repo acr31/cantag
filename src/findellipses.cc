@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.1  2004/01/25 14:53:35  acr31
+ * moved over to autoconf/automake build system
+ *
  * Revision 1.8  2004/01/23 22:37:46  acr31
  * added missing ReleaseImage call
  *
@@ -24,9 +27,9 @@
  * added keywords for substitution
  *
  */
-#include "findellipses.hh"
+#include <findellipses.hh>
 
-#include <cv.h>
+#include <opencv/cv.h>
 #include <cmath>
 
 void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, float maxYDiff, float maxRatioDiff, float maxFitError, std::vector<Ellipse2DChain*> *results) { 

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.1  2004/01/25 14:53:35  acr31
+ * moved over to autoconf/automake build system
+ *
  * Revision 1.3  2004/01/24 17:53:22  acr31
  * Extended TripOriginalCoder to deal with base 2 encodings.  MatrixTag
  * implementation now works.
@@ -14,7 +17,7 @@
  *
  *
  */
-#include "Rectangle2D.hh"
+#include <Rectangle2D.hh>
 
 #undef FILENAME
 #define FILENAME "Rectangle2D.cc"
@@ -51,6 +54,44 @@ void Rectangle2D::ProjectPoint(float x, float y, float *projX, float *projY) con
   *projX = (m_alpha[0]*x+m_alpha[1]*y+m_alpha[2])/(m_alpha[6]*x+m_alpha[7]*y+1);
   *projY = (m_alpha[3]*x+m_alpha[4]*y+m_alpha[5])/(m_alpha[6]*x+m_alpha[7]*y+1);
   PROGRESS("Projecting point ("<<x <<","<<y<<") on to ("<< *projX<<","<<*projY<<")");
+}
+
+Location3D* Rectangle2D::EstimatePose(float width, float height) {
+  /*
+   * We need to work out c1...c9 in order to be able to work out the
+   * xyz positions for any u and v
+   *
+   * We already know alpha[0]...alpha[7] which correspond to c1/c9...c8/c9
+   * 
+   * We know r = the ratio width/height
+   *
+   * So to work out c9 we set u=v=0 this gives x=c3, y=c6, z=c9
+   * Then set u=0,v=1 this gives x=c2+c3, y=c5+c6, z=c8+c9
+   * These are the co-ordinates for the height of the tag
+   *
+   * So  (c3 - (c2+c3))^2 + (c6 - (c5+c6))^2 + (c9 - (c8+c9))^2  = width^2
+   *     c2^2 + c5^2 + c8^2 = width^2
+   *     c2^2/c9^9 + c5^2/c9^2 + c8^2/c9^2 = width^2/c9^2
+   *     c9^2 = width^2/(alpha[1]^2+alpha[4]^2+alpha[7]^2)
+   *
+   * Now, the unit normal is the cross product of two vectors lying in the plane
+   *
+   * Lets use v1 = (0,0)->(0,1) and v2 = (0,0)->(height/width,0) (this is the
+   * vector to the other corner)
+   *
+   * v1 = (c2+c3)     v2 = ( (height/width)c1+c3 )
+   *      (c5+c6)          ( (height/width)c4+c6 )
+   *      (c8+c9)          ( (height/width)c8+c9 )
+   *
+   * v1 x v2 = ( (c5+c6)*((height/width)c8+c9) - (c8+c9)*((height/width)c4+c6) )
+   *           ( (c8+c9)*((height/width)c1+c3) - (c2+c3)*((height/width)c8+c9) )
+   *           ( (c2+c3)*((height/width)c4+c6) - (c5+c6)*((height/width)c1+c3) )
+   *
+   *
+   *
+   *     
+   */
+  return NULL;
 }
 
 void Rectangle2D::compute_alpha() {

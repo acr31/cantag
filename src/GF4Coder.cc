@@ -6,6 +6,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.1  2004/01/25 14:53:35  acr31
+ * moved over to autoconf/automake build system
+ *
  * Revision 1.4  2004/01/23 22:35:04  acr31
  * changed coder to use unsigned long long
  *
@@ -21,7 +24,7 @@
  *
  */
 
-#include "GF4Coder.hh"
+#include <GF4Coder.hh>
 
 #undef FILENAME
 #define FILENAME "GF4Coder.cc"
