@@ -211,7 +211,7 @@ template<int SIZE> LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* MatrixTag<SIZE>::GetT
   TransformQuadTangle(quad,transform);
 
   LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = new LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>();
-  lobj->LoadTransform(transform,1,camera);
+  lobj->LoadTransform(transform,2,camera);
   
   return lobj;
 }
