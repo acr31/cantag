@@ -52,7 +52,13 @@ public:
 
   int Save(Socket& socket) const;
   ShapeTree(Socket& socket);
-  bool Check(const ContourTree& contour) const;
+
+  /**
+   * Check to see if all the shapes in this shape tree match valid contour.
+   * If check_negative is true we also check all the remaining contours to see
+   * that no shape will match them
+   */
+  bool Check(const ContourTree& contour, bool check_negative) const;
 };
 
 template<class S> ShapeTree<S>::ShapeTree(const ContourTree::Contour& contour) : m_root_node() {
@@ -90,12 +96,13 @@ template<class S> bool ShapeTree<S>::Node::Check(std::set<const ContourTree::Con
   return true;
 }
 
-template<class S> bool ShapeTree<S>::Check(const ContourTree& contour) const {
+template<class S> bool ShapeTree<S>::Check(const ContourTree& contour, bool check_negative) const {
   // walk over the shape tree checking that the contour stored matches the shape using the error of fit function
   // add the contour pointer to a set of checked contours.
   std::set<const ContourTree::Contour*> checked;
   if (!m_root_node.Check(checked)) return false;
 
+  if (!check_negative) return true;
   // then we need to check that all the remaining contours do not match a shape
   return CheckUnmatchedContours(contour.GetRootContour(),checked);
 }

@@ -78,19 +78,19 @@ public:
   void DecodeTags(WorldState<PAYLOAD_SIZE>* worldstate,  const Camera& camera, const Image& image) const;
 
   /**
-   * Check that all the nodes in the shapetree are correctly
-   * represented in the worldstate.  This means that all nodes
-   * corresponding to located objects should be checked to see that
-   * they do indeed correspond (by calling CheckTransform).  All nodes
-   * not corresponding to located objects should be checked to see
-   * that they cannot be interprested to do so.
+   * Check that all the nodes in the shapetree are correctly represented in
+   * the worldstate.  This means that all nodes corresponding to located
+   * objects should be checked to see that they do indeed correspond (by
+   * calling CheckTransform).  If check_negative is true then all nodes not
+   * corresponding to located objects are checked to see that they
+   * cannot be interprested to do so.
    */
-  bool CheckGraph(typename ShapeTree<C>::Node* root_node, const WorldState<PAYLOAD_SIZE>* worldstate, const Camera& camera, const Image& image) const;
+  bool CheckGraph(typename ShapeTree<C>::Node* root_node, const WorldState<PAYLOAD_SIZE>* worldstate, const Camera& camera, const Image& image, bool check_negative) const;
 
   /**
    * Check that all the locatedobjects in the worldstate have correctly interpreted data codes
    */
-  bool CheckTags(WorldState<PAYLOAD_SIZE>* worldstate,  const Camera& camera, const Image& image) const;
+  bool CheckTags(WorldState<PAYLOAD_SIZE>* worldstate,  const Camera& camera, const Image& image, bool check_negative) const;
 
 };
 
@@ -128,27 +128,29 @@ template<class C, int PAYLOAD_SIZE> void Tag<C,PAYLOAD_SIZE>::DecodeTags(WorldSt
 /**
  * \todo assumes that everything in temp_store is in the worldstate and vice versa
  */
-template<class C, int PAYLOAD_SIZE> bool Tag<C,PAYLOAD_SIZE>::CheckGraph(typename ShapeTree<C>::Node* root_node, const WorldState<PAYLOAD_SIZE>* worldstate, const Camera& camera, const Image& image) const {
+template<class C, int PAYLOAD_SIZE> bool Tag<C,PAYLOAD_SIZE>::CheckGraph(typename ShapeTree<C>::Node* root_node, const WorldState<PAYLOAD_SIZE>* worldstate, const Camera& camera, const Image& image, bool check_negative) const {
   if (temp_store.count(root_node) == 1) {
     if (!CheckTransform(temp_store[root_node],root_node)) return false;
   }
-  else {
+  else if (check_negative) {
     LocatedObject<PAYLOAD_SIZE>* lobj = GetTransform(root_node,camera,image);
     if (lobj) { delete lobj; return false; }
   }
   for(typename std::vector<typename ShapeTree<C>::Node* >::iterator step = root_node->children.begin(); 
       step != root_node->children.end(); 
       step++) {
-    if (!CheckGraph(*step,worldstate, camera,image)) return false;
+    if (!CheckGraph(*step,worldstate, camera,image,check_negative)) return false;
   }
   return true;
 }
 
-template<class C, int PAYLOAD_SIZE> bool Tag<C,PAYLOAD_SIZE>::CheckTags(WorldState<PAYLOAD_SIZE>* worldstate,  const Camera& camera, const Image& image) const {
+template<class C, int PAYLOAD_SIZE> bool Tag<C,PAYLOAD_SIZE>::CheckTags(WorldState<PAYLOAD_SIZE>* worldstate,  const Camera& camera, const Image& image,bool check_negative) const {
   for(typename std::vector<LocatedObject<PAYLOAD_SIZE>*>::const_iterator i = worldstate->GetNodes().begin();
       i != worldstate->GetNodes().end();
       ++i) {
-    if (!CheckDecode(*i,camera,image)) return false;
+      if (check_negative || (*i)->tag_codes.size() > 0) {
+	  if (!CheckDecode(*i,camera,image)) return false;
+      }
   }
   return true;
 }

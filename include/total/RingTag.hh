@@ -36,7 +36,7 @@ static int debug_image_counter = 0;
  *
  * \todo regression test with gl harness
  */
-#define READING_COUNT 10
+#define READING_COUNT 20
 #define MAX_CHILD_DISTANCE 10
 template<int RING_COUNT, int SECTOR_COUNT>
 class RingTag : public virtual Tag< ShapeChain<Ellipse>, RING_COUNT*SECTOR_COUNT >, 
