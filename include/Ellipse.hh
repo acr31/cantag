@@ -46,10 +46,10 @@ public:
   float GetError(const float* points, int numpoints) const;
   float GetErrorAlgebraic(const float* points, int count) const;
   float GetErrorGradient(const float* points, int count) const;
-  float GetErrorGetErrorNakagawa(const float* points, int numpoints) const;
-  float GetErrorGetErrorSafaeeRad(const float* points, int numpoints) const;
-  float GetErrorGetErrorSafaeeRad2(const float* points, int numpoints) const;
-  float GetErrorGetErrorStricker(const float* points, int numpoints) const;
+  float GetErrorNakagawa(const float* points, int numpoints) const;
+  float GetErrorSafaeeRad(const float* points, int numpoints) const;
+  float GetErrorSafaeeRad2(const float* points, int numpoints) const;
+  float GetErrorStricker(const float* points, int numpoints) const;
 
   virtual void GetTransform(float transform1[16], float transform2[16]);
 

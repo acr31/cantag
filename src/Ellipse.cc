@@ -270,10 +270,11 @@ float Ellipse::GetErrorNakagawa(const float* points, int count) const {
     float sint = sin(theta);
     float cost = cos(theta);
 
+    std::cout << a << " " << b << " " << theta << " " << y0 << " " << y0 << std::endl;
 
     float rtsub1 = -sint+k*cost;
     float rtsub2 = cost+k*sint;
-    float rt = sqrt(a*a*ixrtsub1*ixrtsub1 + b*b*ixrtsub2*ixrtsub2);
+    float rt = sqrt(a*a*rtsub1*rtsub1 + b*b*rtsub2*rtsub2);
 
     // compute ix
     float ix;
@@ -328,7 +329,7 @@ float Ellipse::GetErrorSafaeeRad(const float* points, int count) const {
 
     float rtsub1 = -sint+k*cost;
     float rtsub2 = cost+k*sint;
-    float rt = sqrt(a*a*ixrtsub1*ixrtsub1 + b*b*ixrtsub2*ixrtsub2);
+    float rt = sqrt(a*a*rtsub1*rtsub1 + b*b*rtsub2*rtsub2);
 
     // compute ix
     float ix;
@@ -382,7 +383,7 @@ float Ellipse::GetErrorSafaeeRad2(const float* points, int count) const {
 
     float rtsub1 = -sint+k*cost;
     float rtsub2 = cost+k*sint;
-    float rt = sqrt(a*a*ixrtsub1*ixrtsub1 + b*b*ixrtsub2*ixrtsub2);
+    float rt = sqrt(a*a*rtsub1*rtsub1 + b*b*rtsub2*rtsub2);
 
     // compute ix
     float ix;
@@ -420,7 +421,7 @@ float Ellipse::GetErrorStricker(const float* points, int count) const {
   float a = l.GetWidth();
   float b = l.GetHeight();
   float x0 = l.GetX0();
-  float y0 = l.GetY();
+  float y0 = l.GetY0();
   float theta = l.GetAngle();
 
   float c = sqrt(a*a-b*b);
@@ -431,6 +432,7 @@ float Ellipse::GetErrorStricker(const float* points, int count) const {
   float f2x = x0 - c*cos(theta);
   float f2y = x0 - c*sin(theta);
   
+  float total =0;
   for(int pt=0;pt<count*2;pt+=2) {
     float x = points[pt];
     float y = points[pt+1];
