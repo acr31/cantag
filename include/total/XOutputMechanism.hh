@@ -27,6 +27,7 @@ private:
   XShmSegmentInfo m_shminfo;
   XImage* m_image;
   const Camera& m_camera;
+  Colormap m_colormap;
 
   XWindowAttributes m_windowAttributes;
   int m_width;
@@ -39,6 +40,15 @@ private:
   bool m_mapped;
   bool m_windowgot;
   bool m_displaygot;
+  bool m_colormapgot;
+
+  int m_redbits;
+  int m_bluebits;
+  int m_greenbits;
+  int m_redshift;
+  int m_blueshift;
+  int m_greenshift;
+
   void FromContourTree(const ContourTree::Contour* contour);
   template<class S> void FromShapeTree(Image& i, const typename ShapeTree<S>::Node* node);
 public:

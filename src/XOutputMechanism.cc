@@ -8,6 +8,9 @@ extern "C" {
 #include <sys/shm.h>
 }
 #include <iostream>
+
+#define XOUTPUT_DEBUG
+
 XOutputMechanism::XOutputMechanism(int width, int height, const Camera& camera) :
   m_image(NULL),
   m_width(width),
@@ -20,6 +23,7 @@ XOutputMechanism::XOutputMechanism(int width, int height, const Camera& camera) 
   m_mapped(false),
   m_windowgot(false),
   m_displaygot(false),
+  m_colormapgot(false),
   m_camera(camera)
 {
  
@@ -27,10 +31,8 @@ XOutputMechanism::XOutputMechanism(int width, int height, const Camera& camera) 
     throw "Failed to open display.\n";
   }
   m_displaygot = true;
-    // Get default colo
-  int blackColour = BlackPixel(m_display, DefaultScreen(m_display));
-  int whiteColour = WhitePixel(m_display, DefaultScreen(m_display));
 
+  int blackColour = BlackPixel(m_display, DefaultScreen(m_display));
   m_window = XCreateSimpleWindow(m_display, DefaultRootWindow(m_display), 0, 0, m_width, m_height, 0, blackColour, blackColour);
   m_windowgot = true;
   XStoreName(m_display, m_window, "TripOver");
@@ -42,8 +44,20 @@ XOutputMechanism::XOutputMechanism(int width, int height, const Camera& camera) 
   m_mapped = true;
   m_gc = XCreateGC(m_display, m_window, 0, 0);
   m_gcgot = true;
-  XSetForeground(m_display, m_gc, 0xFF);
+
   Visual* visual = DefaultVisualOfScreen(DefaultScreenOfDisplay(m_display));
+  
+  m_colormap = XCreateColormap(m_display,m_window,visual,0);
+  m_colormapgot = true;
+
+  XColor xc;
+  xc.red=0;
+  xc.green=65535;
+  xc.blue=0;
+  
+  int fgcol = XAllocColor(m_display,m_colormap,&xc);
+
+  XSetForeground(m_display, m_gc, xc.pixel);
   // Xshm stuff
   Status found = XShmQueryExtension(m_display);
   if (!found) {
@@ -75,6 +89,28 @@ XOutputMechanism::XOutputMechanism(int width, int height, const Camera& camera) 
   }
   m_xattached = true;
 
+  // work out the number of bits for each of rgb and where to shift them to
+  unsigned long red = m_image->red_mask;
+  m_redbits = 0;
+  m_redshift = 0;
+  while(! (red & 0x1) ) { m_redshift++; red >>= 1; }
+  while( red & 0x1 ) { m_redbits++; red >>= 1; }
+  unsigned long green = m_image->green_mask;
+  m_greenbits = 0;
+  m_greenshift = 0;
+  while(! (green & 0x1) ) { m_greenshift++; green >>= 1; }
+  while( green & 0x1 ) { m_greenbits++; green >>= 1; }
+  unsigned long blue = m_image->blue_mask;
+  m_bluebits = 0;
+  m_blueshift = 0;
+  while(! (blue & 0x1) ) { m_blueshift++; blue >>= 1; }
+  while( blue & 0x1 ) { m_bluebits++; blue >>= 1; }
+
+#ifdef XOUTPUT_DEBUG
+  PROGRESS("Red mask is " << m_image->red_mask << " = " << m_redbits << " shifted by " << m_redshift);
+  PROGRESS("Green mask is " << m_image->green_mask << " = " << m_greenbits << " shifted by " << m_greenshift);
+  PROGRESS("Blue mask is " << m_image->blue_mask << " = " << m_bluebits << " shifted by " << m_blueshift);
+#endif
 
   // Wait for MapNotify
   while (1) {
@@ -91,6 +127,7 @@ XOutputMechanism::~XOutputMechanism() {
   if (m_image) XDestroyImage(m_image);
   if (m_shmat) shmdt(m_shminfo.shmaddr);
   if (m_shmgot) shmctl(m_shminfo.shmid,IPC_RMID,0);
+  if (m_colormapgot) XFreeColormap(m_display,m_colormap);
   if (m_gcgot) XFreeGC(m_display,m_gc);
   if (m_mapped) XUnmapWindow(m_display,m_window);
   if (m_windowgot) XDestroyWindow(m_display,m_window);
@@ -98,17 +135,36 @@ XOutputMechanism::~XOutputMechanism() {
 }
 
 void XOutputMechanism::FromImageSource(const Image& image) {
+
   for (int y=0; y<m_height/2; ++y) {
     const unsigned char* pointer = image.GetRow(2*y);
+    char* destptr = m_image->data + m_image->bytes_per_line * y;
     for (int x=0; x<m_width/2; ++x) {
       unsigned char data = *pointer;
       pointer+=2;
-      unsigned char rPart = data >> 3;
-      unsigned char gPart = data >> 2;
-      unsigned char bPart = data >> 3;
       
-      unsigned long colourPixel = rPart<<11 | gPart<<5 | bPart;
-      XPutPixel(m_image,x,y,colourPixel);
+      unsigned long rPart = data;
+      int diff = m_redbits - 8;
+      rPart = diff > 0 ? (rPart << diff) : (rPart >> (-diff));
+      rPart <<= m_redshift;
+
+      unsigned long gPart = data;
+      diff = m_greenbits - 8;
+      gPart = diff > 0 ? (gPart << diff) : (gPart >> (-diff));
+      gPart <<= m_greenshift;
+
+      unsigned long bPart = data;
+      diff = m_bluebits - 8;
+      bPart = diff > 0 ? (bPart << diff) : (bPart >> (-diff));
+      bPart <<= m_blueshift;      
+
+      unsigned long value = rPart | gPart | bPart;
+      //      std::cout << (int)data<< " " << rPart << " " << gPart << " " << bPart << " " << (rPart|gPart|bPart) << std::endl;
+      for(int i=0;i<m_image->bits_per_pixel/8;++i) {
+	*destptr = value & 0xFF;
+	destptr++;
+	value>>=8;
+      }
     }
   }
 }
