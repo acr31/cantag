@@ -23,7 +23,7 @@
  * using the TripOriginal coding scheme with 2 sectors of checksum.
  */
 #if defined(HAVE_GMPXX_H) && defined(HAVELIB_GMP) && defined(HAVELIB_GMPXX)
-class TripTag : public RingTag<2,17,Ellipse>, private virtual TripOriginalCoder<34,2,2>, private virtual FullEllipseTransform {
+class TripTag : public RingTag<2,17,Ellipse>, protected virtual TripOriginalCoder<34,2,2>, private virtual FullEllipseTransform {
 public:
   TripTag();
 };
@@ -32,7 +32,7 @@ public:
  * Another tag using the same coding structure as a TRIP tag but with
  * the data sectors inside the target
  */
-class OuterRing : public RingTag<2,17,SimpleEllipse>, private virtual TripOriginalCoder<34,2,2>, private virtual FullEllipseTransform {
+class OuterRing : public RingTag<2,17,SimpleEllipse>, protected virtual TripOriginalCoder<34,2,2>, private virtual FullEllipseTransform {
 public:
   OuterRing();
 };
@@ -40,13 +40,13 @@ public:
 /**
  * A tag much like Rekimoto's Matrix Tag but using a Trip coding scheme
  */
-class MatrixSquare : public MatrixTag<6>,  private virtual TripOriginalCoder<36,3,2>, private virtual ProjectiveQuadTangleTransform {};
+class MatrixSquare : public MatrixTag<6>,  protected virtual TripOriginalCoder<36,3,2>, private virtual ProjectiveQuadTangleTransform {};
 
 /**
  * Another tag that uses the same coding structure as TRIP but with
  * the data sectors written on top of the bullseye ring
  */
-class SplitTarget : public RingTag<2,17,Ellipse>, private virtual TripOriginalCoder<34,2,2>, private virtual FullEllipseTransform {
+class SplitTarget : public RingTag<2,17,Ellipse>, protected virtual TripOriginalCoder<34,2,2>, private virtual FullEllipseTransform {
 public:
   SplitTarget();
 };
