@@ -434,32 +434,88 @@ void Image::DrawPolygon(float* points, int numpoints, unsigned char colour, unsi
 
 
 void Image::DrawFilledPolygon(int* points, int numpoints, unsigned char colour) {
-  DrawPolygon(points,numpoints,colour,1);
-  int cx = 0, cy=0;
-  for (int i=0;i<2*numpoints;i+=2) {
-    cx+=points[i];
-    cy+=points[i+1];
+  float fpoints[numpoints*2];
+  for(int i=0;i<numpoints*2;++i) {
+    fpoints[i] = points[i];
   }
-  cx /= numpoints;
-  cy /= numpoints;
-
-  SeedFill(cx,cy,colour);
+  ScanLineFill(fpoints,numpoints,colour);
 }
 
 
 void Image::DrawFilledPolygon(float* points, int numpoints, unsigned char colour) {
-  DrawPolygon(points,numpoints,colour,1);
-  float cx = 0, cy=0;
-  for (int i=0;i<2*numpoints;i+=2) {
-    cx+=points[i];
-    cy+=points[i+1];
-  }
-  cx /= numpoints;
-  cy /= numpoints;
-
-  SeedFill(Round(cx),Round(cy),colour);
+  ScanLineFill(points,numpoints,colour);
 }
 
+#include <iostream>
+void Image::ScanLineFill(float* points, int numpoints, unsigned char colour) {
+
+  // build the edge list
+  std::list<Edge*> edge_list;
+  for(int i=0;i<2*numpoints-2;i+=2) {
+    if (points[i+1] != points[i+3]) {
+      std::cout << "Adding " << points[i] << " " << points[i+1] << " " << points[i+2] << " " << points[i+3] << std::endl;
+      edge_list.push_back(new Edge(points[i],points[i+1],points[i+2],points[i+3]));
+    }
+  }
+  if (points[1] != points[2*numpoints-1]) {
+    std::cout << "Adding " << points[2*numpoints-2] << " " << points[2*numpoints-1] << " " << points[0] << " " << points[1] << std::endl;
+    edge_list.push_back(new Edge(points[2*numpoints-2],points[2*numpoints-1],points[0],points[1]));    
+  }
+  edge_list.sort(EdgePtrSort());
+  
+  
+  // initialise scanline
+  int scanline = edge_list.front()->miny;
+  
+  // initialise active edge list
+  std::list<Edge*> active_edges;
+
+  while(edge_list.size() > 0 || active_edges.size() > 0) {
+    // initialise parity
+    bool parity = false;
+    std::list<Edge*>::iterator i = edge_list.begin();
+    while( i != edge_list.end() && (*i)->miny == scanline ) {
+      active_edges.push_back(*i);
+      i = edge_list.erase(i);
+    }
+    active_edges.sort(EdgePtrSortX());
+    
+    // draw the current scan line
+    int currentx = active_edges.front()->intx;
+    std::list<Edge*>::iterator j = active_edges.begin();
+    while(j != active_edges.end()) {
+      if ( (*j)->intx == currentx ) {
+	parity ^= true;
+	++j;
+      }
+      else {
+	++currentx;
+      }
+      if (parity) {
+	DrawPixel(currentx,scanline,colour);
+      }
+    }
+    
+    // increment scanline
+    ++scanline;
+    
+    // remove edges with maxy == scanline from the active list
+    // update the x values for the others
+    for(std::list<Edge*>::iterator k = active_edges.begin(); k!=active_edges.end();) {
+      if ( (*k)->maxy == scanline ) {
+	delete *k;
+	k = active_edges.erase(k);
+      }
+      else {
+	Edge* val = *k;
+	val->x += val->invslope;
+	val->intx = Round(val->x);
+	++k;
+      }
+    }
+  }
+
+}
 
 /*
  * Recursive fill.  OK, so it's not pretty, but

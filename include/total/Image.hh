@@ -27,11 +27,6 @@ private:
 
   bool m_binary;
 
-  inline int Round(double d) const {
-    double t =(d+6755399441055744.0); 
-    return *(int*)&t;
-  }
-  
 public:
 
   /**
@@ -287,14 +282,14 @@ public:
    * on them.
    */
   inline void DrawCircle(float x0, float y0, int radius, unsigned char colour, unsigned int thickness) {
-    DrawEllipse(x0,y0,radius,radius,0,colour,thickness);
+    DrawEllipse(x0,y0,(float)radius,(float)radius,0,colour,thickness);
   }
 
   /**
    * Draw a filled circle centred on x0,y0
    */
   inline void DrawFilledCircle(int x0, int y0, int radius, unsigned char colour) {
-    DrawEllipse((float)x0,(float)y0,(float)radius,(float)radius,0,colour,-1);
+    DrawEllipse(x0,y0,radius,radius,0,colour,-1);
   }
 
   /**
@@ -401,7 +396,44 @@ private:
   int AdaptiveWidthStep(int moving_average,int* previous_line,unsigned int i, unsigned int j,unsigned int s, int t);
   void ellipse_polygon_approx(float* points, int startindex, int length, float xc, float yc, float width, float height,  float angle_radians, unsigned char color, int thickness, float start_angle);
   void Load(const char* filename);
+  void ScanLineFill(float* points,int numpoints,unsigned char colour);
 
+  static inline int Round(double d)  {
+    double t =(d+6755399441055744.0); 
+    return *(int*)&t;
+  }
+  
+  class Edge {
+  public:
+    int miny;
+    int maxy;
+    float x;
+    int intx;
+    float invslope;
+    
+    Edge(float x0,float y0, float x1, float y1) :
+      miny(Round(y0<=y1?y0:y1)),
+      maxy(Round(y0<=y1?y1:y0)),
+      x(y0<=y1?x0:x1),
+      intx(Round(x)),
+      invslope( (x0-x1)/(y0-y1) ) {}  
+    
+    bool operator<(const Edge& a) const {
+      return (miny == a.miny) ? intx < a.intx : miny < a.miny;
+    }
+  };
+
+  struct EdgePtrSort {
+    bool operator()(const Edge* a, const Edge* b) {
+      return (a->miny == b->miny) ? a->intx < b->intx : a->miny < b->miny;
+    }
+  };
+
+  struct EdgePtrSortX {
+    bool operator()(const Edge* a, const Edge* b) {
+      return a->intx < b->intx;
+    }
+  };
 };
 
 
