@@ -537,19 +537,22 @@ void Ellipse::GetTransform(float transform1[16], float transform2[16]) {
   }
 
   // we'd like our tag to still face the same way
-  if (eigvects[8] < 0) {
+  if (((eigvects[8] < 0) && (eigvals[8] > 0)) ||  
+      ((eigvects[8] > 0) && (eigvals[8] < 0))) {
     eigvects[2] *= -1;
     eigvects[5] *= -1;
     eigvects[8] *= -1;
   }
  
-  if (eigvects[4] < 0) {
+  if (((eigvects[4] < 0) && (eigvals[4] > 0)) ||
+      ((eigvects[4] > 0) && (eigvals[4] < 0))) {
     eigvects[1] *= -1;
     eigvects[4] *= -1;
     eigvects[7] *= -1;
   }
 
-  if (eigvects[0] < 0) {
+  if (((eigvects[0] < 0) && (eigvals[0] > 0)) ||
+      ((eigvects[0] > 0) && (eigvals[0] < 0))) {
     eigvects[0] *= -1;
     eigvects[3] *= -1;
     eigvects[6] *= -1;
