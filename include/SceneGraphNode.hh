@@ -34,6 +34,7 @@ private:
   std::vector<SceneGraphNode<S,PAYLOAD_SIZE>* > m_children;
 
 public:
+  
   SceneGraphNode(float* points, int numpoints);
   SceneGraphNode();
   ~SceneGraphNode();
@@ -81,6 +82,8 @@ public:
   inline std::vector<SceneGraphNode<S,PAYLOAD_SIZE>* >& GetChildren();
 
   inline const S& GetShapes() const;
+
+  SceneGraphNode<S,PAYLOAD_SIZE>* Check(const CyclicBitSet<PAYLOAD_SIZE>& code) const;
 };
 
 template<class S, int PAYLOAD_SIZE> SceneGraphNode<S,PAYLOAD_SIZE>::SceneGraphNode(float* points, int numpoints) : m_inspected(false), m_located(NULL), m_matcher(points,numpoints), m_children() {};
@@ -141,5 +144,22 @@ template<class S, int PAYLOAD_SIZE> const S& SceneGraphNode<S,PAYLOAD_SIZE>::Get
   return m_matcher;
 } 
 
+template<class S, int PAYLOAD_SIZE> SceneGraphNode<S,PAYLOAD_SIZE>* SceneGraphNode<S,PAYLOAD_SIZE>::Check(const CyclicBitSet<PAYLOAD_SIZE>& code) const {
+  if (node.IsLocated() &&
+      node.GetLocatedObject()->tag_code.get() &&
+      *(node.GetLocatedObject()->tag_code) == code) {
+    return this;
+  }
+    
+  for(typename std::vector<SceneGraphNode<S,PAYLOAD_SIZE>*>::iterator step = node.GetChildren().begin(); 
+      step != node.GetChildren().end(); 
+      step++) {
+    SceneGraphNode<S,PAYLOAD_SIZE>* res = (*step)->Check(code);
+    if (res != NULL) {
+      return res;
+    }
+  }
+  return NULL;
+}
 
 #endif//SCENE_GRAPH_NODE_GUARD
