@@ -37,6 +37,7 @@ public:
   };
 
 private:
+  int m_node_count;
   Node m_root_node;
   void walk_tree(Node* current, const ContourTree::Contour* contour);
   bool CheckUnmatchedContours(const ContourTree::Contour* contour, const std::set<const ContourTree::Contour*>& checked) const;
@@ -59,9 +60,10 @@ public:
    * that no shape will match them
    */
   bool Check(const ContourTree& contour, bool check_negative) const;
+  inline int GetNodeCount() const { return m_node_count;}
 };
 
-template<class S> ShapeTree<S>::ShapeTree(const ContourTree::Contour& contour) : m_root_node() {
+template<class S> ShapeTree<S>::ShapeTree(const ContourTree::Contour& contour) : m_root_node(),m_node_count(0) {
   walk_tree(&m_root_node,&contour);
 }
 
@@ -69,12 +71,14 @@ template<class S> void ShapeTree<S>::walk_tree(Node* current, const ContourTree:
   // try to match this contour using 
   if (!contour->weeded) {
     Node* n = new Node(contour);    
+    m_node_count++;
     if (n->matched.IsChainFitted()) {
       current->children.push_back(n);
       current = n;
     }
     else {
       delete n;
+      m_node_count--;
     }
   }
   for(std::vector<ContourTree::Contour*>::const_iterator i = contour->children.begin() ;
