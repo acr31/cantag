@@ -7,9 +7,10 @@
 
 #include "Tag.hh"
 #include "concentricellipse.hh"
+#include "posefromcircle.hh"
 
-//#define IMAGEDEBUG
-//#define TEXTDEBUG
+#define IMAGEDEBUG
+#define TEXTDEBUG
 
 #ifdef TEXTDEBUG
 #include <iostream>
@@ -61,11 +62,16 @@ public:
   static const double sector_angle = 2*CV_PI / (double)SECTOR_COUNT;
   static const double sync_angle = 2*CV_PI / (double)SYNC_COUNT;
 
+  TripOriginalTag(CvBox2D ellipse, long code, CvPoint3D32f normal,CvPoint3D32f centre ) : m_ellipse(ellipse), m_code(code), m_normal(normal), m_centre(centre) {};
+
   TripOriginalTag(CvBox2D ellipse, long code) : m_ellipse(ellipse), m_code(code) {};
 
   std::ostream& Print(std::ostream& s) const
   {
-    s << m_code;
+    s << "Trip Tag (original)" << std::endl << 
+      "Code: " << m_code << std::endl <<
+      "Normal: [" << m_normal.x << " " << m_normal.y << " " << m_normal.z << "]"<<std::endl <<
+      "Centre: [" << m_centre.x << " " << m_centre.y << " " << m_centre.z << "]"<<std::endl;
     return s;
   }
 
@@ -399,7 +405,12 @@ public:
       
       if (checksum == target_checksum) {
 	PROGRESS("Accepting checksum");
-	return new TripOriginalTag<RING_COUNT,SECTOR_COUNT,SYNC_COUNT,CHECKSUM_COUNT,TAG_SIZE_SCALE>(ellipse,code);	
+
+	CvPoint3D32f unit_normal;
+	CvPoint3D32f centre;
+	PoseFromCircle(ellipse,1.0,&unit_normal,&centre);
+
+	return new TripOriginalTag<RING_COUNT,SECTOR_COUNT,SYNC_COUNT,CHECKSUM_COUNT,TAG_SIZE_SCALE>(ellipse,code,unit_normal,centre);	
       }
       else {
 	PROGRESS("Checksum did not match - refusing tag");
@@ -418,6 +429,8 @@ public:
 private:
   CvBox2D m_ellipse;
   unsigned long m_code;
+  CvPoint3D32f m_normal;
+  CvPoint3D32f m_centre;
 
   void PlotSegment(IplImage *image,
 		   int sector, int ring,
