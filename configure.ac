@@ -81,4 +81,5 @@ Makefile
 src/Makefile
 tests/Makefile
 gltest/Makefile
+unit/Makefile
 ])

@@ -9,15 +9,13 @@
 #include <gmp.h>
 #include <bitset>
 #include <boost/operators.hpp>
-
+#include <CyclicBitSet.hh>
 /**
  * Arbitrary precision big integer using a given backing store.
  * Currently the destructor must be called to force the thing to flush
  * back to the backing store.
  *
  * \todo Change the implementation so it actually uses the backing store
- *
- * \todo regression test by comparing with results from normal ints
  */
 template<int SIZE>
 class BigInt : boost::operators< BigInt<SIZE> > {
