@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/02/01 14:26:24  acr31
+ * moved rectangle2d to quadtangle2d and refactored implmentations
+ *
  * Revision 1.4  2004/01/30 16:54:27  acr31
  * changed the Coder api -reimplemented various bits
  *
@@ -47,7 +50,6 @@ Ellipse2D::Ellipse2D(float width) {
 
   m_cost = 1;
   m_sint = 0;
-
 }
 
 Ellipse2D::Ellipse2D(float x, float y, float width, float height, float angle_radians) : 

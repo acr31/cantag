@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.1  2004/02/01 14:26:24  acr31
+ * moved rectangle2d to quadtangle2d and refactored implmentations
+ *
  * Revision 1.6  2004/01/31 16:48:10  acr31
  * moved some arguments to #defines
  *
@@ -43,21 +46,26 @@
  * added keywords for substitution
  *
  */
-#include <findellipses.hh>
+#include <EllipseFeatureDetector.hh>
 
 #include <opencv/cv.h>
 #include <cmath>
+#include <vector>
 
 #undef FILENAME
-#define FILENAME "findellipses.cc"
+#define FILENAME "EllipseFeatureDetector.cc"
 
 #define MAXLENGTH 1000
 #define MAXXDIFF 10
 #define MAXYDIFF 10
 #define MAXRATIODIFF 0.1
-#define MAXFITERROR 0.0001
+#define MAXFITERROR 0.1
 
-void FindEllipses(Image *image, std::vector<Ellipse2DChain*> *results) { 
+EllipseFeatureDetector::EllipseFeatureDetector() {};
+
+void EllipseFeatureDetector::FindFeatures(Image *image) { 
+  std::vector<Ellipse2DChain*> results;
+
   IplImage *copy = cvCloneImage(image); // the find contours process changes the image ;-(
   
 #ifdef IMAGE_DEBUG
@@ -113,7 +121,7 @@ void FindEllipses(Image *image, std::vector<Ellipse2DChain*> *results) {
 					  current.size.height,
 					  (float)current.angle/180*PI);
 
-	for(std::vector<Ellipse2DChain*>::const_iterator i = results->begin();i!= results->end();i++) {
+	for(std::vector<Ellipse2DChain*>::const_iterator i = results.begin();i!= results.end();i++) {
 	  if (compare(newbox,(*i)->current)) {
 	    PROGRESS("Found concentric partner");
 	    Ellipse2DChain *toadd = *i;
@@ -128,13 +136,13 @@ void FindEllipses(Image *image, std::vector<Ellipse2DChain*> *results) {
 
 	if (newbox != NULL) {
 	  PROGRESS("No concentric partner found");
-	  results->push_back(new Ellipse2DChain(newbox));
+	  results.push_back(new Ellipse2DChain(newbox));
 	}
       }
     }
   }
 #ifdef IMAGE_DEBUG
-  for(std::vector<Ellipse2DChain*>::const_iterator i = results->begin();i!=results->end();i++) {
+  for(std::vector<Ellipse2DChain*>::const_iterator i = results.begin();i!=results.end();i++) {
     Ellipse2DChain *tocheck = *i;
     if (tocheck->nextchain != NULL) {
       do {
@@ -157,9 +165,15 @@ void FindEllipses(Image *image, std::vector<Ellipse2DChain*> *results) {
   cvEndFindContours(&scanner);
   cvReleaseMemStorage(&store);
   cvReleaseImage(&copy);
+
+  for(std::vector<Ellipse2DChain*>::const_iterator step = results.begin();step!=results.end();step++) {
+    if ((*step)->nextchain != NULL) {
+      std::cout << Decode(image, (*step)->current) << std::endl;
+    }
+  }
 }
 
-static inline bool compare(Ellipse2D *e1, Ellipse2D *e2) {
+bool EllipseFeatureDetector::compare(Ellipse2D *e1, Ellipse2D *e2) {
   PROGRESS("Comparing ("<<e1->m_x<<","<<e1->m_y<<") ("<<e1->m_height<<","<<e1->m_width<<") with ("<<e2->m_x<<","<<e2->m_y<<") ("<<e2->m_height<<","<<e2->m_width<<")");
   PROGRESS("      XDIFF = " << (fabs(e1->m_x - e2->m_x)) << " (thresh " << MAXXDIFF<<")");
   PROGRESS("      YDIFF = " << (fabs(e1->m_y - e2->m_y)) << " (thresh " << MAXYDIFF<<")");
@@ -170,7 +184,7 @@ static inline bool compare(Ellipse2D *e1, Ellipse2D *e2) {
 		 e2->m_height/e2->m_width)) < MAXRATIODIFF);
 }
 
-static bool calcerror(CvBox2D *ellipse, CvPoint2D32f *fpoints, int count) {
+bool EllipseFeatureDetector::calcerror(CvBox2D *ellipse, CvPoint2D32f *fpoints, int count) {
   /* Work out the error for this fit.  This just tries every
      point on the contour with the ellipse function from the
      fitter and accumulates the difference 

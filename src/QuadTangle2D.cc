@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.1  2004/02/01 14:26:24  acr31
+ * moved rectangle2d to quadtangle2d and refactored implmentations
+ *
  * Revision 1.7  2004/01/30 16:54:27  acr31
  * changed the Coder api -reimplemented various bits
  *
@@ -35,14 +38,14 @@
  *
  *
  */
-#include <Rectangle2D.hh>
+#include <QuadTangle2D.hh>
 #include <GaussianElimination.hh>
 #include <Drawing.hh>
 #undef FILENAME
-#define FILENAME "Rectangle2D.cc"
+#define FILENAME "Quadtangle2D.cc"
 #define ZERO_DISTANCE 0.00001
 
-Rectangle2D::Rectangle2D(float width) {
+QuadTangle2D::QuadTangle2D(float width) {
   float diff = width/2;
   m_x0 = 0;
   m_y0 = 0;
@@ -58,7 +61,7 @@ Rectangle2D::Rectangle2D(float width) {
   compute_alpha();
 }
 
-Rectangle2D::Rectangle2D(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3) :
+QuadTangle2D::QuadTangle2D(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3) :
   m_x0(x0),
   m_y0(y0),
   m_x1(x1),
@@ -73,7 +76,7 @@ Rectangle2D::Rectangle2D(float x0, float y0,float x1, float y1,float x2, float y
   compute_alpha();
 };
 
-Rectangle2D::Rectangle2D(float* coords) :
+QuadTangle2D::QuadTangle2D(float* coords) :
   m_x0(coords[0]),
   m_y0(coords[1]),
   m_x1(coords[2]),
@@ -88,13 +91,13 @@ Rectangle2D::Rectangle2D(float* coords) :
   compute_alpha();
 };
 
-void Rectangle2D::ProjectPoint(float x, float y, float *projX, float *projY) const {
+void QuadTangle2D::ProjectPoint(float x, float y, float *projX, float *projY) const {
   *projX = (m_alpha[0]*x+m_alpha[1]*y+m_alpha[2])/(m_alpha[6]*x+m_alpha[7]*y+1);
   *projY = (m_alpha[3]*x+m_alpha[4]*y+m_alpha[5])/(m_alpha[6]*x+m_alpha[7]*y+1);
   PROGRESS("Projecting point ("<<x <<","<<y<<") on to ("<< *projX<<","<<*projY<<")");
 }
 
-Location3D* Rectangle2D::EstimatePose(float width, float height) {
+Location3D* QuadTangle2D::EstimatePose(float width, float height) {
   /*
    * We need to work out c1...c9 in order to be able to work out the
    * xyz positions for any u and v
@@ -132,7 +135,7 @@ Location3D* Rectangle2D::EstimatePose(float width, float height) {
   return NULL;
 }
 
-void Rectangle2D::compute_alpha() {
+void QuadTangle2D::compute_alpha() {
   PROGRESS(m_x0<<","<<m_y0<< " " <<m_x1<<","<<m_y1<< " " <<m_x2<<","<<m_y2<< " " <<m_x3<<","<<m_y3);
   /*
    * Taken from:
@@ -345,9 +348,9 @@ void Rectangle2D::compute_alpha() {
 }
 
 
-inline void Rectangle2D::compute_central_point() {
+inline void QuadTangle2D::compute_central_point() {
   /*
-   * Find the central point of this rectangle (A,B,C,D)
+   * Find the central point of this quadtangle (A,B,C,D)
    *
    *     A +--------------+ B
    *       |              |
@@ -401,7 +404,7 @@ inline void Rectangle2D::compute_central_point() {
 }
 
 
-float Rectangle2D::find_angle(float x, float y, float cx, float cy) {
+float QuadTangle2D::find_angle(float x, float y, float cx, float cy) {
   if ((x >= cx) && (y >= cy)) {
     return PI/2+ atan( (y-cy) / (x-cx) );
   }
@@ -416,13 +419,13 @@ float Rectangle2D::find_angle(float x, float y, float cx, float cy) {
   }
 }
 
-void Rectangle2D::swap( float *a, float *b) {
+void QuadTangle2D::swap( float *a, float *b) {
   float t = *a;
   *a = *b;
   *b = t;
 }
 
-void Rectangle2D::sort_points()
+void QuadTangle2D::sort_points()
 {
   // sort the points into clockwise order.
   float angles[4];
@@ -465,14 +468,14 @@ void Rectangle2D::sort_points()
 }
 
   
-Rectangle2DChain::Rectangle2DChain(Rectangle2D *cur) : current(cur), nextchain(NULL) {};
+QuadTangle2DChain::QuadTangle2DChain(QuadTangle2D *cur) : current(cur), nextchain(NULL) {};
 
-Rectangle2DChain::~Rectangle2DChain() {
+QuadTangle2DChain::~QuadTangle2DChain() {
   delete(current);
   if (nextchain!=NULL) { delete(nextchain); }
 }
 
-std::ostream& operator<<(std::ostream& s, const Rectangle2D& z) { 
+std::ostream& operator<<(std::ostream& s, const QuadTangle2D& z) { 
   s << "Position (" << z.m_x0 << "," << z.m_y0 << ") " << "(" << z.m_x1 << "," << z.m_y1 << ") " << "(" << z.m_x2 << "," <<z.m_y2 <<") " << "(" << z.m_x3 << "," << z.m_y3 << ")"; 
   return s;
 }

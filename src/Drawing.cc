@@ -36,8 +36,10 @@ polygon_approx(Image* image, CvPoint* points, int startindex, int length, float 
   for(int i=startindex;i<length+startindex;i++) {
     float cost = cos(currentAngle);
     float sint = sin(currentAngle);
+    // remember that y increases down from the top of the image so we
+    // do yc minus point rather than yc + point
     points[i] = cvPoint( cvRound(xc + a*cosa*cost + b*sina*sint) , 
-			 cvRound(yc - a*sina*cost + b*cosa*sint) );
+			 cvRound(yc + a*sina*cost - b*cosa*sint) );
     currentAngle += STEPSIZE;
   }
 
@@ -73,15 +75,6 @@ DrawEllipseArc(Image *image,
 	       float width, float height, 
 	       float angle_radians, 
 	       float start_angle, float end_angle, int color, int thickness) {
-  if (angle_radians >= PI) { angle_radians -= PI; }
-  
-  if (angle_radians >= PI/2) {
-    float t = width;
-    width = height;
-    height = t;
-    angle_radians -= PI/2;
-  }
-
   assert(thickness > 0 || thickness == -1);
 
   int numsteps = (int)(((float)(end_angle - start_angle))/STEPSIZE)+1; // add one to get to the edge of the sector
@@ -97,16 +90,6 @@ DrawEllipse(Image *image,
 	    float width, float height, 
 	    float angle_radians, 
 	    int color, int thickness) {
-
-  if (angle_radians >= PI) { angle_radians -= PI; }
-  
-  if (angle_radians >= PI/2) {
-    float t = width;
-    width = height;
-    height = t;
-    angle_radians -= PI/2;
-  }
-
   assert(thickness > 0 || thickness == -1);
 
   int numsteps = (int)(2*PI/STEPSIZE); 

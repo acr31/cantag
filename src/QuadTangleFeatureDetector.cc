@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.1  2004/02/01 14:26:24  acr31
+ * moved rectangle2d to quadtangle2d and refactored implmentations
+ *
  * Revision 1.5  2004/01/31 16:48:10  acr31
  * moved some arguments to #defines
  *
@@ -26,21 +29,25 @@
  *
  *
  */
-#include <findrectangles.hh>
+#include <QuadTangleFeatureDetector.hh>
 
 #include <opencv/cv.h>
 #include <cmath>
+#include <vector>
 
 #undef FILENAME
-#define FILENAME "findrectangles.cc"
+#define FILENAME "QuadTangleFeatureDetector.cc"
 
 #define MAXXDIFF 10
 #define MAXYDIFF 10
 
+QuadTangleFeatureDetector::QuadTangleFeatureDetector() {};
+
 /** 
  * Find rectangular white objects- for black tags you _must_ invert the image.
  */
-void FindRectangles(Image *image, std::vector<Rectangle2DChain*> *results) { 
+void QuadTangleFeatureDetector::FindFeatures(Image *image) {
+  std::vector<QuadTangle2DChain*> results;
   IplImage *copy = cvCloneImage(image);
 
 #ifdef IMAGE_DEBUG
@@ -75,19 +82,19 @@ void FindRectangles(Image *image, std::vector<Rectangle2DChain*> *results) {
 #endif	   
 
       cvCvtSeqToArray(result,points,cvSlice(0,4));
-      Rectangle2D *newbox = new Rectangle2D(points[0].x,points[0].y,
+      QuadTangle2D *newbox = new QuadTangle2D(points[0].x,points[0].y,
 					    points[1].x,points[1].y,
 					    points[2].x,points[2].y,
 					    points[3].x,points[3].y);
 					   
-      for(std::vector<Rectangle2DChain*>::const_iterator i = results->begin();i!= results->end();i++) {
+      for(std::vector<QuadTangle2DChain*>::const_iterator i = results.begin();i!= results.end();i++) {
 	if (compare(newbox,(*i)->current)) {
 	  PROGRESS("Found concentric partner");
-	  Rectangle2DChain *toadd = *i;
+	  QuadTangle2DChain *toadd = *i;
 	  while(toadd->nextchain != NULL) {
 	    toadd = toadd->nextchain;
 	  }
-	  toadd->nextchain = new Rectangle2DChain(newbox);
+	  toadd->nextchain = new QuadTangle2DChain(newbox);
 	  newbox = NULL;
 	  break;
 	}
@@ -95,13 +102,13 @@ void FindRectangles(Image *image, std::vector<Rectangle2DChain*> *results) {
       
       if (newbox != NULL) {
 	PROGRESS("No concentric partner found");
-	results->push_back(new Rectangle2DChain(newbox));
+	results.push_back(new QuadTangle2DChain(newbox));
       }
     }
   }
 #ifdef IMAGE_DEBUG
-  for(std::vector<Rectangle2DChain*>::const_iterator i = results->begin();i!=results->end();i++) {
-    Rectangle2DChain *tocheck = *i;
+  for(std::vector<QuadTangle2DChain*>::const_iterator i = results.begin();i!=results.end();i++) {
+    QuadTangle2DChain *tocheck = *i;
     if (tocheck->nextchain != NULL) {
       do {
 	cvLine(debug2,
@@ -139,9 +146,22 @@ void FindRectangles(Image *image, std::vector<Rectangle2DChain*> *results) {
   cvEndFindContours(&scanner);
   cvReleaseMemStorage(&store);
   cvReleaseImage(&copy);
+
+  for(std::vector<QuadTangle2DChain*>::const_iterator step = results.begin();step!=results.end();step++) {
+    QuadTangle2DChain *rect = *step;
+    do {
+      try {
+	std::cout << "Tag:" << Decode(image, rect->current ) << std::endl;
+      }
+      catch (...) {
+	std::cout << "Caught"<<std::endl;
+      }
+      rect = rect->nextchain;
+    } while (rect != NULL);
+  }
 }
 
-static bool compare(Rectangle2D *r1, Rectangle2D *r2)
+bool QuadTangleFeatureDetector::compare(QuadTangle2D *r1, QuadTangle2D *r2)
 {
   /*
     Check if the centre points of each rectangle are close
