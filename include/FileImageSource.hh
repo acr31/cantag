@@ -9,12 +9,18 @@
 #include <Image.hh>
 #include <ImageSource.hh>
 
+/**
+ * An image source that provides an image loaded from disk
+ */
 class FileImageSource : public ImageSource {
 private:
   Image* m_original;
   Image* m_buffer;
 
 public:
+  /**
+   * Create the image source, displaying the file given (jpg or bmp)
+   */ 
   FileImageSource(char* filename);
   virtual ~FileImageSource();
   virtual void Next();

@@ -75,6 +75,10 @@ public:
     cvResize(m_image,dest.m_image);
   }
 
+  /**
+   * Plot a point in the image with the given colour.  x and y are
+   * bounds checked; out of range values will be ignored.
+   */ 
   inline void DrawPixel(int x,int y, unsigned char colour) {
     if ((x >= 0) && (x < m_image->width) &&
 	(y >= 0) && (y < m_image->height)) {
@@ -82,34 +86,64 @@ public:
     }
   }
 
+  /**
+   * Plot a point in the image with the given colour.  x and y are
+   * bounds checked; out of range values will be ignored.
+   */ 
   inline void DrawPixel(unsigned int x,unsigned int y, unsigned char colour) {
     if ((x < m_image->width) &&
 	(y < m_image->height)) {
       ((uchar*)(m_image->imageData+m_image->widthStep*y))[x] = colour;
     }
   }
-
-
+  
+  /**
+   * Plot a point in the image with the given colour.  x and y are
+   * rounded to the nearest pixel and bounds checked; out of range
+   * values will be ignored.
+   */ 
   inline void DrawPixel(float x,float y, unsigned char colour) {
     DrawPixel(cvRound(x),cvRound(y),colour);
   }
    
+  /**
+   * Draw a line of given thickness from (x0,y0) to (x1,y1).  Current
+   * method is an antialiased line and thickess is ignored.
+   */
   inline void DrawLine(int x0,int y0, int x1,int y1, unsigned char colour, unsigned int thickness) {
     cvLineAA(m_image,cvPoint(x0,y0),cvPoint(x1,y1),colour,0);
   }
 
+  /**
+   * Round x0,y0,x1,y1 to the nearest integer and draw a line of given
+   * thickness from (x0,y0) to (x1,y1).  Current method is an
+   * antialiased line and thickess is ignored.
+   */
   inline void DrawLine(float x0,float y0, float x1,float y1, unsigned char colour, unsigned int thickness) {
     DrawLine(cvRound(x0),cvRound(y0),cvRound(x1),cvRound(y1),colour,thickness);
   }
   
+  /**
+   * Draw a point of given size at (x,y).
+   */
   inline void DrawPoint(int x,int y, unsigned char colour, unsigned int size) {
     cvLine(m_image,cvPoint(x,y),cvPoint(x,y),colour,size);
   }
 
+  /**
+   * Round x and y and draw a point at (x,y)
+   */
   inline void DrawPoint(float x,float y, unsigned char colour, unsigned int size) {
     DrawPoint(cvRound(x),cvRound(y),colour,size);
   }
 
+  /**
+   * Draw a polygon.  points is a pointer to an array of integers,
+   * which are x and y co-ordinates consecutivley. i.e. points[2i] is
+   * an x co-ordinate and points[2i+1] is the coresponding y
+   * co-ordinate.  The polygon is currently drawn antialiased and the
+   * thickness is ignored.
+   */
   inline void DrawPolygon(int* points, int numpoints, unsigned char colour, unsigned int thickness) {
     CvPoint pts[numpoints];
     for(int i=0;i<numpoints;i++) {
@@ -120,6 +154,10 @@ public:
     cvPolyLineAA(m_image,&ppts,npts,1,1,colour,0);
   }
 
+  /**
+   * Draw a polygon by rounding the elements of points to the nearest
+   * integer.
+   */
   inline void DrawPolygon(float* points, int numpoints, unsigned char colour, unsigned int thickness) {
     CvPoint pts[numpoints];
     for(int i=0;i<numpoints;i++) {
@@ -130,6 +168,12 @@ public:
     cvPolyLineAA(m_image,&ppts,npts,1,1,colour,0);
   }
   
+  /**
+   * Draw a filled polygon.  points is a pointer to an array of
+   * integers which are x and y co-ordinates consecutively
+   * i.e. points[2i] is x coord and points[2i+1] is corresponding y
+   * coord.
+   */
   inline void DrawFilledPolygon(int* points, int numpoints, unsigned char colour) {
     CvPoint pts[numpoints];
     for(int i=0;i<numpoints;i++) {
@@ -141,6 +185,10 @@ public:
     cvPolyLineAA(m_image,&ppts,npts,1,1,colour,0);
   }
 
+  /**
+   * Draw a filled polygon by rounding the given points to the nearest
+   * integer.
+   */
   inline void DrawFilledPolygon(float* points, int numpoints, unsigned char colour) {
     CvPoint pts[numpoints];
     for(int i=0;i<numpoints;i++) {
@@ -152,6 +200,9 @@ public:
     cvPolyLineAA(m_image,&ppts,npts,1,1,colour,0);
   }
 
+  /**
+   * Draw a quadtangle from (x0,y0) to (x1,y1) to (x2,y2) to (x3,y3).
+   */
   inline void DrawFilledQuadTangle(int x0, int y0,
 				   int x1, int y1,
 				   int x2, int y2,
@@ -163,34 +214,57 @@ public:
 		  x3,y3 };
     DrawFilledPolygon(pts,4,colour);
   }
-
+  
+  /**
+   * Save the current image to disk. The file type is inferred from
+   * the filename currently only bmp and jpg are supported.
+   */
   inline void Save(const char* filename) const {
     cvSaveImage(filename,m_image);
   }
 
+  /**
+   * Draw a circle centred on (x0,y0) with given radius.
+   */
   inline void DrawCircle(int x0, int y0, int radius, unsigned char colour, unsigned int thickness) {
     cvCircle(m_image,cvPoint(x0,y0),radius,colour,thickness);
   }
 
+  /**
+   * Round x0 and y0 to the nearest integer and draw a circle centered
+   * on them.
+   */
   inline void DrawCircle(float x0, float y0, int radius, unsigned char colour, unsigned int thickness) {
     DrawCircle(cvRound(x0),cvRound(y0),radius,colour,thickness);
   }
 
+  /**
+   * Draw a filled circle centred on x0,y0
+   */
   inline void DrawFilledCircle(int x0, int y0, int radius, unsigned char colour) {
-    //    cvCircle(m_image,cvPoint(x0,y0),radius,colour,-1);
     DrawSector(x0,y0,radius,0,2*PI,colour);
   }
 
+  /**
+   * Draw a filled circle centred on x0,y0, the radius is rounded to the nearest integer
+   */
   inline void DrawFilledCircle(int x0, int y0, float radius, unsigned char colour) {
-    //    DrawFilledCircle(x0,y0,cvRound(radius),colour);
     DrawSector(x0,y0,cvRound(radius),0,2*PI,colour);
   }
 
+  /**
+   * Draw a filled circle rounding x0,y0 and radius to the nearest integers
+   */
   inline void DrawFilledCircle(float x0, float y0, float radius, unsigned char colour) {
-    //    DrawFilledCircle(cvRound(x0),cvRound(y0),cvRound(radius),colour);
     DrawSector(cvRound(x0),cvRound(y0),cvRound(radius),0,2*PI,colour);
   }
 
+  /**
+   * Draw a sector of the circle centred on x0,y0 and radius. The
+   * sector starts at angle start_radians and ends at end_radians.
+   * Angles are measured from the horizontal, increasing in an
+   * anti-clockwise direction.
+   */
   inline void DrawSector(int x0, int y0, int radius, float start_radians, float end_radians, unsigned char colour) {
     int numsteps = (int)(100/fabs(start_radians - end_radians)*2*PI);
     CvPoint pts[numsteps+1];
@@ -205,17 +279,34 @@ public:
     cvPolyLineAA(m_image,&ppts,npts,1,1,colour,0);
   }
 
+  /**
+   * Round the radius to the nearest integer before drawing the sector.
+   */
   inline void DrawSector(int x0, int y0, float radius, float start_radians, float end_radians, unsigned char colour) {
     DrawSector(x0,y0,cvRound(radius),start_radians,end_radians,colour);
   }
 
+  /**
+   * Round x0,y0 and the radius to the nearest integer before drawing the sector.
+   */
   inline void DrawSector(float x0, float y0, float radius, float start_radians, float end_radians, unsigned char colour) {
     DrawSector(cvRound(x0),cvRound(y0),cvRound(radius),start_radians,end_radians,colour);
   }
-
+  
+  /**
+   * Return the width of the image
+   */
   inline int GetWidth() const { return m_image->width; }
+
+  /**
+   * Return the height of the image
+   */
   inline int GetHeight() const { return m_image->height; }
 
+  /**
+   * Set the image region of interest.  Various algorithms will apply
+   * only to this region.
+   */
   inline void SetROI(int x0, int y0, int x1, int y1) {
     assert(x0<x1 && y0<y1);
     cvSetImageROI(m_image,cvRect(x0,y0,x1-x0,y1-y0));

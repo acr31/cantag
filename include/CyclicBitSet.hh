@@ -5,12 +5,14 @@
 #ifndef CYCLIC_BIT_SET
 #define CYCLIC_BIT_SET
 
-
 #include <bitset>
 
 /**
  * A simple extension of the STL bitset that supports some cyclic
  * operations.
+ *
+ * \todo regression test test all the operations, copy constructor,
+ * and the additional methods.
  */
 template<int BIT_COUNT>
 class CyclicBitSet : std::bitset<BIT_COUNT> {

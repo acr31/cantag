@@ -13,6 +13,10 @@
 #include <Tag.hh>
 #include <CyclicBitSet.hh>
 
+/**
+ * An image source that synthesizes the view based on an OpenGL
+ * rendering of the tag.
+ */
 template<class TAG>
 class GLImageSource : public ImageSource {
 private:
@@ -28,6 +32,10 @@ private:
   typedef typename TAG::TagShapeType TagShapeType;  // we have to do this to convince the compiler to parse our code before it instantiates the templates
 
 public:
+  /**
+   * Create the image source.  It will create images of the given
+   * size, with a single tag carrying the given code.
+   */
   GLImageSource(int height, int width, CyclicBitSet<TAG::TagPayloadSize>& code, const TAG& t) : 
     m_height(height),
     m_width(width),
@@ -93,6 +101,7 @@ public:
     free(m_buffer);
   }
 
+
   Image* GetBuffer() {
     return &m_glimage;
   }
@@ -101,6 +110,13 @@ public:
     Next(0,M_PI,0,0,0,2);
   };
 
+  /**
+   * Update the buffer to contain a tag with the given rotations about
+   * the x,y, and z axes and the given central point.
+   *
+   * \todo find some way of incorporating the lighting and occlusion
+   * options.
+   */
   void Next(float x_radians, float y_radians, float z_radians, 
 	    float centre_x, float centre_y, float centre_z) {
 

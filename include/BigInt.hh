@@ -16,6 +16,8 @@
  * back to the backing store.
  *
  * \todo Change the implementation so it actually uses the backing store
+ *
+ * \todo regression test by comparing with results from normal ints
  */
 template<int SIZE>
 class BigInt : boost::operators< BigInt<SIZE> > {

@@ -18,8 +18,11 @@
  * CRC-12 = x^12+x^11+x^3+x^2+x+1
  * CRC-8  = x^8+x^7+x^6+x^4+x^2+1
  * CRC-4  = x^4+x^3+x^2+x+1
+ *
+ * \todo finish this one off.  
+ *
+ * \todo include in the coder regression testing
  */
-
 template<int PAYLOAD_SIZE, int CRC_SIZE,  
 	 typename boost::crc_basic<CRC_SIZE>::value_type TRUNC_POLY, 
 	 typename boost::crc_basic<CRC_SIZE>::value_type INIT_REM, 
@@ -27,9 +30,6 @@ template<int PAYLOAD_SIZE, int CRC_SIZE,
 	 bool  REFLECT_IN, 
 	 bool REFLECT_REM>
 class CRCCoder : public Coder<PAYLOAD_SIZE> {
-private:
-
-
 public:
   CRCCoder() {};
   

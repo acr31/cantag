@@ -5,27 +5,10 @@
  *
  * $Header$
  *
- * $Log$
- * Revision 1.1  2004/01/25 14:54:36  acr31
- * moved over to automake/autoconf build system
- *
- * Revision 1.4  2004/01/24 17:53:22  acr31
- * Extended TripOriginalCoder to deal with base 2 encodings.  MatrixTag
- * implementation now works.
- *
- * Revision 1.3  2004/01/23 11:49:54  acr31
- * Finished integrating the GF4 coder - I've ripped out the error correcting stuff for now and its just looking for a match but it doesn't seem to work.  I need to spend some time to understand the division and mod operations in the GF4Poly to progress
- *
- * Revision 1.2  2004/01/23 09:08:41  acr31
- * More work integrating the GF4 stuff with tripover
- *
- * Revision 1.1  2004/01/22 12:02:11  acr31
- * added parts of Ian Caulkins GF4 coding.  Fixed a bug in the weight function (should be +=2 not ++) Need to finish off GF4Coder so it actually does something
- *
- *
- *
  * This representation is good for an order 31 polynomial with GF4
  * co-efficients (2 bits each)
+ *
+ * \todo incorporate this representation in the general GF(2^s) stuff the cbc20 wrote
  */
 #include <string>
 
