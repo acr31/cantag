@@ -74,7 +74,7 @@ public:
 
   void GetTransform(float transform1[16], float transform2[16]);
 
-  /*
+  /**
    * We then build the transformation matrix that transforms the unit circle onto the ellipse
    *
    * This is a scale factor   ( width 0      0 0 )
