@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <tripover/Image.hh>
+#include <tripover/Camera.hh>
 /**
  * A class to fit points to a quadtangle and encapsulate the result
  *
@@ -33,7 +34,7 @@ public:
   QuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3);
   inline bool IsFitted() const { return m_fitted; }
   bool Compare(const QuadTangle& o) const;
-  void Draw(Image& image) const;
+  void Draw(Image& image, const Camera& camera) const;
   /*
    * Taken from:
    *
@@ -200,6 +201,7 @@ private:
   void swap(float *a, float *b);
   float find_angle(float x, float y, float cx, float cy);
 };
-
+#else
+class QuadTangle;
 
 #endif//QUADTANGLE_GUARD

@@ -231,3 +231,19 @@ void Camera::DrawEllipse(Image& image, const Ellipse& ellipse) const {
   float height = (ellipse.GetHeight()*m_intrinsic[4]);
   image.DrawEllipse(x0,y0,width*2,height*2,ellipse.GetAngle(),COLOUR_BLACK,2);
 }
+
+void Camera::DrawQuadTangle(Image& image, const QuadTangle& quadtangle) const {
+  float pts[] = { quadtangle.GetX0(),quadtangle.GetY0(),
+		  quadtangle.GetX1(),quadtangle.GetY1(),
+		  quadtangle.GetX2(),quadtangle.GetY2(),
+		  quadtangle.GetX3(),quadtangle.GetY3() };
+  for(int i=0;i<8;i+=2) {
+    pts[i] = pts[i] * m_intrinsic[0] + m_intrinsic[2];
+    pts[i+1] = pts[i+1] * m_intrinsic[4] + m_intrinsic[5];
+  }
+  image.DrawQuadTangle((int)pts[0],(int)pts[1],
+		       (int)pts[2],(int)pts[3],
+		       (int)pts[4],(int)pts[5],
+		       (int)pts[6],(int)pts[7],
+		       COLOUR_BLACK,2);
+}

@@ -6,6 +6,7 @@
 
 #include <tripover/Image.hh>
 #include <tripover/Ellipse.hh>
+#include <tripover/QuadTangle.hh>
 #include <vector>
 
 /**
@@ -117,6 +118,11 @@ public:
    * Draw this ellipse on the image given after removing the NPCF scale factors from it
    */
   void DrawEllipse(Image& image, const Ellipse& ellipse) const;
+
+  /**
+   * Draw this quadtangle on the image given after removing the NPCF scale factors from it.
+   */
+  void DrawQuadTangle(Image& image, const QuadTangle& qt) const;
 };
 #else
 class Camera;

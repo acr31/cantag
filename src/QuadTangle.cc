@@ -104,13 +104,10 @@ QuadTangle::QuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,
 }
 
 
-void QuadTangle::Draw(Image& image) const {
-  image.DrawQuadTangle(m_x0,m_y0,
-		       m_x1,m_y1,
-		       m_x2,m_y2,
-		       m_x3,m_y3,
-		       COLOUR_BLACK,
-		       1);
+void QuadTangle::Draw(Image& image,const Camera& camera) const {
+  if (m_fitted) {
+    camera.DrawQuadTangle(image,*this);
+  }
 }
 
 float dist(float x0, float y0, float x1, float y1) {
