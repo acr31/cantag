@@ -9,8 +9,8 @@ Camera::Camera() :
   m_extrinsic[3] = 0;    m_extrinsic[4] = 1;    m_extrinsic[5] = 0;  
   m_extrinsic[6] = 0;    m_extrinsic[7] = 0;    m_extrinsic[8] = 1;  
 
-  m_intrinsic[0] = 1;    m_intrinsic[1] = 0;    m_intrinsic[2] = 0;  
-  m_intrinsic[3] = 0;    m_intrinsic[4] = 1;    m_intrinsic[5] = 0;  
+  m_intrinsic[0] = 1;    m_intrinsic[1] = 0;    m_intrinsic[2] = 0.5;  
+  m_intrinsic[3] = 0;    m_intrinsic[4] = 1;    m_intrinsic[5] = 0.5;  
   m_intrinsic[6] = 0;    m_intrinsic[7] = 0;    m_intrinsic[8] = 1;  
 };
 

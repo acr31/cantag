@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/02/13 21:47:39  acr31
+ * work on ellipse fitting
+ *
  * Revision 1.3  2004/02/08 20:30:17  acr31
  * changes to interfaces to add the ImageFilter class
  *
@@ -135,11 +138,7 @@ void EllipseFeatureDetector::FindFeatures(Image *image) {
 	   with the parent ellipse then we accept them as
 	   concentric */
 
-	Ellipse2D *newbox = new Ellipse2D(current.center.x,
-					  current.center.y,
-					  current.size.width,
-					  current.size.height,
-					  (float)current.angle/180*PI);
+	Ellipse2D *newbox = &e2d;
 
 	for(std::vector<Ellipse2DChain*>::const_iterator i = results.begin();i!= results.end();i++) {
 	  if (compare(newbox,(*i)->current)) {

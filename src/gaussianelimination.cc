@@ -4,6 +4,9 @@
  *  $Header$
  *
  *  $Log$
+ *  Revision 1.5  2004/02/13 21:47:40  acr31
+ *  work on ellipse fitting
+ *
  *  Revision 1.4  2004/02/11 08:23:49  acr31
  *  *** empty log message ***
  *
@@ -66,6 +69,17 @@ static inline void swap_columns(double** vals, int c1, int c2) {
   double* p = vals[c1];
   vals[c1] = vals[c2];
   vals[c2] = p;
+}
+
+/**
+ * Swap the rows r1 and r2.
+ */
+static inline void swap_rows(double** vals, int r1, int r2,int size) {
+  for(int i=0;i<size;i++) {
+    double t = vals[i][r1];
+    vals[i][r1] = vals[i][r2];
+    vals[i][r2] = t;
+  }
 }
 
 /**
@@ -230,7 +244,7 @@ void invert_matrix(double** A, double** B, int size) {
 }
 
 /**
- * Takes a matrix A and a matrix B and returns inv(A)*B stored in A.
+ * Takes a matrix A and a matrix B and returns inv(A)*B stored in B.
  *
  * A and B be in column major format (array of arrays of columns) and
  * The parameter size is the size of the square matrix A, matrix B has
@@ -256,10 +270,9 @@ void predivide(double** A, double** B, int size, int cols) {
 #endif
 
     // swap the columns and the pointers accordingly
-    swap_columns(A,i,bestcolumn);
+    //swap_columns(A,i,bestcolumn);
 
-    // this is actually swapping the rows in B - which is what we want!
-    swap_columns(B,i,bestcolumn);
+    //    swap_rows(B,i,bestcolumn,cols);
     
 
     // scale row so that it has a one on the leading diagonal

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.10  2004/02/13 21:47:39  acr31
+ * work on ellipse fitting
+ *
  * Revision 1.9  2004/02/09 21:39:56  acr31
  * manual matrix stuff in ellipse fitter.  Added camera functions and a test.
  *
@@ -49,20 +52,89 @@
  *
  */
 #include <Ellipse2D.hh>
+#include <eigenvv.hh>
 
-Ellipse2D::Ellipse2D(float width) {
-  m_x = width/2;
-  m_y = width/2;
-  m_width = width;
-  m_height = width;
-  m_angle_radians = 0;
+#undef DECOMPOSE_DEBUG
+#define POSE_DEBUG
 
-  m_cost = 1;
-  m_sint = 0;
+Ellipse2D::Ellipse2D(float width) :
+  m_x(width/2),
+  m_y(width/2),
+  m_width(width),
+  m_height(width),
+  m_angle_radians(0)
+ {
+  ToGeneralConic();
+  ComputePose();
 }
 
-Ellipse2D::Ellipse2D(float a, float b, float c, float d, float e, float f) {
+Ellipse2D::Ellipse2D(float a, float b, float c, float d, float e, float f) :
+  m_a(a),
+  m_b(b),
+  m_c(c),
+  m_d(d),
+  m_e(e),
+  m_f(f) {  
+  FromGeneralConic();
+  ComputePose();
+}
 
+Ellipse2D::Ellipse2D(float x, float y, float width, float height, float angle_radians) :
+  m_x(x),
+  m_y(y),
+  m_width(width),
+  m_height(height),
+  m_angle_radians(angle_radians)
+ {
+  ToGeneralConic();
+  ComputePose();
+}
+
+void Ellipse2D::ProjectPoint(float angle_radians, float radius, float *projX, float *projY) const {
+  // work out where we want our point to be if our tag was a circle
+  // centred on the origin and then transform it with the transform
+  // matrix
+
+  float x = radius*cos(angle_radians);
+  float y = radius*sin(angle_radians);
+  float z = 1;
+
+  
+  *projX = m_transform[0]*x + m_transform[1]*y + m_transform[2]*z;
+  *projY = m_transform[3]*x + m_transform[4]*y + m_transform[5]*z;
+  float projZ = m_transform[6]*x + m_transform[7]*y + m_transform[8]*z;
+  
+  // now do an idealised perspective projection to get back to the image
+  *projX /= projZ;
+  *projY /= projZ;
+  
+  PROGRESS("Projecting point radius "<<radius<<" angle "<<angle_radians<<" on to ("<< *projX <<","<< *projY <<")");
+}
+
+void Ellipse2D::ToGeneralConic() {
+  float sintheta = sin(m_angle_radians);
+  float costheta = cos(m_angle_radians);
+  float x0 = m_x;
+  float y0 = m_y;
+  float asq = m_width * m_width * 0.25;
+  float bsq = m_height * m_height *0.25;
+
+  float sinthetasq = sintheta*sintheta;
+  float costhetasq = costheta*costheta;
+  
+  float x0sq = x0*x0;
+  float y0sq = y0*y0;
+
+  float m_a = 1/asq*sinthetasq + 1/bsq*costhetasq;
+  float m_b = 2/asq*sintheta*costheta - 2/bsq*sintheta*costheta;
+  float m_c = 1/asq*costhetasq + 1/bsq*sinthetasq;
+  float m_d = -2/asq*sinthetasq*x0 - 2/asq*sintheta*costheta*y0 + 2/bsq*sintheta*costheta*y0 - 2/bsq*costhetasq*x0;
+  float m_e = -2/asq*sintheta*x0*costheta - 2/asq*costhetasq*y0 - 2/bsq*sinthetasq*y0 + 2/bsq*sintheta*x0*costheta;
+  float m_f = 1/asq*sinthetasq*x0sq + 2/asq*sintheta*x0*costheta*y0 + 1/asq*costhetasq*y0sq + 1/bsq*sinthetasq*y0sq - 2/bsq*sintheta*x0*costheta*y0 + 1/bsq*costhetasq*x0sq-1;
+}
+
+
+void Ellipse2D::FromGeneralConic() { 
   /*
     NOTES ON HOW TO EXTRACT ELLIPSE DETAILS FROM EQNS OF A CONIC SECTION
     (See The Geometry Toolbox for graphics and modelling by Farin and Hansford)
@@ -73,10 +145,12 @@ Ellipse2D::Ellipse2D(float a, float b, float c, float d, float e, float f) {
     with the constraint that
       b**2 - 4ac < 0
   */
-  float disc = b*b - 4*a*c;
+  float disc = m_b*m_b - 4*m_a*m_c;
+
+#ifdef DECOMPOSE_DEBUG
   if (disc >= 0)
     std::cerr << "Constraint Error: this is not an ellipse" << std::endl;
-
+#endif
 
   /*   
     we can re-write the conic equation in vector form as:
@@ -118,10 +192,13 @@ Ellipse2D::Ellipse2D(float a, float b, float c, float d, float e, float f) {
 	            ( 2ae - bd )
   */
 
-  m_x = (2*c*d - b*e) / disc;
-  m_y = (2*a*e - b*d) / disc;
+  m_x = (2*m_c*m_d - m_b*m_e) / disc;
+  m_y = (2*m_a*m_e - m_b*m_d) / disc;
 
-
+#ifdef DECOMPOSE_DEBUG
+  std::cout << "X= " << m_x<< std::endl;
+  std::cout << "Y= " << m_y<< std::endl;
+#endif
   /*    
     The major and minor axes scaling factors are the co-efficients of
     D.  D on its own is a scaling matrix so the vectors (1,0) and
@@ -144,10 +221,16 @@ Ellipse2D::Ellipse2D(float a, float b, float c, float d, float e, float f) {
 
       lambda = ( (a+c) +/- sqrt( (a+c)^2 - 4*ac + b^2 ) ) / 2
   */
-  float tmproot = sqrt( a*a - 2*a*c + c*c + b*b );
-  float lambda1 = a+c + tmproot/2;
-  float lambda2 = a+c - tmproot/2;
+  float tmproot = sqrt( m_a*m_a - 2*m_a*m_c + m_c*m_c + m_b*m_b );
+  float lambda1 = m_a+m_c + tmproot/2;
+  float lambda2 = m_a+m_c - tmproot/2;
   
+#ifdef DECOMPOSE_DEBUG
+  std::cout << "tmproot= " << tmproot << std::endl;
+  std::cout << "lambda1= " << lambda1 << std::endl;
+  std::cout << "lambda2= " << lambda2 << std::endl;
+#endif
+
   /*
     The overall scaling factor is the square-root of the radius of the
     original circle before we transformed it - this is sqrt(z)
@@ -161,7 +244,11 @@ Ellipse2D::Ellipse2D(float a, float b, float c, float d, float e, float f) {
      r = sqrt(z) = sqrt(v'Av - f)
   */
 
-  float scale_factor = sqrt( a*m_x*m_x + b*m_x*m_y + c*m_y*m_y - f);
+  float scale_factor = sqrt( -m_f + m_a*m_x*m_x + m_b*m_x*m_y + m_c*m_y*m_y );
+
+#ifdef DECOMPOSE_DEBUG
+  std::cout << "scale= " << scale_factor << std::endl;
+#endif
 
   /*
     The width and the height of the matrix are then straightforward
@@ -171,6 +258,11 @@ Ellipse2D::Ellipse2D(float a, float b, float c, float d, float e, float f) {
 
   m_width = lambda1 * scale_factor * 2;
   m_height = lambda2 * scale_factor * 2;
+
+#ifdef DECOMPOSE_DEBUG
+  std::cout << "width= " << m_width << std::endl;
+  std::cout << "height= " << m_height << std::endl;
+#endif
 
   /*
     And since A = R'DR, and R'R=I => R'=R^, => RA=DR, therefore
@@ -191,45 +283,186 @@ Ellipse2D::Ellipse2D(float a, float b, float c, float d, float e, float f) {
     convention that is the one that defines the angle)
   */
 
-  m_angle_radians = atan( (a-lambda1)/(0.5*b) );
-  m_cost = cos(m_angle_radians);
-  m_sint = sin(m_angle_radians);
+  m_angle_radians = atan( (m_a-lambda1)/(0.5*m_b) );
+
+#ifdef DECOMPOSE_DEBUG
+  std::cout << "angle= " << m_angle_radians << std::endl;
+#endif
 
   PROGRESS("Decomposed parameters:  centre ("<<m_x<<","<<m_y<<") size ("<<m_width<<"x"<<m_height<<") angle "<<m_angle_radians);
+
 }
 
-Ellipse2D::Ellipse2D(float x, float y, float width, float height, float angle_radians) : 
-  m_x(x),
-  m_y(y),
-  m_width(width),
-  m_height(height),
-  m_angle_radians(angle_radians) {
+void Ellipse2D::ComputePose() {
+#ifdef POSE_DEBUG
+  std::cout << "Ellipse params (a-f) are ["<<m_a<<","<<m_b<<","<<m_c<<","<<m_d<<","<<m_e<<","<<m_f<<"];"<<std::endl;
+#endif
+
+
+  double c[] = { m_a,   m_b/2, m_d/2,
+		 m_b/2, m_c,   m_e,
+		 m_d/2, m_e/2, m_f };
+
+  double eigvects[9];
+  double eigvals[9];
+
+  /**
+   * Solve eigenvectors of ( m_a     m_2/b    m_d/2 )
+   *                       ( m_b/2   m_c      m_e   )
+   *                       ( m_d/2   m_e/2    m_f   )
+   */
+  eigensolve(m_a,m_b/2,m_d/2,m_c,m_e/2,m_f, eigvects, eigvals);
+
+#ifdef POSE_DEBUG
+  std::cout << "Eigen Vectors: " << eigvects[0] << " " << eigvects[1] << " " << eigvects[2] << std::endl;
+  std::cout << "               " << eigvects[3] << " " << eigvects[4] << " " << eigvects[5] << std::endl;
+  std::cout << "               " << eigvects[6] << " " << eigvects[7] << " " << eigvects[8] << std::endl;
+
+  std::cout << "Eigen Values: " << eigvals[0] << " " << eigvals[1] << " " << eigvals[2] << std::endl;
+  std::cout << "              " << eigvals[3] << " " << eigvals[4] << " " << eigvals[5] << std::endl;
+  std::cout << "              " << eigvals[6] << " " << eigvals[7] << " " << eigvals[8] << std::endl;
+#endif
+
+  // normalise the eigen vectors 
+
+  double dete1 = sqrt(eigvects[0]*eigvects[0] +
+		     eigvects[1]*eigvects[1] +
+		     eigvects[2]*eigvects[2]);
+  eigvects[0] /= dete1;
+  eigvects[3] /= dete1;
+  eigvects[6] /= dete1;
   
-  m_cost = cos(m_angle_radians);
-  m_sint = sin(m_angle_radians);
+  double dete2 = sqrt(eigvects[3]*eigvects[3] + 
+		     eigvects[4]*eigvects[4] +
+		     eigvects[5]*eigvects[5]);
+  eigvects[1] /= dete2;
+  eigvects[4] /= dete2;
+  eigvects[7] /= dete2;
+  
+  double dete3 = sqrt(eigvects[6]*eigvects[6] + 
+		     eigvects[7]*eigvects[7] + 
+		     eigvects[8]*eigvects[8]);
+  eigvects[2] /= dete3;
+  eigvects[5] /= dete3;
+  eigvects[8] /= dete3;
+
+#ifdef POSE_DEBUG
+  std::cout << "Normalised Eigen Vectors: " << eigvects[0] << " " << eigvects[1] << " " << eigvects[2] << std::endl;
+  std::cout << "                          " << eigvects[3] << " " << eigvects[4] << " " << eigvects[5] << std::endl;
+  std::cout << "                          " << eigvects[6] << " " << eigvects[7] << " " << eigvects[8] << std::endl;
+#endif
+
+
+  for(int i=0;i<4;i++) {
+    for(int j=1;j<3;j++) {
+      if (eigvals[j*4-4] > eigvals[j*4]) {
+	// swap the vector
+	for(int k=0;k<3;k++) {
+	  double t = eigvects[j-1+k*3];
+	  eigvects[j-1+k*3] = eigvects[j+k*3];
+	  eigvects[j+k*3] = t;	  
+	}
+
+	// swap the value
+	double t = eigvals[j*4-4];
+	eigvals[j*4-4] = eigvals[j*4];
+	eigvals[j*4]=t;
+      }
+    }
+  }
+
+#ifdef POSE_DEBUG
+  std::cout << "Rotation 1: " << eigvects[0] << " " << eigvects[1] << " " << eigvects[2] << std::endl;
+  std::cout << "            " << eigvects[3] << " " << eigvects[4] << " " << eigvects[5] << std::endl;
+  std::cout << "            " << eigvects[6] << " " << eigvects[7] << " " << eigvects[8] << std::endl;
+
+  std::cout << "Sorted Eigen Values: " << eigvals[0] << " " << eigvals[1] << " " << eigvals[2] << std::endl;
+  std::cout << "                     " << eigvals[3] << " " << eigvals[4] << " " << eigvals[5] << std::endl;
+  std::cout << "                     " << eigvals[6] << " " << eigvals[7] << " " << eigvals[8] << std::endl;
+#endif
+      
+
+  double tcos = ( eigvals[8] - eigvals[4] ) / ( eigvals[8] - eigvals[4]);
+  double tsin = ( eigvals[4] - eigvals[0] ) / ( eigvals[8] - eigvals[4]);
+
+  /*
+  if (fabs(cc) < 0.0001) {
+    cc = 0;
+  }
+  if (fabs(s) < 0.0001) {
+    s = 0;
+  }
+  */
+  tcos = sqrt(tcos);
+  tsin = sqrt(tsin);
+
+
+  float r2[] = { tcos, 0, tsin,
+		 0   , 1, 0,
+		 -tsin,0, tcos};
+
+#ifdef POSE_DEBUG  
+  std::cout << "Rotation 2: " << r2[0] << " " << r2[1] << " " << r2[2] << std::endl;
+  std::cout << "            " << r2[3] << " " << r2[4] << " " << r2[5] << std::endl;
+  std::cout << "            " << r2[6] << " " << r2[7] << " " << r2[8] << std::endl;
+#endif
+  
+  // multiply r1 and t2
+  for(int i=0;i<3;i++) {
+    for(int j=0;j<3;j++) {
+      m_transform[i*3+j] = 0;
+      for(int k=0;k<3;k++) {
+	m_transform[i*3+j] += eigvects[i*3+k] * r2[k*3+j];
+      }
+    }
+  }
+
+#ifdef POSE_DEBUG  
+  std::cout << "M_Transform: " << m_transform[0] << " " << m_transform[1] << " " << m_transform[2] << std::endl;
+  std::cout << "             " << m_transform[3] << " " << m_transform[4] << " " << m_transform[5] << std::endl;
+  std::cout << "             " << m_transform[6] << " " << m_transform[7] << " " << m_transform[8] << std::endl;
+#endif
+
+  // store the eigenvalues in the position field - we'll need them to
+  // work out the position so this is a good place to keep them
+  m_px = eigvals[0];
+  m_py = eigvals[4];
+  m_pz = eigvals[8];
+
 }
 
+void Ellipse2D::ComputePosition(double radius) {
+  float eig1 = m_px;
+  float eig2 = m_py;
+  float eig3 = m_pz;
 
-void Ellipse2D::ProjectPoint(float angle_radians, float radius, float *projX, float *projY) const {
-  float x = radius*cos(angle_radians);
-  float y = radius*sin(angle_radians);
+  float dist = -eig2*eig2*radius/eig1/eig3;
 
-  // scale to correct dimensions 
-  x*=m_width/2;
-  y*=m_height/2;
-  
-  // rotate to correct angle    
-  float ix = x*m_cost-y*m_sint;
-  float iy = x*m_sint+y*m_cost;
+  //if (fabs(dist) < 0.0001) { dist = 0.0; }
+  dist = sqrt(dist);
+#ifdef POSE_DEBUG  
+  std::cout << "Dist = " << dist << std::endl;
+#endif
 
-  // translate to the right origin
-  ix+=m_x;
-  iy+=m_y;
+  float alpha = (eig3-eig2)*(eig2-eig1)*dist*dist / eig2/eig2;
+  //  if (fabs(alpha) < 0.0001) { alpha = 0.0; }
+  alpha = sqrt(alpha);
+#ifdef POSE_DEBUG  
+  std::cout << "Alpha = " << alpha << std::endl;
+#endif
 
-  *projX = ix;
-  *projY = iy;
-  
-  PROGRESS("Projecting point radius "<<radius<<" angle "<<angle_radians<<" on to ("<< *projX <<","<< *projY <<")");
+  m_px = alpha * m_transform[0] + dist * m_transform[2];
+  m_py = alpha * m_transform[3] + dist * m_transform[5];
+  m_pz = alpha * m_transform[6] + dist * m_transform[8];
+
+  m_nx = m_transform[2];
+  m_ny = m_transform[5];
+  m_nz = m_transform[8];
+
+#ifdef POSE_DEBUG  
+  std::cout << "Pos: (" << m_px << "," << m_py << "," << m_pz << ")" <<std::endl;
+  std::cout << "Normal: ("<< m_nx << "," << m_ny << "," << m_nz << ")" <<std::endl;
+#endif
 }
 
 

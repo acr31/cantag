@@ -24,8 +24,7 @@ polygon_approx(Image* image, CvPoint* points, int startindex, int length, float 
    * opencv to render it for us
    */
 
-  CvPoint* ppoints[1];
-  ppoints[0] = points;
+  CvPoint* ppoints[1] = {points};
 
   float cosa = cos(angle_radians);
   float sina = sin(angle_radians);
@@ -59,8 +58,6 @@ polygon_approx(Image* image, CvPoint* points, int startindex, int length, float 
 	       1, // number of contours
 	       color);
   }
-
-
 }
 
 /**
