@@ -1,6 +1,6 @@
 #include <tripover/Config.hh>
 #include <tripover/Template.hh>
-
+#include <cassert>
 #include <cstring>
 #include <tripover/findtransform.hh>
 
@@ -56,7 +56,7 @@ float Template::Correlate(const Image& image, const float transform[16], const C
   float scalefactor = 1/(float)m_size;
   float subscalefactor = 1/(float)m_size/(float)m_subsample;
   
-  uchar readvalues[m_size*m_size];
+  unsigned char readvalues[m_size*m_size];
 
   for(int i=0;i<m_size;i++) {
     for(int j=0;j<m_size;j++) {
