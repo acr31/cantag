@@ -108,11 +108,12 @@ void Image::GlobalThreshold(const unsigned char threshold) {
       data_pointer++;
     }
   }
+  m_binary = true;
+
 #ifdef IMAGE_DEBUG
   Save("debug-globalthreshold.pnm");
 #endif
 
-  m_binary = true;
 }
 
 /**
