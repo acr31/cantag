@@ -12,6 +12,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.2  2004/02/03 16:25:10  acr31
+ * more work on template tags and some function signature changes
+ *
  * Revision 1.1  2004/02/01 14:26:48  acr31
  * Implementations for Matrixtag and ringtag
  *
@@ -84,17 +87,22 @@ MatrixTag::MatrixTag(int size) :
 
 MatrixTag::~MatrixTag() {}
 
-void MatrixTag::Draw2D(Image* image, const QuadTangle2D *l, unsigned long long code, int black, int white) {
+void MatrixTag::Draw2D(Image* image, unsigned long long code, int black, int white) {
+
+  QuadTangle2D l(0,0,
+		 image->width,0,
+		 image->width,image->height,
+		 0,image->height);
   PROGRESS("Drawing tag " <<
-	   "(" << l->m_x0 << "," << l->m_y0 << ") " <<
-	   "(" << l->m_x1 << "," << l->m_y1 << ") " <<
-	   "(" << l->m_x2 << "," << l->m_y2 << ") " <<
-	   "(" << l->m_x3 << "," << l->m_y3 << ")");
+	   "(" << l.m_x0 << "," << l.m_y0 << ") " <<
+	   "(" << l.m_x1 << "," << l.m_y1 << ") " <<
+	   "(" << l.m_x2 << "," << l.m_y2 << ") " <<
+	   "(" << l.m_x3 << "," << l.m_y3 << ")");
   DrawFilledQuadTangle(image,
-		       l->m_x0, l->m_y0,
-		       l->m_x1, l->m_y1,
-		       l->m_x2, l->m_y2,
-		       l->m_x3, l->m_y3,
+		       l.m_x0, l.m_y0,
+		       l.m_x1, l.m_y1,
+		       l.m_x2, l.m_y2,
+		       l.m_x3, l.m_y3,
 		       black);
 
   // now draw the code
@@ -104,10 +112,10 @@ void MatrixTag::Draw2D(Image* image, const QuadTangle2D *l, unsigned long long c
   float projX2, projY2;
   float projX3, projY3;
   for(int i=0;i<m_length;i++) {
-    l->ProjectPoint(m_cells_corner[2*i],m_cells_corner[2*i+1], &projX0, &projY0);
-    l->ProjectPoint(m_cells_corner[2*i]+m_cell_width,m_cells_corner[2*i+1], &projX1, &projY1);
-    l->ProjectPoint(m_cells_corner[2*i]+m_cell_width,m_cells_corner[2*i+1]+m_cell_width, &projX2, &projY2);
-    l->ProjectPoint(m_cells_corner[2*i],m_cells_corner[2*i+1]+m_cell_width, &projX3, &projY3);
+    l.ProjectPoint(m_cells_corner[2*i],m_cells_corner[2*i+1], &projX0, &projY0);
+    l.ProjectPoint(m_cells_corner[2*i]+m_cell_width,m_cells_corner[2*i+1], &projX1, &projY1);
+    l.ProjectPoint(m_cells_corner[2*i]+m_cell_width,m_cells_corner[2*i+1]+m_cell_width, &projX2, &projY2);
+    l.ProjectPoint(m_cells_corner[2*i],m_cells_corner[2*i+1]+m_cell_width, &projX3, &projY3);
     DrawFilledQuadTangle(image,
 			 (int)projX0, (int)projY0,
 			 (int)projX1, (int)projY1,

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/02/03 16:25:11  acr31
+ * more work on template tags and some function signature changes
+ *
  * Revision 1.2  2004/02/03 07:48:31  acr31
  * added template tag
  *
@@ -114,30 +117,31 @@ RingTag::~RingTag() {
   delete[] m_read_angles;
 }
 
-void RingTag::Draw2D(Image* image, const Ellipse2D *l, unsigned long long code, int black, int white) {
-  PROGRESS("Draw2D called for ellipse centre (" << l->m_x << "," << l->m_y<< "), size ("<<l->m_width<<","<<l->m_height<<"), code "<<code);
+void RingTag::Draw2D(Image* image,unsigned long long code, int black, int white) {
+  Ellipse2D l(image->width/2, image->height/2,image->width,image->height,0);
+  PROGRESS("Draw2D called for ellipse centre (" << l.m_x << "," << l.m_y<< "), size ("<<l.m_width<<","<<l.m_height<<"), code "<<code);
   
   // Work from the outside inwards
   
   if (m_bullseye_outer_radius > m_data_outer_radius) {
     PROGRESS("Drawing outer bullseye edge");
     DrawFilledEllipse(image, 
-		      l->m_x, 
-		      l->m_y,
-		      l->m_width*m_bullseye_outer_radius, 
-		      l->m_height*m_bullseye_outer_radius,
-		      l->m_angle_radians, 
+		      l.m_x, 
+		      l.m_y,
+		      l.m_width*m_bullseye_outer_radius, 
+		      l.m_height*m_bullseye_outer_radius,
+		      l.m_angle_radians, 
 		      black);
   }
   
   if (m_bullseye_inner_radius > m_data_outer_radius) {
     PROGRESS("Drawing inner bullseye edge");
     DrawFilledEllipse(image, 
-		      l->m_x, 
-		      l->m_y,
-		      l->m_width*m_bullseye_inner_radius, 
-		      l->m_height*m_bullseye_inner_radius,
-		      l->m_angle_radians, 
+		      l.m_x, 
+		      l.m_y,
+		      l.m_width*m_bullseye_inner_radius, 
+		      l.m_height*m_bullseye_inner_radius,
+		      l.m_angle_radians, 
 		      white);
   }
   
@@ -150,11 +154,11 @@ void RingTag::Draw2D(Image* image, const Ellipse2D *l, unsigned long long code, 
       int colour = ((working & (1<<i)) == (1<<i)) ? black : white;
       working >>= m_ring_count;
       DrawFilledEllipse(image,
-			l->m_x,
-			l->m_y,
-			l->m_width*m_data_ring_outer_radii[i],
-			l->m_height*m_data_ring_outer_radii[i],
-			l->m_angle_radians,
+			l.m_x,
+			l.m_y,
+			l.m_width*m_data_ring_outer_radii[i],
+			l.m_height*m_data_ring_outer_radii[i],
+			l.m_angle_radians,
 			m_sector_angles[j],
 			m_sector_angles[j+1],
 			colour);	
@@ -164,11 +168,11 @@ void RingTag::Draw2D(Image* image, const Ellipse2D *l, unsigned long long code, 
   PROGRESS("Blanking out inside of data rings");
   if (m_data_inner_radius != 0) {
     DrawFilledEllipse(image,
-		      l->m_x,
-		      l->m_y,
-		      l->m_width*m_data_inner_radius,
-		      l->m_height*m_data_inner_radius,
-		      l->m_angle_radians,
+		      l.m_x,
+		      l.m_y,
+		      l.m_width*m_data_inner_radius,
+		      l.m_height*m_data_inner_radius,
+		      l.m_angle_radians,
 		      (m_bullseye_inner_radius < m_data_inner_radius &&
 		       m_bullseye_outer_radius > m_data_inner_radius) ? black : white);
   }
@@ -177,22 +181,22 @@ void RingTag::Draw2D(Image* image, const Ellipse2D *l, unsigned long long code, 
   if (m_bullseye_outer_radius < m_data_inner_radius) {
     PROGRESS("Drawing outer bullseye edge");
     DrawFilledEllipse(image, 
-		      l->m_x, 
-		      l->m_y,
-		      l->m_width*m_bullseye_outer_radius, 
-		      l->m_height*m_bullseye_outer_radius,
-		      l->m_angle_radians, 
+		      l.m_x, 
+		      l.m_y,
+		      l.m_width*m_bullseye_outer_radius, 
+		      l.m_height*m_bullseye_outer_radius,
+		      l.m_angle_radians, 
 		      black);
   }
   
   if (m_bullseye_inner_radius < m_data_inner_radius) {
     PROGRESS("Drawing inner bullseye edge");	   
     DrawFilledEllipse(image, 
-		      l->m_x, 
-		      l->m_y,
-		      l->m_width*m_bullseye_inner_radius, 
-		      l->m_height*m_bullseye_inner_radius,
-		      l->m_angle_radians, 
+		      l.m_x, 
+		      l.m_y,
+		      l.m_width*m_bullseye_inner_radius, 
+		      l.m_height*m_bullseye_inner_radius,
+		      l.m_angle_radians, 
 		      white);
   }
 }

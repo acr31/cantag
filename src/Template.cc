@@ -1,9 +1,6 @@
 #include <Config.hh>
 #include <Template.hh>
 
-#undef FILENAME
-#define FILENAME "Template.cc"
-
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <cstring>
@@ -43,7 +40,7 @@ Template::Template(char* filename, int size=16,int subsample=4) :
   }
   cvReleaseImage(&dest);
 
-  calculate_mean_stddev(m_values,&m_stddev,&m_average);
+  calculate_mean_sigma(m_values,&m_sigma,&m_average);
 
 }
 
@@ -59,9 +56,10 @@ Template::~Template() {
 /**
  * Project each one of our points onto the quadtangle in the image to
  * sample the image value for that point.  Then calculate the
- * correlation coefficient
+ * correlation coefficient.  We need to try it against all four
+ * orientations of the template.
  */
-float Template::Correlate(Image* image, QuadTangle2D* q) {
+float Template::Correlate(Image* image, const QuadTangle2D* q) const {
   float scalefactor = 1/(float)m_size;
   float subscalefactor = 1/(float)m_size/(float)m_subsample;
   
@@ -83,26 +81,79 @@ float Template::Correlate(Image* image, QuadTangle2D* q) {
 	}
       }         
       currentvalue/=m_subsample*m_subsample;
-      readvalues[i*j]=(unsigned char)currentvalue;
+      readvalues[i*m_size+j]=(unsigned char)currentvalue;
     }
   }
 
-  float stddev;
-  float mean;
-  calculate_mean_stddev(readvalues,&stddev,&mean);
-  
-  float cross = 0;
-  for(int i=0;i<m_size*m_size;i++) {
-    cross += (m_values[i] - m_average)*(readvalues[i]-mean);
+  Image *d = cvCreateImage(cvSize(m_size,m_size),IPL_DEPTH_8U,1);
+  for(int i=0;i<m_size;i++) {
+    for(int j=0;j<m_size;j++) {
+      DrawPixel(d,i,j,readvalues[i*m_size+j]);
+    }
   }
+  cvSaveImage("debug-save.jpg",d);
+  cvReleaseImage(&d);
+
+  float sigma;
+  float mean;
+  calculate_mean_sigma(readvalues,&sigma,&mean);
   
-  cross /= m_stddev * stddev;
+  // we compare with all four orientations of the template
+  /**
+   *   +-----+   +-----+   +-----+   +-----+
+   *   | --> |   |   | |   |     |   | ^   | 
+   *   |     |   |   | |   |     |   | |   |
+   *   |     |   |   V |   | <-- |   | |   |
+   *   +-----+   +-----+   +-----+   +-----+
+   */
+  float cross0 = 0; 
+  float cross1 = 0;
+  float cross2 = 0;
+  float cross3 = 0;
+  for(int i=0;i<m_size;i++) {
+    for(int j=0;j<m_size;j++) {
+      cross0 += (m_values[i*m_size+j] - m_average)*(readvalues[i*m_size+j]-mean);
+      cross1 += (m_values[j*m_size+(m_size-i)] - m_average)*(readvalues[i*m_size+j]-mean);
+      cross2 += (m_values[(m_size-i)*m_size+(m_size-j)] - m_average)*(readvalues[i*m_size+j]-mean);
+      cross3 += (m_values[(m_size-j)*m_size+i] - m_average)*(readvalues[i*m_size+j]-mean);
+    }
+  }
+  PROGRESS("Orientation 1: "<< cross0);
+  PROGRESS("Orientation 2: "<< cross1);
+  PROGRESS("Orientation 3: "<< cross2);
+  PROGRESS("Orientation 4: "<< cross3);
+  
+  cross0 = fabs(cross0);
+  cross1 = fabs(cross1);
+  cross2 = fabs(cross2);
+  cross3 = fabs(cross3);
+
+  float cross;
+  if ((cross0 > cross1) &&
+      (cross0 > cross2) &&
+      (cross0 > cross3)) {
+    cross = cross0;
+  }
+  else if ((cross1 > cross0) &&
+	   (cross1 > cross2) &&
+	   (cross1 > cross3)) {
+    cross = cross1;
+  }
+  else if ((cross2 > cross0) &&
+	   (cross2 > cross1) &&
+	   (cross2 > cross3)) {
+    cross = cross2;
+  }
+  else {
+    cross = cross3;
+  }
+  cross /= m_sigma * sigma;
 
   return cross;
 
 }
 
-void Template::calculate_mean_stddev(unsigned char* values, float* stddev, float* mean) {
+void Template::calculate_mean_sigma(unsigned char* values, float* sigma, float* mean) const {
   *mean = 0;
   for(int i=0;i<m_size*m_size;i++) {
     *mean += (float)values[i];
@@ -110,31 +161,27 @@ void Template::calculate_mean_stddev(unsigned char* values, float* stddev, float
   *mean /= m_size*m_size;
 
   float diffsq = 0;
-  float diff = 0;
   for(int i=0;i<m_size*m_size;i++) {
     diffsq += (values[i]- *mean) * (values[i]- *mean);
-    diff   += (values[i]- *mean);
   }
   
-  *stddev = sqrt(( diffsq - ( diff * diff / (float)m_size / (float)m_size ) ) / (float)(m_size*m_size-1));
+  *sigma = sqrt(diffsq);
 }
 
-void Template::Draw2D(Image *image, const QuadTangle2D* l, int white, int black) {
+void Template::Draw2D(Image *image, int white, int black) {
 
-  for(int i=0;i<m_original->height;i++) {
-    float u = (float)i/(float)m_original->height;
-    float prevX;
-    float prevY;
-    for(int j=0;j<m_original->width;j++) {
-      float x;
-      float y;
-      float v = (float)j/(float)m_original->width;
-      l->ProjectPoint(u,v,&x,&y);
-      if (j!=0) {
-	cvLine(image,cvPoint(prevX,prevY),cvPoint(x,y),SampleImage(image,x,y));
-      }
-      prevX=x;
-      prevY=y;
+  int starty = 0;
+  int endy = image->height;
+  
+  int startx = 0;
+  int endx = image->width;
+  
+
+  for(int y=starty;y<endy;y++) {
+    float v = m_original->height- m_original->height*((float)y -starty)/endy;
+    for(int x=startx;x<endx;x++) {
+      float u = m_original->width- m_original->width*((float)x -startx)/endx;
+      DrawPixel(image,x,y,SampleImage(m_original,u,v));
     }
   }
 }

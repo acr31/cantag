@@ -3,6 +3,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/02/03 16:25:11  acr31
+ * more work on template tags and some function signature changes
+ *
  * Revision 1.2  2004/02/03 07:48:31  acr31
  * added template tag
  *
@@ -40,11 +43,35 @@ TemplateTag::~TemplateTag() {
 
 };
 
-void TemplateTag::Draw2D(Image* image, const QuadTangle2D *l, unsigned long long code, int black, int white) {
-  DrawFilledQuadTangle(image,l,black);
-  (*m_templates.begin())->Draw2D(image,l,black,white);
+void TemplateTag::Draw2D(Image* image, unsigned long long code, int black, int white) {
+  if (code > m_templates.size()) {
+    code =0;
+  }
+
+  DrawFilledQuadTangle(image,
+		       0,0,
+		       image->width,0,
+		       image->width,image->height,
+		       0,image->height,
+		       black);
+  (m_templates.at(code))->Draw2D(image,black,white);
 }
 
 unsigned long long TemplateTag::Decode(Image* image, const QuadTangle2D *l) {
-  return 0;
+  float best_val;
+  int best_index = -1;
+  int index =0;
+  
+  for(std::vector<Template*>::const_iterator i=m_templates.begin();i!=m_templates.end();i++) {
+    float val = (*i)->Correlate(image,l);
+    if ((best_index ==-1) ||
+	(best_val < val)) {
+      best_index = index;
+      best_val = val;
+    }
+    PROGRESS("Template "<<index<<" ("<<(*i)->m_filename<<") has correlation value "<<val);
+    index++;
+  }
+  PROGRESS("Best choice was template "<<best_index);
+  return best_index;
 }
