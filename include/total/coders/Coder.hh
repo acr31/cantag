@@ -5,6 +5,7 @@
 #ifndef CODER_GUARD
 #define CODER_GUARD
 
+#include <tripover/Config.hh>
 #include <tripover/CyclicBitSet.hh>
 
 template <int PAYLOAD_SIZE>

@@ -4,6 +4,7 @@
 
 #ifndef PARITY_CODER_GUARD
 #define PARITY_CODER_GUARD
+
 #include <tripover/Config.hh>
 #include <tripover/Coder.hh>
 #include <tripover/CyclicBitSet.hh>

@@ -6,6 +6,11 @@
 #define V4L_IMAGE_SOURCE_GUARD
 
 #include <tripover/Config.hh>
+
+#ifndef HAVE_LINUX_VIDEODEV_H
+#error This version has been configured without Video4Linux support
+#endif
+
 #include <tripover/ImageSource.hh>
 
 extern "C" {

@@ -19,119 +19,59 @@ AC_ARG_ENABLE([text-debug],
 	AC_DEFINE([TEXT_DEBUG],[],[enable printing of debug information]),
 	[])
 	
+AC_DEFUN([TRIPOVER_CHECK_HEADER],
+         [AC_CHECK_HEADER([$1],
+                         [AC_DEFINE([$2],[],[Define this to 1 if you have the <$1> header file])
+                          $3=yes],
+			 [$3=no],[$4])
+          AM_CONDITIONAL([$2], [test X@S|@$3 = Xyes])])
+
+AC_DEFUN([TRIPOVER_CHECK_LIB],
+         [AC_CHECK_LIB([$1],[$2],
+	               [LIBS="-l$1 $LIBS"
+                        AC_DEFINE([$3],[],[Define this to 1 if you have the lib$1.so library file])
+                        $4=yes],
+                       [$4=no],[$5])
+          AM_CONDITIONAL([$3], [test X@S|@$4 = Xyes])])
 
 dnl Checks for header files.
 AC_CHECK_HEADER(opencv/cv.h,
-	[],
-	[AC_MSG_ERROR([opencv/cv.h not found in include path])])
-
+ 	[],
+ 	[AC_MSG_ERROR([opencv/cv.h not found in include path])])
+ 
 AC_CHECK_HEADER(opencv/highgui.h,
         [],
         [AC_MSG_ERROR([opencv/highgui.h not found in include path])])
 
-AC_CHECK_HEADER(GL/gl.h,
-	[],
-	[])
-
-AC_CHECK_HEADER(GL/osmesa.h,
-	[],
-	[])
-
-AC_CHECK_HEADER(boost/random.hpp,
-	[AC_DEFINE([HAVE_BOOST_RANDOM],[],[Have boost random.hpp])
-         AM_CONDITIONAL(BUILD_RANDOM_INCLUDE,true)],
-	[AM_CONDITIONAL(BUILD_RANDOM_INCLUDE,false)
-         AC_MSG_NOTICE([boost/random.hh not found in include path])])
-AC_CHECK_HEADER(boost/test/unit_test.hpp,
-	[AM_CONDITIONAL(BUILD_TEST_FRAMEWORK_INCLUDE,true)],
-	[AM_CONDITIONAL(BUILD_TEST_FRAMEWORK_INCLUDE,false)
-         AC_MSG_NOTICE([boost/test/unit_test.hpp not found in include path])])
-AC_CHECK_HEADER(gmpxx.h,
-	[],
-	[])
-AC_CHECK_HEADER(asm/types.h,[],[])
-AC_CHECK_HEADER(linux/videodev.h,
-	[AM_CONDITIONAL(BUILD_VIDEO4LINUX,true)],
-	[AM_CONDITIONAL(BUILD_VIDEO4LINUX,false)])
-
-
+TRIPOVER_CHECK_HEADER(GL/gl.h,HAVE_GL_GL_H,have_gl_gl_h)
+TRIPOVER_CHECK_HEADER(GL/osmesa.h,HAVE_GL_OSMESA_H,have_gl_osmesa_h)
+TRIPOVER_CHECK_HEADER(boost/random.hpp,HAVE_BOOST_RANDOM_H,have_boost_random_h)
+TRIPOVER_CHECK_HEADER(boost/test/unit_test.hpp,HAVE_BOOST_TEST_UNITTEST_H,have_boost_test_unittest_h)
+TRIPOVER_CHECK_HEADER(gmpxx.h,HAVE_GMPXX_H,have_gmpxx_h)
+TRIPOVER_CHECK_HEADER(asm/types.h,HAVE_ASM_TYPES_H,have_asm_types_h)
+TRIPOVER_CHECK_HEADER(linux/videodev.h,HAVE_LINUX_VIDEODEV_H,have_linux_videodev_h,)
+TRIPOVER_CHECK_HEADER(X11/Xlib.h,HAVE_X11_XLIB_H,have_x11_xlib_h)
+TRIPOVER_CHECK_HEADER(X11/Xutil.h,HAVE_X11_XUTIL_H,have_x11_xutil_h)
+TRIPOVER_CHECK_HEADER(X11/extensions/XShm.h,HAVE_X11_EXTENSIONS_XSHM_H,have_x11_extensions_xshm_h,
+[
+#ifdef HAVE_X11_XLIB_H
+#include <X11/Xlib.h>
+#endif
+]
+)
 
 dnl Checks for libraries.
-AC_CHECK_LIB(opencv,
-	[cvGetErrStatus],
-	[],
-	[
-AC_CHECK_LIB(cxcore,
-        [cvGetErrStatus],
-	[],
-        AC_MSG_ERROR([libcxcore.so not found]))
-AC_CHECK_LIB(cv,
-	[cvAdd],
-	[],
-	AC_MSG_ERROR([libopencv.so or libcv.so not found]))])
+AC_CHECK_LIB(opencv,[cvGetErrStatus],[],AC_MSG_ERROR([libopencv.so or libcv.so not found]))
+dnl new version of opencv needs check for cvGetErrStatus in cxcore and cvAdd in cv
 
-AC_CHECK_LIB(highgui,
-        [cvGetWindowName],
-        [],
-        [AC_MSG_ERROR([libhighgui.so not found])])
+AC_CHECK_LIB(highgui,[cvGetWindowName],[],[AC_MSG_ERROR([libhighgui.so not found])])
 
-AC_CHECK_LIB(GL,
-	[glFinish],
-	[
-LIBS="-lGL $LIBS"
-AC_DEFINE([HAVELIB_GL],[],[Include OpenGL support])
-AM_CONDITIONAL(BUILD_GL_LIB,true)
-],
-	[
-AM_CONDITIONAL(BUILD_GL_LIB,false)
-AC_MSG_NOTICE([libGL.so not found])
-])
-
-AC_CHECK_LIB(OSMesa,
-	[OSMesaGetCurrentContext],
-	[
-LIBS="-lOSMesa $LIBS"
-AC_DEFINE([HAVELIB_OSMESA],[],[Include MESA support - for offscreen rendering])
-AM_CONDITIONAL(BUILD_OSMESA_LIB,true)
-],
-	[
-AM_CONDITIONAL(BUILD_OSMESA_LIB,false)
-AC_MSG_NOTICE([libOSMesa.so not found])
-])
-
-AC_CHECK_LIB(GLU,
-	[gluNewTess],
-	[
-LIBS="-lGLU $LIBS"
-AC_DEFINE([HAVELIB_GLU],[],[GLU is present])
-AM_CONDITIONAL(BUILD_GLU_LIB,true)
-],
-	[
-AM_CONDITIONAL(BUILD_GLU_LIB,false)
-AC_MSG_NOTICE([libGLU.so not found])
-])
-
-AC_CHECK_LIB(glut,
-	[glXChooseVisual],
-	[
-LIBS="-lglut $LIBS"
-AC_DEFINE([HAVELIB_GLUT],[],[GLUT is present])
-AM_CONDITIONAL(BUILD_GLUT_LIB,true)
-],
-	[
-AM_CONDITIONAL(BUILD_GLUT_LIB,false)
-AC_MSG_NOTICE([libglut.so not found])
-])
-
-AC_CHECK_LIB(gmp,
-	[__gmpz_init],
-	[],
-	[])
-
-AC_CHECK_LIB(gmpxx,
-	[__gmpz_set],
-	[],
-	[])
+TRIPOVER_CHECK_LIB(GL,glFinish,HAVELIB_GL,havelib_gl)
+TRIPOVER_CHECK_LIB(OSMesa,OSMesaGetCurrentContext,HAVELIB_OSMESA,havelib_osmesa)
+TRIPOVER_CHECK_LIB(GLU,gluNewTess,HAVELIB_GLU,havelib_glu)
+TRIPOVER_CHECK_LIB(glut,fgActivateMenu,HAVELIB_GLUT,havelib_glut)
+TRIPOVER_CHECK_LIB(gmp,__gmpz_init,HAVELIB_GMP,havelib_gmp)
+TRIPOVER_CHECK_LIB(gmpxx,__gmpz_set,HAVELIB_GMPXX,havelib_gmpxx)
 
 LIBSSAVEACR31="$LIBS"
 LIBS="-lboost_unit_test_framework-gcc-1_32 $LIBS"
@@ -148,13 +88,11 @@ int init_unit_test_suite(int, char**) {
 }
 ]]),
 [
-AC_DEFINE_UNQUOTED(AS_TR_CPP(HAVE_LIBBOOST_UNIT_TEST_FRAMEWORK),[],[Have boost unit test framework])
-AM_CONDITIONAL(BUILD_TEST_FRAMEWORK_LIB,true)
-AC_MSG_NOTICE([found boost])],
-[
-AM_CONDITIONAL(BUILD_TEST_FRAMEWORK_LIB,false)
-AC_MSG_NOTICE([boost unit test framework not found - disabling unit tests])])
+AC_DEFINE(HAVELIB_BOOST_UNITTEST,[],[Define this to 1 if you have the libboost_unit_testframework library file])
+havelib_boost_unittest="yes"],
+[havelib_boost_unittest="no"])
 LIBS="$LIBSSAVEACR31"
+AM_CONDITIONAL(HAVELIB_BOOST_UNITTEST,test "$havelib_boost_unittest" = "yes")
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -168,3 +106,46 @@ src/Makefile
 tests/Makefile
 unit/Makefile
 ])
+
+if test "$have_gl_gl_h$havelib_gl$havelib_glu$havelib_glut" = "yesyesyesyes"; then
+   echo "+ Enabled use of OpenGL"
+else
+   echo "! Disabled use of OpenGL"
+fi
+
+if test "$have_gl_osmesa_h$havelib_osmesa" = "yesyes"; then
+   echo "+ Enabled MESA Off-screen rendering"
+else
+   echo "! Disabled use of MESA Off-screen rendering"
+fi
+
+if test "$have_boost_random_h" = "yes"; then
+   echo "+ Enabled use of Boost C++ libraries \"Random\" module"
+else
+   echo "! Disabled use of Boost C++ \"Random\""
+fi
+
+if test "$have_boost_test_unittest_h$havelib_boost_unittest" = "yesyes"; then
+   echo "+ Enabled use of Boost C++ libraries \"UnitTest\" module"
+else
+   echo "! Disabled use of Boost++ libraries \"UnitTest\""
+fi
+
+if test "$have_gmpxx_h$havelib_gmp$havelib_gmpxx" = "yesyesyes"; then
+   echo "+ Enabled use of GNU MP Bignum Library (with C++ support)"
+else
+   echo "! Disabled use of GNU MP Bignum library (with C++ support)"
+fi
+
+if test "$have_linux_videodev_h" = "yes"; then
+   echo "+ Enabled use of Video4Linux"
+else
+   echo "! Disabled use of Video4Linux"
+fi
+
+if test "$have_x11_xlib_h$have_x11_xutil_h$have_x11_extensions_xshm_h" = "yesyesyes"; then
+   echo "+ Enabled Xlib and MIT XSHM Extension"
+else
+   echo "! Disabled use of Xlib and MIT XSHM Extension"
+fi
+

@@ -5,6 +5,18 @@
 #ifndef X_OUTPUT_MECHANISM_GUARD
 #define X_OUTPUT_MECHANISM_GUARD
 
+#include <tripover/Config.hh>
+
+#ifndef HAVE_X11_XLIB_H
+# error This version has been configured without Xlib support
+#endif
+#ifndef HAVE_X11_XUTIL_H
+# error This version has been configured without XUtil support
+#endif
+#ifndef HAVE_X11_EXTENSIONS_XSHM_H
+# error This version has been configured without MIT XSHM support
+#endif
+
 #include <tripover/LocatedObject.hh>
 #include <tripover/ContourTree.hh>
 #include <tripover/ShapeTree.hh>

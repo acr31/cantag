@@ -21,19 +21,25 @@
 #include <ParityCoder.hh>
 #include <SCCCoder.hh>
 #include <SymbolChunkCoder.hh>
-#include <TripOriginalCoder.hh>
+#if defined(HAVE_GMPXX) && defined(HAVELIB_GMP) && defined(HAVELIB_GMPXX)
+# include <TripOriginalCoder.hh>
+#endif
 
 // image sources
 #include <FileImageSource.hh>
-#include <V4LImageSource.hh>
+#ifdef HAVE_LINUX_VIDEODEV_H
+# include <V4LImageSource.hh>
+#endif
 
 // output mechanisms
 #include <TextOutputMechanism.hh>
-#include <XOutputMechanism.hh>
-#include <XOutputStagesMechanism.hh>
+#if defined(HAVE_X11_XLIB_H) && defined(HAVE_X11_XUTIL_H) && defined(HAVE_X11_EXTENSIONS_XSHM_H)
+# include <XOutputMechanism.hh>
+# include <XOutputStagesMechanism.hh>
+#endif
 
-#if defined(HAVELIB_GL) && defined(HAVELIB_GLU) && defined(HAVELIB_GLUT)
-#include <GLOutputMechanism.hh>
+#if defined(HAVE_GL_GL_H) && defined(HAVELIB_GL) && defined(HAVELIB_GLU) && defined(HAVELIB_GLUT)
+# include <GLOutputMechanism.hh>
 #endif
 
 // some predefined tags

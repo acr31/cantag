@@ -4,9 +4,12 @@
 #ifndef QUADTANGLE_GUARD
 #define QUADTANGLE_GUARD
 
-#include <vector>
+#include <tripover/Config.hh>
 #include <tripover/Image.hh>
 #include <tripover/Camera.hh>
+
+#include <vector>
+
 /**
  * A class to fit points to a quadtangle and encapsulate the result
  *

@@ -4,6 +4,7 @@
 #ifndef CAMERA_GUARD
 #define CAMERA_GUARD
 
+#include <tripover/Config.hh>
 #include <tripover/Image.hh>
 #include <tripover/Ellipse.hh>
 #include <tripover/QuadTangle.hh>

@@ -1,6 +1,8 @@
 #ifndef GAUSSIAN_ELIMINATION_GUARD
 #define GAUSSIAN_ELIMINATION_GUARD
 
+#include <tripover/Config.hh>
+
 /**
  * Solve the equation A*R = X for R.
  *

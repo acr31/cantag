@@ -5,9 +5,11 @@
 #ifndef FIND_TRANSFORM_GUARD
 #define FIND_TRANSFORM_GUARD
 
+#include <tripover/Config.hh>
 #include <tripover/Ellipse.hh>
 #include <tripover/QuadTangle.hh>
 #include <tripover/Camera.hh>
+
 #include <vector>
 
 

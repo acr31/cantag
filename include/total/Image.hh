@@ -5,18 +5,19 @@
 #define IMAGE_GUARD
 
 #include <tripover/Config.hh>
+#include <tripover/Socket.hh>
+
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+
 #include <cmath>
-#include <tripover/Socket.hh>
+
 #define COLOUR_BLACK ((unsigned char)0)
 #define COLOUR_WHITE ((unsigned char)255)
 #define PI CV_PI
 
 /**
  * A wrapper object for OpenCv's image
- *
- * \todo Make the m_image object private!
  */
 class Image {
 private:

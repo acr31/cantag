@@ -5,6 +5,20 @@
 #ifndef GL_IMAGE_SOURCE_GUARD
 #define GL_IMAGE_SOURCE_GUARD
 
+#include <tripover/Config.hh>
+
+#ifndef HAVE_GL_GL_H
+#error "This version has been configured without OpenGL support"
+#endif
+
+#ifndef HAVE_GL_GLU_H
+#error "This version has been configured without OpenGL GLU support"
+#endif
+
+#ifndef HAVE_GL_OSMESA_H
+#error "This version has been configured without MESA Off-Screen rendering support"
+#endif
+
 #ifndef HAVELIB_GL
 #error "libGL.so is required for this component"
 #endif
@@ -17,14 +31,16 @@
 #error "libGLU.so is required for this component"
 #endif
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/osmesa.h>
 #include <tripover/ImageSource.hh>
 #include <tripover/Image.hh>
 #include <tripover/Tag.hh>
 #include <tripover/CyclicBitSet.hh>
 #include <tripover/Camera.hh>
+
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/osmesa.h>
+
 #include <cmath>
 
 #define GLIMAGESOURCE_DEBUG

@@ -2,7 +2,6 @@
 #define IMAGE_FILTER_GUARD
 
 class ImageFilter {
-
 public:
   /**
    * Load an image and prepare it for contour following. An image

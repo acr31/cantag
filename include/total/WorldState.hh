@@ -7,8 +7,9 @@
 
 #include <tripover/Config.hh>
 #include <tripover/LocatedObject.hh>
-#include <vector>
 #include <tripover/Socket.hh>
+
+#include <vector>
 
 /**
  * Stores a set of located objects - the world state

@@ -13,9 +13,9 @@
 #include <tripover/Camera.hh>
 #include <tripover/ShapeChain.hh>
 #include <tripover/findtransform.hh>
-#include <bitset>
-#include <iostream>
 #include <tripover/ShapeTree.hh>
+
+#include <bitset>
 
 #ifdef TEXT_DEBUG
 # define MATRIX_TAG_DEBUG

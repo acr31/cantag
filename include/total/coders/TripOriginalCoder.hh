@@ -8,8 +8,9 @@
 #include <tripover/Config.hh>
 #include <tripover/Coder.hh>
 #include <tripover/CyclicBitSet.hh>
-#include <cmath>
 #include <tripover/BigInt.hh>
+
+#include <cmath>
 
 #ifdef TEXT_DEBUG
 # define TRIP_ORIGINAL_CODER_DEBUG

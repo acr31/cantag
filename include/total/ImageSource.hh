@@ -4,6 +4,7 @@
 #ifndef IMAGE_SOURCE_GUARD
 #define IMAGE_SOURCE_GUARD
 
+#include <tripover/Config.hh>
 #include <tripover/Image.hh>
 
 /**

@@ -9,7 +9,6 @@
 
 #include <tripover/Config.hh>
 #include <tripover/Coder.hh>
-#include <cstdio>
 
 #ifdef TEXT_DEBUG
 # define SCCCODER_DEBUG
@@ -289,7 +288,7 @@ template<int RINGS,int SECTORS,int ERRORS, int START> int SCCCoder<RINGS,SECTORS
   return rotation;
 }  
 
-
+#ifdef SCCCODER_DEBUG
 template<int RINGS,int SECTORS,int ERRORS, int START> void SCCCoder<RINGS,SECTORS,ERRORS,START>::print(const char* s, const int *f, int count) const {
   int k;
   PROGRESS(s);
@@ -298,11 +297,14 @@ template<int RINGS,int SECTORS,int ERRORS, int START> void SCCCoder<RINGS,SECTOR
   } 
   std::cout << std::endl;    
 }
+#endif
 
+#ifdef SCCCODER_DEBUG
 template<int RINGS,int SECTORS,int ERRORS, int START> void SCCCoder<RINGS,SECTORS,ERRORS,START>::print(const char *s,const int *f) const
 {
   print(s,f,SECTORS);
 }
+#endif
 
 template<int RINGS,int SECTORS,int ERRORS, int START> int SCCCoder<RINGS,SECTORS,ERRORS,START>::mul_symbol(int i, int j)
 {

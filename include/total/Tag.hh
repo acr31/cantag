@@ -9,10 +9,10 @@
 #include <tripover/Image.hh>
 #include <tripover/Camera.hh>
 #include <tripover/ShapeTree.hh>
-#include <vector>
 #include <tripover/CyclicBitSet.hh>
 #include <tripover/WorldState.hh>
 
+#include <vector>
 /**
  * Abstract superclass for all tags.
  */

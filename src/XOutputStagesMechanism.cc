@@ -3,6 +3,7 @@
  */
 
 #include <tripover/XOutputStagesMechanism.hh>
+
 extern "C" {
 #include <sys/ipc.h>
 #include <sys/shm.h>

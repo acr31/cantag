@@ -5,8 +5,10 @@
 #ifndef TEXT_OUTPUT_MECHANISM_GUARD
 #define TEXT_OUTPUT_MECHANISM_GUARD
 
-#include <ostream>
+#include <tripover/Config.hh>
 #include <tripover/LocatedObject.hh>
+
+#include <ostream>
 
 class TextOutputMechanism {
 private:

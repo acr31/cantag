@@ -5,10 +5,26 @@
 #ifndef BIGINT_GUARD
 #define BIGINT_GUARD
 
+#include <tripover/Config.hh>
+
+#ifndef HAVE_GMPXX_H
+#error "This version has been configured without GNU MP Bignum C++ library"
+#endif
+
+#ifndef HAVELIB_GMP
+#error "This file requires libgmp.so"
+#endif
+
+#ifndef HAVELIB_GMPXX
+#error "This file required libgmpxx.so"
+#endif
+
+#include <tripover/CyclicBitSet.hh>
+
 #include <gmpxx.h>
 #include <gmp.h>
+
 #include <bitset>
-#include <tripover/CyclicBitSet.hh>
 
 template<int SIZE> class BigInt;
 

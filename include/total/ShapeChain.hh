@@ -5,6 +5,7 @@
 #ifndef SHAPE_CHAIN_GUARD
 #define SHAPE_CHAIN_GUARD
 
+#include <tripover/Config.hh>
 #include <tripover/Socket.hh>
 #include <tripover/Camera.hh>
 #include <tripover/Image.hh>

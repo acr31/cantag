@@ -6,13 +6,19 @@
 #define GLOUTPUT_MECHANISM_GUARD
 
 #include <tripover/Config.hh>
+
+#ifndef HAVE_GL_GL_H
+#error "This version has been configured without OpenGL support"
+#endif
+
+#ifndef HAVELIB_GL
+# error "This version has been configured without OpenGL support"
+#endif
+
 #include <tripover/ContourTree.hh>
 #include <tripover/ShapeTree.hh>
 #include <tripover/WorldState.hh>
-
-#ifndef HAVELIB_GL
-# error "libGL.so is required for this component"
-#endif
+#include <iostream>
 
 #include <GL/glx.h>
 

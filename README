@@ -4,6 +4,7 @@ Depending on the state of the distribution you may need to run
 
 libtoolize
 aclocal
+autoheader
 autoconf
 automake -a
 ./configure

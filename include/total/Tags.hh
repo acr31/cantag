@@ -19,6 +19,7 @@
  * Something very like an original TRIP tag.  17 sectors and 2 rings
  * using the TripOriginal coding scheme with 2 sectors of checksum.
  */
+#if defined(HAVE_GMPXX_H) && defined(HAVELIB_GMP) && defined(HAVELIB_GMPXX)
 class TripTag : public RingTag<2,17>, public virtual TripOriginalCoder<34,2,2> {
 public:
   TripTag();
@@ -50,5 +51,5 @@ class SplitTarget : public RingTag<2,17>, public virtual TripOriginalCoder<34,2,
 public:
   SplitTarget();
 };
-
+#endif
 #endif//TAGS_GUARD

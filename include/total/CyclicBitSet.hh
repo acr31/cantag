@@ -5,8 +5,10 @@
 #ifndef CYCLIC_BIT_SET
 #define CYCLIC_BIT_SET
 
-#include <bitset>
+#include <tripover/Config.hh>
 #include <tripover/Socket.hh>
+
+#include <bitset>
 /**
  * A simple extension of the STL bitset that supports some cyclic
  * operations.

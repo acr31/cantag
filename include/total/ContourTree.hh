@@ -7,10 +7,11 @@
 
 #include <tripover/Config.hh>
 #include <tripover/Image.hh>
-#include <vector>
-#include <map>
 #include <tripover/Camera.hh>
 #include <tripover/Socket.hh>
+
+#include <vector>
+#include <map>
 
 /**
  * A tree of matched contours.  Create an instance of this class from

@@ -4,12 +4,13 @@
 
 #ifndef ELLIPSE_GUARD
 #define ELLIPSE_GUARD
+
 #include <tripover/Config.hh>
-#include <vector>
 #include <tripover/Image.hh>
 #include <tripover/Socket.hh>
 #include <tripover/Camera.hh>
 
+#include <vector>
 /**
  * A class to represent ellipses in the image and fit one to a set of points.
  *
