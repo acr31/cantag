@@ -12,6 +12,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/30 08:05:23  acr31
+ * changed rectangle2d to use gaussian elimination
+ *
  * Revision 1.3  2004/01/29 12:47:14  acr31
  * added method for drawing unfilled quadtangles
  *
@@ -154,7 +157,7 @@ public:
 #ifdef IMAGE_DEBUG
     Image* debug0 = cvCloneImage(image);
     cvConvertScale(debug0,debug0,0.5,128);    
-    DrawQuadTangle(image,l,0,3);
+    DrawQuadTangle(debug0,l,0,3);
 #endif
     float projX, projY;
     m_coder.Reset();
@@ -174,11 +177,11 @@ public:
 #ifdef IMAGE_DEBUG
       if (i==1) {
 	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),255,8);
-	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),255-10*i,6);
+	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),0,6);
       }
       else {
 	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),255,4);
-	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),255-10*i,3);
+	cvLine(debug0,cvPoint((int)projX,(int)projY),cvPoint((int)projX,(int)projY),0,3);
       }
 #endif	
     }

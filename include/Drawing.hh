@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.6  2004/01/30 08:05:22  acr31
+ * changed rectangle2d to use gaussian elimination
+ *
  * Revision 1.5  2004/01/29 12:47:14  acr31
  * added method for drawing unfilled quadtangles
  *
@@ -34,7 +37,7 @@
 #include "Ellipse2D.hh"
 #include "Rectangle2D.hh"
 #include <opencv/cv.h>
-
+#include <opencv/highgui.h>
 typedef IplImage Image;
 
 #undef FILENAME

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/30 08:05:23  acr31
+ * changed rectangle2d to use gaussian elimination
+ *
  * Revision 1.2  2004/01/27 18:06:58  acr31
  * changed inheriting classes to inherit publicly from their parents
  *
@@ -54,6 +57,9 @@ public:
 private:
   inline void compute_central_point();
   inline void compute_alpha();
+  void sort_points();
+  void swap(float *a, float *b);
+  float find_angle(float x, float y, float cx, float cy);
 };
 
 class Rectangle2DChain {

@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.6  2004/01/30 08:05:23  acr31
+ * changed rectangle2d to use gaussian elimination
+ *
  * Revision 1.5  2004/01/29 12:47:27  acr31
  * factoring around with the alpha calculation stuff
  *
@@ -30,8 +33,8 @@
  *
  */
 #include <Rectangle2D.hh>
-#include <FixedPoint.hh>
-
+#include <GaussianElimination.hh>
+#include <Drawing.hh>
 #undef FILENAME
 #define FILENAME "Rectangle2D.cc"
 #define ZERO_DISTANCE 0.00001
@@ -49,7 +52,7 @@ Rectangle2D::Rectangle2D(float width) {
 
   m_x3 = 0;
   m_y3 = width;
-
+  sort_points();
   compute_central_point();
   compute_alpha();
 }
@@ -63,10 +66,9 @@ Rectangle2D::Rectangle2D(float x0, float y0,float x1, float y1,float x2, float y
   m_y2(y2),
   m_x3(x3),
   m_y3(y3) {
-
+  sort_points();
   compute_central_point();
   compute_alpha();
-
 };
 
 Rectangle2D::Rectangle2D(float* coords) :
@@ -78,6 +80,7 @@ Rectangle2D::Rectangle2D(float* coords) :
   m_y2(coords[5]),
   m_x3(coords[6]),
   m_y3(coords[7]) {
+  sort_points();
   compute_central_point();
   compute_alpha();
 };
@@ -166,101 +169,120 @@ void Rectangle2D::compute_alpha() {
    * solve for a1 to a8
    *
    * We have found four points - the four corners so we can
-   * solve this (using this matlab script)
-   *
-   * syms X1 X2 X3 X4 Y1 Y2 Y3 Y4
-   * syms x1 x2 x3 x4 y1 y2 y3 y4
-   * syms a1 a2 a3 a4 a5 a6 a7 a8
-   *
-   * A = [ X1; X2; X3; X4; Y1; Y2; Y3; Y4]
-   * B = [ x1 y1 1 0 0 0 -X1*x1 -X1*y1;
-   *       x2 y2 1 0 0 0 -X2*x2 -X2*y2;
-   *       x3 y3 1 0 0 0 -X3*x3 -X3*y3;
-   *       x4 y4 1 0 0 0 -X4*x4 -X4*y4;
-   *       0 0 0 x1 y1 1 -Y1*x1 -Y1*y1;
-   *       0 0 0 x2 y2 1 -Y2*x2 -Y2*y2;
-   *       0 0 0 x3 y3 1 -Y3*x3 -Y3*y3;
-   *       0 0 0 x4 y4 1 -Y4*x4 -Y3*y4 ]
-   *
-   * C = [ a1; a2; a3; a4; a5; a6; a7; a8]
-   *
-   * x1 =0
-   * y1 =0
-   * x2 = 1
-   * y2 = 0
-   * x3 = 1
-   * y3 = 1
-   * x4 = 0
-   * y4 = 1
-   *
-   * D = inv(eval(B))*A
-   *
-   * This gives us the result:
-   *
-   * D = [ -X1+X2+X2/(-Y3+Y2)*Y1-X2/(-Y3+Y2)*Y2+X2/(-Y3+Y2)*Y3-X2/(-Y3+Y2)*Y4 ;
-   *       -X3/(-X4+X3)*X1+X4/(-X4+X3)*X2+X4*(-X3+X2)/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)*Y1-X4*(-X3+X2)/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)*Y2+X4*(-X3+X2)/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)*Y3-X4*(-X3+X2)/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)*Y4 ;
-   *        X1 ;
-   *        Y3/(-Y3+Y2)*Y1-Y2/(-Y3+Y2)*Y4 ;
-   *        -Y3/(-X4+X3)*X1+Y3/(-X4+X3)*X2-Y3/(-X4+X3)*X3+Y3/(-X4+X3)*X4+(Y3*X2-Y3*X4+Y2*X4-Y2*X3)/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)*Y1-(-X3+X2)*Y3/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)*Y2+(-X3+X2)*Y3^2/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)-(Y3*X2-Y3*X4+Y2*X4-Y2*X3)/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)*Y4 ;
-   *        Y1 ;
-   *        1/(-Y3+Y2)*Y1-Y2/(-Y3+Y2)+Y3/(-Y3+Y2)-1/(-Y3+Y2)*Y4 ;
-   *        -1/(-X4+X3)*X1+1/(-X4+X3)*X2-X3/(-X4+X3)+X4/(-X4+X3)+(-X3+X2)/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)*Y1-(-X3+X2)/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)*Y2+(-X3+X2)*Y3/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)-(-X3+X2)/(Y3*X4-Y3*X3-Y2*X4+Y2*X3)*Y4 ]
    */
 
-  float alpha0_t1 = (m_y0 - m_y1 + m_y2 - m_y3) * m_x1;
-  if (fabs(alpha0_t1) > ZERO_DISTANCE) {
-    alpha0_t1 /= (m_x1-m_y2);
-  }
-  m_alpha[0] = m_x1 - m_x0 + alpha0_t1;
+  float** coeffs = new float*[8];
+  coeffs[0] = new float[8];
+  coeffs[0][0] = 1;
+  coeffs[0][1] = 1;
+  coeffs[0][2] = 0;
+  coeffs[0][3] = 0;
+  coeffs[0][4] = 0;
+  coeffs[0][5] = 0;
+  coeffs[0][6] = 0;
+  coeffs[0][7] = 0;
 
-  float alpha1_t1 = m_x1*m_x3 - m_x0*m_x2;
-  if (fabs(alpha1_t1) > ZERO_DISTANCE) {
-    alpha1_t1 /= (m_x2-m_x3);
-  }
-  float alpha1_t2 = m_y0 - m_y1 + m_y2 - m_y3;
-  if (fabs(alpha1_t2) > ZERO_DISTANCE) {
-    alpha1_t2 *= (m_x1-m_x2)*m_x3/(m_x2*(m_x3-m_y2+m_x1) - m_y1*m_x3);
-  }
-  m_alpha[1] = alpha1_t1 + alpha1_t2;
+  coeffs[1] = new float[8];
+  coeffs[1][0] = 0;
+  coeffs[1][1] = 1;
+  coeffs[1][2] = 1;
+  coeffs[1][3] = 0;
+  coeffs[1][4] = 0;
+  coeffs[1][5] = 0;
+  coeffs[1][6] = 0;
+  coeffs[1][7] = 0;
 
-  m_alpha[2] = m_x0;
+  coeffs[2] = new float[8];
+  coeffs[2][0] = 1;
+  coeffs[2][1] = 1;
+  coeffs[2][2] = 1;
+  coeffs[2][3] = 1;
+  coeffs[2][4] = 0;
+  coeffs[2][5] = 0;
+  coeffs[2][6] = 0;
+  coeffs[2][7] = 0;
 
-  float alpha3_t1 = m_y2*m_y0 - m_y1*m_y3;
-  if (fabs(alpha3_t1) > ZERO_DISTANCE) {
-    alpha3_t1 /= m_y1 - m_y2;   
-  }
-  m_alpha[3] = alpha3_t1;
+  coeffs[3] = new float[8];
+  coeffs[3][0] = -m_x1;
+  coeffs[3][1] = -m_x0;
+  coeffs[3][2] = 0;
+  coeffs[3][3] = 0;
+  coeffs[3][4] = -m_y1;
+  coeffs[3][5] = -m_y0;
+  coeffs[3][6] = 0;
+  coeffs[3][7] = 0;
 
-  float alpha4_t1 = m_y2 * (m_x1 - m_x0 - m_x2 + m_x3);
-  if (fabs(alpha4_t1) > ZERO_DISTANCE) {
-    alpha4_t1 /= m_x2 - m_x3;
-  }
+  coeffs[4] = new float[8];
+  coeffs[4][0] = 0;
+  coeffs[4][1] = 0;
+  coeffs[4][2] = 0;
+  coeffs[4][3] = 0;
+  coeffs[4][4] = 1;
+  coeffs[4][5] = 1;
+  coeffs[4][6] = 0;
+  coeffs[4][7] = 0;
 
-  float alpha4_t2 = m_y0*m_y2*m_x1-m_y0*m_y2*m_x3+m_y0*m_y1*m_x3-m_x2*m_y0*m_y1+m_y2*m_y1*m_x2-m_y2*m_y1*m_x1-m_y2*m_y2*m_x2+m_y2*m_y2*m_x1-m_y3*m_y2*m_x1+m_y3*m_y2*m_x3-m_y3*m_y1*m_x3+m_x2*m_y3*m_y1;
-  if (fabs(alpha4_t2) > ZERO_DISTANCE) {
-    alpha4_t2 /= (-m_y2+m_y1)*(-m_x3+m_x2);
-  }
-  m_alpha[4] = alpha4_t1 + alpha4_t2;
+  coeffs[5] = new float[8];
+  coeffs[5][0] = 0;
+  coeffs[5][1] = 0;
+  coeffs[5][2] = 0;
+  coeffs[5][3] = 0;
+  coeffs[5][4] = 0;
+  coeffs[5][5] = 1;
+  coeffs[5][6] = 1;
+  coeffs[5][7] = 0;
 
-  m_alpha[5] = m_y0;
+  coeffs[6] = new float[8];
+  coeffs[6][0] = 0;
+  coeffs[6][1] = -m_x0;
+  coeffs[6][2] = -m_x3;
+  coeffs[6][3] = 0;
+  coeffs[6][4] = 0;
+  coeffs[6][5] = -m_y0;
+  coeffs[6][6] = -m_y3;
+  coeffs[6][7] = 0;
 
-  float alpha6_t1 = m_y0 - m_y1 + m_y2 - m_y3;
-  if (fabs(alpha6_t1) > ZERO_DISTANCE) {
-    alpha6_t1 /= m_y1-m_y2;
-  }
-  m_alpha[6] = alpha6_t1;
+  coeffs[7] = new float[8];
+  coeffs[7][0] = 0;
+  coeffs[7][1] = 0;
+  coeffs[7][2] = 0;
+  coeffs[7][3] = 0;
+  coeffs[7][4] = 1;
+  coeffs[7][5] = 1;
+  coeffs[7][6] = 1;
+  coeffs[7][7] = 1;
 
-  float alpha7_t1 = m_y0-m_y1+m_y2-m_y3;
-  if (fabs(alpha7_t1) > ZERO_DISTANCE) {
-    alpha7_t1 /= m_y2 - m_y3;
+  float* xvals = new float[8];
+  xvals[0] = m_x1;
+  xvals[1] = m_x0;
+  xvals[2] = m_x3;
+  xvals[3] = m_x2;
+  xvals[4] = m_y1;
+  xvals[5] = m_y0;
+  xvals[6] = m_y3;
+  xvals[7] = m_y2;
+
+  float* result = new float[8];
+
+  GaussianElimination(xvals,coeffs,result,8);
+
+ 
+  m_alpha[0] = result[0];
+  m_alpha[1] = result[1];
+  m_alpha[2] = result[2];
+  m_alpha[3] = result[4];
+  m_alpha[4] = result[5];
+  m_alpha[5] = result[7];
+  m_alpha[6] = result[3];
+  m_alpha[7] = result[6];
+
+  delete[] xvals;
+  for(int i=0;i<8;i++) {
+    delete[] coeffs[i];
   }
-  
-  float alpha7_t2 = (m_x1-m_x2)*(m_y0-m_y1+m_y2-m_y3);
-  if (fabs(alpha7_t2) > ZERO_DISTANCE) {
-    alpha7_t2 /= (m_y1-m_y2)*(m_x2-m_x3);
-  }
-  m_alpha[7] = alpha7_t1 + alpha7_t2;
-  
+  delete[] coeffs;
+  delete[] result;
+
   PROGRESS("Computed alpha[0] "<<m_alpha[0]);
   PROGRESS("         alpha[1] "<<m_alpha[1]);
   PROGRESS("         alpha[2] "<<m_alpha[2]);
@@ -315,6 +337,59 @@ inline void Rectangle2D::compute_central_point() {
 
   m_xc = Ax+ACx*b;
   m_yc = Ay+ACy*b;        
+}
+
+
+float Rectangle2D::find_angle(float x, float y, float cx, float cy) {
+  if ((x > cx) && (y > cy)) {
+    return atan( (y-cy) / (x-cx) );
+  }
+  else if ((x > cx) && (y < cy)) {
+    return PI/2 + atan( (cy-y) / (x-cx) );
+  }
+  else if ((x < cx) && (y < cy)) {
+    return PI + atan ( (cx-x) / (cy-y) );
+  }
+  else if ((x < cx) && (y > cy)) {
+    return 3*PI/2 + atan( (cx-x) / (y-cy));
+  }
+}
+
+void Rectangle2D::swap( float *a, float *b) {
+  float t = *a;
+  *a = *b;
+  *b = t;
+}
+
+void Rectangle2D::sort_points()
+{
+  // sort the points into clockwise order.
+  float angles[4];
+  angles[0] = find_angle(m_x0,m_y0,m_yc,m_xc);
+  angles[1] = find_angle(m_x1,m_y1,m_yc,m_xc);
+  angles[2] = find_angle(m_x2,m_y2,m_yc,m_xc);
+  angles[3] = find_angle(m_x3,m_y3,m_yc,m_xc);
+
+  float tx,ty; 
+  for(int i=0;i<4;i++) {
+    if (angles[0] > angles[1]) {
+      swap(&m_x0,&m_x1);
+      swap(&m_y0,&m_y1);
+      swap(&angles[0],&angles[1]);
+    }
+
+    if (angles[1] > angles[2]) {
+      swap(&m_x1,&m_x2);
+      swap(&m_y1,&m_y2);
+      swap(&angles[1],&angles[2]);
+    }
+
+    if (angles[2] > angles[3]) {
+      swap(&m_x2,&m_x3);
+      swap(&m_y2,&m_y3);
+      swap(&angles[2],&angles[3]);
+    }
+  }
 }
 
   
