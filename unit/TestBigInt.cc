@@ -159,9 +159,9 @@ void test_plusplus() {
   for(int i=0;i<100;i++) {
     int i = numbers();
     BigInt<32> bi(i);
-    bi++;
+    bi+=1;
     if ( (unsigned int)bi != i+1) {
-      throw "Failed xorequals test!";
+      throw "Failed plusplus test!";
     }    
   }  
 };
@@ -170,9 +170,9 @@ void test_minusminus() {
   for(int i=0;i<100;i++) {
     int i = numbers();
     BigInt<32> bi(i);
-    bi--;
+    bi-=1;
     if ( (unsigned int)bi != i-1) {
-      throw "Failed xorequals test!";
+      throw "Failed minusminus test!";
     }    
   }  
 };

@@ -3,7 +3,6 @@
  */
 
 #include <boost/test/unit_test.hpp>
-//#include <boost/test/included/unit_test_framework.hpp>
 #include <boost/random.hpp>
 
 #include <Coder.hh>
