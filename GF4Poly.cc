@@ -7,6 +7,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/23 11:57:07  acr31
+ * moved Location2D to Ellipse2D in preparation for Square Tags
+ *
  * Revision 1.3  2004/01/23 11:49:54  acr31
  * Finished integrating the GF4 coder - I've ripped out the error correcting stuff for now and its just looking for a match but it doesn't seem to work.  I need to spend some time to understand the division and mod operations in the GF4Poly to progress
  *
@@ -314,7 +317,7 @@ GF4Poly& GF4Poly::Rotate(unsigned int rotation, unsigned int length)
  */
 unsigned int GF4Poly::Order() const
 {
-  int res = m_symbol_length;
+  int res = 32;
   while( (val >> (--res*2)) & 3 ) {};
   return res+1;
 

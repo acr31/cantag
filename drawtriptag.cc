@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.9  2004/01/23 11:57:08  acr31
+ * moved Location2D to Ellipse2D in preparation for Square Tags
+ *
  * Revision 1.8  2004/01/23 11:49:54  acr31
  * Finished integrating the GF4 coder - I've ripped out the error correcting stuff for now and its just looking for a match but it doesn't seem to work.  I need to spend some time to understand the division and mod operations in the GF4Poly to progress
  *
@@ -52,7 +55,7 @@ main(int argc, char* argv[]) {
     }
   }
 
-  Location2D l(imagewidth/2,
+  Ellipse2D l(imagewidth/2,
 	       imagewidth/2,
 	       width,
 	       width,

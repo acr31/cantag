@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.7  2004/01/23 11:57:08  acr31
+ * moved Location2D to Ellipse2D in preparation for Square Tags
+ *
  * Revision 1.6  2004/01/23 09:08:20  acr31
  * added missing bracket..
  *
@@ -23,7 +26,7 @@
 #include <cv.h>
 #include <cmath>
 
-void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, float maxYDiff, float maxRatioDiff, float maxFitError, std::vector<Location2DChain*> *results) { 
+void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, float maxYDiff, float maxRatioDiff, float maxFitError, std::vector<Ellipse2DChain*> *results) { 
   IplImage *copy = cvCloneImage(image); // the find contours process changes the image ;-(
   
 #ifdef IMAGE_DEBUG
@@ -75,20 +78,20 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 	   with the parent ellipse then we accept them as
 	   concentric */
 
-	Location2D *newbox = new Location2D(current.center.x,
+	Ellipse2D *newbox = new Ellipse2D(current.center.x,
 					    current.center.y,
 					    current.size.width,
 					    current.size.height,
 					    current.angle);
 
-	for(std::vector<Location2DChain*>::const_iterator i = results->begin();i!= results->end();i++) {
+	for(std::vector<Ellipse2DChain*>::const_iterator i = results->begin();i!= results->end();i++) {
 	  if (compare(newbox,(*i)->current,maxXDiff,maxYDiff,maxRatioDiff)) {
 	    PROGRESS("Found concentric partner");
-	    Location2DChain *toadd = *i;
+	    Ellipse2DChain *toadd = *i;
 	    while(toadd->nextchain != NULL) {
 	      toadd = toadd->nextchain;
 	    }
-	    toadd->nextchain = new Location2DChain(newbox);
+	    toadd->nextchain = new Ellipse2DChain(newbox);
 	    newbox = NULL;
 	    break;
 	  }
@@ -96,14 +99,14 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
 
 	if (newbox != NULL) {
 	  PROGRESS("No concentric partner found");
-	  results->push_back(new Location2DChain(newbox));
+	  results->push_back(new Ellipse2DChain(newbox));
 	}
       }
     }
   }
 #ifdef IMAGE_DEBUG
-  for(std::vector<Location2DChain*>::const_iterator i = results->begin();i!=results->end();i++) {
-    Location2DChain *tocheck = *i;
+  for(std::vector<Ellipse2DChain*>::const_iterator i = results->begin();i!=results->end();i++) {
+    Ellipse2DChain *tocheck = *i;
     if (tocheck->nextchain != NULL) {
       do {
 	cvEllipse(debug2,
@@ -130,7 +133,7 @@ void FindEllipses(Image *image, int maxDepth, int maxLength, float  maxXDiff, fl
   cvReleaseMemStorage(&store);
 }
 
-static inline bool compare(Location2D *e1, Location2D *e2, float maxXDiff, float maxYDiff, float maxRatioDiff) {
+static inline bool compare(Ellipse2D *e1, Ellipse2D *e2, float maxXDiff, float maxYDiff, float maxRatioDiff) {
   PROGRESS("Comparing ("<<e1->m_x<<","<<e1->m_y<<") ("<<e1->m_height<<","<<e1->m_width<<") with ("<<e2->m_x<<","<<e2->m_y<<") ("<<e2->m_height<<","<<e2->m_width<<")");
 
   return ( (fabs(e1->m_x - e2->m_x) < maxXDiff) &&

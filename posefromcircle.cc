@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/23 11:57:09  acr31
+ * moved Location2D to Ellipse2D in preparation for Square Tags
+ *
  * Revision 1.3  2004/01/21 13:41:36  acr31
  * added pose from circle to triptest - (pose from circle is unstable at the moment)
  *
@@ -16,7 +19,7 @@
 #define FILENAME "posefromcircle.cc"
 
 Location3D*
-PoseFromCircle(const Location2D *l, double radius) {
+PoseFromCircle(const Ellipse2D *l, double radius) {
   PROGRESS("Angle: " << l->m_angle_radians);
   PROGRESS("Centre: " <<l->m_x << " " << l->m_y);
   PROGRESS("Axes: " << l->m_width << " " << l->m_height);

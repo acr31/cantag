@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.4  2004/01/23 11:57:08  acr31
+ * moved Location2D to Ellipse2D in preparation for Square Tags
+ *
  * Revision 1.3  2004/01/21 13:41:36  acr31
  * added pose from circle to triptest - (pose from circle is unstable at the moment)
  *
@@ -104,7 +107,7 @@ public:
     delete[] m_sync_angles;
   }
 
-  virtual void Draw2D(Image* image, const Location2D *l, unsigned long code, int black, int white) {
+  virtual void Draw2D(Image* image, const Ellipse2D *l, unsigned long code, int black, int white) {
     PROGRESS("Draw2D called for ellipse centre (" << l->m_x << "," << l->m_y<< "), size ("<<l->m_width<<","<<l->m_height<<"), code "<<code);
     
     // Work from the outside inwards
@@ -185,7 +188,7 @@ public:
     }
   }
 
-  virtual unsigned long Decode(Image *image, const Location2D *l) {
+  virtual unsigned long Decode(Image *image, const Ellipse2D *l) {
     // the location we have here locates the outer ring of the
     // bullseye.  Therefore we will need to scale it by the actual
     // size of the bullseye to hit the data sectors properly.

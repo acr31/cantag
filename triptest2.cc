@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.5  2004/01/23 11:57:09  acr31
+ * moved Location2D to Ellipse2D in preparation for Square Tags
+ *
  * Revision 1.4  2004/01/23 11:49:54  acr31
  * Finished integrating the GF4 coder - I've ripped out the error correcting stuff for now and its just looking for a match but it doesn't seem to work.  I need to spend some time to understand the division and mod operations in the GF4Poly to progress
  *
@@ -25,7 +28,7 @@
 #include "adaptivethreshold.hh"
 #include "findellipses.hh"
 #include "posefromcircle.hh"
-#include "Location2D.hh"
+#include "Ellipse2D.hh"
 #include "Location3D.hh"
 #include "GF4Coder.hh"
 
@@ -66,7 +69,7 @@ main(int argc, char* argv[]) {
     }
   }
 
-  Location2D l(imagewidth/2,
+  Ellipse2D l(imagewidth/2,
 	       imagewidth/2,
 	       size,
 	       size,
@@ -90,10 +93,10 @@ main(int argc, char* argv[]) {
   Image* buf = im.GetBuffer();
   im.Next();
   AdaptiveThreshold(buf);
-  std::vector<Location2DChain*> ellipses;
+  std::vector<Ellipse2DChain*> ellipses;
   FindEllipses(buf,10,1000,4,4,0.01,0.001,&ellipses);
 
-  for(std::vector<Location2DChain*>::const_iterator step = ellipses.begin();step!=ellipses.end();step++) {
+  for(std::vector<Ellipse2DChain*>::const_iterator step = ellipses.begin();step!=ellipses.end();step++) {
     if ((*step)->nextchain != NULL) {
       std::cout << "Tag:" << t.Decode(buf, (*step)->current ) << std::endl;
       std::cout << *((*step)->current) << std::endl;
