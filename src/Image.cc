@@ -232,7 +232,7 @@ void Image::AddNoise(float mean, float stddev) {
 }
 #endif
 
-#define STEPSIZE 0.1f
+#define STEPSIZE 0.01f
 void Image::ellipse_polygon_approx(float* points, int startindex, int length, float xc, float yc, float width, float height,  float angle_radians, unsigned char color, int thickness, float start_angle) {
   /**
    * The parametric equation for an ellipse
@@ -440,7 +440,7 @@ void Image::ScanLineFill(float* points, int numpoints, unsigned char colour) {
   std::list<Edge*> edge_list;
   for(int i=0;i<2*numpoints-2;i+=2) {
     if (points[i+1] != points[i+3]) {
-      //std::cout << "Adding " << points[i] << " " << points[i+1] << " " << points[i+2] << " " << points[i+3] << std::endl;
+      //      std::cout << "Adding " << points[i] << " " << points[i+1] << " " << points[i+2] << " " << points[i+3] << std::endl;
       edge_list.push_back(new Edge(points[i],points[i+1],points[i+2],points[i+3]));
     }
   }
@@ -472,6 +472,7 @@ void Image::ScanLineFill(float* points, int numpoints, unsigned char colour) {
     std::list<Edge*>::iterator j = active_edges.begin();
     while(j != active_edges.end()) {
       if ( (*j)->intx == currentx ) {
+	//	DrawPixel(currentx,scanline,colour);
 	parity ^= true;
 	++j;
       }
