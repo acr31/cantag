@@ -9,6 +9,14 @@ dnl Checks for programs.
 AM_PROG_LIBTOOL
 AC_PROG_CXX
 
+AC_CHECK_PROG(magicconfig,[Magick++-config --version],yes,no)
+
+if test $magicconfig = "yes"; then
+   CPPFLAGS="$CPPFLAGS `Magick-config --cppflags`"
+   CXXFLAGS="$CXXFLAGS `Magick-config --cflags`"
+   LDFLAGS="$LDFLAGS `Magick-config --ldflags`"
+fi
+
 AC_ARG_ENABLE([image-debug],
 	AS_HELP_STRING([--enable-image-debug],[enable drawing and saving to disk of debug images (disabled by default)]),
 	AC_DEFINE([IMAGE_DEBUG],[],[enable drawing and saving to disk of debug images]),
@@ -36,6 +44,7 @@ AC_DEFUN([TRIPOVER_CHECK_LIB],
 
 dnl Checks for header files.
 
+TRIPOVER_CHECK_HEADER(Magick++.h,HAVE_MAGICKXX,have_magickxx_h)
 TRIPOVER_CHECK_HEADER(opencv/cv.h,HAVE_OPENCV_CV_H,have_opencv_cv_h)
 TRIPOVER_CHECK_HEADER(opencv/highgui.h,HAVE_OPENCV_HIGHGUI_H,have_opencv_highgui_h)
 TRIPOVER_CHECK_HEADER(GL/gl.h,HAVE_GL_GL_H,have_gl_gl_h)
@@ -58,6 +67,8 @@ TRIPOVER_CHECK_HEADER(X11/extensions/XShm.h,HAVE_X11_EXTENSIONS_XSHM_H,have_x11_
 
 dnl Checks for libraries.
 dnl new version of opencv needs check for cvGetErrStatus in cxcore and cvAdd in cv
+TRIPOVER_CHECK_LIB(Magick,MagickError,HAVELIB_MAGICK,havelib_magick)
+TRIPOVER_CHECK_LIB(Magick++,MagickPlusPlusDestroyMagick,HAVELIB_MAGICKXX,havelib_magickxx)
 TRIPOVER_CHECK_LIB(opencv,cvGetErrStatus,HAVELIB_OPENCV,havelib_opencv)
 TRIPOVER_CHECK_LIB(highgui,cvGetWindowName,HAVELIB_HIGHGUI,havelib_highgui)
 TRIPOVER_CHECK_LIB(GL,glFinish,HAVELIB_GL,havelib_gl)
@@ -145,3 +156,8 @@ else
    echo "! Disabled use of Xlib and MIT XSHM Extension"
 fi
 
+if test "$have_magickxx_h$havelib_magick$havelib_magickxx" = "yesyesyes"; then
+   echo "+ Enabled ImageMagick support"
+else
+   echo "! Disabled ImageMagick support"
+fi
