@@ -53,6 +53,11 @@ public:
    */
   float angle;
 
+  /**
+   * Is this actually a valid location
+   */
+  bool is_valid;
+
   LocatedObject();
   ~LocatedObject();
   void Refresh(Image& image);

@@ -13,7 +13,9 @@
 template <int BITCOUNT>
 class Payload : public std::bitset<BITCOUNT> {
 public:
-  Payload() : std::bitset<BITCOUNT>() {};
+  Payload() : std::bitset<BITCOUNT>() {
+    this->reset();
+  };
 
   Payload(unsigned long value) : std::bitset<BITCOUNT>(value) {};
 

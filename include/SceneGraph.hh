@@ -11,7 +11,7 @@
 
 #define MAXLENGTH 10000
 #define MAXDEPTH 20
-#define SCENE_GRAPH_DEBUG
+#undef SCENE_GRAPH_DEBUG
 
 
 /**

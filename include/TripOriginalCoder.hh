@@ -10,7 +10,7 @@
 #include <Payload.hh>
 #include <cmath>
 #include <BigInt.hh>
-#define TRIP_ORIGINAL_CODER_DEBUG
+#undef TRIP_ORIGINAL_CODER_DEBUG
 
 /**
  * A generalised coding scheme based on the one used in TRIP.  This

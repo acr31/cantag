@@ -12,12 +12,19 @@
 #include <Camera.hh>
 #include <ShapeChain.hh>
 #include <Ellipse.hh>
+#include <findtransform.hh>
 
-#define RING_TAG_DEBUG
-#define RING_TAG_IMAGE_DEBUG
+#undef RING_TAG_DEBUG
+#undef RING_TAG_IMAGE_DEBUG
 #undef DRAW_FIELD_DEBUG
 //#define Ellipse LinearEllipse
 
+/**
+ * The number of readings to make from a tag.  We then look for pairs
+ * of reading that are the same in order to guess the correct angle of
+ * the tag.
+ */
+#define READING_COUNT 5
 template<int RING_COUNT, int SECTOR_COUNT>
 class RingTag : public virtual Tag< ShapeChain<Ellipse>, RING_COUNT*SECTOR_COUNT >, protected virtual Coder<RING_COUNT*SECTOR_COUNT> {
 private:
@@ -76,9 +83,9 @@ public:
     
     // when we read the tag we read a total of five times and then
     // look for three codes which are the same
-    m_read_angles = new float[SECTOR_COUNT*5];
-    for(int i=0;i<SECTOR_COUNT*5;i++) {
-      m_read_angles[i] = 2*PI/SECTOR_COUNT/5 * i;
+    m_read_angles = new float[SECTOR_COUNT*READING_COUNT];
+    for(int i=0;i<SECTOR_COUNT*READING_COUNT;i++) {
+      m_read_angles[i] = 2*PI/SECTOR_COUNT/READING_COUNT * i;
     }
   }
 
@@ -240,10 +247,12 @@ public:
     }
 
 
-    if (correcttrans == NULL) {
+    /*    if (correcttrans == NULL) {
+#ifdef RING_TAG_DEBUG
       PROGRESS("Failed to find a valid transform - just selecting one arbitrarily!");
+#endif
       correcttrans = transform1;
-    }
+      }*/
 
     if (correcttrans != NULL) {
       float normal[3];
@@ -264,22 +273,23 @@ public:
     
       // if we read a full 360 degrees then we stop and ask it for the
       // code
-      Payload<RING_COUNT*SECTOR_COUNT> read_code[5];
-      for(int j=0;j<SECTOR_COUNT*5;j++) {
+      Payload<RING_COUNT*SECTOR_COUNT> read_code[READING_COUNT] = {Payload<RING_COUNT*SECTOR_COUNT>() };
+
+      for(int j=0;j<SECTOR_COUNT*READING_COUNT;j++) {
 	// read a chunk by sampling each ring and shifting and adding
-	int currentcode = j%5;      
+	int currentcode = j%READING_COUNT;      
 	for(int k=RING_COUNT-1;k>=0;k--) {
 	  float tpt[]=  {  cos(m_read_angles[j]) * m_data_ring_centre_radii[k]/m_bullseye_outer_radius,
 			   sin(m_read_angles[j]) * m_data_ring_centre_radii[k]/m_bullseye_outer_radius };
 	  ApplyTransform(correcttrans,tpt[0],tpt[1],tpt,tpt+1);
 	  camera.NPCFToImage(tpt,1);
 	  bool sample = image.Sample(tpt[0],tpt[1]) > 128;
-	  read_code[currentcode][j/5 * RING_COUNT + k] = sample;
+	  read_code[currentcode][j/READING_COUNT * RING_COUNT + k] = sample;
 	}
       }
     
 #ifdef RING_TAG_DEBUG
-      for(int i=0;i<5;i++) {
+      for(int i=0;i<READING_COUNT;i++) {
 	PROGRESS("Code candidate " << i << " is " << read_code[i].to_string());
       }
 #endif
@@ -293,30 +303,37 @@ public:
       // read_code[3] == read_code[4] == read_code[0]
       // read_code[4] == read_code[0] == read_code[1]
     
-      for(int i=0;i<5;i++) {
-	if ((read_code[i] == read_code[(i+1) % 5])) { 
-#ifdef RING_TAG_IMAGE_DEBUG
-	  draw_read(image,camera,correcttrans,(i+1)%5);
-#endif
+      for(int i=0;i<READING_COUNT;i++) {
+	if ((read_code[i] == read_code[(i+1) % READING_COUNT])) { 
 	  std::bitset<RING_COUNT*SECTOR_COUNT> code;
-	  DecodePayload(code,read_code[i]);
-
+	  if (DecodePayload(code,read_code[i]) >= 0) {
+#ifdef RING_TAG_IMAGE_DEBUG
+	  draw_read(image,camera,correcttrans,(i+1)%READING_COUNT);
+#endif
 #ifdef RING_TAG_DEBUG
-	  PROGRESS("Found code " << code);
+	    PROGRESS("Found code " << code);
 #endif	
-	  projected1[0] = 0;
-	  projected1[1] = 0;
-	  ApplyTransform(correcttrans,projected1[0],projected1[1],projected1,projected1+1);
-	  camera.NPCFToImage(projected1,1);
-	  PROGRESS("Ellipse position is "<<projected1[0]<<","<<projected1[1]);
-	
-	  LocatedObject* lobj = node->GetLocatedObject();
-	  for(int i=0;i<16;i++) {
-	    lobj->transform[i] = correcttrans[i];
-	  }		
-	  node->SetInspected();
-	  exit(0);
-	  return;
+	    projected1[0] = 0;
+	    projected1[1] = 0;
+	    ApplyTransform(correcttrans,projected1[0],projected1[1],projected1,projected1+1);
+	    camera.NPCFToImage(projected1,1);
+#ifdef RING_TAG_DEBUG
+	    PROGRESS("Ellipse position is "<<projected1[0]<<","<<projected1[1]);
+#endif
+	    LocatedObject* lobj = node->GetLocatedObject();
+	    for(int i=0;i<16;i++) {
+	      lobj->transform[i] = correcttrans[i];
+	    }		
+	    lobj->is_valid = true;
+	    node->SetInspected();
+	    return;
+	  }
+	  else {
+#ifdef RING_TAG_DEBUG
+	    PROGRESS("Read consistant code but it turned out invalid");
+#endif
+	  }
+	  break;
 	}
       }
     
@@ -326,8 +343,9 @@ public:
 #ifdef RING_TAG_IMAGE_DEBUG
       draw_read(image,camera,correcttrans,0);
 #endif
+      //      exit(0);
       node->SetInspected();
-      exit(0);
+      node->GetLocatedObject()->is_valid = false;
       return;
     }
     else {
@@ -396,9 +414,9 @@ private:
 	ApplyTransform(l,pts,1);
 	camera.NPCFToImage(pts,1);
 	// pick the colour to be the opposite of the sampled point so we can see the dot
-	//int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
+	int colour = image.Sample(pts[0],pts[1]) < 128 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
 	// or pick the colour to be on a gradient so we see the order it samples in
-	int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
+	//int colour = (int)((double)(k*RING_COUNT+(RING_COUNT-1-r))/(double)(SECTOR_COUNT*RING_COUNT)*255);
 	debug0.DrawPoint(pts[0],pts[1],colour,4);
       }
       counter++;
