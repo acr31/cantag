@@ -4,7 +4,7 @@
 #ifndef CONFIG_GUARD
 #define CONFIG_GUARD
 
-#include <CompilationOptions.h>
+#include <tripover/CompilationOptions.h>
 
 #ifdef TEXT_DEBUG
 #include <iostream>
