@@ -7,7 +7,7 @@
 #include <gaussianelimination.hh>
 #include <cmath>
 
-#undef SQUARE_TRANSFORM_DEBUG
+#define SQUARE_TRANSFORM_DEBUG
 #undef APPLY_TRANSFORM_DEBUG
 
 void GetTransform(const QuadTangle& quad, float transform[16]) {
@@ -21,8 +21,17 @@ void GetTransform(const QuadTangle& quad, float transform[16]) {
 #endif
 
   // we particularly want coeffs to be an array of pointers to arrays
-  // containing the columns of the matrix - then we can swap columns
+  // containing the rows of the matrix - then we can swap rows
   // conveniently by swapping pointers
+  double coeffs0[] = {1,1,1,0,0,0,-quad.GetX1(),-quad.GetX1() };
+  double coeffs1[] = {1,0,1,0,0,0,-quad.GetX0(),0             };
+  double coeffs2[] = {0,0,1,0,0,0,0            ,0             };
+  double coeffs3[] = {0,1,1,0,0,0,0            ,-quad.GetX2() };
+  double coeffs4[] = {0,0,0,1,1,1,-quad.GetY1(),-quad.GetY1() };
+  double coeffs5[] = {0,0,0,1,0,1,-quad.GetY0(),0             };
+  double coeffs6[] = {0,0,0,0,0,1,0            ,0             };
+  double coeffs7[] = {0,0,0,0,1,1,0            ,-quad.GetY2() };
+  /*
   double coeffs0[] = {1,1,0,0,0,0,0,0};
   double coeffs1[] = {1,0,0,1,0,0,0,0};
   double coeffs2[] = {1,1,1,1,0,0,0,0};
@@ -31,6 +40,7 @@ void GetTransform(const QuadTangle& quad, float transform[16]) {
   double coeffs5[] = {0,0,0,0,1,1,1,1};
   double coeffs6[] = {-quad.GetX1(),-quad.GetX0(),0,0,-quad.GetY1(),-quad.GetY0(),0,0};
   double coeffs7[] = {-quad.GetX1(),0,0,-quad.GetX2(),-quad.GetY1(),0,0,-quad.GetY2()};
+  */
   double* coeffs[] = {coeffs0,
 		      coeffs1,
 		      coeffs2,
@@ -71,6 +81,7 @@ void GetTransform(const QuadTangle& quad, float transform[16]) {
   //  for(int i=0;i<8;i++) {
   //    result[i] *= scalefactor;
   //  }
+
 #ifdef SQUARE_TRANSFORM_DEBUG
   PROGRESS("Scaled   a0 "<<result[0]);
   PROGRESS("         a1 "<<result[1]);
