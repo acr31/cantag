@@ -96,6 +96,11 @@ namespace Total {
      */
     bool CheckTags(WorldState<PAYLOAD_SIZE>* worldstate,  const Camera& camera, const Image& image, bool check_negative) const;
 
+    /**
+     * Return the number of bits to rotate the payload by if the tag was rotated by angle degrees
+     */
+    virtual int PayloadRotation(float angle) const = 0;
+
   };
 
   template<class C, int PAYLOAD_SIZE> void Tag<C,PAYLOAD_SIZE>::WalkGraph(typename ShapeTree<C>::Node* root_node, WorldState<PAYLOAD_SIZE>* worldstate, const Camera& camera, const Image& image) const {

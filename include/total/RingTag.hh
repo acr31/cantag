@@ -72,6 +72,11 @@ namespace Total {
 
     virtual bool CheckTransform(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, typename ShapeTree<ShapeChain<C> >::Node* node) const;
     virtual bool CheckDecode(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, const Camera& camera, const Image& image) const;
+
+    virtual int PayloadRotation(float angle) const {
+      int sectors = (int)(angle/2/PI * SECTOR_COUNT);
+      return sectors * RING_COUNT;
+    }
  
   private:
     void draw_circle(Image& debug0, const Camera& camera, float l[16], double radius) const;

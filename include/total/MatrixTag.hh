@@ -69,6 +69,11 @@ namespace Total {
      */
     virtual bool CheckDecode(const LocatedObject<SIZE*SIZE-(SIZE*SIZE % 2)>* lobj, const Camera& camera, const Image& image) const { return true; }
 
+    virtual int PayloadRotation(float angle) const {
+      int quad = (int)(angle/2/PI * 4);
+      return quad* (SIZE*SIZE-(SIZE*SIZE %2)) / 4;
+    }
+
   };
 
   template<int SIZE> MatrixTag<SIZE>::MatrixTag() :
