@@ -576,6 +576,7 @@ void LinearEllipse::GetTransform(float transform1[16], float transform2[16]) con
   height = -(float)sqrt((float)-2.0*f/(lump_1 - lump_2));
 
   angle_radians = M_PI/2 -(float)0.5*(float)atan(2*b/(c-a));
+  angle_radians = (float)0.5*(float)atan(2*b/(c-a));
 
   transform1[0] = width*cos(angle_radians);
   transform1[1] = -height*sin(angle_radians); 

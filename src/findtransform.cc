@@ -63,14 +63,14 @@ void GetTransform(const QuadTangle& quad, float transform[16]) {
   PROGRESS("         a7 "<<result[7]);
 #endif
 
-  double scalefactor = result[1]*result[1]+result[4]*result[4]+result[7]*result[7];
+  double scalefactor = sqrt(result[1]*result[1]+result[4]*result[4]+result[7]*result[7]);
 #ifdef SQUARE_TRANSFORM_DEBUG
   PROGRESS("Scale factor is "<<scalefactor);
 #endif
 
-  for(int i=0;i<8;i++) {
-    result[8] += scalefactor;
-  }
+  //  for(int i=0;i<8;i++) {
+  //    result[i] *= scalefactor;
+  //  }
 #ifdef SQUARE_TRANSFORM_DEBUG
   PROGRESS("Scaled   a0 "<<result[0]);
   PROGRESS("         a1 "<<result[1]);
@@ -82,9 +82,14 @@ void GetTransform(const QuadTangle& quad, float transform[16]) {
   PROGRESS("         a7 "<<result[7]);
 #endif
  
+  //  transform[0] = result[0];  transform[1] = result[1];  transform[2] = 0;  transform[3] = result[2];
+  //  transform[4] = result[3];  transform[5] = result[4];  transform[6] = 0;  transform[7] = result[5];
+  //  transform[8] = result[6];  transform[9] = result[7];  transform[10]= 0;  transform[11]= 1/scalefactor;
+  //  transform[12]= 0;          transform[13]= 0;          transform[14]= 0;  transform[15]= 1;
+
   transform[0] = result[0];  transform[1] = result[1];  transform[2] = 0;  transform[3] = result[2];
   transform[4] = result[3];  transform[5] = result[4];  transform[6] = 0;  transform[7] = result[5];
-  transform[8] = result[6];  transform[9] = result[7];  transform[10]= 0;  transform[11]= result[8];
+  transform[8] = result[6];  transform[9] = result[7];  transform[10]= 0;  transform[11]= 1;
   transform[12]= 0;          transform[13]= 0;          transform[14]= 0;  transform[15]= 1;
 
 #ifdef SQUARE_TRANSFORM_DEBUG

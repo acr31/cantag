@@ -44,10 +44,9 @@ public:
    */
   void Update(const Image& image, const Camera& camera) {
     IplImage *copy = cvCloneImage(image.m_image); // the find contours process changes the image ;-(
-    
     CvMemStorage* store = cvCreateMemStorage(0);
     CvSeq* root;
-    cvFindContours(copy,store,&root,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_NONE);
+    cvFindContours(copy,store,&root,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_SIMPLE);
     cvReleaseImage(&copy);
 
 #ifdef IMAGE_DEBUG
@@ -55,15 +54,18 @@ public:
     cvConvertScale(debug0,debug0,0.5,128);
 #endif
 
-    CvTreeNodeIterator treeiter;
-    cvInitTreeNodeIterator(&treeiter,root,MAXDEPTH);
     for(int i=0;i<MAXDEPTH;i++) {
       m_parents[i] = NULL;
     }
     m_parents[0] = new SceneGraphNode<S>();
     m_root = m_parents[0];
+
+    CvTreeNodeIterator treeiter;
+    cvInitTreeNodeIterator(&treeiter,root,MAXDEPTH);
+
     do {
       CvSeq *c = (CvSeq*)treeiter.node;
+
       if ((c != NULL) && (fabs(cvContourArea(c,CV_WHOLE_SEQ))>10)) {
 #ifdef IMAGE_DEBUG
 	// draw found contours

@@ -10,36 +10,40 @@
 
 #define QUADTANGLE_DEBUG
 
+QuadTangle::QuadTangle() {
+  m_fitted = false;
+}
+
 QuadTangle::QuadTangle(float* points, int numpoints, bool prev_fitted) {
   
-  if (!prev_fitted) {
-    CvMemStorage* store = cvCreateMemStorage(0);
-    CvSeq* contour = cvCreateSeq(CV_SEQ_POLYGON,sizeof(CvSeq),sizeof(CvPoint),store);
+  if (!prev_fitted && points) {
+    CvMemStorage* seqstore = cvCreateMemStorage(0);
+    CvSeq* contour = cvCreateSeq(CV_SEQ_POLYGON,sizeof(CvSeq),sizeof(CvPoint),seqstore);
     for(int i=0;i<numpoints*2;i+=2) {
       CvPoint p = cvPoint((int)(points[i]*100000),(int)(points[i+1]*100000));
       cvSeqPush(contour,&p);    
     }
 
-    CvPoint poly2[contour->total];
-    cvCvtSeqToArray( contour, poly2 , cvSlice(0,contour->total));
-    for( int pt = 0; pt < contour->total; pt++ ) {
-      std::cerr << poly2[pt].x << " " << poly2[pt].y << std::endl;
-    }
+    //CvPoint poly2[contour->total];
+    //    cvCvtSeqToArray( contour, poly2 , cvSlice(0,contour->total));
+    //for( int pt = 0; pt < contour->total; pt++ ) {
+    //      std::cerr << poly2[pt].x << " " << poly2[pt].y << std::endl;
+    //    }
 
 #ifdef QUADTANGLE_DEBUG
     PROGRESS("Copied points back into opencv sequence");
 #endif
-
+    CvMemStorage* store = cvCreateMemStorage(0);
     CvSeq *result = cvApproxPoly( contour, sizeof(CvContour), store,
 				  CV_POLY_APPROX_DP, 
 				  cvContourPerimeter(contour)*0.02, 0 );
     
-    CvPoint poly[result->total];
-    cvCvtSeqToArray( result, poly , cvSlice(0,result->total));
-    for( int pt = 0; pt < result->total; pt++ ) {
-      std::cerr << "0 0 " << poly[pt].x << " " << poly[pt].y << std::endl;
-    }
-    std::cerr<<"-"<<std::endl;
+    //    CvPoint poly[result->total];
+    //    cvCvtSeqToArray( result, poly , cvSlice(0,result->total));
+    //    for( int pt = 0; pt < result->total; pt++ ) {
+    //      std::cerr << "0 0 " << poly[pt].x << " " << poly[pt].y << std::endl;
+    //    }
+    //    std::cerr<<"-"<<std::endl;
 
 #ifdef QUADTANGLE_DEBUG
     PROGRESS("Applied polygon approximation");
@@ -53,20 +57,26 @@ QuadTangle::QuadTangle(float* points, int numpoints, bool prev_fitted) {
     
     if( result->total == 4 &&
 	cvCheckContourConvexity(result) &&
-	fabs(cvContourArea(result,CV_WHOLE_SEQ)) > 1000) {    
-#ifdef QUADTANGLE_DEBUG
-      PROGRESS("Accepting polygon");
-#endif
+	fabs(cvContourArea(result,CV_WHOLE_SEQ)) > 100000000) {    
       CvPoint corners[4];
       cvCvtSeqToArray(result,corners,cvSlice(0,4));
-      m_x0 = (float)corners[0].x/100000;
-      m_y0 = (float)corners[0].y/100000;
-      m_x1 = (float)corners[1].x/100000;
-      m_y1 = (float)corners[1].y/100000;
-      m_x2 = (float)corners[2].x/100000;
-      m_y2 = (float)corners[2].y/100000;
-      m_x3 = (float)corners[3].x/100000;
-      m_y3 = (float)corners[3].y/100000;
+#ifdef QUADTANGLE_DEBUG
+      PROGRESS("Accepting polygon with points " <<
+	       "("<<corners[0].x<<","<<corners[0].y<<") "<<
+	       "("<<corners[1].x<<","<<corners[1].y<<") "<<
+	       "("<<corners[2].x<<","<<corners[2].y<<") "<<
+	       "("<<corners[3].x<<","<<corners[3].y<<")");
+
+#endif
+
+      m_x0 = (float)corners[0].x/100000.f;
+      m_y0 = (float)corners[0].y/100000.f;
+      m_x1 = (float)corners[1].x/100000.f;
+      m_y1 = (float)corners[1].y/100000.f;
+      m_x2 = (float)corners[2].x/100000.f;
+      m_y2 = (float)corners[2].y/100000.f;
+      m_x3 = (float)corners[3].x/100000.f;
+      m_y3 = (float)corners[3].y/100000.f;
       m_fitted = true;
     }
     else {
@@ -76,6 +86,7 @@ QuadTangle::QuadTangle(float* points, int numpoints, bool prev_fitted) {
       m_fitted = false;
     }
   
+    cvReleaseMemStorage(&seqstore);
     cvReleaseMemStorage(&store);
   }
   else {

@@ -98,11 +98,13 @@ void MatrixTag::Draw2D(Image& image, unsigned long long code) {
     int v2 = (int)((m_cells_corner[2*i+1]+m_cell_width)*(float)size);
     int u3 = (int)(m_cells_corner[2*i]*(float)size);
     int v3 = (int)((m_cells_corner[2*i+1]+m_cell_width)*(float)size);
+    int colour = (value & 1) == 1 ? COLOUR_BLACK : COLOUR_WHITE;
+    //int colour = (float)i/(float)m_length * 255;
     image.DrawFilledQuadTangle(u0,v0,
 			       u1,v1,
 			       u2,v2,
 			       u3,v3,
-			       (value & 1) == 1 ? COLOUR_BLACK : COLOUR_WHITE);
+			       colour);
     value >>=1;
   }
 }
@@ -113,6 +115,13 @@ void MatrixTag::DecodeNode(SceneGraphNode< ShapeChain<QuadTangle> >* node, const
 #endif
 
   const QuadTangle quad = node->GetShapes().GetShape();
+
+  if (!quad.IsFitted()) {
+#ifdef MATRIX_TAG_DEBUG
+    PROGRESS("Ignoring unfitted quadtangle");
+#endif
+    return;
+  }
 #ifdef MATRIX_TAG_DEBUG
   PROGRESS("QuadTangle: " << 
 	   "("<<quad.GetX0()<<","<<quad.GetY0()<<"),"<<
@@ -143,14 +152,14 @@ void MatrixTag::DecodeNode(SceneGraphNode< ShapeChain<QuadTangle> >* node, const
   Image debug0(image);
   debug0.ConvertScale(-1,255);
   debug0.ConvertScale(0.5,128);
-  for(int i=0;i<m_size;i++) {
+  for(int i=0;i<m_size+2;i++) {
     float pts[] = { 0,
-		  (float)i/m_length,
+		  (float)i/(float)(m_size+2),
 		  1,
-		  (float)i/m_length,
-		  (float)i/m_length,
+		  (float)i/(float)(m_size+2),
+		  (float)i/(float)(m_size+2),
 		  0,
-		  (float)i/m_length,
+		  (float)i/(float)(m_size+2),
 		  1 };
     ApplyTransform(transform,pts,4);
     camera.NPCFToImage(pts,4);

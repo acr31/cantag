@@ -13,7 +13,7 @@
 #include <ShapeChain.hh>
 #include <Ellipse.hh>
 
-class RingTag : public virtual Tag< ShapeChain<LinearEllipse> >, protected virtual Coder {
+class RingTag : public virtual Tag< ShapeChain<Ellipse> >, protected virtual Coder {
 private:
   int m_ring_count;
   int m_sector_count;
@@ -35,7 +35,7 @@ public:
 	  float data_outer_radius);
   virtual ~RingTag();
   virtual void Draw2D(Image& image,  unsigned long long code);
-  virtual void DecodeNode(SceneGraphNode< ShapeChain<LinearEllipse> >* node, const Camera& camera, const Image& image);
+  virtual void DecodeNode(SceneGraphNode< ShapeChain<Ellipse> >* node, const Camera& camera, const Image& image);
 
 private:
   void draw_circle(Image& image, const Camera& camera, float l[16], double radius);
