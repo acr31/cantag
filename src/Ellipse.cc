@@ -22,8 +22,10 @@
 #define COMPARETHRESH 1
 #define MAXDISTANCE 
 
+#ifdef ELLIPSE_DEBUG
 static void print(const char* label, double* array, int rows, int cols);
 static void print(const char* label, double** array, int rows, int cols);
+#endif
 
 Ellipse::Ellipse(): m_fitted(false) {}
 
@@ -573,6 +575,7 @@ float Ellipse::GetErrorStricker(const std::vector<float>& points) const {
 #endif
 }
 
+#ifdef ELLIPSE_DEBUG
 static void print(const char* label, double* array, int rows, int cols) {
   std::cout << label << "= [ ";
   for(int i=0;i<rows;i++) {
@@ -595,6 +598,7 @@ static void print(const char* label, double** array, int rows, int cols) {
   }
   std::cout << "]" << std::endl;
 }
+#endif
 
 void Ellipse::Compose() {
   float x0 = GetX0();
