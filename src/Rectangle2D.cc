@@ -2,6 +2,9 @@
  * $Header$
  *
  * $Log$
+ * Revision 1.3  2004/01/26 09:07:42  acr31
+ * added comments to new method of solving linear equation
+ *
  * Revision 1.2  2004/01/26 08:56:22  acr31
  * rewrite of the find central point method - needs to be finished
  *
@@ -200,24 +203,21 @@ void Rectangle2D::compute_alpha() {
 
 inline void Rectangle2D::compute_central_point() {
   /*
-    Find the central point of this rectangle (A,B,C,D)
-
-     A + AC*a = B + BD*b
-
-     Ax + ACx * a = Bx + BDx * b   (1)
-     Ay + ACy * a = By + BDy * b   (2)
-
-                a = ( Bx + BDx * b - Ax ) / ACx   (from 1)
-                
-     Ay + ACy * (Bx + BDx * b - Ax) / ACx = By + BDy * b  (subst in 2)
-
-     ACx*Ay + ACy * (Bx + BDx * b - Ax)   = ACx*By + ACx*BDy * b
-     
-     b = ( Ay * ACx + ACy * Bx + ACy * Ax - ACx * By ) / ( ACx * (BDy + BDx) )
-
-     Central point  = B+BD*b
-
-  */
+   * Find the central point of this rectangle (A,B,C,D)
+   *
+   *       A + AC*a = B + BD*b
+   *
+   *    a*AC - b*BD = B - A
+   *
+   *  (ACx -BDx)(a) = (ABx) 
+   *  (ACy -BDy)(b)   (ABy)
+   *
+   *            (a) = 1/( ACy*BDx - ACx*BDy ) * (-BDy  BDx)(ABx)
+   *            (b)                             (-ACy  ACx)(ABy)
+   *
+   * Central point  = A+AC*a
+   *
+   */
   float Ax = m_x0;
   float Ay = m_y0;
 
@@ -240,11 +240,9 @@ inline void Rectangle2D::compute_central_point() {
   float ABy = By-Ay;
 
   float b = (BDx*ABy - BDy*ABx)/(ACy*BDx - ACx*BDy);
-  //  assert(ACx*(BDy + BDx) != 0);
+
   m_xc = Ax+ACx*b;
   m_yc = Ay+ACy*b;        
-  std::cout << m_x0 << " " << m_y0 << " " << m_x1 << " " << m_y1 << " " << m_x2 << " " << m_y2 << " " << m_x3 << " " << m_y3 << std::endl;
-  std::cout << m_xc << " " << m_yc<<std::endl;
 }
 
   
