@@ -196,7 +196,7 @@ template<int RING_COUNT,int SECTOR_COUNT,class C> void RingTag<RING_COUNT,SECTOR
       //int colour = (int)((float)(i+j*RING_COUNT) / (float)(RING_COUNT*SECTOR_COUNT) * 128)+128;
       // or pick the colour as if we were reading the tag in the wrong order - useful for pictures
       //int colour = (int)((float)(i*SECTOR_COUNT+j) / (float)(RING_COUNT*SECTOR_COUNT) * 128)+128;
-      image.DrawSector(x0,y0,scalefactor*m_data_ring_outer_radii[i],m_sector_angles[j],m_sector_angles[j+1],colour);
+      image.DrawSector(x0,y0,scalefactor*m_data_ring_outer_radii[i],m_sector_angles[j],m_sector_angles[SECTOR_COUNT],colour);
     }
   }
 
@@ -323,6 +323,7 @@ template<int RING_COUNT,int SECTOR_COUNT,class C> LocatedObject<RING_COUNT*SECTO
   
   // first check that the points on the mid transforms are all 0-pixels
   bool transform1mid_ok = true;
+  /*
   for(std::vector<float>::const_iterator i = projected1b.begin();
       i!=projected1b.end();
       ++i) {
@@ -331,12 +332,14 @@ template<int RING_COUNT,int SECTOR_COUNT,class C> LocatedObject<RING_COUNT*SECTO
     float y = *i;
     if (image.Sample(x,y)) { transform1mid_ok = false; break; }
   }
+  */
 #ifdef RING_TAG_DEBUG
   PROGRESS("Transform1mid_ok " << transform1mid_ok);
 #endif
 
   // first check that the points on the mid transforms are all 0-pixels
   bool transform2mid_ok = true;
+  /*
   for(std::vector<float>::const_iterator i = projected2b.begin();
       i!=projected2b.end();
       ++i) {
@@ -345,6 +348,7 @@ template<int RING_COUNT,int SECTOR_COUNT,class C> LocatedObject<RING_COUNT*SECTO
     float y = *i;
     if (image.Sample(x,y)) { transform2mid_ok = false; break; }
   }
+  */
 #ifdef RING_TAG_DEBUG
   PROGRESS("Transform2mid_ok " << transform2mid_ok);
 #endif
@@ -660,8 +664,8 @@ template<int RING_COUNT,int SECTOR_COUNT,class C> void RingTag<RING_COUNT,SECTOR
 template<int RING_COUNT,int SECTOR_COUNT,class C>  void RingTag<RING_COUNT,SECTOR_COUNT,C>::draw_read(const Image& image, const Camera& camera, float l[16]) const {
   int i =0;
   Image debug0(image);
+  debug0.ConvertScale(50,0);
   debug0.ConvertScale(-1,255);
-  debug0.ConvertScale(0.5,128);
   
 #ifdef DRAW_FIELD_DEBUG
   float step = 0.2;
