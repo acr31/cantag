@@ -41,6 +41,10 @@ public:
     cvConvertScale(m_image,m_image,scalefactor,offset);
   }
   
+  inline void Resize(Image& dest) const {
+    cvResize(m_image,dest.m_image);
+  }
+
   inline void DrawPixel(int x,int y, unsigned char colour) {
     if ((x >= 0) && (x < m_image->width) &&
 	(y >= 0) && (y < m_image->height)) {

@@ -1,9 +1,8 @@
 #include <Config.hh>
 #include <Template.hh>
 
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
 #include <cstring>
+#include <findtransform.hh>
 
 /**
  * Load the image file given from disk.  Subsample it to produce a
@@ -20,27 +19,19 @@ Template::Template(char* filename, int size=16,int subsample=4) :
   m_filename = new char[strlen(filename)];
   strncpy(m_filename,filename,strlen(filename));
   PROGRESS("Filename "<<filename);
-  Image *loaded = LoadImage(filename);  
 
-  assert(loaded->width == loaded->height);
+  m_original = new Image(filename);
+  assert(m_original->GetWidth() == m_original->GetHeight());
 
-  m_original = cvCreateImage(cvSize(loaded->width,loaded->height),IPL_DEPTH_8U,1);
-  if (loaded->nChannels==3) {
-    cvCvtColor(loaded,m_original,CV_RGB2GRAY);
-  }
-  else {
-    cvCopy(loaded,m_original,NULL);
-  }
-  cvReleaseImage(&loaded);
-
-  Image* dest = cvCreateImage(cvSize(size,size),IPL_DEPTH_8U,1);
-  cvResize(m_original,dest);
+  Image dest(size,size);
+  m_original->Resize(dest);
 
   m_values = new unsigned char[size*size];
-  for(int i=0;i<size*size;i++) {
-    m_values[i] = *((uchar*)(dest->imageData + i));
+  for(int x=0;x<size;x++) {
+    for(int y=0;y<size;y++) {
+      m_values[x+size*y] = dest.Sample(x,y);
+    }
   }
-  cvReleaseImage(&dest);
 
   calculate_mean_sigma(m_values,&m_sigma,&m_average);
 
@@ -52,7 +43,7 @@ bool Template::operator<(const Template& t) {
 
 Template::~Template() {
   delete[] m_values;
-  cvReleaseImage(&m_original);
+  delete m_original;
 }
 
 /**
@@ -61,7 +52,7 @@ Template::~Template() {
  * correlation coefficient.  We need to try it against all four
  * orientations of the template.
  */
-float Template::Correlate(Image* image, const QuadTangle2D* q) const {
+float Template::Correlate(const Image& image, const float transform[16], const Camera& camera) const {
   float scalefactor = 1/(float)m_size;
   float subscalefactor = 1/(float)m_size/(float)m_subsample;
   
@@ -72,21 +63,19 @@ float Template::Correlate(Image* image, const QuadTangle2D* q) const {
       float currentvalue  = 0;
       for(int k=0;k<m_subsample;k++) {
 	for(int l=0;l<m_subsample;l++) {
-	  float projX;
-	  float projY;
-	  q->ProjectPoint(i*scalefactor+k*subscalefactor,
-			  j*scalefactor+l*subscalefactor,
-			  &projX,
-			  &projY);
-
-	  currentvalue+=SampleImage(image,projX,projY);	    
+	  float points[] = { i*scalefactor+k*subscalefactor,
+			     j*scalefactor+l*subscalefactor};
+	  ApplyTransform(transform,points,1);
+	  camera.NPCFToImage(points,1);
+	  currentvalue+=(float)image.Sample(points[0],points[1]);	    
 	}
       }         
-      currentvalue/=m_subsample*m_subsample;
+      currentvalue/= m_subsample*m_subsample;
       readvalues[i*m_size+j]=(unsigned char)currentvalue;
     }
   }
 
+  /*
   Image *d = cvCreateImage(cvSize(m_size,m_size),IPL_DEPTH_8U,1);
   for(int i=0;i<m_size;i++) {
     for(int j=0;j<m_size;j++) {
@@ -94,6 +83,7 @@ float Template::Correlate(Image* image, const QuadTangle2D* q) const {
     }
   }
   cvReleaseImage(&d);
+  */
 
   return Correlate(readvalues);
 }
@@ -102,7 +92,7 @@ float Template::Correlate(const Template& t) const {
   return Correlate(t.m_values);
 }
 
-float Template::Correlate(const float* readvalues) const {
+float Template::Correlate(const unsigned char* readvalues) const {
   float sigma;
   float mean;
   calculate_mean_sigma(readvalues,&sigma,&mean);
@@ -162,7 +152,7 @@ float Template::Correlate(const float* readvalues) const {
 
 }
 
-void Template::calculate_mean_sigma(unsigned char* values, float* sigma, float* mean) const {
+void Template::calculate_mean_sigma(const unsigned char* values, float* sigma, float* mean) const {
   *mean = 0;
   for(int i=0;i<m_size*m_size;i++) {
     *mean += (float)values[i];
@@ -177,20 +167,19 @@ void Template::calculate_mean_sigma(unsigned char* values, float* sigma, float* 
   *sigma = sqrt(diffsq);
 }
 
-void Template::Draw2D(Image *image, int white, int black) {
+void Template::Draw2D(Image& image) {
 
   int starty = 0;
-  int endy = image->height;
+  int endy = image.GetHeight();
   
   int startx = 0;
-  int endx = image->width;
+  int endx = image.GetWidth();
   
-
   for(int y=starty;y<endy;y++) {
-    float v = m_original->height- m_original->height*((float)y -starty)/endy;
+    float v = m_original->GetHeight() - m_original->GetHeight()*((float)y -starty)/endy;
     for(int x=startx;x<endx;x++) {
-      float u = m_original->width- m_original->width*((float)x -startx)/endx;
-      DrawPixel(image,x,y,SampleImage(m_original,u,v));
+      float u = m_original->GetWidth() - m_original->GetWidth()*((float)x -startx)/endx;
+      image.DrawPixel(x,y,m_original->Sample(u,v));
     }
   }
 }

@@ -2,8 +2,8 @@
 #define TEMPLATE_GUARD
 
 #include <Config.hh>
-#include <Drawing.hh>
-#include <QuadTangle2D.hh>
+#include <Image.hh>
+#include <Camera.hh>
 
 class Template {
 private:
@@ -18,12 +18,12 @@ public:
   char* m_filename;
   Template(char* filename, int size, int subsample);
   ~Template();
-  float Correlate(Image* image, const QuadTangle2D* l) const;
-  float Correlate(const Template* template) const;
+  float Correlate(const Image& image, const float transform[16], const Camera& camera) const;
+  float Correlate(const Template& t) const;
   bool operator<(const Template& t);
-  void Draw2D(Image* image,int white, int black);
+  void Draw2D(Image& image);
 private:
-  void calculate_mean_sigma(unsigned char* values, float* stddev, float* mean) const;
+  void calculate_mean_sigma(const unsigned char* values, float* stddev, float* mean) const;
   float Correlate(const unsigned char* values) const;
 };
 
