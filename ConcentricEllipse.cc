@@ -1,13 +1,22 @@
 #include "ConcentricEllipse.hh"
 
+#include "IdentifyTagCircularOuter.hh"
+
+#define MAX_FIT_ERROR 0.01
+#define MAX_X_OFFSET 4
+#define MAX_Y_OFFSET 4
+#define MAX_RATIO_DIFF 0.1
+#define MAX_ITERATOR_DEPTH 10
+
 void
-findTags(CvArr* image, std::vector<CvBox2D> *concentrics)
+findTags(IplImage* input, std::vector<Tag> *result)
 {
   /* Follow edges in the image and recover contours */
   CvMemStorage *store = cvCreateMemStorage(0);
   CvSeq *seq = NULL;
   /* CV_RETR_TREE mode returns a tree of contours - a nodes children
      are inner contours of the node */
+  IplImage *image = cvCloneImage(input);
   int num = cvFindContours(image,store,&seq,sizeof(CvContour),CV_RETR_TREE,CV_CHAIN_APPROX_TC89_KCOS);
 
   if (num != 0) {
@@ -87,9 +96,11 @@ findTags(CvArr* image, std::vector<CvBox2D> *concentrics)
 		(fabs(boxes[i.level].center.y - boxes[i.level-1].center.y) < MAX_Y_OFFSET) &&
 		(fabs((double)boxes[i.level].size.height/(double)boxes[i.level-1].size.width - 
 		      (double)boxes[i.level].size.height/(double)boxes[i.level-1].size.width) < MAX_RATIO_DIFF)) {
-	      /* this will create a new copy of the box leaving us
-		 free to reuse this pointer */
-	      concentrics->push_back(boxes[i.level-1]);
+
+	      if (identifyTag(input,boxes+i.level-1,result)) {
+		int color = CV_RGB( rand(), rand(), rand() );
+		cvEllipseBox( input, boxes[i.level-1],color,3);
+	      }
 	      
 	      /* We can now push the iterator on to get the next sibling of the parent */
 	      int target_level = i.level-1;

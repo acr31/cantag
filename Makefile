@@ -3,11 +3,18 @@ OPENCVLIB=`params --opencv-lib`
 OPENCVLINK=`params --opencv-link`
 CPPFLAGS=`params --opencv-cxx-flags`
 FLAGS=-g
-test: test.o ConcentricEllipse.o
+
+
+test: test.o ConcentricEllipse.o IdentifyTagCircularOuter.o
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $^ ${OPENCVLINK}
+
+
+DrawCircularOuter: DrawCircularOuter.o
+	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVLIB} -o $@ $^ ${OPENCVLINK}
+
 
 %.o: %.cc
 	g++ ${FLAGS} ${CPPFLAGS} ${OPENCVINC} -o $@ -c $<
 
 clean:
-	-rm -f test test.o
+	-rm -f test test.o ConcentricEllipse.o IdentifyTagCircularOuter.o
