@@ -17,7 +17,7 @@ namespace Total {
    * \todo regression test give it sets of points we see if it fits them properly
    */
   class QuadTangle {
-  private:
+  protected:
     float m_x0;
     float m_y0;
     float m_x1;
@@ -58,14 +58,27 @@ namespace Total {
      */ 
     bool Check(const std::vector<float>& points) const {return true;};
   private:
-    inline void compute_central_point();
-    void sort_points();
     void swap(float *a, float *b);
     float find_angle(float x, float y, float cx, float cy);
-    void CornerFit(const std::vector<float>& points);
+
+  protected:
+    inline void compute_central_point();
+    void sort_points();
+    virtual bool Fit(const std::vector<float>& points) = 0;
 
   };
+
+  class CornerQuadTangle : public QuadTangle {
+  public:
+    CornerQuadTangle();
+    CornerQuadTangle(const std::vector<float>& points, bool prev_fitted=false);
+    CornerQuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3);
+  protected:
+    bool Fit(const std::vector<float>& points);
+  };
 }
+
+
 #else
 namespace Total {
   class QuadTangle;

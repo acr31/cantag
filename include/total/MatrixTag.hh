@@ -40,8 +40,8 @@ namespace Total {
    *
    * \todo regression test with gl harness
    */ 
-  template<int SIZE>
-  class MatrixTag : public virtual Tag< ShapeChain<QuadTangle>, SIZE*SIZE - (SIZE*SIZE % 2) >, public virtual Coder<SIZE*SIZE - (SIZE*SIZE % 2)>, protected virtual QuadTangleTransform {
+  template<int SIZE, class Quad>
+  class MatrixTag : public virtual Tag< ShapeChain<Quad>, SIZE*SIZE - (SIZE*SIZE % 2) >, public virtual Coder<SIZE*SIZE - (SIZE*SIZE % 2)>, protected virtual QuadTangleTransform {
   private:
     float m_cell_width;
     float m_cell_width_2;
@@ -54,7 +54,7 @@ namespace Total {
 
     virtual void Draw2D(Image& image, CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>& tag_data) const;
 
-    virtual LocatedObject<SIZE*SIZE-(SIZE*SIZE % 2)>* GetTransform(ShapeTree< ShapeChain<QuadTangle> >::Node* node, 
+    virtual LocatedObject<SIZE*SIZE-(SIZE*SIZE % 2)>* GetTransform(typename ShapeTree< ShapeChain<Quad> >::Node* node, 
 								   const Camera& camera, const Image& image) const;
     virtual bool DecodeNode(LocatedObject<SIZE*SIZE-(SIZE*SIZE % 2)>* lobj,
 			    const Camera& camera, const Image& image) const;
@@ -62,7 +62,7 @@ namespace Total {
     /**
      * \todo implement CheckTransform
      */
-    virtual bool CheckTransform(const LocatedObject<SIZE*SIZE-(SIZE*SIZE % 2)>* lobj, ShapeTree<ShapeChain<QuadTangle> >::Node* node) const { return true; }
+    virtual bool CheckTransform(const LocatedObject<SIZE*SIZE-(SIZE*SIZE % 2)>* lobj, typename ShapeTree<ShapeChain<Quad> >::Node* node) const { return true; }
 
     /**
      * \todo implement CheckDecode
@@ -76,7 +76,7 @@ namespace Total {
 
   };
 
-  template<int SIZE> MatrixTag<SIZE>::MatrixTag() :
+  template<int SIZE,class Quad> MatrixTag<SIZE,Quad>::MatrixTag() :
     m_cell_width(2/(float)(SIZE+2)),
     m_cell_width_2(1/(float)(SIZE+2))
   {
@@ -126,11 +126,11 @@ namespace Total {
 #endif
   }
 
-  template<int SIZE> MatrixTag<SIZE>::~MatrixTag() {
+  template<int SIZE,class Quad> MatrixTag<SIZE,Quad>::~MatrixTag() {
     delete[] m_cells_corner;
   }
 
-  template<int SIZE> void MatrixTag<SIZE>::Draw2D(Image& image, CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>& tag_data) const {
+  template<int SIZE,class Quad> void MatrixTag<SIZE,Quad>::Draw2D(Image& image, CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>& tag_data) const {
 #ifdef MATRIX_TAG_DEBUG
     PROGRESS("Draw2D called");
 #endif
@@ -198,12 +198,12 @@ namespace Total {
   }
 
 
-  template<int SIZE> LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* MatrixTag<SIZE>::GetTransform(ShapeTree< ShapeChain<QuadTangle> >::Node* node, const Camera& camera, const Image& image) const {
+  template<int SIZE,class Quad> LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* MatrixTag<SIZE,Quad>::GetTransform(typename ShapeTree< ShapeChain<Quad> >::Node* node, const Camera& camera, const Image& image) const {
 #ifdef MATRIX_TAG_DEBUG
     PROGRESS("Decode node called");
 #endif
 
-    const QuadTangle quad = node->matched.GetShape();
+    const Quad quad = node->matched.GetShape();
 
     if (!quad.IsFitted()) return false;
 
@@ -226,7 +226,7 @@ namespace Total {
     return lobj;
   }
 
-  template<int SIZE> bool MatrixTag<SIZE>::DecodeNode( LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* lobj, const Camera& camera, const Image& image) const {
+  template<int SIZE,class Quad> bool MatrixTag<SIZE,Quad>::DecodeNode( LocatedObject<SIZE*SIZE-(SIZE*SIZE%2)>* lobj, const Camera& camera, const Image& image) const {
   
     float* transform= lobj->transform;
     CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>* read_code = new CyclicBitSet<SIZE*SIZE - (SIZE*SIZE % 2)>();

@@ -24,146 +24,9 @@ namespace Total {
     m_fitted = false;
   }
 
-  static void compute(const float* xwindow, const float* ywindow, int datapointer, int k, float* lik, float* rik) {
-    float chordx = xwindow[MASK(datapointer+k)] - xwindow[MASK(datapointer-k)];
-    float chordy = ywindow[MASK(datapointer+k)] - ywindow[MASK(datapointer-k)];
-  
-    *lik = sqrt(chordx*chordx + chordy*chordy);
-  
-    float apx = xwindow[MASK(datapointer-k)] - xwindow[datapointer];
-    float apy = ywindow[MASK(datapointer-k)] - ywindow[datapointer];
-
-    float modchord = *lik;
-
-    if (modchord < 1e-5) { *rik = 0; return; }
-  
-    float denom = fabs((chordx*apy - apx*chordy));
-  
-    *rik = denom/modchord/modchord;
-
-  }
-
-  static bool check(const float* xwindow, const float* ywindow, int datapointer, int k) {
-    if (k+1 == (1<<(LOGMAXWINDOW-1))) return false;
-
-    float lik,rik,lik1,rik1;
-    compute(xwindow,ywindow,datapointer,k,&lik,&rik);
-    compute(xwindow,ywindow,datapointer,k+1,&lik1,&rik1);
-
-    bool result = (lik < lik1) && (rik < rik1);
-
-    return result;
-  }
-
-  static float curvature(const float* xwindow, const float* ywindow, int datapointer, int k) {
-    float ax = xwindow[MASK(datapointer+k)] - xwindow[datapointer];
-    float ay = ywindow[MASK(datapointer+k)] - ywindow[datapointer];
-
-    float bx = xwindow[MASK(datapointer-k)] - xwindow[datapointer];
-    float by = ywindow[MASK(datapointer-k)] - ywindow[datapointer];
-
-    float moda = sqrt(ax*ax+ay*ay);
-    float modb = sqrt(bx*bx+by*by);
-
-    float result = (ax*bx+ay*by)/moda/modb;
-
-    return result;
-  }
-
-  void QuadTangle::CornerFit(const std::vector<float>& points) {
-    if (points.size() > (2<<LOGMAXWINDOW) && points.size() > 50) {
-      float xcorners[4];
-      float ycorners[4];
-      float curvecorners[4];
-      int indexcorners[4];
-      int corner_counter = 0;
-      float xwindow[1<<LOGMAXWINDOW];
-      float ywindow[1<<LOGMAXWINDOW];
-    
-      int loadpointer = 0;
-      std::vector<float>::const_iterator i = points.begin();
-      for(;loadpointer < (1<<LOGMAXWINDOW);++loadpointer) {
-	xwindow[loadpointer] = *i;
-	++i;
-	ywindow[loadpointer] = *i;
-	++i;
-      }
-      int datapointer = 1<<(LOGMAXWINDOW-1);
-    
-      float curve2 = curvature(xwindow,ywindow,datapointer,10);
-      if (curve2 > CURVTHRESH) {
-	xcorners[0] = xwindow[datapointer];
-	ycorners[0] = ywindow[datapointer];
-	curvecorners[0] = curve2;
-	indexcorners[0] = 0;
-	++corner_counter;
-      }
-    
-      float previous = curve2;
-      float currentmax = -10;
-      int count = points.size()/2;
-      for(int c=1;c<count;++c) {
-	datapointer = MASK(datapointer+1);
-	loadpointer = MASK(loadpointer+1);
-	xwindow[loadpointer] = *i;
-	++i;
-	ywindow[loadpointer] = *i;
-	++i;
-      
-	if (i == points.end()) { i = points.begin(); }
-      
-	float curve = curvature(xwindow,ywindow,datapointer,10);
-	curve = -fabs(curve);
-	if (curve < CURVTHRESH) { 
-	  if (previous > CURVTHRESH) {
-	    ++corner_counter;
-	    currentmax = -10;
-	    if (corner_counter > 4) { m_fitted = false; return; }
-	  }
-	}
-	else {
-	  if (curve > currentmax && corner_counter < 4) { 
-	    currentmax = curve;
-	    xcorners[corner_counter] = xwindow[datapointer];
-	    ycorners[corner_counter] = ywindow[datapointer];
-	  }
-	}
-	previous = curve;
-      }
-    
-      if (corner_counter == 4) {
-	m_x0 = xcorners[0];
-	m_y0 = ycorners[0];
-	m_x1 = xcorners[1];
-	m_y1 = ycorners[1];
-	m_x2 = xcorners[2];
-	m_y2 = ycorners[2];
-	m_x3 = xcorners[3];
-	m_y3 = ycorners[3];
-	compute_central_point();
-	sort_points();
-	m_fitted = true;
-	return;
-      }
-    }
-    m_fitted = false;
-    return;
-  }
-
-  QuadTangle::QuadTangle(const std::vector<float>& points, bool prev_fitted) {
-  
-    if (!prev_fitted) {
-      CornerFit(points);
-    }
-    else {
-      m_fitted = false;
-    }
-  }
-
   QuadTangle::QuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3) : m_x0(x0), m_y0(y0),m_x1(x1), m_y1(y1),m_x2(x2), m_y2(y2),m_x3(x3), m_y3(y3), m_fitted(true) {
     compute_central_point();
     sort_points();
-
   }
 
 
@@ -320,4 +183,142 @@ namespace Total {
     count += socket.Send((int)m_fitted);
     return count;
   }
+
+  static void compute(const float* xwindow, const float* ywindow, int datapointer, int k, float* lik, float* rik) {
+    float chordx = xwindow[MASK(datapointer+k)] - xwindow[MASK(datapointer-k)];
+    float chordy = ywindow[MASK(datapointer+k)] - ywindow[MASK(datapointer-k)];
+  
+    *lik = sqrt(chordx*chordx + chordy*chordy);
+  
+    float apx = xwindow[MASK(datapointer-k)] - xwindow[datapointer];
+    float apy = ywindow[MASK(datapointer-k)] - ywindow[datapointer];
+
+    float modchord = *lik;
+
+    if (modchord < 1e-5) { *rik = 0; return; }
+  
+    float denom = fabs((chordx*apy - apx*chordy));
+  
+    *rik = denom/modchord/modchord;
+
+  }
+
+  static bool check(const float* xwindow, const float* ywindow, int datapointer, int k) {
+    if (k+1 == (1<<(LOGMAXWINDOW-1))) return false;
+
+    float lik,rik,lik1,rik1;
+    compute(xwindow,ywindow,datapointer,k,&lik,&rik);
+    compute(xwindow,ywindow,datapointer,k+1,&lik1,&rik1);
+
+    bool result = (lik < lik1) && (rik < rik1);
+
+    return result;
+  }
+
+  static float curvature(const float* xwindow, const float* ywindow, int datapointer, int k) {
+    float ax = xwindow[MASK(datapointer+k)] - xwindow[datapointer];
+    float ay = ywindow[MASK(datapointer+k)] - ywindow[datapointer];
+
+    float bx = xwindow[MASK(datapointer-k)] - xwindow[datapointer];
+    float by = ywindow[MASK(datapointer-k)] - ywindow[datapointer];
+
+    float moda = sqrt(ax*ax+ay*ay);
+    float modb = sqrt(bx*bx+by*by);
+
+    float result = (ax*bx+ay*by)/moda/modb;
+
+    return result;
+  }
+
+  CornerQuadTangle::CornerQuadTangle() : QuadTangle() {};
+
+  CornerQuadTangle::CornerQuadTangle(const std::vector<float>& points, bool prev_fitted) : QuadTangle() {
+    if (!prev_fitted) {
+      m_fitted = Fit(points);
+    }
+    else {
+      m_fitted = false;
+    }
+  };
+
+  CornerQuadTangle::CornerQuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3) : QuadTangle(x0,y0,x1,y1,x2,y2,x3,y3) {};
+
+  bool CornerQuadTangle::Fit(const std::vector<float>& points) {
+    if (points.size() > (2<<LOGMAXWINDOW) && points.size() > 50) {
+      float xcorners[4];
+      float ycorners[4];
+      float curvecorners[4];
+      int indexcorners[4];
+      int corner_counter = 0;
+      float xwindow[1<<LOGMAXWINDOW];
+      float ywindow[1<<LOGMAXWINDOW];
+    
+      int loadpointer = 0;
+      std::vector<float>::const_iterator i = points.begin();
+      for(;loadpointer < (1<<LOGMAXWINDOW);++loadpointer) {
+	xwindow[loadpointer] = *i;
+	++i;
+	ywindow[loadpointer] = *i;
+	++i;
+      }
+      int datapointer = 1<<(LOGMAXWINDOW-1);
+    
+      float curve2 = curvature(xwindow,ywindow,datapointer,10);
+      if (curve2 > CURVTHRESH) {
+	xcorners[0] = xwindow[datapointer];
+	ycorners[0] = ywindow[datapointer];
+	curvecorners[0] = curve2;
+	indexcorners[0] = 0;
+	++corner_counter;
+      }
+    
+      float previous = curve2;
+      float currentmax = -10;
+      int count = points.size()/2;
+      for(int c=1;c<count;++c) {
+	datapointer = MASK(datapointer+1);
+	loadpointer = MASK(loadpointer+1);
+	xwindow[loadpointer] = *i;
+	++i;
+	ywindow[loadpointer] = *i;
+	++i;
+      
+	if (i == points.end()) { i = points.begin(); }
+      
+	float curve = curvature(xwindow,ywindow,datapointer,10);
+	curve = -fabs(curve);
+	if (curve < CURVTHRESH) { 
+	  if (previous > CURVTHRESH) {
+	    ++corner_counter;
+	    currentmax = -10;
+	    if (corner_counter > 4) { return false; }
+	  }
+	}
+	else {
+	  if (curve > currentmax && corner_counter < 4) { 
+	    currentmax = curve;
+	    xcorners[corner_counter] = xwindow[datapointer];
+	    ycorners[corner_counter] = ywindow[datapointer];
+	  }
+	}
+	previous = curve;
+      }
+    
+      if (corner_counter == 4) {
+	m_x0 = xcorners[0];
+	m_y0 = ycorners[0];
+	m_x1 = xcorners[1];
+	m_y1 = ycorners[1];
+	m_x2 = xcorners[2];
+	m_y2 = ycorners[2];
+	m_x3 = xcorners[3];
+	m_y3 = ycorners[3];
+	compute_central_point();
+	sort_points();
+	return true;
+      }
+    }
+    return false;
+  }
+
 }
