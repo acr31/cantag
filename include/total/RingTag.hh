@@ -30,7 +30,7 @@
 #endif
 
 #define READING_COUNT 200
-#define MAX_CHILD_DISTANCE 10
+#define MAX_CHILD_DISTANCE 50
 
 namespace Total {
 
