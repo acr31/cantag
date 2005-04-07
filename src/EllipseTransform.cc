@@ -6,7 +6,7 @@
 #include <total/polysolve.hh>
 #include <total/Ellipse.hh>
 
-#define ELLIPSE_TRANSFORM_DEBUG
+#undef ELLIPSE_TRANSFORM_DEBUG
 
 namespace Total {
 
