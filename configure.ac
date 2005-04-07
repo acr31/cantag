@@ -109,6 +109,7 @@ AC_OUTPUT([
 Makefile
 src/Makefile
 unit/Makefile
+samples/Makefile
 include/Makefile
 include/total/Makefile
 ])
