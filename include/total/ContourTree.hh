@@ -26,22 +26,74 @@ namespace Total {
     enum topology_t {ALL,CONCAVE_ONLY, CONVEX_ONLY};
     enum bordertype_t { UNKNOWN = 2, OUTER_BORDER = 1, HOLE_BORDER = 0};
 
+    /**
+     * A data structure for holding the contour itself
+     */
     struct Contour {
+      /**
+       * The unique contour id
+       */
       int nbd;
+      
+      /**
+       * The type of the contour (UKNOWN, OUTER_BORDER, HOLE_BORDER)
+       */
       bordertype_t bordertype;
+
+      /**
+       * The contour id of the parent contour
+       */
       int parent_id;
+
+      /**
+       * The points on the contour
+       */
       std::vector<float> points;
+
+      /**
+       * The children contours - a child contour is completely contained within the parent contour
+       */
       std::vector<Contour*> children;
+
+      /**
+       * Indicate if this contour has been eliminated from
+       * consideration in future stages because it failed to match a
+       * contour constraint.
+       */
       bool weeded;
+
+      /**
+       * Create a new contour with the given contour id
+       */ 
       Contour(int id) : nbd(id),bordertype(UNKNOWN),parent_id(id),points(),children(),weeded(false) {}
+
+      /**
+       * Create this contour with data from the network
+       */
       Contour(Socket& socket);
+
+      /**
+       * Copy construct this contour (deep copy so all children contours are copied too)
+       */
       Contour(const Contour& contour);
+
+      /**
+       * Delete this contour and all children contours
+       */
       ~Contour();
 
+      /**
+       * Save this contour over the network
+       */
       int Save(Socket& socket) const;
 
     };
   
+    /**
+     * A datastructure representing constraints to check as we accumulate contours
+     * 
+     * \todo currently unused
+     */
     struct ContourConstraint {
       int minLength;
       int maxLength;
@@ -51,6 +103,11 @@ namespace Total {
       ContourConstraint() {}
     };
 
+    /**
+     * A datastructure to represent statistics about the contour as we walk around it
+     *
+     * \todo currently unused
+     */
     struct ContourStatistics {
       int length;
       int min_x;
@@ -112,20 +169,61 @@ namespace Total {
 		      unsigned int* nbd_store
 		      );
 
+    /**
+     * Convert this contour to NCPF and then recursively convert its children contours
+     */
     void ImageToNPCF(const Camera& camera, Contour* contour);
     bool CheckImageToNPCF(const Camera& camera, const Contour* current, const Contour* evidence_current) const;
   public:
+    
+    /**
+     * Construct a contour tree from the proffered image
+     */
+    ContourTree(Image& image);
 
-    ContourTree(Image& image, std::vector<ContourConstraint>& constraints);
+    /**
+     * Construct a contour tree from the network
+     */
     ContourTree(Socket& socket);
+
+    /**
+     * Copy construct (deep copy) this contour tree
+     */
     ContourTree(const ContourTree& tree);
+
+    /**
+     * Convert the pixels in the contours in this tree to NPCF co-ordinates
+     */
     void ImageToNPCF(const Camera& camera);
+
+    /**
+     * Validate the ImageToNPCF stage
+     */
     bool CheckImageToNPCF(const ContourTree& evidence, const Camera& camera) const;
+
+    /**
+     * Return a pointer to the root contour in the tree
+     */
     inline Contour* GetRootContour() { return m_root_contour; }
+
+    /**
+     * Return a const pointer to the root contour in the tree
+     */
     inline const Contour* GetRootContour() const { return m_root_contour; }
+
+    /**
+     * Return the number of contours in the tree
+     */
     inline int GetContourCount() const { return m_contour_count; }
+
+    /**
+     * Delete this tree and all the contours within it
+     */
     ~ContourTree();
 
+    /**
+     * Send this contour tree over the network using this socket
+     */
     int Save(Socket& socket) const;
 
   };
