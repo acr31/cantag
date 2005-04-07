@@ -59,7 +59,7 @@ namespace Total {
 	unsigned char data = *pointer;
 	pointer+=2;
 	for(int i=0;i<m_bytes_per_pixel;++i) {
-	  *destptr = data == 0 ? 0xFF : 0;
+	  *destptr = data & 0x1 ? 0 : 0xFF;
 	  destptr++;
 	}
       }

@@ -8,9 +8,11 @@
 #undef  CONTOUR_TREE_DEBUG_SAVE
 
 namespace Total {
+#ifdef IMAGE_DEBUG
   static Image* debug_image;
+#endif
 
-  ContourTree::ContourTree(Image& image, std::vector<ContourConstraint>& constraints) : m_root_contour(NULL), m_contour_count(0)
+  ContourTree::ContourTree(Image& image) : m_root_contour(NULL), m_contour_count(0)
   {
     unsigned int* nbd_store = new unsigned int[image.GetWidth()*image.GetHeight()];
     std::map<int,Contour*> node_hash;
@@ -76,7 +78,7 @@ namespace Total {
 	  }	
 
 	  int contour_length;
-	  ContourStatistics contour_statistics;;
+	  ContourStatistics contour_statistics;
 	  if (!cNBD && !(*(data_pointer-1) & 1)) { // this pixel has not been seen before and the previous pixel is a 0-element
 	    current->bordertype = OUTER_BORDER;	  
 #ifdef CONTOUR_TREE_DEBUG
