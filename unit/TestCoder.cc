@@ -14,7 +14,7 @@
 #include <iostream>
 
 using boost::unit_test_framework::test_suite;
-using namespace total;
+using namespace Total;
 
 template<int PAYLOAD_SIZE> void tryrotations(const CyclicBitSet<PAYLOAD_SIZE>& test_value,
 					     const CyclicBitSet<PAYLOAD_SIZE>& target_code,

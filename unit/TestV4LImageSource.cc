@@ -9,6 +9,7 @@
 #include <iostream>
 
 using boost::unit_test_framework::test_suite;
+using namespace Total;
 
 void test_rate() {
   V4LImageSource s("/dev/video0",0);

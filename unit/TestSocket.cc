@@ -11,6 +11,7 @@
 #define PORT 56789
 
 using boost::unit_test_framework::test_suite;
+using namespace Total;
  
 boost::mt19937 rng;
 boost::uniform_int<> numbersource(0,255);

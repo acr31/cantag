@@ -12,7 +12,7 @@
 #define IMAGE_HEIGHT 600
 
 using boost::unit_test_framework::test_suite;
-using namespace total;
+using namespace Total;
 
 boost::mt19937 rng;
 boost::uniform_int<> widthsource(0,IMAGE_WIDTH);
@@ -108,8 +108,8 @@ void multi_square(int size) {
   }
   image.Save("temp.bmp");
   image.GlobalThreshold(128);
-  std::vector<ContourTree::ContourConstraint> v;
-  ContourTree c(image,v);
+  //  std::vector<ContourTree::ContourConstraint> v;
+  ContourTree c(image);
   
  
 

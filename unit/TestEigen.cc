@@ -8,7 +8,7 @@
 #include <iostream>
 
 using boost::unit_test_framework::test_suite;
-using namespace total;
+using namespace Total;
  
 boost::mt19937 rng;
 boost::uniform_real<> numbersource(0,10);
