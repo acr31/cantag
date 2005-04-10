@@ -8,6 +8,7 @@
 #include <iostream>
 
 #undef SQUARE_TRANSFORM_DEBUG
+#undef NON_LINEAR_DEBUG
 
 namespace Total {
 
@@ -351,12 +352,16 @@ namespace Total {
       // this result may be acceptable
 
       if (nlm.GetNumIter()<2 || nlm.GetStdErr()> 6.0) {
-	std::cerr << "NLM failed: " << e.what() << std::endl;
+#ifdef NON_LINEAR_DEBUG
+	PROGRESS("NLM Failed " << e.what());
+#endif
 	return false;
       }
     }
     catch (NLMAPException &e) {
-      std::cerr << "NLM failed: " << e.what() << std::endl;
+#ifdef NON_LINEAR_DEBUG
+      PROGRESS("NLM failed: " << e.what());
+#endif
       return false;
     }
 
