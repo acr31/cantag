@@ -241,7 +241,7 @@ namespace Total {
   /**
    * Helper function to access eigensolve
    */
-  void eigensolve(double a, double b, double f,
+  bool eigensolve(double a, double b, double f,
 		  /*    */  double c, double d,
 		  /*               */ double e,
 		  double* eigenvects,

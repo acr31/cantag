@@ -218,7 +218,9 @@ namespace Total {
     // extract its pose
     float transform[16];
   
-    TransformQuadTangle(quad,transform);
+    if (!TransformQuadTangle(quad,transform)) {
+      return NULL;
+    }
 
     LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>* lobj = new LocatedObject<SIZE*SIZE - (SIZE*SIZE % 2)>();
     lobj->LoadTransform(transform,1,camera);

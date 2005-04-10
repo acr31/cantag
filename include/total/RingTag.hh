@@ -30,7 +30,7 @@
 #endif
 
 #define READING_COUNT 200
-#define MAX_CHILD_DISTANCE 50
+#define MAX_CHILD_DISTANCE 1000
 
 namespace Total {
 
@@ -294,7 +294,9 @@ namespace Total {
     float transform1[16];
     float transform2[16];
 
-    TransformEllipse(el,transform1,transform2);
+    if (!TransformEllipse(el,transform1,transform2)) {
+      return NULL;
+    }
   
     float* correcttrans = NULL;
     float* correctnormal = NULL;

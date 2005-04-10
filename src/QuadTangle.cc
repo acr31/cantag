@@ -396,7 +396,7 @@ namespace Total {
   }
 
   bool ConvexHullQuadTangle::FitPoints(const std::vector<float>& points) {
-  // Take a convex hull of the polyline ( O(n) )
+    // Take a convex hull of the polyline ( O(n) )
     int h[points.size()/2];
     int n = ConvexHull(points,points.size()/2,h);
 

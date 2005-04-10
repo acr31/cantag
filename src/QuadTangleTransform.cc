@@ -11,7 +11,7 @@
 
 namespace Total {
 
-  void ProjectiveQuadTangleTransform::TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const {
+  bool ProjectiveQuadTangleTransform::TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const {
     // see the header file for a full explanation of what's going on here
 #ifdef SQUARE_TRANSFORM_DEBUG
     PROGRESS("Calculating transform for :"
@@ -132,7 +132,7 @@ namespace Total {
     PROGRESS("             " << transform[8] << "," << transform[9] << "," << transform[10]<< ","<<transform[11]<<";");
     PROGRESS("             " << transform[12]<< "," << transform[13]<< "," << transform[14]<< ","<<transform[15]<<"];");
 #endif
-
+    return true;
   }
 
 
@@ -333,8 +333,8 @@ namespace Total {
   }
 
 
-  void NonLinearQuadTangleTransform::TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const {
-
+  bool NonLinearQuadTangleTransform::TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const {
+    
     NLQuadData nlcd(quadtangle);
     NLQuadFunction nlcf;
     nlcf.InitialiseParameters(&nlcd);
@@ -352,12 +352,12 @@ namespace Total {
 
       if (nlm.GetNumIter()<2 || nlm.GetStdErr()> 6.0) {
 	std::cerr << "NLM failed: " << e.what() << std::endl;
-	return;
+	return false;
       }
     }
     catch (NLMAPException &e) {
       std::cerr << "NLM failed: " << e.what() << std::endl;
-      return;
+      return false;
     }
 
 
@@ -411,6 +411,7 @@ namespace Total {
 //     u=1.0; v=-1.0;
 //     nlcf.GetPointProj(u,v,w,&x,&y);
 //     std::cout << "R " << x << " " << y << std::endl;
+    return true;
   }
 
 

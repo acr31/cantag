@@ -742,12 +742,6 @@ namespace Total {
 
   SimpleEllipse::SimpleEllipse() : Ellipse() {}
 
-  //  SimpleEllipse::SimpleEllipse(const std::vector<float>& points) : Ellipse(points) {}
-
-  // SimpleEllipse::SimpleEllipse(const std::vector<float>& points, bool prev_fit) : Ellipse(points,prev_fit) {}
-
-  //  SimpleEllipse::SimpleEllipse(Socket& socket) : Ellipse(socket) {}
-
   bool SimpleEllipse::FitEllipse(const std::vector<float>& points) {
 
     if (points.size()/2 < 6) return false;
@@ -767,45 +761,27 @@ namespace Total {
     float majorx = -1;
     float majory = -1;
     float majorlen = 0;
-    bool found_major = false;
-    bool set_major = false;
-
+    
     float minorx = -1;
     float minory = -1;
     float minorlen = 1e10;
-    bool found_minor = false;
-    bool set_minor = false;
 
     for(std::vector<float>::const_iterator i = points.begin(); i!= points.end(); ++i) {
       float x = *i;
       ++i;
       float y = *i;
       float distsq = (centrex - x)*(centrex-x) + (centrey-y)*(centrey-y);
-      if (!found_major) {
-	if (distsq > majorlen) {
-	  set_major = true;
-	  majorx = x;
-	  majory = y;
-	  majorlen = distsq;
-	}
-	else if (set_major) {
-	  found_major = true;
-	}
+      if (distsq > majorlen) {
+	majorx = x;
+	majory = y;
+	majorlen = distsq;
       }
       
-      if (!found_minor) {
-	if (distsq < minorlen) {
-	  set_minor = true;
-	  minorx = x;
-	  minory = y;
-	  minorlen = distsq;
-	}
-	else if (set_minor) {
-	  found_minor = true;
-	}
+      if (distsq < minorlen) {
+	minorx = x;
+	minory = y;
+	minorlen = distsq;
       }
-
-      if (found_minor && found_major) break;
     }
 
     assert(majorlen != 0);

@@ -24,7 +24,7 @@ namespace Total {
    * eigenvector and eigenvalue arrays must contain 9 elements, they
    * will be filled in row major order.
    */
-  void eigensolve(double a, double b, double f,
+  bool eigensolve(double a, double b, double f,
 		  /*    */  double c, double d,
 		  /*               */ double e,
 		  double* eigenvects,

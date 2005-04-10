@@ -11,12 +11,12 @@
 namespace Total {
   class EllipseTransform {
   public:
-    virtual void TransformEllipse(const Ellipse& ellipse, float transform1[16], float transform2[16]) const = 0;
+    virtual bool TransformEllipse(const Ellipse& ellipse, float transform1[16], float transform2[16]) const = 0;
   };
 
   class FullEllipseTransform : public virtual EllipseTransform {
   public:
-    void TransformEllipse(const Ellipse& ellipse, float transform1[16], float transform2[16]) const;
+    bool TransformEllipse(const Ellipse& ellipse, float transform1[16], float transform2[16]) const;
   };
 
   class LinearEllipseTransform : public virtual EllipseTransform  {
@@ -44,7 +44,7 @@ namespace Total {
      * anything when we apply it later)
      *
      */
-    void TransformEllipse(const Ellipse& ellipse, float transform1[16], float transform2[16]) const;
+    bool TransformEllipse(const Ellipse& ellipse, float transform1[16], float transform2[16]) const;
   };
 }
 #endif//ELLIPSE_TRANSFORM_GUARD

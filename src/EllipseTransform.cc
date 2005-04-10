@@ -10,7 +10,7 @@
 
 namespace Total {
 
-  void FullEllipseTransform::TransformEllipse(const Ellipse& ellipse, float transform1[16], float transform2[16]) const {
+  bool FullEllipseTransform::TransformEllipse(const Ellipse& ellipse, float transform1[16], float transform2[16]) const {
     float a = ellipse.GetA();
     float b = ellipse.GetB();
     float c = ellipse.GetC();
@@ -37,10 +37,16 @@ namespace Total {
      *                       ( b/2   c      e/2 )
      *                       ( d/2   e/2    f   )
      */
-    eigensolve(a,b/2, d/2,
-	       c,e/2,
-	       f,
-	       eigvects, eigvals);
+    if (!eigensolve(a,b/2, d/2,
+		    c,e/2,
+		    f,
+		    eigvects, eigvals)) {
+#ifdef ELLIPSE_TRANSFORM_DEBUG
+      PROGRESS("EIGENFAIL! Failed to find eigenvectors of symmetric matrix");
+      PROGRESS(a << " " << b/2 << " " << d/2 << " " << c << " " << e/2 << " " << f);
+#endif
+      return false;
+    }
 
 #ifdef ELLIPSE_TRANSFORM_DEBUG
     PROGRESS("Eigen Vectors: e=[" << eigvects[0] << "," << eigvects[1] << "," << eigvects[2] << ";");
@@ -75,21 +81,6 @@ namespace Total {
 
 
 
-    /*
-
-    if (fabs(eigvals[0]) > fabs(eigvals[4])) {
-    for(int i=0;i<3;i++) {
-    eigvals[4*i]*=-1;
-    }
-    #ifdef ELLIPSE_TRANSFORM_DEBUG
-    PROGRESS("Two of the eigenvalues are less than zero - reversing ellipse equation");    
-    PROGRESS("Eigen Values: v=[" << eigvals[0] << "," << eigvals[1] << "," << eigvals[2] << ";");
-    PROGRESS("                 " << eigvals[3] << "," << eigvals[4] << "," << eigvals[5] << ";");
-    PROGRESS("                 " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];");
-    #endif
-    }
-    */
-  
     // bubble sort the vectors (based on their eigenvalue)...I'm so embarresed ;-)
     for(int i=0;i<4;i++) {
       for(int j=1;j<3;j++) {
@@ -160,21 +151,6 @@ namespace Total {
     PROGRESS("                           " << eigvals[3] << "," << eigvals[4] << "," << eigvals[5] << ";");
     PROGRESS("                           " << eigvals[6] << "," << eigvals[7] << "," << eigvals[8] << "];");
 
-    /*
-      double normal_t1 = sqrt( (eigvals[4]-eigvals[0])/(eigvals[4]-eigvals[8]) );
-      double normal_t2 = sqrt( (eigvals[0]-eigvals[8])/(eigvals[4]-eigvals[8]) );
-
-      double normal_x = normal_t1*eigvects[1] + normal_t2*eigvects[2];
-      double normal_y = normal_t1*eigvects[4] + normal_t2*eigvects[5];
-      double normal_z = normal_t1*eigvects[7] + normal_t2*eigvects[8];
-
-      double normal2_x = -normal_t1*eigvects[1] + normal_t2*eigvects[2];
-      double normal2_y = -normal_t1*eigvects[4] + normal_t2*eigvects[5];
-      double normal2_z = -normal_t1*eigvects[7] + normal_t2*eigvects[8];
-
-      PROGRESS("Normal vector: n=[ " << normal_x << "," << normal_y << "," << normal_z <<";");
-      PROGRESS("Normal vector: n=[ " << normal2_x << "," << normal2_y << "," << normal2_z <<";");
-    */
 #endif
       
     double denom = ( eigvals[8] - eigvals[0] );
@@ -294,15 +270,15 @@ namespace Total {
     PROGRESS("                 " << transform2[12] << "," << transform2[13] << "," << transform2[14] << "," << transform2[15] << ";");
 #endif
 
-   
+    return true;
   }
 
-  void LinearEllipseTransform::TransformEllipse(const Ellipse& ellipse, float transform1[16], float transform2[16]) const {
+  bool LinearEllipseTransform::TransformEllipse(const Ellipse& ellipse, float transform1[16], float transform2[16]) const {
     //  wc  hs  0  x0
     //  ws  hc  0  y0
     //  0   0   1  0
     //  0   0   0  1
-
+    
 
     transform1[0] = ellipse.GetWidth()*cos(ellipse.GetAngle());
     transform1[1] = -ellipse.GetHeight()*sin(ellipse.GetAngle()); 
@@ -327,5 +303,6 @@ namespace Total {
     for(int i=0;i<16;i++) {
       transform2[i] = transform1[i];
     }  
+    return true;
   }
 }

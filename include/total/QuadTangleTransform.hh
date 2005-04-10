@@ -14,7 +14,7 @@
 namespace Total {
   class QuadTangleTransform {
   public:
-    virtual void TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const = 0;
+    virtual bool TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const = 0;
   };
 
   class ProjectiveQuadTangleTransform  : public virtual QuadTangleTransform {
@@ -170,7 +170,7 @@ namespace Total {
      * The final matrix is created using the cross product
      * of the first two columns to fill in the 3rd
      */
-    void TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const;
+    bool TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const;
   };
 
 
@@ -226,7 +226,7 @@ namespace Total {
      * beta about the new x, finally gamma about the new z). They allow arbitrary
      * pose.
      */
-    void TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const;
+    bool TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const;
   }; 
 }
 #endif//QUADTANGLE_TRANSFORM_GUARD
