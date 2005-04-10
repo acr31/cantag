@@ -422,7 +422,7 @@ namespace Total {
       // we've found a good transform
     
       LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj = new LocatedObject<RING_COUNT*SECTOR_COUNT>();
-      lobj->LoadTransform(correcttrans,1, camera);
+      lobj->LoadTransform(correcttrans,m_bullseye_outer_radius, camera);
       return lobj;
     }
     return NULL;
@@ -547,7 +547,7 @@ namespace Total {
       PROGRESS("Found code " << *read_code << " at " << temp[0] << "," << temp[1]);
 #endif
 #endif
-      lobj->LoadTransform(finaltrans,1,camera);
+      lobj->LoadTransform(finaltrans,m_bullseye_outer_radius,camera);
       lobj->tag_codes.push_back(read_code);
       return true;
     }
