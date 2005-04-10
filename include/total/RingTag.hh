@@ -16,6 +16,7 @@
 #include <total/Coder.hh>
 #include <iostream>
 #include <cassert>
+#include <total/SpeedMath.hh>
 
 #ifdef TEXT_DEBUG
 # define RING_TAG_DEBUG
@@ -668,13 +669,14 @@ namespace Total {
 
   template<int RING_COUNT,int SECTOR_COUNT,class C> bool RingTag<RING_COUNT,SECTOR_COUNT,C>::CheckTransform(const LocatedObject<RING_COUNT*SECTOR_COUNT>* lobj, typename ShapeTree<ShapeChain<C> >::Node* node) const {
     // project some points for the inner circle using both interpretations and check which one fits  
-    int count = 200;
+    const int count = 200;
     std::vector<float> projected;
+    std::cout << "*** ARB: Called this (1)" << std::endl;
     for(int i=0;i<count*2;i+=2) {
-      float x = cos( (float)i*PI/(float)count ); // DCOS
-      float y = sin( (float)i*PI/(float)count ); // DSINE
+      float x = DCOS(8, (float)(i-count)*PI/(float)count ); // DCOS
+      float y = DSIN(8, (float)(i-count)*PI/(float)count ); // DSINE
       ApplyTransform(lobj->transform,x,y,projected);
-    }       
+    }
     return node->matched.GetShape().Check(projected);
   }
 
