@@ -7,6 +7,8 @@
 #include <total/gaussianelimination.hh>
 #include <total/findtransform.hh>
 #include <total/polysolve.hh>
+#include <total/SpeedMath.hh>
+#include <iostream>
 
 #include <cmath>
 #include <cassert>
@@ -610,8 +612,9 @@ namespace Total {
 
     float angle = GetAngle();
 
-    float c = cos(angle); // DCOS
-    float s = sin(angle); // DSINE
+    //    std::cout << "ARB: ***Impact" << std::endl;
+    float c = DCOS(8,angle); // DCOS
+    float s = DSIN(8,angle); // DSINE
   
     m_a = c*c/alpha1sq + s*s/alpha2sq;
     m_b = 2*c*s*(1/alpha1sq - 1/alpha2sq);

@@ -8,6 +8,9 @@ extern "C" {
 #include <fstream>
 #include <cassert>
 #include <list>
+#include <total/SpeedMath.hh>
+#include <iostream>
+
 #ifdef HAVE_BOOST_RANDOM
 # include <boost/random.hpp>
 #endif
@@ -253,8 +256,9 @@ namespace Total {
      * angle_radians is the angle between the axis given by width and the horizontal
      *
      */
-    float cosa = cos(angle_radians); // DCOS (later)
-    float sina = sin(angle_radians); // DSINE (later)
+
+    float cosa = DCOS(8,angle_radians); // DCOS (later)
+    float sina = DCOS(8,angle_radians); // DSINE (later)
     float a = width/2;
     float b = height/2;
 

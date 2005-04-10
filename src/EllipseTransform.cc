@@ -5,6 +5,8 @@
 #include <total/EllipseTransform.hh>
 #include <total/polysolve.hh>
 #include <total/Ellipse.hh>
+#include <iostream>
+#include <total/SpeedMath.hh>
 
 #undef ELLIPSE_TRANSFORM_DEBUG
 
@@ -279,14 +281,13 @@ namespace Total {
     //  0   0   1  0
     //  0   0   0  1
     
-
-    transform1[0] = ellipse.GetWidth()*cos(ellipse.GetAngle()); // DCOS
-    transform1[1] = -ellipse.GetHeight()*sin(ellipse.GetAngle());  // DSINE
+    transform1[0] = ellipse.GetWidth()*DCOS(8,ellipse.GetAngle()); // DCOS
+    transform1[1] = -ellipse.GetHeight()*DSIN(8,ellipse.GetAngle());  // DSINE
     transform1[2] = 0;
     transform1[3] = ellipse.GetX0();
 
-    transform1[4] = ellipse.GetWidth()*sin(ellipse.GetAngle()); // DSINE
-    transform1[5] = ellipse.GetHeight()*cos(ellipse.GetAngle());  // DCOS
+    transform1[4] = ellipse.GetWidth()*DSIN(8,ellipse.GetAngle()); // DSINE
+    transform1[5] = ellipse.GetHeight()*DCOS(8,ellipse.GetAngle());  // DCOS
     transform1[6] = 0;
     transform1[7] = ellipse.GetY0();
 
