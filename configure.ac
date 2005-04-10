@@ -11,6 +11,8 @@ AC_PROG_CXX
 
 AC_CHECK_PROG(magicconfig,[Magick++-config --version],yes,no)
 
+CXXFLAGS="$CXXFLAGS -finline-limit=1000 -Wall"
+
 if test $magicconfig = "yes"; then
    CPPFLAGS="$CPPFLAGS `Magick-config --cppflags`"
 #   CXXFLAGS="$CXXFLAGS `Magick-config --cflags`"
