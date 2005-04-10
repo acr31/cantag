@@ -253,15 +253,15 @@ namespace Total {
      * angle_radians is the angle between the axis given by width and the horizontal
      *
      */
-    float cosa = cos(angle_radians);
-    float sina = sin(angle_radians);
+    float cosa = cos(angle_radians); // DCOS (later)
+    float sina = sin(angle_radians); // DSINE (later)
     float a = width/2;
     float b = height/2;
 
     float currentAngle = start_angle;
     for(int i=2*startindex;i<2*(length+startindex);i+=2) {
-      float cost = cos(currentAngle);
-      float sint = sin(currentAngle);
+      float cost = cos(currentAngle); // DCOS (later)
+      float sint = sin(currentAngle); // DSINE (later)
 
       points[i] = Round(xc + a*cosa*cost + b*sina*sint);
       points[i+1] = Round(yc + a*sina*cost + b*cosa*sint);

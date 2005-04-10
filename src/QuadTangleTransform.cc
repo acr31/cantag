@@ -220,9 +220,9 @@ namespace Total {
     m = sqrt(t[2]*t[2]+t[6]*t[6]+t[10]*t[10]);
     t[2]/=m; t[6]/=m; t[10]/=m;
 
-    mParams[3] = atan(-t[8]/t[9]);
-    mParams[4] = atan( t[8] / (sin(mParams[3])*t[10]));
-    mParams[5] = atan(t[2]/t[6]);
+    mParams[3] = atan(-t[8]/t[9]); // DATAN
+    mParams[4] = atan( t[8] / (sin(mParams[3])*t[10])); // DSINE
+    mParams[5] = atan(t[2]/t[6]); // DATAN
 
     // Add in location
     mParams[0] = t[3];
@@ -244,12 +244,12 @@ namespace Total {
     while (p[5]<=-M_PI) p[5]+=2*M_PI;
 
     // cosine, sine of euler angles
-    REAL ca = cos(p[3]);
-    REAL sa = sin(p[3]);
-    REAL cb = cos(p[4]);
-    REAL sb = sin(p[4]);
-    REAL cg = cos(p[5]);
-    REAL sg = sin(p[5]);
+    REAL ca = cos(p[3]); // DCOS
+    REAL sa = sin(p[3]); // DSINE
+    REAL cb = cos(p[4]); // DCOS
+    REAL sb = sin(p[4]); // DSINE
+    REAL cg = cos(p[5]); // DCOS
+    REAL sg = sin(p[5]); // DSINE
 
     REAL x = p[0];
     REAL y = p[1];
@@ -366,12 +366,12 @@ namespace Total {
     
     //   std::cout << "Result " << p[0] << " " << p[1] << " " << p[2] << " " << p[3]/M_PI*180 << " " << p[4]/M_PI*180 << " " << p[5]/M_PI*180 << std::endl;
     
-    REAL ca = cos(p[3]);
-    REAL sa = sin(p[3]);
-    REAL cb = cos(p[4]);
-    REAL sb = sin(p[4]);
-    REAL cg = cos(p[5]);
-    REAL sg = sin(p[5]);
+    REAL ca = cos(p[3]); // DCOS
+    REAL sa = sin(p[3]); // DSINE
+    REAL cb = cos(p[4]); // DCOS
+    REAL sb = sin(p[4]); // DSINE
+    REAL cg = cos(p[5]); // DCOS
+    REAL sg = sin(p[5]); // DSINE
     
     transform[0] = ca*cg - cb*sa*sg;
     transform[1] = sa*cg + cb*ca*sg;
@@ -416,12 +416,12 @@ namespace Total {
 
 
   void NonLinearQuadTangleTransform::NLQuadFunction::GetPoint3D(REAL u, REAL v, REAL w, REAL *xo, REAL *yo, REAL *zo) {
-    REAL ca = cos(mParams[3]);
-    REAL sa = sin(mParams[3]);
-    REAL cb = cos(mParams[4]);
-    REAL sb = sin(mParams[4]);
-    REAL cg = cos(mParams[5]);
-    REAL sg = sin(mParams[5]);
+    REAL ca = cos(mParams[3]); // DCOS
+    REAL sa = sin(mParams[3]); // DSINE
+    REAL cb = cos(mParams[4]); // DCOS
+    REAL sb = sin(mParams[4]); // DSINE
+    REAL cg = cos(mParams[5]); // DCOS
+    REAL sg = sin(mParams[5]); // DSINE
     
     REAL x = mParams[0];
     REAL y = mParams[1];
@@ -437,12 +437,12 @@ namespace Total {
   }
   
   void NonLinearQuadTangleTransform::NLQuadFunction::GetPointProj(REAL u, REAL v, REAL w, REAL *xo, REAL *yo) {
-    REAL ca = cos(mParams[3]);
-    REAL sa = sin(mParams[3]);
-    REAL cb = cos(mParams[4]);
-    REAL sb = sin(mParams[4]);
-    REAL cg = cos(mParams[5]);
-    REAL sg = sin(mParams[5]);
+    REAL ca = cos(mParams[3]); // DCOS
+    REAL sa = sin(mParams[3]); // DSINE
+    REAL cb = cos(mParams[4]); // DCOS
+    REAL sb = sin(mParams[4]); // DSINE
+    REAL cg = cos(mParams[5]); // DCOS
+    REAL sg = sin(mParams[5]); // DSINE
 
     REAL x = mParams[0];
     REAL y = mParams[1];

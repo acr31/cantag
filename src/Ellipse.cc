@@ -610,8 +610,8 @@ namespace Total {
 
     float angle = GetAngle();
 
-    float c = cos(angle);
-    float s = sin(angle);
+    float c = cos(angle); // DCOS
+    float s = sin(angle); // DSINE
   
     m_a = c*c/alpha1sq + s*s/alpha2sq;
     m_b = 2*c*s*(1/alpha1sq - 1/alpha2sq);
@@ -696,7 +696,7 @@ namespace Total {
       m_angle_radians = 0;
     }
     else {
-      m_angle_radians = atan( -(a-lambda1t)/(0.5*b) );
+      m_angle_radians = atan( -(a-lambda1t)/(0.5*b) ); // DATAN
     }
 #ifdef DECOMPOSE_DEBUG
     PROGRESS("angle= " << m_angle_radians);
@@ -790,7 +790,7 @@ namespace Total {
     majorlen = sqrt(majorlen);
     minorlen = sqrt(minorlen);
 
-    float theta = atan((majory-centrey)/(majorx-centrex));
+    float theta = atan((majory-centrey)/(majorx-centrex)); // DATAN
 
     m_x0 = centrex;
     m_y0 = centrey;

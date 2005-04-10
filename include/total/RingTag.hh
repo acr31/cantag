@@ -671,8 +671,8 @@ namespace Total {
     int count = 200;
     std::vector<float> projected;
     for(int i=0;i<count*2;i+=2) {
-      float x = cos( (float)i*PI/(float)count );
-      float y = sin( (float)i*PI/(float)count );
+      float x = cos( (float)i*PI/(float)count ); // DCOS
+      float y = sin( (float)i*PI/(float)count ); // DSINE
       ApplyTransform(lobj->transform,x,y,projected);
     }       
     return node->matched.GetShape().Check(projected);

@@ -280,13 +280,13 @@ namespace Total {
     //  0   0   0  1
     
 
-    transform1[0] = ellipse.GetWidth()*cos(ellipse.GetAngle());
-    transform1[1] = -ellipse.GetHeight()*sin(ellipse.GetAngle()); 
+    transform1[0] = ellipse.GetWidth()*cos(ellipse.GetAngle()); // DCOS
+    transform1[1] = -ellipse.GetHeight()*sin(ellipse.GetAngle());  // DSINE
     transform1[2] = 0;
     transform1[3] = ellipse.GetX0();
 
-    transform1[4] = ellipse.GetWidth()*sin(ellipse.GetAngle());
-    transform1[5] = ellipse.GetHeight()*cos(ellipse.GetAngle()); 
+    transform1[4] = ellipse.GetWidth()*sin(ellipse.GetAngle()); // DSINE
+    transform1[5] = ellipse.GetHeight()*cos(ellipse.GetAngle());  // DCOS
     transform1[6] = 0;
     transform1[7] = ellipse.GetY0();
 
