@@ -246,7 +246,7 @@ namespace Total {
 		  /*               */ double e,
 		  double* eigenvects,
 		  double* eigenvals) {
-    assert(eigensolve(a,b,f,b,c,d,f,d,e,eigenvects,eigenvals));
+    return eigensolve(a,b,f,b,c,d,f,d,e,eigenvects,eigenvals);
   }
 
   /*
