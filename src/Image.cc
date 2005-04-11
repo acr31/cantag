@@ -258,7 +258,7 @@ namespace Total {
      */
 
     float cosa = DCOS(8,angle_radians); // DCOS (later)
-    float sina = DCOS(8,angle_radians); // DSINE (later)
+    float sina = DSIN(8,angle_radians); // DSINE (later)
     float a = width/2;
     float b = height/2;
 
