@@ -56,7 +56,8 @@ TOTAL_CHECK_HEADER(boost/random.hpp,HAVE_BOOST_RANDOM_H,have_boost_random_h)
 TOTAL_CHECK_HEADER(boost/test/unit_test.hpp,HAVE_BOOST_TEST_UNITTEST_H,have_boost_test_unittest_h)
 TOTAL_CHECK_HEADER(gmpxx.h,HAVE_GMPXX_H,have_gmpxx_h)
 TOTAL_CHECK_HEADER(asm/types.h,HAVE_ASM_TYPES_H,have_asm_types_h)
-TOTAL_CHECK_HEADER(linux/videodev.h,HAVE_LINUX_VIDEODEV_H,have_linux_videodev_h,)
+TOTAL_CHECK_HEADER(linux/videodev.h,HAVE_LINUX_VIDEODEV_H,have_linux_videodev_h)
+TOTAL_CHECK_HEADER(gsl/gsl_multimin.h,HAVE_GSL_MULTIMIN_H,have_gsl_multimin_h)
 TOTAL_CHECK_HEADER(X11/Xlib.h,HAVE_X11_XLIB_H,have_x11_xlib_h)
 TOTAL_CHECK_HEADER(X11/Xutil.h,HAVE_X11_XUTIL_H,have_x11_xutil_h)
 TOTAL_CHECK_HEADER(X11/extensions/XShm.h,HAVE_X11_EXTENSIONS_XSHM_H,have_x11_extensions_xshm_h,
@@ -79,6 +80,8 @@ TOTAL_CHECK_LIB(GLU,gluNewTess,HAVELIB_GLU,havelib_glu)
 TOTAL_CHECK_LIB(glut,fgActivateMenu,HAVELIB_GLUT,havelib_glut)
 TOTAL_CHECK_LIB(gmp,__gmpz_init,HAVELIB_GMP,havelib_gmp)
 TOTAL_CHECK_LIB(gmpxx,__gmpz_set,HAVELIB_GMPXX,havelib_gmpxx)
+TOTAL_CHECK_LIB(gslcblas,cblas_caxpy,HAVELIB_GSLCBLAS,havelib_gslcblas)
+TOTAL_CHECK_LIB(gsl,gsl_multimin_diff,HAVELIB_GSL,havelib_gsl)
 
 LIBSSAVEACR31="$LIBS"
 LIBS="-lboost_unit_test_framework-gcc-1_32 $LIBS"
@@ -163,3 +166,10 @@ if test "$have_magickxx_h$havelib_magick$havelib_magickxx" = "yesyesyes"; then
 else
    echo "! Disabled ImageMagick support"
 fi
+
+if test "$have_gsl_multimin_h$havelib_gsl$havelib_gslcblas" = "yesyesyes"; then
+   echo "+ Enabled GNU Scientific Library support"
+else
+   echo "! Disabled GNU Scientific Library support"
+fi
+
