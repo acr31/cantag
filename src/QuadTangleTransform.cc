@@ -5,6 +5,8 @@
 #include <total/QuadTangleTransform.hh>
 #include <total/gaussianelimination.hh>
 
+#include <gsl/gsl_multimin.h>
+
 #include <iostream>
 
 #undef SQUARE_TRANSFORM_DEBUG
@@ -95,7 +97,8 @@ namespace Total {
     PROGRESS("         a6 "<<result[6]);
     PROGRESS("         a7 "<<result[7]);
 #endif
- 
+
+
     // the final vector for the transform is simply the cross product of the first two
     double final[] = { result[3]*result[7] - result[6]*result[4],
 		       result[6]*result[1] - result[0]*result[7],
@@ -126,6 +129,117 @@ namespace Total {
     transform[8] = result[6]; transform[9] = result[7]; transform[10] = final[2]; transform[11] = (result[6]+result[7])+c8*2;
     transform[12] = 0;          transform[13] = 0;          transform[14] = 0;  transform[15] = 1;
 
+#ifdef SQUARE_TRANSFORM_DEBUG
+    PROGRESS("Final trans=[" << transform[0] << "," << transform[1] << "," << transform[2] << ","<<transform[3] <<";");
+    PROGRESS("             " << transform[4] << "," << transform[5] << "," << transform[6] << ","<<transform[7] <<";");
+    PROGRESS("             " << transform[8] << "," << transform[9] << "," << transform[10]<< ","<<transform[11]<<";");
+    PROGRESS("             " << transform[12]<< "," << transform[13]<< "," << transform[14]<< ","<<transform[15]<<"];");
+#endif
+    return true;
+  }
+
+
+
+
+  // ReducedProjectiveQuadTangleTransform
+
+
+  bool ReducedProjectiveQuadTangleTransform::TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const {
+    // see the header file for a full explanation of what's going on here
+#ifdef SQUARE_TRANSFORM_DEBUG
+    PROGRESS("Calculating transform for :"
+	     "("<<quadtangle.GetX0()<<","<<quadtangle.GetY0()<<"),"<<
+	     "("<<quadtangle.GetX1()<<","<<quadtangle.GetY1()<<"),"<<
+	     "("<<quadtangle.GetX2()<<","<<quadtangle.GetY2()<<"),"<<
+	     "("<<quadtangle.GetX3()<<","<<quadtangle.GetY3()<<"),");	   
+#endif
+
+
+    // Set up a data params array
+    float  p[10] = {quadtangle.GetX0(), quadtangle.GetY0(),
+		    quadtangle.GetX1(), quadtangle.GetY1(),
+		    quadtangle.GetX2(), quadtangle.GetY2(),
+		    quadtangle.GetX3(), quadtangle.GetY3(),
+		    0.0, 0.0};
+
+    // Calculate the centre point
+    float lambda = ( (p[1]-p[3])*(p[6]-p[2]) - (p[7]-p[3])*(p[0]-p[2]) ) /
+      ( (p[4]-p[0])*(p[7]-p[3]) - (p[5]-p[1])*(p[6]-p[2]) );
+  
+    float Xc = p[0]+lambda*(p[4]-p[0]);
+    float Yc = p[1]+lambda*(p[5]-p[1]);
+   
+
+    // we particularly want coeffs to be an array of pointers to arrays
+    // containing the rows of the matrix - then we can swap rows
+    // conveniently by swapping pointers
+
+    double coeffs0[] = {-1, 1, 0, 0, quadtangle.GetX0(), -quadtangle.GetX0() };
+    double coeffs1[] = { 1, 1, 0, 0,-quadtangle.GetX1(), -quadtangle.GetX1() };
+    double coeffs2[] = { 1,-1, 0, 0,-quadtangle.GetX2(),  quadtangle.GetX2() };
+    double coeffs3[] = { 0, 0,-1, 1, quadtangle.GetY0(), -quadtangle.GetY0() };
+    double coeffs4[] = { 0, 0, 1, 1,-quadtangle.GetY1(), -quadtangle.GetY1() };
+    double coeffs5[] = { 0, 0,-1,-1, quadtangle.GetY3(),  quadtangle.GetY3() };
+
+    double* coeffs[] = {coeffs0,
+			coeffs1,
+			coeffs2,
+			coeffs3,
+			coeffs4,
+			coeffs5};
+
+   
+    
+    double xvals[] = { quadtangle.GetX0()-Xc,
+		       quadtangle.GetX1()-Xc,
+		       quadtangle.GetX2()-Xc,
+		       quadtangle.GetY0()-Yc,
+		       quadtangle.GetY1()-Yc,
+		       quadtangle.GetY3()-Yc};
+
+
+
+    double result[8];
+
+    solve_simultaneous(xvals,coeffs,result,6);
+
+    float c88 = 1.0 /sqrt(result[0]*result[0]+result[2]*result[2] + result[4]*result[4]);
+
+    if (c88!=c88) return false;
+
+    result[7] = result[5];
+    result[6] = result[4];
+    result[4] = result[3];
+    result[3] = result[2];
+
+    result[2] = Xc;
+    result[5] = Yc;
+
+    for (int i=0; i<8; i++) result[i]*=c88;
+
+
+#ifdef SQUARE_TRANSFORM_DEBUG
+    PROGRESS("Scaled   a0 "<<result[0]);
+    PROGRESS("         a1 "<<result[1]);
+    PROGRESS("         a2 "<<result[2]);
+    PROGRESS("         a3 "<<result[3]);
+    PROGRESS("         a4 "<<result[4]);
+    PROGRESS("         a5 "<<result[5]);
+    PROGRESS("         a6 "<<result[6]);
+    PROGRESS("         a7 "<<result[7]);
+#endif
+
+    // the final vector for the transform is simply the cross product of the first two
+    double final[] = { result[3]*result[7] - result[6]*result[4],
+		       result[6]*result[1] - result[0]*result[7],
+		       result[0]*result[4] - result[3]*result[1] };
+  
+
+    transform[0] = result[1]; transform[1] = result[0]; transform[2] = final[0];  transform[3] = result[2];
+    transform[4] = result[4]; transform[5] = result[3]; transform[6] = final[1];  transform[7] = result[5];
+    transform[8] = result[7]; transform[9] = result[6]; transform[10] = final[2]; transform[11] = c88;
+    transform[12] = 0;          transform[13] = 0;          transform[14] = 0;  transform[15] = 1;
+
 
 #ifdef SQUARE_TRANSFORM_DEBUG
     PROGRESS("Final trans=[" << transform[0] << "," << transform[1] << "," << transform[2] << ","<<transform[3] <<";");
@@ -137,80 +251,56 @@ namespace Total {
   }
 
 
-  // BEGIN NonLinearQuadTangleTransform
-
-  NonLinearQuadTangleTransform::NLQuadData::NLQuadData(const QuadTangle& q) : FitData(1), mQuad(&q) {
-    FitData::Datum datum;
-    datum.push_back(q.GetX0()); AddDatum(datum,0.0,0.001); datum.clear();
-    datum.push_back(q.GetY0()); AddDatum(datum,0.0,0.001); datum.clear();
-    datum.push_back(q.GetX1()); AddDatum(datum,0.0,0.001); datum.clear();
-    datum.push_back(q.GetY1()); AddDatum(datum,0.0,0.001); datum.clear();
-    datum.push_back(q.GetX2()); AddDatum(datum,0.0,0.001); datum.clear();
-    datum.push_back(q.GetY2()); AddDatum(datum,0.0,0.001); datum.clear();
-    datum.push_back(q.GetX3()); AddDatum(datum,0.0,0.001); datum.clear(); 
-    datum.push_back(q.GetY3()); AddDatum(datum,0.0,0.001); datum.clear();
-//     std::cout << "P " << q.GetX0() << " " << q.GetY0() << std::endl;
-//     std::cout << "P " << q.GetX1() << " " << q.GetY1() << std::endl;
-//     std::cout << "P " << q.GetX2() << " " << q.GetY2() << std::endl;
-//     std::cout << "P " << q.GetX3() << " " << q.GetY3() << std::endl;
-  }
 
 
-  void NonLinearQuadTangleTransform::NLQuadFunction::InitialiseParameters(FitData *fd) {
-    NLQuadData *data = dynamic_cast<NLQuadData *>(fd);
 
-    // Zero the derivatives
-    for (int i=0; i<6; i++) {
-      mDeriv[i]=1.0;
-    }
 
-    // Find the centre point
-    float cx = (data->GetData(0,0) + data->GetData(0,2) + data->GetData(0,4) + data->GetData(0,6))/4.0;
-    float cy = (data->GetData(0,1) + data->GetData(0,3) + data->GetData(0,5) + data->GetData(0,7))/4.0;
-
-    mXseq[0] = 1; 
-    mYseq[0] = 1;
+  
+  // NLMSimplexQuadTangleTransform
+#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
+  bool NLMSimplexQuadTangleTransform::TransformQuadTangle(const QuadTangle& q, float transform[16]) const {
+    size_t iter = 0;
+    int status;
+  
+    const gsl_multimin_fminimizer_type *T;
+    gsl_multimin_fminimizer *s;
     
-    if ( (data->GetData(0,0)-cx) < 0.0) mXseq[0]=-1;
-    if ( (data->GetData(0,1)-cy) < 0.0) mYseq[0]=-1;
 
-    int s=0;
-    if ( mXseq[0]==-1 && mYseq[0]==-1) s=1;
-    if ( mXseq[0]==1 && mYseq[0]==-1)  s=2;
-    if ( mXseq[0]==1 && mYseq[0]==1)   s=3;
+    // Set up a data params array
+    float  p[10] = {q.GetX0(), q.GetY0(),
+		    q.GetX1(), q.GetY1(),
+		    q.GetX2(), q.GetY2(),
+		    q.GetX3(), q.GetY3(),
+		    0.0, 0.0};
+  
 
-    if (s==0) {
-      mXseq[1]=-1; mYseq[1]=-1;
-      mXseq[2]=1; mYseq[2]=-1;
-      mXseq[3]=1; mYseq[3]=1;
-    }
-    else if (s==1) {
-      mXseq[1]=1; mYseq[1]=-1;
-      mXseq[2]=1; mYseq[2]=1;
-      mXseq[3]=-1; mYseq[3]=1;
-    }
-    else if (s==2) {
-      mXseq[1]=1; mYseq[1]=1;
-      mXseq[2]=-1; mYseq[2]=1;
-      mXseq[3]=-1; mYseq[3]=-1; 
-    }
-    else if (s==3) {
-      mXseq[1]=-1; mYseq[1]=1;
-      mXseq[2]=-1; mYseq[2]=-1;
-      mXseq[3]=1; mYseq[3]=-1;
-    }
+    // Calculate the centre point
+    float lambda = ( (p[1]-p[3])*(p[6]-p[2]) - (p[7]-p[3])*(p[0]-p[2]) ) /
+      ( (p[4]-p[0])*(p[7]-p[3]) - (p[5]-p[1])*(p[6]-p[2]) );
+  
+    p[8] = p[0]+lambda*(p[4]-p[0]);
+    p[9] = p[1]+lambda*(p[5]-p[1]);
+  
+    gsl_vector *x;
+    gsl_vector *step;
+    gsl_multimin_function errfunc;
 
-   
+    int nparam = 4;
+  
+    errfunc.f = &(Total::NLMSimplexQuadTangleTransform::NLMQuadFunc);
+    errfunc.n = nparam;
+    errfunc.params = &p;
 
-    // Start by doing the linear approach
-    ProjectiveQuadTangleTransform pqtt;
+
+  // Start by doing the linear approach
+    ReducedProjectiveQuadTangleTransform pqtt;
     float t[16];
-    pqtt.TransformQuadTangle(*(data->GetQuadTangle()),t);
+    pqtt.TransformQuadTangle(q,t);
 
     // Where does the z' point?
     float zx = t[2];
     float zy = t[6];
-    float zz = t[10];
+    float zz = -t[10];
     float mag = sqrt(zx*zx+zy*zy+zz*zz);
     zx/=mag; zy/=mag; zz/=mag;
 
@@ -221,245 +311,168 @@ namespace Total {
     m = sqrt(t[2]*t[2]+t[6]*t[6]+t[10]*t[10]);
     t[2]/=m; t[6]/=m; t[10]/=m;
 
-    mParams[3] = atan(-t[8]/t[9]); // DATAN
-    mParams[4] = atan( t[8] / (sin(mParams[3])*t[10])); // DSINE
-    mParams[5] = atan(t[2]/t[6]); // DATAN
+    float alpha = atan(-t[8]/t[9]); // DATAN
+    float beta =  -atan( t[8] / (sin(alpha)*t[10])); // DSINE
+    float gamma = atan(t[2]/t[6]); // DATAN
+    float zest = t[11];
 
-    // Add in location
-    mParams[0] = t[3];
-    mParams[1] = t[7];
-    mParams[2] = t[11];
+    if (alpha!=alpha) alpha=0.0;
+    if (beta!=beta) beta=0.0;
+    if (gamma!=gamma) gamma=0.0;
 
-    for (int i=3; i<6; i++) if (mParams[i]!=mParams[i]) mParams[i]=0.0;
-  }
+   
+    x = gsl_vector_alloc (nparam);
+    gsl_vector_set (x, 0, zest);
+    gsl_vector_set (x, 1, alpha);
+    gsl_vector_set (x, 2, beta);
+    gsl_vector_set (x, 3, gamma);
 
-  REAL  NonLinearQuadTangleTransform::NLQuadFunction::Evaluate(const int i, REAL *p, FitData *fd) {
-     NLQuadData *d = dynamic_cast<NLQuadData *>(fd);
+    // Characteristic steps differ 
+    // for distances and angles
+    step = gsl_vector_alloc (nparam);
+    gsl_vector_set (step, 0, zest/2.0);
+    gsl_vector_set (step, 1, 0.1);
+    gsl_vector_set (step, 2, 0.1);
+    gsl_vector_set (step, 3, 1.5);
 
-    // Wrap angles
-    while (p[3]>M_PI) p[3]-=2*M_PI;
-    while (p[3]<=-M_PI) p[3]+=2*M_PI;
-    while (p[4]>M_PI) p[4]-=2*M_PI;
-    while (p[4]<=-M_PI) p[4]+=2*M_PI;
-    while (p[5]>M_PI) p[5]-=2*M_PI;
-    while (p[5]<=-M_PI) p[5]+=2*M_PI;
-
-    // cosine, sine of euler angles
-    REAL ca = cos(p[3]); // DCOS
-    REAL sa = sin(p[3]); // DSINE
-    REAL cb = cos(p[4]); // DCOS
-    REAL sb = sin(p[4]); // DSINE
-    REAL cg = cos(p[5]); // DCOS
-    REAL sg = sin(p[5]); // DSINE
-
-    REAL x = p[0];
-    REAL y = p[1];
-    REAL z = p[2];
-
-    // Fit a dataset point to a specific corner
-    REAL u,v,w;
-    if (i==0 || i==1) {
-      u=(REAL)mXseq[0];
-      v=(REAL)mYseq[0];
-      w=0;
-    }
-    else if (i==2 || i==3) {
-      u=(REAL)mXseq[1];
-      v=(REAL)mYseq[1];
-      w=0;
-    }
-    else if (i==4 || i==5) {
-      u=(REAL)mXseq[2];
-      v=(REAL)mYseq[2];
-      w=0;
-    }
-    else if (i==6 || i==7) {
-      u=(REAL)mXseq[3];
-      v=(REAL)mYseq[3];
-      w=0;
-    }
-
-    // Calculate the true position of the corner for the
-    // current parameters
-    REAL xx = (ca*cg - cb*sa*sg)*u + (sa*cg + cb*ca*sg)*v + sg*sb*w + x;
-    REAL yy = (-sg*ca - cb*sa*cg)*u + (-sg*sa + cb*ca*cg)*v + (cg*sb)*w + y;
-    REAL zz = sb*sa*u - sb*ca*v + cb*w + z;
-
-    // Form partial derivatives
-    REAL dxxdx = 1.0;
-    REAL dxxdy = 0.0;
-    REAL dxxdz = 0.0;
-    REAL dxxda = (-sa*cg - cb*ca*sg)*u + (ca*cg - cb*sa*sg)*v;
-    REAL dxxdb = (sb*sa*sg)*u - (sb*ca*sg)*v + sg*cb*w;
-    REAL dxxdg = (-ca*sg - cb*sa*cg)*u + (-sa*sg + cb*ca*cg)*v + cg*sb*w;
-
-    REAL dyydx = 0.0;
-    REAL dyydy = 1.0;
-    REAL dyydz = 0.0;
-    REAL dyyda = (sg*sa - cb*ca*cg)*u + (-sg*ca - cb*sa*cg)*v;
-    REAL dyydb = (sb*sa*cg)*u + (-sb*ca*cg)*v + (cg*cb)*w;
-    REAL dyydg = (-cg*ca + cb*sa*sg)*u + (-cg*sa - cb*ca*sg)*v + (-sg*sb)*w;
-
-    REAL dzzdx = 0.0;
-    REAL dzzdy = 0.0;
-    REAL dzzdz = 1.0;
-    REAL dzzda = sb*ca*u + sb*sa*v;
-    REAL dzzdb = cb*sa*u - cb*ca*v - sb*w;
-    REAL dzzdg = 0.0;
-
-
-    // Data is striped x0,y0,x1,y1,...
-    if (i%2==0) {
-      // Calculate projection and derivatives for X
-      mDeriv[0] = dxxdx/zz - xx*dzzdx/(zz*zz);
-      mDeriv[1] = dxxdy/zz - xx*dzzdy/(zz*zz);
-      mDeriv[2] = dxxdz/zz - xx*dzzdz/(zz*zz);
-      mDeriv[3] = dxxda/zz - xx*dzzda/(zz*zz);
-      mDeriv[4] = dxxdb/zz - xx*dzzdb/(zz*zz);
-      mDeriv[5] = dxxdg/zz - xx*dzzdg/(zz*zz);
-      //      std::cout << xx/zz - d->GetData(0,i) << std::endl;
-      return xx/zz - d->GetData(0,i);
-    }
-    else {
-      // Calculate projection and derivatives for Y
-      mDeriv[0] = dyydx/zz - yy*dzzdx/(zz*zz);
-      mDeriv[1] = dyydy/zz - yy*dzzdy/(zz*zz);
-      mDeriv[2] = dyydz/zz - yy*dzzdz/(zz*zz);
-      mDeriv[3] = dyyda/zz - yy*dzzda/(zz*zz);
-      mDeriv[4] = dyydb/zz - yy*dzzdb/(zz*zz);
-      mDeriv[5] = dyydg/zz - yy*dzzdg/(zz*zz);
-      //   std::cout << "R " << i << " " << yy/zz <<" " << d->GetData(0,i) << " " << yy/zz - d->GetData(0,i) << std::endl;
-      return yy/zz - d->GetData(0,i);
-    }
-  }
-
-
-  bool NonLinearQuadTangleTransform::TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const {
-    
-    NLQuadData nlcd(quadtangle);
-    NLQuadFunction nlcf;
-    nlcf.InitialiseParameters(&nlcd);
-
-    NonLinearModel nlm(&nlcf, &nlcd);
-    try {
-      // Fit with up to 1000 iterations
-      // Stop if the % change in chi squared
-      // is less that 0.1%
-      nlm.Fit(100,0.0001);
-    }
-    catch (SingularMatrix &e) {
-      // If we've done a few iterations and suddenly got a singular matrix
-      // this result may be acceptable
-
-      if (nlm.GetNumIter()<2 || nlm.GetStdErr()> 6.0) {
-#ifdef NON_LINEAR_DEBUG
-	PROGRESS("NLM Failed " << e.what());
-#endif
-	return false;
-      }
-    }
-    catch (NLMAPException &e) {
-#ifdef NON_LINEAR_DEBUG
-      PROGRESS("NLM failed: " << e.what());
-#endif
-      return false;
-    }
-
-
-    REAL *p= nlcf.GetParams();
-    
-    
-    //   std::cout << "Result " << p[0] << " " << p[1] << " " << p[2] << " " << p[3]/M_PI*180 << " " << p[4]/M_PI*180 << " " << p[5]/M_PI*180 << std::endl;
-    
-    REAL ca = cos(p[3]); // DCOS
-    REAL sa = sin(p[3]); // DSINE
-    REAL cb = cos(p[4]); // DCOS
-    REAL sb = sin(p[4]); // DSINE
-    REAL cg = cos(p[5]); // DCOS
-    REAL sg = sin(p[5]); // DSINE
-    
-    transform[0] = ca*cg - cb*sa*sg;
-    transform[1] = sa*cg + cb*ca*sg;
-    transform[2] = sg*sb;
-    
-    transform[4] = -sg*ca - cb*sa*cg;
-    transform[5] = -sg*sa + cb*ca*cg;
-    transform[6] = cg*sb;
-    
-    transform[8] = sb*sa;
-    transform[9] = -sb*ca;
-    transform[10] = cb;
-    
-    // Add in the 4th col (offsets)
-    transform[3] = p[0];
-    transform[7] = p[1];
-    transform[11] = p[2];
-    
-    // Add in the 4th row (homogeneous coords)
-    transform[12] = 0.0;
-    transform[13] = 0.0;
-    transform[14] = 0.0;
-    transform[15] = 1.0;
-
-    REAL u,v,w=0.0;
-    REAL x,y;
-    
-  //   u=1.0; v=1.0;
-//     nlcf.GetPointProj(u,v,w,&x,&y);
-//     std::cout << "R " << x << " " << y << std::endl;
-//     u=-1.0; v=1.0;
-//     nlcf.GetPointProj(u,v,w,&x,&y);
-//     std::cout << "R " << x << " " << y << std::endl;
-//     u=-1.0; v=-1.0;
-//     nlcf.GetPointProj(u,v,w,&x,&y);
-//     std::cout << "R " << x << " " << y << std::endl;
-//     u=1.0; v=-1.0;
-//     nlcf.GetPointProj(u,v,w,&x,&y);
-//     std::cout << "R " << x << " " << y << std::endl;
-    return true;
-  }
-
-
-  void NonLinearQuadTangleTransform::NLQuadFunction::GetPoint3D(REAL u, REAL v, REAL w, REAL *xo, REAL *yo, REAL *zo) {
-    REAL ca = cos(mParams[3]); // DCOS
-    REAL sa = sin(mParams[3]); // DSINE
-    REAL cb = cos(mParams[4]); // DCOS
-    REAL sb = sin(mParams[4]); // DSINE
-    REAL cg = cos(mParams[5]); // DCOS
-    REAL sg = sin(mParams[5]); // DSINE
-    
-    REAL x = mParams[0];
-    REAL y = mParams[1];
-    REAL z = mParams[2];
-
-    REAL xx = (ca*cg - cb*sa*sg)*u + (sa*cg + cb*ca*sg)*v + sg*sb*w + x;
-    REAL yy = (-sg*ca - cb*sa*cg)*u + (-sg*sa + cb*ca*cg)*v + (cg*sb)*w + y;
-    REAL zz = sb*sa*u - sb*ca*v + cb*w + z;
-
-    *xo = xx;
-    *yo = yy;
-    *zo = zz;
-  }
   
-  void NonLinearQuadTangleTransform::NLQuadFunction::GetPointProj(REAL u, REAL v, REAL w, REAL *xo, REAL *yo) {
-    REAL ca = cos(mParams[3]); // DCOS
-    REAL sa = sin(mParams[3]); // DSINE
-    REAL cb = cos(mParams[4]); // DCOS
-    REAL sb = sin(mParams[4]); // DSINE
-    REAL cg = cos(mParams[5]); // DCOS
-    REAL sg = sin(mParams[5]); // DSINE
+    T = gsl_multimin_fminimizer_nmsimplex;
+    s = gsl_multimin_fminimizer_alloc (T, nparam);
+  
+    gsl_multimin_fminimizer_set (s, &errfunc, x, step); 
+  
+    do
+      {
+	iter++;
+	status = gsl_multimin_fminimizer_iterate (s);
+      
+	if (status)
+	  break;
+      
+	status = gsl_multimin_test_size(s->size,1e-4); 
+   
+      }  while (status == GSL_CONTINUE && iter < 500);
 
-    REAL x = mParams[0];
-    REAL y = mParams[1];
-    REAL z = mParams[2];
+    if (iter <500) {
+      // Success
+      float ca = cos(gsl_vector_get(s->x, 1)); // DCOS
+      float sa = sin(gsl_vector_get(s->x, 1)); // DSINE
+      float cb = cos(gsl_vector_get(s->x, 2)); // DCOS
+      float sb = sin(gsl_vector_get(s->x, 2)); // DSINE
+      float cg = cos(gsl_vector_get(s->x, 3)); // DCOS
+      float sg = sin(gsl_vector_get(s->x, 3)); // DCOS
+      float z = gsl_vector_get(s->x, 0);
 
-    REAL xx = (ca*cg - cb*sa*sg)*u + (sa*cg + cb*ca*sg)*v + sg*sb*w + x;
-    REAL yy = (-sg*ca - cb*sa*cg)*u + (-sg*sa + cb*ca*cg)*v + (cg*sb)*w + y;
-    REAL zz = sb*sa*u - sb*ca*v + cb*w + z;
+      transform[0] = ca*cg - cb*sa*sg;
+      transform[1] = sa*cg + cb*ca*sg;
+      transform[2] = sg*sb;
+    
+      transform[4] = -sg*ca - cb*sa*cg;
+      transform[5] = -sg*sa + cb*ca*cg;
+      transform[6] = cg*sb;
+    
+      transform[8] = sb*sa;
+      transform[9] = -sb*ca;
+      transform[10] = cb;
+    
+      // Add in the 4th col (offsets)
+      transform[3] = p[8]*z;
+      transform[7] = p[9]*z;
+      transform[11] = z;
+    
+      // Add in the 4th row (homogeneous coords)
+      transform[12] = 0.0;
+      transform[13] = 0.0;
+      transform[14] = 0.0;
+      transform[15] = 1.0;
+ 
+      return true;
+    }
 
-    *xo=xx/zz;
-    *yo=yy/zz;
+    gsl_multimin_fminimizer_free (s);
+    gsl_vector_free (x);
+    return false;
   }
 
 
-}
+
+  double NLMSimplexQuadTangleTransform::NLMQuadFunc(const gsl_vector *v, void *params)
+  {
+    float *p = (float *) params;
+    float X0, Y0, X1, Y1, X2, Y2, X3, Y3;
+    REAL ca = cos(gsl_vector_get(v, 1)); // DCOS
+    REAL sa = sin(gsl_vector_get(v, 1)); // DSINE
+    REAL cb = cos(gsl_vector_get(v, 2)); // DCOS
+    REAL sb = sin(gsl_vector_get(v, 2)); // DSINE
+    REAL cg = cos(gsl_vector_get(v, 3)); // DCOS
+    REAL sg = sin(gsl_vector_get(v, 3)); // DSINE
+    
+    float z = gsl_vector_get(v, 0);
+    float x = p[8] * z;
+    float y = p[9] * z;
+    
+    X0 = ((ca*cg - cb*sa*sg)*(-1.0) + (sa*cg + cb*ca*sg)*(1.0) + x) /
+      (sb*sa*(-1.0) - sb*ca*(1.0) + z);
+    Y0 = ((-sg*ca - cb*sa*cg)*(-1.0) + (-sg*sa + cb*ca*cg)*(1.0)+ y) /
+      (sb*sa*(-1.0) - sb*ca*(1.0) + z);
+
+    X1 = ((ca*cg - cb*sa*sg)*(-1.0) + (sa*cg + cb*ca*sg)*(-1.0) + x) /
+      (sb*sa*(-1.0) - sb*ca*(-1.0) + z);
+    Y1 = ((-sg*ca - cb*sa*cg)*(-1.0) + (-sg*sa + cb*ca*cg)*(-1.0) + y) /
+      (sb*sa*(-1.0) - sb*ca*(-1.0) + z);
+
+    X2 = ((ca*cg - cb*sa*sg)*(1.0) + (sa*cg + cb*ca*sg)*(-1.0) + x) /
+      (sb*sa*(1.0) - sb*ca*(-1.0) + z);
+    Y2 = ((-sg*ca - cb*sa*cg)*(1.0) + (-sg*sa + cb*ca*cg)*(-1.0) + y) /
+      (sb*sa*(1.0) - sb*ca*(-1.0) + z);
+
+    X3 = ((ca*cg - cb*sa*sg)*(1.0) + (sa*cg + cb*ca*sg)*(1.0) + x) /
+      (sb*sa*(1.0) - sb*ca*(1.0) + z);
+    Y3 = ((-sg*ca - cb*sa*cg)*(1.0) + (-sg*sa + cb*ca*cg)*(1.0) + y) /
+      (sb*sa*(1.0) - sb*ca*(1.0) + z);
+  
+    float s1x = X1-X0; float s1y = Y1-Y0;
+    float s2x = X2-X1; float s2y = Y2-Y1;
+    float s3x = X3-X2; float s3y = Y3-Y2;
+    float s4x = X0-X3; float s4y = Y0-Y3;
+
+    float p1x = p[2]-p[0]; float p1y = p[3]-p[1];
+    float p2x = p[4]-p[2]; float p2y = p[5]-p[3];
+    float p3x = p[6]-p[4]; float p3y = p[7]-p[5];
+    float p4x = p[0]-p[6]; float p4y = p[1]-p[7];
+    
+    float ca1 = (p1x*s1x + p1y*s1y) / (sqrt(p1x*p1x+p1y*p1y)*sqrt(s1x*s1x+s1y*s1y));
+    float ca2 = (p2x*s2x + p2y*s2y) / (sqrt(p2x*p2x+p2y*p2y)*sqrt(s2x*s2x+s2y*s2y));
+    float ca3 = (p3x*s3x + p3y*s3y) / (sqrt(p3x*p3x+p3y*p3y)*sqrt(s3x*s3x+s3y*s3y));
+    float ca4 = (p4x*s4x + p4y*s4y) / (sqrt(p4x*p4x+p4y*p4y)*sqrt(s4x*s4x+s4y*s4y));
+
+    float xmin = p[0];
+    float xmax = p[0];
+    float ymin = p[1];
+    float ymax = p[1];
+    for (int i=2; i<8; i+=2) {
+      if (p[i] < xmin) xmin=p[i];
+      if (p[i] > xmax) xmax=p[i];
+      if (p[i+1] < ymin) ymin=p[i+1];
+      if (p[i+1] > ymax) ymax=p[i+1];
+    }
+    float scale = ((ymax-ymin)>(xmax-xmin)) ? (ymax-ymin):(xmax-xmin);
+
+    float f= (scale/5)/(cos(20.0/180.0*M_PI)-1);
+    f*=f;
+
+    // Sum of squares
+    return (X0-p[0])*(X0-p[0]) + (Y0-p[1])*(Y0-p[1]) +
+      (X1-p[2])*(X1-p[2]) + (Y1-p[3])*(Y1-p[3]) +
+      (X2-p[4])*(X2-p[4]) + (Y2-p[5])*(Y2-p[5]) +
+      (X3-p[6])*(X3-p[6]) + (Y3-p[7])*(Y3-p[7])  +
+      f*(ca1-1.0)*(ca1-1.0) +
+      f*(ca2-1.0)*(ca2-1.0) +
+      f*(ca3-1.0)*(ca3-1.0) +
+      f*(ca4-1.0)*(ca4-1.0);
+  }
+#endif
+
+
+
+};

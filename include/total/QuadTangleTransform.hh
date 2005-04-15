@@ -8,14 +8,23 @@
 #include <total/Config.hh>
 #include <total/QuadTangle.hh>
 
-#include <total/NLNonLinearModel.hh>
-#include <total/NLNLMAPExceptions.hh>
+#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
+#include <gsl/gsl_multimin.h>
+#endif
+
+
+#include <gsl/gsl_multimin.h>
+
 
 namespace Total {
   class QuadTangleTransform {
   public:
     virtual bool TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const = 0;
   };
+
+
+
+
 
   class ProjectiveQuadTangleTransform  : public virtual QuadTangleTransform {
   public:
@@ -176,57 +185,73 @@ namespace Total {
 
 
 
+  // \todo: optimise the matrix before inversion
 
-
-
-  class NonLinearQuadTangleTransform  : public virtual QuadTangleTransform {
+  class ReducedProjectiveQuadTangleTransform  : public virtual QuadTangleTransform {
   public:
-
-
-
-    class NLQuadData : public FitData {
-    public:
-      /*
-       * Feed in the corner data. Each corner estimate
-       * is accurate to ~ a pixel. In NPCF ~1000 pixels 
-       * is scaled to 1.0.  Hence estimate the measurement 
-       * error to be 0.001
-       */
-      NLQuadData(const QuadTangle& q);
-      virtual ~NLQuadData() {};
-      const QuadTangle * GetQuadTangle() { return mQuad; }
-    private:
-      const QuadTangle *mQuad;
-    };
-
-
-
-
-    class NLQuadFunction :  public FitFunction {
-    public:
-      NLQuadFunction() : FitFunction(6){};
-      virtual ~NLQuadFunction() {};
-      virtual void  InitialiseParameters(FitData *fd);
-      virtual REAL  Evaluate(const int i, REAL *p, FitData *fd);
-      void GetPoint3D(REAL u, REAL v, REAL w, REAL *xo, REAL *yo, REAL *zo);
-      void GetPointProj(REAL u, REAL v, REAL w, REAL *xo, REAL *yo);
-    private:
-      int mXseq[4];
-      int mYseq[4];
-    };
-
-
-
     /*
-     * Fit the quadtangle to a _guaranteed_ square by fitting the corners
-     * to a square of side 2 at parameterised position (x,y,z) and pose (alpha, 
-     * beta,gamma).
+     * This algorithm is as the one above, but makes
+     * better use of the information available
+     * to reduce the parameter set.
      *
-     * Alpha, beta, gamma are the euler angles (i.e. rotate alpha about z, then
-     * beta about the new x, finally gamma about the new z). They allow arbitrary
-     * pose.
+     * Given the quadtangle, calculate the point that
+     * the square centre maps to (the intersection of
+     * the diagonals). This is a projection Xc=x/z, Yc=y/z
+     * for a tag at (x,y,z). Thus, given Xc and Yc, the tag
+     * location is completely determined by z!
+     *
+     * Following the same analysis above, we find:
+     * (X-Xc) = a0*u + a1*v - a5*u*X - a6*v*X
+     * (Y-Yc) = a3*u + a4*v - a5*u*Y - a6*v*Y
+     *
+     * And so we solve for a0, a1, a3, a4, a5, a6
+     * and calculate:
+     *
+     * c8 = 1.0/ sqrt( a0*a0 + a3*a3 +a5*a5 )
+     *
+     * which then gives us all the params we had before,
+     * but has only required inverting a 6x6 matrix rather
+     * than an 8x8
      */
     bool TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const;
-  }; 
+  };
+
+
+
+
+#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
+  /**
+   * Perform transform based on assertion that tag is exactly
+   * square in real life.  Solves for four parameters: z, alpha,
+   * beta, gamma, where the three angles are standarad euler angles
+   */
+  class NLMSimplexQuadTangleTransform : public virtual QuadTangleTransform {
+  public:
+    /*
+     * Static function so it can be passed as a function pointer
+     * to GNU Scientific Library
+     */
+    static double NLMQuadFunc(const gsl_vector *v, void *params);
+
+    /*
+     * Calculate the transform by least squares minimising the 
+     * euclidean distance for each point AND the angle between the
+     * sides.
+     *
+     * This transform assumes the tag is square (the correct thing to do)
+     * and moves it in space to find a best fit to the input corner points.
+     * 
+     * Position is fully defined by the depth distance, z, whilst pose is
+     * completely defined by the Euler angles alpha, beta, gamma --
+     * see http://mathworld.wolfram.com/EulerAngles.html
+     * 
+     * Therefore this is a minimisation wrt (z,alpha,beta,gamma).
+     */
+    bool TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const;
+  };
+#else
+  class NLMSimplexQuadTangleTransform : public virtual QuadTangleTransform {};
+#endif
+
 }
 #endif//QUADTANGLE_TRANSFORM_GUARD
