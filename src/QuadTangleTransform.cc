@@ -400,12 +400,12 @@ namespace Total {
   {
     float *p = (float *) params;
     float X0, Y0, X1, Y1, X2, Y2, X3, Y3;
-    REAL ca = cos(gsl_vector_get(v, 1)); // DCOS
-    REAL sa = sin(gsl_vector_get(v, 1)); // DSINE
-    REAL cb = cos(gsl_vector_get(v, 2)); // DCOS
-    REAL sb = sin(gsl_vector_get(v, 2)); // DSINE
-    REAL cg = cos(gsl_vector_get(v, 3)); // DCOS
-    REAL sg = sin(gsl_vector_get(v, 3)); // DSINE
+    float ca = cos(gsl_vector_get(v, 1)); // DCOS
+    float sa = sin(gsl_vector_get(v, 1)); // DSINE
+    float cb = cos(gsl_vector_get(v, 2)); // DCOS
+    float sb = sin(gsl_vector_get(v, 2)); // DSINE
+    float cg = cos(gsl_vector_get(v, 3)); // DCOS
+    float sg = sin(gsl_vector_get(v, 3)); // DSINE
     
     float z = gsl_vector_get(v, 0);
     float x = p[8] * z;
