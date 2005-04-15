@@ -5,8 +5,6 @@
 #include <total/QuadTangleTransform.hh>
 #include <total/gaussianelimination.hh>
 
-#include <gsl/gsl_multimin.h>
-
 #include <iostream>
 
 #undef SQUARE_TRANSFORM_DEBUG

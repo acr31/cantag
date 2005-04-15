@@ -13,9 +13,6 @@
 #endif
 
 
-#include <gsl/gsl_multimin.h>
-
-
 namespace Total {
   class QuadTangleTransform {
   public:
@@ -249,8 +246,6 @@ namespace Total {
      */
     bool TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const;
   };
-#else
-  class NLMSimplexQuadTangleTransform : public virtual QuadTangleTransform {};
 #endif
 
 }
