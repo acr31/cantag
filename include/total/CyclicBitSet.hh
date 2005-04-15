@@ -158,6 +158,7 @@ namespace Total {
 	return false;
       }
     }
+    return false;
   }
 
   template<int BIT_COUNT> template<int SIZE>  bool CyclicBitSet<BIT_COUNT>::Equals(const CyclicBitSet<SIZE>& target) const {
