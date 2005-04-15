@@ -36,7 +36,7 @@ main(int argc, char* argv[]) {
     // start a timer to measure FPS
     time_t cur_time = time(NULL);
     int count = 0;
-    int iter=0;
+
     while(true) {
 
       // STAGE1: fetch the next image from the image source.

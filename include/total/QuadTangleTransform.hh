@@ -246,6 +246,47 @@ namespace Total {
      */
     bool TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const;
   };
+
+
+
+  class CyberCodeQuadTangleTransform : public virtual QuadTangleTransform {
+  public:
+    /*
+     * Static function so it can be passed as a function pointer
+     * to GNU Scientific Library
+     */
+    static double QuadFunc(const gsl_vector *v, void *params);
+    static bool ComputeCameraPointsFromAngles(const gsl_vector *v, void *p, float *pts, float *n);
+
+    /*
+     * An implementation of the CyberCode algorithm
+     * The details are scant in the paper and the maths
+     * that is quoted is not actually correct/optimal
+     *
+     * The idea is to separate out determination of the
+     * normal from determination of distance since
+     * this is simply a scaling factor
+     *
+     * Thus we select a normal vector n and place a plane
+     * with this normal at the point (Xc, Yc, 1) which is 
+     * where the quad diagonals intersect. The normal is
+     * represented by two spherical polar angles, theta and
+     * phi
+     *
+     * We then look at the points P where the rays passing
+     * through the corners {X,Y} intersect the plane. We compute
+     * the dot products of the sides defined by P and add on
+     * the dot product of the diagonals. If P is a square all
+     * these angles are 90 degrees and the sum evaluates as zero.
+     * Hence we minimise the sum to estimate the normal.
+     *
+     * To calculate the distance, we simply measure the length
+     * of one of the sides defined by P and find the factor that
+     * makes it 2.0
+     */
+    bool TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const;
+  };
+
 #endif
 
 }

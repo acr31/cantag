@@ -225,6 +225,10 @@ namespace Total {
 				      public RegressionQuadTangle 
   {};
 
+  class RegressPolygonQuadTangle : public PolygonQuadTangle,
+				   public RegressionQuadTangle 
+  {};
+
 
 }
 

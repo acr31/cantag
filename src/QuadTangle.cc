@@ -423,7 +423,7 @@ namespace Total {
     // Copy the remaining vertex indices
     // to a vector and sort them numerically
     ci = angles.begin();
-    for (int i=0; i<angles.size(); i++) {
+    for (unsigned int i=0; i<angles.size(); i++) {
       indexes.push_back (ci->second);
       ++ci;
     }
@@ -436,7 +436,7 @@ namespace Total {
       // Find the longest side in the current poly
       float longest = 0.0;
       
-      for (int i=0; i<indexes.size(); i++) {
+      for (unsigned int i=0; i<indexes.size(); i++) {
 	float xd = points[indexes[i]*2] - points[indexes[(i+1)%indexes.size()]*2];
 	float yd = points[indexes[i]*2+1] - points[indexes[(i+1)%indexes.size()]*2+1];
 	if ((xd*xd+yd*yd) > longest) longest = xd*xd+yd*yd;
@@ -445,7 +445,7 @@ namespace Total {
       // Iterate over again, storing the index and
       // its ensuing side length relative to the longest
       std::multimap<float,int> dist;    
-      for (int i=0; i<indexes.size(); i++) {
+      for (unsigned int i=0; i<indexes.size(); i++) {
 	float xd = points[indexes[i]*2] - points[indexes[(i+1)%indexes.size()]*2];
 	float yd = points[indexes[i]*2+1] - points[indexes[(i+1)%indexes.size()]*2+1];
 	dist.insert( std::pair<float,int>(-(xd*xd+yd*yd)/longest,indexes[i]));
@@ -482,7 +482,7 @@ namespace Total {
     // Calculate the indexes of the current points
     std::vector<int> indexes(4);
     for (int i=0; i<4; i++) indexes[i]=-1;
-    for (int i=0; i<points.size(); i+=2) {
+    for (unsigned int i=0; i<points.size(); i+=2) {
       if (m_x0==points[i] && m_y0==points[i+1]) indexes[0]=i/2;
       if (m_x1==points[i] && m_y1==points[i+1]) indexes[1]=i/2;
       if (m_x2==points[i] && m_y2==points[i+1]) indexes[2]=i/2;
@@ -583,6 +583,9 @@ namespace Total {
     m_y2 = yres[2]; 
     m_x3 = xres[3];
     m_y3 = yres[3];
+
+    //    std::cout << m_x0 << " " << m_y0 << " " << m_x1 << " " << m_y1 << " " << m_x2 << " " << m_y2 <<" " << m_x3 << " " << m_y3 << std::endl;
+
     compute_central_point();
     sort_points();
     return true;
@@ -638,6 +641,7 @@ namespace Total {
 				 std::list<std::pair<float,float> >::iterator start,
 				 std::list<std::pair<float,float> >::iterator mid,
 				 std::list<std::pair<float,float> >::iterator end) {
+if (mid==end) return;
 
 #ifdef POLYGON_DEBUG
     int start_index = -1;
@@ -864,7 +868,6 @@ namespace Total {
       float firsty=*++points.begin();
     
       //must copy since we want to modify this datastructure and vector is const!
-      int index =0 ;
       for(std::vector<float>::const_iterator i = points.begin(); i != points.end(); ++i) {
 	float x = *i;
 	++i;

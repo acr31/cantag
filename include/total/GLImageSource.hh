@@ -105,7 +105,7 @@ namespace Total {
     // d = 0.5/tan(fov/2)
 
     // however, we'd actually like the system to report the distance as 1
-    // so set the focal length to d
+    // so set the focabl length to d
 
     float invd = tan(m_fov/2/180*M_PI)*2;
 

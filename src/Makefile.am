@@ -1,5 +1,5 @@
 lib_LTLIBRARIES = libtotal.la
-libtotal_la_SOURCES = Ellipse.cc QuadTangle.cc findtransform.cc Camera.cc gaussianelimination.cc Image.cc FileImageSource.cc  Template.cc polysolve.cc ContourTree.cc Socket.cc EllipseTransform.cc QuadTangleTransform.cc NLNonLinearModel.cc NLFitData.cc NLFitFunction.cc NLGaussJordanEliminator.cc
+libtotal_la_SOURCES = Ellipse.cc QuadTangle.cc findtransform.cc Camera.cc gaussianelimination.cc Image.cc FileImageSource.cc  Template.cc polysolve.cc ContourTree.cc Socket.cc EllipseTransform.cc QuadTangleTransform.cc 
 
 if HAVE_LINUX_VIDEODEV_H
 libtotal_la_SOURCES += V4LImageSource.cc

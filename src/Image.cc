@@ -48,6 +48,7 @@ namespace Total {
       m_contents = new unsigned char[m_width*m_height];
       m_free_contents = true;
       m_binary = false;
+
       Magick::PixelPacket *pixel_cache = i.getPixels(0,0,m_width,m_height);
       int size = m_width*m_height;
       for(int ptr=0;ptr<size;++ptr) {

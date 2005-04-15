@@ -14,7 +14,7 @@
 #include <cassert>
 
 #ifdef TEXT_DEBUG
-# undef ELLIPSE_DEBUG
+#define ELLIPSE_DEBUG
 # undef ELLIPSE_DEBUG_DUMP_POINTS
 # undef CIRCLE_TRANSFORM_DEBUG
 # undef DECOMPOSE_DEBUG
@@ -147,7 +147,7 @@ namespace Total {
     PROGRESS("Determinant of S3 " << determinant);
 #endif    
 
-    if (fabs(determinant) < 1e-5) { 
+    if (fabs(determinant) < 1e-20) { 
 #ifdef ELLIPSE_DEBUG
       PROGRESS("Determinant of S3 is zero - no fit");
 #endif

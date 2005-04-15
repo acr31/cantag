@@ -97,7 +97,7 @@ namespace Total {
 	    continue;
 	  }
 
-	  if (contour_length < 20) { current->weeded = true; m_contour_count--;}
+	  //	  if (contour_length < 20) { current->weeded = true; m_contour_count--;}
 	
 	  // now decide the parent of this border
 	

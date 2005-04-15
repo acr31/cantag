@@ -41,7 +41,7 @@ namespace Total {
   /**
    * A tag much like Rekimoto's Matrix Tag but using a Trip coding scheme
    */
-  class MatrixSquare : public MatrixTag<6,ConvexHullQuadTangle>,  protected virtual TripOriginalCoder<36,3,2>, private virtual ProjectiveQuadTangleTransform {};
+  class MatrixSquare : public MatrixTag<6,RegressConvexHullQuadTangle>,  protected virtual TripOriginalCoder<36,3,2>, private virtual ProjectiveQuadTangleTransform {};
 
   /**
    * Another tag that uses the same coding structure as TRIP but with
@@ -60,4 +60,5 @@ namespace Total {
   };
 
 }
+
 #endif//TAGS_GUARD
