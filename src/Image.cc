@@ -309,7 +309,7 @@ namespace Total {
 			  unsigned char color, int thickness) {
     assert(thickness > 0 || thickness == -1);
 
-    int numsteps = (int)(2*PI/STEPSIZE); 
+    int numsteps = (int)(2.f*PI/STEPSIZE); 
 
     float points[numsteps*2];
     ellipse_polygon_approx(points,0, numsteps, xc, yc ,width, height, angle_radians, color, thickness, 0);
@@ -477,6 +477,7 @@ namespace Total {
     }
     edge_list.sort(EdgePtrSort());
   
+    if (edge_list.size() == 0) return;
   
     // initialise scanline
     int scanline = edge_list.front()->miny;
