@@ -7,6 +7,8 @@
 #include <total/Config.hh>
 #include <total/Socket.hh>
 
+#include <sys/param.h>
+
 #include <cmath>
 
 #define COLOUR_BLACK ((unsigned char)0)
@@ -410,8 +412,12 @@ namespace Total {
     void ScanLineFill(float* points,int numpoints,unsigned char colour);
 
     static inline int Round(double d)  {
+#if BYTE_ORDER == LITTLE_ENDIAN
       double t =(d+6755399441055744.0); 
       return *(int*)&t;
+#else
+      return (int)round(d);
+#endif
     }
   
     class Edge {
