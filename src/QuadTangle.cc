@@ -20,7 +20,7 @@
 
 namespace Total {
 
-#define MASK(x) ((x) & ((1<<LOGMAXWINDOW)-1))
+#define TOTAL_MASK(x) ((x) & ((1<<LOGMAXWINDOW)-1))
 
   QuadTangle::QuadTangle() {}
 
@@ -194,13 +194,13 @@ namespace Total {
 
 
   static void compute(const float* xwindow, const float* ywindow, int datapointer, int k, float* lik, float* rik) {
-    float chordx = xwindow[MASK(datapointer+k)] - xwindow[MASK(datapointer-k)];
-    float chordy = ywindow[MASK(datapointer+k)] - ywindow[MASK(datapointer-k)];
+    float chordx = xwindow[TOTAL_MASK(datapointer+k)] - xwindow[TOTAL_MASK(datapointer-k)];
+    float chordy = ywindow[TOTAL_MASK(datapointer+k)] - ywindow[TOTAL_MASK(datapointer-k)];
   
     *lik = sqrt(chordx*chordx + chordy*chordy);
   
-    float apx = xwindow[MASK(datapointer-k)] - xwindow[datapointer];
-    float apy = ywindow[MASK(datapointer-k)] - ywindow[datapointer];
+    float apx = xwindow[TOTAL_MASK(datapointer-k)] - xwindow[datapointer];
+    float apy = ywindow[TOTAL_MASK(datapointer-k)] - ywindow[datapointer];
 
     float modchord = *lik;
 
@@ -225,11 +225,11 @@ namespace Total {
   }
 
   static float curvature(const float* xwindow, const float* ywindow, int datapointer, int k) {
-    float ax = xwindow[MASK(datapointer+k)] - xwindow[datapointer];
-    float ay = ywindow[MASK(datapointer+k)] - ywindow[datapointer];
+    float ax = xwindow[TOTAL_MASK(datapointer+k)] - xwindow[datapointer];
+    float ay = ywindow[TOTAL_MASK(datapointer+k)] - ywindow[datapointer];
 
-    float bx = xwindow[MASK(datapointer-k)] - xwindow[datapointer];
-    float by = ywindow[MASK(datapointer-k)] - ywindow[datapointer];
+    float bx = xwindow[TOTAL_MASK(datapointer-k)] - xwindow[datapointer];
+    float by = ywindow[TOTAL_MASK(datapointer-k)] - ywindow[datapointer];
 
     float moda = sqrt(ax*ax+ay*ay);
     float modb = sqrt(bx*bx+by*by);
@@ -283,8 +283,8 @@ namespace Total {
       float currentmax = -10;
       int count = points.size()/2;
       for(int c=1;c<count;++c) {
-	datapointer = MASK(datapointer+1);
-	loadpointer = MASK(loadpointer+1);
+	datapointer = TOTAL_MASK(datapointer+1);
+	loadpointer = TOTAL_MASK(loadpointer+1);
 	xwindow[loadpointer] = *i;
 	++i;
 	ywindow[loadpointer] = *i;
