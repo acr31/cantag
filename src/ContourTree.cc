@@ -69,6 +69,8 @@ namespace Total {
       for(int raster_x=1;raster_x < image_width_1;++raster_x, ++data_pointer) {
 	if (*data_pointer & 3) {  // this pixel is a 1-element or it has been visited before
 	  const int cNBD = *data_pointer & 2;   // the second pixel will be 1 if we've seen it before and 0 if not
+	  const int previous_is_1 = *(data_pointer-1) & 3;
+	  const int next_is_1 = *(data_pointer+1) & 3;
 	  if (cNBD) { // this pixel has been seen before
 #ifdef CONTOUR_TREE_DEBUG
 	    PROGRESS("Updating LNBD to " << nbd_store[raster_x+raster_y*image.GetWidth()]);
@@ -79,14 +81,14 @@ namespace Total {
 
 	  int contour_length;
 	  ContourStatistics contour_statistics;
-	  if (!cNBD && !(*(data_pointer-1) & 1)) { // this pixel has not been seen before and the previous pixel is a 0-element
+	  if (!cNBD && !previous_is_1) { // this pixel has not been seen before and the previous pixel is a 0-element
 	    current->bordertype = OUTER_BORDER;	  
 #ifdef CONTOUR_TREE_DEBUG
 	    PROGRESS("Found outer border.  Following from " << raster_x << "," << raster_y);
 #endif
 	    contour_length = FollowContour(image, data_pointer, raster_x, raster_y, current->points, contour_statistics,0, NBD,nbd_store);
 	  } 
-	  else if ((!(*data_pointer & 0x2)) && !(*(data_pointer+1) & 0x1)) { // this pixel has not been seen before or it is not an exit pixel, and the next pixel is a 0-element
+	  else if (!cNBD && !next_is_1) { // this pixel has not been seen before or it is not an exit pixel, and the next pixel is a 0-element
 	    current->bordertype = HOLE_BORDER;
 #ifdef CONTOUR_TREE_DEBUG
 	    PROGRESS("Found hole border.  Following from " << raster_x << "," << raster_y);
@@ -197,6 +199,7 @@ namespace Total {
     // contour_0 is the first pixel in the contour
     const unsigned char* contour_0 = data_pointer;
 
+    // find the first point that we will start searching from
     do {
       position = (position - 1) & 0x7;
       sample_pointer = data_pointer+offset[position];
@@ -208,8 +211,8 @@ namespace Total {
     PROGRESS("Finished clockwise scan at " << position << " (started:" << start_position << ")");
 #endif
 
+    // check if we have a 1-pixel contour
     if (position == start_position) {
-      // one pixel contour
       *data_pointer |= 2;
       nbd_store[start_x+image_width*start_y] = nbd;
       points.push_back(start_x);
@@ -228,7 +231,7 @@ namespace Total {
     else {
       position = (position + 1) & 0x7;
 
-      // contour_n is the last pixel in the contour
+      // contour_n is the last point in the contour
       const unsigned char* contour_n = sample_pointer;
 
       bool cell4_is_0 = false; // will be set to true when we search a region if we pass cell4 and cell4 is a 0-element
@@ -276,7 +279,7 @@ namespace Total {
 	    PROGRESS("Marked " << start_x << "," << start_y << " with 3");
 #endif
 	  }
-
+	  
 	  // update the length
 	  statistics.length += (position & 0x1 ? 45 : 32);
 	  // update the bounding box
@@ -284,6 +287,13 @@ namespace Total {
 	  else if (start_x > statistics.max_x) { statistics.max_x = start_x; }
 	  if (start_y < statistics.min_y) { statistics.min_y = start_y; }
 	  else if (start_y > statistics.max_y) { statistics.max_y = start_y; }
+
+
+	  // store this point in the pixel chain and update the start position
+	  points.push_back(start_x);
+	  points.push_back(start_y);
+	  start_x += offset_x[position];
+	  start_y += offset_y[position];
 
 	  // check the stopping condition
 	  if ((points.size() > 4) && // i.e. we have seen more than two pixels
@@ -293,21 +303,15 @@ namespace Total {
 #ifdef CONTOUR_TREE_DEBUG
 	    PROGRESS("Found " << (points.size()>>1) << " pixel contour starting from "<< points[0] << "," << points[1]);
 #endif
-#ifdef IMAGE_DEBUG
-#ifdef CONTOUR_TREE_DEBUG_SAVE
+#if defined(IMAGE_DEBUG) and defined(CONTOUR_TREE_DEBUG_SAVE)
 	    debug_image->DrawPixel(start_x,start_y,0);		  
 	    debug_image->Save("debug-contourtree-contours.bmp");
-#endif
 #endif
 	    return points.size()>>1;
 	  }
 
-	  // store this point in the pixel chain and update the start position
-	  points.push_back(start_x);
-	  points.push_back(start_y);
-	  start_x += offset_x[position];
-	  start_y += offset_y[position];
 	  data_pointer = sample_pointer;
+
 
 	  // reset the search value for cell 4
 	  cell4_is_0=false;
@@ -353,6 +357,9 @@ namespace Total {
       }
 
       statistics.length >>= 5;
+#ifdef CONTOUR_TREE_DEBUG
+      PROGRESS("Contour length = " << (points.size()-3/2));
+#endif
       return (points.size()-3)/2;
     }
   }
