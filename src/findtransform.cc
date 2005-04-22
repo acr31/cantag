@@ -122,7 +122,9 @@ namespace Total {
     location[0] = tag_size*transform[3]/transform[15];
     location[1] = tag_size*transform[7]/transform[15];
     location[2] = tag_size*transform[11]/transform[15];
+#ifdef APPLY_TRANSFORM_DEBUG
     PROGRESS("Found location ("<<location[0]<<","<<location[1]<<","<<location[2]<<")");
+#endif
   }
 
 
