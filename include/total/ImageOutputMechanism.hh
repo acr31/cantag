@@ -7,35 +7,39 @@
 
 #include <total/Config.hh>
 #include <total/LocatedObject.hh>
+#include <total/ContourTree.hh>
+#include <total/ShapeTree.hh>
+#include <total/WorldState.hh>
+#include <total/Camera.hh>
 
 namespace Total {
   class ImageOutputMechanism {
-  private:
+  private:    
     const Camera& m_camera;
-    Image* m_savedimage;
+    Image* m_saved_originalimage;
+    Image* m_saved_thresholdimage;
+    void FromContourTree(Image& dest, const ContourTree::Contour* contour);
+
   public:
   
-    ImageOutputMechanism(const Camera& camera) : m_camera(camera), m_savedimage(NULL) {};
-  
-    inline void FromImageSource(const Image& image) {
-      image.Save("debug-fromimagesource.pnm");
+    ImageOutputMechanism(const Camera& camera) : m_camera(camera), m_saved_originalimage(NULL), m_saved_thresholdimage(NULL) {};
+    ~ImageOutputMechanism();
 
-      m_savedimage = new Image(image);
-    };
-    inline void FromThreshold(const Image& image) {
-      image.Save("debug-fromthreshold.pnm");
-    };
-    inline void FromContourTree(const ContourTree& contours) {};
+    void FromImageSource(const Image& image);
+
+    void FromThreshold(const Image& image);
+
+    void FromContourTree(const ContourTree& contours);
     inline void FromRemoveIntrinsic(const ContourTree& contours) {};
     template<class ShapeType> inline void FromShapeTree(const ShapeTree<ShapeType>& shapes) {};
     template<int PAYLOADSIZE> void FromTag(const WorldState<PAYLOADSIZE>& world);
   };
   
   template<int PAYLOADSIZE> void ImageOutputMechanism::FromTag(const WorldState<PAYLOADSIZE>& world) {
-    if (!m_savedimage) throw "Must call FromImageSource before calling FromTag";
+    if (!m_saved_originalimage) throw "Must call FromImageSource before calling FromTag";
 
-    m_savedimage->ConvertScale(0.25,0);
-    m_savedimage->ConvertScale(1,128);      
+    m_saved_originalimage->ConvertScale(0.25,0);
+    m_saved_originalimage->ConvertScale(1,128);      
     for(typename std::vector<LocatedObject<PAYLOADSIZE>*>::const_iterator i = world.GetNodes().begin();
 	i != world.GetNodes().end();
 	++i) {
@@ -47,11 +51,10 @@ namespace Total {
 		       1,-1};
 	ApplyTransform(loc->transform,pts,4);
 	m_camera.NPCFToImage(pts,4);
-	m_savedimage->DrawPolygon(pts,4,COLOUR_BLACK,1);
+	m_saved_originalimage->DrawPolygon(pts,4,COLOUR_BLACK,1);
       }
     }
-    m_savedimage->Save("debug-fromtag.pnm");
-    delete m_savedimage;
+    m_saved_originalimage->Save("debug-fromtag.pnm");
   }
 }
 #endif//IMAGE_OUTPUT_MECHANISM_GUARD
