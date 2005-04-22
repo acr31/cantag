@@ -347,9 +347,7 @@ namespace Total {
   }
 
   void Image::Mask(unsigned char mask) {
-    if (mask == 1) {
-      m_binary = true;
-    }
+    m_binary = mask == 1;
     for(int i=0;i<GetHeight();++i) {
       unsigned char* ptr = GetRow(i);
       for(int j=0;j<GetWidth();++j) {
