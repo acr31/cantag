@@ -14,4 +14,4 @@ endif
 endif
 
 AM_CPPFLAGS=-I../include
-AM_LDFLAGS=-L../src -ltotal -lm -lgslcblas -lgsl
+AM_LDFLAGS=-L../src -ltotal
