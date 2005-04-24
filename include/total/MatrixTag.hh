@@ -19,8 +19,8 @@
 #include <bitset>
 
 #ifdef TEXT_DEBUG
-# define MATRIX_TAG_DEBUG
-# define MATRIX_TAG_DEBUG_POINTS
+# undef MATRIX_TAG_DEBUG
+# undef MATRIX_TAG_DEBUG_POINTS
 #endif
 
 #ifdef IMAGE_DEBUG

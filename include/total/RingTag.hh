@@ -19,7 +19,7 @@
 #include <total/SpeedMath.hh>
 
 #ifdef TEXT_DEBUG
-# define RING_TAG_DEBUG
+# undef RING_TAG_DEBUG
 #endif
 
 #ifdef IMAGE_DEBUG

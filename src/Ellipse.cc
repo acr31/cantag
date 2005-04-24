@@ -14,7 +14,7 @@
 #include <cassert>
 
 #ifdef TEXT_DEBUG
-#define ELLIPSE_DEBUG
+# undef ELLIPSE_DEBUG
 # undef ELLIPSE_DEBUG_DUMP_POINTS
 # undef CIRCLE_TRANSFORM_DEBUG
 # undef DECOMPOSE_DEBUG
