@@ -668,6 +668,11 @@ namespace Total {
     float lambda1 = ((a+c) - tmproot)/2;
     float lambda2 = ((a+c) + tmproot)/2;
     float lambda1t = lambda1;
+    if (lambda1 < lambda2) {
+      lambda1t = lambda2;
+      lambda2 =lambda1;
+      lambda1 = lambda1t;
+    }
     lambda1 = 1/sqrt(lambda1);
     lambda2 = 1/sqrt(lambda2);
 
@@ -678,14 +683,14 @@ namespace Total {
 #endif
   
     float scale_factor = sqrt( -f + a*m_x0*m_x0 + b*m_x0*m_y0 + c*m_y0*m_y0);
-  
+
 #ifdef DECOMPOSE_DEBUG
     PROGRESS("scale= " << scale_factor);
 #endif
   
     m_width = lambda1 * scale_factor;
     m_height = lambda2 * scale_factor;
-  
+    
     //  m_width = lambda1;
     //m_height = lambda2;
 
@@ -699,7 +704,7 @@ namespace Total {
       m_angle_radians = 0;
     }
     else {
-      m_angle_radians = atan( -(a-lambda1t)/(0.5*b) ); // DATAN
+      m_angle_radians = atan( -(a-lambda1t*scale_factor)/(0.5*b) ); // DATAN
     }
 #ifdef DECOMPOSE_DEBUG
     PROGRESS("angle= " << m_angle_radians);
