@@ -275,7 +275,7 @@ namespace Total {
     }
 
     char filename[256];
-    snprintf(filename,255,"debug-decode-%0.5d.pnm",debug_matrix_image_counter++);
+    snprintf(filename,255,"debug-decode-%d.pnm",debug_matrix_image_counter++);
     filename[255]=0;
     debug0.Save(filename);
 #endif
