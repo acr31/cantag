@@ -16,27 +16,26 @@ namespace Total {
   {
     unsigned int* nbd_store = new unsigned int[image.GetWidth()*image.GetHeight()];
     std::map<int,Contour*> node_hash;
-    unsigned char* data_pointer = image.GetDataPointer();
     int image_width = image.GetWidth();
     int image_height = image.GetHeight();
     int image_width_1 = image_width-1;
     // our frame border is a hole border.  We write zero's around the
     // edge of the image to make sure that our border follower never
     // goes out of range
-    for(int i=0;i<image_width;++i) {
+    for(int i=0;i<image_height;++i) {
+      unsigned char* data_pointer = image.GetRow(i);
       *data_pointer &= 0xFC;
-      data_pointer++;
+      if (i == 0 || i == image_height-1) {
+	for(int j=0;j<image_width-2;++j) {
+	  *data_pointer &= 0xFC;
+	  data_pointer++;
+	}
+      }
+      else {
+	data_pointer+=image_width_1;
+      }
+      *data_pointer &= 0xFC;
     }
-    for(int i=0;i<image_height-2;++i) {
-      *data_pointer &= 0xFC;
-      data_pointer+=image_width_1;
-      *data_pointer &= 0xFC;
-      ++data_pointer;
-    }
-    for(int i=0;i<image_width;++i) {
-      *data_pointer &= 0xFC;
-      ++data_pointer;
-    }  
 
 #ifdef IMAGE_DEBUG
     debug_image= new Image(image.GetWidth(),image.GetHeight());
@@ -48,7 +47,6 @@ namespace Total {
     Contour* current = m_root_contour;
     current->bordertype=HOLE_BORDER;
     node_hash[1] = current;
-    data_pointer = image.GetDataPointer();
     int NBD = 2;
     node_hash[NBD] = new Contour(NBD);
     m_contour_count++;
@@ -64,7 +62,7 @@ namespace Total {
       PROGRESS("Updating LNBD to 1 (row start)");
 #endif
       unsigned int LNBD = 1; // we've just "seen" the frame border so set the last seen border id to match
-      data_pointer = image.GetRow(raster_y);
+      unsigned char* data_pointer = image.GetRow(raster_y);
       ++data_pointer; // exclude the first pixel on the line
       for(int raster_x=1;raster_x < image_width_1;++raster_x, ++data_pointer) {
 	if (*data_pointer & 3) {  // this pixel is a 1-element or it has been visited before
@@ -99,7 +97,7 @@ namespace Total {
 	    continue;
 	  }
 
-	  //	  if (contour_length < 20) { current->weeded = true; m_contour_count--;}
+	  if (contour_length < 20) { current->weeded = true; m_contour_count--;}
 	
 	  // now decide the parent of this border
 	

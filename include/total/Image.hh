@@ -95,20 +95,6 @@ namespace Total {
     }
 
     /**
-     * \todo remove this
-     */
-    inline unsigned char* GetDataPointer() {
-      return m_contents;
-    }
-  
-    /**
-     * \todo remove this
-     */
-    inline const unsigned char* GetDataPointer() const {
-      return m_contents;
-    }
-
-    /**
      * Read the pixel at the given x and y co-ordinates. Includes a
      * bounds check---returns 0 if out of range.
      */
