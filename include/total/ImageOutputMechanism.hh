@@ -19,7 +19,7 @@ namespace Total {
     Image* m_saved_originalimage;
     Image* m_saved_thresholdimage;
     void FromContourTree(Image& dest, const ContourTree::Contour* contour);
-
+    template<class ShapeType> void FromShapeTree(Image& image, const typename ShapeTree<ShapeType>::Node* node);
   public:
   
     ImageOutputMechanism(const Camera& camera) : m_camera(camera), m_saved_originalimage(NULL), m_saved_thresholdimage(NULL) {};
@@ -31,10 +31,26 @@ namespace Total {
 
     void FromContourTree(const ContourTree& contours);
     inline void FromRemoveIntrinsic(const ContourTree& contours) {};
-    template<class ShapeType> inline void FromShapeTree(const ShapeTree<ShapeType>& shapes) {};
+    template<class ShapeType>  void FromShapeTree(const ShapeTree<ShapeType>& shapes);
     template<int PAYLOADSIZE> void FromTag(const WorldState<PAYLOADSIZE>& world);
   };
   
+  template<class ShapeType> void ImageOutputMechanism::FromShapeTree(Image& image,const typename ShapeTree<ShapeType>::Node* node) {
+    node->matched.DrawChain(image,m_camera);
+    for(typename std::vector<typename ShapeTree<ShapeType>::Node* >::const_iterator i = node->children.begin();
+	i!=node->children.end();
+	++i) {
+      FromShapeTree<ShapeType>(image,*i);
+    }
+  };
+
+
+  template<class ShapeType> void ImageOutputMechanism::FromShapeTree(const ShapeTree<ShapeType>& shapes) {
+    Image i(m_saved_originalimage->GetWidth(),m_saved_originalimage->GetHeight());
+    FromShapeTree<ShapeType>(i,shapes.GetRootNode());
+    i.Save("debug-fromshapetree.pnm");
+  }
+
   template<int PAYLOADSIZE> void ImageOutputMechanism::FromTag(const WorldState<PAYLOADSIZE>& world) {
     if (!m_saved_originalimage) throw "Must call FromImageSource before calling FromTag";
 
