@@ -629,7 +629,6 @@ namespace Total {
   }
 
   template<int RING_COUNT,int SECTOR_COUNT,class C>  void RingTag<RING_COUNT,SECTOR_COUNT,C>::draw_read(const Image& image, const Camera& camera, float l[16]) const {
-    int i =0;
     Image debug0(image);
     debug0.Mask(1);
     debug0.ConvertScale(50,0);
@@ -650,12 +649,12 @@ namespace Total {
 //       debug0.DrawLine(pts[4],pts[5],pts[6],pts[7],COLOUR_BLACK,2);
     }
 #else
- //    draw_circle(debug0,camera,l,m_bullseye_inner_radius / m_bullseye_outer_radius);
-//     draw_circle(debug0,camera,l,1);
-//     draw_circle(debug0,camera,l,m_data_inner_radius / m_bullseye_outer_radius);
+    draw_circle(debug0,camera,l,m_bullseye_inner_radius / m_bullseye_outer_radius);
+    draw_circle(debug0,camera,l,1);
+    draw_circle(debug0,camera,l,m_data_inner_radius / m_bullseye_outer_radius);
     
     for(int r=0;r<RING_COUNT;r++) {
-      //  draw_circle(debug0,camera,l,m_data_ring_outer_radii[r] / m_bullseye_outer_radius);
+      draw_circle(debug0,camera,l,m_data_ring_outer_radii[r] / m_bullseye_outer_radius);
     }
   
     int counter=0;
@@ -670,7 +669,7 @@ namespace Total {
 	int colour = image.Sample(pts[0],pts[1]) & 1 ? COLOUR_BLACK:COLOUR_WHITE; // our debug image is inverted 255 : 0;
 	// or pick the colour to be on a gradient so we see the order it samples in
 	//int colour = (int)((double)counter/(double)(SECTOR_COUNT*RING_COUNT)*255);
-	colour = 170;
+	//colour = 170;
 	//debug0.DrawPoint(pts[0],pts[1],colour,4);
 	debug0.DrawPixel(pts[0],pts[1],colour);
 	counter++;
@@ -678,7 +677,7 @@ namespace Total {
     }
 #endif
     char filename[256];
-    snprintf(filename,255,"debug-decode-%0.5d.pnm",debug_image_counter++);
+    snprintf(filename,255,"debug-decode-%d.pnm",debug_image_counter++);
     filename[255]=0;
     debug0.Save(filename);
   }
