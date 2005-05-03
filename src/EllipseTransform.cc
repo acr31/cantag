@@ -4,7 +4,7 @@
 
 #include <total/EllipseTransform.hh>
 #include <total/polysolve.hh>
-#include <total/Ellipse.hh>
+#include <total/shapefit/Ellipse.hh>
 #include <iostream>
 #include <total/SpeedMath.hh>
 
