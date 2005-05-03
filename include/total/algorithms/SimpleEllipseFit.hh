@@ -11,7 +11,7 @@
 namespace Total {
   class SimpleEllipseFit {
   public:
-    void operator()(const ContourEntity* contour, ShapeEntity<Ellipse>* shape);
+    void operator()(const ContourEntity& contour, ShapeEntity<Ellipse>& shape) const;
   };
 }
 #endif//SIMPLE_ELLIPSE_FIT_GUARD
