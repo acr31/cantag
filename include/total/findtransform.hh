@@ -6,8 +6,8 @@
 #define FIND_TRANSFORM_GUARD
 
 #include <total/Config.hh>
-#include <total/Ellipse.hh>
-#include <total/QuadTangle.hh>
+#include <total/shapefit/Ellipse.hh>
+#include <total/shapefit/QuadTangle.hh>
 #include <total/Camera.hh>
 
 #include <vector>

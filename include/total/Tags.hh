@@ -15,7 +15,6 @@
 #include <total/SCCCoder.hh>
 #include <total/SymbolChunkCoder.hh>
 #include <total/EllipseTransform.hh>
-#include <total/Ellipse.hh>
 
 namespace Total {
 

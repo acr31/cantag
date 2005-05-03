@@ -6,7 +6,7 @@
 #define ELLIPSE_TRANSFORM_GUARD
 
 #include <total/Config.hh>
-#include <total/Ellipse.hh>
+#include <total/shapefit/Ellipse.hh>
 
 namespace Total {
   class EllipseTransform {

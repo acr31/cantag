@@ -6,8 +6,8 @@
 
 #include <total/Config.hh>
 #include <total/Image.hh>
-#include <total/Ellipse.hh>
-#include <total/QuadTangle.hh>
+#include <total/shapefit/Ellipse.hh>
+#include <total/shapefit/QuadTangle.hh>
 #include <vector>
 
 namespace Total {
@@ -101,7 +101,6 @@ namespace Total {
      */
     void ImageToNPCF(float* points, int num_points) const;
 
-
     /**
      * Convert a set of normalised principle co-ordinate frame (NPCF)
      * points to image points.  This involves applying the correct
@@ -142,6 +141,8 @@ namespace Total {
      * Draw this quadtangle on the image given after removing the NPCF scale factors from it.
      */
     void DrawQuadTangle(Image& image, const QuadTangle& qt) const;
+
+    
   };
 }
 
