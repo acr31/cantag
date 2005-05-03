@@ -6,7 +6,7 @@
 #define QUADTANGLE_TRANSFORM_GUARD
 
 #include <total/Config.hh>
-#include <total/shapefit/QuadTangle.hh>
+#include <total/QuadTangle.hh>
 
 #if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
 #include <gsl/gsl_multimin.h>

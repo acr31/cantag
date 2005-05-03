@@ -12,7 +12,7 @@
 #include <total/ShapeChain.hh>
 #include <total/EllipseTransform.hh>
 #include <total/findtransform.hh>
-#include <total/shapefit/Ellipse.hh>
+#include <total/Ellipse.hh>
 #include <total/Coder.hh>
 #include <iostream>
 #include <cassert>

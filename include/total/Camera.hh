@@ -6,8 +6,8 @@
 
 #include <total/Config.hh>
 #include <total/Image.hh>
-#include <total/shapefit/Ellipse.hh>
-#include <total/shapefit/QuadTangle.hh>
+#include <total/Ellipse.hh>
+#include <total/QuadTangle.hh>
 #include <vector>
 
 namespace Total {
