@@ -11,7 +11,7 @@
 
 // basic tag code
 #include <total/RingTag.hh>
-#include <total/QuadTangle.hh>
+#include <total/MatrixTag.hh>
 
 // coders
 #include <total/RawCoder.hh>
