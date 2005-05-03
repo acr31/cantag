@@ -71,7 +71,7 @@ namespace Total {
 
     E* root_contour = new E();
     root_contour->nbd = 1;
-    root_contour->weeded = true;
+    root_contour->SetWeeded();
     root_contour->bordertype = ContourEntity::HOLE_BORDER;
     node_hash[1] = root_contour;
     int NBD = 2;
@@ -131,7 +131,8 @@ namespace Total {
 	  // HOLE         OUTER      LNBD
 	  // HOLE         HOLE       Parent of LNBD
 	  current->parent_id = current->bordertype == node_hash[LNBD]->bordertype ?  node_hash[LNBD]->parent_id : LNBD;
-	
+	  current->m_contourFitted = true;
+	      
 	  if (current->parent_id != NBD) {
 	    node_hash[current->parent_id]->AddChild(current);
 #ifdef CONTOUR_TREE_DEBUG
