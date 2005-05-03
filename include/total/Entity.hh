@@ -22,20 +22,22 @@ namespace Total {
     bordertype_t bordertype;
     int parent_id;
     std::vector<float> points;
-    bool weeded;
-    
+    bool m_contourFitted;
   public:
-    ContourEntity() : weeded(false) {};
+    ContourEntity() : m_contourFitted(false) {};
+    virtual ~ContourEntity() {};
+
+    virtual void SetWeeded() = 0;
+    virtual bool GetWeeded() = 0;
+  private:
     ContourEntity(const ContourEntity& copyme) : 
       nbd(copyme.nbd),
       bordertype(copyme.bordertype),
       parent_id(copyme.parent_id),
-      points(copyme.points),
-      weeded(copyme.weeded) {
+      points(copyme.points) {
       std::cerr << "Copy Contour Entity" << std::endl;	    
     };
 
-    ~ContourEntity() {};
 
   };
 
@@ -46,11 +48,17 @@ namespace Total {
     bool m_shapeFitted;
   public:
     ShapeEntity() : m_shapeDetails(NULL), m_shapeFitted(false) {};
+
+    virtual ~ShapeEntity() {
+      if (m_shapeDetails) delete m_shapeDetails;
+    }
+
+    virtual void SetWeeded() = 0;
+    virtual bool GetWeeded() = 0;
+
+  private:
     ShapeEntity(const ShapeEntity<Shape>& copyme) : m_shapeDetails(copyme.m_shapeDetails ? new Shape(*copyme.m_shapeDetails) : NULL) {
       std::cerr << "Copy Shape" << std::endl;	    
-    };
-    ~ShapeEntity() {
-      if (m_shapeDetails) delete m_shapeDetails;
     };
   };
 
@@ -61,10 +69,14 @@ namespace Total {
     CyclicBitSet<PAYLOAD_SIZE>* m_payload;
   public:
     DecodeEntity() : m_decode_transform(NULL), m_payload(NULL) {};
+    virtual ~DecodeEntity() {};
+    virtual void SetWeeded() = 0;
+    virtual bool GetWeeded() = 0;
+
+  private:
     DecodeEntity(const DecodeEntity<PAYLOAD_SIZE>& copyme) {
       std::cerr << "Copy Decode" << std::endl;	    
     }
-    ~DecodeEntity() {};
   };
   
   class TransformEntity  {
@@ -72,10 +84,14 @@ namespace Total {
     float* m_3d_transform;
   public:
     TransformEntity() : m_3d_transform(NULL) {};
+    virtual ~TransformEntity() {};
+    virtual void SetWeeded() = 0;
+    virtual bool GetWeeded() = 0;
+
+  private:
     TransformEntity(const TransformEntity& copyme) {
       std::cerr << "Copy Transform" << std::endl;	    
     }
-    ~TransformEntity() {};
   };
   
   template<class H, class T> struct EntityList {
@@ -122,13 +138,13 @@ namespace Total {
   class TEntity : public List::Head, public TEntity<typename List::Tail> {
   private:
     typedef TEntity<typename List::Tail> RecSuper;
-  public:
-    TEntity() : List::Head(), RecSuper() {};
-
     template<class CopyTail> TEntity(const TEntity<EntityList<typename List::Head, CopyTail> >& copyme) : 
       List::Head(copyme), RecSuper(copyme) {};
 
     TEntity(const TEntity<EntityList<typename List::Head, EntityListEOL> >& copyme) : List::Head(copyme), RecSuper() {};
+    
+  public:
+    TEntity() : List::Head(), RecSuper() {};
   };
 
   template<> class TEntity<EntityListEOL> {
@@ -149,15 +165,17 @@ namespace Total {
     typedef TEntity<typename Select<Shape,PAYLOADSIZE,Start,Stop>::Selected> SuperType;
 
     std::list<MyType*> m_children;
-  public:
-    Entity() : SuperType() {};
-    
-    template<class CopyShape, int COPYPAYLOAD, class CopyStart, class CopyStop> 
-    Entity(const Entity<CopyShape,COPYPAYLOAD,CopyStart,CopyStop>& copyme) : SuperType(copyme) {
-    };
+    bool m_weeded;
 
-    template<class Algorithm> void Transform(Algorithm& algorithm) {
-      algorithm((const MyType*)this,this);
+    template<class CopyShape, int COPYPAYLOAD, class CopyStart, class CopyStop> 
+    Entity(const Entity<CopyShape,COPYPAYLOAD,CopyStart,CopyStop>& copyme) : SuperType(copyme) {};
+
+  public:
+    Entity() : SuperType(),m_weeded(false) {};
+    
+
+    template<class Algorithm> void Transform(const Algorithm& algorithm) {
+      algorithm(*this,*this);
       for(typename std::list<MyType*>::iterator i = m_children.begin();
 	  i != m_children.end();
 	  ++i) {
@@ -165,13 +183,8 @@ namespace Total {
       }
     }
 
-    template<class Algorithm> void Transform() {
-      Algorithm a;
-      Transform(a);
-    }
-
-    template<class Algorithm> void Apply(Algorithm& algorithm) const {
-      algorithm(this);
+    template<class Algorithm> void Apply(const Algorithm& algorithm) const {
+      algorithm(*this);
       for(typename std::list<MyType*>::const_iterator i = m_children.begin();
 	  i != m_children.end();
 	  ++i) {
@@ -179,14 +192,12 @@ namespace Total {
       }
     }
 
-    template<class Algorithm> void Apply() const {
-      Algorithm a;
-      Apply(a);
-    }
-
     void AddChild(MyType* newChild) {
       m_children.push_back(newChild);
     }
+
+    void SetWeeded() { m_weeded = true; }    
+    bool GetWeeded() { return m_weeded; }
   };
   
 
