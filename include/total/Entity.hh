@@ -165,6 +165,11 @@ namespace Total {
       }
     }
 
+    template<class Algorithm> void Transform() {
+      Algorithm a;
+      Transform(a);
+    }
+
     template<class Algorithm> void Apply(Algorithm& algorithm) const {
       algorithm(this);
       for(typename std::list<MyType*>::const_iterator i = m_children.begin();
@@ -172,6 +177,11 @@ namespace Total {
 	  ++i) {
 	(*i)->Apply(algorithm);
       }
+    }
+
+    template<class Algorithm> void Apply() const {
+      Algorithm a;
+      Apply(a);
     }
 
     void AddChild(MyType* newChild) {
