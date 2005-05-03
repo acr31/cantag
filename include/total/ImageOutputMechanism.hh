@@ -28,10 +28,10 @@ namespace Total {
       Image& m_image;
     public:
       ContourTreeAlgorithm(Image& output_image) : m_image(output_image) {};
-      void operator()(const ContourEntity* contour) {
-	if (!contour->weeded) {
-	  for(std::vector<float>::const_iterator i = contour->points.begin();
-	      i!=contour->points.end();
+      void operator()(const ContourEntity& contour) const {
+	if (contour.m_contourFitted) {
+	  for(std::vector<float>::const_iterator i = contour.points.begin();
+	      i!=contour.points.end();
 	      ++i) {
 	    const float x = *i;
 	    ++i;
@@ -49,9 +49,9 @@ namespace Total {
       Image& m_image;
     public:
       ShapeTreeAlgorithm(const Camera& camera, Image& output_image) : m_camera(camera), m_image(output_image) {};
-      void operator()(const ShapeEntity<Shape>* shape) {
-	if (shape->m_shapeFitted) {
-	  shape->m_shapeDetails->Draw(m_image,m_camera);
+      void operator()(const ShapeEntity<Shape>& shape) const {
+	if (shape.m_shapeFitted) {
+	  m_camera.Draw(m_image,*shape.m_shapeDetails);
 	}
       }
     };
@@ -65,8 +65,7 @@ namespace Total {
     struct Helper<Entity,EntityList<ContourEntity,Tail> > {
       static void Output(const Entity& root_element, const Image* original_image, const Camera& camera) {
 	Image i(original_image->GetWidth(),original_image->GetHeight());
-	ContourTreeAlgorithm alg(i);
-	root_element.Apply(alg);
+	root_element.Apply(ContourTreeAlgorithm(i));
 	i.Save("debug-fromcontourtree.pnm");
 	Helper<Entity,Tail>::Output(root_element,original_image,camera);
       }
@@ -76,8 +75,7 @@ namespace Total {
     struct Helper<Entity,EntityList<ShapeEntity<typename Entity::ShapeType>,Tail> > {
       static void Output(const Entity& root_element, const Image* original_image, const Camera& camera) {
 	Image i(original_image->GetWidth(),original_image->GetHeight());
-	ShapeTreeAlgorithm<typename Entity::ShapeType> alg(camera,i);
-	root_element.Apply(alg);
+	root_element.Apply(ShapeTreeAlgorithm<typename Entity::ShapeType>(camera,i));
 	i.Save("debug-fromshapetree.pnm");
 	Helper<Entity,Tail>::Output(root_element,original_image,camera);
       }
