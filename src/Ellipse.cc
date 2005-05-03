@@ -3,7 +3,7 @@
  */
 
 #include <total/Config.hh>
-#include <total/shapefit/Ellipse.hh>
+#include <total/Ellipse.hh>
 #include <total/gaussianelimination.hh>
 #include <total/findtransform.hh>
 #include <total/polysolve.hh>

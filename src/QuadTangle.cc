@@ -3,7 +3,7 @@
  */
 
 #include <total/Config.hh>
-#include <total/shapefit/QuadTangle.hh>
+#include <total/QuadTangle.hh>
 #include <total/gaussianelimination.hh>
 
 #include <cmath>
