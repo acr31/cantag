@@ -12,8 +12,8 @@
 
 namespace Total {
 
-  void FullEllipseFit::operator()(const ContourEntity* contour, ShapeEntity<Ellipse>* shape) {
-    const std::vector<float>& points = contour->points;
+  void FullEllipseFit::operator()(const ContourEntity& contour, ShapeEntity<Ellipse>& shape) const {
+    const std::vector<float>& points = contour.points;
 
     int numpoints = points.size()/2;
     if (numpoints < 6) {
@@ -196,11 +196,13 @@ namespace Total {
 #endif      
 
 	if (e->CheckError(points)) {
-	  shape->m_shapeDetails = e;
-	  shape->m_shapeFitted = true;
+	  shape.m_shapeDetails = e;
+	  shape.m_shapeFitted = true;
 	  return;
 	}
 	else {
+	  shape.m_shapeFitted = false;
+	  shape.SetWeeded();
 	  delete e;
 	}
       }

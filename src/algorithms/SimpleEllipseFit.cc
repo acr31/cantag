@@ -6,8 +6,8 @@
 
 namespace Total {
 
-  void SimpleEllipseFit::operator()(const ContourEntity* contour, ShapeEntity<Ellipse>* shape) {
-    const std::vector<float>& points = contour->points;
+  void SimpleEllipseFit::operator()(const ContourEntity& contour, ShapeEntity<Ellipse>& shape) const {
+    const std::vector<float>& points = contour.points;
     if (points.size()/2 < 6) return;
 
     float centrex = 0;
@@ -56,7 +56,7 @@ namespace Total {
 
     float theta = atan((majory-centrey)/(majorx-centrex)); // DATAN
 
-    shape->m_shapeDetails = new Ellipse(centrex,centrey,theta,majorlen,minorlen);
-    shape->m_shapeFitted = true;
+    shape.m_shapeDetails = new Ellipse(centrex,centrey,theta,majorlen,minorlen);
+    shape.m_shapeFitted = true;
   }
 }
