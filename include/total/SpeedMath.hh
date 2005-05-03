@@ -54,9 +54,12 @@ static double DSIN(const int accuracy, const double x) {
 }
 
 static double DCOS(const int accuracy, const double x) {
+  assert(x<=M_PI);
+  assert(x>=-M_PI);
   double y=x+M_PI/2;
-  assert(y<=M_PI);
-  assert(y>=-M_PI);
+  if (y > M_PI) {
+    y = 2*M_PI - y;
+  }
   return taylor<8,0,double>::sin(y,1);
 }
 
