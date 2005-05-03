@@ -5,7 +5,7 @@
 #ifndef SIMPLE_ELLIPSE_FIT_GUARD
 #define SIMPLE_ELLIPSE_FIT_GUARD
 
-#include <total/shapefit/Ellipse.hh>
+#include <total/Ellipse.hh>
 #include <total/Entity.hh>
 
 namespace Total {

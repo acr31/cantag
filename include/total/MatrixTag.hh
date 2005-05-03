@@ -9,7 +9,7 @@
 #include <total/Image.hh>
 #include <total/Tag.hh>
 #include <total/Coder.hh>
-#include <total/shapefit/QuadTangle.hh>
+#include <total/QuadTangle.hh>
 #include <total/QuadTangleTransform.hh>
 #include <total/Camera.hh>
 #include <total/ShapeChain.hh>
