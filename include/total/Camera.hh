@@ -137,6 +137,9 @@ namespace Total {
      */
     void DrawEllipse(Image& image, const Ellipse& ellipse) const;
 
+    void Draw(Image& image, const Ellipse& ellipse) const;
+    void Draw(Image& image, const QuadTangle& ellipse) const;
+
     /**
      * Draw this quadtangle on the image given after removing the NPCF scale factors from it.
      */

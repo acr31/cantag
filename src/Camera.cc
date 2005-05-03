@@ -229,6 +229,13 @@ namespace Total {
     image.DrawEllipse(x0,y0,width*2,height*2,ellipse.GetAngle(),COLOUR_BLACK,2);
   }
 
+  void Camera::Draw(Image& image, const Ellipse& ellipse) const {
+    DrawEllipse(image,ellipse);
+  }
+  void Camera::Draw(Image& image, const QuadTangle& quadtangle) const {
+    DrawQuadTangle(image,quadtangle);
+  }
+
   void Camera::DrawQuadTangle(Image& image, const QuadTangle& quadtangle) const {
     float pts[] = { quadtangle.GetX0(),quadtangle.GetY0(),
 		    quadtangle.GetX1(),quadtangle.GetY1(),
