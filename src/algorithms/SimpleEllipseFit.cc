@@ -2,7 +2,7 @@
  * $Header$
  */
 
-#include <total/shapefit/SimpleEllipseFit.hh>
+#include <total/algorithms/SimpleEllipseFit.hh>
 
 namespace Total {
 

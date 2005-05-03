@@ -2,7 +2,7 @@
  * $Header$
  */
 
-#include <total/shapefit/FullEllipseFit.hh>
+#include <total/algorithms/FullEllipseFit.hh>
 #include <total/gaussianelimination.hh>
 #include <total/polysolve.hh>
 #include <total/SpeedMath.hh>
