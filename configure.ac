@@ -117,6 +117,7 @@ unit/Makefile
 samples/Makefile
 include/Makefile
 include/total/Makefile
+include/total/shapefit/Makefile
 ])
 
 if test "$have_gl_gl_h$havelib_gl$havelib_glu$havelib_glut" = "yesyesyesyes"; then
