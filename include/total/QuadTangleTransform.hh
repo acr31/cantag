@@ -16,10 +16,17 @@
 namespace Total {
   class QuadTangleTransform {
   public:
-    virtual bool TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const = 0;
+    virtual bool TransformQuadTangle(const QuadTangle& quadtangle, float transform[16], int res) const = 0;
   };
 
 
+  /*
+   * This function takes the four points of a
+   * quadrilateralin array p such that p[0]=x0, p[1]=y0,
+   * etc. It returns as good starting guess for the normal
+   * vector of the plane in variable n
+   */
+  bool EstimatePoseQuadrant(float *p, float *n);
 
 
 
@@ -183,11 +190,11 @@ namespace Total {
 
 
   // \todo: optimise the matrix before inversion
-
   class ReducedProjectiveQuadTangleTransform  : public virtual QuadTangleTransform {
   public:
     /*
-     * This algorithm is as the one above, but makes
+     * This algorithm is as the same as
+     * ProjectiveQuadTangleTransform, but makes
      * better use of the information available
      * to reduce the parameter set.
      *
@@ -222,13 +229,13 @@ namespace Total {
    * square in real life.  Solves for four parameters: z, alpha,
    * beta, gamma, where the three angles are standarad euler angles
    */
-  class NLMSimplexQuadTangleTransform : public virtual QuadTangleTransform {
+  class SpaceSearchQuadTangleTransform : public virtual QuadTangleTransform {
   public:
     /*
      * Static function so it can be passed as a function pointer
      * to GNU Scientific Library
      */
-    static double NLMQuadFunc(const gsl_vector *v, void *params);
+    static double SpaceSearchQuadFunc(const gsl_vector *v, void *params);
 
     /*
      * Calculate the transform by least squares minimising the 
@@ -243,19 +250,28 @@ namespace Total {
      * see http://mathworld.wolfram.com/EulerAngles.html
      * 
      * Therefore this is a minimisation wrt (z,alpha,beta,gamma).
+     *
+     * This version uses the downhill simplex minimisation
+     * found in the GNU Scientific Library because that does
+     * not require derivatives, and more importantly, can have 
+     * the search space easily restricted
      */
     bool TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const;
   };
 
 
 
-  class CyberCodeQuadTangleTransform : public virtual QuadTangleTransform {
+  class PlaneRotationQuadTangleTransform : public virtual QuadTangleTransform {
   public:
     /*
      * Static function so it can be passed as a function pointer
      * to GNU Scientific Library
      */
-    static double QuadFunc(const gsl_vector *v, void *params);
+    static double PlaneRotationQuadFunc(const gsl_vector *v, void *params);
+
+    /*
+     * Helper function
+     */
     static bool ComputeCameraPointsFromAngles(const gsl_vector *v, void *p, float *pts, float *n);
 
     /*
