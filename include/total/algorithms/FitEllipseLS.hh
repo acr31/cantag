@@ -10,9 +10,12 @@
 
 namespace Total {
   
-  class FullEllipseFit {
+  class FitEllipseLS {
   public:
-    void operator()(const ContourEntity&  contour, ShapeEntity<Ellipse>& shape) const;
+    typedef ContourEntity SourceType;
+    typedef ShapeEntity<Ellipse> DestinationType;
+
+    bool operator()(const ContourEntity&  contour, ShapeEntity<Ellipse>& shape) const;
   };
 }
 #endif//FULL_ELLIPSE_FIT_GUARD

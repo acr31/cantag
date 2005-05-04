@@ -9,9 +9,12 @@
 #include <total/Entity.hh>
 
 namespace Total {
-  class SimpleEllipseFit {
+  class FitEllipseSimple {
   public:
-    void operator()(const ContourEntity& contour, ShapeEntity<Ellipse>& shape) const;
+    typedef ContourEntity SourceType;
+    typedef ShapeEntity<Ellipse> DestinationType;
+
+    bool operator()(const ContourEntity& contour, ShapeEntity<Ellipse>& shape) const;
   };
 }
 #endif//SIMPLE_ELLIPSE_FIT_GUARD

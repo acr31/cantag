@@ -1,3 +1,4 @@
 totalincludedir = $(includedir)/total/algorithms
-totalinclude_HEADERS = SimpleEllipseFit.hh FullEllipseFit.hh
+totalinclude_HEADERS = DistortionCorrection.hh FitEllipseLS.hh FitEllipseSimple.hh TransformEllipseFull.hh TransformEllipseLinear.hh
+
 

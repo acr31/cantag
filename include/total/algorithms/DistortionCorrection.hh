@@ -10,11 +10,15 @@
 
 namespace Total {
   class DistortionCorrection {
+  public:
+    typedef ContourEntity SourceType;
+    typedef ContourEntity DestinationType;
+
   private:
     const Camera& m_camera;
   public:
     DistortionCorrection(const Camera& camera) : m_camera(camera) {};
-    void operator()(const ContourEntity& source, ContourEntity& dest) const;
+    bool operator()(const ContourEntity& source, ContourEntity& dest) const;
   };
 }
 
