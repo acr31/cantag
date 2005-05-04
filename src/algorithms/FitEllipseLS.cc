@@ -2,7 +2,7 @@
  * $Header$
  */
 
-#include <total/algorithms/FullEllipseFit.hh>
+#include <total/algorithms/FitEllipseLS.hh>
 #include <total/gaussianelimination.hh>
 #include <total/polysolve.hh>
 #include <total/SpeedMath.hh>
@@ -12,12 +12,12 @@
 
 namespace Total {
 
-  void FullEllipseFit::operator()(const ContourEntity& contour, ShapeEntity<Ellipse>& shape) const {
+  bool FitEllipseLS::operator()(const ContourEntity& contour, ShapeEntity<Ellipse>& shape) const {
     const std::vector<float>& points = contour.points;
 
     int numpoints = points.size()/2;
     if (numpoints < 6) {
-      return;
+      return false;
     }
 
 #ifdef ELLIPSE_DEBUG_DUMP_POINTS
@@ -93,7 +93,7 @@ namespace Total {
 #ifdef ELLIPSE_DEBUG
       PROGRESS("Determinant of S3 is zero - no fit");
 #endif
-      return;
+      return false;
     }
 
     // Compute
@@ -162,7 +162,7 @@ namespace Total {
 #ifdef ELLIPSE_DEBUG
       PROGRESS("Failed to solve eigenvectors of the non-symmetric matrix.  Fit failed.");
 #endif
-      return;
+      return false;
     }
 
 
@@ -198,15 +198,14 @@ namespace Total {
 	if (e->CheckError(points)) {
 	  shape.m_shapeDetails = e;
 	  shape.m_shapeFitted = true;
-	  return;
+	  return true;
 	}
 	else {
 	  shape.m_shapeFitted = false;
-	  shape.SetWeeded();
 	  delete e;
 	}
       }
     }
-    return;
+    return false;
   }
 }

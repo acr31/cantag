@@ -2,13 +2,13 @@
  * $Header$
  */
 
-#include <total/algorithms/SimpleEllipseFit.hh>
+#include <total/algorithms/FitEllipseSimple.hh>
 
 namespace Total {
 
-  void SimpleEllipseFit::operator()(const ContourEntity& contour, ShapeEntity<Ellipse>& shape) const {
+  bool FitEllipseSimple::operator()(const ContourEntity& contour, ShapeEntity<Ellipse>& shape) const {
     const std::vector<float>& points = contour.points;
-    if (points.size()/2 < 6) return;
+    if (points.size()/2 < 6) return false;
 
     float centrex = 0;
     float centrey = 0;
@@ -58,5 +58,6 @@ namespace Total {
 
     shape.m_shapeDetails = new Ellipse(centrex,centrey,theta,majorlen,minorlen);
     shape.m_shapeFitted = true;
+    return true;
   }
 }
