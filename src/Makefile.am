@@ -1,5 +1,5 @@
 lib_LTLIBRARIES = libtotal.la
-libtotal_la_SOURCES = Ellipse.cc QuadTangle.cc findtransform.cc Camera.cc gaussianelimination.cc Image.cc FileImageSource.cc  Template.cc polysolve.cc ContourTree.cc Socket.cc EllipseTransform.cc QuadTangleTransform.cc  ImageOutputMechanism.cc ContourFollower.cc algorithms/SimpleEllipseFit.cc algorithms/FullEllipseFit.cc algorithms/DistortionCorrection.cc
+libtotal_la_SOURCES = Ellipse.cc QuadTangle.cc findtransform.cc Camera.cc gaussianelimination.cc Image.cc FileImageSource.cc  Template.cc polysolve.cc ContourTree.cc Socket.cc EllipseTransform.cc QuadTangleTransform.cc  ImageOutputMechanism.cc ContourFollower.cc algorithms/FitEllipseSimple.cc algorithms/FitEllipseLS.cc algorithms/DistortionCorrection.cc algorithms/TransformEllipseLinear.cc algorithms/TransformEllipseFull.cc
 
 if HAVE_LINUX_VIDEODEV_H
 libtotal_la_SOURCES += V4LImageSource.cc
