@@ -13,7 +13,6 @@
 #include <iostream>
 
 namespace Total {
-
   class ContourEntity  {
   public:
     enum bordertype_t { UNKNOWN = 2, OUTER_BORDER = 1, HOLE_BORDER = 0};
@@ -25,10 +24,8 @@ namespace Total {
     bool m_contourFitted;
   public:
     ContourEntity() : m_contourFitted(false) {};
-    virtual ~ContourEntity() {};
+    ~ContourEntity() {};
 
-    virtual void SetWeeded() = 0;
-    virtual bool GetWeeded() = 0;
   private:
     ContourEntity(const ContourEntity& copyme) : 
       nbd(copyme.nbd),
@@ -37,8 +34,6 @@ namespace Total {
       points(copyme.points) {
       std::cerr << "Copy Contour Entity" << std::endl;	    
     };
-
-
   };
 
   template<class Shape>
@@ -49,51 +44,59 @@ namespace Total {
   public:
     ShapeEntity() : m_shapeDetails(NULL), m_shapeFitted(false) {};
 
-    virtual ~ShapeEntity() {
+    ~ShapeEntity() {
       if (m_shapeDetails) delete m_shapeDetails;
     }
-
-    virtual void SetWeeded() = 0;
-    virtual bool GetWeeded() = 0;
 
   private:
     ShapeEntity(const ShapeEntity<Shape>& copyme) : m_shapeDetails(copyme.m_shapeDetails ? new Shape(*copyme.m_shapeDetails) : NULL) {
       std::cerr << "Copy Shape" << std::endl;	    
     };
   };
-
-  template<int PAYLOAD_SIZE>
-  class DecodeEntity {
-  protected:
-    float* m_decode_transform;
-    CyclicBitSet<PAYLOAD_SIZE>* m_payload;
-  public:
-    DecodeEntity() : m_decode_transform(NULL), m_payload(NULL) {};
-    virtual ~DecodeEntity() {};
-    virtual void SetWeeded() = 0;
-    virtual bool GetWeeded() = 0;
-
-  private:
-    DecodeEntity(const DecodeEntity<PAYLOAD_SIZE>& copyme) {
-      std::cerr << "Copy Decode" << std::endl;	    
-    }
-  };
   
   class TransformEntity  {
-  protected:    
-    float* m_3d_transform;
   public:
-    TransformEntity() : m_3d_transform(NULL) {};
-    virtual ~TransformEntity() {};
-    virtual void SetWeeded() = 0;
-    virtual bool GetWeeded() = 0;
+    float* m_transform;
+    bool m_transformDone;
+  public:
+    TransformEntity() : m_transform(NULL),m_transformDone(false) {};
+    ~TransformEntity() {
+      if (m_transform) delete m_transform;
+    };
 
   private:
     TransformEntity(const TransformEntity& copyme) {
       std::cerr << "Copy Transform" << std::endl;	    
     }
   };
-  
+
+  template<int PAYLOAD_SIZE>
+  class DecodeEntity {
+  protected:
+    CyclicBitSet<PAYLOAD_SIZE>* m_payload;
+  public:
+    DecodeEntity() : m_payload(NULL) {};
+    ~DecodeEntity() {};
+
+  private:
+    DecodeEntity(const DecodeEntity<PAYLOAD_SIZE>& copyme) {
+      std::cerr << "Copy Decode" << std::endl;	    
+    }
+  };
+    
+  class LocatedEntity  {
+  protected:    
+
+  public:
+    LocatedEntity() {};
+    ~LocatedEntity() {};
+
+  private:
+    LocatedEntity(const LocatedEntity& copyme) {
+      std::cerr << "Copy Transform" << std::endl;	    
+    }
+  };
+
   template<class H, class T> struct EntityList {
     typedef H Head;
     typedef T Tail;
@@ -106,9 +109,10 @@ namespace Total {
   struct PipelineList {
     typedef EntityList<ContourEntity,
 	    EntityList<ShapeEntity<Shape>,
-            EntityList<DecodeEntity<PAYLOADSIZE>,
             EntityList<TransformEntity, 
-            EntityListEOL> > > > Entities;
+            EntityList<DecodeEntity<PAYLOADSIZE>,
+            EntityList<LocatedEntity,
+            EntityListEOL> > > > > Entities;
   };
 
   // select a subset of the list based on a start and stop value
@@ -164,25 +168,45 @@ namespace Total {
     typedef Entity<Shape,PAYLOADSIZE,Start,Stop> MyType;
     typedef TEntity<typename Select<Shape,PAYLOADSIZE,Start,Stop>::Selected> SuperType;
 
+    template<class A, class List = Typelist>
+    struct Position {
+      static const int position = Position<A,typename List::Tail>::position + 1;
+    };
+
+    template<class A, class Tail>
+    struct Position<A,EntityList<A,Tail> > {
+      static const int position = 1;
+    };
+
     std::list<MyType*> m_children;
     bool m_weeded;
+    bool m_evalStage[Position<Stop,Typelist>::position+1];
 
     template<class CopyShape, int COPYPAYLOAD, class CopyStart, class CopyStop> 
     Entity(const Entity<CopyShape,COPYPAYLOAD,CopyStart,CopyStop>& copyme) : SuperType(copyme) {};
 
+
+
   public:
-    Entity() : SuperType(),m_weeded(false) {};
-    
+    Entity() : SuperType(),m_weeded(false) {
+      for(int i=0;i<Position<Stop>::position+1;++i) {
+	m_evalStage[i] = false;
+      }
+    };    
 
     template<class Algorithm> void Transform(const Algorithm& algorithm) {
-      algorithm(*this,*this);
+      if (m_evalStage[Position<typename Algorithm::SourceType>::position]) {
+	if (algorithm(*this,*this)) {
+	  m_evalStage[Position<typename Algorithm::DestinationType>::position]= true;
+	}
+      }
       for(typename std::list<MyType*>::iterator i = m_children.begin();
 	  i != m_children.end();
 	  ++i) {
 	(*i)->Transform(algorithm);
       }
-    }
-
+    };
+    
     template<class Algorithm> void Apply(const Algorithm& algorithm) const {
       algorithm(*this);
       for(typename std::list<MyType*>::const_iterator i = m_children.begin();
@@ -196,12 +220,13 @@ namespace Total {
       m_children.push_back(newChild);
     }
 
-    void SetWeeded() { m_weeded = true; }    
-    bool GetWeeded() { return m_weeded; }
-  };
-  
-
-
+    /**
+     * \todo remove dummy parameter 
+     */
+    template<class Stage> void SetStage(Stage* ptr) {
+      m_evalStage[Position<Stage>::position] = true;
+    }
+  }; 
 };
 
 
