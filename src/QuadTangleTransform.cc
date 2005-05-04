@@ -4,6 +4,7 @@
 
 #include <total/QuadTangleTransform.hh>
 #include <total/gaussianelimination.hh>
+#include <total/SpeedMath.hh>
 
 #include <iostream>
 
@@ -22,7 +23,8 @@ namespace Total {
 	     "("<<quadtangle.GetX3()<<","<<quadtangle.GetY3()<<"),");	   
 #endif
 
-    // we particularly want coeffs to be an array of pointers to arrays
+
+     // we particularly want coeffs to be an array of pointers to arrays
     // containing the rows of the matrix - then we can swap rows
     // conveniently by swapping pointers
     double coeffs0[] = {1,1,1,0,0,0,-quadtangle.GetX1(),-quadtangle.GetX1() };
@@ -75,7 +77,11 @@ namespace Total {
     PROGRESS("         a7 "<<result[7]);
 #endif
 
-    double scalefactor = sqrt(result[1]*result[1]+result[4]*result[4]+result[7]*result[7]);
+    double scalefactor;
+
+    scalefactor=sqrt(result[0]*result[0]+result[3]*result[3]+result[6]*result[6]);
+    // Alternative scale factor:
+    //scalefactor=sqrt(result[1]*result[1]+result[4]*result[4]+result[7]*result[7]);
     double c8 = 1.0/scalefactor;
 #ifdef SQUARE_TRANSFORM_DEBUG
     PROGRESS("Scale factor is "<<scalefactor);
@@ -145,8 +151,6 @@ namespace Total {
 
 
   // ReducedProjectiveQuadTangleTransform
-
-
   bool ReducedProjectiveQuadTangleTransform::TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const {
     // see the header file for a full explanation of what's going on here
 #ifdef SQUARE_TRANSFORM_DEBUG
@@ -259,9 +263,9 @@ namespace Total {
 
 
   
-  // NLMSimplexQuadTangleTransform
+  // SpaceSearchQuadTangleTransform
 #if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
-  bool NLMSimplexQuadTangleTransform::TransformQuadTangle(const QuadTangle& q, float transform[16]) const {
+  bool SpaceSearchQuadTangleTransform::TransformQuadTangle(const QuadTangle& q, float transform[16]) const {
     size_t iter = 0;
     int status;
   
@@ -290,40 +294,32 @@ namespace Total {
 
     int nparam = 4;
   
-    errfunc.f = &(Total::NLMSimplexQuadTangleTransform::NLMQuadFunc);
+    errfunc.f = &(Total::SpaceSearchQuadTangleTransform::SpaceSearchQuadFunc);
     errfunc.n = nparam;
     errfunc.params = &p;
 
+    //  Start by getting an estimate to help with ambiguities
+    // I'm too lazy to compute the same starting conditions as I 
+    // did with the Cyber algorithm so I'll just use that
+    // for the moment: it should make no difference other
+    // than to slow things down!
+ 
+    float n[3]={0.0};
 
-  // Start by doing the linear approach
-    ReducedProjectiveQuadTangleTransform pqtt;
-    float t[16];
-    pqtt.TransformQuadTangle(q,t);
+    EstimatePoseQuadrant(p,n);
 
-    // Where does the z' point?
-    float zx = t[2];
-    float zy = t[6];
-    float zz = -t[10];
-    float mag = sqrt(zx*zx+zy*zy+zz*zz);
-    zx/=mag; zy/=mag; zz/=mag;
+    // Store where the z' points
+    float ezx = n[0]; //t[2];
+    float ezy = n[1]; //t[6];
+    float ezz = n[2]; //t[10];
+    float mag = sqrt(ezx*ezx+ezy*ezy+ezz*ezz);
+    ezx/=mag; ezy/=mag; ezz/=mag;
 
-    float m = sqrt(t[0]*t[0]+t[4]*t[4]+t[8]*t[8]);
-    t[0]/=m; t[4]/=m; t[8]/=m;
-    m = sqrt(t[1]*t[1]+t[5]*t[5]+t[9]*t[9]);
-    t[1]/=m; t[5]/=m; t[9]/=m;
-    m = sqrt(t[2]*t[2]+t[6]*t[6]+t[10]*t[10]);
-    t[2]/=m; t[6]/=m; t[10]/=m;
+    float zest = 10.0;
+    float alpha=0.0;
+    float beta = 0.0;
+    float gamma  = 0.0;
 
-    float alpha = atan(-t[8]/t[9]); // DATAN
-    float beta =  -atan( t[8] / (sin(alpha)*t[10])); // DSINE
-    float gamma = atan(t[2]/t[6]); // DATAN
-    float zest = t[11];
-
-    if (alpha!=alpha) alpha=0.0;
-    if (beta!=beta) beta=0.0;
-    if (gamma!=gamma) gamma=0.0;
-
-   
     x = gsl_vector_alloc (nparam);
     gsl_vector_set (x, 0, zest);
     gsl_vector_set (x, 1, alpha);
@@ -334,8 +330,8 @@ namespace Total {
     // for distances and angles
     step = gsl_vector_alloc (nparam);
     gsl_vector_set (step, 0, zest/2.0);
-    gsl_vector_set (step, 1, 0.1);
-    gsl_vector_set (step, 2, 0.1);
+    gsl_vector_set (step, 1, 1.5);
+    gsl_vector_set (step, 2, 1.5);
     gsl_vector_set (step, 3, 1.5);
 
   
@@ -344,27 +340,39 @@ namespace Total {
   
     gsl_multimin_fminimizer_set (s, &errfunc, x, step); 
   
-    do
-      {
-	iter++;
-	status = gsl_multimin_fminimizer_iterate (s);
-      
-	if (status)
-	  break;
-      
-	status = gsl_multimin_test_size(s->size,1e-4); 
-   
-      }  while (status == GSL_CONTINUE && iter < 500);
+    do {
+      iter++;
+      status = gsl_multimin_fminimizer_iterate (s);
+      if (status)
+	break;      
+      status = gsl_multimin_test_size(s->size,1e-4);
+
+    }  while (status == GSL_CONTINUE && iter < 500);
 
     if (iter <500) {
-      // Success
-      float ca = cos(gsl_vector_get(s->x, 1)); // DCOS
-      float sa = sin(gsl_vector_get(s->x, 1)); // DSINE
-      float cb = cos(gsl_vector_get(s->x, 2)); // DCOS
-      float sb = sin(gsl_vector_get(s->x, 2)); // DSINE
-      float cg = cos(gsl_vector_get(s->x, 3)); // DCOS
-      float sg = sin(gsl_vector_get(s->x, 3)); // DCOS
+      // Converged
       float z = gsl_vector_get(s->x, 0);
+      float alpha = gsl_vector_get(s->x, 1);
+      float beta  = gsl_vector_get(s->x, 2);
+      float gamma = gsl_vector_get(s->x, 3);
+
+      // Wrap the angles around
+      while (alpha >  M_PI) alpha -=  2*M_PI;
+      while (alpha < -M_PI) alpha +=  2*M_PI;
+      while (beta  >  M_PI) beta  -=  2*M_PI;
+      while (beta  < -M_PI) beta  +=  2*M_PI;
+      while (gamma >  M_PI) gamma -=  2*M_PI;
+      while (gamma < -M_PI) gamma +=  2*M_PI;
+      
+
+      // Now figure out the transform
+      float ca = DCOS(8,alpha); 
+      float sa = DSIN(8,alpha);
+      float cb = DCOS(8,beta); 
+      float sb = DSIN(8,beta);
+      float cg = DCOS(8,gamma);
+      float sg = DSIN(8,gamma);
+      
 
       transform[0] = ca*cg - cb*sa*sg;
       transform[1] = sa*cg + cb*ca*sg;
@@ -402,21 +410,38 @@ namespace Total {
 
 
 
-  double NLMSimplexQuadTangleTransform::NLMQuadFunc(const gsl_vector *v, void *params)
+  double SpaceSearchQuadTangleTransform::SpaceSearchQuadFunc(const gsl_vector *v, void *params)
   {
     float *p = (float *) params;
-    float X0, Y0, X1, Y1, X2, Y2, X3, Y3;
-    float ca = cos(gsl_vector_get(v, 1)); // DCOS
-    float sa = sin(gsl_vector_get(v, 1)); // DSINE
-    float cb = cos(gsl_vector_get(v, 2)); // DCOS
-    float sb = sin(gsl_vector_get(v, 2)); // DSINE
-    float cg = cos(gsl_vector_get(v, 3)); // DCOS
-    float sg = sin(gsl_vector_get(v, 3)); // DSINE
-    
+    float X0, Y0, X1, Y1, X2, Y2, X3, Y3, XC, YC;
+
     float z = gsl_vector_get(v, 0);
+    float alpha = gsl_vector_get(v, 1);
+    float beta  = gsl_vector_get(v, 2);
+    float gamma = gsl_vector_get(v, 3);
+    
+    // Wrap the angles around
+    while (alpha >  M_PI) alpha -=  2*M_PI;
+    while (alpha < -M_PI) alpha +=  2*M_PI;
+    while (beta  >  M_PI) beta  -=  2*M_PI;
+    while (beta  < -M_PI) beta  +=  2*M_PI;
+    while (gamma >  M_PI) gamma -=  2*M_PI;
+    while (gamma < -M_PI) gamma +=  2*M_PI;
+    
+    
+    // Now figure out the transform
+    float ca = DCOS(8,alpha); 
+    float sa = DSIN(8,alpha);
+    float cb = DCOS(8,beta); 
+    float sb = DSIN(8,beta);
+    float cg = DCOS(8,gamma);
+    float sg = DSIN(8,gamma);
+          
     float x = p[8] * z;
     float y = p[9] * z;
-    
+
+
+    // Projections of what we currently have
     X0 = ((ca*cg - cb*sa*sg)*(-1.0) + (sa*cg + cb*ca*sg)*(1.0) + x) /
       (sb*sa*(-1.0) - sb*ca*(1.0) + z);
     Y0 = ((-sg*ca - cb*sa*cg)*(-1.0) + (-sg*sa + cb*ca*cg)*(1.0)+ y) /
@@ -436,54 +461,115 @@ namespace Total {
       (sb*sa*(1.0) - sb*ca*(1.0) + z);
     Y3 = ((-sg*ca - cb*sa*cg)*(1.0) + (-sg*sa + cb*ca*cg)*(1.0) + y) /
       (sb*sa*(1.0) - sb*ca*(1.0) + z);
+
+    // Centre point of current
+    float lambda = ( (Y0-Y1)*(X3-X1) - (Y3-Y1)*(X0-X1) ) /
+      ( (X2-X0)*(Y3-Y1) - (Y2-Y0)*(X3-X1) );
   
-    float s1x = X1-X0; float s1y = Y1-Y0;
-    float s2x = X2-X1; float s2y = Y2-Y1;
-    float s3x = X3-X2; float s3y = Y3-Y2;
-    float s4x = X0-X3; float s4y = Y0-Y3;
+    XC = X0+lambda*(X2-X0);
+    YC = Y0+lambda*(Y2-Y0);
 
-    float p1x = p[2]-p[0]; float p1y = p[3]-p[1];
-    float p2x = p[4]-p[2]; float p2y = p[5]-p[3];
-    float p3x = p[6]-p[4]; float p3y = p[7]-p[5];
-    float p4x = p[0]-p[6]; float p4y = p[1]-p[7];
+  
+ //    // Vectors of projected sides
+//     float s1x = X1-X0; float s1y = Y1-Y0;
+//     float s2x = X2-X1; float s2y = Y2-Y1;
+//     float s3x = X3-X2; float s3y = Y3-Y2;
+//     float s4x = X0-X3; float s4y = Y0-Y3;
+
+//     // Actual vectors of sides
+//     float p1x = p[2]-p[0]; float p1y = p[3]-p[1];
+//     float p2x = p[4]-p[2]; float p2y = p[5]-p[3];
+//     float p3x = p[6]-p[4]; float p3y = p[7]-p[5];
+//     float p4x = p[0]-p[6]; float p4y = p[1]-p[7];
     
-    float ca1 = (p1x*s1x + p1y*s1y) / (sqrt(p1x*p1x+p1y*p1y)*sqrt(s1x*s1x+s1y*s1y));
-    float ca2 = (p2x*s2x + p2y*s2y) / (sqrt(p2x*p2x+p2y*p2y)*sqrt(s2x*s2x+s2y*s2y));
-    float ca3 = (p3x*s3x + p3y*s3y) / (sqrt(p3x*p3x+p3y*p3y)*sqrt(s3x*s3x+s3y*s3y));
-    float ca4 = (p4x*s4x + p4y*s4y) / (sqrt(p4x*p4x+p4y*p4y)*sqrt(s4x*s4x+s4y*s4y));
+//     // Angle betweeen actual and current
+//     float ca1 = (p1x*s1x + p1y*s1y) / (sqrt(p1x*p1x+p1y*p1y)*sqrt(s1x*s1x+s1y*s1y));
+//     float ca2 = (p2x*s2x + p2y*s2y) / (sqrt(p2x*p2x+p2y*p2y)*sqrt(s2x*s2x+s2y*s2y));
+//     float ca3 = (p3x*s3x + p3y*s3y) / (sqrt(p3x*p3x+p3y*p3y)*sqrt(s3x*s3x+s3y*s3y));
+//     float ca4 = (p4x*s4x + p4y*s4y) / (sqrt(p4x*p4x+p4y*p4y)*sqrt(s4x*s4x+s4y*s4y));
 
-    float xmin = p[0];
-    float xmax = p[0];
-    float ymin = p[1];
-    float ymax = p[1];
-    for (int i=2; i<8; i+=2) {
-      if (p[i] < xmin) xmin=p[i];
-      if (p[i] > xmax) xmax=p[i];
-      if (p[i+1] < ymin) ymin=p[i+1];
-      if (p[i+1] > ymax) ymax=p[i+1];
-    }
-    float scale = ((ymax-ymin)>(xmax-xmin)) ? (ymax-ymin):(xmax-xmin);
+//     // Scaling/weighting factors for angles and distances
+//     float xmin = p[0];
+//     float xmax = p[0];
+//     float ymin = p[1];
+//     float ymax = p[1];
+//     for (int i=2; i<8; i+=2) {
+//       if (p[i] < xmin) xmin=p[i];
+//       if (p[i] > xmax) xmax=p[i];
+//       if (p[i+1] < ymin) ymin=p[i+1];
+//       if (p[i+1] > ymax) ymax=p[i+1];
+//     }
+//     float scale = ((ymax-ymin)>(xmax-xmin)) ? (ymax-ymin):(xmax-xmin);
 
-    float f= (scale/5)/(cos(20.0/180.0*M_PI)-1);
-    f*=f;
+//     float f= (scale/5)/(cos(20.0/180.0*M_PI)-1);
+//     f*=f;
 
     // Sum of squares
     return (X0-p[0])*(X0-p[0]) + (Y0-p[1])*(Y0-p[1]) +
       (X1-p[2])*(X1-p[2]) + (Y1-p[3])*(Y1-p[3]) +
       (X2-p[4])*(X2-p[4]) + (Y2-p[5])*(Y2-p[5]) +
       (X3-p[6])*(X3-p[6]) + (Y3-p[7])*(Y3-p[7])  +
-      f*(ca1-1.0)*(ca1-1.0) +
-      f*(ca2-1.0)*(ca2-1.0) +
-      f*(ca3-1.0)*(ca3-1.0) +
-      f*(ca4-1.0)*(ca4-1.0);
+      (XC-p[8])*(XC-p[8]) + (YC-p[8])*(YC-p[9]);
   }
 
 
 
 
+  bool EstimatePoseQuadrant(float *p, float *n) {
+    // Now find where a vertical line through the centre intersects the shape
+    int side1=0;
+    float mu = (p[8]-p[2*side1])/(p[2*(side1+1)]-p[2*side1]);
+    if (mu!=mu || mu <=0.0 || mu > 1.0) {
+      // It doesn't intersect this side: must intersect the next
+      side1++;
+      mu = (p[8]-p[2*side1])/(p[2*(side1+1)]-p[2*side1]);
+    }
+    int side2=(side1+2)%4;
+    float mu2 = (p[8]-p[2*side2])/(p[2*(side2+1)]-p[2*side2]);
+
+    // y co-ordinates: one will be -ve, one +ve
+    float d1 = p[2*side1+1] + mu*(p[2*(side1+1)+1]-p[2*side1+1]) - p[9];
+    float d2 = p[2*side2+1] + mu2*(p[2*(side2+1)+1]-p[2*side2+1]) - p[9];
+    float yratio = (d1>0) ? -d1/d2:-d2/d1;
+
+    // Now find where a horizontal line through the centre intersects the shape
+    int sideh = side1+1;
+    mu = (p[9]-p[2*sideh+1])/(p[2*(sideh+1)+1]-p[2*sideh+1]);
+    d1 = p[2*sideh] + mu*(p[2*(sideh+1)]-p[2*sideh]) - p[8];
+    
+    sideh = (sideh+2)%4;
+    mu = (p[9]-p[2*sideh+1])/(p[2*((sideh+1)%4)+1]-p[2*sideh+1]);
+    d2 = p[2*sideh] + mu*(p[2*((sideh+1)%4)]-p[2*sideh]) - p[8];
+
+    float xratio = (d1>0) ? -d1/d2:-d2/d1;
+ 
+ //    if (xratio>0.99 && xratio<1.01 && yratio>0.99 && yratio<1.01) {
+//       // It's a rectangle
+//       float size1 = (p[0]-p[2])*(p[0]-p[2]) + (p[1]-p[3])*(p[1]-p[3]);
+//       float size2 = (p[2]-p[4])*(p[2]-p[4]) + (p[3]-p[5])*(p[3]-p[5]);
+//       // if (size1/size2 !=1.0) return false;
+//     }
 
 
-  bool CyberCodeQuadTangleTransform::TransformQuadTangle(const QuadTangle& q, float transform[16]) const {
+    if (xratio > 1.0)  n[0]=1.0;
+    else if (xratio == 1.0) n[0]=0.0;
+    else n[1]=-1.0;
+
+    if (yratio > 1.0) n[1]=1.0;
+    else if (yratio == 1.0) n[1]=0.0;
+    else n[1]=-1.0;
+
+    n[2]=1.0;
+
+    float m = sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]);
+    for (int i=0; i<3;i++) n[i]/=m;
+    return true;
+  }
+
+
+
+
+  bool PlaneRotationQuadTangleTransform::TransformQuadTangle(const QuadTangle& q, float transform[16]) const {
 
     size_t iter = 0;
     int status;
@@ -499,38 +585,59 @@ namespace Total {
 		    0.0, 0.0};
   
 
-    // Calculate the centre point
+    // Calculate the cross of the diagonals
     float lambda = ( (p[1]-p[3])*(p[6]-p[2]) - (p[7]-p[3])*(p[0]-p[2]) ) /
       ( (p[4]-p[0])*(p[7]-p[3]) - (p[5]-p[1])*(p[6]-p[2]) );
-  
     p[8] = p[0]+lambda*(p[4]-p[0]);
     p[9] = p[1]+lambda*(p[5]-p[1]);
-  
+
+
+    float n[3]={0.0};
+
+    EstimatePoseQuadrant(p,n);
+
+
+    float phistart=0.0;
+    if (n[0]<=0.0 && n[1]>=0.0) {
+      phistart = 7.0/4.0*M_PI;
+    }
+    else if (n[0]<0.0 && n[1]<0.0) {
+      phistart = M_PI/4.0;
+    }
+    else if (n[0] > 0.0 && n[1] > 0.0) {
+      phistart = 5.0/4.0*M_PI;
+    }
+    else {
+      phistart = 3.0/4.0*M_PI;
+    }
+
     gsl_vector *x;
     gsl_vector *step;
     gsl_multimin_function errfunc;
 
     int nparam = 2;
   
-    errfunc.f = &(Total::CyberCodeQuadTangleTransform::QuadFunc);
+    errfunc.f = &(Total::PlaneRotationQuadTangleTransform::PlaneRotationQuadFunc);
     errfunc.n = nparam;
     errfunc.params = &p;
    
     x = gsl_vector_alloc (nparam);
-    gsl_vector_set (x, 0, M_PI);
-    gsl_vector_set (x, 1, M_PI);
+    gsl_vector_set (x, 0, M_PI/4.0*3.0);
+    gsl_vector_set (x, 1, phistart);
 
     // Characteristic steps 
     step = gsl_vector_alloc (nparam);
-    gsl_vector_set (step, 0, M_PI/2.0);
-    gsl_vector_set (step, 1, M_PI);
+    gsl_vector_set (step, 0, M_PI/4.0);
+    gsl_vector_set (step, 1, M_PI/2.0);
+    //   gsl_vector_set (step, 0, M_PI/4.0);
+    //  gsl_vector_set (step, 1, M_PI);
   
     T = gsl_multimin_fminimizer_nmsimplex;
     s = gsl_multimin_fminimizer_alloc (T, nparam);
   
     gsl_multimin_fminimizer_set (s, &errfunc, x, step); 
     float pts[12] = {0.0, 0.0};
-    float n[3] = {0.0};
+ 
     do {
       iter++;
       status = gsl_multimin_fminimizer_iterate (s);
@@ -539,26 +646,37 @@ namespace Total {
       // There is a danger that theta ~ 180 and phi
       // is being moved randomly without effect
       if (gsl_vector_get(s->x, 0)/M_PI > 0.98 && 
-	  QuadFunc(s->x,p) < 1e-4) break;;
+	  PlaneRotationQuadFunc(s->x,p) < 1e-3) break;;
 
       status = gsl_multimin_test_size(s->size,1e-5);
     }  while (status == GSL_CONTINUE && iter < 500);
     
 
     if (iter <500) {
+      
       // Converged
       ComputeCameraPointsFromAngles(s->x,p,pts,n);
       // Choose a side as the x axis of the tag
       float xaxis[3] = { pts[6]-pts[3],
 			 pts[7]-pts[4],
 			 pts[8]-pts[5] };
-      float m = sqrt (xaxis[0]*xaxis[0]+
-		      xaxis[1]*xaxis[1]+
-		      xaxis[2]*xaxis[2]);
+      float yaxis[3] = { pts[0]-pts[3],
+			 pts[1]-pts[4],
+			 pts[2]-pts[5] };
+      float m=0.0;
+      
+     
+      m=sqrt (xaxis[0]*xaxis[0]+
+	      xaxis[1]*xaxis[1]+
+	      xaxis[2]*xaxis[2]);
+
+      // Alternative Scale factor
+      // 	m = sqrt (yaxis[0]*yaxis[0]+
+      // 		yaxis[1]*yaxis[1]+
+      // 		yaxis[2]*yaxis[2]);
+    
       for (int i=0; i<3; i++) xaxis[i]/=m;
-      float yaxis[] = { (xaxis[1]*n[2]-xaxis[2]*n[1]),
-		      (xaxis[2]*n[0]-xaxis[0]*n[2]),
-		      (xaxis[0]*n[1]-xaxis[1]*n[0]) };
+      for (int i=0; i<3; i++) yaxis[i]/=m;
 	
       // We want m to be 2.0
       transform[0]  = xaxis[0];
@@ -584,16 +702,11 @@ namespace Total {
       transform[14] = 0.0;
       transform[15] = 1.0;
 
-    //   std::cout << "Final trans=[" << transform[0] << "," << transform[1] << "," << transform[2] << ","<<transform[3] <<";"<< std::endl;
-//       std::cout << "             " << transform[4] << "," << transform[5] << "," << transform[6] << ","<<transform[7] <<";"<< std::endl;
-//       std::cout << "             " << transform[8] << "," << transform[9] << "," << transform[10]<< ","<<transform[11]<<";"<< std::endl;
-//       std::cout << "             " << transform[12]<< "," << transform[13]<< "," << transform[14]<< ","<<transform[15]<<"];"<< std::endl;
-      
       gsl_multimin_fminimizer_free (s);
       gsl_vector_free (x);
       return true;
     }
-
+  
     gsl_multimin_fminimizer_free (s);
     gsl_vector_free (x);
     return false;
@@ -602,16 +715,16 @@ namespace Total {
 
 
 
-  bool  CyberCodeQuadTangleTransform::ComputeCameraPointsFromAngles(const gsl_vector *v, void *vp, float *pts, float *n) {
+  bool  PlaneRotationQuadTangleTransform::ComputeCameraPointsFromAngles(const gsl_vector *v, void *vp, float *pts, float *n) {
     float *p = (float *)vp;
     // v contains the theta/phi for spherical polars
     float theta = gsl_vector_get(v, 0);
     float phi   = gsl_vector_get(v, 1);
     
     // theta=0, phi=0 points along 1,0,0
-    float nx = sin(theta)*cos(phi);
-    float ny = sin(theta)*sin(phi);
-    float nz = cos(theta);
+    float nx = -DSIN(8,theta)*DCOS(8,phi);
+    float ny = -DSIN(8,theta)*DSIN(8,phi);
+    float nz = -DCOS(8,theta);
 
     // std::cout << theta/M_PI*180.0 << " " << phi/M_PI*180.0 << " " << nx << " " << ny << " " << nz << std::endl;
     
@@ -624,7 +737,7 @@ namespace Total {
       pts[3*i]   = lambda*p[2*i];
       pts[3*i+1] = lambda*p[2*i+1];
       pts[3*i+2] = lambda;
-      if (lambda <= 1e-05) return false;
+      // if (lambda <= 1e-05) return false;
     }
 
     n[0] = nx;
@@ -635,7 +748,7 @@ namespace Total {
 
 
 
-  double CyberCodeQuadTangleTransform::QuadFunc(const gsl_vector *v, void *vp) {
+  double PlaneRotationQuadTangleTransform::PlaneRotationQuadFunc(const gsl_vector *v, void *vp) {
     float *p = (float *)vp;
     float pts[12]={0.0};
     float n[3]={0.0};
@@ -674,7 +787,6 @@ namespace Total {
       s[13]*s[16] +
       s[14]*s[17])/ (sqrt(s[12]*s[12]+s[13]*s[13]+s[14]*s[14])*sqrt(s[15]*s[15]+s[16]*s[16]+s[17]*s[17]));
     sumsq += diagdp*diagdp;
-    //   std::cout << "S " << sumsq << std::endl;
     return sumsq;
   }
 
