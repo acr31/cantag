@@ -16,7 +16,7 @@
 namespace Total {
   class QuadTangleTransform {
   public:
-    virtual bool TransformQuadTangle(const QuadTangle& quadtangle, float transform[16], int res) const = 0;
+    virtual bool TransformQuadTangle(const QuadTangle& quadtangle, float transform[16]) const = 0;
   };
 
 
