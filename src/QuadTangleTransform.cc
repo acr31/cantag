@@ -720,6 +720,12 @@ namespace Total {
     // v contains the theta/phi for spherical polars
     float theta = gsl_vector_get(v, 0);
     float phi   = gsl_vector_get(v, 1);
+
+    while (theta >  M_PI) theta -=  2*M_PI;
+    while (theta < -M_PI) theta +=  2*M_PI;
+    while (phi  >  M_PI) phi  -=  2*M_PI;
+    while (phi  < -M_PI) phi  +=  2*M_PI;
+
     
     // theta=0, phi=0 points along 1,0,0
     float nx = -DSIN(8,theta)*DCOS(8,phi);
