@@ -1,6 +1,7 @@
-noinst_PROGRAMS=TextOnly DrawTag
+noinst_PROGRAMS=TextOnly DrawTag GnuplotOutput
 TextOnly_SOURCES=TextOnly.cc 
 DrawTag_SOURCES=DrawTag.cc
+GnuplotOutput_SOURCES=GnuplotOutput.cc
 
 if HAVE_LINUX_VIDEODEV_H
 if HAVE_X11_XLIB_H

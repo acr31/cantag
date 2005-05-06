@@ -14,7 +14,8 @@ namespace Total {
     CustomCircle() : RingTag<2,17,Ellipse>(0.2,1.0,0.4,0.8) {};
   };
   
-  class CustomSquare : public MatrixTag<6,PolygonQuadTangle>, protected virtual RawCoder<36,9>, private virtual ProjectiveQuadTangleTransform {};
+  class PSquare : public MatrixTag<5,ConvexHullQuadTangle>, protected virtual  SymbolChunkCoder<24,6>, private virtual ProjectiveQuadTangleTransform {};
+
 
 };
 
