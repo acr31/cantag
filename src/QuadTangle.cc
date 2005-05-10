@@ -10,6 +10,10 @@
 #include <cassert>
 #include <iostream>
 #include <map>
+
+#include <deque>
+#include <vector>
+
 #define COMPARE_THRESH 1
 
 #undef QUADTANGLE_DEBUG
@@ -355,8 +359,8 @@ namespace Total {
   int ConvexHullQuadTangle::ConvexHull(const std::vector<float> &V, int n, int* H) {
     // initialize a deque D[] from bottom to top so that the
     // 1st three vertices of V[] are a counterclockwise triangle
-    
     int D[2*n+1];
+    for (int i=0;i<2*n+1; i++) D[i]=0;
     int bot = n-2, top = bot+3;   // initial bottom and top deque indices
     D[bot] = D[top] = 2;       // 3rd vertex is at both bot and top
     if (isLeft(V, 0, 1, 2) > 0) {
@@ -385,6 +389,7 @@ namespace Total {
       while (isLeft(V,D[top-1],D[top], i) <= 0)
 	--top;                // pop top of deque
       D[++top] = i;          // push V[i] onto top of deque
+      if (top-bot < 2) return -1;
     }
     
     // transcribe deque D[] to the output hull array H[]
@@ -399,6 +404,7 @@ namespace Total {
     // Take a convex hull of the polyline ( O(n) )
     int h[points.size()/2];
     int n = ConvexHull(points,points.size()/2,h);
+    if (n<4) return false;
 
     // Throw away vertices with large angles ~ 180
     // It doesn't matter too much if some get through
