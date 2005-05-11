@@ -14,5 +14,15 @@ endif
 endif
 endif
 
+if HAVE_GL_GL_H
+if HAVE_GL_GLU_H
+if HAVE_GL_OSMESA_H
+noinst_PROGRAMS+=GLOutput
+GLOutput_SOURCES=GLOutput.cc
+endif
+endif
+endif
+
+
 AM_CPPFLAGS=-I../include
 AM_LDFLAGS=-L../src -ltotal
