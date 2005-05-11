@@ -18,9 +18,20 @@
 #include <total/ContourTree.hh>
 #include <total/ShapeTree.hh>
 #include <total/WorldState.hh>
+#include <total/Tag.hh>
+#include <total/Camera.hh>
 #include <iostream>
 
+#include <total/CyclicBitSet.hh>
+
 #include <GL/glx.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/osmesa.h>
+
+#include <map>
+
+#define FRAME_TTL 1
 
 namespace Total {
 
@@ -45,64 +56,100 @@ namespace Total {
     inline void Flush() {};
 
   private:
-    void Draw(int mode);
+    float m_ratio;
   };
 
-  /**
-   * \todo currently broken
-   */
-  template<int PAYLOAD_SIZE> void GLOutputMechanism::FromTag(const WorldState<PAYLOAD_SIZE>& world) { 
-    glMatrixMode(GL_MODELVIEW);
-    /* reset modelview matrix to the identity matrix */
-    glLoadIdentity();
-    /* move the camera back three units */
-    glTranslatef(0.0, 0.0, -3.0);
-    glRasterPos2i(0,0);
-    glPixelZoom(1.0, -1.0);
-    //    glDrawPixels(newdata->GetWidth(),newdata->GetHeight(),GL_RED,GL_UNSIGNED_BYTE, newdata->GetDataPointer());
+  class Corners {
+  public:
+    float c1[3];
+    float c2[3];
+    float c3[3];
+    float c4[3];
+    int ttl;
+  };
 
+
+  template<int PAYLOAD_SIZE> void GLOutputMechanism::FromTag(const WorldState<PAYLOAD_SIZE>& world) { 
+   
+    static std::map< unsigned long, Corners *> sSeen;
+    static int fnum=-1;
+    fnum=(fnum+1)%FRAME_TTL;
+
+    std::map< unsigned long, Corners *>::iterator sIt;
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(60,m_ratio,0.0001, 100.0);
+    gluLookAt(0.0,0.0,0.0,0.0,0.0,1.0,0.0,-1.0,0.0);
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    glClearColor(1.0, 1.0, 1.0, 0.0);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  
     for(typename std::vector<LocatedObject<PAYLOAD_SIZE>*>::const_iterator i = world.GetNodes().begin();
 	i!=world.GetNodes().end();
 	++i) {
       LocatedObject<PAYLOAD_SIZE>* loc = *i;
       if (loc->tag_codes.size() > 0) {
-	float nx = loc->normal[0];
-	float ny = loc->normal[1];
-	float nz = loc->normal[2];
-	std::cout << "Tag: " << loc->location[0] << "," << loc->location[1] << "," << loc->location[2] << std::endl;
-	
-	/* rotate by X, Y, and Z angles */
-	float norm = sqrt(nx*nx+ny*ny+nz*nz);
-	nx/=norm;
-	ny/=norm;
-	nz/=norm;
-	
-	//float factor = -sqrt(nx*nx+nz*nz);
-	//	float rotation[] = { nz/factor, 0, -nx/factor, 0, 
-	//			     -ny*nx/factor, factor, -ny*nz/factor, 0,
-	//			     nx,ny,nz,0,
-	//			     0,0,0,1};
-	//	float angle = -loc->angle/M_PI*180;
-	
-	glMatrixMode(GL_MODELVIEW);
-	/* reset modelview matrix to the identity matrix */
-	glLoadIdentity();
-	/* move the camera back three units */
-	glTranslatef(0.0, 0.0, -3.0);
-	
-	glMultMatrixf(loc->transform);
-	/* rotate tag around z axis for angle */
-	//	glRotatef(angle,0.0,0.0,1.0);
-	
-	//	float tagsizescale=(34-loc->location[2])/20;
-	
-	//	glScalef(tagsizescale,tagsizescale,tagsizescale);
-	
-	Draw(1);
-	return;
+	sIt = sSeen.find(loc->tag_codes[0]->to_ulong());
+	if (sIt==sSeen.end()) {
+	  // Add it
+	  Corners *c = new Corners();
+	  c->c1[0] = -1; c->c1[1]=1; c->c1[2]=0.0;
+	  ApplyCameraTransform(loc->transform,c->c1);
+	  c->c2[0] =  1; c->c2[1]=1; c->c2[2]=0.0;
+	  ApplyCameraTransform(loc->transform,c->c2);
+	  c->c3[0] = 1; c->c3[1]=-1; c->c3[2]=0.0;
+	  ApplyCameraTransform(loc->transform,c->c3);
+	  c->c4[0] = -1; c->c4[1]=-1; c->c4[2]=0.0;
+	  ApplyCameraTransform(loc->transform,c->c4);
+	  c->ttl=FRAME_TTL;
+	  sSeen[loc->tag_codes[0]->to_ulong()]=c;
+	}
+	else {
+	  // Update it
+	  Corners *c = sIt->second;
+	  c->c1[0] = -1; c->c1[1]=1; c->c1[2]=0.0;
+	  ApplyCameraTransform(loc->transform,c->c1);
+	  c->c2[0] = 1; c->c2[1]=1; c->c2[2]=0.0;
+	  ApplyCameraTransform(loc->transform,c->c2);
+	  c->c3[0] = 1; c->c3[1]=-1; c->c3[2]=0.0;
+	  ApplyCameraTransform(loc->transform,c->c3);
+	  c->c4[0] = -1; c->c4[1]=-1; c->c4[2]=0.0;
+	  ApplyCameraTransform(loc->transform,c->c4);
+	  c->ttl=FRAME_TTL;
+	}
       }
     }
-    Draw(2);
+
+    for (sIt=sSeen.begin(); sIt!=sSeen.end(); ++sIt) {
+      if (sIt->second->ttl!=0) {
+	Corners *c = sIt->second;
+	c->ttl--;
+	glBegin(GL_QUADS);
+	glColor3f(0.0, 0.7, 0.1);       /* green */
+	glVertex3f(c->c1[0], c->c1[1], c->c1[2]);
+	glVertex3f(c->c2[0], c->c2[1], c->c2[2]);
+	glVertex3f(c->c3[0], c->c3[1], c->c3[2]);
+	glVertex3f(c->c4[0], c->c4[1], c->c4[2]);
+	glEnd();
+      }
+      else{
+	Corners *c = sIt->second;
+	delete c;
+	sSeen.erase(sIt->first);
+      }
+    }
+    glXSwapBuffers(m_display, m_window);
+    GLenum errCode;
+    const GLubyte *errString;
+    if ((errCode = glGetError()) != GL_NO_ERROR) {
+      errString = gluErrorString(errCode);
+      std::cout << errString << std::endl;
+    }
   }
 }
 
