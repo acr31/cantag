@@ -7,11 +7,13 @@
 namespace Total {
 
   GLOutputMechanism::GLOutputMechanism(int argc, char* argv[], int width, int height) {
+
     /**
      * Follows the template laid out at:
      * http://www.sgi.com/software/opengl/glandx/intro/section3_7.html#SECTION0007000000000000000
      */
 
+    m_ratio=(float)width/(float)height;
     /* open the display */
     m_display = XOpenDisplay(NULL);
     if (m_display == NULL) { throw "Failed to open display"; }
@@ -51,25 +53,18 @@ namespace Total {
     /* map the window to the screen */
     XMapWindow(m_display, m_window);
   
-    glEnable(GL_DEPTH_TEST); /* enable depth buffering */
-    /* frame buffer clears should be to black */
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    /* set up projection transform */
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glFrustum(-1.0, 1.0, -1.0, 1.0, 1.0, 10.0);
-    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-  
+     
     /* clear the event queue - which we ignore */
     XEvent event;
     while (XPending(m_display)) { 
       XNextEvent(m_display, &event);
     }
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  
-    displayListInited = GL_FALSE;
   };
+
+
+
+
 
   GLOutputMechanism::~GLOutputMechanism() {
     // unbind the current context
@@ -88,45 +83,4 @@ namespace Total {
     XCloseDisplay(m_display);
   }
 
-  void GLOutputMechanism::Draw(int mode) {
-    if (displayListInited) {
-      /* if display list already exists, just execute it */
-      glCallList(1);
-    } else {
-      /* otherwise compile and execute to create the display list */
-      glNewList(1, GL_COMPILE_AND_EXECUTE);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      /* front face */
-      glBegin(GL_QUADS);
-      glColor3f(0.0, 0.7, 0.1);       /* green */
-      glVertex3f(-1.0, 1.0, 1.0);
-      glVertex3f(1.0, 1.0, 1.0);
-      glVertex3f(1.0, -1.0, 1.0);
-      glVertex3f(-1.0, -1.0, 1.0);
-      /* back face */
-      glColor3f(0.9, 1.0, 0.0);       /* yellow */
-      glVertex3f(-1.0, 1.0, -1.0);
-      glVertex3f(1.0, 1.0, -1.0);
-      glVertex3f(1.0, -1.0, -1.0);
-      glVertex3f(-1.0, -1.0, -1.0);
-      /* top side face */
-      glColor3f(0.2, 0.2, 1.0);       /* blue */
-      glVertex3f(-1.0, 1.0, 1.0);
-      glVertex3f(1.0, 1.0, 1.0);
-      glVertex3f(1.0, 1.0, -1.0);
-      glVertex3f(-1.0, 1.0, -1.0);
-      /* bottom side face */
-      glColor3f(0.7, 0.0, 0.1);       /* red */
-      glVertex3f(-1.0, -1.0, 1.0);
-      glVertex3f(1.0, -1.0, 1.0);
-      glVertex3f(1.0, -1.0, -1.0);
-      glVertex3f(-1.0, -1.0, -1.0);
-      glEnd();
-      glEndList();
-      displayListInited = GL_TRUE;
-    }
-    glXSwapBuffers(m_display, m_window); /* buffer swap does implicit glFlush */  
-
-  }
-
-}
+};
