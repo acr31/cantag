@@ -58,6 +58,7 @@ TOTAL_CHECK_HEADER(gmpxx.h,HAVE_GMPXX_H,have_gmpxx_h)
 TOTAL_CHECK_HEADER(asm/types.h,HAVE_ASM_TYPES_H,have_asm_types_h)
 TOTAL_CHECK_HEADER(linux/videodev.h,HAVE_LINUX_VIDEODEV_H,have_linux_videodev_h)
 TOTAL_CHECK_HEADER(gsl/gsl_multimin.h,HAVE_GSL_MULTIMIN_H,have_gsl_multimin_h)
+TOTAL_CHECK_HEADER(libdc1394/dc1394_control.h,HAVE_DC1394_CONTROL_H,have_dc1394_control_h)
 TOTAL_CHECK_HEADER(X11/Xlib.h,HAVE_X11_XLIB_H,have_x11_xlib_h)
 TOTAL_CHECK_HEADER(X11/Xutil.h,HAVE_X11_XUTIL_H,have_x11_xutil_h)
 TOTAL_CHECK_HEADER(X11/extensions/XShm.h,HAVE_X11_EXTENSIONS_XSHM_H,have_x11_extensions_xshm_h,
@@ -82,6 +83,7 @@ TOTAL_CHECK_LIB(gmp,__gmpz_init,HAVELIB_GMP,havelib_gmp)
 TOTAL_CHECK_LIB(gmpxx,__gmpz_set,HAVELIB_GMPXX,havelib_gmpxx)
 TOTAL_CHECK_LIB(gslcblas,cblas_caxpy,HAVELIB_GSLCBLAS,havelib_gslcblas)
 TOTAL_CHECK_LIB(gsl,gsl_multimin_diff,HAVELIB_GSL,havelib_gsl)
+TOTAL_CHECK_LIB(dc1394_control,dc1394_dma_setup_capture,HAVELIB_DC1394,havelib_dc1394)
 
 LIBSSAVEACR31="$LIBS"
 LIBS="-lboost_unit_test_framework-gcc-1_32 $LIBS"
@@ -119,6 +121,13 @@ include/Makefile
 include/total/Makefile
 include/total/algorithms/Makefile
 ])
+
+if test "$havelib_dc1394$have_dc1394_control_h" = "yesyes"; then
+   echo "+ Enabled use of IEEE1394 (Firewire) Cameras"
+else
+   echo "! Disabled use of IEEE1394 (Firewire) Cameras"
+fi
+
 
 if test "$have_gl_gl_h$havelib_gl$havelib_glu$havelib_glut" = "yesyesyesyes"; then
    echo "+ Enabled use of OpenGL"
