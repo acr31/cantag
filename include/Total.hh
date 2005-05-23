@@ -14,13 +14,13 @@
 #include <total/MatrixTag.hh>
 
 // coders
-#include <total/RawCoder.hh>
-#include <total/SCCCoder.hh>
-#include <total/ParityCoder.hh>
-#include <total/SCCCoder.hh>
-#include <total/SymbolChunkCoder.hh>
+#include <total/coders/RawCoder.hh>
+#include <total/coders/SCCCoder.hh>
+#include <total/coders/ParityCoder.hh>
+#include <total/coders/SCCCoder.hh>
+#include <total/coders/SymbolChunkCoder.hh>
 #if defined(HAVE_GMPXX) && defined(HAVELIB_GMP) && defined(HAVELIB_GMPXX)
-# include <total/TripOriginalCoder.hh>
+# include <total/coders/TripOriginalCoder.hh>
 #endif
 
 // image sources
@@ -43,6 +43,10 @@
 
 #if defined(HAVE_GL_GL_H) && defined(HAVE_GL_GLU_H) && defined(HAVE_GL_OSMESA_H) && defined(HAVELIB_GL) && defined(HAVELIB_OSMESA) && defined(HAVELIB_GLU)
 # include <total/GLImageSource.hh>
+#endif
+
+#if defined(HAVELIB_DC1394) && defined(HAVE_DC1394_CONTROL_H)
+#include <total/IEEE1394ImageSource.hh>
 #endif
 
 // some predefined tags
