@@ -27,7 +27,10 @@ namespace Total {
     IEEE1394ImageSource(
 			char *device_name,
 			int port,
-			u_int64_t guid);
+			u_int64_t guid,
+			int framerate= FRAMERATE_30,
+			int shutter=-1,
+			int gain=-1);
     virtual ~IEEE1394ImageSource();
     virtual Image* Next();
     inline int GetWidth() { return 640; }
