@@ -95,6 +95,8 @@ namespace Total {
     CyclicBitSet& operator<<(size_t shift) const;
 
     CyclicBitSet& operator>>(size_t shift) const;
+
+    unsigned long to_ulong() const;
     
     int Save(Socket& socket) const;
     CyclicBitSet(Socket& socket);
@@ -249,5 +251,11 @@ namespace Total {
     }
     return os;
   };
+
+  template<int BIT_COUNT> unsigned long  CyclicBitSet<BIT_COUNT>::to_ulong() const {
+    return std::bitset<BIT_COUNT>::to_ulong();
+  }
+
+
 }
 #endif//CYCLIC_BIT_SET
