@@ -11,6 +11,13 @@ libtotal_la_SOURCES += GLOutputMechanism.cc
 endif
 endif
 
+if HAVE_DC1394_CONTROL_H
+if HAVELIB_DC1394
+libtotal_la_SOURCES += IEEE1394ImageSource.cc
+endif
+endif
+
+
 if HAVE_X11_XLIB_H
 if HAVE_X11_XUTIL_H
 if HAVE_X11_EXTENSIONS_XSHM_H
