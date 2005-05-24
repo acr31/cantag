@@ -6,7 +6,7 @@
 #define PARITY_CODER_GUARD
 
 #include <total/Config.hh>
-#include <total/Coder.hh>
+#include <total/coders/Coder.hh>
 #include <total/CyclicBitSet.hh>
 
 #define PARITY_DEBUG

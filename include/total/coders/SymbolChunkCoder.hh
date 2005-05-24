@@ -6,7 +6,7 @@
 #define SYMBOL_CHUNK_CODER
 
 #include <total/Config.hh>
-#include <total/Coder.hh>
+#include <total/coders/Coder.hh>
 
 #define SYMBOL_CHUNK_DEBUG
 

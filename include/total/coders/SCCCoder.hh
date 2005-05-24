@@ -8,7 +8,7 @@
 #define SCCCODER_GUARD
 
 #include <total/Config.hh>
-#include <total/Coder.hh>
+#include <total/coders/Coder.hh>
 
 #ifdef TEXT_DEBUG
 # define SCCCODER_DEBUG
