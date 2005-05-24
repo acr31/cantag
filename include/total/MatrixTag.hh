@@ -8,7 +8,7 @@
 #include <total/Config.hh>
 #include <total/Image.hh>
 #include <total/Tag.hh>
-#include <total/Coder.hh>
+#include <total/coders/Coder.hh>
 #include <total/QuadTangle.hh>
 #include <total/QuadTangleTransform.hh>
 #include <total/Camera.hh>

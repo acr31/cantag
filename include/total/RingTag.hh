@@ -7,13 +7,13 @@
 
 #include <total/Config.hh>
 #include <total/Tag.hh>
-#include <total/Coder.hh>
+#include <total/coders/Coder.hh>
 #include <total/Camera.hh>
 #include <total/ShapeChain.hh>
 #include <total/EllipseTransform.hh>
 #include <total/findtransform.hh>
 #include <total/Ellipse.hh>
-#include <total/Coder.hh>
+#include <total/coders/Coder.hh>
 #include <iostream>
 #include <cassert>
 #include <total/SpeedMath.hh>
