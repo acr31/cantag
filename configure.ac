@@ -120,6 +120,7 @@ samples/Makefile
 include/Makefile
 include/total/Makefile
 include/total/algorithms/Makefile
+include/total/coders/Makefile
 ])
 
 if test "$havelib_dc1394$have_dc1394_control_h" = "yesyes"; then
