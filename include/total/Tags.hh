@@ -10,10 +10,10 @@
 #include <total/Config.hh>
 #include <total/RingTag.hh>
 #include <total/MatrixTag.hh>
-#include <total/TripOriginalCoder.hh>
-#include <total/ParityCoder.hh>
-#include <total/SCCCoder.hh>
-#include <total/SymbolChunkCoder.hh>
+#include <total/coders/TripOriginalCoder.hh>
+#include <total/coders/ParityCoder.hh>
+#include <total/coders/SCCCoder.hh>
+#include <total/coders/SymbolChunkCoder.hh>
 #include <total/EllipseTransform.hh>
 
 namespace Total {
