@@ -485,6 +485,9 @@ namespace Total {
 
   
   bool RegressionQuadTangle::Refine(const std::vector<float>& points) {
+
+    m_fitted=false;
+
     // Calculate the indexes of the current points
     std::vector<int> indexes(4);
     for (int i=0; i<4; i++) indexes[i]=-1;
@@ -559,7 +562,6 @@ namespace Total {
     
     
     for (int j=0; j<4; j++) {
-      //    std::cout << "Y " << yeq[j] << " " << (j-1)%4 << std::endl;
       int lastj = (j-1);
       if (lastj==-1) lastj=3;
       if (yeq[j] && yeq[lastj]) {
@@ -580,6 +582,7 @@ namespace Total {
       }
     }
     
+    
     // Copy results
     m_x0 = xres[0];
     m_y0 = yres[0];
@@ -590,8 +593,17 @@ namespace Total {
     m_x3 = xres[3];
     m_y3 = yres[3];
 
-    //    std::cout << m_x0 << " " << m_y0 << " " << m_x1 << " " << m_y1 << " " << m_x2 << " " << m_y2 <<" " << m_x3 << " " << m_y3 << std::endl;
+    if ( fabs(m_x0)>1 || fabs(m_y0)>1 ||
+	 fabs(m_x1)>1 || fabs(m_y1)>1 ||
+	 fabs(m_x2)>1 || fabs(m_y2)>1 ||
+	 fabs(m_x3)>1 || fabs(m_y3)>1 ) return false;
 
+    if ( (m_x0!=m_x0) || (m_y0!=m_y0) ||
+	 (m_x1!=m_x1) || (m_y1!=m_y1) ||
+	 (m_x2!=m_x2) || (m_y2!=m_y2) ||
+	 (m_x3!=m_x3) || (m_y3!=m_y3) ) return false;
+
+    m_fitted=true;
     compute_central_point();
     sort_points();
     return true;
