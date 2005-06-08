@@ -20,9 +20,10 @@ namespace Total {
    * and the additional methods.
    */
   template<int BIT_COUNT>
-  class CyclicBitSet : std::bitset<BIT_COUNT> {
+  class CyclicBitSet : public std::bitset<BIT_COUNT> {
   private:
     size_t m_rotation;
+    bool m_invalid;
 
   public:
     CyclicBitSet();
@@ -30,6 +31,15 @@ namespace Total {
     CyclicBitSet(const CyclicBitSet<BIT_COUNT>& o);
 
     void reset();
+
+    void SetInvalid() { m_invalid = true; }
+    
+    bool IsInvalid() { return m_invalid; }
+
+    /**
+     * Return the number of bits that this bit set has been rotated 
+     */
+    size_t GetRotation() { return m_rotation; }
 
     /**
      * Rotate the bit field so that the bit at position i goes to
@@ -114,11 +124,11 @@ namespace Total {
   }
 
 
-  template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet() : std::bitset<BIT_COUNT>(), m_rotation(0) {};
+  template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet() : std::bitset<BIT_COUNT>(), m_rotation(0), m_invalid(false) {};
 
-  template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet(unsigned long val) : std::bitset<BIT_COUNT>(val), m_rotation(0) {};
+  template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet(unsigned long val) : std::bitset<BIT_COUNT>(val), m_rotation(0), m_invalid(false) {};
 
-  template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet(const CyclicBitSet<BIT_COUNT>& o) : std::bitset<BIT_COUNT>(o), m_rotation(o.m_rotation) {};
+  template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet(const CyclicBitSet<BIT_COUNT>& o) : std::bitset<BIT_COUNT>(o), m_rotation(o.m_rotation), m_invalid(false) {};
 
   template<int BIT_COUNT> void CyclicBitSet<BIT_COUNT>::reset() {
     std::bitset<BIT_COUNT>::reset();

@@ -145,6 +145,7 @@ namespace Total {
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
 	  PROGRESS("Failed. Checksum mismatch");
 #endif
+	  payload.SetInvalid();
 	  return -1;
 	}
       }
@@ -156,6 +157,7 @@ namespace Total {
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
     PROGRESS("Failed to find a sync sector");
 #endif
+    payload.SetInvalid();
     return -1;
   }
 

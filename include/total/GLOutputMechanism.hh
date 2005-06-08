@@ -15,12 +15,14 @@
 # error "This version has been configured without OpenGL support"
 #endif
 
+#include <iostream>
+#include <map>
+
 #include <total/ContourTree.hh>
 #include <total/ShapeTree.hh>
 #include <total/WorldState.hh>
 #include <total/Tag.hh>
 #include <total/Camera.hh>
-#include <iostream>
 
 #include <total/CyclicBitSet.hh>
 
@@ -28,8 +30,6 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/osmesa.h>
-
-#include <map>
 
 #define FRAME_TTL 1
 

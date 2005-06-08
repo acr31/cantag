@@ -71,6 +71,7 @@ namespace Total {
 #ifdef SYMBOL_CHUNK_DEBUG
 	  PROGRESS("Parity check bit at position " << (payload_pointer-1) << " is invalid");
 #endif
+	  data.SetInvalid();
 	  return -1; 
 	}
       }
@@ -80,6 +81,7 @@ namespace Total {
 #ifdef SYMBOL_CHUNK_DEBUG
       PROGRESS("Failed to find orientation start bit");
 #endif
+      data.SetInvalid();
       return -1;
     }
   }

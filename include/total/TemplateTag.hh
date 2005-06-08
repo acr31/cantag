@@ -10,7 +10,7 @@
 #include <total/Tag.hh>
 #include <total/QuadTangle2D.hh>
 #include <total/Template.hh>
-#include <total/Coder.hh>
+#include <total/coders/Coder.hh>
 #include <total/Camera.hh>
 
 #include <vector>

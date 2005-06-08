@@ -2,10 +2,26 @@
  * $Header$
  */
 
-#include <ImageOutputMechanism.hh>
+#include <total/ImageOutputMechanism.hh>
 
 namespace Total {
 
+
+  ImageOutputMechanism::ContourAlgorithm::ContourAlgorithm(Image& output_image): m_image(output_image) {};
+
+  void ImageOutputMechanism::ContourAlgorithm::operator()(const ContourEntity& contour) const {
+    if (contour.m_contourFitted) {
+      for(std::vector<float>::const_iterator i = contour.points.begin();
+	  i!=contour.points.end();
+	  ++i) {
+	const float x = *i;
+	++i;
+	const float y = *i;
+	m_image.DrawPixel(x,y,COLOUR_BLACK);
+      }
+    }
+  }
+  
   ImageOutputMechanism::~ImageOutputMechanism() {
     if (m_saved_originalimage) delete m_saved_originalimage;
     if (m_saved_thresholdimage) delete m_saved_thresholdimage;
@@ -16,14 +32,14 @@ namespace Total {
     
     if (m_saved_originalimage) delete m_saved_originalimage;
     m_saved_originalimage = new Image(image);
-  };
+  }
 
   void ImageOutputMechanism::FromThreshold(const Image& image) {
     image.Save("debug-fromthreshold.pnm");
     
     if (m_saved_thresholdimage) delete m_saved_thresholdimage;
     m_saved_thresholdimage = new Image(image);
-  };
+  }
 
   void ImageOutputMechanism::FromContourTree(const ContourTree& contours) {
     Image i(*m_saved_thresholdimage);

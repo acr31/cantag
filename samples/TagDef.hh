@@ -17,8 +17,10 @@ namespace Total {
   class PSquare : public MatrixTag<5,ConvexHullQuadTangle>, protected virtual  SymbolChunkCoder<24,6>, private virtual ProjectiveQuadTangleTransform {};
 
 
+  class ISquare : public MatrixTag<16,RegressConvexHullQuadTangle>,protected virtual SymbolChunkCoder<256,64>,private virtual ProjectiveQuadTangleTransform {};
 };
 
-typedef Total::OuterRing TagType;
+typedef Total::TripTag TagType;
+//typedef Total::ISquare TagType;
 
 #endif//TAG_DEF_GUARD

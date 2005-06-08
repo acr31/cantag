@@ -1,3 +1,3 @@
-SUBDIRS = src unit include samples
+SUBDIRS = src include samples
 
 AM_CPPFLAGS=

@@ -17,27 +17,28 @@ namespace Total {
     
     const Ellipse& ellipse = *source.m_shapeDetails;
 
-    dest.m_transform = new float[16];
+    Transform* t = new Transform();    
+    dest.m_transforms.push_back(t);
 
-    dest.m_transform[0] = ellipse.GetWidth()*DCOS(8,ellipse.GetAngle()); // DCOS
-    dest.m_transform[1] = -ellipse.GetHeight()*DSIN(8,ellipse.GetAngle());  // DSINE
-    dest.m_transform[2] = 0;
-    dest.m_transform[3] = ellipse.GetX0();
+    (*t)[0] = ellipse.GetWidth()*DCOS(8,ellipse.GetAngle()); // DCOS
+    (*t)[1] = -ellipse.GetHeight()*DSIN(8,ellipse.GetAngle());  // DSINE
+    (*t)[2] = 0;
+    (*t)[3] = ellipse.GetX0();
 
-    dest.m_transform[4] = ellipse.GetWidth()*DSIN(8,ellipse.GetAngle()); // DSINE
-    dest.m_transform[5] = ellipse.GetHeight()*DCOS(8,ellipse.GetAngle());  // DCOS
-    dest.m_transform[6] = 0;
-    dest.m_transform[7] = ellipse.GetY0();
+    (*t)[4] = ellipse.GetWidth()*DSIN(8,ellipse.GetAngle()); // DSINE
+    (*t)[5] = ellipse.GetHeight()*DCOS(8,ellipse.GetAngle());  // DCOS
+    (*t)[6] = 0;
+    (*t)[7] = ellipse.GetY0();
 
-    dest.m_transform[8] = 0;
-    dest.m_transform[9] = 0;
-    dest.m_transform[10] = 1;
-    dest.m_transform[11] = 1;
+    (*t)[8] = 0;
+    (*t)[9] = 0;
+    (*t)[10] = 1;
+    (*t)[11] = 1;
 
-    dest.m_transform[12] = 0;
-    dest.m_transform[13] = 0;
-    dest.m_transform[14] = 0;
-    dest.m_transform[15] = 1;
+    (*t)[12] = 0;
+    (*t)[13] = 0;
+    (*t)[14] = 0;
+    (*t)[15] = 1;
 
     dest.m_transformDone = true;
     return true;

@@ -34,7 +34,7 @@
 #include <total/ImageOutputMechanism.hh>
 #if defined(HAVE_X11_XLIB_H) && defined(HAVE_X11_XUTIL_H) && defined(HAVE_X11_EXTENSIONS_XSHM_H)
 # include <total/XOutputMechanism.hh>
-# include <total/XOutputStagesMechanism.hh>
+//# include <total/XOutputStagesMechanism.hh>
 #endif
 
 #if defined(HAVE_GL_GL_H) && defined(HAVELIB_GL) && defined(HAVELIB_GLU) && defined(HAVELIB_GLUT)

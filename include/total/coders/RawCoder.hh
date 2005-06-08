@@ -8,7 +8,7 @@
 #include <total/Config.hh>
 #include <total/coders/Coder.hh>
 #include <total/CyclicBitSet.hh>
-#include <iostream>
+
 namespace Total {
 
   /**

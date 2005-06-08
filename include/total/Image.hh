@@ -6,9 +6,8 @@
 
 #include <total/Config.hh>
 #include <total/Socket.hh>
-
-#include <sys/param.h>
-
+#include <total/SpeedMath.hh>
+#include <total/Entity.hh>
 #include <cmath>
 
 #define COLOUR_BLACK ((unsigned char)0)
@@ -20,7 +19,7 @@ namespace Total {
   /**
    * A wrapper object for OpenCv's image
    */
-  class Image {
+  class Image : public Entity {
   private:
     unsigned int m_width;
     unsigned int m_height;
@@ -397,15 +396,6 @@ namespace Total {
     void Load(const char* filename);
     void ScanLineFill(float* points,int numpoints,unsigned char colour);
 
-    static inline int Round(double d)  {
-#if BYTE_ORDER == LITTLE_ENDIAN
-      double t =(d+6755399441055744.0); 
-      return *(int*)&t;
-#else
-      return (int)round(d);
-#endif
-    }
-  
     class Edge {
     public:
       int miny;
@@ -440,5 +430,8 @@ namespace Total {
   };
 
 }
-
+#else
+namespace Total {
+  class Image;
+}
 #endif//IMAGE_GUARD

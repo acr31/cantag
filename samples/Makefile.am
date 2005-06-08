@@ -1,14 +1,17 @@
-noinst_PROGRAMS=TextOnly DrawTag GnuplotOutput
-TextOnly_SOURCES=TextOnly.cc 
-DrawTag_SOURCES=DrawTag.cc
-GnuplotOutput_SOURCES=GnuplotOutput.cc
+noinst_PROGRAMS= NewTest 
+#TextOnly DrawTag
+#GnuplotOutput
+#TextOnly_SOURCES=TextOnly.cc 
+#DrawTag_SOURCES=DrawTag.cc
+NewTest_SOURCES=NewTest.cc
+#GnuplotOutput_SOURCES=GnuplotOutput.cc
 
 if HAVE_LINUX_VIDEODEV_H
 if HAVE_X11_XLIB_H
 if HAVE_X11_XUTIL_H
 if HAVE_X11_EXTENSIONS_XSHM_H
-noinst_PROGRAMS+=XOutput
-XOutput_SOURCES=XOutput.cc
+#noinst_PROGRAMS+=XOutput
+#XOutput_SOURCES=XOutput.cc
 endif
 endif
 endif

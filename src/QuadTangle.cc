@@ -8,7 +8,6 @@
 
 #include <cmath>
 #include <cassert>
-#include <iostream>
 #include <map>
 
 #include <deque>
@@ -155,6 +154,62 @@ namespace Total {
       m_x2= x2; m_y2=y2;
       m_x3= x1; m_y3=y1;
     }
+  }
+
+  /**
+   * \todo tidy this function up 
+   */
+  bool QuadTangle::EstimatePoseQuadrant(float n[3]) const {
+
+    float p[] = {m_x0,m_y0,m_x1,m_y1,m_x2,m_y2,m_x3,m_y3};
+    // Now find where a vertical line through the centre intersects the shape
+    int side1=0;
+    float mu = (p[8]-p[2*side1])/(p[2*(side1+1)]-p[2*side1]);
+    if (mu!=mu || mu <=0.0 || mu > 1.0) {
+      // It doesn't intersect this side: must intersect the next
+      side1++;
+      mu = (p[8]-p[2*side1])/(p[2*(side1+1)]-p[2*side1]);
+    }
+    int side2=(side1+2)%4;
+    float mu2 = (p[8]-p[2*side2])/(p[2*(side2+1)]-p[2*side2]);
+
+    // y co-ordinates: one will be -ve, one +ve
+    float d1 = p[2*side1+1] + mu*(p[2*(side1+1)+1]-p[2*side1+1]) - p[9];
+    float d2 = p[2*side2+1] + mu2*(p[2*(side2+1)+1]-p[2*side2+1]) - p[9];
+    float yratio = (d1>0) ? -d1/d2:-d2/d1;
+
+    // Now find where a horizontal line through the centre intersects the shape
+    int sideh = side1+1;
+    mu = (p[9]-p[2*sideh+1])/(p[2*(sideh+1)+1]-p[2*sideh+1]);
+    d1 = p[2*sideh] + mu*(p[2*(sideh+1)]-p[2*sideh]) - p[8];
+    
+    sideh = (sideh+2)%4;
+    mu = (p[9]-p[2*sideh+1])/(p[2*((sideh+1)%4)+1]-p[2*sideh+1]);
+    d2 = p[2*sideh] + mu*(p[2*((sideh+1)%4)]-p[2*sideh]) - p[8];
+
+    float xratio = (d1>0) ? -d1/d2:-d2/d1;
+ 
+ //    if (xratio>0.99 && xratio<1.01 && yratio>0.99 && yratio<1.01) {
+//       // It's a rectangle
+//       float size1 = (m_x0-p[2])*(p[0]-p[2]) + (p[1]-p[3])*(p[1]-p[3]);
+//       float size2 = (p[2]-p[4])*(p[2]-p[4]) + (p[3]-p[5])*(p[3]-p[5]);
+//       // if (size1/size2 !=1.0) return false;
+//     }
+
+
+    if (xratio > 1.0)  n[0]=1.0;
+    else if (xratio == 1.0) n[0]=0.0;
+    else n[1]=-1.0;
+
+    if (yratio > 1.0) n[1]=1.0;
+    else if (yratio == 1.0) n[1]=0.0;
+    else n[1]=-1.0;
+
+    n[2]=1.0;
+
+    float m = sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]);
+    for (int i=0; i<3;i++) n[i]/=m;
+    return true;
   }
 
   /**

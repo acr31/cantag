@@ -23,7 +23,7 @@ namespace Total {
   Image::Image(int width, int height) : m_width(width),m_height(height), m_contents(new unsigned char[width*height]), m_free_contents(true), m_width_step(m_width), m_binary(false) {
     assert(width > 0);
     assert(height > 0);
-    ConvertScale(0,255);
+    memset(m_contents,0,width*height);
   };
 
   Image::Image(const Image& c) : m_width(c.m_width), m_height(c.m_height), m_contents(new unsigned char[c.m_width_step*c.m_height]), m_free_contents(true), m_width_step(c.m_width_step), m_binary(c.m_binary) {
@@ -152,7 +152,7 @@ namespace Total {
 
     int previous_line[image_width];
     // intentionally uninitialised
-    //  for(int i=0;i<image_width;++i) { previous_line[i] = 127; }
+    for(int i=0;i<image_width;++i) { previous_line[i] = 127; }
 
     for(int i=0;i<image_height-1;) { // use height-1 so we dont overrun the image if its height is an odd number
       unsigned char* data_pointer = GetRow(i);

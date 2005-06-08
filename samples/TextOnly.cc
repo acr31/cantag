@@ -35,6 +35,7 @@ main(int argc, char* argv[]) {
 
     // create an output mechanism which will print out our results
     TextOutputMechanism o(std::cout);
+    //ImageOutputMechanism o(c);
 
     // STAGE1: fetch the next image from the image source (in this case there will be only one)
     Image* buffer = fs.Next();

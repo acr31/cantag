@@ -50,6 +50,8 @@ public:
 
   void Draw(Image& image,const Camera& camera) const;
   
+  void Draw(std::vector<int>& points, const Camera& camera) const;
+
   inline float GetA() const { return m_a; }
   inline float GetB() const { return m_b; }
   inline float GetC() const { return m_c; }

@@ -32,6 +32,7 @@ main(int argc, char* argv[]) {
     // create an output mechanism which will display the decoding
     // process on screen
     XOutputStagesMechanism o(v.GetWidth(),v.GetHeight(),c);
+    //GLOutputMechanism o(argc,argv,v.GetWidth(),v.GetHeight());
     
     // start a timer to measure FPS
     time_t cur_time = time(NULL);

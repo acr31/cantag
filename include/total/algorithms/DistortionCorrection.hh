@@ -7,18 +7,15 @@
 
 #include <total/Entity.hh>
 #include <total/Camera.hh>
+#include <total/Function.hh>
 
 namespace Total {
-  class DistortionCorrection {
-  public:
-    typedef ContourEntity SourceType;
-    typedef ContourEntity DestinationType;
-
+  class DistortionCorrection : public Function0<ContourEntity> {
   private:
     const Camera& m_camera;
   public:
     DistortionCorrection(const Camera& camera) : m_camera(camera) {};
-    bool operator()(const ContourEntity& source, ContourEntity& dest) const;
+    bool operator()(ContourEntity& dest) const;
   };
 }
 

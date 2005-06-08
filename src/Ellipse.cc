@@ -20,7 +20,7 @@
 # undef DECOMPOSE_DEBUG
 #endif
 
-#define MAXFITERROR 0.01
+#define MAXFITERROR 1000
 #define COMPARETHRESH 1
 #define MAXDISTANCE 
 
@@ -42,6 +42,37 @@ namespace Total {
   void Ellipse::Draw(Image& image,const Camera& camera) const {
     if (m_fitted) {
       camera.DrawEllipse(image,*this);
+    }
+  }
+
+  void Ellipse::Draw(std::vector<int>& points, const Camera& camera) const {
+    /**
+     * The parametric equation for an ellipse
+     *
+     * x = xc + a*cos(angle_radians)*cos(t) + b*sin(angle_radians)*sin(t)
+     * y = yc - a*sin(angle_radians)*cos(t) + b*cos(angle_radians)*sin(t)
+     *
+     * a = width/2; b=height/2
+     * angle_radians is the angle between the axis given by width and the horizontal
+     *
+     */
+    float cosa = DCOS(8,m_angle_radians); // DCOS (later)
+    float sina = DSIN(8,m_angle_radians); // DSINE (later)
+    float a = m_width;
+    float b = m_height;
+    float currentAngle = 0;
+    while(currentAngle < 2*PI) {
+      float cost = cos(currentAngle); // DCOS (later)
+      float sint = sin(currentAngle); // DSINE (later)
+      
+      float pointsv[] = { m_x0 + a*cosa*cost + b*sina*sint,
+			  m_y0 + a*sina*cost + b*cosa*sint };
+
+      camera.NPCFToImage(pointsv,1);
+      
+      points.push_back(Round(pointsv[0]));
+      points.push_back(Round(pointsv[1]));
+      currentAngle += 0.01f;
     }
   }
 

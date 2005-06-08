@@ -23,7 +23,7 @@ namespace Total {
     const int m_image_width;
     const int m_image_height;
     const int m_image_width_bytes;
-    
+
   public:
     /**
      * Create the contour follower suitable for dealing with images of the given size.

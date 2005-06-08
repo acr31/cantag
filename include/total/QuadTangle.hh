@@ -59,6 +59,12 @@ namespace Total {
      * \todo implement the check method
      */ 
     bool Check(const std::vector<float>& points) const {return true;};
+
+    /**
+     * This function returns a good starting guess for the normal
+     * vector of the plane in variable n
+     */
+    bool EstimatePoseQuadrant(float n[3]) const;
   private:
     void swap(float *a, float *b);
     float find_angle(float x, float y, float cx, float cy);

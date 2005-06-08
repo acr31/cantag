@@ -7,7 +7,7 @@
  *
  */
 
-#include <total/GF4Coder.hh>
+#include <total/coders/GF4Coder.hh>
 
 namespace Total {
   /**

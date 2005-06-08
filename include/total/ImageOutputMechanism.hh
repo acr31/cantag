@@ -12,6 +12,9 @@
 #include <total/WorldState.hh>
 #include <total/Camera.hh>
 #include <total/Entity.hh>
+#include <total/ComposeEntity.hh>
+#include <total/CyclicBitSet.hh>
+#include <list>
 
 namespace Total {
   class ImageOutputMechanism {
@@ -23,60 +26,76 @@ namespace Total {
     void FromContourTree(Image& dest, const ContourTree::Contour* contour);
     template<class ShapeType> void FromShapeTree(Image& image, const typename ShapeTree<ShapeType>::Node* node);
 
-    class ContourTreeAlgorithm {
+    class ContourAlgorithm {
     private:
       Image& m_image;
     public:
-      ContourTreeAlgorithm(Image& output_image) : m_image(output_image) {};
-      void operator()(const ContourEntity& contour) const {
-	if (contour.m_contourFitted) {
-	  for(std::vector<float>::const_iterator i = contour.points.begin();
-	      i!=contour.points.end();
-	      ++i) {
-	    const float x = *i;
-	    ++i;
-	    const float y = *i;
-	    m_image.DrawPixel(x,y,COLOUR_BLACK);
-	  }
-	}
-      }
+      ContourAlgorithm(Image& output_image);
+      void operator()(const ContourEntity& contour) const;
     };
 
     template<class Shape>
-    class ShapeTreeAlgorithm {
+    class ShapeAlgorithm {
     private:
       const Camera& m_camera;
       Image& m_image;
     public:
-      ShapeTreeAlgorithm(const Camera& camera, Image& output_image) : m_camera(camera), m_image(output_image) {};
-      void operator()(const ShapeEntity<Shape>& shape) const {
-	if (shape.m_shapeFitted) {
-	  m_camera.Draw(m_image,*shape.m_shapeDetails);
-	}
-      }
+      ShapeAlgorithm(const Camera& camera, Image& output_image);
+      void operator()(const ShapeEntity<Shape>& shape) const;
     };
+
+    template<class Shape,int PAYLOADSIZE>
+    class DecodeAlgorithm {
+    private:
+      const Camera& m_camera;
+      Image& m_image;
+    public:
+      DecodeAlgorithm(const Camera& camera, Image& output_image);
+      void operator()(const ShapeEntity<Shape>& shape, const DecodeEntity<PAYLOADSIZE>& decode) const;
+    };
+    
+
 
     template<class Entity, class Dummy>
     struct Helper {
-      static void Output(const Entity& root_element, const Image* original_image, const Camera& camera) {};
+      static void Output(const Entity& root_element, const Image* original_image, const Camera& camera) {
+	Helper<Entity,typename Dummy::Tail>::Output(root_element,original_image,camera);
+      };
     };
 
+    template<class Entity>
+    struct Helper<Entity,TypeListEOL> {
+      static void Output(const Entity& root_element, const Image* original_image, const Camera& camera) {}
+    };
+    
+    
     template<class Entity, class Tail>
-    struct Helper<Entity,EntityList<ContourEntity,Tail> > {
+    struct Helper<Entity,TypeList<ContourEntity,Tail> > {
       static void Output(const Entity& root_element, const Image* original_image, const Camera& camera) {
 	Image i(original_image->GetWidth(),original_image->GetHeight());
-	root_element.Apply(ContourTreeAlgorithm(i));
+	root_element.Apply(ContourAlgorithm(i));
 	i.Save("debug-fromcontourtree.pnm");
 	Helper<Entity,Tail>::Output(root_element,original_image,camera);
       }
     };
 
     template<class Entity, class Tail>
-    struct Helper<Entity,EntityList<ShapeEntity<typename Entity::ShapeType>,Tail> > {
+    struct Helper<Entity,TypeList<ShapeEntity<typename Entity::ShapeType>,Tail> > {
       static void Output(const Entity& root_element, const Image* original_image, const Camera& camera) {
 	Image i(original_image->GetWidth(),original_image->GetHeight());
-	root_element.Apply(ShapeTreeAlgorithm<typename Entity::ShapeType>(camera,i));
+	root_element.Apply(ShapeAlgorithm<typename Entity::ShapeType>(camera,i));
 	i.Save("debug-fromshapetree.pnm");
+	Helper<Entity,Tail>::Output(root_element,original_image,camera);
+      }
+    };
+
+    template<class Entity, class Tail>
+    struct Helper<Entity,TypeList<DecodeEntity<Entity::PayloadSize>,Tail> > {
+      static void Output(const Entity& root_element, const Image* original_image, const Camera& camera) {
+	Image i(original_image->GetWidth(),original_image->GetHeight());
+	DecodeAlgorithm<typename Entity::ShapeType, Entity::PayloadSize> d(camera,i);
+	root_element.Apply2(d);
+	i.Save("debug-fromdecode.pnm");
 	Helper<Entity,Tail>::Output(root_element,original_image,camera);
       }
     };
@@ -98,6 +117,7 @@ namespace Total {
     inline void FromRemoveIntrinsic(const ContourTree& contours) {};
     template<class ShapeType>  void FromShapeTree(const ShapeTree<ShapeType>& shapes);
     template<int PAYLOADSIZE> void FromTag(const WorldState<PAYLOADSIZE>& world);
+
 
   };
   
@@ -138,5 +158,26 @@ namespace Total {
     }
     m_saved_originalimage->Save("debug-fromtag.pnm");
   }
+
+  template<class Shape> ImageOutputMechanism::ShapeAlgorithm<Shape>::ShapeAlgorithm(const Camera& camera, Image& output_image) : m_camera(camera), m_image(output_image) {};
+  template<class Shape> void ImageOutputMechanism::ShapeAlgorithm<Shape>::operator()(const ShapeEntity<Shape>& shape) const {
+    if (shape.m_shapeFitted) {
+      m_camera.Draw(m_image,*shape.m_shapeDetails);
+    }
+  }
+
+  
+  template<class Shape,int PAYLOADSIZE> ImageOutputMechanism::DecodeAlgorithm<Shape,PAYLOADSIZE>::DecodeAlgorithm(const Camera& camera, Image& output_image) : m_camera(camera), m_image(output_image) {};
+  template<class Shape,int PAYLOADSIZE> void ImageOutputMechanism::DecodeAlgorithm<Shape,PAYLOADSIZE>::operator()(const ShapeEntity<Shape>& shape, const DecodeEntity<PAYLOADSIZE>& decode) const {
+    if (shape.m_shapeFitted) {
+      for(typename std::list<CyclicBitSet<PAYLOADSIZE>*>::const_iterator i = decode.m_payloads.begin(); i != decode.m_payloads.end(); ++i) {
+	if (!(*i)->IsInvalid()) {
+	  m_camera.Draw(m_image,*(shape.m_shapeDetails));
+	  return;
+	}
+      }
+    }
+  }
+    
 }
 #endif//IMAGE_OUTPUT_MECHANISM_GUARD

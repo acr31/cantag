@@ -7,10 +7,11 @@
 
 #include <total/Entity.hh>
 #include <total/Ellipse.hh>
+#include <total/Function.hh>
 
 namespace Total {
 
-  class TransformEllipseLinear {
+  class TransformEllipseLinear : public Function1<ShapeEntity<Ellipse>,TransformEntity> {
   public:
     typedef ShapeEntity<Ellipse> SourceType;
     typedef TransformEntity DestinationType;

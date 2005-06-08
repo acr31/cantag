@@ -7,13 +7,11 @@
 
 #include <total/Ellipse.hh>
 #include <total/Entity.hh>
+#include <total/Function.hh>
 
 namespace Total {
-  class FitEllipseSimple {
+  class FitEllipseSimple : public Function1<ContourEntity,ShapeEntity<Ellipse> > {
   public:
-    typedef ContourEntity SourceType;
-    typedef ShapeEntity<Ellipse> DestinationType;
-
     bool operator()(const ContourEntity& contour, ShapeEntity<Ellipse>& shape) const;
   };
 }

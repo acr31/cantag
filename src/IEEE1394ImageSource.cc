@@ -31,7 +31,6 @@ namespace Total {
        throw "Unable to find a 1394 Camera. Please check that you have modprobed raw1394 and videodev1394 and created the relevant device nodes in /dev";
      }
 
-
      if (nCam>1) {
        // More than one camera - use guid to select
        dc1394_camerainfo info;
@@ -78,7 +77,7 @@ namespace Total {
   }
 
 
-  Image * IEEE1394ImageSource::Next() {
+  Image* IEEE1394ImageSource::Next() {
     /*
      * This is what we would like,
      * but we can't write to the memory
@@ -105,6 +104,7 @@ namespace Total {
       }
     }
     dc1394_dma_done_with_buffer(&mCamera);
+    mImage->SetValid(true);
     return mImage;
   }
 

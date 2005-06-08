@@ -237,7 +237,7 @@ namespace Total {
      */
     static double SpaceSearchQuadFunc(const gsl_vector *v, void *params);
 
-    /*
+    /**
      * Calculate the transform by least squares minimising the 
      * euclidean distance for each point AND the angle between the
      * sides.

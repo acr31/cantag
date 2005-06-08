@@ -13,6 +13,7 @@
 #include <total/EllipseTransform.hh>
 #include <total/findtransform.hh>
 #include <total/Ellipse.hh>
+
 #include <total/coders/Coder.hh>
 #include <iostream>
 #include <cassert>
@@ -686,7 +687,6 @@ namespace Total {
     // project some points for the inner circle using both interpretations and check which one fits  
     const int count = 200;
     std::vector<float> projected;
-    std::cout << "*** ARB: Called this (1)" << std::endl;
     for(int i=0;i<count*2;i+=2) {
       float x = DCOS(8, (float)(i-count)*PI/(float)count ); // DCOS
       float y = DSIN(8, (float)(i-count)*PI/(float)count ); // DSINE

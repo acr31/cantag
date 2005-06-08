@@ -27,7 +27,7 @@ namespace Total {
     IEEE1394ImageSource(
 			char *device_name,
 			int port,
-			u_int64_t guid,
+			u_int64_t guid=0,
 			int framerate= FRAMERATE_30,
 			int shutter=-1,
 			int gain=-1);

@@ -63,6 +63,7 @@ namespace Total {
       return rotation;
     }
     else {
+      data.SetInvalid();
       return -1;
     }
   }

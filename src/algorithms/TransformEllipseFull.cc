@@ -245,35 +245,37 @@ namespace Total {
       }
     }
 
-    dest.m_transform = new float[16];
-    dest.m_transformDone = true;
-    float* transform1 = dest.m_transform;
-    float transform2[16];
-    
-
+    Transform* t1 = new Transform();
+    Transform* t2 = new Transform();
+ 
+    dest.m_transforms.push_back(t1);
+    dest.m_transforms.push_back(t2);
+   
     // premultiply by r1
     for(int row=0;row<4;row++) {
       for(int col=0;col<4;col++) {
-	transform1[row*4+col] = 0;
-	transform2[row*4+col] = 0;
+	(*t1)[row*4+col] = 0;
+	(*t2)[row*4+col] = 0;
 	for(int k=0;k<4;k++) {
-	  transform1[row*4+col] += r1[row*4+k] * rtotc1[k*4+col];
-	  transform2[row*4+col] += r1[row*4+k] * rtotc2[k*4+col];
+	  (*t1)[row*4+col] += r1[row*4+k] * rtotc1[k*4+col];
+	  (*t2)[row*4+col] += r1[row*4+k] * rtotc2[k*4+col];
 	}
       }
     }
 
 #ifdef ELLIPSE_TRANSFORM_DEBUG  
-    PROGRESS("M_Transform: mt=[" << transform1[0] << "," << transform1[1] << "," << transform1[2] << "," << transform1[3] << ";");
-    PROGRESS("                 " << transform1[4] << "," << transform1[5] << "," << transform1[6] << "," << transform1[7] << ";");
-    PROGRESS("                 " << transform1[8] << "," << transform1[9] << "," << transform1[10] << "," << transform1[11] << ";");
-    PROGRESS("                 " << transform1[12] << "," << transform1[13] << "," << transform1[14] << "," << transform1[15] << ";");
+    PROGRESS("M_Transform: mt=[" << (*t1)[0] << "," << (*t1)[1] << "," << (*t1)[2] << "," << (*t1)[3] << ";");
+    PROGRESS("                 " << (*t1)[4] << "," << (*t1)[5] << "," << (*t1)[6] << "," << (*t1)[7] << ";");
+    PROGRESS("                 " << (*t1)[8] << "," << (*t1)[9] << "," << (*t1)[10] << "," << (*t1)[11] << ";");
+    PROGRESS("                 " << (*t1)[12] << "," << (*t1)[13] << "," << (*t1)[14] << "," << (*t1)[15] << ";");
 
-    PROGRESS("M_Transform: mt2=[" << transform2[0] << "," << transform2[1] << "," << transform2[2] << "," << transform2[3] << ";");
-    PROGRESS("                 " << transform2[4] << "," << transform2[5] << "," << transform2[6] << "," << transform2[7] << ";");
-    PROGRESS("                 " << transform2[8] << "," << transform2[9] << "," << transform2[10] << "," << transform2[11] << ";");
-    PROGRESS("                 " << transform2[12] << "," << transform2[13] << "," << transform2[14] << "," << transform2[15] << ";");
+    PROGRESS("M_Transform: m(*t2)=[" << (*t2)[0] << "," << (*t2)[1] << "," << (*t2)[2] << "," << (*t2)[3] << ";");
+    PROGRESS("                 " << (*t2)[4] << "," << (*t2)[5] << "," << (*t2)[6] << "," << (*t2)[7] << ";");
+    PROGRESS("                 " << (*t2)[8] << "," << (*t2)[9] << "," << (*t2)[10] << "," << (*t2)[11] << ";");
+    PROGRESS("                 " << (*t2)[12] << "," << (*t2)[13] << "," << (*t2)[14] << "," << (*t2)[15] << ";");
 #endif
+
+    dest.m_transformDone = true;
 
     return true;
   }

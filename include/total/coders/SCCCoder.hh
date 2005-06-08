@@ -267,8 +267,9 @@ namespace Total {
     if (rotation < 0) {
 #ifdef SCCCODER_DEBUG
       PROGRESS("Failed to decode corrected code");
-      return -1;
 #endif
+      data.SetInvalid();
+      return -1;
     }
 
     data.reset();
