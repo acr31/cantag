@@ -41,10 +41,9 @@ protected:
 
 public:
   Ellipse();
-  // Ellipse(const std::vector<float>& points); 
-  // Ellipse(const std::vector<float>& points, bool prev_fit); 
   Ellipse(float a, float b, float c, float d, float e, float f);
   Ellipse(float x0, float y0,float width, float height, float angle);
+
   inline bool IsFitted() const { return m_fitted; }
   bool Compare(const Ellipse& o) const;
 
@@ -191,26 +190,8 @@ public:
   Ellipse(Socket& socket);
 
   bool Check(const std::vector<float>& points) const;
-
-  virtual bool Fit(const std::vector<float>& points, bool prev_fit) {
-    if (prev_fit) return true;
-    return (m_fitted=FitEllipse(points));
-  }
-
-protected:
-  virtual bool FitEllipse(const std::vector<float>& points); 
-
 };
 
-class SimpleEllipse : public Ellipse {
-public:
-  SimpleEllipse();
-  // SimpleEllipse(const std::vector<float>& points); 
-  //  SimpleEllipse(const std::vector<float>& points, bool prev_fit); 
-  //  SimpleEllipse(Socket& socket);
-protected:
-  virtual bool FitEllipse(const std::vector<float>& points);   
-};
 }
 #else
 namespace Total {
