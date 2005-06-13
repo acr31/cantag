@@ -20,8 +20,8 @@ endif
 if HAVE_GL_GL_H
 if HAVE_GL_GLU_H
 if HAVE_GL_OSMESA_H
-noinst_PROGRAMS+=GLOutput
-GLOutput_SOURCES=GLOutput.cc
+#noinst_PROGRAMS+=GLOutput
+#GLOutput_SOURCES=GLOutput.cc
 endif
 endif
 endif
