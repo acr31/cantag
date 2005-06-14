@@ -2,33 +2,9 @@
  * $Header$
  */
 
-#include <Total.hh>
-#include <total/Entity.hh>
-#include <total/ComposeEntity.hh>
-#include <total/EntityTree.hh>
-#include <total/ContourFollower.hh>
-#include <total/algorithms/FitEllipseLS.hh>
-#include <total/algorithms/FitEllipseSimple.hh>
-#include <total/algorithms/FitQuadTangleCorner.hh>
-#include <total/algorithms/FitQuadTangleConvexHull.hh>
-#include <total/algorithms/FitQuadTanglePolygon.hh>
-#include <total/algorithms/DistortionCorrection.hh>
-#include <total/algorithms/TransformEllipseLinear.hh>
-#include <total/algorithms/TransformEllipseFull.hh>
-#include <total/algorithms/TransformQuadTangleProjective.hh>
-#include <total/algorithms/TransformQuadTangleReduced.hh>
-#include <total/algorithms/TransformQuadTangleSpaceSearch.hh>
-#include <total/algorithms/SampleTagCircle.hh>
-#include <total/algorithms/SampleTagSquare.hh>
-#include <total/algorithms/ContourFollowerTree.hh>
-#include <total/algorithms/Decode.hh>
-#include <total/algorithms/ThresholdAdaptive.hh>
-#include <total/TagCircle.hh>
-#include <total/Apply.hh>
-
 #include <iostream>
 
-#include <total/Bind.hh>
+#include <Total.hh>
 
 using namespace Total;
 
@@ -46,24 +22,40 @@ int main(int argc,char* argv[]) {
     TagCircle<2,17> tag(0.8,1.0,0.2,0.6);
     //TagSquare<5> tag;
     int cnt=0;
+    time_t cur_time = time(NULL);
+    int count = 0;
     while(cnt<1) {
       Image* i = fs.Next();
       Apply(*i,o3.m_ImageAlgorithm);
       MonochromeImage m(i->GetWidth(),i->GetHeight());
-      Apply(*i,m,ThresholdAdaptive(8,10));
+      //      Apply(*i,m,ThresholdAdaptive(atoi(argv[1]),atoi(argv[2])));
+      Apply(*i,m,ThresholdGlobal(atoi(argv[1])));
       Apply(m,o3.m_ThresholdAlgorithm);
 
       Tree<ComposedEntity<TL4(ContourEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<34>)> > tree;
-      Apply(m,tree,ContourFollowerTree());
+      Apply(m,tree,ContourFollowerTree(tag));
+      // weed out contours that don't match i.e. non-concentric circles etc.
       Apply(tree,o3.m_ContourAlgorithm);
       Apply(tree,DistortionCorrection(camera));
-      Apply(tree,FitEllipseLS());
+      Apply(tree,FitEllipseLS()); // maximum fit error and error technique
+      // weed out shapes that don't match
       Apply(tree,o3.m_ShapeAlgorithm);
       Apply(tree,TransformEllipseFull());
+      // select transform
+      // snap transform to sector edge
       Apply(tree,Bind(SampleTagCircle<2,17>(tag,camera),m));
       Apply(tree,Decode<TripOriginalCoder<34,2,2> >());
+      // rotate transform to decoded angle
       Apply(tree,o3.m_TransformAlgorithm);
       o3.Flush();
+      ++count;
+      if (count == 100) {
+	time_t elapsed = time(NULL)-cur_time;
+	float fps = 100/elapsed;
+	std::cout << fps << " FPS" <<  std::endl;      
+	count = 0;
+	cur_time = time(NULL);
+      }
     }
   }
   catch (const char* exception) {
