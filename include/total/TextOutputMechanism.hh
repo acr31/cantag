@@ -71,7 +71,7 @@ namespace Total {
       static void Output(const Entity& root_element, std::ostream& os) {
 	ContourTreeAlgorithm c;
 	root_element.Apply(c);
-	os << "ContourFollower: Found " << c.GetAccumulator() << " contours" << std::endl;
+	os << "ContourTreeFollower: Found " << c.GetAccumulator() << " contours" << std::endl;
 	Helper<Entity,Tail>::Output(root_element,os);
       }
     };
