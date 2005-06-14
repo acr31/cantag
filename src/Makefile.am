@@ -1,5 +1,5 @@
 lib_LTLIBRARIES = libtotal.la
-libtotal_la_SOURCES = Ellipse.cc QuadTangle.cc Camera.cc gaussianelimination.cc Image.cc FileImageSource.cc polysolve.cc Socket.cc algorithms/FitEllipseSimple.cc algorithms/FitEllipseLS.cc algorithms/DistortionCorrection.cc algorithms/TransformEllipseLinear.cc algorithms/TransformEllipseFull.cc Transform.cc algorithms/FitQuadTangleCorner.cc algorithms/FitQuadTangleConvexHull.cc algorithms/FitQuadTanglePolygon.cc algorithms/TransformQuadTangleProjective.cc algorithms/TransformQuadTangleReduced.cc algorithms/ContourFollowerTree.cc MonochromeImage.cc algorithms/ThresholdGlobal.cc algorithms/ThresholdAdaptive.cc
+libtotal_la_SOURCES = Ellipse.cc QuadTangle.cc Camera.cc gaussianelimination.cc Image.cc FileImageSource.cc polysolve.cc Socket.cc algorithms/FitEllipseSimple.cc algorithms/FitEllipseLS.cc algorithms/DistortionCorrection.cc algorithms/TransformEllipseLinear.cc algorithms/TransformEllipseFull.cc Transform.cc algorithms/FitQuadTangleCorner.cc algorithms/FitQuadTangleConvexHull.cc algorithms/FitQuadTanglePolygon.cc algorithms/TransformQuadTangleProjective.cc algorithms/TransformQuadTangleReduced.cc algorithms/ContourFollowerTree.cc MonochromeImage.cc algorithms/ThresholdGlobal.cc algorithms/ThresholdAdaptive.cc ContourEntity.cc
 
 #disabled  ImageOutputMechanism.cc Template.cc
 #obsolete findtransform.cc 
