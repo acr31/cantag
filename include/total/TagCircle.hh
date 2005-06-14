@@ -5,10 +5,13 @@
 #ifndef TAG_CIRCLE_GUARD
 #define TAG_CIRCLE_GUARD
 
+#include <cmath>
+#include <total/ContourRestrictions.hh>
+
 namespace Total {
 
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT=5>
-  class TagCircle {
+  class TagCircle  : public ContourRestrictions {
   private:
     const float m_bullseye_inner_edge;
     const float m_bullseye_outer_edge;
@@ -23,6 +26,10 @@ namespace Total {
     float *m_sin_read_angles;
     float *m_cos_read_angles;
 
+    int m_minContourLength;
+    int m_minContourWidth;
+    int m_minContourHeight;    
+
   public:
     TagCircle(float bullseye_inner_edge, float bullseye_outer_edge, float data_inner_edge, float data_outer_edge);
     ~TagCircle();
@@ -32,8 +39,7 @@ namespace Total {
     
     inline float GetYSamplePoint(int read_angle, int ring) const {
       return m_sin_read_angles[read_angle] * m_data_ring_centre_radii[ring]/m_bullseye_outer_edge;
-    }
-
+    }   
   };
 
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>::~TagCircle() {
@@ -82,7 +88,7 @@ namespace Total {
     
     m_sector_angles = new float[SECTOR_COUNT+1];
     for(int i=0;i<SECTOR_COUNT+1;i++) {
-      m_sector_angles[i] = 2*PI/SECTOR_COUNT *i;
+      m_sector_angles[i] = 2*M_PI/SECTOR_COUNT *i;
     }
     
     // when we read the tag we read a total of five times and then
@@ -91,12 +97,13 @@ namespace Total {
     m_sin_read_angles = new float[SECTOR_COUNT*READ_COUNT];
     m_cos_read_angles = new float[SECTOR_COUNT*READ_COUNT];
     for(int i=0;i<SECTOR_COUNT*READ_COUNT;i++) {
-      m_read_angles[i] = 2*PI/SECTOR_COUNT/READ_COUNT * i;
+      m_read_angles[i] = 2*M_PI/SECTOR_COUNT/READ_COUNT * i;
       m_sin_read_angles[i] = sin(m_read_angles[i]);
       m_cos_read_angles[i] = cos(m_read_angles[i]);
     }
+    SetContourRestrictions(30,20,20);
   }
-
+  
   
 }
 #endif//TAG_CIRCLE_GUARD
