@@ -25,7 +25,7 @@ namespace Total {
   }
 
   bool FitQuadTangleCorner::operator()(const ContourEntity& contour, ShapeEntity<QuadTangle>& shape) const {
-    const std::vector<float>& points = contour.points;
+    const std::vector<float>& points = contour.GetPoints();
 
     if (points.size() > (2<<LOGMAXWINDOW) && points.size() > 50) {
       float xcorners[4];

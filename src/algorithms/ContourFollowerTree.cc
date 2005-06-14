@@ -10,7 +10,7 @@
 
 namespace Total {
 
-  ContourFollowerTree::ContourFollowerTree() : m_working_store(NULL), m_image_width(-1),m_image_height(-1) {
+  ContourFollowerTree::ContourFollowerTree(const ContourRestrictions& constraint) : m_working_store(NULL), m_image_width(-1),m_image_height(-1),m_constraints(constraint) {
     m_offset_x[0] = -1;
     m_offset_x[1] = -1;
     m_offset_x[2] = 0;
@@ -48,9 +48,9 @@ namespace Total {
     std::map<int,TreeNode<ContourEntity>*> node_hash;
     
     TreeNode<ContourEntity>* root_contour = &result;
-    root_contour->GetNode()->nbd = 1;
-    root_contour->GetNode()->bordertype = ContourEntity::HOLE_BORDER;
-    root_contour->GetNode()->parent_id = 1;
+    root_contour->GetNode()->SetNBD(1);
+    root_contour->GetNode()->SetBorderType(ContourEntity::HOLE_BORDER);
+    root_contour->GetNode()->SetParentNBD(1);
     node_hash[1] = root_contour;
     int NBD = 2;
     
@@ -104,7 +104,7 @@ namespace Total {
 	    // OUTER        HOLE       LNBD
 	    // HOLE         OUTER      LNBD
 	    // HOLE         HOLE       Parent of LNBD
-	    int parent_id = border_type == node_hash[LNBD]->GetNode()->bordertype ?  node_hash[LNBD]->GetNode()->parent_id : LNBD;
+	    int parent_id = border_type == node_hash[LNBD]->GetNode()->GetBorderType() ?  node_hash[LNBD]->GetNode()->GetParentNBD() : LNBD;
 	    TreeNode<ContourEntity>* parent = node_hash[parent_id];
 	    TreeNode<ContourEntity>* child = parent->AddChild();	    
 	    ContourEntity* node = child->GetNode();
@@ -112,11 +112,11 @@ namespace Total {
 	    PROGRESS("Following contour from "<< raster_x << "," << raster_y);
 #endif
 	    FollowContour(image, raster_x, raster_y, border_type == ContourEntity::OUTER_BORDER ? 0:4, NBD,node);
-	    node->m_contourFitted = true;
-	    node->parent_id = parent_id;
-	    node->nbd = NBD;
-	    node->bordertype = border_type;
-	    node->SetValid(true);
+	    //	    node->SetContourFitted(node->GetLength() > 100);
+	    node->SetParentNBD(parent_id);
+	    node->SetNBD(NBD);
+	    node->SetBorderType(border_type);
+	    node->SetValid(m_constraints.CheckDimensions(node->GetLength(),node->GetWidth(),node->GetHeight()));
 	    node_hash[NBD] = child;
 	    ++NBD;
 	  }
@@ -134,7 +134,8 @@ namespace Total {
 					 const int nbd,  // the NBD to mark this contour with
 					 ContourEntity* result // the entity to store the result in
 					 ) const {
-    
+
+    result->SetStart(start_x,start_y);
     // start_x,start_y is the current focus of the search region
     // sample_x,sample_y is the current read point
     int sample_x;
@@ -164,8 +165,6 @@ namespace Total {
     // check if we have a 1-pixel contour
     if (position == start_position) {
       SetVisited(start_x,start_y,nbd,EXIT_PIXEL);
-      result->points.push_back(start_x);
-      result->points.push_back(start_y);
 #ifdef CONTOUR_TREE_DEBUG
       PROGRESS("Found 1 pixel contour starting from "<< start_x << "," << start_y);
 #endif
@@ -173,20 +172,12 @@ namespace Total {
     }
     else {
       position = (position + 1) & 0x7;
-
+      int move_position = -1;
       // contour_n is the last point in the contour
       const int contour_n_x = sample_x;
       const int contour_n_y = sample_y;
 
       bool cell4_is_0 = false; // will be set to true when we search a region if we pass cell4 and cell4 is a 0-element
-    
-      //      statistics.length = 0; // the contour length
-      //      statistics.min_x = start_x; // bounding box
-      //      statistics.max_x = start_x; // bounding box
-      //      statistics.min_y = start_y; // bounding box
-      //      statistics.max_y = start_y; // bounding box
-      //      statistics.convex = true; // true if this contour is convex
-
       while(1) {
 	sample_x = start_x + m_offset_x[position];
 	sample_y = start_y + m_offset_y[position];
@@ -216,36 +207,25 @@ namespace Total {
 #endif
 	  }
 	  
-	  // update the length
-	  //	  statistics.length += (position & 0x1 ? 45 : 32);
-	  // update the bounding box
-	  //	  if (start_x < statistics.min_x) { statistics.min_x = start_x; }
-	  //	  else if (start_x > statistics.max_x) { statistics.max_x = start_x; }
-	  //	  if (start_y < statistics.min_y) { statistics.min_y = start_y; }
-	  //	  else if (start_y > statistics.max_y) { statistics.max_y = start_y; }
-
-
 	  // store this point in the pixel chain and update the start position
-	  result->points.push_back(start_x);
-	  result->points.push_back(start_y);
+	  result->AddPoint(move_position);
 
 	  // check the stopping condition
-	  if ((result->points.size() > 4) && // i.e. we have seen more than two pixels
+	  if ((result->GetNumPoints() > 4) && // i.e. we have seen more than two pixels
 	      (start_x == contour_n_x) &&
 	      (start_y == contour_n_y) &&	      
 	      (sample_x == contour_0_x) &&
 	      (sample_y == contour_0_y)) {
-	    //	    statistics.length >>= 5;
 #ifdef CONTOUR_TREE_DEBUG
-	    PROGRESS("Found " << (result->points.size()>>1) << " pixel contour starting from "<< result->points[0] << "," << result->points[1]);
+	    PROGRESS("Found " << (result->GetNumPoints()>>1) << " pixel contour");
 #endif
 
-	    return result->points.size()>>1;
+	    return result->GetNumPoints()>>1;
 	  }
 
 	  start_x = sample_x;
 	  start_y = sample_y;
-
+	  move_position = position;
 
 	  // reset the search value for cell 4
 	  cell4_is_0=false;
@@ -287,14 +267,12 @@ namespace Total {
 	  // advance the position
 	  position = (position+1) & 0x7;
 	}
-
       }
 
-      //      statistics.length >>= 5;
 #ifdef CONTOUR_TREE_DEBUG
-      PROGRESS("Contour length = " << (result->points.size()-3/2));
+      PROGRESS("Contour length = " << (result->GetNumPoints()-3/2));
 #endif
-      return (result->points.size()-3)/2;
+      return (result->GetNumPoints()-3)/2;
     }
   }
 }

@@ -21,7 +21,7 @@
 namespace Total {
 
   bool FitQuadTanglePolygon::operator()(const ContourEntity& contour, ShapeEntity<QuadTangle>& shape) const {
-    const std::vector<float>& points = contour.points;
+    const std::vector<float>& points = contour.GetPoints();
 
     if (points.size() > 4) {
       std::list<std::pair<float,float> > fulllist;

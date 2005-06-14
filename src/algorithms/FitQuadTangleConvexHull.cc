@@ -10,7 +10,7 @@ namespace Total {
 
   bool FitQuadTangleConvexHull::operator()(const ContourEntity& contour, ShapeEntity<QuadTangle>& shape) const {
     
-    const std::vector<float>& points = contour.points;
+    const std::vector<float>& points = contour.GetPoints();
 
     // Take a convex hull of the polyline ( O(n) )
     int h[points.size()/2];

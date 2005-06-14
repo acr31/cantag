@@ -7,7 +7,7 @@
 namespace Total {
 
   bool FitEllipseSimple::operator()(const ContourEntity& contour, ShapeEntity<Ellipse>& shape) const {
-    const std::vector<float>& points = contour.points;
+    const std::vector<float>& points = contour.GetPoints();
     if (points.size()/2 < 6) return false;
 
     float centrex = 0;
