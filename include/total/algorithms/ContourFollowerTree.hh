@@ -8,8 +8,9 @@
 #include <total/Config.hh>
 #include <total/MonochromeImage.hh>
 #include <total/EntityTree.hh>
-#include <total/Entity.hh>
+#include <total/ContourEntity.hh>
 #include <total/Function.hh>
+#include <total/ContourRestrictions.hh>
 
 namespace Total {
   class ContourFollowerTree : public Function1<MonochromeImage,TreeNode<ContourEntity> >{
@@ -25,7 +26,6 @@ namespace Total {
      * visited before if the second bit is set.  When we raster across
      * the image we clear the values in the bit we are not using ready
      * for the next pass.
-     
      */
     mutable unsigned int* m_working_store;
     mutable int m_image_width;
@@ -37,8 +37,10 @@ namespace Total {
 
     enum PixelType { EXIT_PIXEL=0, ENTRY_PIXEL=1};
 
+    const ContourRestrictions& m_constraints;
+
   public:
-    ContourFollowerTree();
+    ContourFollowerTree(const ContourRestrictions& constraints);
     ~ContourFollowerTree();
     bool operator()(const MonochromeImage& image, TreeNode<ContourEntity>& result) const;
     

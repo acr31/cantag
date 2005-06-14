@@ -7,6 +7,7 @@
 
 #include <total/QuadTangle.hh>
 #include <total/Entity.hh>
+#include <total/ContourEntity.hh>
 #include <total/Function.hh>
 
 namespace Total {
