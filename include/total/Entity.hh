@@ -23,26 +23,6 @@ namespace Total {
   };
 
 
-  class ContourEntity : public Entity {
-  public:
-    enum bordertype_t { UNKNOWN = 2, OUTER_BORDER = 1, HOLE_BORDER = 0};
-
-    int nbd;
-    bordertype_t bordertype;
-    int parent_id;
-    std::vector<float> points;
-    bool m_contourFitted;
-  public:
-    ContourEntity() : m_contourFitted(false) {};
-    ~ContourEntity() {};
-
-  private:
-    ContourEntity(const ContourEntity& copyme) : 
-      nbd(copyme.nbd),
-      bordertype(copyme.bordertype),
-      parent_id(copyme.parent_id),
-      points(copyme.points) {};
-  };
 
   template<class Shape>
   class ShapeEntity : public Entity {
