@@ -25,13 +25,10 @@ extern "C" {
 #include <sys/shm.h>
 }
 
-#include <total/LocatedObject.hh>
-#include <total/ContourTree.hh>
-#include <total/ShapeTree.hh>
-#include <total/WorldState.hh>
 #include <total/Entity.hh>
 #include <total/Function.hh>
 #include <total/MonochromeImage.hh>
+#include <total/Camera.hh>
 
 namespace Total {
 
@@ -341,8 +338,8 @@ namespace Total {
   template<class Shape, int PAYLOAD_SIZE> bool XOutputMechanism<Shape,PAYLOAD_SIZE>::ContourAlgorithm::operator()(ContourEntity& contour) {
     XImage* ximage = m_output.m_image[m_output.m_displayed_image ^ 0x1]->m_image;
 
-    for(std::vector<float>::const_iterator i = contour.points.begin();
-	i != contour.points.end();
+    for(std::vector<float>::const_iterator i = contour.GetPoints().begin();
+	i != contour.GetPoints().end();
 	++i) {
       const float x = *i;
       ++i;
