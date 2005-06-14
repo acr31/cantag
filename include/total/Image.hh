@@ -12,7 +12,6 @@
 
 #define COLOUR_BLACK ((unsigned char)0)
 #define COLOUR_WHITE ((unsigned char)255)
-#define PI M_PI
 
 namespace Total {
 
