@@ -7,8 +7,6 @@
 
 #include <total/Config.hh>
 #include <total/LocatedObject.hh>
-#include <total/ContourTree.hh>
-#include <total/ShapeTree.hh>
 #include <total/WorldState.hh>
 #include <total/Camera.hh>
 #include <total/Entity.hh>
