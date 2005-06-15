@@ -7,11 +7,12 @@
 
 #include <cmath>
 #include <total/ContourRestrictions.hh>
+#include <total/ConvexHullRestrictions.hh>
 
 namespace Total {
 
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT=5>
-  class TagCircle  : public ContourRestrictions {
+  class TagCircle  : public ContourRestrictions, public ConvexHullRestrictions {
   private:
     const float m_bullseye_inner_edge;
     const float m_bullseye_outer_edge;
@@ -52,6 +53,8 @@ namespace Total {
   }
   
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>::TagCircle(float bullseye_inner_edge, float bullseye_outer_edge, float data_inner_edge, float data_outer_edge) :
+    ContourRestrictions(30,20,20),
+    ConvexHullRestrictions(5),
     m_bullseye_inner_edge(bullseye_inner_edge),
     m_bullseye_outer_edge(bullseye_outer_edge),
     m_data_inner_edge(data_inner_edge),
@@ -101,7 +104,6 @@ namespace Total {
       m_sin_read_angles[i] = sin(m_read_angles[i]);
       m_cos_read_angles[i] = cos(m_read_angles[i]);
     }
-    SetContourRestrictions(30,20,20);
   }
   
   

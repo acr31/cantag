@@ -12,15 +12,12 @@ private:
   int m_minContourHeight;    
 
 public:
-  inline void SetContourRestrictions(int minlength, int minwidth, int minheight) { 
-    m_minContourLength = minlength; 
-    m_minContourWidth = minwidth;
-    m_minContourHeight = minheight;
-  }
+
+  ContourRestrictions(int minlength, int minwidth, int minheight) : m_minContourLength(minlength),m_minContourWidth(minwidth),m_minContourHeight(minheight) {}
   
-  inline int GetMinContourLength() { return m_minContourLength; }
-  inline int GetMinContourWidth() { return m_minContourWidth; }
-  inline int GetMinContourHeight() { return m_minContourHeight; }
+  inline int GetMinContourLength() const { return m_minContourLength; }
+  inline int GetMinContourWidth() const { return m_minContourWidth; }
+  inline int GetMinContourHeight() const { return m_minContourHeight; }
 
   inline bool CheckDimensions(int length, int width, int height) const {
     return length > m_minContourLength && width > m_minContourWidth && height > m_minContourHeight;
