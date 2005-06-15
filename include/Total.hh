@@ -13,6 +13,7 @@
 // entities
 #include <total/entities/Entity.hh>
 #include <total/entities/ContourEntity.hh>
+#include <total/entities/ConvexHullEntity.hh>
 
 #include <total/ComposeEntity.hh>
 #include <total/EntityTree.hh>
@@ -44,6 +45,7 @@
 #include <total/algorithms/Decode.hh>
 #include <total/algorithms/ThresholdAdaptive.hh>
 #include <total/algorithms/ThresholdGlobal.hh>
+#include <total/algorithms/ConvexHull.hh>
 
 ///////////////////////
 // coders
