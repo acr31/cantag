@@ -7,7 +7,7 @@
 
 #include <total/Config.hh>
 #include <total/LocatedObject.hh>
-#include <total/Entity.hh>
+#include <total/entities/Entity.hh>
 #include <total/ComposeEntity.hh>
 
 #include <ostream>

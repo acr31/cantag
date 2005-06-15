@@ -6,7 +6,7 @@
 #define CONTOUR_ENTITY_GUARD
 
 #include <total/Config.hh>
-#include <total/Entity.hh>
+#include <total/entities/Entity.hh>
 
 namespace Total {
 

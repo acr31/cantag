@@ -9,7 +9,7 @@
 #include <iostream>
 
 #include <total/Config.hh>
-#include <total/Entity.hh>
+#include <total/entities/Entity.hh>
 #include <total/ComposeEntity.hh>
 
 namespace Total {

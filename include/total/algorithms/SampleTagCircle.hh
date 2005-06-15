@@ -5,7 +5,7 @@
 #ifndef SAMPLE_CIRCLE_TAG
 #define SAMPLE_CIRCLE_TAG
 
-#include <total/Entity.hh>
+#include <total/entities/Entity.hh>
 #include <total/TagCircle.hh>
 #include <total/MonochromeImage.hh>
 #include <total/Function.hh>

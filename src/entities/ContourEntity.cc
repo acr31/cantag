@@ -2,7 +2,7 @@
  * $Header$
  */
 
-#include <total/ContourEntity.hh>
+#include <total/entities/ContourEntity.hh>
 
 namespace Total {
 

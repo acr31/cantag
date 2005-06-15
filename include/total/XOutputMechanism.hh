@@ -25,7 +25,7 @@ extern "C" {
 #include <sys/shm.h>
 }
 
-#include <total/Entity.hh>
+#include <total/entities/Entity.hh>
 #include <total/Function.hh>
 #include <total/MonochromeImage.hh>
 #include <total/Camera.hh>

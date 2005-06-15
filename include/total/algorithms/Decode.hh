@@ -7,7 +7,7 @@
 
 #include <list>
 
-#include <total/Entity.hh>
+#include <total/entities/Entity.hh>
 #include <total/CyclicBitSet.hh>
 #include <total/Function.hh>
 

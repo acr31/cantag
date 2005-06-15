@@ -5,7 +5,7 @@
 #ifndef SAMPLE_SQUARE_TAG
 #define SAMPLE_SQUARE_TAG
 
-#include <total/Entity.hh>
+#include <total/entities/Entity.hh>
 #include <total/TagSquare.hh>
 #include <total/MonochromeImage.hh>
 #include <total/Function.hh>

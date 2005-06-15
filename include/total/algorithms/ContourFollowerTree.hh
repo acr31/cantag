@@ -8,7 +8,7 @@
 #include <total/Config.hh>
 #include <total/MonochromeImage.hh>
 #include <total/EntityTree.hh>
-#include <total/ContourEntity.hh>
+#include <total/entities/ContourEntity.hh>
 #include <total/Function.hh>
 #include <total/ContourRestrictions.hh>
 

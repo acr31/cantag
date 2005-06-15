@@ -6,7 +6,7 @@
 #define COMPOSE_ENTITY_GUARD
 
 #include <iostream>
-#include <total/Entity.hh>
+#include <total/entities/Entity.hh>
 #include <total/TemplateUtils.hh>
 #include <total/Function.hh>
 

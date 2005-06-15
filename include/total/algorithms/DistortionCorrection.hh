@@ -5,7 +5,7 @@
 #ifndef DISTORTION_CORRECTION_GUARD
 #define DISTORTION_CORRECTION_GUARD
 
-#include <total/ContourEntity.hh>
+#include <total/entities/ContourEntity.hh>
 #include <total/Camera.hh>
 #include <total/Function.hh>
 

@@ -5,7 +5,7 @@
 #ifndef FULL_ELLIPSE_TRANSFORM_GUARD
 #define FULL_ELLIPSE_TRANSFORM_GUARD
 
-#include <total/Entity.hh>
+#include <total/entities/Entity.hh>
 #include <total/Ellipse.hh>
 #include <total/Function.hh>
 

@@ -7,7 +7,7 @@
 #include <total/Config.hh>
 #include <total/Socket.hh>
 #include <total/SpeedMath.hh>
-#include <total/Entity.hh>
+#include <total/entities/Entity.hh>
 #include <cmath>
 
 #define COLOUR_BLACK ((unsigned char)0)

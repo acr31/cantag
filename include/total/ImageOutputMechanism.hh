@@ -9,7 +9,7 @@
 #include <total/LocatedObject.hh>
 #include <total/WorldState.hh>
 #include <total/Camera.hh>
-#include <total/Entity.hh>
+#include <total/entities/Entity.hh>
 #include <total/ComposeEntity.hh>
 #include <total/CyclicBitSet.hh>
 #include <list>

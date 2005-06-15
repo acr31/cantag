@@ -9,7 +9,11 @@
 
 #include <total/Config.hh>
 
-#include <total/Entity.hh>
+///////////////////////
+// entities
+#include <total/entities/Entity.hh>
+#include <total/entities/ContourEntity.hh>
+
 #include <total/ComposeEntity.hh>
 #include <total/EntityTree.hh>
 

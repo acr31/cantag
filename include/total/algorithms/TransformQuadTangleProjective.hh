@@ -6,7 +6,7 @@
 #define TRANSFORMQUADTANGLEPROJ_GUARD
 
 #include <total/QuadTangle.hh>
-#include <total/Entity.hh>
+#include <total/entities/Entity.hh>
 #include <total/Function.hh>
 
 namespace Total {

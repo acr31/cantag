@@ -6,7 +6,7 @@
 #define MONOCHROME_IMAGE_GUARD
 
 #include <cassert>
-#include <total/Entity.hh>
+#include <total/entities/Entity.hh>
 namespace Total {
   /**
    * \todo pack the data into ints

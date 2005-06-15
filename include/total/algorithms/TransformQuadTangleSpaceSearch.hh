@@ -6,7 +6,7 @@
 #define TRANSFORMQUADTANGLESPACE_GUARD
 
 #include <total/QuadTangle.hh>
-#include <total/Entity.hh>
+#include <total/entities/Entity.hh>
 #include <total/Function.hh>
 
 #if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
