@@ -32,8 +32,9 @@ int main(int argc,char* argv[]) {
       Apply(*i,m,ThresholdGlobal(atoi(argv[1])));
       Apply(m,o3.m_ThresholdAlgorithm);
 
-      Tree<ComposedEntity<TL4(ContourEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<34>)> > tree;
+      Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<34>)> > tree;
       Apply(m,tree,ContourFollowerTree(tag));
+      Apply(tree,ConvexHull(tag));
       // weed out contours that don't match i.e. non-concentric circles etc.
       Apply(tree,o3.m_ContourAlgorithm);
       Apply(tree,DistortionCorrection(camera));
