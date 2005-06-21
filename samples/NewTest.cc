@@ -35,7 +35,6 @@ int main(int argc,char* argv[]) {
       Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<34>)> > tree;
       Apply(m,tree,ContourFollowerTree(tag));
       Apply(tree,ConvexHull(tag));
-      // weed out contours that don't match i.e. non-concentric circles etc.
       Apply(tree,o3.m_ContourAlgorithm);
       Apply(tree,DistortionCorrection(camera));
       Apply(tree,FitEllipseLS()); // maximum fit error and error technique

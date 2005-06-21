@@ -12,28 +12,6 @@
 
 namespace Total {
 
-//   /**
-//    * The list of all possible entities for a particular shape and payload size
-//    */
-//   template<class Shape,int PAYLOADSIZE> 
-//   struct PipelineList {
-//     typedef TypeList<ContourEntity,
-// 	    TypeList<ShapeEntity<Shape>,
-//             TypeList<TransformEntity, 
-//             TypeList<DecodeEntity<PAYLOADSIZE>,
-//             TypeList<LocatedEntity,
-//             TypeListEOL> > > > > Entities;
-//   };
-
-//   /**
-//    * Select a range from the entity pipeline
-//    */
-//   template<class Shape, int PAYLOADSIZE, class Start, class Stop>
-//   struct Select {
-//     typedef typename SelectPipeline<typename PipelineList<Shape,PAYLOADSIZE>::Entities,Start,Stop>::Selected Selected;
-//   };
-
-
   template<class List>
   class TEntity : public List::Head, public TEntity<typename List::Tail> {
   private:
@@ -60,13 +38,13 @@ namespace Total {
      */
     int m_progress;
     
-    /*
+
     template<class WorkingList, class Dummy = WorkingList>
     class Check {
     public:
-      inline static bool CheckValid(int index, ComposedEntity& me) {
-	std::cout << "Checkvalid " << index << std::endl;
-	if (index == 1) { return (static_cast<typename WorkingList::Head&>(me)).IsValid(); }
+      inline static bool CheckValid(int index, const ComposedEntity& me) {
+	if (index == 1) {
+	  return (static_cast<const typename WorkingList::Head&>(me)).IsValid(); }
 	else {
 	  return Check<typename WorkingList::Tail>::CheckValid(index-1,me);
 	}
@@ -76,17 +54,17 @@ namespace Total {
     template<class Dummy>
     class Check<TypeListEOL,Dummy> {
     public:
-      inline static bool CheckValid(int index, ComposedEntity& me) { return false; }
+      inline static bool CheckValid(int index, const ComposedEntity& me) { return false; }
     };
-    */
+
   public:
     typedef List Typelist;
 
     ComposedEntity() : TEntity<List>(), m_progress(-1) {}
 
     inline bool IsPipelineValid() const {
-      return true;
-      //      return Check<List>::CheckValid(m_progress,*this);
+      if (m_progress == -1) return true;
+      return Check<List>::CheckValid(m_progress,*this);
     }
 
     template<class L, class Algorithm> friend bool Apply(ComposedEntity<L>& entity,Algorithm& algorithm);

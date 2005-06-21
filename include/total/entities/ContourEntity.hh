@@ -89,7 +89,7 @@ namespace Total {
     int m_numPoints;
     
   public:
-    ContourEntity() : m_contourFitted(false) {};
+    ContourEntity() : m_points(), m_contourFitted(false) {};
     ~ContourEntity() {};
 
     inline int GetNBD() { return m_nbd; }

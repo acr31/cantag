@@ -4,6 +4,7 @@
 
 #include <cstring>
 
+#include <cmath>
 #include <total/algorithms/ConvexHull.hh>
 
 namespace Total {
@@ -24,7 +25,7 @@ namespace Total {
     const std::vector<float>& V = source.GetPoints();
     const int n = V.size()/2;
     std::vector<int>& H = dest.GetIndices();
-
+    H.resize(V.size()/2+2);
     // initialize a deque D[] from bottom to top so that the
     // 1st three vertices of V[] are a counterclockwise triangle
     int D[2*n+1];
@@ -49,15 +50,13 @@ namespace Total {
       
       // incrementally add an exterior vertex to the deque hull
       // get the rightmost tangent at the deque bot
-      while (isLeft(V,D[bot], D[bot+1], i) <= 0)
-	++bot;                // remove bot of deque
+      while (isLeft(V,D[bot], D[bot+1], i) <= 0) ++bot; // remove bot of deque
       D[--bot] = i;          // insert V[i] at bot of deque
       
       // get the leftmost tangent at the deque top
-      while (isLeft(V,D[top-1],D[top], i) <= 0)
-	--top;                // pop top of deque
+      while (isLeft(V,D[top-1],D[top], i) <= 0) --top; // pop top of deque
       D[++top] = i;          // push V[i] onto top of deque
-      if (top-bot < 2) return -1;
+      if (top-bot < 2) return false;
     }
     
     // transcribe deque D[] to the output hull array H[]
@@ -65,6 +64,24 @@ namespace Total {
     for (h=0; h <= (top-bot); h++) {
       H[h] = D[bot + h];
     } 
+
+    // now work out if any of the points not on the convex hull are
+    // too far from the hull itself we do this by taking each pair of
+    // indices from the index list and measuring the shortest distance
+    // of each point between the indices to the line
+    int index = -1;
+    for(std::vector<int>::const_iterator i = H.begin();i!=H.end();++i) {
+      if (index != -1) {
+	for(int count=index+1;count<*i;++count) {
+	  float dist = (V[2*index]-V[2*count])*(V[2*index]-V[2*count]) +
+	    (V[2*index+1]-V[2*count+1])*(V[2*index+1]-V[2*count+1]);
+	  if (dist > m_restriction.GetMaxDeviation()) {
+	    return false;
+	  }
+	}
+      }
+      index = *i;
+    }
 
     return true;
     

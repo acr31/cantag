@@ -203,7 +203,9 @@ namespace Total {
   template<class List, class Algorithm> bool Apply(ComposedEntity<List>& entity, Algorithm& algorithm) {    
     if (entity.IsPipelineValid()) {
       typename Internal::ApplyHelperOuter<ComposedEntity<List> >::template ApplyHelper<Algorithm,typename Algorithm::FunctionType> a;
-      if (Position<typename Algorithm::ResultType,List>::value > entity.m_progress) entity.m_progress = Position<typename Algorithm::ResultType,List>::value;
+      if (Position<typename Algorithm::ResultType,List>::value > entity.m_progress) {
+	entity.m_progress = Position<typename Algorithm::ResultType,List>::value;
+      }
       if (a(algorithm,entity,entity)) return true;
     }
     return false;
