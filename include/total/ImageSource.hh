@@ -13,11 +13,14 @@ namespace Total {
    */
   class ImageSource {
   public:
-    /**
-     * Get the next frame.  This method may or may not invalidate the
-     * current pointer to the buffer.
-     */
-    virtual Image* Next() = 0;
+      /**
+       * Get the next frame.  This method may or may not invalidate the
+       * current pointer to the buffer.
+       */
+      virtual Image* Next() = 0;
+
+      virtual int GetWidth() const = 0;
+      virtual int GetHeight() const = 0;
   };
 
 }

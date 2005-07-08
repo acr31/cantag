@@ -9,10 +9,10 @@
 using namespace Total;
 
 int main(int argc,char* argv[]) {
-  try {
-    //    FileImageSource fs(argv[1]);
+    try {
+      FileImageSource fs(argv[1]);
     //    V4LImageSource fs("/dev/video0",1);
-    IEEE1394ImageSource fs("/dev/video1394",0);
+//    IEEE1394ImageSource fs("/dev/video1394",0);
     Camera camera;
     // set the intrinsic parameters of the camera
     camera.SetIntrinsic(1284.33,1064.55,450.534, 321.569,0 );
@@ -25,7 +25,7 @@ int main(int argc,char* argv[]) {
     time_t cur_time = time(NULL);
     int count = 0;
     while(cnt<1) {
-      Image* i = fs.Next();
+	const Image* i = fs.Next();
       Apply(*i,o3.m_ImageAlgorithm);
       MonochromeImage m(i->GetWidth(),i->GetHeight());
       //      Apply(*i,m,ThresholdAdaptive(atoi(argv[1]),atoi(argv[2])));

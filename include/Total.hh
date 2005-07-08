@@ -12,11 +12,17 @@
 ///////////////////////
 // entities
 #include <total/entities/Entity.hh>
+#include <total/EntityTree.hh>
+
 #include <total/entities/ContourEntity.hh>
 #include <total/entities/ConvexHullEntity.hh>
 
+///////////////////////
+// composed entities
+#if defined(HAVECXX_COVARIANT_RETURNS)
 #include <total/ComposeEntity.hh>
-#include <total/EntityTree.hh>
+#include <total/ComposeEntityTree.hh>
+#endif
 
 #include <total/Apply.hh>
 #include <total/Bind.hh>
@@ -38,7 +44,9 @@
 #include <total/algorithms/TransformEllipseFull.hh>
 #include <total/algorithms/TransformQuadTangleProjective.hh>
 #include <total/algorithms/TransformQuadTangleReduced.hh>
+#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
 #include <total/algorithms/TransformQuadTangleSpaceSearch.hh>
+#endif
 #include <total/algorithms/SampleTagCircle.hh>
 #include <total/algorithms/SampleTagSquare.hh>
 #include <total/algorithms/ContourFollowerTree.hh>
@@ -64,7 +72,7 @@
 #ifdef HAVE_LINUX_VIDEODEV_H
 # include <total/V4LImageSource.hh>
 #endif
-#if defined(HAVE_GL_GL_H) && defined(HAVE_GL_GLU_H) && defined(HAVE_GL_OSMESA_H) && defined(HAVELIB_GL) && defined(HAVELIB_OSMESA) && defined(HAVELIB_GLU)
+#if defined(HAVE_GL_GL_H) && defined(HAVE_GL_GLU_H) && defined(HAVE_GL_OSMESA_H) && defined(HAVELIB_GL) && defined(HAVELIB_OSMESA) && defined(HAVELIB_GLU) && false
 # include <total/GLImageSource.hh>
 #endif
 #if defined(HAVELIB_DC1394) && defined(HAVE_DC1394_CONTROL_H)

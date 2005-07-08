@@ -19,7 +19,7 @@ namespace Total {
     template<class Tree, class Algorithm> bool _Apply_Tree(Tree& tree, Algorithm& algorithm) {
       bool result = Apply(*(tree.GetNode()),algorithm);
       for(typename std::list<Tree*>::iterator i = tree.GetChildren().begin(); i != tree.GetChildren().end(); ++i) {
-	result |= Apply(*(*i),algorithm);
+	result |= _Apply_Tree<Tree,Algorithm>(*(*i),algorithm);
       }    
       return result;
     };

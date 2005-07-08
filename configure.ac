@@ -44,6 +44,32 @@ AC_DEFUN([TOTAL_CHECK_LIB],
                        [$4=no],[$5])
           AM_CONDITIONAL([$3], [test X@S|@$4 = Xyes])])
 
+dnl check for covariant returns
+
+AC_COMPILE_IFELSE(
+AC_LANG_SOURCE([[
+struct A {
+    virtual A* Get() = 0;
+};
+
+struct B {
+    virtual B* Get() = 0;
+};
+
+struct C : public A, public B {
+    virtual C* Get() = 0;
+};
+]]),
+[
+AC_DEFINE(HAVECXX_COVARIANT_RETURNS,[],[Define this to 1 if your compiler properly supports covariant return types]),
+havecxx_covariant_returns="yes"],
+[havecxx_covariant_returns="no"])
+AM_CONDITIONAL(HAVECXX_COVARIANT_RETURNS,test "havecxx_covariant_returns"="yes")
+if test "$havecxx_covariant_returns" = "no"; then
+   echo "!!! Your compiler does not support covariant return types well enough for some of the features contained within Total - if you wish to use these please upgrade to gcc 3.3.5 or newer"
+fi
+
+
 dnl Checks for header files.
 
 TOTAL_CHECK_HEADER(Magick++.h,HAVE_MAGICKXX,have_magickxx_h)
@@ -125,12 +151,17 @@ include/total/coders/Makefile
 include/total/entities/Makefile
 ])
 
+if test "$havecxx_covariant_returns" = "yes"; then
+   echo "+ Enabled ComposedEntity classes"
+else
+   echo "! Disabled ComposedEntity classes"
+fi
+
 if test "$havelib_dc1394$have_dc1394_control_h" = "yesyes"; then
    echo "+ Enabled use of IEEE1394 (Firewire) Cameras"
 else
    echo "! Disabled use of IEEE1394 (Firewire) Cameras"
 fi
-
 
 if test "$have_gl_gl_h$havelib_gl$havelib_glu$havelib_glut" = "yesyesyesyes"; then
    echo "+ Enabled use of OpenGL"

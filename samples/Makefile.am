@@ -1,9 +1,9 @@
-noinst_PROGRAMS= NewTest 
+noinst_PROGRAMS= NewTest2
 #TextOnly DrawTag
 #GnuplotOutput
 #TextOnly_SOURCES=TextOnly.cc 
 #DrawTag_SOURCES=DrawTag.cc
-NewTest_SOURCES=NewTest.cc
+NewTest2_SOURCES=NewTest2.cc
 #GnuplotOutput_SOURCES=GnuplotOutput.cc
 
 if HAVE_LINUX_VIDEODEV_H

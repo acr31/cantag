@@ -407,7 +407,7 @@ namespace Total {
 
   template<class Shape, int PAYLOAD_SIZE> void XOutputMechanism<Shape,PAYLOAD_SIZE>::Flush() {
     m_displayed_image ^= 0x1;
-    //    XShmPutImage(m_display,m_window,m_gc,m_image[m_displayed_image]->m_image,0,0,0,0,m_width,m_height,false);	
+    XShmPutImage(m_display,m_window,m_gc,m_image[m_displayed_image]->m_image,0,0,0,0,m_width,m_height,false);	
     XFlush(m_display);
     XImage* ximage = m_image[m_displayed_image ^ 0x1]->m_image;
     memset(ximage->data,0xFF,ximage->bytes_per_line*ximage->height);

@@ -24,7 +24,9 @@ namespace Total {
      */ 
     FileImageSource(char* filename);
     virtual ~FileImageSource();
-    virtual Image* Next();
+    Image* Next();
+    int GetWidth() const;
+    int GetHeight() const;
   };
 }
 #endif//FILE_IMAGE_SOURCE

@@ -167,7 +167,7 @@ namespace Total {
     if (m_slots) delete[] m_slots;
   }
 
-  Image* V4LImageSource::Next() {  
+ Image* V4LImageSource::Next() {  
     // start the device collecting the one we just used
     int rs;
     int retry = 0;
