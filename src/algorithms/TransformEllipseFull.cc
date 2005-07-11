@@ -245,8 +245,8 @@ namespace Total {
       }
     }
 
-    Transform* t1 = new Transform();
-    Transform* t2 = new Transform();
+    Transform* t1 = new Transform(1.f);
+    Transform* t2 = new Transform(1.f);
  
     dest.m_transforms.push_back(t1);
     dest.m_transforms.push_back(t2);

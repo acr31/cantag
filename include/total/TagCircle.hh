@@ -54,7 +54,7 @@ namespace Total {
   
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>::TagCircle(float bullseye_inner_edge, float bullseye_outer_edge, float data_inner_edge, float data_outer_edge) :
     ContourRestrictions(30,10,10),
-    ConvexHullRestrictions(100000),
+    ConvexHullRestrictions(1000),
     m_bullseye_inner_edge(bullseye_inner_edge),
     m_bullseye_outer_edge(bullseye_outer_edge),
     m_data_inner_edge(data_inner_edge),

@@ -4,22 +4,25 @@
 
 #include <total/Config.hh>
 
+/**
+ * A class to represent a transformation from camera co-ordinates to
+ * object co-ordinates
+ */
 class Transform {
 private:
   float m_transform[16];
-
+  float m_confidence;
+  
 public:
   
-  Transform();
-  Transform(float* transform);
+  Transform(float confidence);
+  Transform(float* transform, float confidence);
 
-  float& operator[](int index) {
-    return m_transform[index];
-  }
-
-  float operator[](int index) const {
-    return m_transform[index];
-  }
+  inline float& operator[](int index) { return m_transform[index]; }
+  inline float operator[](int index) const { return m_transform[index]; }
+  
+  inline float getConfidence() { return m_confidence;} 
+  inline void setConfidence(float confidence) { m_confidence = confidence; }
 
   void Apply(float x, float y, float* resx, float* resy) const;
   void Apply(float x, float y, float z,float* resx, float* resy) const;

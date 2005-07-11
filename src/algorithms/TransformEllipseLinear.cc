@@ -17,7 +17,7 @@ namespace Total {
     
     const Ellipse& ellipse = *source.m_shapeDetails;
 
-    Transform* t = new Transform();    
+    Transform* t = new Transform(1.f);
     dest.m_transforms.push_back(t);
 
     (*t)[0] = ellipse.GetWidth()*DCOS(8,ellipse.GetAngle()); // DCOS

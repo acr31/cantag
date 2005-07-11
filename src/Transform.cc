@@ -7,9 +7,9 @@
 
 #undef TRANSFORM_DEBUG
 
-Transform::Transform() {};
+Transform::Transform(float confidence) : m_confidence(confidence) {};
 
-Transform::Transform(float* transform) {
+Transform::Transform(float* transform, float confidence) : m_confidence(confidence) {
   for(int i=0;i<16;++i) {
     m_transform[i] = transform[i];
   }

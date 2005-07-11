@@ -118,7 +118,7 @@ namespace Total {
       float cg = DCOS(8,gamma);
       float sg = DSIN(8,gamma);
       
-      Transform* t = new Transform();
+      Transform* t = new Transform(1.f);
       dest.m_transforms.push_back(t);
       dest.m_transformDone = true;
       

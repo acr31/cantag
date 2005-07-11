@@ -33,8 +33,8 @@ namespace Total {
 			int gain=-1);
     virtual ~IEEE1394ImageSource();
     virtual Image* Next();
-    inline int GetWidth() { return 640; }
-    inline int GetHeight() {  return 480; }
+    inline int GetWidth() const { return 640; }
+    inline int GetHeight() const {  return 480; }
 
   };
 }
