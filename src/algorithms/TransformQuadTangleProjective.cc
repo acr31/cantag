@@ -117,8 +117,7 @@ namespace Total {
   
 
     Transform* t = new Transform(1.f);
-    dest.m_transforms.push_back(t);
-    dest.m_transformDone = true;
+    dest.GetTransforms().push_back(t);
 
     Transform& transform = *t;
 

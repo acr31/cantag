@@ -6,7 +6,6 @@
 #define ENTITY_GUARD
 
 #include <total/Config.hh>
-#include <total/Transform.hh>
 #include <total/CyclicBitSet.hh>
 
 #include <list>
@@ -40,22 +39,6 @@ namespace Total {
     ShapeEntity(const ShapeEntity<Shape>& copyme) : m_shapeDetails(copyme.m_shapeDetails ? new Shape(*copyme.m_shapeDetails) : NULL) {}
   };
   
-  class TransformEntity : public Entity  {
-  public:
-    std::list<Transform*> m_transforms;
-    bool m_transformDone;
-  public:
-    TransformEntity() : m_transformDone(false) {};
-    ~TransformEntity() {
-      for(std::list<Transform*>::const_iterator i = m_transforms.begin(); i != m_transforms.end(); ++i) {
-	delete *i;
-      }
-    };
-
-  private:
-    TransformEntity(const TransformEntity& copyme) {}
-  };
-
   template<int PAYLOAD_SIZE>
   class DecodeEntity : public Entity {
   public:

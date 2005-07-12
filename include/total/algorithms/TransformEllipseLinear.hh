@@ -6,6 +6,7 @@
 #define LINEAR_ELLIPSE_TRANSFORM_GUARD
 
 #include <total/entities/Entity.hh>
+#include <total/entities/TransformEntity.hh>
 #include <total/Ellipse.hh>
 #include <total/Function.hh>
 

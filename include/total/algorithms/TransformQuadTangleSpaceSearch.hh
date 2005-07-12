@@ -7,6 +7,7 @@
 
 #include <total/QuadTangle.hh>
 #include <total/entities/Entity.hh>
+#include <total/entities/TransformEntity.hh>
 #include <total/Function.hh>
 
 #if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)

@@ -30,7 +30,7 @@ namespace Total {
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool SampleTagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(const MonochromeImage& image, const TransformEntity& source, DecodeEntity<RING_COUNT*SECTOR_COUNT>& destination) const {
 
     bool return_result = false;
-    for(std::list<Transform*>::const_iterator i = source.m_transforms.begin(); i != source.m_transforms.end(); ++i) {
+    for(std::list<Transform*>::const_iterator i = source.GetTransforms().begin(); i != source.GetTransforms().end(); ++i) {
   
       bool left = true;
       bool right = true;

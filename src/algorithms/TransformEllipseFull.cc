@@ -248,8 +248,8 @@ namespace Total {
     Transform* t1 = new Transform(1.f);
     Transform* t2 = new Transform(1.f);
  
-    dest.m_transforms.push_back(t1);
-    dest.m_transforms.push_back(t2);
+    dest.GetTransforms().push_back(t1);
+    dest.GetTransforms().push_back(t2);
    
     // premultiply by r1
     for(int row=0;row<4;row++) {
@@ -274,8 +274,6 @@ namespace Total {
     PROGRESS("                 " << (*t2)[8] << "," << (*t2)[9] << "," << (*t2)[10] << "," << (*t2)[11] << ";");
     PROGRESS("                 " << (*t2)[12] << "," << (*t2)[13] << "," << (*t2)[14] << "," << (*t2)[15] << ";");
 #endif
-
-    dest.m_transformDone = true;
 
     return true;
   }
