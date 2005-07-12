@@ -9,10 +9,10 @@
 using namespace Total;
 
 int main(int argc,char* argv[]) {
-    try {
-      //FileImageSource fs(argv[1]);
+  try {
+    //FileImageSource fs(argv[1]);
     //    V4LImageSource fs("/dev/video0",1);
-      IEEE1394ImageSource fs("/dev/video1394",0);
+    IEEE1394ImageSource fs("/dev/video1394",0);
     Camera camera;
     // set the intrinsic parameters of the camera
     camera.SetIntrinsic(1284.33,1064.55,450.534, 321.569,0 );
@@ -34,19 +34,19 @@ int main(int argc,char* argv[]) {
 
       Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<34>)> > tree;
       Apply(m,tree,ContourFollowerTree(tag));
-      Apply(tree,ConvexHull(tag));
-      Apply(tree,o3.m_ContourAlgorithm);
-      Apply(tree,DistortionCorrection(camera));
-      Apply(tree,FitEllipseLS()); // maximum fit error and error technique
+      ApplyTree(tree,ConvexHull(tag));
+      ApplyTree(tree,o3.m_ContourAlgorithm);
+      ApplyTree(tree,DistortionCorrection(camera));
+      ApplyTree(tree,FitEllipseLS()); // maximum fit error and error technique
       // weed out shapes that don't match
-      Apply(tree,o3.m_ShapeAlgorithm);
-      Apply(tree,TransformEllipseFull());
+      ApplyTree(tree,o3.m_ShapeAlgorithm);
+      ApplyTree(tree,TransformEllipseFull());
       // select transform
       // snap transform to sector edge
-      Apply(tree,Bind(SampleTagCircle<2,17>(tag,camera),m));
-      Apply(tree,Decode<TripOriginalCoder<34,2,2> >());
+      ApplyTree(tree,Bind(SampleTagCircle<2,17>(tag,camera),m));
+      ApplyTree(tree,Decode<TripOriginalCoder<34,2,2> >());
       // rotate transform to decoded angle
-      Apply(tree,o3.m_TransformAlgorithm);
+      ApplyTree(tree,o3.m_TransformAlgorithm);
       o3.Flush();
       ++count;
       if (count == 100) {

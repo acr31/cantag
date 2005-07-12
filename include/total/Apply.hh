@@ -168,22 +168,22 @@ namespace Total {
     };
   }
 
-  template<class C, class Algorithm> bool Apply(Tree<C>& tree, Algorithm& algorithm) {
+  template<class C, class Algorithm> bool ApplyTree(Tree<C>& tree, Algorithm& algorithm) {
     return Internal::_Apply_Tree<Tree<C>,Algorithm>(tree,algorithm);
   }
-  template<class C, class Algorithm> bool Apply(const Tree<C>& tree, Algorithm& algorithm) {
+  template<class C, class Algorithm> bool ApplyTree(const Tree<C>& tree, Algorithm& algorithm) {
     return Internal::_Apply_Tree<const Tree<C>,Algorithm>(tree,algorithm);
   }
-  template<class C, class Algorithm> bool Apply(Tree<C>& tree, const Algorithm& algorithm) {
+  template<class C, class Algorithm> bool ApplyTree(Tree<C>& tree, const Algorithm& algorithm) {
     return Internal::_Apply_Tree<Tree<C>,const Algorithm>(tree,algorithm);
   }
-  template<class C, class Algorithm> bool Apply(const Tree<C>& tree, const Algorithm& algorithm) {
+  template<class C, class Algorithm> bool ApplyTree(const Tree<C>& tree, const Algorithm& algorithm) {
     return Internal::_Apply_Tree<const Tree<C>,const Algorithm>(tree,algorithm);
   }
 
-  template<class Algorithm> bool Apply(const Tree<typename Algorithm::FunctionType::SourceType1>& source, 
-				       TreeNode<typename Algorithm::FunctionType::ResultType>& dest, 
-				       const Algorithm& algorithm) {
+  template<class Algorithm> bool ApplyTree(const Tree<typename Algorithm::FunctionType::SourceType1>& source, 
+					   TreeNode<typename Algorithm::FunctionType::ResultType>& dest, 
+					   const Algorithm& algorithm) {
     return Internal::_Apply_Tree_Tree(source, dest,dest,algorithm);
   }
 
