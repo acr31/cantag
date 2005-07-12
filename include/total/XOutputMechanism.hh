@@ -384,7 +384,7 @@ namespace Total {
 		   -1,1,
 		   1,1,
 		   1,-1};
-    (*(transform.m_transforms.begin()))->Apply(pts,4);
+    transform.GetTransform()->Apply(pts,4);
     m_output.m_camera.NPCFToImage(pts,4);
     XDrawLine(m_output.m_display,m_output.m_window,m_output.m_gc,
 	      (int)(pts[0]/2),(int)(pts[1]/2),
