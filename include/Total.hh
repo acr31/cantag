@@ -16,6 +16,7 @@
 
 #include <total/entities/ContourEntity.hh>
 #include <total/entities/ConvexHullEntity.hh>
+#include <total/entities/TransformEntity.hh>
 
 ///////////////////////
 // composed entities
