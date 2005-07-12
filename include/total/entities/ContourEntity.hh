@@ -92,21 +92,28 @@ namespace Total {
     ContourEntity() : m_points(), m_contourFitted(false) {};
     ~ContourEntity() {};
 
-    inline int GetNBD() { return m_nbd; }
+    inline int GetNBD() const { return m_nbd; }
     inline void SetNBD(int nbd) { m_nbd = nbd; }
-    inline bordertype_t GetBorderType() { return m_bordertype; }
+    inline bordertype_t GetBorderType() const { return m_bordertype; }
     inline void SetBorderType(bordertype_t bordertype) { m_bordertype = bordertype; }
-    inline int GetParentNBD() { return m_parent_id; }
+    inline int GetParentNBD() const { return m_parent_id; }
     inline void SetParentNBD(int parentid) { m_parent_id = parentid; }
 
-    inline int GetNumPoints() { return m_numPoints; }
+    inline int GetNumPoints() const { return m_numPoints; }
     inline void SetContourFitted(bool fitted) { m_contourFitted = fitted; }
 
     inline int GetLength() const { return m_length >> 5; }
     inline int GetWidth() const { return m_maxX - m_minX; }
     inline int GetHeight() const { return m_maxY - m_minY; }
+
+    inline int GetMinX() const { return m_minX; }
+    inline int GetMaxX() const { return m_maxX; }
+    inline int GetMinY() const { return m_minY; }
+    inline int GetMaxY() const { return m_maxY; }
+
     inline int GetCentralX() const { return m_centralX / m_numPoints; }
     inline int GetCentralY() const { return m_centralY / m_numPoints; }    
+
     inline const std::vector<float>& GetPoints() const { return m_points;}
     inline std::vector<float>& GetPoints() { return m_points; }
     void SetStart(int x, int y);
