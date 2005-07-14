@@ -34,6 +34,17 @@ namespace Total {
     Load(filename);
   };
 
+  Image::Image(const MonochromeImage& mono, const char blackval) : m_width(mono.GetWidth()),m_height(mono.GetHeight()), m_contents(new unsigned char[m_width*m_height]), m_free_contents(true), m_width_step(m_width), m_binary(false) {
+
+    for(unsigned int i=0;i<m_height;++i) {
+      unsigned char* data_pointer = GetRow(i);
+      for(unsigned int j=0;j<m_width;++j) {
+	*data_pointer = mono.GetPixel(j,i) ? blackval : 0;
+	++data_pointer;
+      }
+    }
+  };
+   
 #if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(HAVELIB_MAGICK)
   void Image::Load(const char* filename) {
     Magick::Image i;
@@ -373,7 +384,7 @@ namespace Total {
 
       if (dy > 0 && dy >= dx) { // NE or N
 	int d = (int)((a*(x+0.5)+b*(y+1)+c));
-	while (y < y1) {
+	while (y < y1-1) {
 	  ++y;
 	  if (d>0) {
 	    d+=b;
@@ -401,7 +412,7 @@ namespace Total {
       }
       else if (dy <= 0 && dx > -dy) { // E or SE
 	int d = (int)((a*(x+1)+b*(y-0.5)+c));
-	while (x<x1) {
+	while ( x < x1-1) {
 	  ++x;
 	  if (d>0) {
 	    d+=a;
@@ -445,6 +456,24 @@ namespace Total {
 
   }
 
+  void Image::DrawPolygon(const std::vector<float>& points, unsigned char colour, unsigned int thickness) {
+    
+    if (points.size() < 4 )
+      return;
+
+    for(unsigned int i=2;i<points.size();i+=2) {
+      DrawLine(points[i-2],points[i-1],points[i],points[i+1],colour,thickness);
+    }
+    DrawLine(points[points.size()-2],points[points.size()-1],points[0],points[1],colour,thickness);
+  }
+
+  void Image::DrawFilledPolygon(const std::vector<float>& points, unsigned char colour) {
+    float fpoints[points.size()];
+    for(int i=0;i<points.size();++i) {
+      fpoints[i] = points[i];
+    }
+    ScanLineFill(fpoints,points.size()/2,colour);
+  }
 
   void Image::DrawFilledPolygon(int* points, int numpoints, unsigned char colour) {
     float fpoints[numpoints*2];
@@ -453,7 +482,6 @@ namespace Total {
     }
     ScanLineFill(fpoints,numpoints,colour);
   }
-
 
   void Image::DrawFilledPolygon(float* points, int numpoints, unsigned char colour) {
     ScanLineFill(points,numpoints,colour);
@@ -469,13 +497,16 @@ namespace Total {
 	edge_list.push_back(new Edge(points[i],points[i+1],points[i+2],points[i+3]));
       }
     }
+
+    if (edge_list.size() == 0) {
+      return;
+    }
+
     if (points[1] != points[2*numpoints-1]) {
-      //    std::cout << "Adding " << points[2*numpoints-2] << " " << points[2*numpoints-1] << " " << points[0] << " " << points[1] << std::endl;
+      //std::cout << "Adding " << points[2*numpoints-2] << " " << points[2*numpoints-1] << " " << points[0] << " " << points[1] << std::endl;
       edge_list.push_back(new Edge(points[2*numpoints-2],points[2*numpoints-1],points[0],points[1]));    
     }
     edge_list.sort(EdgePtrSort());
-  
-    if (edge_list.size() == 0) return;
   
     // initialise scanline
     int scanline = edge_list.front()->miny;
@@ -492,6 +523,10 @@ namespace Total {
 	i = edge_list.erase(i);
       }
       active_edges.sort(EdgePtrSortX());
+
+      for (std::list<Edge*>::iterator j = active_edges.begin();
+	   j != active_edges.end(); ++j ) {
+      }
     
       // draw the current scan line
       int currentx = active_edges.front()->intx;
@@ -509,7 +544,7 @@ namespace Total {
 	  DrawPixel(currentx,scanline,colour);
 	}
       }
-    
+
       // increment scanline
       ++scanline;
     
@@ -527,6 +562,14 @@ namespace Total {
 	  ++k;
 	}
       }
+
+      /*
+	if (active_edges.size()==1) {
+	int miny = active_edges.front()->miny;
+	int maxy = active_edges.front()->maxy;
+	std::cout << "Edges:" << miny << "->" << maxy <<" inside? " << scanline << std::endl;
+      }
+      */
     }
 
   }
@@ -548,6 +591,8 @@ namespace Total {
       SeedFill(x,y-1,colour);
     }
   }
+
+
 
 #if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(HAVELIB_MAGICK)
   void Image::Save(const char* filename) const {
