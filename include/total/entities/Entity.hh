@@ -6,7 +6,6 @@
 #define ENTITY_GUARD
 
 #include <total/Config.hh>
-#include <total/CyclicBitSet.hh>
 
 #include <list>
 #include <vector>
@@ -39,19 +38,6 @@ namespace Total {
     ShapeEntity(const ShapeEntity<Shape>& copyme) : m_shapeDetails(copyme.m_shapeDetails ? new Shape(*copyme.m_shapeDetails) : NULL) {}
   };
   
-  template<int PAYLOAD_SIZE>
-  class DecodeEntity : public Entity {
-  public:
-    std::list<CyclicBitSet<PAYLOAD_SIZE>*> m_payloads;
-    bool m_decodeDone;
-  public:
-    DecodeEntity() : m_decodeDone(false) {};
-    ~DecodeEntity() {};
-
-  private:
-    DecodeEntity(const DecodeEntity<PAYLOAD_SIZE>& copyme) {}
-  };
-    
   class LocatedEntity : public Entity {
   protected:    
     float normal[3];
