@@ -17,6 +17,7 @@
 #include <total/entities/ContourEntity.hh>
 #include <total/entities/ConvexHullEntity.hh>
 #include <total/entities/TransformEntity.hh>
+#include <total/entities/DecodeEntity.hh>
 
 ///////////////////////
 // composed entities
@@ -43,18 +44,22 @@
 #include <total/algorithms/DistortionCorrection.hh>
 #include <total/algorithms/TransformEllipseLinear.hh>
 #include <total/algorithms/TransformEllipseFull.hh>
+#include <total/algorithms/TransformEllipseRotate.hh>
 #include <total/algorithms/TransformQuadTangleProjective.hh>
 #include <total/algorithms/TransformQuadTangleReduced.hh>
 #if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
 #include <total/algorithms/TransformQuadTangleSpaceSearch.hh>
 #endif
+#include <total/algorithms/TransformRotateToPayload.hh>
 #include <total/algorithms/SampleTagCircle.hh>
 #include <total/algorithms/SampleTagSquare.hh>
 #include <total/algorithms/ContourFollowerTree.hh>
+#include <total/algorithms/Encode.hh>
 #include <total/algorithms/Decode.hh>
 #include <total/algorithms/ThresholdAdaptive.hh>
 #include <total/algorithms/ThresholdGlobal.hh>
 #include <total/algorithms/ConvexHull.hh>
+#include <total/algorithms/DrawTagCircle.hh>
 
 ///////////////////////
 // coders
