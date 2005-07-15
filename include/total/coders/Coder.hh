@@ -13,8 +13,7 @@ namespace Total {
   template <int PAYLOAD_SIZE>
   class Coder {
   public:  
-
-    static const int PayloadSize = PAYLOAD_SIZE;
+    enum { PayloadSize = PAYLOAD_SIZE };
   
     /**
      * Alters the passed payload inorder to encode it.
