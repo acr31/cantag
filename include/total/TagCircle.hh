@@ -6,13 +6,21 @@
 #define TAG_CIRCLE_GUARD
 
 #include <cmath>
+
+#include <total/Config.hh>
+#include <total/TagSpec.hh>
 #include <total/ContourRestrictions.hh>
 #include <total/ConvexHullRestrictions.hh>
+#include <total/coders/Coder.hh>
 
 namespace Total {
 
-  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT=5>
-  class TagCircle  : public ContourRestrictions, public ConvexHullRestrictions {
+  template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT=5>
+  class TagCircle : public TagSpec<PARAM_RING_COUNT*PARAM_SECTOR_COUNT>, public ContourRestrictions, public ConvexHullRestrictions {
+  public:
+    enum { RING_COUNT = PARAM_RING_COUNT };
+    enum { SECTOR_COUNT = PARAM_SECTOR_COUNT };
+    enum { READ_COUNT = PARAM_READ_COUNT };
   private:
     const float m_bullseye_inner_edge;
     const float m_bullseye_outer_edge;
@@ -34,16 +42,42 @@ namespace Total {
   public:
     TagCircle(float bullseye_inner_edge, float bullseye_outer_edge, float data_inner_edge, float data_outer_edge);
     ~TagCircle();
+    
+    /**
+     * Return the x-coordinate to sample the tag.  The sample point
+     * will be the middle of the selected ring and at the angle
+     * read_angle/(PARAM_RING_COUNT*PARAM_READ_COUNT) * 360
+     */
     inline float GetXSamplePoint(int read_angle, int ring) const {
       return m_cos_read_angles[read_angle] * m_data_ring_centre_radii[ring]/m_bullseye_outer_edge;
     }
     
+    /**
+     * Return the y-coordinate to sample the tag.  The sample point
+     * will be the middle of the selected ring and at the angle
+     * read_angle/(PARAM_RING_COUNT*PARAM_READ_COUNT) * 360
+     */
     inline float GetYSamplePoint(int read_angle, int ring) const {
       return m_sin_read_angles[read_angle] * m_data_ring_centre_radii[ring]/m_bullseye_outer_edge;
     }   
+
+    /**
+     * Return cos(read_angle/(PARAM_RING_COUNT*PARAM_READ_COUNT) * 360) and sin(read_angle/(PARAM_RING_COUNT*PARAM_READ_COUNT) * 360)
+     */
+    inline void GetAngle(int read_angle, float& cos, float& sin) const {
+      cos = m_cos_read_angles[read_angle];
+      sin = m_sin_read_angles[read_angle];
+    }
+
+    inline float GetBullseyeOuterEdge() const { return m_bullseye_outer_edge; }
+    inline float GetBullseyeInnerEdge() const { return m_bullseye_inner_edge; }
+    inline float GetDataOuterEdge() const { return m_data_outer_edge; }
+    inline float GetDataInnerEdge() const { return m_data_inner_edge; }
+    inline float GetDataRingOuterEdge(int ring) const { return m_data_ring_outer_radii[ring]; }
+    inline float GetReadAngle(int index) const { return m_sector_angles[index]; }
   };
 
-  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>::~TagCircle() {
+  template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT> TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::~TagCircle() {
     delete[] m_data_ring_outer_radii;
     delete[] m_data_ring_centre_radii;
     delete[] m_sector_angles;
@@ -52,9 +86,10 @@ namespace Total {
     delete[] m_cos_read_angles;
   }
   
-  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>::TagCircle(float bullseye_inner_edge, float bullseye_outer_edge, float data_inner_edge, float data_outer_edge) :
-    ContourRestrictions(30,10,10),
-    ConvexHullRestrictions(1000),
+  template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT> TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::TagCircle(float bullseye_inner_edge, float bullseye_outer_edge, float data_inner_edge, float data_outer_edge) :
+    TagSpec<PARAM_SECTOR_COUNT*PARAM_RING_COUNT>(PARAM_SECTOR_COUNT,PARAM_RING_COUNT),
+    ContourRestrictions(30,30,30),
+    ConvexHullRestrictions(100000),
     m_bullseye_inner_edge(bullseye_inner_edge),
     m_bullseye_outer_edge(bullseye_outer_edge),
     m_data_inner_edge(data_inner_edge),
@@ -77,35 +112,33 @@ namespace Total {
   
     // Lets give each one an equal amount - first pass
   
-    m_data_ring_centre_radii = new float[RING_COUNT];
-    m_data_ring_outer_radii = new float[RING_COUNT];
+    m_data_ring_centre_radii = new float[PARAM_RING_COUNT];
+    m_data_ring_outer_radii = new float[PARAM_RING_COUNT];
   
-    float ring_width = (m_data_outer_edge-m_data_inner_edge)/RING_COUNT;
+    float ring_width = (m_data_outer_edge-m_data_inner_edge)/PARAM_RING_COUNT;
     
-    for(int i=0;i<RING_COUNT;i++) {
+    for(int i=0;i<PARAM_RING_COUNT;i++) {
       m_data_ring_outer_radii[i] = m_data_inner_edge + ring_width*(i+1);
       m_data_ring_centre_radii[i] = m_data_ring_outer_radii[i]-ring_width/2;    
     }
     
     // now the sector angles - go one more than necessary it makes drawing easier ;-)
     
-    m_sector_angles = new float[SECTOR_COUNT+1];
-    for(int i=0;i<SECTOR_COUNT+1;i++) {
-      m_sector_angles[i] = 2*M_PI/SECTOR_COUNT *i;
+    m_sector_angles = new float[PARAM_SECTOR_COUNT+1];
+    for(int i=0;i<PARAM_SECTOR_COUNT+1;i++) {
+      m_sector_angles[i] = 2*M_PI/PARAM_SECTOR_COUNT *i;
     }
     
     // when we read the tag we read a total of five times and then
     // look for three codes which are the same
-    m_read_angles = new float[SECTOR_COUNT*READ_COUNT];
-    m_sin_read_angles = new float[SECTOR_COUNT*READ_COUNT];
-    m_cos_read_angles = new float[SECTOR_COUNT*READ_COUNT];
-    for(int i=0;i<SECTOR_COUNT*READ_COUNT;i++) {
-      m_read_angles[i] = 2*M_PI/SECTOR_COUNT/READ_COUNT * i;
+    m_read_angles = new float[PARAM_SECTOR_COUNT*PARAM_READ_COUNT];
+    m_sin_read_angles = new float[PARAM_SECTOR_COUNT*PARAM_READ_COUNT];
+    m_cos_read_angles = new float[PARAM_SECTOR_COUNT*PARAM_READ_COUNT];
+    for(int i=0;i<PARAM_SECTOR_COUNT*PARAM_READ_COUNT;i++) {
+      m_read_angles[i] = 2*M_PI/PARAM_SECTOR_COUNT/PARAM_READ_COUNT * i;
       m_sin_read_angles[i] = sin(m_read_angles[i]);
       m_cos_read_angles[i] = cos(m_read_angles[i]);
     }
-  }
-  
-  
+  }  
 }
 #endif//TAG_CIRCLE_GUARD

@@ -7,10 +7,13 @@
 
 #undef SQUARE_DEBUG_POINTS
 
+#include <total/Config.hh>
+#include <total/TagSpec.hh>
+
 namespace Total {
 
   template<int SIZE>
-  class TagSquare {
+  class TagSquare :public TagSpec<SIZE*SIZE - ((SIZE*SIZE)%2)> {
   public:
     static const int PayloadSize = SIZE*SIZE - ((SIZE*SIZE)%2);
 
@@ -32,7 +35,10 @@ namespace Total {
 
   };
 
-  template<int SIZE> TagSquare<SIZE>::TagSquare() : m_cell_width(2.f/(SIZE+2)), m_cell_width_2(1.f/(SIZE+2)) {
+  template<int SIZE> TagSquare<SIZE>::TagSquare() : 
+    TagSpec<SIZE*SIZE - ((SIZE*SIZE)%2)>(4,PayloadSize/4),
+    m_cell_width(2.f/(SIZE+2)), 
+    m_cell_width_2(1.f/(SIZE+2)) {
     /* we read the tag in triangles:
      *
      *    1  2  3  4  5  6  7 17       1  2  3  4  5  6 13
