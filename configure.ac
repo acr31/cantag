@@ -61,7 +61,7 @@ struct C : public A, public B {
 };
 ]]),
 [
-AC_DEFINE(HAVECXX_COVARIANT_RETURNS,[],[Define this to 1 if your compiler properly supports covariant return types]),
+AC_DEFINE(HAVECXX_COVARIANT_RETURNS,[],[Define this to 1 if your compiler properly supports covariant return types])
 havecxx_covariant_returns="yes"],
 [havecxx_covariant_returns="no"])
 AM_CONDITIONAL(HAVECXX_COVARIANT_RETURNS,test "havecxx_covariant_returns"="yes")
