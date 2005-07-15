@@ -7,8 +7,8 @@
 
 #include <Total.hh>
 
+  /*
 namespace Total {
-
   class CustomCircle : public RingTag<2,17,Ellipse>, protected virtual RawCoder<34,2>, private virtual FullEllipseTransform {
   public:
     CustomCircle() : RingTag<2,17,Ellipse>(0.2,1.0,0.4,0.8) {};
@@ -22,5 +22,12 @@ namespace Total {
 
 typedef Total::TripTag TagType;
 //typedef Total::ISquare TagType;
+*/
+
+struct TestTag : public Total::TagCircle<2,17>,Total::TripOriginalCoder<34,2,2> {
+  TestTag() : Total::TagCircle<2,17>(0.8,1.0,0.2,0.6) {}
+};
+
+typedef TestTag TagType;
 
 #endif//TAG_DEF_GUARD
