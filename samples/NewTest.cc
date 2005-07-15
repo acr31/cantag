@@ -6,6 +6,11 @@
 
 #include <Total.hh>
 
+// this file includes the definition of the type of tag used in the
+// samples.  This is then typedef'd to be of type TagType which is
+// used below
+#include "TagDef.hh"
+
 using namespace Total;
 
 int main(int argc,char* argv[]) {
@@ -18,9 +23,9 @@ int main(int argc,char* argv[]) {
     camera.SetIntrinsic(1284.33,1064.55,450.534, 321.569,0 );
     
     XOutputMechanism<Ellipse,34> o3(fs.GetWidth(),fs.GetHeight(),camera);
-    
-    TagCircle<2,17> tag(0.8,1.0,0.2,0.6);
-    //TagSquare<5> tag;
+
+    TagType tag;
+
     int cnt=0;
     time_t cur_time = time(NULL);
     int count = 0;
@@ -32,7 +37,7 @@ int main(int argc,char* argv[]) {
       Apply(*i,m,ThresholdGlobal(atoi(argv[1])));
       Apply(m,o3.m_ThresholdAlgorithm);
 
-      Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<34>)> > tree;
+      Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<TagType::PayloadSize>)> > tree;
       Apply(m,tree,ContourFollowerTree(tag));
       ApplyTree(tree,ConvexHull(tag));
       ApplyTree(tree,o3.m_ContourAlgorithm);
@@ -42,10 +47,10 @@ int main(int argc,char* argv[]) {
       ApplyTree(tree,o3.m_ShapeAlgorithm);
       ApplyTree(tree,TransformEllipseFull());
       // select transform
-      // snap transform to sector edge
-      ApplyTree(tree,Bind(SampleTagCircle<2,17>(tag,camera),m));
-      ApplyTree(tree,Decode<TripOriginalCoder<34,2,2> >());
-      // rotate transform to decoded angle
+      ApplyTree(tree,Bind(TransformEllipseRotate(tag,camera),m));
+      ApplyTree(tree,Bind(SampleTagCircle(tag,camera),m));
+      ApplyTree(tree,Decode<TestTag>());
+      ApplyTree(tree,TransformRotateToPayload(tag));
       ApplyTree(tree,o3.m_TransformAlgorithm);
       o3.Flush();
       ++count;
