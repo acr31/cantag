@@ -400,14 +400,15 @@ namespace Total {
 	      (int)(pts[0]/2),(int)(pts[1]/2));
     XTextItem ti;
     ti.chars=new char[PAYLOAD_SIZE];
+    typename DecodeEntity<PAYLOAD_SIZE>::Data* data = *(decode.GetPayloads().begin());
     for(int i=0;i<PAYLOAD_SIZE;++i) {
-      ti.chars[i] = (*(*(decode.m_payloads.begin())))[i] ? '1' : '0';
+      ti.chars[i] = (data->payload)[i] ? '1' : '0';
     }
     ti.nchars=PAYLOAD_SIZE;
     ti.delta=0;
     ti.font=None;
     XDrawText(m_output.m_display,m_output.m_window,m_output.m_gc,(int)(pts[0]),(int)(pts[1]),&ti,1);
-    std::cout << *(*(decode.m_payloads.begin())) << std::endl;
+    //    std::cout << (data->payload) << std::endl;
     delete[] ti.chars;
     return true;    
   }
