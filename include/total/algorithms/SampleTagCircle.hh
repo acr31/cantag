@@ -12,22 +12,24 @@
 
 namespace Total {
 
+  /**
+   * This algorithm samples points on a circular tag and stores the
+   * raw data in the decode entity ready for decoding.  This is a
+   * helper object you can create using the inline template function
+   * SampleTagCircle which will infer the template parameters
+   */
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT=5>
-  class SampleTagCircle : public Function2<MonochromeImage,TransformEntity,DecodeEntity<RING_COUNT*SECTOR_COUNT> > {
+  class SampleTagCircleObj : public Function2<MonochromeImage,TransformEntity,DecodeEntity<RING_COUNT*SECTOR_COUNT> > {
   private:
     const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& m_tagspec;
     const Camera& m_camera;
 
   public:
-    SampleTagCircle(const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec, const Camera& camera);
+    SampleTagCircleObj(const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec, const Camera& camera) : m_tagspec(tagspec),m_camera(camera) {};
     bool operator()(const MonochromeImage& image, const TransformEntity& source, DecodeEntity<RING_COUNT*SECTOR_COUNT>& destination) const;
   };
-
-  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> SampleTagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>::SampleTagCircle(const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec, const Camera& camera) :
-    m_tagspec(tagspec),
-    m_camera(camera) {}
   
-  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool SampleTagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(const MonochromeImage& image, const TransformEntity& source, DecodeEntity<RING_COUNT*SECTOR_COUNT>& destination) const {
+  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool SampleTagCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(const MonochromeImage& image, const TransformEntity& source, DecodeEntity<RING_COUNT*SECTOR_COUNT>& destination) const {
 
     bool return_result = false;
     for(std::list<Transform*>::const_iterator i = source.GetTransforms().begin(); i != source.GetTransforms().end(); ++i) {
@@ -83,8 +85,9 @@ namespace Total {
 	}
       }
 
-      CyclicBitSet<RING_COUNT*SECTOR_COUNT>* payload = new CyclicBitSet<RING_COUNT*SECTOR_COUNT>();  
-      destination.m_payloads.push_back(payload);
+      typename DecodeEntity<RING_COUNT*SECTOR_COUNT>::Data* payload = new typename DecodeEntity<RING_COUNT*SECTOR_COUNT>::Data();
+      destination.GetPayloads().push_back(payload);
+      
       int index = 0;
       int readindex = (leftindex + READ_COUNT/2) % (SECTOR_COUNT * READ_COUNT);
       for(int j=0;j<SECTOR_COUNT;++j) {
@@ -99,16 +102,23 @@ namespace Total {
 	    return false;
 	  }
 	  bool sample = image.GetPixel(tpt[0],tpt[1]);
-	  (*payload)[index] = sample;      
+	  (payload->payload)[index] = sample;      
 	  index++;
 	}
 	readindex+=READ_COUNT;
 	readindex %= SECTOR_COUNT * READ_COUNT;
       }      
+      payload->confidence = 1.f;
       return_result = true;
     }
 
     return return_result;
+  }
+
+  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
+  inline
+  SampleTagCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT> SampleTagCircle(const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec, const Camera& camera) {
+    return SampleTagCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>(tagspec,camera);
   }
 }
 #endif//SAMPLE_CIRCLE_TAG
