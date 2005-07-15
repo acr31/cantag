@@ -5,6 +5,7 @@
 #ifndef CONTOUR_ENTITY_GUARD
 #define CONTOUR_ENTITY_GUARD
 
+#include <cassert>
 #include <total/Config.hh>
 #include <total/entities/Entity.hh>
 
