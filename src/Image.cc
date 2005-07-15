@@ -23,7 +23,7 @@ namespace Total {
   Image::Image(int width, int height) : m_width(width),m_height(height), m_contents(new unsigned char[width*height]), m_free_contents(true), m_width_step(m_width), m_binary(false) {
     assert(width > 0);
     assert(height > 0);
-    memset(m_contents,0,width*height);
+    memset(m_contents,255,width*height);
   };
 
   Image::Image(const Image& c) : m_width(c.m_width), m_height(c.m_height), m_contents(new unsigned char[c.m_width_step*c.m_height]), m_free_contents(true), m_width_step(c.m_width_step), m_binary(c.m_binary) {
@@ -469,7 +469,7 @@ namespace Total {
 
   void Image::DrawFilledPolygon(const std::vector<float>& points, unsigned char colour) {
     float fpoints[points.size()];
-    for(int i=0;i<points.size();++i) {
+    for(unsigned int i=0;i<points.size();++i) {
       fpoints[i] = points[i];
     }
     ScanLineFill(fpoints,points.size()/2,colour);
