@@ -50,13 +50,13 @@ namespace Total {
   //#define FCOS(N,x) taylor<N,0,float>::sin(x-M_PI/2,1)
 
   //temporary test values: use to make sure that values are within range
-  static double DSIN(const int accuracy, const double x) { 
+  static inline double DSIN(const int accuracy, const double x) { 
     assert(x<=M_PI);
     assert(x>=-M_PI);
     return taylor<8,0,double>::sin(x,1);
   }
 
-  static double DCOS(const int accuracy, const double x) {
+  static inline double DCOS(const int accuracy, const double x) {
     assert(x<=M_PI);
     assert(x>=-M_PI);
     double y=x+M_PI/2;
@@ -79,12 +79,14 @@ namespace Total {
   };
 
   static inline int Round(double d)  {
-#if BYTE_ORDER == LITTLE_ENDIAN
+    /*
+#if BYTE_ORDER == LITTLE_ENDIAN 
     double t =(d+6755399441055744.0); 
     return *(int*)&t;
 #else
+    */
     return (int)round(d);
-#endif
+    //#endif
   }
 }
 #endif //SPEEDMATH_GUARD
