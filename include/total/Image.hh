@@ -7,8 +7,10 @@
 #include <total/Config.hh>
 #include <total/Socket.hh>
 #include <total/SpeedMath.hh>
+#include <total/MonochromeImage.hh>
 #include <total/entities/Entity.hh>
 #include <cmath>
+#include <cassert>
 
 #define COLOUR_BLACK ((unsigned char)0)
 #define COLOUR_WHITE ((unsigned char)255)
@@ -41,6 +43,11 @@ namespace Total {
      */
     Image(int width, int height);
 
+
+    /**
+     * Construct an image from monochromeimage, mapping black pixels to blackval
+     */
+    Image(const MonochromeImage& mono, const char blackval);
     /**
      * Construct an image using the buffer offered to store data
      */
@@ -209,6 +216,12 @@ namespace Total {
     }
 
     /**
+     * Draw a polygon.  points is a pointer to vector of floats
+     * which are x and y co-ordinates consecutivley.
+     */
+    void DrawPolygon(const std::vector<float>& points, unsigned char colour, unsigned int thickness);
+
+    /**
      * Draw a polygon.  points is a pointer to an array of integers,
      * which are x and y co-ordinates consecutivley. i.e. points[2i] is
      * an x co-ordinate and points[2i+1] is the coresponding y
@@ -230,6 +243,7 @@ namespace Total {
      */
     void DrawFilledPolygon(int* points, int numpoints, unsigned char colour);
 
+    void DrawFilledPolygon(const std::vector<float>& points, unsigned char colour);
     /**
      * Draw a filled polygon by rounding the given points to the nearest
      * integer.
