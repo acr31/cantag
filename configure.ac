@@ -78,7 +78,6 @@ dnl TOTAL_CHECK_HEADER(opencv/highgui.h,HAVE_OPENCV_HIGHGUI_H,have_opencv_highgu
 TOTAL_CHECK_HEADER(GL/gl.h,HAVE_GL_GL_H,have_gl_gl_h)
 TOTAL_CHECK_HEADER(GL/glu.h,HAVE_GL_GLU_H,have_gl_glu_h)
 TOTAL_CHECK_HEADER(GL/osmesa.h,HAVE_GL_OSMESA_H,have_gl_osmesa_h)
-TOTAL_CHECK_HEADER(boost/bind.hpp,HAVE_BOOST_BIND_H,have_boost_bind_h)
 TOTAL_CHECK_HEADER(boost/random.hpp,HAVE_BOOST_RANDOM_H,have_boost_random_h)
 TOTAL_CHECK_HEADER(boost/test/unit_test.hpp,HAVE_BOOST_TEST_UNITTEST_H,have_boost_test_unittest_h)
 TOTAL_CHECK_HEADER(gmpxx.h,HAVE_GMPXX_H,have_gmpxx_h)
