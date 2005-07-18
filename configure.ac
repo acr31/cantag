@@ -66,7 +66,7 @@ havecxx_covariant_returns="yes"],
 [havecxx_covariant_returns="no"])
 AM_CONDITIONAL(HAVECXX_COVARIANT_RETURNS,test "havecxx_covariant_returns"="yes")
 if test "$havecxx_covariant_returns" = "no"; then
-   echo "!!! Your compiler does not support covariant return types well enough for some of the features contained within Total - if you wish to use these please upgrade to gcc 3.3.5 or newer"
+   AC_MSG_ERROR([Your compiler does not support covariant return types (combined with multiple inheritance) for some of the features contained within Total - please upgrade to gcc 3.4.4 or newer])
 fi
 
 
