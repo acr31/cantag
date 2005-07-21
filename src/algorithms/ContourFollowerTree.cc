@@ -42,7 +42,7 @@ namespace Total {
       m_image_height = image.GetHeight();
       m_working_store = new unsigned int[m_image_width*m_image_height];     
       memset(m_working_store,0,m_image_width*m_image_height*sizeof(unsigned int));
-      m_flag = true;
+      m_flag = 1;
     }
 
     std::map<int,TreeNode<ContourEntity>*> node_hash;
@@ -194,13 +194,13 @@ namespace Total {
 	  // is an exit pixel.  Write (NBD,r).
 	  if (cell4_is_0) {
 	    SetVisited(start_x,start_y,nbd,EXIT_PIXEL);
-#ifdef CONTOUR_xTREE_DEBUG
+#ifdef CONTOUR_TREE_DEBUG
 	    PROGRESS("Marked  exit " << start_x << "," << start_y);
 #endif
 	  }
 	  // 2) else if sample_x,sample_y is unmarked write
 	  // (NBD,l).
-	  else if (AssessPixel(sample_x,sample_y) == -1) {
+	  else if (AssessPixel(start_x,start_y) == -1) {
 	    SetVisited(start_x,start_y,nbd,ENTRY_PIXEL);
 #ifdef CONTOUR_TREE_DEBUG
 	    PROGRESS("Marked " << start_x << "," << start_y);
