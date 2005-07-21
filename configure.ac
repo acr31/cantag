@@ -112,7 +112,7 @@ TOTAL_CHECK_LIB(gsl,gsl_multimin_diff,HAVELIB_GSL,havelib_gsl)
 TOTAL_CHECK_LIB(dc1394_control,dc1394_dma_setup_capture,HAVELIB_DC1394,havelib_dc1394)
 
 LIBSSAVEACR31="$LIBS"
-LIBS="-lboost_unit_test_framework-gcc-1_32 $LIBS"
+LIBS="-lboost_unit_test_framework-gcc-1_31 $LIBS"
 AC_LINK_IFELSE(
 AC_LANG_SOURCE([[
 #ifdef __cplusplus
