@@ -206,8 +206,8 @@ namespace Total {
   }
 
 
-  void Camera::UnDistortImage(Image& image) const {
-    const Image source(image);
+  void Camera::UnDistortImage(Image<Colour::Grey>& image) const {
+    const Image<Colour::Grey> source(image);
     for(int i=0;i<image.GetHeight();i++) {
       for(int j=0;j<image.GetWidth();j++) {
 	float points[] = {i,j};
@@ -221,7 +221,7 @@ namespace Total {
     }
   }
 
-  void Camera::DrawEllipse(Image& image, const Ellipse& ellipse) const {
+  void Camera::DrawEllipse(Image<Colour::Grey>& image, const Ellipse& ellipse) const {
     float x0 = (ellipse.GetX0()*m_intrinsic[0]) + m_intrinsic[2];
     float y0 = (ellipse.GetY0()*m_intrinsic[4]) + m_intrinsic[5];
     float width = (ellipse.GetWidth()*m_intrinsic[0]);
@@ -229,14 +229,14 @@ namespace Total {
     image.DrawEllipse(x0,y0,width*2,height*2,ellipse.GetAngle(),COLOUR_BLACK,2);
   }
 
-  void Camera::Draw(Image& image, const Ellipse& ellipse) const {
+  void Camera::Draw(Image<Colour::Grey>& image, const Ellipse& ellipse) const {
     DrawEllipse(image,ellipse);
   }
-  void Camera::Draw(Image& image, const QuadTangle& quadtangle) const {
+  void Camera::Draw(Image<Colour::Grey>& image, const QuadTangle& quadtangle) const {
     DrawQuadTangle(image,quadtangle);
   }
 
-  void Camera::DrawQuadTangle(Image& image, const QuadTangle& quadtangle) const {
+  void Camera::DrawQuadTangle(Image<Colour::Grey>& image, const QuadTangle& quadtangle) const {
     float pts[] = { quadtangle.GetX0(),quadtangle.GetY0(),
 		    quadtangle.GetX1(),quadtangle.GetY1(),
 		    quadtangle.GetX2(),quadtangle.GetY2(),

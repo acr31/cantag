@@ -27,13 +27,13 @@ namespace Total {
    * average. the window used is now 2^window_size
    *
    */
-  class ThresholdAdaptive : public Function1<Image,MonochromeImage> {
+  class ThresholdAdaptive : public Function1<Image<Colour::Grey>,MonochromeImage> {
   private:
     int m_window_size;
     int m_offset;
   public:
     ThresholdAdaptive(int window_size, int offset);
-    bool operator()(const Image& source, MonochromeImage& dest) const;
+    bool operator()(const Image<Colour::Grey>& source, MonochromeImage& dest) const;
   };
 }
 

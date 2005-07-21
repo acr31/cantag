@@ -33,7 +33,7 @@ namespace Total {
   }
 
 
-  void QuadTangle::Draw(Image& image,const Camera& camera) const {
+  void QuadTangle::Draw(Image<Colour::Grey>& image,const Camera& camera) const {
       camera.DrawQuadTangle(image,*this);
   }
 

@@ -11,12 +11,12 @@
 
 namespace Total {
 
-  class ThresholdGlobal : public Function1<Image,MonochromeImage> {
+  class ThresholdGlobal : public Function1<Image<Colour::Grey>,MonochromeImage> {
   private:
     int m_threshold;
   public:
     ThresholdGlobal(int threshold);
-    bool operator()(const Image& source, MonochromeImage& dest) const;
+    bool operator()(const Image<Colour::Grey>& source, MonochromeImage& dest) const;
   };
 }
 

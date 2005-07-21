@@ -89,4 +89,5 @@ namespace Total {
     //#endif
   }
 }
+
 #endif //SPEEDMATH_GUARD

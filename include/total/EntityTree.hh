@@ -19,7 +19,7 @@ namespace Total {
     virtual const Entity* GetNode() const = 0;
     virtual TreeNode<Entity>* AddChild() = 0;
     virtual ~TreeNode() {};
-    virtual bool IsValid() = 0;
+    virtual bool IsValid() const = 0;
     virtual void SetValid(bool valid) = 0;
   };
   
@@ -52,7 +52,7 @@ namespace Total {
       return &m_node;
     }
     
-    bool IsValid() { return m_node.IsValid(); }
+    bool IsValid() const { return m_node.IsValid(); }
     void SetValid(bool valid) { m_node.SetValid(valid); }
 
     int GetSize() { 

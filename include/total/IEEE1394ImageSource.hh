@@ -16,7 +16,7 @@ extern "C" {
 
 namespace Total {
 
-  class IEEE1394ImageSource : public ImageSource {
+  class IEEE1394ImageSource : public ImageSource<Colour::Grey> {
   private:
     raw1394handle_t      mHandle;
     dc1394_cameracapture mCamera;

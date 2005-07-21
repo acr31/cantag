@@ -85,7 +85,7 @@ main(int argc, char* argv[])
 
     
     // create the image that will hold the tag design
-    Image i(512,512);
+    Image<Colour::Grey> i(512,512);
     if (!DrawTagCircle(t)(d,i)) {
       std::cerr << "Failed to draw tag. Aborting" << std::endl;
       exit(-1);

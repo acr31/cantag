@@ -6,7 +6,7 @@
 namespace Total {
   ThresholdAdaptive::ThresholdAdaptive(int window_size, int offset) : m_window_size(window_size), m_offset(offset) {};
 
-  bool ThresholdAdaptive::operator()(const Image& image, MonochromeImage& dest) const {
+  bool ThresholdAdaptive::operator()(const Image<Colour::Grey>& image, MonochromeImage& dest) const {
     int moving_average = 127;
     const int image_width = image.GetWidth();
     const int image_height = image.GetHeight();

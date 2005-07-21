@@ -26,7 +26,7 @@ namespace Total {
    *
    * \todo need someway of saying composite input
    */
-  V4LImageSource::V4LImageSource(char* device, int channel) : 
+  template<> V4LImageSource<Colour::Grey>::V4LImageSource(char* device, int channel) : 
     m_handle(-1), m_mmap((unsigned char*)MAP_FAILED,-1),
     m_slots(NULL),m_images(NULL)
   {
@@ -130,7 +130,7 @@ namespace Total {
     // we ask the capture card to asynchronously fetch the images for
     // us.
     m_slots = new struct video_mmap[m_total_frames];
-    m_images = new Image[m_total_frames];
+    m_images = new Image<Colour::Grey>[m_total_frames];
 
     // populate the arrays
     for(int i=0;i<m_total_frames;i++) {
@@ -138,7 +138,7 @@ namespace Total {
       m_slots[i].frame = i;
       m_slots[i].width = m_image_width;
       m_slots[i].height = m_image_height;
-      m_images[i] = Image(m_image_width,m_image_height,m_image_width,m_mmap.Get()+mbuf.offsets[i]);
+      m_images[i] = Image<Colour::Grey>(m_image_width,m_image_height,m_image_width,m_mmap.Get()+mbuf.offsets[i]);
       // start the device asynchronously fetching the frame
       if (i>0) { // dont start capturing for this one because we'll
 	// start it when we first call next
@@ -159,7 +159,7 @@ namespace Total {
 #endif
   }
 
-  V4LImageSource::~V4LImageSource() {
+  template<> V4LImageSource<Colour::Grey>::~V4LImageSource() {
 #ifdef V4L_DEBUG
     PROGRESS("Destroying image source");
 #endif
@@ -167,7 +167,7 @@ namespace Total {
     if (m_slots) delete[] m_slots;
   }
 
- Image* V4LImageSource::Next() {  
+ template<> Image<Colour::Grey>* V4LImageSource<Colour::Grey>::Next() {  
     // start the device collecting the one we just used
     int rs;
     int retry = 0;
@@ -185,16 +185,17 @@ namespace Total {
       throw "Failed to ioctl (VIDIOCSYNC) video device";
     }  
 
-    Image* result = &m_images[m_current_frame];
+    Image<Colour::Grey>* result = &m_images[m_current_frame];
+    result->SetValid(true);
 
     return result;
   }
 
 
 
-  V4LImageSource::VideoDevHandle::VideoDevHandle(int f_handle) : m_f_handle(f_handle) {};
-  V4LImageSource::VideoDevHandle& V4LImageSource::VideoDevHandle::SetHandle(int f_handle) { m_f_handle = f_handle; return *this;}
-  V4LImageSource::VideoDevHandle::~VideoDevHandle() { 
+  template<Colour::Type IMTYPE> V4LImageSource<IMTYPE>::VideoDevHandle::VideoDevHandle(int f_handle) : m_f_handle(f_handle) {};
+  template<Colour::Type IMTYPE> typename V4LImageSource<IMTYPE>::VideoDevHandle& V4LImageSource<IMTYPE>::VideoDevHandle::SetHandle(int f_handle) { m_f_handle = f_handle; return *this;}
+  template<Colour::Type IMTYPE> V4LImageSource<IMTYPE>::VideoDevHandle::~VideoDevHandle() { 
     if(m_f_handle >=0) {
 #ifdef V4L_DEBUG
       PROGRESS("Closing handle");
@@ -203,13 +204,15 @@ namespace Total {
     }
   }
 
-  int V4LImageSource::VideoDevHandle::Get() const { 
+  template<Colour::Type IMTYPE> int V4LImageSource<IMTYPE>::VideoDevHandle::Get() const { 
     return m_f_handle; 
   }
 
-  V4LImageSource::MMapHandle::MMapHandle(unsigned char* mmap_start,int size) : m_mmap_start(mmap_start),m_size(size) {};
-  V4LImageSource::MMapHandle& V4LImageSource::MMapHandle::SetHandle(unsigned char* f_handle, int size) { m_mmap_start = f_handle; m_size=size; return *this; }
-  V4LImageSource::MMapHandle::~MMapHandle() { 
+  template<Colour::Type IMTYPE> V4LImageSource<IMTYPE>::MMapHandle::MMapHandle(unsigned char* mmap_start,int size) : m_mmap_start(mmap_start),m_size(size) {};
+  
+template<Colour::Type IMTYPE> typename V4LImageSource<IMTYPE>::MMapHandle& V4LImageSource<IMTYPE>::MMapHandle::SetHandle(unsigned char* f_handle, int size) { m_mmap_start = f_handle; m_size=size; return *this; }
+
+  template<Colour::Type IMTYPE> V4LImageSource<IMTYPE>::MMapHandle::~MMapHandle() { 
     if (m_mmap_start != (unsigned char*)MAP_FAILED) { 
 #ifdef V4L_DEBUG
       PROGRESS("Unmapping memory");
@@ -218,7 +221,7 @@ namespace Total {
     }
   }
 
-  unsigned char* V4LImageSource::MMapHandle::Get() { 
+  template<Colour::Type IMTYPE> unsigned char* V4LImageSource<IMTYPE>::MMapHandle::Get() { 
     return m_mmap_start; 
   }
 }

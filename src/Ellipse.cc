@@ -38,7 +38,7 @@ namespace Total {
   Ellipse::Ellipse(float x0, float y0, float width, float height, float angle) :
     m_x0(x0), m_y0(y0),m_angle_radians(angle), m_width(width),m_height(height),m_fitted(true) { Compose(); }
 
-  void Ellipse::Draw(Image& image,const Camera& camera) const {
+  void Ellipse::Draw(Image<Colour::Grey>& image,const Camera& camera) const {
     if (m_fitted) {
       camera.DrawEllipse(image,*this);
     }

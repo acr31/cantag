@@ -20,7 +20,7 @@ namespace Total {
    * you.
    */
   template<int RING_COUNT, int SECTOR_COUNT, int READ_COUNT = 5>
-  class DrawTagCircleObj : public Function1<DecodeEntity<RING_COUNT*SECTOR_COUNT>, Image> {
+  class DrawTagCircleObj : public Function1<DecodeEntity<RING_COUNT*SECTOR_COUNT>, Image<Colour::Grey> > {
   private:
     const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& m_tagspec;
     static const int PayloadSize = SECTOR_COUNT*RING_COUNT;
@@ -30,10 +30,10 @@ namespace Total {
   public:
     DrawTagCircleObj(const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec) : m_tagspec(tagspec) {}
     
-    bool operator()(const DecodeEntity<RING_COUNT*SECTOR_COUNT>& code, Image& image) const;
+    bool operator()(const DecodeEntity<RING_COUNT*SECTOR_COUNT>& code, Image<Colour::Grey>& image) const;
   };
 
-  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool DrawTagCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(const DecodeEntity<RING_COUNT*SECTOR_COUNT>& code, Image& image) const {
+  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool DrawTagCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(const DecodeEntity<RING_COUNT*SECTOR_COUNT>& code, Image<Colour::Grey>& image) const {
     if (code.GetPayloads().size() == 0) return false;
 
     typename std::vector<DecodeData*>::const_iterator i = code.GetPayloads().begin();

@@ -222,6 +222,14 @@ namespace Total {
     return Internal::_Apply_Fn1<const Algorithm>(arg1,result,algorithm);
   }
 
+  template<class Algorithm> inline bool Apply(TreeNode <typename Algorithm::FunctionType::SourceType1>& tree, typename Algorithm::FunctionType::ResultType& dest, Algorithm& algorithm) {
+      bool result = Apply(*(tree.GetNode()),dest,algorithm);
+      for(typename std::list<TreeNode <typename Algorithm::FunctionType::SourceType1>*>::iterator i = tree.GetChildren().begin(); i != tree.GetChildren().end(); ++i) {
+	result |= Apply<Algorithm>(*(*i),dest,algorithm);
+      }    
+      return result;
+  }
+
   template<class Algorithm> inline bool Apply(const typename Algorithm::FunctionType::SourceType1& arg1, typename Algorithm::FunctionType::ResultType& result, Algorithm& algorithm) {
     return Internal::_Apply_Fn1<Algorithm>(arg1,result,algorithm);    
   }
@@ -241,8 +249,6 @@ namespace Total {
   template<class Algorithm> bool Apply(const typename Algorithm::FunctionType::SourceType1& arg1, const typename Algorithm::FunctionType::SourceType2& arg2, const typename Algorithm::FunctionType::SourceType3& arg3, typename Algorithm::FunctionType::ResultType& result, const Algorithm& algorithm) {
     return Internal::_Apply_Fn3<const Algorithm>(arg1,arg2,arg3,result,algorithm);
   }
-
-
 };
 
 #endif//APPLY_GUARD

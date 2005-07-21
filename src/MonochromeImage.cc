@@ -13,9 +13,8 @@ namespace Total {
     delete[] m_data;
   }
 
-
   void MonochromeImage::Save(const char* filename) const {
-    Image image(m_width,m_height);
+    Image<Colour::Grey> image(m_width,m_height);
     for(unsigned int i=0;i<m_height;++i) {
       unsigned char* data_pointer = image.GetRow(i);
       for(unsigned int j=0;j<m_width;++j) {

@@ -19,7 +19,7 @@ extern "C" {
 
 namespace Total {
 
-  class V4LImageSource : public ImageSource {
+  template <Colour::Type IMTYPE> class V4LImageSource : public ImageSource<IMTYPE> {
   private:
   
     class VideoDevHandle {
@@ -51,15 +51,15 @@ namespace Total {
     int m_image_width;
     int m_image_height;
     video_mmap* m_slots;
-    Image* m_images;
+    Image<Colour::Grey> * m_images;
 
   public:
 
     V4LImageSource(char* deviceName, int channel);
     virtual ~V4LImageSource();
-    virtual Image* Next();
-    inline int GetWidth() { return m_image_width; }
-    inline int GetHeight() {  return m_image_height; }
+    virtual Image<IMTYPE>* Next();
+    inline int GetWidth() const { return m_image_width; }
+    inline int GetHeight() const {  return m_image_height; }
 
   };
 }

@@ -49,13 +49,13 @@ namespace Total {
    * An image source that synthesizes the view based on an OpenGL
    * rendering of the tag.
    */
-  class GLImageSource : public ImageSource {
+  class GLImageSource : public ImageSource<Colour::Grey> {
   private:
     int m_width;
     int m_height;
     unsigned char* m_buffer;
     float m_fov;
-    Image m_glimage;
+    Image<Colour::Grey> m_glimage;
     OSMesaContext m_ctx;
     GLubyte* m_tmap;
     GLuint m_textureid;
@@ -65,7 +65,7 @@ namespace Total {
      * Create the image source.  It will create images of the given
      * size, with the texture source mapped on the tag
      */
-    GLImageSource(int width, int height, float fov, const Image& texture_source);
+    GLImageSource(int width, int height, float fov, const Image<Colour::Grey>& texture_source);
     virtual ~GLImageSource();
 
 
@@ -74,7 +74,7 @@ namespace Total {
      */
     void SetCameraParameters(Camera& cam);
   
-    Image* Next();
+    Image<Colour::Grey>* Next();
 
     /**
      * Update the buffer to contain a tag with the given rotations about
@@ -83,7 +83,7 @@ namespace Total {
      * \todo find some way of incorporating the lighting and occlusion
      * options.
      */
-    Image* Next(float n_x, float n_y, float n_z, float centre_x, float centre_y, float centre_z);
+    Image<Colour::Grey>* Next(float n_x, float n_y, float n_z, float centre_x, float centre_y, float centre_z);
   
   };
 }

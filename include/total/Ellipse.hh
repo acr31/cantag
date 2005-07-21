@@ -47,7 +47,7 @@ public:
   inline bool IsFitted() const { return m_fitted; }
   bool Compare(const Ellipse& o) const;
 
-  void Draw(Image& image,const Camera& camera) const;
+  void Draw(Image<Colour::Grey>& image,const Camera& camera) const;
   
   void Draw(std::vector<int>& points, const Camera& camera) const;
 

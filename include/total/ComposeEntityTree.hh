@@ -38,7 +38,7 @@ namespace Total {
 	    return result;
 	}
 
-	bool IsValid() { return m_node.IsPipelineValid(); }
+	bool IsValid() const { return m_node.IsPipelineValid(); }
 	/**
 	 * \todo does nothing at the moment
 	 */

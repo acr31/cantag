@@ -132,10 +132,10 @@ namespace Total {
     int m_displayed_image;
   public:
 
-    class ImageAlgorithm : public Function0<Image> {
+    class ImageAlgorithm : public Function0<Image<Colour::Grey> > {
       friend class XOutputMechanism;
     public:
-      bool operator()(Image& dest);
+      bool operator()(Image<Colour::Grey>& dest);
       
     private:
       XOutputMechanism& m_output;
@@ -276,7 +276,7 @@ namespace Total {
     if (m_displaygot) XCloseDisplay(m_display);
   }
 
-  template<class Shape, int PAYLOAD_SIZE> bool XOutputMechanism<Shape,PAYLOAD_SIZE>::ImageAlgorithm::operator()(Image& image) {
+  template<class Shape, int PAYLOAD_SIZE> bool XOutputMechanism<Shape,PAYLOAD_SIZE>::ImageAlgorithm::operator()(Image<Colour::Grey>& image) {
     XSHMAttachedImage& attached = *m_output.m_image[m_output.m_displayed_image ^ 0x1];
     XImage* ximage = attached.m_image;
 

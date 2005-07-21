@@ -13,10 +13,10 @@ namespace Total {
   /**
    * An image source that provides an image loaded from disk
    */
-  class FileImageSource : public ImageSource {
+  template<Colour::Type IMTYPE> class FileImageSource : public ImageSource<IMTYPE> {
   private:
-    Image* m_original;
-    Image* m_buffer;
+    Image<IMTYPE>* m_original;
+    Image<IMTYPE>* m_buffer;
 
   public:
     /**
@@ -24,9 +24,35 @@ namespace Total {
      */ 
     FileImageSource(char* filename);
     virtual ~FileImageSource();
-    Image* Next();
+    Image<IMTYPE>* Next();
     int GetWidth() const;
     int GetHeight() const;
   };
+
+    template<Colour::Type IMTYPE> FileImageSource<IMTYPE>::FileImageSource(char* filename) : m_original(new Image<IMTYPE>(filename)), m_buffer(new Image<IMTYPE>(filename)) {}    
+    
+    template<Colour::Type IMTYPE> int FileImageSource<IMTYPE>::GetWidth() const {
+	return m_original->GetWidth();
+    }
+
+    template<Colour::Type IMTYPE> int FileImageSource<IMTYPE>::GetHeight() const {
+	return m_original->GetHeight();
+    }
+
+    template<Colour::Type IMTYPE> FileImageSource<IMTYPE>::~FileImageSource() { 
+	if (m_buffer != NULL) {
+	    delete m_buffer;
+	}
+    }
+    
+    template<Colour::Type IMTYPE> Image<IMTYPE>* FileImageSource<IMTYPE>::Next() {
+	if (m_buffer != NULL) {
+	    delete m_buffer;
+	}
+	m_buffer = new Image<IMTYPE>(*m_original);
+	m_buffer->SetValid(true);
+	return m_buffer;
+    }
+
 }
 #endif//FILE_IMAGE_SOURCE
