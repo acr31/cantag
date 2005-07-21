@@ -88,7 +88,7 @@ namespace Total {
      */
     ImageBase(int width, int height, int width_step, unsigned char* contents, bool own) :
       m_width(width), m_height(height), m_contents(contents), 
-      m_free_contents(own), m_width_step(width_step), m_binary(false) {}
+      m_free_contents(own), m_width_step(width_step), m_binary(false) {SetValid(true);}
     ImageBase() :
       m_width(0), m_height(0), m_contents(0), 
       m_free_contents(false), m_width_step(0), m_binary(false) {}
