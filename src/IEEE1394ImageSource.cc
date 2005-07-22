@@ -77,7 +77,7 @@ namespace Total {
   }
 
 
-  Image* IEEE1394ImageSource::Next() {
+  Image<Colour::Grey>* IEEE1394ImageSource::Next() {
     /*
      * This is what we would like,
      * but we can't write to the memory
@@ -94,7 +94,7 @@ namespace Total {
 
     // Doing a copy instead at the moment!!
     if (!mImage) {
-      mImage = new Image(GetWidth(),GetHeight());
+      mImage = new Image<Colour::Grey>(GetWidth(),GetHeight());
     }
     dc1394_dma_single_capture(&mCamera);
     unsigned char *img = (unsigned char*) mCamera.capture_buffer;
