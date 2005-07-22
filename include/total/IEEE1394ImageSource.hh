@@ -20,7 +20,7 @@ namespace Total {
   private:
     raw1394handle_t      mHandle;
     dc1394_cameracapture mCamera;
-    Image               *mImage;
+    Image<Colour::Grey>  *mImage;
   
   public:
 
@@ -32,7 +32,7 @@ namespace Total {
 			int shutter=-1,
 			int gain=-1);
     virtual ~IEEE1394ImageSource();
-    virtual Image* Next();
+    virtual Image<Colour::Grey>* Next();
     inline int GetWidth() const { return 640; }
     inline int GetHeight() const {  return 480; }
 
