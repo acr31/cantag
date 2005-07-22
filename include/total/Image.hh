@@ -72,6 +72,7 @@ namespace Total {
    * A wrapper object for an image
    */
   class ImageBase : public Entity {
+
   protected:
     unsigned int m_width;
     unsigned int m_height;
@@ -93,6 +94,12 @@ namespace Total {
       m_width(0), m_height(0), m_contents(0), 
       m_free_contents(false), m_width_step(0), m_binary(false) {}
 
+    ImageBase(const ImageBase& image) : m_width(image.m_width), m_height(image.m_height), m_contents(new unsigned char[image.m_width_step*image.m_height]), m_free_contents(true), m_width_step(image.m_width_step),m_binary(false) { 
+      SetValid(true); 
+      memcpy(m_contents,image.m_contents,image.m_width_step*image.m_height);
+    }
+
+
     ~ImageBase() {
       if (m_free_contents) {
 	delete[] m_contents;
@@ -111,6 +118,11 @@ namespace Total {
      */
     inline int GetHeight() const { return m_height; }
 
+
+    /**
+     * Return the number of bytes per line of an image
+     */ 
+    inline int GetWidthStep() const { return m_width_step; }
   };
 
   /**
@@ -123,12 +135,15 @@ namespace Total {
    */
   template<> class ImageSpecialise<Colour::RGB> : public ImageBase { 
   protected:
-    ImageSpecialise(int w,int h): ImageBase(w,h,w,new unsigned char[Bpp*w*h],false)
-    {memset(m_contents,255,w*h*Bpp);}
-    ImageSpecialise(int w, int h, int w_step, unsigned char* c) : 
-      ImageBase(w, h, w_step, c, false) {}
-    ImageSpecialise() :
-      ImageBase() {}
+    ImageSpecialise(int w,int h): ImageBase(w,h,w*Bpp,new unsigned char[Bpp*w*h],false) {
+      memset(m_contents,255,w*h*Bpp);
+    }
+
+    ImageSpecialise(int w, int h, int w_step, unsigned char* c) : ImageBase(w, h, w_step, c, false) {}
+
+    ImageSpecialise(const ImageSpecialise<Colour::RGB>& image) : ImageBase(image) {}
+
+    ImageSpecialise() : ImageBase() {}
   public:
     /**
      * Number of bytes per pixel
@@ -186,12 +201,16 @@ namespace Total {
    */
   template<> class ImageSpecialise<Colour::Grey> : public ImageBase { 
   protected:
-    ImageSpecialise(int w,int h): ImageBase(w,h,w,new unsigned char[w*h],true)
-    {memset(m_contents,255,w*h*Bpp);}
-    ImageSpecialise(int w, int h, int w_step, unsigned char* c) : 
-      ImageBase(w, h, w_step, c, false) {}
-    ImageSpecialise() :
-      ImageBase() {}
+    ImageSpecialise(int w,int h): ImageBase(w,h,w,new unsigned char[w*h],true) {
+      memset(m_contents,255,w*h*Bpp);
+    }
+
+    ImageSpecialise(int w, int h, int w_step, unsigned char* c) : ImageBase(w, h, w_step, c, false) {}
+
+    ImageSpecialise(const ImageSpecialise<Colour::Grey>& image) : ImageBase(image) {};
+
+    ImageSpecialise() : ImageBase() {};
+
   public:
      /**
      * Number of bytes per pixel
@@ -248,12 +267,10 @@ namespace Total {
   typedef ImageSpecialise<ColType> s;
 
   public:
-    Image() : 
-      ImageSpecialise<ColType>() {}
-    Image(int width, int height) : 
-      ImageSpecialise<ColType>(width,height) {}
-    Image(int width, int height, int width_step, unsigned char* contents) : 
-      ImageSpecialise<ColType>(width, height, width_step, contents) {}
+    Image() : ImageSpecialise<ColType>() {}
+    Image(int width, int height) : ImageSpecialise<ColType>(width,height) {}
+    Image(int width, int height, int width_step, unsigned char* contents) : ImageSpecialise<ColType>(width, height, width_step, contents) {}
+    Image(const Image<ColType>& image) : ImageSpecialise<ColType>(image) {};
 
     /**
      * Attempts to construct a new image, reading a file from disk
