@@ -1,8 +1,9 @@
-noinst_PROGRAMS= NewTest DrawTag TextFinder
+noinst_PROGRAMS= NewTest DrawTag ContourTest
+ContourTest_SOURCES = ContourTest.cc
 #TextOnly DrawTag
 #GnuplotOutput
 #TextOnly_SOURCES=TextOnly.cc 
-TextFinder_SOURCES=TextFinder.cc
+#TextFinder_SOURCES=TextFinder.cc
 DrawTag_SOURCES=DrawTag.cc
 #NewTest2_SOURCES=NewTest2.cc
 NewTest_SOURCES=NewTest.cc
