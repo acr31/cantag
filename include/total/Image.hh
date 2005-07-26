@@ -92,7 +92,7 @@ namespace Total {
       m_free_contents(own), m_width_step(width_step), m_binary(false) {SetValid(true);}
     ImageBase() :
       m_width(0), m_height(0), m_contents(0), 
-      m_free_contents(false), m_width_step(0), m_binary(false) {}
+      m_free_contents(false), m_width_step(0), m_binary(false) {SetValid(false);}
 
     ImageBase(const ImageBase& image) : m_width(image.m_width), m_height(image.m_height), m_contents(new unsigned char[image.m_width_step*image.m_height]), m_free_contents(true), m_width_step(image.m_width_step),m_binary(false) { 
       SetValid(true); 
