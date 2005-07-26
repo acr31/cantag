@@ -17,18 +17,18 @@ extern "C" {
 # include <boost/random.hpp>
 #endif
 
-#include <total/Config.hh>
-#include <total/Socket.hh>
-#include <total/SpeedMath.hh>
-#include <total/MonochromeImage.hh>
-#include <total/entities/Entity.hh>
+#include <cantag/Config.hh>
+#include <cantag/Socket.hh>
+#include <cantag/SpeedMath.hh>
+#include <cantag/MonochromeImage.hh>
+#include <cantag/entities/Entity.hh>
 #include <cmath>
 #include <cassert>
 
 #define COLOUR_BLACK ((unsigned char)0)
 #define COLOUR_WHITE ((unsigned char)255)
 
-namespace Total {
+namespace Cantag {
 
 
   /*
@@ -979,7 +979,7 @@ namespace Total {
 //#include <Magick++.h>
 //#endif
 //
-//namespace Total {
+//namespace Cantag {
 //  template<Colour::Type ColType> class Image;
 //}
 #endif//IMAGE_GUARD

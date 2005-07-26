@@ -22,9 +22,9 @@
  * $Header$
  */
 
-#include <total/Config.hh>
-#include <total/QuadTangle.hh>
-#include <total/gaussianelimination.hh>
+#include <cantag/Config.hh>
+#include <cantag/QuadTangle.hh>
+#include <cantag/gaussianelimination.hh>
 
 #include <cmath>
 #include <cassert>
@@ -41,7 +41,7 @@
 #define LOGMAXWINDOW 5
 #define CURVTHRESH -0.8
 
-namespace Total {
+namespace Cantag {
 
 #define TOTAL_MASK(x) ((x) & ((1<<LOGMAXWINDOW)-1))
 

@@ -6,11 +6,11 @@
 #define COMPOSE_ENTITY_GUARD
 
 #include <iostream>
-#include <total/entities/Entity.hh>
-#include <total/TemplateUtils.hh>
-#include <total/Function.hh>
+#include <cantag/entities/Entity.hh>
+#include <cantag/TemplateUtils.hh>
+#include <cantag/Function.hh>
 
-namespace Total {
+namespace Cantag {
 
   template<class List>
   class TEntity : public List::Head, public TEntity<typename List::Tail> {

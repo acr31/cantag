@@ -5,9 +5,9 @@
 #ifndef BIND_GUARD
 #define BIND_GUARD
 
-#include <total/Function.hh>
+#include <cantag/Function.hh>
 
-namespace Total {
+namespace Cantag {
   template<class S, class T>
   class Bound {
   };

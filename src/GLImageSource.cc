@@ -22,9 +22,9 @@
  * $Header$
  */
 
-#include <total/GLImageSource.hh>
+#include <cantag/GLImageSource.hh>
 
-namespace Total {
+namespace Cantag {
 
   void GLImageSource::SetCameraParameters(Camera& cam) {
     // focal length

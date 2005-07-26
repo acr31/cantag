@@ -5,11 +5,11 @@
 #ifndef TRANSFORM_ELLIPSE_ROTATE_GUARD
 #define TRANSFORM_ELLIPSE_ROTATE_GUARD
 
-#include <total/Function.hh>
-#include <total/MonochromeImage.hh>
-#include <total/entities/TransformEntity.hh>
+#include <cantag/Function.hh>
+#include <cantag/MonochromeImage.hh>
+#include <cantag/entities/TransformEntity.hh>
 
-namespace Total {
+namespace Cantag {
 
   /**
    * An algorithm to rotate the object co-ordinates of the transforms

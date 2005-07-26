@@ -9,14 +9,14 @@
 #include <cmath>
 #include <iostream>
 
-#include <total/Config.hh>
-#include <total/TagSpec.hh>
-#include <total/Camera.hh>
-#include <total/MonochromeImage.hh>
-#include <total/entities/Entity.hh>
-#include <total/CyclicBitSet.hh>
+#include <cantag/Config.hh>
+#include <cantag/TagSpec.hh>
+#include <cantag/Camera.hh>
+#include <cantag/MonochromeImage.hh>
+#include <cantag/entities/Entity.hh>
+#include <cantag/CyclicBitSet.hh>
 
-namespace Total {
+namespace Cantag {
   /**
    * Rotate the transformation to the angle as represented by the
    * number of bits of rotation in the payload.  If the transformation

@@ -24,11 +24,11 @@
 
 #include <map>
 
-#include <total/algorithms/ContourFollowerTree.hh>
+#include <cantag/algorithms/ContourFollowerTree.hh>
 
 #define CONTOUR_TREE_DEBUG
 
-namespace Total {
+namespace Cantag {
 
   ContourFollowerTree::ContourFollowerTree(const ContourRestrictions& constraint) : m_working_store(NULL), m_image_width(-1),m_image_height(-1),m_constraints(constraint) {
     m_offset_x[0] = -1;

@@ -18,12 +18,12 @@
   Email: acr31@cam.ac.uk
 */
 
-#include <Total.hh>
+#include <Cantag.hh>
 #include <iostream>
 
 #include "TagDef.hh"
 
-using namespace Total;
+using namespace Cantag;
 
 /**
  * Simply pipe the output of this program to 

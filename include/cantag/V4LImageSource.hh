@@ -5,13 +5,13 @@
 #ifndef V4L_IMAGE_SOURCE_GUARD
 #define V4L_IMAGE_SOURCE_GUARD
 
-#include <total/Config.hh>
+#include <cantag/Config.hh>
 
 #ifndef HAVE_LINUX_VIDEODEV_H
 #error This version has been configured without Video4Linux support
 #endif
 
-#include <total/ImageSource.hh>
+#include <cantag/ImageSource.hh>
 
 extern "C" {
 #include <linux/videodev.h> // for Video4Linux
@@ -28,7 +28,7 @@ extern "C" {
 #define V4L_DEBUG
 
 
-namespace Total {
+namespace Cantag {
 
   template <Colour::Type ColType> class V4LImageSource : public ImageSource<ColType> {
   private:

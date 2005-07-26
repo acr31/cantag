@@ -4,13 +4,13 @@
 #ifndef LOCATED_OBJECT_GUARD
 #define LOCATED_OBJECT_GUARD
 
-#include <total/Config.hh>
-#include <total/Image.hh>
-#include <total/CyclicBitSet.hh>
-#include <total/findtransform.hh>
-#include <total/Camera.hh>
+#include <cantag/Config.hh>
+#include <cantag/Image.hh>
+#include <cantag/CyclicBitSet.hh>
+#include <cantag/findtransform.hh>
+#include <cantag/Camera.hh>
 
-namespace Total {
+namespace Cantag {
   /**
    * Represents a tag that has been located.  Contains its 3D location,
    * pose, transformation matrix and its coded value.

@@ -22,13 +22,13 @@
  * $Header$
  */
 
-#include <total/Camera.hh>
+#include <cantag/Camera.hh>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
 
 using boost::unit_test_framework::test_suite;
-using namespace Total;
+using namespace Cantag;
 
 float intrinsics[] = { 651.374035092475992, 646.891646093565100,385.839970984750892, 258.272641514105032, 0,
 		       1420.751194666989250, 1419.169243508142245, 344.678301126735334, 322.299040811109990, 0 };

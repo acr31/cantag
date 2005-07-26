@@ -4,10 +4,10 @@
 #ifndef IMAGE_SOURCE_GUARD
 #define IMAGE_SOURCE_GUARD
 
-#include <total/Config.hh>
-#include <total/Image.hh>
+#include <cantag/Config.hh>
+#include <cantag/Image.hh>
 
-namespace Total {
+namespace Cantag {
   /**
    * Encapsulate a source of input images
    */

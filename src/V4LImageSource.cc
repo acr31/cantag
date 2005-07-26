@@ -22,9 +22,9 @@
  * $Header$
  */
 
-#include <total/V4LImageSource.hh>
+#include <cantag/V4LImageSource.hh>
 
 
-namespace Total {
+namespace Cantag {
 
 }

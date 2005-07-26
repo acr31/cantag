@@ -5,12 +5,12 @@
 #ifndef SAMPLE_CIRCLE_TAG
 #define SAMPLE_CIRCLE_TAG
 
-#include <total/entities/Entity.hh>
-#include <total/TagCircle.hh>
-#include <total/MonochromeImage.hh>
-#include <total/Function.hh>
+#include <cantag/entities/Entity.hh>
+#include <cantag/TagCircle.hh>
+#include <cantag/MonochromeImage.hh>
+#include <cantag/Function.hh>
 
-namespace Total {
+namespace Cantag {
 
   /**
    * This algorithm samples points on a circular tag and stores the

@@ -22,9 +22,9 @@
  * $Header$
  */
 
-#include <total/algorithms/ThresholdGlobal.hh>
+#include <cantag/algorithms/ThresholdGlobal.hh>
 
-namespace Total {
+namespace Cantag {
   ThresholdGlobal::ThresholdGlobal(int threshold) : m_threshold(threshold) {}
   
   bool ThresholdGlobal::operator()(const Image<Colour::Grey>& image, MonochromeImage& dest) const {

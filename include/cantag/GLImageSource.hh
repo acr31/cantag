@@ -5,7 +5,7 @@
 #ifndef GL_IMAGE_SOURCE_GUARD
 #define GL_IMAGE_SOURCE_GUARD
 
-#include <total/Config.hh>
+#include <cantag/Config.hh>
 
 #ifndef HAVE_GL_GL_H
 #error "This version has been configured without OpenGL support"
@@ -31,9 +31,9 @@
 #error "libGLU.so is required for this component"
 #endif
 
-#include <total/ImageSource.hh>
-#include <total/Image.hh>
-#include <total/Camera.hh>
+#include <cantag/ImageSource.hh>
+#include <cantag/Image.hh>
+#include <cantag/Camera.hh>
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -43,7 +43,7 @@
 
 #define GLIMAGESOURCE_DEBUG
 
-namespace Total {
+namespace Cantag {
 
   /**
    * An image source that synthesizes the view based on an OpenGL

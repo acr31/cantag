@@ -6,8 +6,8 @@
 #define MONOCHROME_IMAGE_GUARD
 
 #include <cassert>
-#include <total/entities/Entity.hh>
-namespace Total {
+#include <cantag/entities/Entity.hh>
+namespace Cantag {
   /**
    * \todo pack the data into ints
    */

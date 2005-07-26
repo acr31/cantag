@@ -22,7 +22,7 @@
  * $Header$
  */
 
-#include <total/algorithms/FitQuadTanglePolygon.hh>
+#include <cantag/algorithms/FitQuadTanglePolygon.hh>
 
 /**
  * The corner curvature we use for weeding out false vertexes
@@ -38,7 +38,7 @@
 
 #undef POLYGON_DEBUG
   
-namespace Total {
+namespace Cantag {
 
   bool FitQuadTanglePolygon::operator()(const ContourEntity& contour, ShapeEntity<QuadTangle>& shape) const {
     const std::vector<float>& points = contour.GetPoints();

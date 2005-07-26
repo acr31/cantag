@@ -5,11 +5,11 @@
 #ifndef THRESHOLD_GLOBAL_GUARD
 #define THRESHOLD_GLOBAL_GUARD
 
-#include <total/Image.hh>
-#include <total/MonochromeImage.hh>
-#include <total/Function.hh>
+#include <cantag/Image.hh>
+#include <cantag/MonochromeImage.hh>
+#include <cantag/Function.hh>
 
-namespace Total {
+namespace Cantag {
 
   class ThresholdGlobal : public Function1<Image<Colour::Grey>,MonochromeImage> {
   private:

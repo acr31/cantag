@@ -5,12 +5,12 @@
 #ifndef FULL_ELLIPSE_TRANSFORM_GUARD
 #define FULL_ELLIPSE_TRANSFORM_GUARD
 
-#include <total/entities/Entity.hh>
-#include <total/entities/TransformEntity.hh>
-#include <total/Ellipse.hh>
-#include <total/Function.hh>
+#include <cantag/entities/Entity.hh>
+#include <cantag/entities/TransformEntity.hh>
+#include <cantag/Ellipse.hh>
+#include <cantag/Function.hh>
 
-namespace Total {
+namespace Cantag {
 
   class TransformEllipseFull : public Function1<ShapeEntity<Ellipse>, TransformEntity> {
   public:

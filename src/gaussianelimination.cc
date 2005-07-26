@@ -22,8 +22,8 @@
  *  $Header$
  */
 
-#include <total/Config.hh>
-#include <total/gaussianelimination.hh>
+#include <cantag/Config.hh>
+#include <cantag/gaussianelimination.hh>
 #include <cmath>
 
 #ifdef TEXT_DEBUG
@@ -31,7 +31,7 @@
 # undef GAUSSIAN_DEBUG
 #endif
 
-namespace Total {
+namespace Cantag {
   /**
    * Pick the most well conditioned co-efficient from the matrix.
    *

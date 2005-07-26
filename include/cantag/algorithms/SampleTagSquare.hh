@@ -5,12 +5,12 @@
 #ifndef SAMPLE_SQUARE_TAG
 #define SAMPLE_SQUARE_TAG
 
-#include <total/entities/Entity.hh>
-#include <total/TagSquare.hh>
-#include <total/MonochromeImage.hh>
-#include <total/Function.hh>
+#include <cantag/entities/Entity.hh>
+#include <cantag/TagSquare.hh>
+#include <cantag/MonochromeImage.hh>
+#include <cantag/Function.hh>
 
-namespace Total {
+namespace Cantag {
 
   template<int EDGE_CELLS>
   class SampleTagSquare : public Function2<MonochromeImage,TransformEntity, DecodeEntity<EDGE_CELLS*EDGE_CELLS-(EDGE_CELLS*EDGE_CELLS%2)> > {

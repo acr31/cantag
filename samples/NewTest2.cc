@@ -24,9 +24,9 @@
 
 #include <iostream>
 
-#include <Total.hh>
+#include <Cantag.hh>
 
-using namespace Total;
+using namespace Cantag;
 
 int main(int argc,char* argv[]) {
     try {

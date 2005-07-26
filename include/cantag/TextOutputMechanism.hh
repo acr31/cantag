@@ -5,14 +5,14 @@
 #ifndef TEXT_OUTPUT_MECHANISM_GUARD
 #define TEXT_OUTPUT_MECHANISM_GUARD
 
-#include <total/Config.hh>
-#include <total/LocatedObject.hh>
-#include <total/entities/Entity.hh>
-#include <total/ComposeEntity.hh>
+#include <cantag/Config.hh>
+#include <cantag/LocatedObject.hh>
+#include <cantag/entities/Entity.hh>
+#include <cantag/ComposeEntity.hh>
 
 #include <ostream>
 
-namespace Total {
+namespace Cantag {
   class TextOutputMechanism {
   private:
     std::ostream& m_ostream;

@@ -5,13 +5,13 @@
 #ifndef CYCLIC_BIT_SET
 #define CYCLIC_BIT_SET
 
-#include <total/Config.hh>
-#include <total/Socket.hh>
+#include <cantag/Config.hh>
+#include <cantag/Socket.hh>
 
 #include <cassert>
 #include <bitset>
 
-namespace Total {
+namespace Cantag {
   /**
    * A simple extension of the STL bitset that supports some cyclic
    * operations.

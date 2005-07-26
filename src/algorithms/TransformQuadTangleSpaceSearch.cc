@@ -22,11 +22,11 @@
  * $Header$
  */
 
-#include <total/algorithms/TransformQuadTangleSpaceSearch.hh>
-#include <total/gaussianelimination.hh>
-#include <total/SpeedMath.hh>
+#include <cantag/algorithms/TransformQuadTangleSpaceSearch.hh>
+#include <cantag/gaussianelimination.hh>
+#include <cantag/SpeedMath.hh>
 
-namespace Total {
+namespace Cantag {
 
   bool TransformQuadTangleSpaceSearch::operator()(const ShapeEntity<QuadTangle>& shape, TransformEntity& dest) const {
     
@@ -59,7 +59,7 @@ namespace Total {
 
     int nparam = 4;
   
-    errfunc.f = &(Total::TransformQuadTangleSpaceSearch::SpaceSearchQuadFunc);
+    errfunc.f = &(Cantag::TransformQuadTangleSpaceSearch::SpaceSearchQuadFunc);
     errfunc.n = nparam;
     errfunc.params = &p;
 

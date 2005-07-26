@@ -7,10 +7,10 @@
 
 #undef SQUARE_DEBUG_POINTS
 
-#include <total/Config.hh>
-#include <total/TagSpec.hh>
+#include <cantag/Config.hh>
+#include <cantag/TagSpec.hh>
 
-namespace Total {
+namespace Cantag {
 
   template<int SIZE>
   class TagSquare :public TagSpec<SIZE*SIZE - ((SIZE*SIZE)%2)> {

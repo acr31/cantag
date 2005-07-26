@@ -9,9 +9,9 @@
 #ifndef POLYSOLVE_GUARD
 #define POLYSOLVE_GUARD
 
-#include <total/Config.hh>
+#include <cantag/Config.hh>
 
-namespace Total {
+namespace Cantag {
 
   bool eigensolve(double a, double b, double c,
 		  double d, double e, double f,

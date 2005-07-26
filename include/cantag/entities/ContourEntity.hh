@@ -6,10 +6,10 @@
 #define CONTOUR_ENTITY_GUARD
 
 #include <cassert>
-#include <total/Config.hh>
-#include <total/entities/Entity.hh>
+#include <cantag/Config.hh>
+#include <cantag/entities/Entity.hh>
 
-namespace Total {
+namespace Cantag {
 
   class ContourEntity : public Entity {
   public:

@@ -24,21 +24,21 @@
 
 #include <iostream>
 
-#include <Total.hh>
+#include <Cantag.hh>
 
 // this file includes the definition of the type of tag used in the
 // samples.  This is then typedef'd to be of type TagType which is
 // used below
 #include "TagDef.hh"
 
-using namespace Total;
+using namespace Cantag;
 
 int main(int argc,char* argv[]) {
 
   try {
-    FileImageSource<Colour::Grey> fs(argv[1]);
+    //FileImageSource<Colour::Grey> fs(argv[1]);
     //V4LImageSource<Colour::Grey> fs("/dev/video0",1);
-    //IEEE1394ImageSource fs("/dev/video1394",0);
+    IEEE1394ImageSource fs("/dev/video1394",0);
     
     Camera camera;
     // set the intrinsic parameters of the camera
@@ -57,7 +57,7 @@ int main(int argc,char* argv[]) {
       Apply(*i,o3.m_ImageAlgorithm);
       MonochromeImage m(i->GetWidth(),i->GetHeight());
       //Apply(*i,m,ThresholdAdaptive(atoi(argv[1]),atoi(argv[2])));
-      Apply(*i,m,ThresholdGlobal(atoi(argv[2])));
+      Apply(*i,m,ThresholdGlobal(atoi(argv[1])));
       //      m.Save("tmp2.ppm");
 
       Apply(m,o3.m_ThresholdAlgorithm);

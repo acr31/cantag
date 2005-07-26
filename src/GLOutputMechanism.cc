@@ -22,9 +22,9 @@
  * $Header$
  */
 
-#include <total/GLOutputMechanism.hh>
+#include <cantag/GLOutputMechanism.hh>
 
-namespace Total {
+namespace Cantag {
 
   GLOutputMechanism::GLOutputMechanism(int argc, char* argv[], int width, int height) {
 
@@ -65,7 +65,7 @@ namespace Total {
     swa.event_mask = ExposureMask | ButtonPressMask | StructureNotifyMask;
     m_window = XCreateWindow(m_display, RootWindow(m_display, m_visual->screen), 0, 0, width, height, 0, m_visual->depth,
 			     InputOutput, m_visual->visual, CWBorderPixel | CWColormap | CWEventMask, &swa);
-    XSetStandardProperties(m_display, m_window, "Total", "Total", None, argv, argc, NULL);
+    XSetStandardProperties(m_display, m_window, "Cantag", "Cantag", None, argv, argc, NULL);
   
     /* Bind the rendering context to the window */
     glXMakeCurrent(m_display, m_window, m_context);

@@ -22,9 +22,9 @@
  * $Header$
  */
 
-#include <total/algorithms/FitEllipseSimple.hh>
+#include <cantag/algorithms/FitEllipseSimple.hh>
 
-namespace Total {
+namespace Cantag {
 
   bool FitEllipseSimple::operator()(const ContourEntity& contour, ShapeEntity<Ellipse>& shape) const {
     const std::vector<float>& points = contour.GetPoints();

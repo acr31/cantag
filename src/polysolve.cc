@@ -25,13 +25,13 @@
  *
  */
 
-#include <total/Config.hh>
+#include <cantag/Config.hh>
 
 #include <cmath>
 #include <cassert>
 #include <stdio.h>
 
-namespace Total {
+namespace Cantag {
   /** 
    * Solve simultaneous equations with two unknowns
    * Effectively does Gaussian elimination on a 2x2 matrix; i.e. solve:

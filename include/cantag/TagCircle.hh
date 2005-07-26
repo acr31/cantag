@@ -7,13 +7,13 @@
 
 #include <cmath>
 
-#include <total/Config.hh>
-#include <total/TagSpec.hh>
-#include <total/ContourRestrictions.hh>
-#include <total/ConvexHullRestrictions.hh>
-#include <total/coders/Coder.hh>
+#include <cantag/Config.hh>
+#include <cantag/TagSpec.hh>
+#include <cantag/ContourRestrictions.hh>
+#include <cantag/ConvexHullRestrictions.hh>
+#include <cantag/coders/Coder.hh>
 
-namespace Total {
+namespace Cantag {
 
   template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT=5>
   class TagCircle : public TagSpec<PARAM_RING_COUNT*PARAM_SECTOR_COUNT>, public ContourRestrictions, public ConvexHullRestrictions {

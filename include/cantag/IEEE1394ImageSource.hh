@@ -5,16 +5,16 @@
 #ifndef IEEE1394_IMAGE_SOURCE_GUARD
 #define IEEE1394_IMAGE_SOURCE_GUARD
 
-#include <total/Config.hh>
+#include <cantag/Config.hh>
 
-#include <total/ImageSource.hh>
+#include <cantag/ImageSource.hh>
 
 extern "C" {
 #include <libraw1394/raw1394.h>
 #include <libdc1394/dc1394_control.h> // libdc1394 interface
 };
 
-namespace Total {
+namespace Cantag {
 
   class IEEE1394ImageSource : public ImageSource<Colour::Grey> {
   private:

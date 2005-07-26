@@ -5,11 +5,11 @@
 #ifndef FILE_IMAGE_SOURCE
 #define FILE_IMAGE_SOURCE
 
-#include <total/Config.hh>
-#include <total/Image.hh>
-#include <total/ImageSource.hh>
+#include <cantag/Config.hh>
+#include <cantag/Image.hh>
+#include <cantag/ImageSource.hh>
 
-namespace Total {
+namespace Cantag {
   /**
    * An image source that provides an image loaded from disk
    */

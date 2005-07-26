@@ -5,16 +5,16 @@
 #ifndef IMAGE_OUTPUT_MECHANISM_GUARD
 #define IMAGE_OUTPUT_MECHANISM_GUARD
 
-#include <total/Config.hh>
-#include <total/LocatedObject.hh>
-#include <total/WorldState.hh>
-#include <total/Camera.hh>
-#include <total/entities/Entity.hh>
-#include <total/ComposeEntity.hh>
-#include <total/CyclicBitSet.hh>
+#include <cantag/Config.hh>
+#include <cantag/LocatedObject.hh>
+#include <cantag/WorldState.hh>
+#include <cantag/Camera.hh>
+#include <cantag/entities/Entity.hh>
+#include <cantag/ComposeEntity.hh>
+#include <cantag/CyclicBitSet.hh>
 #include <list>
 
-namespace Total {
+namespace Cantag {
   class ImageOutputMechanism {
   private:    
     const Camera& m_camera;

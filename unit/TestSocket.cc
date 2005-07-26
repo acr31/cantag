@@ -22,8 +22,8 @@
  * $Header$
  */
 
-#include <total/Socket.hh>
-#include <total/Image.hh>
+#include <cantag/Socket.hh>
+#include <cantag/Image.hh>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
@@ -31,7 +31,7 @@
 #define PORT 56789
 
 using boost::unit_test_framework::test_suite;
-using namespace Total;
+using namespace Cantag;
  
 boost::mt19937 rng;
 boost::uniform_int<> numbersource(0,255);

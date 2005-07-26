@@ -5,10 +5,10 @@
 #ifndef APPLY_GUARD
 #define APPLY_GUARD
 
-#include <total/ComposeEntity.hh>
-#include <total/EntityTree.hh>
+#include <cantag/ComposeEntity.hh>
+#include <cantag/EntityTree.hh>
 
-namespace Total {
+namespace Cantag {
 
   namespace Internal {
     /**

@@ -22,7 +22,7 @@
  * $Header$
  */
 
-#include <total/gaussianelimination.hh>
+#include <cantag/gaussianelimination.hh>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
@@ -32,7 +32,7 @@
 #define SIZE 10
 
 using boost::unit_test_framework::test_suite;
-using namespace Total;
+using namespace Cantag;
  
 boost::mt19937 rng;
 boost::uniform_real<> numbersource(-1024,1024);

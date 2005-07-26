@@ -4,14 +4,14 @@
 #ifndef QUADTANGLE_GUARD
 #define QUADTANGLE_GUARD
 
-#include <total/Config.hh>
-#include <total/Image.hh>
-#include <total/Camera.hh>
+#include <cantag/Config.hh>
+#include <cantag/Image.hh>
+#include <cantag/Camera.hh>
 
 #include <vector>
 #include <list>
 
-namespace Total {
+namespace Cantag {
 
   /**
    * A class to fit points to a quadtangle and encapsulate the result
@@ -74,7 +74,7 @@ namespace Total {
   };
 }
 #else
-namespace Total {
+namespace Cantag {
   class QuadTangle;
 }
 #endif//QUADTANGLE_GUARD

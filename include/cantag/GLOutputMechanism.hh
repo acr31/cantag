@@ -5,7 +5,7 @@
 #ifndef GLOUTPUT_MECHANISM_GUARD
 #define GLOUTPUT_MECHANISM_GUARD
 
-#include <total/Config.hh>
+#include <cantag/Config.hh>
 
 #ifndef HAVE_GL_GL_H
 #error "This version has been configured without OpenGL support"
@@ -18,13 +18,13 @@
 #include <iostream>
 #include <map>
 
-#include <total/ContourTree.hh>
-#include <total/ShapeTree.hh>
-#include <total/WorldState.hh>
-#include <total/Tag.hh>
-#include <total/Camera.hh>
+#include <cantag/ContourTree.hh>
+#include <cantag/ShapeTree.hh>
+#include <cantag/WorldState.hh>
+#include <cantag/Tag.hh>
+#include <cantag/Camera.hh>
 
-#include <total/CyclicBitSet.hh>
+#include <cantag/CyclicBitSet.hh>
 
 #include <GL/glx.h>
 #include <GL/gl.h>
@@ -33,7 +33,7 @@
 
 #define FRAME_TTL 1
 
-namespace Total {
+namespace Cantag {
 
   class GLOutputMechanism {
   private:

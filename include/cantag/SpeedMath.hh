@@ -5,7 +5,7 @@
 #include <cassert>
 #include <sys/param.h>
 
-namespace Total {
+namespace Cantag {
 
   template<unsigned int N> inline int t_fact() {
     return N*t_fact<N-1>();

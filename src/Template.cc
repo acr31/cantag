@@ -18,14 +18,14 @@
   Email: acr31@cam.ac.uk
 */
 
-#include <total/Config.hh>
-#include <total/Template.hh>
-#include <total/findtransform.hh>
+#include <cantag/Config.hh>
+#include <cantag/Template.hh>
+#include <cantag/findtransform.hh>
 
 #include <cassert>
 #include <cstring>
 
-namespace Total {
+namespace Cantag {
   /**
    * Load the image file given from disk.  Subsample it to produce a
    * matrix of greyscale values with the size given.  Subsample is the

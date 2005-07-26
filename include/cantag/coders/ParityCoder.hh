@@ -5,13 +5,13 @@
 #ifndef PARITY_CODER_GUARD
 #define PARITY_CODER_GUARD
 
-#include <total/Config.hh>
-#include <total/coders/Coder.hh>
-#include <total/CyclicBitSet.hh>
+#include <cantag/Config.hh>
+#include <cantag/coders/Coder.hh>
+#include <cantag/CyclicBitSet.hh>
 
 #define PARITY_DEBUG
 
-namespace Total {
+namespace Cantag {
 
   /**
    * A parity coding scheme.  Lays out the code with a parity bit at the end.

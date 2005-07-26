@@ -5,11 +5,11 @@
 #ifndef CRC_CODER_GUARD
 #define CRC_CODER_GUARD
 
-#include <total/Config.hh>
-#include <total/coders/Coder.hh>
+#include <cantag/Config.hh>
+#include <cantag/coders/Coder.hh>
 #include <boost/crc.hpp>
 
-namespace Total {
+namespace Cantag {
 
 /**
  * A CRC based coding scheme.  The generator polynomials used are:

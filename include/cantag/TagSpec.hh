@@ -5,11 +5,11 @@
 #ifndef TAG_SPEC_GUARD
 #define TAG_SPEC_GUARD
 
-#include <total/Config.hh>
-#include <total/SpeedMath.hh>
-#include <total/coders/Coder.hh>
+#include <cantag/Config.hh>
+#include <cantag/SpeedMath.hh>
+#include <cantag/coders/Coder.hh>
 
-namespace Total {
+namespace Cantag {
 
   /**
    * Concrete superclass for tag specifications.

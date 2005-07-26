@@ -22,11 +22,11 @@
  * $Header$
  */
 
-#include <total/Config.hh>
-#include <total/Ellipse.hh>
-#include <total/gaussianelimination.hh>
-#include <total/polysolve.hh>
-#include <total/SpeedMath.hh>
+#include <cantag/Config.hh>
+#include <cantag/Ellipse.hh>
+#include <cantag/gaussianelimination.hh>
+#include <cantag/polysolve.hh>
+#include <cantag/SpeedMath.hh>
 #include <iostream>
 
 #include <cmath>
@@ -43,7 +43,7 @@
 #define COMPARETHRESH 1
 #define MAXDISTANCE 
 
-namespace Total {
+namespace Cantag {
 
 #ifdef ELLIPSE_DEBUG
   static void print(const char* label, double* array, int rows, int cols);

@@ -5,10 +5,10 @@
 #ifndef TRANSFORMQUADTANGLESPACE_GUARD
 #define TRANSFORMQUADTANGLESPACE_GUARD
 
-#include <total/QuadTangle.hh>
-#include <total/entities/Entity.hh>
-#include <total/entities/TransformEntity.hh>
-#include <total/Function.hh>
+#include <cantag/QuadTangle.hh>
+#include <cantag/entities/Entity.hh>
+#include <cantag/entities/TransformEntity.hh>
+#include <cantag/Function.hh>
 
 #if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
 #else
@@ -18,7 +18,7 @@
 #include <gsl/gsl_multimin.h>
 
 
-namespace Total {
+namespace Cantag {
   /**
    * Perform transform based on assertion that tag is exactly
    * square in real life.  Solves for four parameters: z, alpha,

@@ -22,10 +22,10 @@
  * $Header$
  */
 
-#include <total/MonochromeImage.hh>
-#include <total/Image.hh>
+#include <cantag/MonochromeImage.hh>
+#include <cantag/Image.hh>
 
-namespace Total {
+namespace Cantag {
 
   MonochromeImage::MonochromeImage(unsigned int width, unsigned int height) : m_width(width),m_height(height),m_data(new bool[width*height])  {}
 

@@ -18,12 +18,12 @@
   Email: acr31@cam.ac.uk
 */
 
-#include <total/Image.hh>
+#include <cantag/Image.hh>
 #if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(HAVELIB_MAGICK)
 #include <Magick++.h>
 #endif
 
-namespace Total {
+namespace Cantag {
 
 #if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(HAVELIB_MAGICK)
     void ImageSpecialise<Colour::RGB>::Save(const char* filename) const {

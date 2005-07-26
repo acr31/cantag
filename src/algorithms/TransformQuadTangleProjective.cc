@@ -22,11 +22,11 @@
  * $Header$
  */
 
-#include <total/algorithms/TransformQuadTangleProjective.hh>
-#include <total/gaussianelimination.hh>
+#include <cantag/algorithms/TransformQuadTangleProjective.hh>
+#include <cantag/gaussianelimination.hh>
 
 #undef PROJECTIVE_TRANSFORM_DEBUG
-namespace Total {
+namespace Cantag {
 
   bool TransformQuadTangleProjective::operator()(const ShapeEntity<QuadTangle>& shape, TransformEntity& dest) const {
     

@@ -22,19 +22,19 @@
  * $Header$
  */
 
-#include <total/Coder.hh>
-#include <total/TripOriginalCoder.hh>
-#include <total/ParityCoder.hh>
-#include <total/SymbolChunkCoder.hh>
-#include <total/SCCCoder.hh>
-#include <total/CyclicBitSet.hh>
+#include <cantag/Coder.hh>
+#include <cantag/TripOriginalCoder.hh>
+#include <cantag/ParityCoder.hh>
+#include <cantag/SymbolChunkCoder.hh>
+#include <cantag/SCCCoder.hh>
+#include <cantag/CyclicBitSet.hh>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
 #include <iostream>
 
 using boost::unit_test_framework::test_suite;
-using namespace Total;
+using namespace Cantag;
 
 template<int PAYLOAD_SIZE> void tryrotations(const CyclicBitSet<PAYLOAD_SIZE>& test_value,
 					     const CyclicBitSet<PAYLOAD_SIZE>& target_code,

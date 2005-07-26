@@ -22,7 +22,7 @@
  * $Header$
  */
 
-#include <total/Socket.hh>
+#include <cantag/Socket.hh>
 #include <cerrno>
 
 extern "C" {
@@ -37,7 +37,7 @@ extern "C" {
 
 #define SOCKET_DEBUG
 
-namespace Total {
+namespace Cantag {
 
   Socket::Socket() : m_byte_count(0), m_host(NULL), m_port(0), m_soft_connect(false) {
 #ifdef SOCKET_DEBUG

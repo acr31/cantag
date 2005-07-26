@@ -22,7 +22,7 @@
  * $Header$
  */
 
-#include <total/XOutputMechanism.hh>
+#include <cantag/XOutputMechanism.hh>
 
 extern "C" {
 #include <sys/ipc.h>
@@ -31,7 +31,7 @@ extern "C" {
 
 #undef XOUTPUT_DEBUG
 
-namespace Total {
+namespace Cantag {
 
   XOutputMechanism::XOutputMechanism(int width, int height, const Camera& camera) :
     m_xattached(false),
@@ -57,7 +57,7 @@ namespace Total {
     int blackColour = BlackPixel(m_display, DefaultScreen(m_display));
     m_window = XCreateSimpleWindow(m_display, DefaultRootWindow(m_display), 0, 0, m_width, m_height, 0, blackColour, blackColour);
     m_windowgot = true;
-    XStoreName(m_display, m_window, "Total");
+    XStoreName(m_display, m_window, "Cantag");
     XWindowAttributes windowAttributes;
     XGetWindowAttributes(m_display, m_window, &windowAttributes);
     int depth;

@@ -5,7 +5,7 @@
 #ifndef X_OUTPUT_MECHANISM_GUARD
 #define X_OUTPUT_MECHANISM_GUARD
 
-#include <total/Config.hh>
+#include <cantag/Config.hh>
 
 #ifndef HAVE_X11_XLIB_H
 # error This version has been configured without Xlib support
@@ -25,12 +25,12 @@ extern "C" {
 #include <sys/shm.h>
 }
 
-#include <total/entities/Entity.hh>
-#include <total/Function.hh>
-#include <total/MonochromeImage.hh>
-#include <total/Camera.hh>
+#include <cantag/entities/Entity.hh>
+#include <cantag/Function.hh>
+#include <cantag/MonochromeImage.hh>
+#include <cantag/Camera.hh>
 
-namespace Total {
+namespace Cantag {
 
   template<class Shape, int PAYLOAD_SIZE>
   class XOutputMechanism {
@@ -215,7 +215,7 @@ namespace Total {
     int blackColour = BlackPixel(m_display, DefaultScreen(m_display));
     m_window = XCreateSimpleWindow(m_display, DefaultRootWindow(m_display), 0, 0, m_width, m_height, 0, blackColour, blackColour);
     m_windowgot = true;
-    XStoreName(m_display, m_window, "Total");
+    XStoreName(m_display, m_window, "Cantag");
     XWindowAttributes windowAttributes;
     XGetWindowAttributes(m_display, m_window, &windowAttributes);
     int depth;

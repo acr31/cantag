@@ -5,7 +5,7 @@
 #ifndef TEMPLATE_UTILS_GUARD
 #define TEMPLATE_UTILS_GUARD
 
-namespace Total {
+namespace Cantag {
 
   /**
    * A list of types

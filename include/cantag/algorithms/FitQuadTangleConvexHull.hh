@@ -5,12 +5,12 @@
 #ifndef FITQUADTANGLECONVEXHULL_GUARD
 #define FITQUADTANGLECONVEXHULL_GUARD
 
-#include <total/QuadTangle.hh>
-#include <total/entities/Entity.hh>
-#include <total/entities/ContourEntity.hh>
-#include <total/Function.hh>
+#include <cantag/QuadTangle.hh>
+#include <cantag/entities/Entity.hh>
+#include <cantag/entities/ContourEntity.hh>
+#include <cantag/Function.hh>
 
-namespace Total {
+namespace Cantag {
   class FitQuadTangleConvexHull : public Function1<ContourEntity,ShapeEntity<QuadTangle> > {
   public:
 

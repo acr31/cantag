@@ -8,12 +8,12 @@
 #ifndef GF4_CODER_GUARD
 #define GF4_CODER_GUARD
 
-#include <total/Config.hh>
-#include <total/coders/Coder.hh>
-#include <total/GF4Poly.hh>
+#include <cantag/Config.hh>
+#include <cantag/coders/Coder.hh>
+#include <cantag/GF4Poly.hh>
 #include <cmath>
 
-namespace Total {
+namespace Cantag {
 class GF4Coder : public Coder {
 private:
   int m_symbol_range;

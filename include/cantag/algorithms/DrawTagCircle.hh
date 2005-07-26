@@ -5,13 +5,13 @@
 #ifndef DRAW_TAG_CIRCLE_GUARD
 #define DRAW_TAG_CIRCLE_GUARD
 
-#include <total/Config.hh>
-#include <total/entities/DecodeEntity.hh>
-#include <total/Function.hh>
-#include <total/Image.hh>
-#include <total/TagCircle.hh>
+#include <cantag/Config.hh>
+#include <cantag/entities/DecodeEntity.hh>
+#include <cantag/Function.hh>
+#include <cantag/Image.hh>
+#include <cantag/TagCircle.hh>
 
-namespace Total {
+namespace Cantag {
   
   /**
    * Algorithm for drawing a circular tag to an image. This is a

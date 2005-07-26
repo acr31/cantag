@@ -5,12 +5,12 @@
 #ifndef ENTITY_GUARD
 #define ENTITY_GUARD
 
-#include <total/Config.hh>
+#include <cantag/Config.hh>
 
 #include <list>
 #include <vector>
 
-namespace Total {
+namespace Cantag {
   class Entity {
   protected:
     bool m_valid;

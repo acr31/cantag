@@ -22,11 +22,11 @@
  * $Header$
  */
 
-#include <total/algorithms/TransformEllipseFull.hh>
-#include <total/polysolve.hh>
-#include <total/SpeedMath.hh>
+#include <cantag/algorithms/TransformEllipseFull.hh>
+#include <cantag/polysolve.hh>
+#include <cantag/SpeedMath.hh>
 
-namespace Total {
+namespace Cantag {
 
   bool TransformEllipseFull::operator()(const ShapeEntity<Ellipse>& source, TransformEntity& dest) const {    
     if (!source.m_shapeFitted) { return false; }

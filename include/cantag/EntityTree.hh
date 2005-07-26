@@ -7,10 +7,10 @@
 
 #include <list>
 
-#include <total/Config.hh>
-#include <total/entities/Entity.hh>
+#include <cantag/Config.hh>
+#include <cantag/entities/Entity.hh>
 
-namespace Total {
+namespace Cantag {
 
   template<class Entity>
   class TreeNode {

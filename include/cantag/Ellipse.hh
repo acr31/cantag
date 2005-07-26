@@ -5,14 +5,14 @@
 #ifndef ELLIPSE_GUARD
 #define ELLIPSE_GUARD
 
-#include <total/Config.hh>
-#include <total/Image.hh>
-#include <total/Socket.hh>
-#include <total/Camera.hh>
+#include <cantag/Config.hh>
+#include <cantag/Image.hh>
+#include <cantag/Socket.hh>
+#include <cantag/Camera.hh>
 
 #include <vector>
 
-namespace Total {
+namespace Cantag {
 /**
  * A class to represent ellipses in the image and fit one to a set of points.
  *
@@ -194,7 +194,7 @@ public:
 
 }
 #else
-namespace Total {
+namespace Cantag {
   class Ellipse;
 }
 #endif//ELLIPSE_GUARD

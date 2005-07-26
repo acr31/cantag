@@ -5,11 +5,11 @@
 #ifndef RAW_CODER_GUARD
 #define RAW_CODER_GUARD
 
-#include <total/Config.hh>
-#include <total/coders/Coder.hh>
-#include <total/CyclicBitSet.hh>
+#include <cantag/Config.hh>
+#include <cantag/coders/Coder.hh>
+#include <cantag/CyclicBitSet.hh>
 
-namespace Total {
+namespace Cantag {
 
   /**
    * A raw coding scheme.  Lays out the code given - no error detection.

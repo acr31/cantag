@@ -25,9 +25,9 @@
 #include <cstring>
 
 #include <cmath>
-#include <total/algorithms/ConvexHull.hh>
+#include <cantag/algorithms/ConvexHull.hh>
 
-namespace Total {
+namespace Cantag {
 
   static inline float isLeft(const std::vector<float> &V,int l0, int l1, int p) {
     return (V[l1*2] - V[l0*2])*(V[p*2+1] - V[l0*2+1]) - (V[p*2] - V[l0*2])*(V[l1*2+1] - V[l0*2+1]);

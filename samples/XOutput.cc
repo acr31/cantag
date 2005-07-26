@@ -22,7 +22,7 @@
  * $Header$
  */
 
-#include <Total.hh>
+#include <Cantag.hh>
 
 // this file includes the definition of the type of tag used in the
 // samples.  This is then typedef'd to be of type TagType which is
@@ -31,7 +31,7 @@
 
 #include <iostream>
 
-using namespace Total;
+using namespace Cantag;
 
 int
 main(int argc, char* argv[]) {

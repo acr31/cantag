@@ -5,7 +5,7 @@
 #ifndef BIGINT_GUARD
 #define BIGINT_GUARD
 
-#include <total/Config.hh>
+#include <cantag/Config.hh>
 
 #ifndef HAVE_GMPXX_H
 #error "This version has been configured without GNU MP Bignum C++ library"
@@ -19,14 +19,14 @@
 #error "This file required libgmpxx.so"
 #endif
 
-#include <total/CyclicBitSet.hh>
+#include <cantag/CyclicBitSet.hh>
 
 #include <gmpxx.h>
 #include <gmp.h>
 
 #include <bitset>
 
-namespace Total {
+namespace Cantag {
 
   template<int SIZE> class BigInt;
 

@@ -5,14 +5,14 @@
 #ifndef CONTOUR_FOLLOWER_TREE_GUARD
 #define CONTOUR_FOLLOWER_TREE_GUARD
 
-#include <total/Config.hh>
-#include <total/MonochromeImage.hh>
-#include <total/EntityTree.hh>
-#include <total/entities/ContourEntity.hh>
-#include <total/Function.hh>
-#include <total/ContourRestrictions.hh>
+#include <cantag/Config.hh>
+#include <cantag/MonochromeImage.hh>
+#include <cantag/EntityTree.hh>
+#include <cantag/entities/ContourEntity.hh>
+#include <cantag/Function.hh>
+#include <cantag/ContourRestrictions.hh>
 
-namespace Total {
+namespace Cantag {
   class ContourFollowerTree : public Function1<MonochromeImage,TreeNode<ContourEntity> >{
   private:
     /**

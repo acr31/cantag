@@ -27,9 +27,9 @@
  *
  */
 
-#include <total/coders/GF4Coder.hh>
+#include <cantag/coders/GF4Coder.hh>
 
-namespace Total {
+namespace Cantag {
   /**
    * Initialise genpoly to 404429. This is
    *

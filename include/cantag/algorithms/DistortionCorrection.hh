@@ -5,11 +5,11 @@
 #ifndef DISTORTION_CORRECTION_GUARD
 #define DISTORTION_CORRECTION_GUARD
 
-#include <total/entities/ContourEntity.hh>
-#include <total/Camera.hh>
-#include <total/Function.hh>
+#include <cantag/entities/ContourEntity.hh>
+#include <cantag/Camera.hh>
+#include <cantag/Function.hh>
 
-namespace Total {
+namespace Cantag {
   class DistortionCorrection : public Function0<ContourEntity> {
   private:
     const Camera& m_camera;

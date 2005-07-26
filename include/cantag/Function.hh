@@ -5,7 +5,7 @@
 #ifndef ALGORITHM_GUARD
 #define ALGORITHM_GUARD
 
-namespace Total {
+namespace Cantag {
   
   template<class Result>
   struct Function0 {

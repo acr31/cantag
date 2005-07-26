@@ -5,11 +5,11 @@
 #ifndef TRANSFORM_ENTITY_GUARD
 #define TRANSFORM_ENTITY_GUARD
 
-#include <total/entities/Entity.hh>
-#include <total/Transform.hh>
+#include <cantag/entities/Entity.hh>
+#include <cantag/Transform.hh>
 
 
-namespace Total {
+namespace Cantag {
   class TransformEntity : public Entity  {
   private:
     std::list<Transform*> m_transforms;

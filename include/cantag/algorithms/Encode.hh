@@ -7,12 +7,12 @@
 
 #include <list>
 
-#include <total/entities/DecodeEntity.hh>
-#include <total/coders/Coder.hh>
-#include <total/CyclicBitSet.hh>
-#include <total/Function.hh>
+#include <cantag/entities/DecodeEntity.hh>
+#include <cantag/coders/Coder.hh>
+#include <cantag/CyclicBitSet.hh>
+#include <cantag/Function.hh>
 
-namespace Total {
+namespace Cantag {
 
   /**
    * Algorithm for encoding tag data

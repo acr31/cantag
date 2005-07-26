@@ -7,9 +7,9 @@
 
 #include <vector>
 
-#include <total/entities/Entity.hh>
+#include <cantag/entities/Entity.hh>
 
-namespace Total {
+namespace Cantag {
 
   /**
    * Represent the convex hull of a contour.  We store the indices of

@@ -22,9 +22,9 @@
  * $Header$
  */
 
-#include <total/ImageOutputMechanism.hh>
+#include <cantag/ImageOutputMechanism.hh>
 
-namespace Total {
+namespace Cantag {
 
 
   ImageOutputMechanism::ContourAlgorithm::ContourAlgorithm(Image& output_image): m_image(output_image) {};

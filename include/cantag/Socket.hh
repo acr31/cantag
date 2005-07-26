@@ -5,7 +5,7 @@
 #ifndef SOCKET_GUARD
 #define SOCKET_GUARD
 
-#include <total/Config.hh>
+#include <cantag/Config.hh>
 #include <vector>
 #include <bitset>
 
@@ -13,7 +13,7 @@ extern "C" {
 #include <netinet/in.h>
 }
 
-namespace Total {
+namespace Cantag {
 
   class Socket {
   private:

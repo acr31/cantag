@@ -24,9 +24,9 @@
 
 #include <map>
 
-#include <total/algorithms/FitQuadTangleConvexHull.hh>
+#include <cantag/algorithms/FitQuadTangleConvexHull.hh>
 
-namespace Total {
+namespace Cantag {
 
   bool FitQuadTangleConvexHull::operator()(const ContourEntity& contour, ShapeEntity<QuadTangle>& shape) const {
     

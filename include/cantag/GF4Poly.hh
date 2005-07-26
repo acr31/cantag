@@ -12,7 +12,7 @@
  */
 #include <string>
 
-namespace Total {
+namespace Cantag {
 
   class GF4Poly
   {

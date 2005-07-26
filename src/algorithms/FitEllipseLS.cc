@@ -22,15 +22,15 @@
  * $Header$
  */
 
-#include <total/algorithms/FitEllipseLS.hh>
-#include <total/gaussianelimination.hh>
-#include <total/polysolve.hh>
-#include <total/SpeedMath.hh>
+#include <cantag/algorithms/FitEllipseLS.hh>
+#include <cantag/gaussianelimination.hh>
+#include <cantag/polysolve.hh>
+#include <cantag/SpeedMath.hh>
 
 #undef ELLIPSE_DEBUG_DUMP_POINTS
 #undef ELLIPSE_DEBUG
 
-namespace Total {
+namespace Cantag {
 
   bool FitEllipseLS::operator()(const ContourEntity& contour, ShapeEntity<Ellipse>& shape) const {
     const std::vector<float>& points = contour.GetPoints();

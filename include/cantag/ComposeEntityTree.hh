@@ -7,12 +7,12 @@
 
 #include <list>
 
-#include <total/Config.hh>
-#include <total/entities/Entity.hh>
-#include <total/EntityTree.hh>
-#include <total/ComposeEntity.hh>
+#include <cantag/Config.hh>
+#include <cantag/entities/Entity.hh>
+#include <cantag/EntityTree.hh>
+#include <cantag/ComposeEntity.hh>
 
-namespace Total {    
+namespace Cantag {    
     template<class TypeList> class TreeHelper : public TreeNode<typename TypeList::Head>, public TreeHelper<typename TypeList::Tail> {};
     template<> class TreeHelper<TypeListEOL> {};
 

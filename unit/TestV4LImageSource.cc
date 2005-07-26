@@ -22,14 +22,14 @@
  * $Header$
  */
 
-#include <total/V4LImageSource.hh>
+#include <cantag/V4LImageSource.hh>
 
 #include <boost/test/unit_test.hpp>
 #include <ctime>
 #include <iostream>
 
 using boost::unit_test_framework::test_suite;
-using namespace Total;
+using namespace Cantag;
 
 void test_rate() {
   V4LImageSource s("/dev/video0",0);

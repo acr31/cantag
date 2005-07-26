@@ -22,12 +22,12 @@
  * $Header$
  */
 
-#include <total/algorithms/FitQuadTangleCorner.hh>
+#include <cantag/algorithms/FitQuadTangleCorner.hh>
 
 #define LOGMAXWINDOW 5
 #define CURVTHRESH -0.8
 #define TOTAL_MASK(x) ((x) & ((1<<LOGMAXWINDOW)-1))
-namespace Total {
+namespace Cantag {
 
   static float curvature(const float* xwindow, const float* ywindow, int datapointer, int k) {
     float ax = xwindow[TOTAL_MASK(datapointer+k)] - xwindow[datapointer];

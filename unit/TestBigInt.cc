@@ -22,13 +22,13 @@
  * $Header$
  */
 
-#include <total/BigInt.hh>
+#include <cantag/BigInt.hh>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
 
 using boost::unit_test_framework::test_suite;
-using namespace Total;
+using namespace Cantag;
  
 boost::mt19937 rng;
 boost::uniform_int<> numbersource(0,1<<15);

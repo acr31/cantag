@@ -1,2 +1,2 @@
-SUBDIRS = total
-include_HEADERS = Total.hh
+SUBDIRS = cantag
+include_HEADERS = Cantag.hh

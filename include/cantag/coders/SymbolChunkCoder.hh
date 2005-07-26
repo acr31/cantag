@@ -5,12 +5,12 @@
 #ifndef SYMBOL_CHUNK_CODER
 #define SYMBOL_CHUNK_CODER
 
-#include <total/Config.hh>
-#include <total/coders/Coder.hh>
+#include <cantag/Config.hh>
+#include <cantag/coders/Coder.hh>
 
 #define SYMBOL_CHUNK_DEBUG
 
-namespace Total {
+namespace Cantag {
   /**
    * Encodes the data into a number of symbols containing granularity
    * bits.  The first bit of each symbol is the orientation bit - 1 for

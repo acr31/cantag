@@ -22,10 +22,10 @@
  * $Header$
  */
 
-#include <total/Config.hh>
-#include <total/Camera.hh>
+#include <cantag/Config.hh>
+#include <cantag/Camera.hh>
 
-namespace Total {
+namespace Cantag {
   Camera::Camera() :
     m_r2(0),m_r4(0),m_r6(0),
     m_d1(0),m_d2(0)

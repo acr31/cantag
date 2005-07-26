@@ -22,13 +22,13 @@
  * $Header$
  */
 
-#include <total/IEEE1394ImageSource.hh>
+#include <cantag/IEEE1394ImageSource.hh>
 
 #include <cerrno>
 
 #undef IEEE1394_DEBUG
 
-namespace Total {
+namespace Cantag {
 
 
   IEEE1394ImageSource::IEEE1394ImageSource(

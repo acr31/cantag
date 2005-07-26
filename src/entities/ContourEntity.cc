@@ -22,9 +22,9 @@
  * $Header$
  */
 
-#include <total/entities/ContourEntity.hh>
+#include <cantag/entities/ContourEntity.hh>
 
-namespace Total {
+namespace Cantag {
 
   void ContourEntity::SetStart(int x, int y) {
     m_points.clear();

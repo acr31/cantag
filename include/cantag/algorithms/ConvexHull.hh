@@ -5,12 +5,12 @@
 #ifndef CONVEXHULL_GUARD
 #define CONVEXHULL_GUARD
 
-#include <total/entities/ContourEntity.hh>
-#include <total/entities/ConvexHullEntity.hh>
-#include <total/Function.hh>
-#include <total/ConvexHullRestrictions.hh>
+#include <cantag/entities/ContourEntity.hh>
+#include <cantag/entities/ConvexHullEntity.hh>
+#include <cantag/Function.hh>
+#include <cantag/ConvexHullRestrictions.hh>
 
-namespace Total {
+namespace Cantag {
   class ConvexHull : public Function1<ContourEntity,ConvexHullEntity> {
   private:
     const ConvexHullRestrictions& m_restriction;

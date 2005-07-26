@@ -21,8 +21,8 @@
 /**
  * $Header$
  */
-#include <total/FileImageSource.hh>
+#include <cantag/FileImageSource.hh>
 
-namespace Total {
+namespace Cantag {
 
 }

@@ -22,10 +22,10 @@
  * $Header$
  */
 
-#include <total/algorithms/TransformEllipseLinear.hh>
-#include <total/SpeedMath.hh>
+#include <cantag/algorithms/TransformEllipseLinear.hh>
+#include <cantag/SpeedMath.hh>
 
-namespace Total {
+namespace Cantag {
 
   bool TransformEllipseLinear::operator()(const ShapeEntity<Ellipse>& source, TransformEntity& dest) const {    
     if (!source.m_shapeFitted) { return false; }

@@ -5,10 +5,10 @@
 #ifndef CODER_GUARD
 #define CODER_GUARD
 
-#include <total/Config.hh>
-#include <total/CyclicBitSet.hh>
+#include <cantag/Config.hh>
+#include <cantag/CyclicBitSet.hh>
 
-namespace Total {
+namespace Cantag {
 
   template <int PAYLOAD_SIZE>
   class Coder {

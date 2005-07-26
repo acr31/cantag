@@ -5,12 +5,12 @@
 #ifndef FULL_ELLIPSE_FIT_GUARD
 #define FULL_ELLIPSE_FIT_GUARD
 
-#include <total/Ellipse.hh>
-#include <total/entities/Entity.hh>
-#include <total/entities/ContourEntity.hh>
-#include <total/Function.hh>
+#include <cantag/Ellipse.hh>
+#include <cantag/entities/Entity.hh>
+#include <cantag/entities/ContourEntity.hh>
+#include <cantag/Function.hh>
 
-namespace Total {
+namespace Cantag {
   
   class FitEllipseLS : public Function1<ContourEntity,ShapeEntity<Ellipse> > {
   public:

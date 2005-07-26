@@ -5,10 +5,10 @@
 #ifndef TRIP_ORIGINAL_CODER_GUARD
 #define TRIP_ORIGINAL_CODER_GUARD
 
-#include <total/Config.hh>
-#include <total/coders/Coder.hh>
-#include <total/CyclicBitSet.hh>
-#include <total/BigInt.hh>
+#include <cantag/Config.hh>
+#include <cantag/coders/Coder.hh>
+#include <cantag/CyclicBitSet.hh>
+#include <cantag/BigInt.hh>
 
 #include <cmath>
 #include <cassert>
@@ -17,7 +17,7 @@
 # define TRIP_ORIGINAL_CODER_DEBUG
 #endif
 
-namespace Total {
+namespace Cantag {
   /**
    * A generalised coding scheme based on the one used in TRIP.  This
    * scheme encodes a fixed number of bits using 4 or more symbols

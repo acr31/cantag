@@ -7,10 +7,10 @@
 
 #include <vector>
 
-#include <total/Config.hh>
-#include <total/CyclicBitSet.hh>
+#include <cantag/Config.hh>
+#include <cantag/CyclicBitSet.hh>
 
-namespace Total {
+namespace Cantag {
 
   /**
    * This entity stores symbolic payload data from the tag and the

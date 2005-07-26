@@ -1,11 +1,11 @@
 #ifndef TEMPLATE_GUARD
 #define TEMPLATE_GUARD
 
-#include <total/Config.hh>
-#include <total/Image.hh>
-#include <total/Camera.hh>
+#include <cantag/Config.hh>
+#include <cantag/Image.hh>
+#include <cantag/Camera.hh>
 
-namespace Total {
+namespace Cantag {
 
   /**
    * A template code.  Handles correlation with other templates and the

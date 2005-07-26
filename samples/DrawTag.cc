@@ -29,14 +29,14 @@
 #include <iostream>
 
 
-#include <Total.hh>
+#include <Cantag.hh>
 
 // this file includes the definition of the type of tag used in the
 // samples.  This is then typedef'd to be of type TagType which is
 // used below
 #include "TagDef.hh"
 
-using namespace Total;
+using namespace Cantag;
 
 /**
  * A function to build the correct payload for the entered data.  code

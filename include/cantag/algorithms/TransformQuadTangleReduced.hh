@@ -5,12 +5,12 @@
 #ifndef TRANSFORMQUADTANGLEREDUCED_GUARD
 #define TRANSFORMQUADTANGLEREDUCED_GUARD
 
-#include <total/QuadTangle.hh>
-#include <total/entities/Entity.hh>
-#include <total/entities/TransformEntity.hh>
-#include <total/Function.hh>
+#include <cantag/QuadTangle.hh>
+#include <cantag/entities/Entity.hh>
+#include <cantag/entities/TransformEntity.hh>
+#include <cantag/Function.hh>
 
-namespace Total {
+namespace Cantag {
   class TransformQuadTangleReduced : public Function1<ShapeEntity<QuadTangle>,TransformEntity> {
   public:
     /**

@@ -22,13 +22,13 @@
  * $Header$
  */
 
-#include <total/polysolve.hh>
+#include <cantag/polysolve.hh>
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
 #include <iostream>
 
 using boost::unit_test_framework::test_suite;
-using namespace Total;
+using namespace Cantag;
  
 boost::mt19937 rng;
 boost::uniform_real<> numbersource(0,10);

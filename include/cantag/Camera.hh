@@ -4,13 +4,13 @@
 #ifndef CAMERA_GUARD
 #define CAMERA_GUARD
 
-#include <total/Config.hh>
-#include <total/Image.hh>
-#include <total/Ellipse.hh>
-#include <total/QuadTangle.hh>
+#include <cantag/Config.hh>
+#include <cantag/Image.hh>
+#include <cantag/Ellipse.hh>
+#include <cantag/QuadTangle.hh>
 #include <vector>
 
-namespace Total {
+namespace Cantag {
 
   /**
    * A camera model.  Use this class to convert from NPCF to Image co-ordinates and back again
@@ -150,7 +150,7 @@ namespace Total {
 }
 
 #else
-namespace Total {
+namespace Cantag {
   class Camera;
 }
 #endif//CAMERA_GAURD

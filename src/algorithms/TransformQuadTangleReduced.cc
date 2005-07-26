@@ -22,11 +22,11 @@
  * $Header$
  */
 
-#include <total/algorithms/TransformQuadTangleReduced.hh>
-#include <total/gaussianelimination.hh>
+#include <cantag/algorithms/TransformQuadTangleReduced.hh>
+#include <cantag/gaussianelimination.hh>
 
 #undef REDUCED_TRANSFORM_DEBUG
-namespace Total {
+namespace Cantag {
 
   bool TransformQuadTangleReduced::operator()(const ShapeEntity<QuadTangle>& shape, TransformEntity& dest) const {
     

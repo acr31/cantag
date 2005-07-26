@@ -22,11 +22,11 @@
  * $Header$
  */
 
-#include <total/Transform.hh>
+#include <cantag/Transform.hh>
 
 #undef TRANSFORM_DEBUG
 
-namespace Total {
+namespace Cantag {
 
   Transform::Transform(float confidence) : m_confidence(confidence) {};
 

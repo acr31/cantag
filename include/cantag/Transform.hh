@@ -2,9 +2,9 @@
  * $Header$
  */
 
-#include <total/Config.hh>
+#include <cantag/Config.hh>
 
-namespace Total {
+namespace Cantag {
   
   /**
    * A class to represent a transformation from camera co-ordinates to

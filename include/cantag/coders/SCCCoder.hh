@@ -7,8 +7,8 @@
 #ifndef SCCCODER_GUARD
 #define SCCCODER_GUARD
 
-#include <total/Config.hh>
-#include <total/coders/Coder.hh>
+#include <cantag/Config.hh>
+#include <cantag/coders/Coder.hh>
 
 #ifdef TEXT_DEBUG
 # define SCCCODER_DEBUG
@@ -18,7 +18,7 @@
 # undef BERLEKAMP_DEBUG
 #endif
 
-namespace Total {
+namespace Cantag {
 
   /**
    * A structured cyclic coding class.

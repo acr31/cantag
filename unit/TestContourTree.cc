@@ -22,8 +22,8 @@
  * $Header$
  */
 
-#include <total/ContourTree.hh>
-#include <total/Image.hh>
+#include <cantag/ContourTree.hh>
+#include <cantag/Image.hh>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/random.hpp>
@@ -32,7 +32,7 @@
 #define IMAGE_HEIGHT 600
 
 using boost::unit_test_framework::test_suite;
-using namespace Total;
+using namespace Cantag;
 
 boost::mt19937 rng;
 boost::uniform_int<> widthsource(0,IMAGE_WIDTH);

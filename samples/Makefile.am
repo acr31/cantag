@@ -1,5 +1,4 @@
-noinst_PROGRAMS= NewTest DrawTag ContourTest
-ContourTest_SOURCES = ContourTest.cc
+noinst_PROGRAMS= NewTest DrawTag 
 #TextOnly DrawTag
 #GnuplotOutput
 #TextOnly_SOURCES=TextOnly.cc 

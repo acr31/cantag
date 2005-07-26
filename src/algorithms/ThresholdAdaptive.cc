@@ -22,8 +22,8 @@
  * $Header$
  */
 
-#include <total/algorithms/ThresholdAdaptive.hh>
-namespace Total {
+#include <cantag/algorithms/ThresholdAdaptive.hh>
+namespace Cantag {
   ThresholdAdaptive::ThresholdAdaptive(int window_size, int offset) : m_window_size(window_size), m_offset(offset) {};
 
   bool ThresholdAdaptive::operator()(const Image<Colour::Grey>& image, MonochromeImage& dest) const {

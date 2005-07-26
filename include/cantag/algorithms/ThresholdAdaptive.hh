@@ -5,11 +5,11 @@
 #ifndef THRESHOLD_ADAPTIVE_GUARD
 #define THRESHOLD_ADAPTIVE_GUARD
 
-#include <total/Image.hh>
-#include <total/MonochromeImage.hh>
-#include <total/Function.hh>
+#include <cantag/Image.hh>
+#include <cantag/MonochromeImage.hh>
+#include <cantag/Function.hh>
 
-namespace Total {
+namespace Cantag {
 
   /**
    * An implementation of Pierre Wellner's Adaptive Thresholding

@@ -1,9 +1,9 @@
 #ifndef GAUSSIAN_ELIMINATION_GUARD
 #define GAUSSIAN_ELIMINATION_GUARD
 
-#include <total/Config.hh>
+#include <cantag/Config.hh>
 
-namespace Total {
+namespace Cantag {
   /**
    * Solve the equation A*R = X for R.
    *
