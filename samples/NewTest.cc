@@ -38,8 +38,8 @@ int main(int argc,char* argv[]) {
   try {
     //FileImageSource<Colour::Grey> fs(argv[1]);
     //V4LImageSource<Colour::Grey> fs("/dev/video0",1);
-    IEEE1394ImageSource fs("/dev/video1394",0);
-    
+    //    IEEE1394ImageSource fs("/dev/video1394/0",0);
+    IEEE1394ImageSource fs("/dev/video1394/0",0,0, FRAMERATE_60,125,530 );
     Camera camera;
     // set the intrinsic parameters of the camera
     camera.SetIntrinsic(1284.33,1064.55,450.534, 321.569,0 );
