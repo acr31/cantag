@@ -100,6 +100,8 @@ namespace Cantag {
    * list of channels returned by the video card.
    *
    * \todo need someway of saying composite input
+   *
+   * Added Colour support: Alastair R. Beresford.
    */
   template<Colour::Type ColType> V4LImageSource<ColType>::V4LImageSource(char* device, int channel) : 
     m_handle(-1), m_mmap((unsigned char*)MAP_FAILED,-1),

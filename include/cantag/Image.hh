@@ -1,5 +1,6 @@
 /*
   Copyright (C) 2004 Andrew C. Rice
+  Copyright (C) 2005 Alastair R. Beresford
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License

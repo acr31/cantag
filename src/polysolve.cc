@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2004 Andrew C. Rice
+  Copyright (C) 2004 Alastair R. Beresford
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -15,14 +15,12 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-  Email: acr31@cam.ac.uk
+  Email: arb33@cam.ac.uk
 */
 
 /**
- * Copyright 2004 Alastair R. Beresford.
  *  Use characteristic polynomial to calculate eigenvalues for
  *  three-by-three matrix.
- *
  */
 
 #include <cantag/Config.hh>
