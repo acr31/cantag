@@ -129,6 +129,12 @@ namespace Cantag {
   DrawTagCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT> DrawTagCircle(const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec) {
     return DrawTagCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>(tagspec);
   }
+
+  template<int RING_COUNT, int SECTOR_COUNT, int READ_COUNT>
+  inline
+  DrawTagCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT> DrawTag(const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec) {
+    return DrawTagCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>(tagspec);
+  }
 }
 
 #endif//DRAW_TAG_CIRCLE_GUARD
