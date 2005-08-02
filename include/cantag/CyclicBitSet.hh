@@ -46,6 +46,8 @@ namespace Cantag {
     bool m_invalid;
 
   public:
+    enum { Size = BIT_COUNT };
+
     CyclicBitSet();
     CyclicBitSet(unsigned long val);
     CyclicBitSet(const CyclicBitSet<BIT_COUNT>& o);
