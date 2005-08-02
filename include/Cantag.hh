@@ -80,6 +80,7 @@
 #include <cantag/algorithms/ThresholdGlobal.hh>
 #include <cantag/algorithms/ConvexHull.hh>
 #include <cantag/algorithms/DrawTagCircle.hh>
+#include <cantag/algorithms/DrawTagSquare.hh>
 
 ///////////////////////
 // coders
