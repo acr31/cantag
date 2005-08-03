@@ -51,12 +51,21 @@ namespace Cantag {
     CyclicBitSet();
     CyclicBitSet(unsigned long val);
     CyclicBitSet(const CyclicBitSet<BIT_COUNT>& o);
+    CyclicBitSet(const char* asciibinary);
 
     void reset();
 
     void SetInvalid() { m_invalid = true; }
     
     bool IsInvalid() { return m_invalid; }
+
+
+    /**
+     * Reset this bitset to hold the code specified in the string
+     * passed.  The string should be in ascii binary format i.e. all 1
+     * and 0 characters.
+     */
+    void SetCode(const char* code);
 
     /**
      * Return the number of bits that this bit set has been rotated 
@@ -145,6 +154,27 @@ namespace Cantag {
     return count;
   }
 
+
+  template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet(const char* code) : std::bitset<BIT_COUNT>(),m_rotation(0),m_invalid(false) {
+    SetCode(code);
+  }
+
+  template<int BIT_COUNT> void CyclicBitSet<BIT_COUNT>::SetCode(const char* code) {
+    m_rotation = 0;
+    m_invalid = false;
+    int length = strlen(code);
+    
+    for(int i=0;i<BIT_COUNT;++i) {
+      (*this)[i] = 0;
+    }
+    
+    if (length > BIT_COUNT) length = BIT_COUNT;
+    for(int i=length-1;i>=0;i--) {
+      (*this)[i] = (*code == '1');
+      code++;
+      if (!code[0]) break;
+    }
+  };
 
   template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet() : std::bitset<BIT_COUNT>(), m_rotation(0), m_invalid(false) {};
 
