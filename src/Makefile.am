@@ -20,8 +20,20 @@ if HAVE_GL_GL_H
 if HAVELIB_GL
 # disabled
 # libtotal_la_SOURCES += GLOutputMechanism.cc
+
+if HAVE_GL_OSMESA_H
+if HAVELIB_OSMESA
+if HAVE_GL_GLU_H
+if HAVELIB_GLU
+libtotal_la_SOURCES += GLImageSource.cc
 endif
 endif
+endif
+endif
+
+endif
+endif
+
 
 if HAVE_DC1394_CONTROL_H
 if HAVELIB_DC1394
