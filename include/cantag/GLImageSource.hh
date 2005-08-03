@@ -108,6 +108,13 @@ namespace Cantag {
      */
     Image<Colour::Grey>* Next(float n_x, float n_y, float n_z, float centre_x, float centre_y, float centre_z);
   
+    inline Image<Colour::Grey>* Next(float theta, float phi, float x0, float y0, float z0) {
+      float nx = sin(theta/180*M_PI)*sin(phi/180*M_PI);
+      float ny = sin(theta/180*M_PI)*cos(phi/180*M_PI);
+      float nz = cos(theta/180*M_PI);
+      return Next(nx,ny,nz,x0,y0,z0);
+    };
+
   };
 }
 #endif//GL_IMAGE_SOURCE_GUARD
