@@ -96,6 +96,9 @@ namespace Cantag {
   
     Image<Colour::Grey>* Next();
 
+    inline int GetWidth() const { return m_width; }
+    inline int GetHeight() const { return m_height; }
+
     /**
      * Update the buffer to contain a tag with the given rotations about
      * the x,y, and z axes and the given central point.
