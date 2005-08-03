@@ -60,7 +60,7 @@ namespace Cantag {
   
     
 
-  GLImageSource::GLImageSource(int width, int height, float fov, const Image& source) :
+  GLImageSource::GLImageSource(int width, int height, float fov, const Image<Colour::Grey>& source) :
     m_width(width),
     m_height(height),
     m_fov(fov),
@@ -123,13 +123,13 @@ namespace Cantag {
     free(m_buffer);
   };
 
-  Image* GLImageSource::Next() {
+  Image<Colour::Grey>* GLImageSource::Next() {
     return Next(0,0,-1,0,0,2);
   };
 
 
-  Image* GLImageSource::Next(float nx, float ny, float nz, 
-			     float centre_x, float centre_y, float centre_z) {
+  Image<Colour::Grey>* GLImageSource::Next(float nx, float ny, float nz, 
+					   float centre_x, float centre_y, float centre_z) {
     
     glClearColor(1.0,1.0,1.0,0.0);
     glShadeModel(GL_SMOOTH);
