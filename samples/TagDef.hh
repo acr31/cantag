@@ -27,10 +27,14 @@
 
 #include <Cantag.hh>
 
-struct TestTag : public Cantag::TagCircle<2,17>,Cantag::TripOriginalCoder<34,2,2> {
-  TestTag() : Cantag::TagCircle<2,17>(0.8,1.0,0.2,0.6) {}
+struct TestCircle : public Cantag::TagCircle<2,17>,Cantag::TripOriginalCoder<34,2,2> {
+  TestCircle() : Cantag::TagCircle<2,17>(0.8,1.0,0.2,0.6) {}
 };
 
-typedef TestTag TagType;
+struct TestSquare : public Cantag::TagSquare<6>,Cantag::SymbolChunkCoder<36,9> {
+  TestSquare() : Cantag::TagSquare<6>() {}
+};
+
+
 
 #endif//TAGDEF_GUARD

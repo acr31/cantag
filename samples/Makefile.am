@@ -1,10 +1,10 @@
-noinst_PROGRAMS= NewTest DrawTag 
+noinst_PROGRAMS= NewTest DrawTag NewTest3
 #TextOnly DrawTag
 #GnuplotOutput
 #TextOnly_SOURCES=TextOnly.cc 
 #TextFinder_SOURCES=TextFinder.cc
 DrawTag_SOURCES=DrawTag.cc
-#NewTest2_SOURCES=NewTest2.cc
+NewTest3_SOURCES=NewTest3.cc
 NewTest_SOURCES=NewTest.cc
 #GnuplotOutput_SOURCES=GnuplotOutput.cc
 

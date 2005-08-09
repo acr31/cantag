@@ -38,24 +38,8 @@
 
 using namespace Cantag;
 
-/**
- * A function to build the correct payload for the entered data.  code
- * should be a null terminated char array of '1' and '0' characters
- */
-template<class TAG> void GetCode(char* code, CyclicBitSet<TAG::PayloadSize>& tag_data) {
-  int length = strlen(code);
 
-  for(int i=0;i<TAG::PayloadSize;++i) {
-    tag_data[i] = 0;
-  }
-
-  if (length > TAG::PayloadSize) length = TAG::PayloadSize;
-  for(int i=length-1;i>=0;i--) {
-    tag_data[i] = (*code == '1');
-    code++;
-    if (!code[0]) break;
-  }
-}
+typedef TestSquare TagType;
 
 int
 main(int argc, char* argv[]) 
@@ -91,8 +75,8 @@ main(int argc, char* argv[])
 
     DecodeEntity<TagType::PayloadSize> d;
     DecodeEntity<TagType::PayloadSize>::Data* data = d.Add();
-    GetCode<TagType>(code,data->payload);
-
+    data->payload.SetCode(code);
+    
     // keep a copy of original code so we can warn if we cannot encode it
     CyclicBitSet<TagType::PayloadSize> toencode = data->payload; // copy construct
       
@@ -106,7 +90,7 @@ main(int argc, char* argv[])
     
     // create the image that will hold the tag design
     Image<Colour::Grey> i(512,512);
-    if (!DrawTagCircle(t)(d,i)) {
+    if (!DrawTag(t)(d,i)) {
       std::cerr << "Failed to draw tag. Aborting" << std::endl;
       exit(-1);
     }
