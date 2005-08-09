@@ -108,11 +108,10 @@ namespace Cantag {
       }
     
       if (corner_counter == 4) {
-	shape.m_shapeDetails = new QuadTangle(xcorners[0],ycorners[0],
-					      xcorners[1],ycorners[1],
-					      xcorners[2],ycorners[2],
-					      xcorners[3],ycorners[3]);
-	shape.m_shapeFitted = true;
+	shape.SetShape(new QuadTangle(xcorners[0],ycorners[0],
+				      xcorners[1],ycorners[1],
+				      xcorners[2],ycorners[2],
+				      xcorners[3],ycorners[3]));
 	return true;
       }
     }

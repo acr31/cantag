@@ -30,7 +30,7 @@ namespace Cantag {
 
   bool TransformQuadTangleProjective::operator()(const ShapeEntity<QuadTangle>& shape, TransformEntity& dest) const {
     
-    const QuadTangle& quadtangle = *(shape.m_shapeDetails);
+    const QuadTangle& quadtangle = *(shape.GetShape());
 
     // see the header file for a full explanation of what's going on here
 #ifdef PROJECTIVE_TRANSFORM_DEBUG

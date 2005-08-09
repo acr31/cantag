@@ -99,11 +99,10 @@ namespace Cantag {
     }
     sort(indexes.begin(), indexes.end());
 
-    shape.m_shapeDetails = new QuadTangle(points[indexes[0]*2],points[indexes[0]*2+1],
-					  points[indexes[1]*2],points[indexes[1]*2+1],
-					  points[indexes[2]*2],points[indexes[2]*2+1],
-					  points[indexes[3]*2],points[indexes[3]*2+1]);
-    shape.m_shapeFitted=true;
+    shape.SetShape(new QuadTangle(points[indexes[0]*2],points[indexes[0]*2+1],
+				  points[indexes[1]*2],points[indexes[1]*2+1],
+				  points[indexes[2]*2],points[indexes[2]*2+1],
+				  points[indexes[3]*2],points[indexes[3]*2+1]));
     return true;
   }
   

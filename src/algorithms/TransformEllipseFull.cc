@@ -29,8 +29,7 @@
 namespace Cantag {
 
   bool TransformEllipseFull::operator()(const ShapeEntity<Ellipse>& source, TransformEntity& dest) const {    
-    if (!source.m_shapeFitted) { return false; }
-    const Ellipse& ellipse = *source.m_shapeDetails;
+    const Ellipse& ellipse = *source.GetShape();
     float a = ellipse.GetA();
     float b = ellipse.GetB();
     float c = ellipse.GetC();
