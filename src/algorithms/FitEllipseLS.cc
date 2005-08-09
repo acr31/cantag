@@ -216,12 +216,10 @@ namespace Cantag {
 #endif      
 
 	if (e->CheckError(points)) {
-	  shape.m_shapeDetails = e;
-	  shape.m_shapeFitted = true;
+	  shape.SetShape(e);
 	  return true;
 	}
 	else {
-	  shape.m_shapeFitted = false;
 	  delete e;
 	}
       }

@@ -87,11 +87,10 @@ namespace Cantag {
 
       if (fulllist.size() == 4) {
 	std::list<std::pair<float,float> >::iterator i = fulllist.begin();
-	shape.m_shapeDetails = new QuadTangle(i->first,i->second,
-					      (++i)->first,i->second,
-					      (++i)->first,i->second,
-					      (++i)->first,i->second);
-	shape.m_shapeFitted = true;
+	shape.SetShape(new QuadTangle(i->first,i->second,
+				      (++i)->first,i->second,
+				      (++i)->first,i->second,
+				      (++i)->first,i->second));
 	return true;
       }
     }

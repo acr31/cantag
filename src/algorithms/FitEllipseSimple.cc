@@ -76,8 +76,7 @@ namespace Cantag {
 
     float theta = atan((majory-centrey)/(majorx-centrex)); // DATAN
 
-    shape.m_shapeDetails = new Ellipse(centrex,centrey,theta,majorlen,minorlen);
-    shape.m_shapeFitted = true;
+    shape.SetShape(new Ellipse(centrex,centrey,theta,majorlen,minorlen));
     return true;
   }
 }
