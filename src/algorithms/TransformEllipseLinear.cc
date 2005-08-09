@@ -28,14 +28,12 @@
 namespace Cantag {
 
   bool TransformEllipseLinear::operator()(const ShapeEntity<Ellipse>& source, TransformEntity& dest) const {    
-    if (!source.m_shapeFitted) { return false; }
-
     //  wc  hs  0  x0
     //  ws  hc  0  y0
     //  0   0   1  0
     //  0   0   0  1
     
-    const Ellipse& ellipse = *source.m_shapeDetails;
+    const Ellipse& ellipse = *source.GetShape();
 
     Transform* t = new Transform(1.f);
     dest.GetTransforms().push_back(t);
