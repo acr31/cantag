@@ -27,7 +27,6 @@
 
 #include <list>
 #include <cmath>
-#include <iostream>
 
 #include <cantag/Config.hh>
 #include <cantag/TagSpec.hh>
