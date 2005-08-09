@@ -25,8 +25,6 @@
 #ifndef DRAW_TAG_SQUARE_GUARD
 #define DRAW_TAG_SQUARE_GUARD
 
-#include <iostream>
-
 #include <cantag/Config.hh>
 #include <cantag/entities/DecodeEntity.hh>
 #include <cantag/Function.hh>
@@ -97,7 +95,6 @@ namespace Cantag {
 
       int u3 = u0;
       int v3 = v0 + cell_size;
-      std::cout << u0 << "," << v0 << " " << u1 << "," << v1 << " " << u2 << "," << v2 << " " << u3 << "," << v3 << std::endl;
 
       int colour = chosen->payload[i] ? COLOUR_BLACK : COLOUR_WHITE;
 
