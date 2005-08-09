@@ -25,6 +25,9 @@
 #ifndef TEMPLATE_UTILS_GUARD
 #define TEMPLATE_UTILS_GUARD
 
+#include <cantag/Config.hh>
+#include <cantag/EntityTree.hh>
+
 namespace Cantag {
 
   /**
@@ -81,6 +84,11 @@ namespace Cantag {
   
   template<class A, class Tail>
   struct Position<A,TypeList<A,Tail> > {
+    enum { value = 1 };
+  };
+
+  template<class A, class Tail>
+  struct Position<TreeNode<A>,TypeList<A,Tail> > {
     enum { value = 1 };
   };
 
