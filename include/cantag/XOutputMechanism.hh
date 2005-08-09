@@ -70,7 +70,6 @@ namespace Cantag {
     Window m_window;
     int m_width;
     int m_height;
-    bool m_needPut;
 
     class XSHMAttachedImage {
     public:
@@ -218,7 +217,6 @@ namespace Cantag {
     m_camera(camera),
     m_width(width),
     m_height(height),
-    m_needPut(false),
     m_ImageAlgorithm(*this),
     m_ThresholdAlgorithm(*this),
     m_ContourAlgorithm(*this),
@@ -330,7 +328,6 @@ namespace Cantag {
 	}
       }
     }
-    m_output.m_needPut = true;
     return true;
   }
 
@@ -354,7 +351,6 @@ namespace Cantag {
       }
       sampley+=2;
     }
-    m_output.m_needPut = true;
     return true;
   }
 
@@ -369,7 +365,6 @@ namespace Cantag {
       const float y = *i;
       XPutPixel(ximage,(int)(x/2),(int)(y/2+m_output.m_height/2),0);
     }    
-    m_output.m_needPut = true;
     return true;
   }
 
@@ -377,7 +372,7 @@ namespace Cantag {
     XImage* ximage = m_output.m_image[m_output.m_displayed_image ^ 0x1]->m_image;
 
     std::vector<int> points;
-    shape.m_shapeDetails->Draw(points,m_output.m_camera);
+    shape.GetShape()->Draw(points,m_output.m_camera);
     for(std::vector<int>::const_iterator i = points.begin();
 	i != points.end();
 	++i) {
@@ -392,19 +387,15 @@ namespace Cantag {
 	XPutPixel(ximage,a,b,0);
       }
     }  
-    m_output.m_needPut = true;
     return true;    
   }
 
   template<class Shape, int PAYLOAD_SIZE> bool XOutputMechanism<Shape,PAYLOAD_SIZE>::TransformAlgorithm::operator()(const TransformEntity& transform, const DecodeEntity<PAYLOAD_SIZE>& decode, DecodeEntity<PAYLOAD_SIZE>& dest) const {
-    XImage* ximage = m_output.m_image[m_output.m_displayed_image ^ 0x1]->m_image;
-    XShmPutImage(m_output.m_display,m_output.m_window,m_output.m_gc,ximage,0,0,0,0,m_output.m_width,m_output.m_height,false);
-    m_output.m_needPut = false;
     float pts[] = {-1,-1,
 		   -1,1,
 		   1,1,
 		   1,-1};
-    transform.GetTransform()->Apply(pts,4);
+    transform.GetPreferredTransform()->Apply(pts,4);
     m_output.m_camera.NPCFToImage(pts,4);
     XDrawLine(m_output.m_display,m_output.m_window,m_output.m_gc,
 	      (int)(pts[0]/2),(int)(pts[1]/2),
@@ -427,18 +418,16 @@ namespace Cantag {
     ti.nchars=PAYLOAD_SIZE;
     ti.delta=0;
     ti.font=None;
-    XDrawText(m_output.m_display,m_output.m_window,m_output.m_gc,(int)(pts[0]),(int)(pts[1]),&ti,1);
+    XDrawText(m_output.m_display,m_output.m_window,m_output.m_gc,(int)(pts[0]/2),(int)(pts[1]/2),&ti,1);
     //    std::cout << (data->payload) << std::endl;
     delete[] ti.chars;
+    XFlush(m_output.m_display);
     return true;    
   }
 
   template<class Shape, int PAYLOAD_SIZE> void XOutputMechanism<Shape,PAYLOAD_SIZE>::Flush() {
     m_displayed_image ^= 0x1;
-    if (m_needPut) {
-      XShmPutImage(m_display,m_window,m_gc,m_image[m_displayed_image]->m_image,0,0,0,0,m_width,m_height,false);	
-      m_needPut = false;
-    }
+    XShmPutImage(m_display,m_window,m_gc,m_image[m_displayed_image]->m_image,0,0,0,0,m_width,m_height,false);	
     XFlush(m_display);
     XImage* ximage = m_image[m_displayed_image ^ 0x1]->m_image;
     memset(ximage->data,0xFF,ximage->bytes_per_line*ximage->height);
