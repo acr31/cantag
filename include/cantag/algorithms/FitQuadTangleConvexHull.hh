@@ -26,7 +26,7 @@
 #define FITQUADTANGLECONVEXHULL_GUARD
 
 #include <cantag/QuadTangle.hh>
-#include <cantag/entities/Entity.hh>
+#include <cantag/entities/ShapeEntity.hh>
 #include <cantag/entities/ContourEntity.hh>
 #include <cantag/Function.hh>
 

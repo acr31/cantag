@@ -28,7 +28,7 @@
 #include <cantag/Function.hh>
 #include <cantag/MonochromeImage.hh>
 #include <cantag/entities/TransformEntity.hh>
-
+#include <cmath>
 namespace Cantag {
 
   /**
