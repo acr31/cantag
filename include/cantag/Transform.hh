@@ -23,6 +23,7 @@
  */
 
 #include <cantag/Config.hh>
+#include <cantag/Camera.hh>
 
 namespace Cantag {
   
@@ -43,8 +44,9 @@ namespace Cantag {
     inline float& operator[](int index) { return m_transform[index]; }
     inline float operator[](int index) const { return m_transform[index]; }
     
-    inline float getConfidence() { return m_confidence;} 
-    inline void setConfidence(float confidence) { m_confidence = confidence; }
+    inline float GetConfidence() { return m_confidence;} 
+    inline void SetConfidence(float confidence) { m_confidence = confidence; }
+    inline void AccrueConfidence(float confidence) { m_confidence *= confidence; }
     
     void Apply(float x, float y, float* resx, float* resy) const;
     void Apply(float x, float y, float z,float* resx, float* resy) const;
@@ -55,5 +57,16 @@ namespace Cantag {
      * the sine and cos of this angle as arguments.
      */
     void Rotate(float cos,float sin);
+
+    /**
+     * Calculate the origin for this tag.
+     */
+    void GetLocation(float location[3], float tag_size);
+
+    /**
+     * Calculate the normal vector for the tag in this transform
+     */
+    void GetNormalVector(const Camera& cam, float normal[3]);
+ 
   };
 }
