@@ -30,7 +30,7 @@ namespace Cantag {
 
   bool TransformQuadTangleSpaceSearch::operator()(const ShapeEntity<QuadTangle>& shape, TransformEntity& dest) const {
     
-    const QuadTangle& q = *(shape.m_shapeDetails);
+    const QuadTangle& q = *(shape.GetShape());
     size_t iter = 0;
     int status;
   
