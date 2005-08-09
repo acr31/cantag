@@ -25,8 +25,10 @@
 #ifndef ALGORITHM_GUARD
 #define ALGORITHM_GUARD
 
+#include <cantag/Config.hh>
+
 namespace Cantag {
-  
+
   template<class Result>
   struct Function0 {
     typedef Function0<Result> FunctionType;
