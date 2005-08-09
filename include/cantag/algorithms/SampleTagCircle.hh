@@ -54,62 +54,10 @@ namespace Cantag {
     bool return_result = false;
     for(std::list<Transform*>::const_iterator i = source.GetTransforms().begin(); i != source.GetTransforms().end(); ++i) {
   
-      bool left = true;
-      bool right = true;
-      int k=RING_COUNT-1;
-      int j;
-      // scan round reading a half sector width apart until we read two adjacent cells of different values
-      for(j=0;j<SECTOR_COUNT*READ_COUNT;j+=READ_COUNT/2) {
-	float tpt[]=  {  m_tagspec.GetXSamplePoint(j,k),
-			 m_tagspec.GetYSamplePoint(j,k) };
-	(*i)->Apply(tpt[0],tpt[1],tpt,tpt+1);
-	m_camera.NPCFToImage(tpt,1);
-	if (tpt[0] < 0 || tpt[0] >= image.GetWidth() ||
-	    tpt[1] < 0 || tpt[1] >= image.GetHeight()) { 
-	   return false;
-	 }
-	right = image.GetPixel(tpt[0],tpt[1]);
-	if ((j>0) && (left != right)) break;
-	left = right;
-      }
-  
-      if (left == right) {
-#ifdef RING_TAG_DEBUG
-	PROGRESS("Failed to find a sector edge!");
-#endif
-	continue;
-      }
-  
-      int leftindex = j-READ_COUNT;
-      int rightindex = j;
-      while(rightindex - leftindex > 1) {
-	int centre = (leftindex + rightindex) / 2;
-	float tpt[]=  {  m_tagspec.GetXSamplePoint(centre,k),
-			 m_tagspec.GetYSamplePoint(centre,k) };
-	(*i)->Apply(tpt[0],tpt[1],tpt,tpt+1);
-	m_camera.NPCFToImage(tpt,1);
-	if (tpt[0] < 0 || tpt[0] >= image.GetWidth() ||
-	     tpt[1] < 0 || tpt[1] >= image.GetHeight()) { 
-	   return false;
-	 }
-	bool sample = image.GetPixel(tpt[0],tpt[1]);
-	if (sample) {
-	  if (left && !right) leftindex = centre;
-	  else if (!left && right) rightindex = centre;
-	  else assert(false);
-	}
-	else {
-	  if (left && !right) rightindex = centre;
-	  else if (!left && right) leftindex = centre;
-	  else assert(false);
-	}
-      }
-
-      typename DecodeEntity<RING_COUNT*SECTOR_COUNT>::Data* payload = new typename DecodeEntity<RING_COUNT*SECTOR_COUNT>::Data();
-      destination.GetPayloads().push_back(payload);
+      typename DecodeEntity<RING_COUNT*SECTOR_COUNT>::Data* payload = destination.Add();
       
       int index = 0;
-      int readindex = (leftindex + READ_COUNT/2) % (SECTOR_COUNT * READ_COUNT);
+      int readindex = READ_COUNT/2;
       for(int j=0;j<SECTOR_COUNT;++j) {
 	// read a chunk by sampling each ring and shifting and adding
 	for(int k=RING_COUNT-1;k>=0;--k) {
