@@ -33,7 +33,6 @@ namespace Cantag {
   class TransformEntity : public Entity  {
   private:
     std::list<Transform*> m_transforms;
-    Transform* m_preferredTransform;
   public:
     TransformEntity() : Entity() {}
     ~TransformEntity() {
@@ -44,7 +43,17 @@ namespace Cantag {
 
     inline std::list<Transform*>& GetTransforms() { return m_transforms; }
     inline const std::list<Transform*>& GetTransforms() const { return m_transforms; }
-    inline Transform* GetTransform() { return *(m_transforms.begin()); }
+    inline const Transform* GetPreferredTransform() const { 
+      float best = 0.f;
+      Transform* chosen = NULL;
+      for(std::list<Transform*>::const_iterator i = m_transforms.begin();i!=m_transforms.end();++i) {
+	if ((*i)->GetConfidence() >= best) {
+	  chosen = *i;
+	  best = (*i)->GetConfidence();
+	}
+      }
+      return chosen;
+    }
     inline const Transform* GetTransform() const { return *(m_transforms.begin()); }
   private:
     TransformEntity(const TransformEntity& copyme) {}
