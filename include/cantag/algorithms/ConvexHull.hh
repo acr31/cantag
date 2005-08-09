@@ -25,6 +25,7 @@
 #ifndef CONVEXHULL_GUARD
 #define CONVEXHULL_GUARD
 
+#include <cantag/Config.hh>
 #include <cantag/entities/ContourEntity.hh>
 #include <cantag/entities/ConvexHullEntity.hh>
 #include <cantag/Function.hh>

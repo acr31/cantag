@@ -26,7 +26,7 @@
 #define FULL_ELLIPSE_FIT_GUARD
 
 #include <cantag/Ellipse.hh>
-#include <cantag/entities/Entity.hh>
+#include <cantag/entities/ShapeEntity.hh>
 #include <cantag/entities/ContourEntity.hh>
 #include <cantag/Function.hh>
 
