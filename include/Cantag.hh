@@ -37,6 +37,7 @@
 #include <cantag/entities/ContourEntity.hh>
 #include <cantag/entities/ConvexHullEntity.hh>
 #include <cantag/entities/TransformEntity.hh>
+#include <cantag/entities/ShapeEntity.hh>
 #include <cantag/entities/DecodeEntity.hh>
 
 ///////////////////////
@@ -81,6 +82,8 @@
 #include <cantag/algorithms/ConvexHull.hh>
 #include <cantag/algorithms/DrawTagCircle.hh>
 #include <cantag/algorithms/DrawTagSquare.hh>
+#include <cantag/algorithms/TransformSelectEllipse.hh>
+#include <cantag/algorithms/RemoveNonConcentricEllipse.hh>
 
 ///////////////////////
 // coders
