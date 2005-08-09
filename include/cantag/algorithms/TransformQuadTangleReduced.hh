@@ -26,7 +26,7 @@
 #define TRANSFORMQUADTANGLEREDUCED_GUARD
 
 #include <cantag/QuadTangle.hh>
-#include <cantag/entities/Entity.hh>
+#include <cantag/entities/ShapeEntity.hh>
 #include <cantag/entities/TransformEntity.hh>
 #include <cantag/Function.hh>
 

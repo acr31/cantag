@@ -25,7 +25,7 @@
 #ifndef FULL_ELLIPSE_TRANSFORM_GUARD
 #define FULL_ELLIPSE_TRANSFORM_GUARD
 
-#include <cantag/entities/Entity.hh>
+#include <cantag/entities/ShapeEntity.hh>
 #include <cantag/entities/TransformEntity.hh>
 #include <cantag/Ellipse.hh>
 #include <cantag/Function.hh>
