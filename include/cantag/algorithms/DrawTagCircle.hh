@@ -96,14 +96,14 @@ namespace Cantag {
       scalefactor = (float)size/m_tagspec.GetDataRingOuterEdge(RING_COUNT-1);
     }
 
-    int pointer = SECTOR_COUNT*RING_COUNT-1;
+    int pointer = 0;
     for(int i=0;i<SECTOR_COUNT;++i) {
       for(int j=0;j<RING_COUNT;++j) {
 	int colour = (chosen->payload)[pointer] ? COLOUR_BLACK : COLOUR_WHITE;
 	// or pick the colour based on which sector we are encoding - useful for debugging
 	//int colour = (int)((float)(pointer) / (float)(RING_COUNT*SECTOR_COUNT) * 128)+128;
-	image.DrawSector(x0,y0,scalefactor*m_tagspec.GetDataRingOuterEdge(RING_COUNT-j-1),m_tagspec.GetReadAngle(SECTOR_COUNT-i-1),m_tagspec.GetReadAngle(SECTOR_COUNT-i),colour);
-	pointer--;
+	image.DrawSector(x0,y0,scalefactor*m_tagspec.GetDataRingOuterEdge(RING_COUNT-j-1),m_tagspec.GetReadAngle(i),m_tagspec.GetReadAngle(i+1),colour);
+	++pointer;
       }
     }
 
