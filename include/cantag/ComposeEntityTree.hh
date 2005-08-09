@@ -25,7 +25,7 @@
 #ifndef COMPOSE_ENTITY_TREE_GUARD
 #define COMPOSE_ENTITY_TREE_GUARD
 
-#include <list>
+#include <vector>
 
 #include <cantag/Config.hh>
 #include <cantag/entities/Entity.hh>
@@ -39,13 +39,31 @@ namespace Cantag {
     template<class C>
     class Tree<ComposedEntity<C> > : public TreeHelper<typename ComposedEntity<C>::Typelist> {
     private:
-	ComposedEntity<C> m_node;
-	std::list<Tree<ComposedEntity<C> >* > m_children;
+      ComposedEntity<C> m_node;
+      std::vector<Tree<ComposedEntity<C> >* > m_children;
+      typename std::vector<Tree<ComposedEntity<C> >* >::iterator m_children_iterator;
 	
     public:
+
+      void Reset() {
+	m_children_iterator = m_children.begin();
+      }
+
+      bool HasNext() {
+	return m_children_iterator != m_children.end();
+      }
+
+      Tree<ComposedEntity<C> >* NextChild() {
+	if (m_children_iterator != m_children.end()) {
+	  return *(m_children_iterator++);
+	}
+	else {
+	  return NULL;
+	}
+      }
 	
 	~Tree() {
-	    for(typename std::list<Tree<ComposedEntity<C> >* >::const_iterator i = m_children.begin();
+	    for(typename std::vector<Tree<ComposedEntity<C> >* >::const_iterator i = m_children.begin();
 		i != m_children.end();
 		++i) {
 		delete *i;
@@ -58,11 +76,12 @@ namespace Cantag {
 	    return result;
 	}
 
-	bool IsValid() const { return m_node.IsPipelineValid(); }
-	/**
-	 * \todo does nothing at the moment
-	 */
-	void SetValid(bool valid) { }
+      bool IsPipelineValid() const { return m_node.IsPipelineValid(); }
+
+      bool IsTreeValid() const { return m_node.IsPipelineValid(); }
+      void SetTreeValid(bool valid) { 
+	m_node.SetValid(valid); 
+      }
 
 	ComposedEntity<C>* GetNode() {
 	    return &m_node;
@@ -72,8 +91,11 @@ namespace Cantag {
 	    return &m_node;
 	}
 	
-	std::list<Tree<ComposedEntity<C> >*>& GetChildren() { return m_children; }
-	const std::list<Tree<ComposedEntity<C> >*>& GetChildren() const { return m_children; }
+	std::vector<Tree<ComposedEntity<C> >*>& GetChildren() { return m_children; }
+	const std::vector<Tree<ComposedEntity<C> >*>& GetChildren() const { return m_children; }
+
+      void SetProgress(int progress) { m_node.SetProgress(progress); }
+      int GetProgress() { return m_node.GetProgress(); }
 	
     };
     
