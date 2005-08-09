@@ -25,11 +25,9 @@
 #ifndef ENTITY_TREE_GUARD
 #define ENTITY_TREE_GUARD
 
-#include <list>
-
+#include <vector>
 #include <cantag/Config.hh>
 #include <cantag/entities/Entity.hh>
-
 namespace Cantag {
 
   template<class Entity>
@@ -39,23 +37,52 @@ namespace Cantag {
     virtual const Entity* GetNode() const = 0;
     virtual TreeNode<Entity>* AddChild() = 0;
     virtual ~TreeNode() {};
-    virtual bool IsValid() const = 0;
-    virtual void SetValid(bool valid) = 0;
+
+    bool IsValid() const {
+      return GetNode()->IsValid() && IsTreeValid();
+    }
+
+    void SetValid(bool valid) {
+      GetNode()->SetValid(valid);
+      SetTreeValid(valid);
+    }
+    
+    virtual void Reset() = 0;
+    virtual TreeNode<Entity>* NextChild() = 0;
+    virtual bool HasNext() = 0 ;
+
+  protected:
+    virtual void SetTreeValid(bool valid) = 0;
+    virtual bool IsTreeValid() const = 0;
   };
   
   template<class C>
   class Tree : public TreeNode<C> {
   private:
     C m_node;
-    std::list<Tree<C>*> m_children;
+    std::vector<Tree<C>*> m_children;
+    typename std::vector<Tree<C>*>::iterator m_current_iterator;
   public:
 
     ~Tree() {
-      for(typename std::list<Tree<C>*>::const_iterator i = m_children.begin();
+      for(typename std::vector<Tree<C>*>::const_iterator i = m_children.begin();
 	  i != m_children.end();
 	  ++i) {
 	delete *i;
       }
+    }
+
+    void Reset() {
+      m_current_iterator = m_children.begin();
+    }
+
+    bool HasNext() {
+      return m_current_iterator != m_children.end();
+    }
+
+    Tree<C>* NextChild() {
+      if (m_current_iterator == m_children.end()) return NULL;
+      else return *(m_current_iterator++);
     }
 
     Tree<C>* AddChild() {
@@ -72,12 +99,12 @@ namespace Cantag {
       return &m_node;
     }
     
-    bool IsValid() const { return m_node.IsValid(); }
-    void SetValid(bool valid) { m_node.SetValid(valid); }
+    bool IsTreeValid() const { return true; }
+    void SetTreeValid(bool valid) { }
 
     int GetSize() { 
       int count = m_node.IsValid() ? 1 : 0;
-      for(typename std::list<Tree<C>*>::const_iterator i = m_children.begin();
+      for(typename std::vector<Tree<C>*>::const_iterator i = m_children.begin();
 	  i != m_children.end();
 	  ++i) {
 	count += (*i)->GetSize();
@@ -85,8 +112,8 @@ namespace Cantag {
       return count;
     };
 
-    std::list<Tree<C>*>& GetChildren() { return m_children; }
-    const std::list<Tree<C>*>& GetChildren() const { return m_children; }
+    std::vector<Tree<C>*>& GetChildren() { return m_children; }
+    const std::vector<Tree<C>*>& GetChildren() const { return m_children; }
   };
 
 }
