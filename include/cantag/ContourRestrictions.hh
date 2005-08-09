@@ -39,6 +39,12 @@ public:
   inline int GetMinContourWidth() const { return m_minContourWidth; }
   inline int GetMinContourHeight() const { return m_minContourHeight; }
 
+  inline void SetContourRestrictions(int minlength, int minwidth, int minheight) {
+    m_minContourLength = minlength;
+    m_minContourWidth = minwidth;
+    m_minContourHeight = minheight;
+  }
+
   inline bool CheckDimensions(int length, int width, int height) const {
     return length > m_minContourLength && width > m_minContourWidth && height > m_minContourHeight;
   }
