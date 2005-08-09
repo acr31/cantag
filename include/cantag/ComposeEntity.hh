@@ -60,8 +60,7 @@ namespace Cantag {
     
 
     template<class WorkingList, class Dummy = WorkingList>
-    class Check {
-    public:
+    struct Check {
       inline static bool CheckValid(int index, const ComposedEntity& me) {
 	if (index == 1) {
 	  return (static_cast<const typename WorkingList::Head&>(me)).IsValid(); }
@@ -69,12 +68,23 @@ namespace Cantag {
 	  return Check<typename WorkingList::Tail>::CheckValid(index-1,me);
 	}
       }
+
+      inline static void SetValid(bool value, int index, ComposedEntity& me) {
+	if (index == 1) {
+	  (static_cast<typename WorkingList::Head&>(me)).SetValid(value);
+	}
+	else {
+	  Check<typename WorkingList::Tail>::SetValid(value,index-1,me);
+	}
+      }
+
     };
 
     template<class Dummy>
     class Check<TypeListEOL,Dummy> {
     public:
       inline static bool CheckValid(int index, const ComposedEntity& me) { return false; }
+      inline static void SetValid(bool value, int index, ComposedEntity& me) {}
     };
 
   public:
@@ -87,7 +97,12 @@ namespace Cantag {
       return Check<List>::CheckValid(m_progress,*this);
     }
 
-    template<class L, class Algorithm> friend bool Apply(ComposedEntity<L>& entity,Algorithm& algorithm);
+    void SetValid(bool value) {
+      Check<List>::SetValid(value,m_progress,*this);
+    }
+
+    void SetProgress(int progress) { m_progress = progress; }
+    int GetProgress() { return m_progress; }
   };
 
   
