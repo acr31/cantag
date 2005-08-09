@@ -28,7 +28,7 @@
 #include <cantag/Config.hh>
 #include <cantag/SpeedMath.hh>
 #include <cantag/coders/Coder.hh>
-
+#include <cmath>
 namespace Cantag {
 
   /**
@@ -50,11 +50,13 @@ namespace Cantag {
   public:
     TagSpec(int symmetry, int cells_per_rotation) : m_symmetry(symmetry),m_cells_per_rotation(cells_per_rotation) {}
 
-    inline void GetCellRotation(int cells, float& cos, float& sin) const {
+    inline void GetCellRotation(int cells, float& vcos, float& vsin) const {
       float angle = (float)(cells / m_cells_per_rotation) / (float)m_symmetry * 2*M_PI;
       if (angle > M_PI) angle = M_PI - angle;
-      cos = DCOS(8,angle);
-      sin = DSIN(8,angle);
+      //      vcos = DCOS(8,angle);
+      //      vsin = DSIN(8,angle);
+      vcos = cos(angle);
+      vsin = sin(angle);
     }
   };
 
