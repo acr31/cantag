@@ -97,7 +97,7 @@ namespace Cantag {
   }
 
 
-  Image<Colour::Grey>* IEEE1394ImageSource::Next() {
+  Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* IEEE1394ImageSource::Next() {
     /*
      * This is what we would like,
      * but we can't write to the memory
@@ -114,7 +114,7 @@ namespace Cantag {
 
     // Doing a copy instead at the moment!!
     if (!mImage) {
-      mImage = new Image<Colour::Grey>(GetWidth(),GetHeight());
+      mImage = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(GetWidth(),GetHeight());
     }
     dc1394_dma_single_capture(&mCamera);
     unsigned char *img = (unsigned char*) mCamera.capture_buffer;

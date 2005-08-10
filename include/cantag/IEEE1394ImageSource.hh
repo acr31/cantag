@@ -36,11 +36,11 @@ extern "C" {
 
 namespace Cantag {
 
-  class IEEE1394ImageSource : public ImageSource<Colour::Grey> {
+  class IEEE1394ImageSource : public ImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> {
   private:
     raw1394handle_t      mHandle;
     dc1394_cameracapture mCamera;
-    Image<Colour::Grey>  *mImage;
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>  *mImage;
   
   public:
 
@@ -52,7 +52,7 @@ namespace Cantag {
 			int shutter=-1,
 			int gain=-1);
     virtual ~IEEE1394ImageSource();
-    virtual Image<Colour::Grey>* Next();
+    virtual Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* Next();
     inline int GetWidth() const { return 640; }
     inline int GetHeight() const {  return 480; }
 
