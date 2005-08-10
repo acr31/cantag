@@ -26,22 +26,50 @@
 
 namespace Cantag {
 
+  void ImageSpecialise<Pix::Sze::Byte1,Pix::Fmt::Grey8>::ConvertScale(float scalefactor, int offset) {
+    
+    //\todo: fix up this binary flag setting---could break stuff :(
+    //m_binary = false;
+    for(unsigned int i=0;i<GetHeight();++i) {
+      PixRow<Pix::Fmt::Grey8> row = GetRow(i);
+      for(PixRow<Pix::Fmt::Grey8>::iterator x=row.begin(); x!= row.end(); ++x) {
+	x.v( Round(x.v()*scalefactor)+offset );
+      }
+    }
+  }
+  
+  void ImageSpecialise<Pix::Sze::Byte1,Pix::Fmt::Grey8>::Mask(unsigned char mask) {
+    
+    //\todo: fix up this binary flag setting---could break stuff :(
+    //m_binary = mask == 1;
+    for(unsigned int i=0;i<GetHeight();++i) {
+      PixRow<Pix::Fmt::Grey8> row = GetRow(i);
+      for(PixRow<Pix::Fmt::Grey8>::iterator x=row.begin(); x!= row.end(); ++x) {
+	x.v(x.v() & mask);
+      }
+    }
+  }
+
+
+
 #if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(HAVELIB_MAGICK)
-    void ImageSpecialise<Colour::RGB>::Save(const char* filename) const {
+    void ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::RGB24>::Save(const char* filename) const {
       try {
-	Magick::Image i(Magick::Geometry(m_width,m_height),
+	Magick::Image i(Magick::Geometry(GetWidth(),GetHeight()),
 			Magick::ColorRGB(1.0,1.0,1.0));
 	i.type(Magick::TrueColorType);
 	i.colorSpace(Magick::RGBColorspace);
 	i.depth(8);
 	i.modifyImage();
-	for(unsigned int y=0;y<m_height;++y) {
-	  for(unsigned int x=0;x<m_width;++x) {	
-	    int offset = Bpp*(y*m_width_step+x);
-	    Magick::ColorRGB color((double)m_contents[offset]/255,
-				   (double)m_contents[offset+1]/255,
-				   (double)m_contents[offset+2]/255);
+	for(unsigned int y=0;y<GetHeight();++y) {
+	  const PixRow<Pix::Fmt::RGB24> row = GetRow(y);
+	  PixRow<Pix::Fmt::RGB24>::const_iterator pixel=row.begin();
+	  for(unsigned int x=0;x<GetWidth();++x) {
+	    Magick::ColorRGB color((double)pixel.r()/255,
+				   (double)pixel.g()/255,
+				   (double)pixel.b()/255);
 	    i.pixelColor(x,y,color);
+	    ++pixel;
 	  }
 	} 
 	i.write(filename);
@@ -51,22 +79,17 @@ namespace Cantag {
       }
     }
 #else
-  void ImageSpecialise<Colour::RGB>::Save(const char* filename) const {
+  void ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::RGB24>::Save(const char* filename) const {
       std::ofstream output(filename);
       output << "P3" << std::endl;
       output << "# CREATOR: TOTAL" << std::endl;
-      output << m_width << " " << m_height << std::endl;
+      output << GetWidth() << " " << GetHeight() << std::endl;
       output << 255 << std::endl;
-      for(unsigned int i=0;i<m_height;++i) {
-	const unsigned char* row_pointer = GetRow(i);
-	for(unsigned int j=0;j<Bpp*m_width;++j) {
-	  int data = (int)row_pointer[j];
-	  if (m_binary) {
-	    output << (data == 0 ? 0 : 255) << std::endl;
-	  }
-	  else {
-	    output << data << std::endl;
-	  }
+      for(unsigned int y=0;y<GetHeight();++y) {
+	PixRow<Pix::Fmt::RGB24> row = GetRow(y);
+	for(PixRow<Pix::Fmt::RGB24>::iterator x=row.begin(); 
+	    x!= row.end(); ++x) {
+	  output << x.r() << " " << x.g() << " " << x.b() << std::endl;
 	}
       }
       output.flush();
@@ -75,55 +98,77 @@ namespace Cantag {
 #endif
 
 #if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(HAVELIB_MAGICK)
-    void ImageSpecialise<Colour::RGB>::Load(const char* filename) {
+    void ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::RGB24>::Load(const char* filename) {
       
       Magick::Image i;
-      
-      if (m_free_contents) {
-	delete[] m_contents;
-      }    
+      i.read(filename);
+      unsigned int width=i.baseColumns();
+      unsigned int height=i.baseRows();
+      int size = width*height*3;
+      unsigned char* contents = new unsigned char[size];
       
       try {
-	i.read(filename);
-	m_width = i.baseColumns();
-	m_width_step = m_width;
-	m_height = i.baseRows();
-	int size = m_width*m_height*Bpp;
-	m_contents = new unsigned char[size];
-	m_free_contents = true;
-	m_binary = false;
-	Magick::Pixels view(i);
-	Magick::PixelPacket *pixel_cache = view.get(0,0,m_width,m_height);
 	i.quantizeColorSpace(Magick::RGBColorspace);
 	i.quantize();
+	Magick::Pixels view(i);
+	Magick::PixelPacket *pixel_cache = view.get(0,0,width,height);
 	for(int ptr=0;ptr<size;ptr+=3) {
-	  m_contents[ptr] = pixel_cache->red;
-	  m_contents[ptr+1] = pixel_cache->green;
-	  m_contents[ptr+2] = pixel_cache->blue;
+	  contents[ptr] = (pixel_cache->red >> (sizeof(Magick::Quantum)-1)*8) & 0xff;
+	  contents[ptr+1] = (pixel_cache->green >> (sizeof(Magick::Quantum)-1)*8) & 0xff;
+	  contents[ptr+2] = (pixel_cache->blue >> (sizeof(Magick::Quantum)-1)*8) & 0xff;
 	  ++pixel_cache;
 	}
+	NewImage(width,height,3*width,3,contents,true);
+
+	
+      }
+      catch(Magick::Exception& e) {
+	throw e.what();
+      }
+
+      try {
+	Magick::Image i(Magick::Geometry(width,height),
+			Magick::ColorRGB(1.0,1.0,1.0));
+	i.type(Magick::TrueColorType);
+	i.colorSpace(Magick::RGBColorspace);
+	i.depth(8);
+	i.modifyImage();
+	for(unsigned int y=0;y<height;++y) {
+	  for(unsigned int x=0;x<width;++x) {
+	    Magick::ColorRGB color((double)contents[3*(y*width+x)]/255,
+				   (double)contents[3*(y*width+x)]/255,
+				   (double)contents[3*(y*width+x)]/255);
+	    i.pixelColor(x,y,color);
+	  }
+	} 
+	i.write("tmp.ppm");
       }
       catch(Magick::Exception& e) {
 	throw e.what();
       }
     }
+
+
 #endif
 
 #if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(HAVELIB_MAGICK)
-   void ImageSpecialise<Colour::Grey>::Save(const char* filename) const {
+   void ImageSpecialise<Pix::Sze::Byte1,Pix::Fmt::Grey8>::Save(const char* filename) const {
     try {
-      Magick::Image i(Magick::Geometry(m_width,m_height),
+      Magick::Image i(Magick::Geometry(GetWidth(),GetHeight()),
 		      Magick::ColorRGB(1.0,1.0,1.0));
       i.type(Magick::GrayscaleType);
       i.colorSpace(Magick::GRAYColorspace);
       i.depth(8);
       i.modifyImage();
-      for(unsigned int y=0;y<m_height;++y) {
-	const unsigned char* row = GetRow(y);
-	for(unsigned int x=0;x<m_width;++x) {	
-	  Magick::ColorGray color(m_binary ? ((*row & 1) ? 1.0 : 0.0) : (double)*row/255);
+      for(unsigned int y=0;y<GetHeight();++y) {
+	const PixRow<Pix::Fmt::Grey8> row = GetRow(y);
+	PixRow<Pix::Fmt::Grey8>::const_iterator pixel=row.begin();
+	for(unsigned int x=0;x<GetWidth();++x) {
+	  //Magick::ColorGray color(m_binary ? ((*row & 1) ? 1.0 : 0.0) : (double)*row/255);
+	  unsigned char val = pixel.v();
+	  Magick::ColorGray color((double)val/255.0);
 	  i.pixelColor(x,y,color);
-	  ++row;
+	  ++pixel;
 	}
       } 
       i.write(filename);
@@ -133,22 +178,23 @@ namespace Cantag {
     }
    }
 #else
-    void ImageSpecialise<Colour::Grey>::Save(const char* filename) const {
+    void ImageSpecialise<Pix::Sze::Byte1,Pix::Fmt::Grey8>::Save(const char* filename) const {
       std::ofstream output(filename);
       output << "P2" << std::endl;
       output << "# CREATOR: TOTAL" << std::endl;
-      output << m_width << " " << m_height << std::endl;
+      output << GetWidth() << " " << GetHeight() << std::endl;
       output << 255 << std::endl;
-      for(unsigned int i=0;i<m_height;++i) {
-	const unsigned char* row_pointer = GetRow(i);
-	for(unsigned int j=0;j<m_width;++j) {
-	  int data = (int)row_pointer[j];
-	  if (m_binary) {
-	    output << (data == 0 ? 0 : 255) << std::endl;
-	  }
-	  else {
-	    output << data << std::endl;
-	  }
+      for(unsigned int y=0;y<GetHeight();++y) {
+	const PixRow<Pix::Fmt::Grey8> row = GetRow(y);
+	for(PixRow<Pix::Fmt::Grey8>::const_iterator x=row.begin(); 
+	    x!= row.end(); ++x) {
+	  output << x.v() << std::endl;
+	  //if (m_binary) {
+	  //output << (data == 0 ? 0 : 255) << std::endl;
+	  //}
+	  //else {
+	  //output << data << std::endl;
+	  //}
 	}
       }
       output.flush();
@@ -157,40 +203,35 @@ namespace Cantag {
 #endif 
 
 #if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(HAVELIB_MAGICK)
-    void ImageSpecialise<Colour::Grey>::Load(const char* filename) {
+    void ImageSpecialise<Pix::Sze::Byte1,Pix::Fmt::Grey8>::Load(const char* filename) {
 
       Magick::Image i;
-      
-      if (m_free_contents) {
-	delete[] m_contents;
-      }    
       
       try {
 	
 	i.read(filename);
-	m_width = i.baseColumns();
-	m_width_step = m_width;
-	m_height = i.baseRows();
-	int size = m_width*m_height*Bpp;
-	m_contents = new unsigned char[size];
-	m_free_contents = true;
-	m_binary = false;
+	unsigned int width = i.baseColumns();
+	unsigned int height = i.baseRows();
+	int size = width*height;
+	unsigned char* contents = new unsigned char[size];
 	Magick::Pixels view(i);
-	Magick::PixelPacket *pixel_cache = view.get(0,0,m_width,m_height);
+	Magick::PixelPacket *pixel_cache = view.get(0,0,width,height);
 	i.quantizeColorSpace(Magick::GRAYColorspace);
 	i.quantizeColors(256);
 	i.quantize();
 	for(int ptr=0;ptr<size;++ptr) {
-	  m_contents[ptr] = pixel_cache->red;
+	  contents[ptr] = (pixel_cache->red >> (sizeof(Magick::Quantum)-1)*8) & 0xff;
 	  ++pixel_cache;
 	}
+
+	NewImage(width,height,width,1,contents,true);
       }
       catch(Magick::Exception& e) {
 	throw e.what();
       }
     }
 #else
-    void ImageSpecialise<Colour::Grey>::Load(const char* filename) {
+    void ImageSpecialise<Pix::Sze::Byte1,Pix::Fmt::Grey8>::Load(const char* filename) {
 
       std::ifstream input(filename);
       char buffer[50];
@@ -203,9 +244,10 @@ namespace Cantag {
       
       input.getline(buffer,50);
       
-      input >> m_width;
-      m_width_step = m_width;
-      input >> m_height;
+      unsigned int width;
+      input >> width;
+      unsigned int height
+      input >> height;
       int colourdepth;
       input >> colourdepth;
       
@@ -213,20 +255,20 @@ namespace Cantag {
 	throw "Can only load greyscale PNM images (wrong colour depth)!";        
       }
       
-      m_contents = new unsigned char[m_width*m_height*Bpp];
-      m_free_contents = true;
+      unsigned char* contents = new unsigned char[width*height];
       int ptr = 0;
-      int max = m_width*m_height;
+      int max = width*height;
       while(ptr < max && !input.eof()) {
 	int val;
 	input >> val;
-	m_contents[ptr++] = val;
+	contents[ptr++] = val;
       }
       
       if (ptr != max) {
 	throw "Incorrect number of datapoints in PNM file";
       }
-      m_binary = false;
+
+      NewImage(width,height,width,1,contents,true);
     }
 #endif
 

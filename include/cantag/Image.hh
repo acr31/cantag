@@ -43,6 +43,9 @@ extern "C" {
 #include <cantag/SpeedMath.hh>
 #include <cantag/MonochromeImage.hh>
 #include <cantag/entities/Entity.hh>
+#include <cantag/Pixel.hh>
+#include <cantag/PixRow.hh>
+
 #include <cmath>
 #include <cassert>
 
@@ -52,7 +55,7 @@ extern "C" {
 namespace Cantag {
 
 
-  /*
+  /**
    * Overview of the Image class
    * 
    * The image class supports various different image formats
@@ -63,13 +66,13 @@ namespace Cantag {
    *
    * Instead we do something slightly more complicated...
    *
-   * 1) Define a new namespace, called "Colour" which holds both an enumeration for the supported
-   * image formats, as well as a const array declaring the size of each pixel in this format.
+   * 1) Define a new namespace, called "Colour" which holds an enumeration for the supported
+   * image formats
    *
    * 2) Declare a protected base class called ImageBase which holds data and functions common to all 
    * image formats.
    *
-   * 3) Derive partially specialised, templated, classes which inherit the ImageBase and 
+   * 3) Derive partially specialised, templated, classes which inherits the ImageBase and 
    * which support functions which require knowledge of the type of image being supported.
    *
    * 4) Define a final templated "Image" class which inherits from the specialised classes and defines
@@ -85,41 +88,161 @@ namespace Cantag {
    * 
    */
 
-  namespace Colour {
-    enum Type {RGB=0,Grey=1,Mono=2};
-  }
+  /************************************************************************/
 
   /**
    * A wrapper object for an image
    */
-  class ImageBase : public Entity {
+  template<Pix::Fmt::Layout layout> class ImageBase : public Entity {
 
-  protected:
+  private:
     unsigned int m_width;
     unsigned int m_height;
+    unsigned int m_width_step;
+    unsigned int m_bpp;
     unsigned char* m_contents;
     bool m_free_contents;
-    unsigned int m_width_step;
-
 
     //FIXME: legacy and should probably be removed
     bool m_binary;
 
+  protected:
     /**
      * Constructs new image using pre-allocated storage
      */
-    ImageBase(int width, int height, int width_step, unsigned char* contents, bool own) :
-      m_width(width), m_height(height), m_contents(contents), 
-      m_free_contents(own), m_width_step(width_step), m_binary(false) {SetValid(true);}
-    ImageBase() :
-      m_width(0), m_height(0), m_contents(0), 
-      m_free_contents(false), m_width_step(0), m_binary(false) {SetValid(false);}
+    ImageBase(unsigned int width, unsigned int height, unsigned int width_step, 
+	      unsigned int bpp, unsigned char* contents, bool own) :
+      m_width(width), m_height(height), m_width_step(width_step), m_bpp(m_bpp),
+      m_contents(contents), m_free_contents(own),  m_binary(false) {
+      SetValid(true);
+    }
 
-    ImageBase(const ImageBase& image) : m_width(image.m_width), m_height(image.m_height), m_contents(new unsigned char[image.m_width_step*image.m_height]), m_free_contents(true), m_width_step(image.m_width_step),m_binary(false) { 
+    ImageBase() :
+      m_width(0), m_height(0),  m_width_step(0), m_bpp(0), m_contents(0), 
+      m_free_contents(false), m_binary(false) {SetValid(false);}
+
+    ImageBase(const ImageBase& image) : 
+      m_width(image.m_width), m_height(image.m_height), 
+      m_width_step(image.m_width_step), m_bpp(image.m_bpp),
+      m_contents(new unsigned char[image.m_width_step*image.m_height]), 
+      m_free_contents(true), m_binary(false) { 
       SetValid(true); 
       memcpy(m_contents,image.m_contents,image.m_width_step*image.m_height);
     }
 
+  protected:
+    ~ImageBase() {
+      if (m_free_contents) {
+	delete[] m_contents;
+      }
+    }
+    
+    void NewImage(unsigned int width, unsigned int height, unsigned int width_step, 
+	     unsigned int bpp, unsigned char* contents, bool own) {
+      if (m_free_contents) {
+	delete[] m_contents;
+      }
+      
+      m_width=width;
+      m_height=height;
+      m_width_step=width_step;
+      m_bpp=bpp;
+      m_contents = contents;
+      m_free_contents = own;
+      m_binary=false;
+      SetValid(true);
+    }
+    
+  public:
+    
+    /**
+     * Return the width of the image
+     */
+    inline unsigned int GetWidth() const { return m_width; }
+
+    /**
+     * Return the height of the image
+     */
+    inline unsigned int GetHeight() const { return m_height; }
+
+    /**
+     * Return a vector to the current row
+     */
+    inline PixRow<layout> GetRow(int y) {
+      PixRow<layout> v(reinterpret_cast<Pixel<layout>*>
+		       (m_contents+y*m_width_step),m_width);
+      return v;
+    }
+
+    /**
+     * Return a vector to the current row
+     */
+    inline const PixRow<layout> GetRow(int y) const {
+      const PixRow<layout> v(reinterpret_cast<Pixel<layout>*>
+		       (m_contents+y*m_width_step),m_width);
+      return v;
+    }
+    /**
+     * Write a pixel to the image without a bounds check
+     */
+    inline void DrawPixelNoCheck(int x,int y, const Pixel<layout>& p) {
+      Pixel<layout>* row = reinterpret_cast<Pixel<layout>*>
+	(m_contents+y*m_width_step);
+      row += x;
+      *row = p;
+    }
+
+    /**
+     * Reads a pixel from the image without a bounds check
+     */
+    inline const Pixel<layout>& SampleNoCheck(unsigned int x,unsigned int y) const {
+      Pixel<layout>* row = reinterpret_cast<Pixel<layout>*>
+	(m_contents+y*m_width_step);
+      row += x;
+      return *row;
+    }
+  };
+
+  /**
+   * A wrapper object for an image, specialised with runtime layout support
+   */
+  template<> class ImageBase<Pix::Fmt::Runtime> : public Entity {
+
+  private:
+    unsigned int m_width;
+    unsigned int m_height;
+    unsigned int m_width_step;
+    unsigned int m_bpp;
+    unsigned int* m_matching;
+    unsigned char* m_contents;
+    bool m_free_contents;
+
+    //FIXME: legacy and should probably be removed
+    bool m_binary;
+
+  protected:
+    /**
+     * Constructs new image using pre-allocated storage
+     */
+    ImageBase(unsigned int width, unsigned int height, unsigned int width_step, 
+	      unsigned int bpp, unsigned char* contents, bool own) :
+      m_width(width), m_height(height), m_width_step(width_step), m_bpp(bpp),
+      m_contents(contents), m_free_contents(own),  m_binary(false) {
+      SetValid(true);
+    }
+
+    ImageBase(const ImageBase& image) : 
+      m_width(image.m_width), m_height(image.m_height), 
+      m_width_step(image.m_width_step), m_bpp(image.m_bpp),
+      m_contents(new unsigned char[image.m_width_step*image.m_height]), 
+      m_free_contents(true), m_binary(false) { 
+      SetValid(true); 
+      memcpy(m_contents,image.m_contents,image.m_width_step*image.m_height);
+    }
+
+    ImageBase() :
+      m_width(0), m_height(0),  m_width_step(0), m_bpp(0), m_contents(0), 
+      m_free_contents(false), m_binary(false) {SetValid(false);}
 
     ~ImageBase() {
       if (m_free_contents) {
@@ -127,8 +250,24 @@ namespace Cantag {
       }    
     }
 
-  public:
+    void NewImage(unsigned int width, unsigned int height, unsigned int width_step, 
+	     unsigned int bpp, unsigned char* contents, bool own) {
+      if (m_free_contents) {
+	delete[] m_contents;
+      }
+      
+      m_width=width;
+      m_height=height;
+      m_width_step=width_step;
+      m_bpp=bpp;
+      m_contents = contents;
+      m_free_contents = own;
+      m_binary=false;
+      SetValid(true);
+    }
 
+  public:
+    
     /**
      * Return the width of the image
      */
@@ -139,160 +278,209 @@ namespace Cantag {
      */
     inline int GetHeight() const { return m_height; }
 
-
     /**
-     * Return the number of bytes per line of an image
-     */ 
-    inline int GetWidthStep() const { return m_width_step; }
-  };
-
-  /**
-   * Empty unspecialised class to enable specialisation through templates
-   */
-  template<Colour::Type ColType> class ImageSpecialise : public ImageBase {};
-
-  /**
-   * Functions whose body is specific to RGB images are placed in here.
-   */
-  template<> class ImageSpecialise<Colour::RGB> : public ImageBase { 
-  protected:
-    ImageSpecialise(int w,int h): ImageBase(w,h,w*Bpp,new unsigned char[Bpp*w*h],false) {
-      memset(m_contents,255,w*h*Bpp);
-    }
-
-    ImageSpecialise(int w, int h, int w_step, unsigned char* c) : ImageBase(w, h, w_step, c, false) {}
-
-    ImageSpecialise(const ImageSpecialise<Colour::RGB>& image) : ImageBase(image) {}
-
-    ImageSpecialise() : ImageBase() {}
-  public:
-    /**
-     * Number of bytes per pixel
+     * Set the mapping between bytes and values to be configured at runtime
      */
-    static const unsigned int Bpp=3;
+    inline void SetMatching(unsigned int m[]) 
+    {for (unsigned int i=0;i<m_bpp;i++) m_matching[i] = m[i];}
+
+    /**
+     * Retrieve the current mapping associated with an image
+     */
+    inline const unsigned int* GetMatching() {return m_matching;}
+
+    /**
+     * Return a vector to the current row
+     * WARNING: PixRow takes the current matching value stored in the image
+     * and continues to use this local copy, /even after/ the value is changed
+     * in the Image class.
+     */
+    inline PixRow<Pix::Fmt::Runtime> GetRow(int y) {
+      PixRow<Pix::Fmt::Runtime> v(reinterpret_cast<Pixel<Pix::Fmt::Runtime>*>
+				  (m_contents+y*m_width_step),m_width,m_matching);
+      return v;
+    }
 
     /**
      * Write a pixel to the image without a bounds check
+     * Remember that no assumptions are made about the pixel format
+     * For the runtime, so you should check the matching of the Image
+     * object to be sure that your pixel m_contents is correct
      */
-    inline void DrawPixelNoCheck(int x,int y, unsigned int colour) {
-      *(m_contents+(m_width_step*y+x)*Bpp) =   (unsigned char) ((colour >> 16) & 0xff);
-      *(m_contents+(m_width_step*y+x)*Bpp+1) = (unsigned char) ((colour >> 8)  & 0xff);
-      *(m_contents+(m_width_step*y+x)*Bpp+2) = (unsigned char) (colour         & 0xff);
+    inline void DrawPixelNoCheck(int x,int y, const Pixel<Pix::Fmt::Runtime>& p) {
+      Pixel<Pix::Fmt::Runtime>* row = reinterpret_cast<Pixel<Pix::Fmt::Runtime>*>(m_contents+y*m_width_step);
+      row += x;
+      *row = p;
     }
 
     /**
      * Reads a pixel from the image without a bounds check
      */
-    inline unsigned int SampleNoCheck(unsigned int x,unsigned int y) const {
-      unsigned char r = *(m_contents+m_width_step*y*Bpp);
-      unsigned char g = *(m_contents+m_width_step*y*Bpp+1);
-      unsigned char b = *(m_contents+m_width_step*y*Bpp+2);
-      int col = r; 
-      col <<= 8; 
-      col ^= g; 
-      col <<= 8; 
-      col ^= b;
-      return col;
+    inline const Pixel<Pix::Fmt::Runtime>& SampleNoCheck(unsigned int x,unsigned int y) const {
+      Pixel<Pix::Fmt::Runtime>* row = reinterpret_cast<Pixel<Pix::Fmt::Runtime>*>(m_contents+y*m_width_step);
+      row += x;
+      return *row;
     }
-  
-    /**
-     * Return a (non-const) pointer to the yth row of this image
-     * Remember that this is raw interface to the underlying data structure
-     * - Check number of bytes per pixel with "Bpp" member variable
-     */
-    inline unsigned char* GetRow(unsigned int y) {
-      return Bpp*y*m_width_step+m_contents;
+  };
+
+  /*************************************************************************/
+  /* ImageSpecialise - internal library class used to enforce type checking*/
+  /*                   by linking Sze templates to Fmt templates correctly */
+  /*************************************************************************/
+
+  /**
+   * Empty unspecialised class to enable specialisation through templates
+   */
+  template<Pix::Sze::Bpp type,Pix::Fmt::Layout layout> class ImageSpecialise 
+    : public ImageBase<layout> {};
+
+  /**
+   * Functions whose body is specific to RGB images are placed in here.
+   */
+  template<> class ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::RGB24> 
+    : public ImageBase<Pix::Fmt::RGB24> { 
+
+  protected:
+    ImageSpecialise(int w,int h) 
+      : ImageBase<Pix::Fmt::RGB24>() {
+      unsigned char* contents = new unsigned char[3*w*h];
+      memset(contents,255,3*w*h);
+      NewImage(w,h,3*w,3,contents,true);
     }
 
-    /**
-     * Return a const pointer to the yth row of this image
-     * Remember that this is raw interface to the underlying data structure
-     * - Check number of bytes per pixel with "Bpp" member variable
-     */
-    inline const unsigned char* GetRow(unsigned int y) const {
-      return Bpp*y*m_width_step+m_contents;
-    }
-    
+    ImageSpecialise(int w, int h, int w_step, unsigned char* c) 
+      : ImageBase<Pix::Fmt::RGB24>(w,h,w_step,3,c,false) {}
+
+    ImageSpecialise(const ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::RGB24>& image) 
+      : ImageBase<Pix::Fmt::RGB24>(image) {}
+
+    ImageSpecialise() : ImageBase<Pix::Fmt::RGB24>() {}
+
+  public:
+
     void Load(const char* filename);
     void Save(const char* filename) const;
+  };
+
+  /**
+   * Functions whose body is specific to BGR images are placed in here.
+   */
+  template<> class ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::BGR24> 
+    : public ImageBase<Pix::Fmt::BGR24> { 
+
+  protected:
+    ImageSpecialise(int w,int h) 
+      : ImageBase<Pix::Fmt::BGR24>() {
+      unsigned char* contents = new unsigned char[3*w*h];
+      memset(contents,255,3*w*h);
+      NewImage(w,h,3*w,3,contents,true);
+    }
+
+    ImageSpecialise(int w, int h, int w_step, unsigned char* c) 
+      : ImageBase<Pix::Fmt::BGR24>(w,h,w_step,3,c,false) {}
+
+    ImageSpecialise(const ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::BGR24>& image) 
+      : ImageBase<Pix::Fmt::BGR24>(image) {}
+
+    ImageSpecialise() : ImageBase<Pix::Fmt::BGR24>() {}
+
+  public:
+  };
+
+  /**
+   * Functions whose body is specific to BGR images are placed in here.
+   */
+  template<> class ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::Runtime> 
+    : public ImageBase<Pix::Fmt::Runtime> { 
+
+  protected:
+    ImageSpecialise(int w,int h) 
+      : ImageBase<Pix::Fmt::Runtime>() {
+      unsigned char* contents = new unsigned char[3*w*h];
+      memset(contents,255,3*w*h);
+      NewImage(w,h,3*w,3,contents,true);
+    }
+
+    ImageSpecialise(int w, int h, int w_step, unsigned char* c) 
+      : ImageBase<Pix::Fmt::Runtime>(w,h,w_step,3,c,false) {}
+
+    ImageSpecialise(const ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::Runtime>& image) 
+      : ImageBase<Pix::Fmt::Runtime>(image) {}
+
+    ImageSpecialise() : ImageBase<Pix::Fmt::Runtime>() {}
+
+  public:
   };
 
   /**
    * Functions whose body is specific to Grey images are placed in here.
    */
-  template<> class ImageSpecialise<Colour::Grey> : public ImageBase { 
+  template<> class ImageSpecialise<Pix::Sze::Byte1,Pix::Fmt::Grey8> 
+    : public ImageBase<Pix::Fmt::Grey8> { 
+
   protected:
-    ImageSpecialise(int w,int h): ImageBase(w,h,w,new unsigned char[w*h],true) {
-      memset(m_contents,255,w*h*Bpp);
+    ImageSpecialise(int w, int h)
+      : ImageBase<Pix::Fmt::Grey8>() {
+      unsigned char* contents = new unsigned char[w*h];
+      memset(contents,255,w*h);
+      NewImage(w,h,w,1,contents,true);
     }
 
-    ImageSpecialise(int w, int h, int w_step, unsigned char* c) : ImageBase(w, h, w_step, c, false) {}
+    ImageSpecialise(int w, int h, int w_step, unsigned char* c) 
+      : ImageBase<Pix::Fmt::Grey8>(w,h,w_step,1,c,false) {}
 
-    ImageSpecialise(const ImageSpecialise<Colour::Grey>& image) : ImageBase(image) {};
+    ImageSpecialise(const ImageSpecialise<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) 
+      : ImageBase<Pix::Fmt::Grey8>(image) {};
 
-    ImageSpecialise() : ImageBase() {};
+    ImageSpecialise() : ImageBase<Pix::Fmt::Grey8>() {};
 
   public:
-     /**
-     * Number of bytes per pixel
-     */
-    static const unsigned int Bpp=1;
-
-    /**
-     * Write a pixel to the image without a bounds check
-     */
-    inline void DrawPixelNoCheck(int x,int y, unsigned int colour) {
-      *(m_contents+(m_width_step*y+x)*Bpp) = (unsigned char) (colour & 0xff);
-    }
-
-    /**
-     * Return a (non-const) pointer to the yth row of this image
-     * Remember that this is raw interface to the underlying data structure
-     * - Check number of bytes per pixel with "Bpp" member variable
-     */
-    inline unsigned char* GetRow(unsigned int y) {
-      return Bpp*y*m_width_step+m_contents;
-    }
-
-    /**
-     * Return a const pointer to the yth row of this image
-     * Remember that this is raw interface to the underlying data structure
-     * - Check number of bytes per pixel with "Bpp" member variable
-     */
-    inline const unsigned char* GetRow(unsigned int y) const {
-      return Bpp*y*m_width_step+m_contents;
-    }
-
-    /**
-     * Reads a pixel from the image without a bounds check
-     */
-    inline unsigned int SampleNoCheck(unsigned int x,unsigned int y) const {
-      return (unsigned int) (m_contents+m_width_step*y*Bpp);
-    }
 
     void Load(const char* filename);
     void Save(const char* filename) const;
+
+    /**
+     * Mutltiply every point in the image by scalefactor and add on the
+     * offset.
+     */
+    void ConvertScale(float scalefactor, int offset);
+
+    /**
+     * Bitwise AND this mask with every pixel
+     */
+    void Mask(unsigned char mask);
   };
+
+
+  /************************************************************************/
+  /* Image class - used by developers to manipulate images ****************/
+  /************************************************************************/
+
 
   /**
    * Functions whose body is non-specific to image type, but rely on
    * functions which are specialised, go in here.
    */
-  template<Colour::Type ColType> class Image : public ImageSpecialise<ColType> {
+  template<Pix::Sze::Bpp size, Pix::Fmt::Layout layout> class Image 
+    : public ImageSpecialise<size,layout> {
   private:
   /**
    * Sadly gcc4 is too stupid to infer that parent class variables & methods exist
    * so we have to manually tell the compiler where to find the names; 
    * typedef makes this manual defn easier (well, at least more succinct).
    */
-  typedef ImageSpecialise<ColType> s;
+  typedef ImageSpecialise<size,layout> s;
 
   public:
-    Image() : ImageSpecialise<ColType>() {}
-    Image(int width, int height) : ImageSpecialise<ColType>(width,height) {}
-    Image(int width, int height, int width_step, unsigned char* contents) : ImageSpecialise<ColType>(width, height, width_step, contents) {}
-    Image(const Image<ColType>& image) : ImageSpecialise<ColType>(image) {};
+    Image() : ImageSpecialise<size,layout>() {}
+    Image(int width, int height) 
+      : ImageSpecialise<size,layout>(width,height) {}
+    Image(int width, int height, int width_step, unsigned char* contents) 
+      : ImageSpecialise<size,layout>(width, height, width_step, contents) {}
+    Image(const Image<size,layout>& image) 
+      : ImageSpecialise<size,layout>(image) {};
 
+  public:
     /**
      * Attempts to construct a new image, reading a file from disk
      * Throws exception if file doesn't exist, or format is not understandable
@@ -309,15 +497,15 @@ namespace Cantag {
      * Read the pixel at the given x and y co-ordinates. Includes a
      * bounds check---returns 0 if out of range.
      */
-    inline unsigned char Sample(unsigned int x, unsigned int y) const {
-      return (x < s::m_width && y < s::m_height) ? s::SampleNoCheck(x,y) : 0;
+    inline const Pixel<layout>& Sample(unsigned int x, unsigned int y) const {
+      return (x < s::GetWidth() && y < s::GetHeight()) ? s::SampleNoCheck(x,y) : 0;
     }
 
     /**
      * Read the pixel at the given x and y co-ordinates. Includes a
      * bounds check---returns 0 if out of range.
      */
-    inline unsigned char Sample(int x, int y) const {
+    inline const Pixel<layout>& Sample(int x, int y) const {
       return (x >= 0 && y>=0) ? Sample( (unsigned int)x, (unsigned int)y ) : 0;
     }
   
@@ -325,41 +513,30 @@ namespace Cantag {
      * Round the floating point values to the nearest pixel and then
      * sample the image at that point.
      */
-    inline unsigned char Sample(float x, float y) const {
+    inline const Pixel<layout>& Sample(float x, float y) const {
       return Sample(Round(x),Round(y));
     }
 
     /**
-     * Mutltiply every point in the image by scalefactor and add on the
-     * offset.
-     */
-    void ConvertScale(float scalefactor, int offset);
-
-    /**
-     * Bitwise AND this mask with every pixel
-     */
-    void Mask(unsigned char mask);
-
-    /**
      * Plot a point in the image with the given colour.  x and y are
      * bounds checked; out of range values will be ignored.
      */ 
-    inline void DrawPixel(int x,int y, unsigned int colour) {
-      if ((x >= 0) && (x < (int)s::m_width) &&
-	  (y >= 0) && (y < (int)s::m_height)) {
+    inline void DrawPixel(int x,int y, const Pixel<layout>& colour) {
+      if ((x >= 0) && (x < (int)s::GetWidth()) &&
+	  (y >= 0) && (y < (int)s::GetHeight())) {
 	s::DrawPixelNoCheck(x,y,colour);
       }
     }
 
-    void SeedFill(int x, int y,unsigned int colour);
+    void SeedFill(int x, int y,const Pixel<layout>& colour);
 
     /**
      * Plot a point in the image with the given colour.  x and y are
      * bounds checked; out of range values will be ignored.
      */ 
-    inline void DrawPixel(unsigned int x,unsigned int y, unsigned int colour) {
-      if ((x < s::m_width) &&
-	  (y < s::m_height)) {
+    inline void DrawPixel(unsigned int x,unsigned int y, const Pixel<layout>& colour) {
+      if ((x < s::GetWidth()) &&
+	  (y < s::GetHeight())) {
 	s::DrawPixelNoCheck(x,y,colour);
       }
     }
@@ -369,7 +546,7 @@ namespace Cantag {
      * rounded to the nearest pixel and bounds checked; out of range
      * values will be ignored.
      */ 
-    inline void DrawPixel(float x,float y, unsigned int colour) {
+    inline void DrawPixel(float x,float y, const Pixel<layout>& colour) {
       DrawPixel(Round(x),Round(y),colour);
     }
    
@@ -380,13 +557,13 @@ namespace Cantag {
      *
      * \todo doesn't draw a line!
      */
-    void DrawLine(int x0,int y0, int x1,int y1, unsigned int colour, unsigned int thickness);
+    void DrawLine(int x0,int y0, int x1,int y1, const Pixel<layout>& colour, unsigned int thickness);
 
     /**
      * Round x0,y0,x1,y1 to the nearest integer and draw a line of given
      * thickness from (x0,y0) to (x1,y1).  
      */
-    inline void DrawLine(float x0,float y0, float x1,float y1, unsigned int colour, unsigned int thickness) {
+    inline void DrawLine(float x0,float y0, float x1,float y1, const Pixel<layout>& colour, unsigned int thickness) {
       DrawLine(Round(x0),Round(y0),Round(x1),Round(y1),colour,thickness);
     }
   
@@ -395,7 +572,7 @@ namespace Cantag {
      *
      * \todo size is ignored
      */
-    inline void DrawPoint(int x,int y, unsigned int colour, unsigned int size) {
+    inline void DrawPoint(int x,int y, const Pixel<layout>& colour, unsigned int pointsize) {
       DrawPixel(x,y,colour);
       DrawPixel(x+1,y,colour);
       DrawPixel(x,y+1,colour);
@@ -406,15 +583,15 @@ namespace Cantag {
     /**
      * Round x and y and draw a point at (x,y)
      */
-    inline void DrawPoint(float x,float y, unsigned int colour, unsigned int size) {
-      DrawPoint(Round(x),Round(y),colour,size);
+    inline void DrawPoint(float x,float y, const Pixel<layout>& colour, unsigned int pointsize) {
+      DrawPoint(Round(x),Round(y),colour,pointsize);
     }
 
     /**
      * Draw a polygon.  points is a pointer to vector of floats
      * which are x and y co-ordinates consecutivley.
      */
-    void DrawPolygon(const std::vector<float>& points, unsigned int colour, unsigned int thickness);
+    void DrawPolygon(const std::vector<float>& points, const Pixel<layout>& colour, unsigned int thickness);
 
     /**
      * Draw a polygon.  points is a pointer to an array of integers,
@@ -422,13 +599,13 @@ namespace Cantag {
      * an x co-ordinate and points[2i+1] is the coresponding y
      * co-ordinate.  
      */
-    void DrawPolygon(int* points, int numpoints, unsigned int colour, unsigned int thickness);
+    void DrawPolygon(int* points, int numpoints, const Pixel<layout>& colour, unsigned int thickness);
 
     /**
      * Draw a polygon by rounding the elements of points to the nearest
      * integer.
      */
-    void DrawPolygon(float* points, int numpoints, unsigned int colour, unsigned int thickness);
+    void DrawPolygon(float* points, int numpoints, const Pixel<layout>& colour, unsigned int thickness);
   
     /**
      * Draw a filled polygon.  points is a pointer to an array of
@@ -436,14 +613,14 @@ namespace Cantag {
      * i.e. points[2i] is x coord and points[2i+1] is corresponding y
      * coord.
      */
-    void DrawFilledPolygon(int* points, int numpoints, unsigned int colour);
+    void DrawFilledPolygon(int* points, int numpoints, const Pixel<layout>& colour);
 
-    void DrawFilledPolygon(const std::vector<float>& points, unsigned int colour);
+    void DrawFilledPolygon(const std::vector<float>& points, const Pixel<layout>& colour);
     /**
      * Draw a filled polygon by rounding the given points to the nearest
      * integer.
      */
-    void DrawFilledPolygon(float* points, int numpoints, unsigned int colour);
+    void DrawFilledPolygon(float* points, int numpoints, const Pixel<layout>& colour);
 
 
     /**
@@ -453,7 +630,7 @@ namespace Cantag {
 				     int x1, int y1,
 				     int x2, int y2,
 				     int x3, int y3,
-				     unsigned int colour) {
+				     const Pixel<layout>& colour) {
       int pts[] = { x0,y0,x1,y1, x2,y2,x3,y3 };
       DrawFilledPolygon(pts,4,colour);
     }
@@ -465,7 +642,7 @@ namespace Cantag {
 			       int x1, int y1,
 			       int x2, int y2,
 			       int x3, int y3,
-			       unsigned int colour,
+			       const Pixel<layout>& colour,
 			       unsigned int thickness) {
       int pts[] = { x0,y0,x1,y1, x2,y2, x3,y3 };
       DrawPolygon(pts,4,colour,thickness);
@@ -474,7 +651,7 @@ namespace Cantag {
     /**
      * Draw a circle centred on (x0,y0) with given radius.
      */
-    inline void DrawCircle(int x0, int y0, int radius, unsigned int colour, unsigned int thickness) {
+    inline void DrawCircle(int x0, int y0, int radius, const Pixel<layout>& colour, unsigned int thickness) {
       DrawEllipse(x0,y0,2*radius,2*radius,0,colour,thickness);
     }
 
@@ -482,28 +659,28 @@ namespace Cantag {
      * Round x0 and y0 to the nearest integer and draw a circle centered
      * on them.
      */
-    inline void DrawCircle(float x0, float y0, int radius, unsigned int colour, unsigned int thickness) {
+    inline void DrawCircle(float x0, float y0, int radius, const Pixel<layout>& colour, unsigned int thickness) {
       DrawEllipse(x0,y0,(float)(2*radius),(float)(2*radius),0,colour,thickness);
     }
 
     /**
      * Draw a filled circle centred on x0,y0
      */
-    inline void DrawFilledCircle(int x0, int y0, int radius, unsigned int colour) {
+    inline void DrawFilledCircle(int x0, int y0, int radius, const Pixel<layout>& colour) {
       DrawEllipse(x0,y0,2*radius,2*radius,0,colour,-1);
     }
 
     /**
      * Draw a filled circle centred on x0,y0
      */
-    inline void DrawFilledCircle(int x0, int y0, float radius, unsigned int colour) {
+    inline void DrawFilledCircle(int x0, int y0, float radius, const Pixel<layout>& colour) {
       DrawEllipse((float)x0,(float)y0,2*radius,2*radius,0,colour,-1);
     }
 
     /**
      * Draw a filled circle centred on x0,y0
      */
-    inline void DrawFilledCircle(float x0, float y0, float radius, unsigned int colour) {
+    inline void DrawFilledCircle(float x0, float y0, float radius, const Pixel<layout>& colour) {
       DrawEllipse(x0,y0,2*radius,2*radius,0,colour,-1);
     }
 
@@ -513,24 +690,24 @@ namespace Cantag {
      * Angles are measured from the horizontal, increasing in an
      * anti-clockwise direction.
      */
-    inline void DrawSector(int x0, int y0, int radius, float start_radians, float end_radians, unsigned int colour) {
+    inline void DrawSector(int x0, int y0, int radius, float start_radians, float end_radians, const Pixel<layout>& colour) {
       DrawEllipseArc(x0,y0,2*radius,2*radius,0,start_radians,end_radians,colour,-1);
     }
 
     /**
      * Round the radius to the nearest integer before drawing the sector.
      */
-    inline void DrawSector(int x0, int y0, float radius, float start_radians, float end_radians, unsigned int colour) {
+    inline void DrawSector(int x0, int y0, float radius, float start_radians, float end_radians, const Pixel<layout>& colour) {
       DrawSector(x0,y0,Round(radius),start_radians,end_radians,colour);
     }
 
     /**
      * Round x0,y0 and the radius to the nearest integer before drawing the sector.
      */
-    inline void DrawSector(float x0, float y0, float radius, float start_radians, float end_radians, unsigned int colour) {
+    inline void DrawSector(float x0, float y0, float radius, float start_radians, float end_radians, const Pixel<layout>& colour) {
       DrawSector(Round(x0),Round(y0),Round(radius),start_radians,end_radians,colour);
     }
-  
+
     /**
      * Resize this image to the dimensions of the argument image and write the result into it
      */ 
@@ -571,22 +748,22 @@ namespace Cantag {
      * they represent.  angle_radians is the angle between the horizontal
      * and the axis given by width
      */
-    void DrawEllipseArc(int xc, int yc, int width, int height, float angle_radians, float start_angle, float end_angle, unsigned int color, int thickness);
+    void DrawEllipseArc(int xc, int yc, int width, int height, float angle_radians, float start_angle, float end_angle, const Pixel<layout>& colour, int thickness);
 
-    void DrawEllipseArc(float xc, float yc, float width, float height, float angle_radians, float start_angle, float end_angle, unsigned int color, int thickness);
+    void DrawEllipseArc(float xc, float yc, float width, float height, float angle_radians, float start_angle, float end_angle, const Pixel<layout>& colour, int thickness);
   
-    void DrawEllipse(float xc, float yc, float width, float height, float angle_radians, unsigned int color, int thickness);
+    void DrawEllipse(float xc, float yc, float width, float height, float angle_radians, const Pixel<layout>& colour, int thickness);
 
     /**
      * Send this image over the network using the socket proffered.
      * Return the number of bytes written
      */
     //int Save(Socket& socket) const;
-
+  
   private:
     int AdaptiveWidthStep(int moving_average,int* previous_line,unsigned int i, unsigned int j,unsigned int s, int t);
-    void ellipse_polygon_approx(float* points, int startindex, int length, float xc, float yc, float width, float height,  float angle_radians, unsigned int color, int thickness, float start_angle);
-    void ScanLineFill(float* points,int numpoints,unsigned int colour);
+    void ellipse_polygon_approx(float* points, int startindex, int length, float xc, float yc, float width, float height,  float angle_radians, const Pixel<layout>& colour, int thickness, float start_angle);
+    void ScanLineFill(float* points,int numpoints,const Pixel<layout>& colour);
 
     class Edge {
     public:
@@ -622,45 +799,8 @@ namespace Cantag {
   };
 
 
-   template<Colour::Type ColType> void Image<ColType>::ConvertScale(float scalefactor, int offset) {
-    /**
-     * Sadly gcc4 is too stupid to infer that parent class variables & methods exist
-     * so we have to manually tell the compiler where to find the names; 
-     * typedef makes this manual defn easier (well, at least more succinct).
-     */
-    typedef ImageSpecialise<ColType> s;
-
-    s::m_binary = false;
-    for(int i=0;i<s::GetHeight();++i) {
-      unsigned char* ptr = s::GetRow(i);
-      for(int j=0;j<s::GetWidth();++j) {
-	unsigned char value = *ptr;
-	*ptr = Round(value*scalefactor)+offset;
-	ptr++;
-      }
-    }
-  }
-
-   template<Colour::Type ColType> void Image<ColType>::Mask(unsigned char mask) {
-    /**
-     * Sadly gcc4 is too stupid to infer that parent class variables & methods exist
-     * so we have to manually tell the compiler where to find the names; 
-     * typedef makes this manual defn easier (well, at least more succinct).
-     */
-    typedef ImageSpecialise<ColType> s;
-
-    s::m_binary = mask == 1;
-    for(int i=0;i<s::GetHeight();++i) {
-      unsigned char* ptr = s::GetRow(i);
-      for(int j=0;j<s::GetWidth();++j) {
-	*ptr &= mask;
-	++ptr;
-      }
-    }
-  }
-
 #define STEPSIZE 0.01f
-   template<Colour::Type ColType> void Image<ColType>::ellipse_polygon_approx(float* points, int startindex, int length, float xc, float yc, float width, float height,  float angle_radians, unsigned int color, int thickness, float start_angle) {
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> void Image<type,layout>::ellipse_polygon_approx(float* points, int startindex, int length, float xc, float yc, float width, float height,  float angle_radians, const Pixel<layout>& colour, int thickness, float start_angle) {
     /**
      * The parametric equation for an ellipse
      *
@@ -689,23 +829,23 @@ namespace Cantag {
 
     int numvertices = startindex+length;
     if (thickness > 0) {
-      DrawPolygon(points,numvertices,color,thickness);
-    }
-    else {
-      DrawFilledPolygon(points,numvertices,color);
+      DrawPolygon(points,numvertices,colour,thickness);
+    } else {
+      DrawFilledPolygon(points,numvertices,colour);
     }
   }
 
-   template<Colour::Type ColType> void Image<ColType>::DrawEllipse(float xc, float yc, 
-			  float width, float height, 
-			  float angle_radians, 
-			  unsigned int color, int thickness) {
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
+  void Image<type,layout>::DrawEllipse(float xc, float yc, 
+				       float width, float height, 
+				       float angle_radians, 
+				       const Pixel<layout>& colour, int thickness) {
     assert(thickness > 0 || thickness == -1);
-
+    
     int numsteps = (int)(2.f*M_PI/STEPSIZE); 
-
+    
     float points[numsteps*2];
-    ellipse_polygon_approx(points,0, numsteps, xc, yc ,width, height, angle_radians, color, thickness, 0);
+    ellipse_polygon_approx(points,0, numsteps, xc, yc ,width, height, angle_radians, colour, thickness, 0);
   }
 
   /*
@@ -713,50 +853,63 @@ namespace Cantag {
     memcpy(m_contents,c.m_contents,s::m_width_step*s::m_height);
   };
   */
+  /*
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> Image<type,layout>::Image(const MonochromeImage& mono, const char blackval) : 
+    ImageSpecialise<type,layout>(mono.GetWidth(),mono.GetHeight()) {
 
-  template<Colour::Type ColType> Image<ColType>::Image(const MonochromeImage& mono, const char blackval) : 
-    ImageSpecialise<ColType>(mono.GetWidth(),mono.GetHeight()) {
-
-    /**
      * Sadly gcc4 is too stupid to infer that parent class variables & methods exist
      * so we have to manually tell the compiler where to find the names; 
      * typedef makes this manual defn easier (well, at least more succinct).
-     */
-    typedef ImageSpecialise<ColType> s;
+
+    typedef ImageSpecialise<type,layout> s;
 
     for(unsigned int i=0;i<s::m_height;++i) {
-      unsigned char* data_pointer = s::GetRow(i);
-      for(unsigned int j=0;j<s::m_width;++j) {
-	for(unsigned int k=0;k<s::Bpp; k++) {
-	  *data_pointer = mono.GetPixel(j,i) ? blackval : 0;
+      PixRow<Pix::Fmt::Runtime> row=test.GetRow(y);
+      for(PixRow<Pix::Fmt::Runtime>::iterator x=row.begin(); x!= row.end(); ++x) { 
+	*data_pointer = mono.GetPixel(j,i) ? blackval : 0;
 	  ++data_pointer;
 	}
       }
-    }
-  };
-   
-  template<Colour::Type ColType> void Image<ColType>::DrawEllipseArc(int xc, int yc, 
-				 int  width, int height, 
-				 float angle_radians, 
-				 float start_angle, float end_angle, unsigned int color, int thickness) {
-    DrawEllipseArc((float)xc,(float)yc,(float)width,(float)height,angle_radians,start_angle,end_angle,color,thickness);
+  */
+
+
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
+  void Image<type,layout>::DrawEllipseArc(int xc, int yc, 
+					  int  width, int height, 
+					  float angle_radians, 
+					  float start_angle, 
+					  float end_angle, 
+					  const Pixel<layout>& colour, 
+					  int thickness) {
+    DrawEllipseArc((float)xc,(float)yc,(float)width,(float)height,
+		   angle_radians,start_angle,end_angle,colour,thickness);
   }
 
-  template<Colour::Type ColType> void Image<ColType>::DrawEllipseArc(float xc, float yc, 
-				 float width, float height, 
-				 float angle_radians, 
-				 float start_angle, float end_angle, unsigned int color, int thickness) {
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
+  void Image<type,layout>::DrawEllipseArc(float xc, float yc, 
+					  float width, float height, 
+					  float angle_radians, 
+					  float start_angle, 
+					  float end_angle, 
+					  const Pixel<layout>& colour, 
+					  int thickness) {
     assert(thickness > 0 || thickness == -1);
     
-    int numsteps = (int)(((float)(end_angle - start_angle))/STEPSIZE)+1; // add one to get to the edge of the sector
+    // add one to get to the edge of the sector
+    int numsteps = (int)(((float)(end_angle - start_angle))/STEPSIZE)+1; 
+
     // add in an extra point (the centre) if we are drawing a slice
     float points[numsteps*2+2];
     points[0] = Round(xc);
     points[1] = Round(yc);
-    ellipse_polygon_approx(points, 1, numsteps, xc, yc ,width, height, angle_radians, color, thickness, start_angle); 
+    ellipse_polygon_approx(points, 1, numsteps, xc, yc ,width, height, 
+			   angle_radians, colour, thickness, start_angle); 
   }
 
-   template<Colour::Type ColType> void Image<ColType>::DrawLine(int x0,int y0, int x1,int y1, unsigned int colour, unsigned int thickness) {
+   template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
+   void Image<type,layout>::DrawLine(int x0,int y0, int x1,int y1, 
+				     const Pixel<layout>& colour, 
+				     unsigned int thickness) {
     if (x1 < x0 || (x0 == x1 && y1 < y0)) {
       DrawLine(x1,y1,x0,y0,colour,thickness);
     }
@@ -829,15 +982,22 @@ namespace Cantag {
     }
   }
 
-   template<Colour::Type ColType> void Image<ColType>::DrawPolygon(float* points, int numpoints, unsigned int colour, unsigned int thickness) {
+   template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
+   void Image<type,layout>::DrawPolygon(float* points, int numpoints, 
+					const Pixel<layout>& colour, 
+					unsigned int thickness) {
     for(int i=2;i<2*numpoints;i+=2) {
       DrawLine(points[i-2],points[i-1],points[i],points[i+1],colour,thickness);
     }  
-    DrawLine(points[2*numpoints-2],points[2*numpoints-1],points[0],points[1],colour,thickness);
+    DrawLine(points[2*numpoints-2],points[2*numpoints-1],points[0],
+	     points[1],colour,thickness);
 
   }
 
-   template<Colour::Type ColType> void Image<ColType>::DrawPolygon(const std::vector<float>& points, unsigned int colour, unsigned int thickness) {
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
+  void Image<type,layout>::DrawPolygon(const std::vector<float>& points, 
+				       const Pixel<layout>& colour, 
+				       unsigned int thickness) {
     
     if (points.size() < 4 )
       return;
@@ -845,10 +1005,13 @@ namespace Cantag {
     for(unsigned int i=2;i<points.size();i+=2) {
       DrawLine(points[i-2],points[i-1],points[i],points[i+1],colour,thickness);
     }
-    DrawLine(points[points.size()-2],points[points.size()-1],points[0],points[1],colour,thickness);
+    DrawLine(points[points.size()-2],points[points.size()-1],
+	     points[0],points[1],colour,thickness);
   }
 
-   template<Colour::Type ColType> void Image<ColType>::DrawFilledPolygon(const std::vector<float>& points, unsigned int colour) {
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
+  void Image<type,layout>::DrawFilledPolygon(const std::vector<float>& points,
+					     const Pixel<layout>& colour) {
     float fpoints[points.size()];
     for(unsigned int i=0;i<points.size();++i) {
       fpoints[i] = points[i];
@@ -856,7 +1019,9 @@ namespace Cantag {
     ScanLineFill(fpoints,points.size()/2,colour);
   }
 
-   template<Colour::Type ColType> void Image<ColType>::DrawFilledPolygon(int* points, int numpoints, unsigned int colour) {
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
+  void Image<type,layout>::DrawFilledPolygon(int* points, int numpoints, 
+					     const Pixel<layout>& colour) {
     float fpoints[numpoints*2];
     for(int i=0;i<numpoints*2;++i) {
       fpoints[i] = points[i];
@@ -864,28 +1029,34 @@ namespace Cantag {
     ScanLineFill(fpoints,numpoints,colour);
   }
 
-   template<Colour::Type ColType> void Image<ColType>::DrawFilledPolygon(float* points, int numpoints, unsigned int colour) {
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
+  void Image<type,layout>::DrawFilledPolygon(float* points, int numpoints, 
+					     const Pixel<layout>& colour) {
     ScanLineFill(points,numpoints,colour);
   }
 
-   template<Colour::Type ColType> void Image<ColType>::ScanLineFill(float* points, int numpoints, unsigned int colour) {
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
+  void Image<type,layout>::ScanLineFill(float* points, int numpoints, 
+					const Pixel<layout>& colour) {
 
     // build the edge list
     std::list<Edge*> edge_list;
     for(int i=0;i<2*numpoints-2;i+=2) {
       if (points[i+1] != points[i+3]) {
 	//      std::cout << "Adding " << points[i] << " " << points[i+1] << " " << points[i+2] << " " << points[i+3] << std::endl;
-	edge_list.push_back(new Edge(points[i],points[i+1],points[i+2],points[i+3]));
+	edge_list.push_back(new Edge(points[i],points[i+1],
+				     points[i+2],points[i+3]));
       }
     }
-
+    
     if (edge_list.size() == 0) {
       return;
     }
 
     if (points[1] != points[2*numpoints-1]) {
       //std::cout << "Adding " << points[2*numpoints-2] << " " << points[2*numpoints-1] << " " << points[0] << " " << points[1] << std::endl;
-      edge_list.push_back(new Edge(points[2*numpoints-2],points[2*numpoints-1],points[0],points[1]));    
+      edge_list.push_back(new Edge(points[2*numpoints-2],points[2*numpoints-1],
+				   points[0],points[1]));    
     }
     edge_list.sort(EdgePtrSort());
   
@@ -931,7 +1102,8 @@ namespace Cantag {
     
       // remove edges with maxy == scanline from the active list
       // update the x values for the others
-      for(typename std::list<Edge*>::iterator k = active_edges.begin(); k!=active_edges.end();) {
+      for(typename std::list<Edge*>::iterator k = active_edges.begin(); 
+	  k!=active_edges.end();) {
 	if ( (*k)->maxy == scanline ) {
 	  delete *k;
 	  k = active_edges.erase(k);
@@ -961,16 +1133,17 @@ namespace Cantag {
    *
    * Rob Harle <rkh23@cam.ac.uk>
    */
-   template<Colour::Type ColType> void Image<ColType>::SeedFill(int x, int y,unsigned int colour) {
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
+  void Image<type,layout>::SeedFill(int x, int y,const Pixel<layout>& colour) {
 
     /**
      * Sadly gcc4 is too stupid to infer that parent class variables & methods exist
      * so we have to manually tell the compiler where to find the names; 
      * typedef makes this manual defn easier (well, at least more succinct).
      */
-    typedef ImageSpecialise<ColType> s;
+    typedef ImageSpecialise<type,layout> s;
 
-    if (x<0 || y<0 || x >=(int)s::m_width || y >= (int)s::m_height) return;
+    if (x<0 || y<0 || x >=(int)s::GetWidth() || y >= (int)s::GetHeight()) return;
     if (Sample(x,y)==colour) return;
     else {
       DrawPixel(x,y,colour);
@@ -980,19 +1153,17 @@ namespace Cantag {
       SeedFill(x,y-1,colour);
     }
   }
-
-
-
-
-   template<Colour::Type ColType> void Image<ColType>::DrawPolygon(int* points, int numpoints, unsigned int colour, unsigned int thickness) {
+  
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
+  void Image<type,layout>::DrawPolygon(int* points, int numpoints, 
+				       const Pixel<layout>& colour, 
+				       unsigned int thickness) {
     for(int i=2;i<2*numpoints;i+=2) {
       DrawLine(points[i-2],points[i-1],points[i],points[i+1],colour,thickness);
     }
-    DrawLine(points[2*numpoints-2],points[2*numpoints-1],points[0],points[1],colour,thickness);
+    DrawLine(points[2*numpoints-2],points[2*numpoints-1],
+	     points[0],points[1],colour,thickness);
   }
-
-
-
 };
 //#else
 

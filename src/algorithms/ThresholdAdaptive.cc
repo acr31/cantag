@@ -26,7 +26,7 @@
 namespace Cantag {
   ThresholdAdaptive::ThresholdAdaptive(int window_size, int offset) : m_window_size(window_size), m_offset(offset) {};
 
-  bool ThresholdAdaptive::operator()(const Image<Colour::Grey>& image, MonochromeImage& dest) const {
+  bool ThresholdAdaptive::operator()(const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, MonochromeImage& dest) const {
     int moving_average = 127;
     const int image_width = image.GetWidth();
     const int image_height = image.GetHeight();
@@ -36,25 +36,26 @@ namespace Cantag {
     for(int i=0;i<image_width;++i) { previous_line[i] = 127; }
     
     for(int i=0;i<image_height-1;) { // use height-1 so we dont overrun the image if its height is an odd number
-      const unsigned char* data_pointer = image.GetRow(i);
-      for(int j=0;j<image_width;++j) {
-	const int pixel = *data_pointer;
+      const PixRow<Pix::Fmt::Grey8> row = image.GetRow(i);
+      PixRow<Pix::Fmt::Grey8>::const_iterator x=row.begin(); 
+      for (int j=0; j<image_width;++j) {
+	const int pixel = x.v(); ++x;
+
 	moving_average = pixel + moving_average - (moving_average >> m_window_size);
 	int current_thresh = (moving_average + previous_line[j])>>1;
 	previous_line[j] = moving_average;      
 	dest.SetPixel(j,i, (pixel << m_window_size+8) < (current_thresh * useoffset) );
-	++data_pointer;
       }
 
       ++i;
-      data_pointer = image.GetRow(i) + image_width-1;
+      x=row.end()-1; 
       for(int j=image_width-1;j>=0;--j) {
-	const int pixel = *data_pointer;
+	const int pixel = x.v(); --x;
+
 	moving_average = pixel + moving_average - (moving_average >> m_window_size);
 	int current_thresh = (moving_average + previous_line[j])>>1;
 	previous_line[j] = moving_average;
 	dest.SetPixel(j,i, (pixel << m_window_size+8) < (current_thresh * useoffset) );
-	--data_pointer;
       }
       ++i;
     }  
@@ -70,5 +71,4 @@ namespace Cantag {
     }
     return true;
   }
-
 }

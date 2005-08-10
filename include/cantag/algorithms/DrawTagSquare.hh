@@ -40,7 +40,7 @@ namespace Cantag {
    * you.
    */
   template<int SIZE>
-  class DrawTagSquareObj : public Function1<DecodeEntity<SIZE*SIZE - (SIZE*SIZE)%2>, Image<Colour::Grey> > {
+  class DrawTagSquareObj : public Function1<DecodeEntity<SIZE*SIZE - (SIZE*SIZE)%2>, Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> > {
   private:
     const TagSquare<SIZE>& m_tagspec;
     static const int PayloadSize = TagSquare<SIZE>::PayloadSize;
@@ -50,10 +50,10 @@ namespace Cantag {
   public:
     DrawTagSquareObj(const TagSquare<SIZE>& tagspec) : m_tagspec(tagspec) {}
     
-    bool operator()(const DecodeEntity<PayloadSize>& code, Image<Colour::Grey>& image) const;
+    bool operator()(const DecodeEntity<PayloadSize>& code, Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const;
   };
 
-  template<int SIZE> bool DrawTagSquareObj<SIZE>::operator()(const DecodeEntity<PayloadSize>& code, Image<Colour::Grey>& image) const {
+  template<int SIZE> bool DrawTagSquareObj<SIZE>::operator()(const DecodeEntity<PayloadSize>& code, Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const {
     if (code.GetPayloads().size() == 0) return false;
 
     typename std::vector<DecodeData*>::const_iterator i = code.GetPayloads().begin();

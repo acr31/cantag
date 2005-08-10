@@ -60,7 +60,7 @@ namespace Cantag {
   
     
 
-  GLImageSource::GLImageSource(int width, int height, float fov, const Image<Colour::Grey>& source) :
+  GLImageSource::GLImageSource(int width, int height, float fov, const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& source) :
     m_width(width),
     m_height(height),
     m_fov(fov),
@@ -72,12 +72,12 @@ namespace Cantag {
 
     m_tmap = new GLubyte[source.GetHeight()*source.GetWidth()*4];
 
-    int pos=0;
-    for(int j=source.GetWidth()-1;j>=0;--j) {
-	for(int i=0;i<source.GetHeight();++i) {
-	m_tmap[pos++] = (GLubyte)source.Sample(i,j);
-	m_tmap[pos++] = (GLubyte)source.Sample(i,j);
-	m_tmap[pos++] = (GLubyte)source.Sample(i,j);
+    unsigned int pos=0;
+    for(unsigned int j=source.GetWidth();j>0;--j) {
+      for(unsigned int i=0;i<source.GetHeight();++i) {
+	m_tmap[pos++] = (GLubyte)source.Sample(i,j-1).intensity();
+	m_tmap[pos++] = (GLubyte)source.Sample(i,j-1).intensity();
+	m_tmap[pos++] = (GLubyte)source.Sample(i,j-1).intensity();
 	m_tmap[pos++] = (GLubyte)255;	
       }
     }
@@ -123,12 +123,12 @@ namespace Cantag {
     free(m_buffer);
   };
 
-  Image<Colour::Grey>* GLImageSource::Next() {
+  Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* GLImageSource::Next() {
     return Next(0,0,-1,0,0,2);
   };
 
 
-  Image<Colour::Grey>* GLImageSource::Next(float nx, float ny, float nz, 
+  Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* GLImageSource::Next(float nx, float ny, float nz, 
 					   float centre_x, float centre_y, float centre_z) {
     
     glClearColor(1.0,1.0,1.0,0.0);
@@ -267,7 +267,7 @@ namespace Cantag {
 	unsigned char val = (unsigned char)(0.3*(float)m_buffer[pointer++] +
 					    0.59*(float)m_buffer[pointer++] +
 					    0.11*(float)m_buffer[pointer++]);
-	m_glimage.DrawPixelNoCheck(j,i,val);
+	m_glimage.DrawPixelNoCheck(j,i,Pixel<Pix::Fmt::Grey8>(val));
       }
     }
     return &m_glimage;

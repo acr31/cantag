@@ -47,13 +47,13 @@ namespace Cantag {
    * average. the window used is now 2^window_size
    *
    */
-  class ThresholdAdaptive : public Function1<Image<Colour::Grey>,MonochromeImage> {
+  class ThresholdAdaptive : public Function1<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>,MonochromeImage> {
   private:
     int m_window_size;
     int m_offset;
   public:
     ThresholdAdaptive(int window_size, int offset);
-    bool operator()(const Image<Colour::Grey>& source, MonochromeImage& dest) const;
+    bool operator()(const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& source, MonochromeImage& dest) const;
   };
 }
 

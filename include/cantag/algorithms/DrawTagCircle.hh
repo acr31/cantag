@@ -40,7 +40,7 @@ namespace Cantag {
    * you.
    */
   template<int RING_COUNT, int SECTOR_COUNT, int READ_COUNT = 5>
-  class DrawTagCircleObj : public Function1<DecodeEntity<RING_COUNT*SECTOR_COUNT>, Image<Colour::Grey> > {
+  class DrawTagCircleObj : public Function1<DecodeEntity<RING_COUNT*SECTOR_COUNT>, Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> > {
   private:
     const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& m_tagspec;
     static const int PayloadSize = SECTOR_COUNT*RING_COUNT;
@@ -50,10 +50,10 @@ namespace Cantag {
   public:
     DrawTagCircleObj(const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec) : m_tagspec(tagspec) {}
     
-    bool operator()(const DecodeEntity<RING_COUNT*SECTOR_COUNT>& code, Image<Colour::Grey>& image) const;
+    bool operator()(const DecodeEntity<RING_COUNT*SECTOR_COUNT>& code, Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const;
   };
 
-  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool DrawTagCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(const DecodeEntity<RING_COUNT*SECTOR_COUNT>& code, Image<Colour::Grey>& image) const {
+  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool DrawTagCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(const DecodeEntity<RING_COUNT*SECTOR_COUNT>& code, Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const {
     if (code.GetPayloads().size() == 0) return false;
 
     typename std::vector<DecodeData*>::const_iterator i = code.GetPayloads().begin();

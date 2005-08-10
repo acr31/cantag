@@ -53,7 +53,7 @@ namespace Cantag {
   }
 
 
-  void QuadTangle::Draw(Image<Colour::Grey>& image,const Camera& camera) const {
+  void QuadTangle::Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image,const Camera& camera) const {
       camera.DrawQuadTangle(image,*this);
   }
 

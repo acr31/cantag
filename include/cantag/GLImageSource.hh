@@ -69,13 +69,13 @@ namespace Cantag {
    * An image source that synthesizes the view based on an OpenGL
    * rendering of the tag.
    */
-  class GLImageSource : public ImageSource<Colour::Grey> {
+  class GLImageSource : public ImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> {
   private:
     int m_width;
     int m_height;
     unsigned char* m_buffer;
     float m_fov;
-    Image<Colour::Grey> m_glimage;
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> m_glimage;
     OSMesaContext m_ctx;
     GLubyte* m_tmap;
     GLuint m_textureid;
@@ -85,7 +85,7 @@ namespace Cantag {
      * Create the image source.  It will create images of the given
      * size, with the texture source mapped on the tag
      */
-    GLImageSource(int width, int height, float fov, const Image<Colour::Grey>& texture_source);
+    GLImageSource(int width, int height, float fov, const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& texture_source);
     virtual ~GLImageSource();
 
 
@@ -94,7 +94,7 @@ namespace Cantag {
      */
     void SetCameraParameters(Camera& cam);
   
-    Image<Colour::Grey>* Next();
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* Next();
 
     inline int GetWidth() const { return m_width; }
     inline int GetHeight() const { return m_height; }
@@ -106,9 +106,9 @@ namespace Cantag {
      * \todo find some way of incorporating the lighting and occlusion
      * options.
      */
-    Image<Colour::Grey>* Next(float n_x, float n_y, float n_z, float centre_x, float centre_y, float centre_z);
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* Next(float n_x, float n_y, float n_z, float centre_x, float centre_y, float centre_z);
   
-    inline Image<Colour::Grey>* Next(float theta, float phi, float x0, float y0, float z0) {
+    inline Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* Next(float theta, float phi, float x0, float y0, float z0) {
       float nx = sin(theta/180*M_PI)*sin(phi/180*M_PI);
       float ny = sin(theta/180*M_PI)*cos(phi/180*M_PI);
       float nz = cos(theta/180*M_PI);

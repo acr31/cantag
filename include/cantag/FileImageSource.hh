@@ -33,10 +33,10 @@ namespace Cantag {
   /**
    * An image source that provides an image loaded from disk
    */
-  template<Colour::Type IMTYPE> class FileImageSource : public ImageSource<IMTYPE> {
+  template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> class FileImageSource : public ImageSource<B,L> {
   private:
-    Image<IMTYPE>* m_original;
-    Image<IMTYPE>* m_buffer;
+    Image<B,L>* m_original;
+    Image<B,L>* m_buffer;
 
   public:
     /**
@@ -44,32 +44,32 @@ namespace Cantag {
      */ 
     FileImageSource(char* filename);
     virtual ~FileImageSource();
-    Image<IMTYPE>* Next();
+    Image<B,L>* Next();
     int GetWidth() const;
     int GetHeight() const;
   };
 
-    template<Colour::Type IMTYPE> FileImageSource<IMTYPE>::FileImageSource(char* filename) : m_original(new Image<IMTYPE>(filename)), m_buffer(new Image<IMTYPE>(filename)) {}    
+    template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> FileImageSource<B,L>::FileImageSource(char* filename) : m_original(new Image<B,L>(filename)), m_buffer(new Image<B,L>(filename)) {}    
     
-    template<Colour::Type IMTYPE> int FileImageSource<IMTYPE>::GetWidth() const {
+    template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> int FileImageSource<B,L>::GetWidth() const {
 	return m_original->GetWidth();
     }
 
-    template<Colour::Type IMTYPE> int FileImageSource<IMTYPE>::GetHeight() const {
+    template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> int FileImageSource<B,L>::GetHeight() const {
 	return m_original->GetHeight();
     }
 
-    template<Colour::Type IMTYPE> FileImageSource<IMTYPE>::~FileImageSource() { 
+    template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> FileImageSource<B,L>::~FileImageSource() { 
 	if (m_buffer != NULL) {
 	    delete m_buffer;
 	}
     }
     
-    template<Colour::Type IMTYPE> Image<IMTYPE>* FileImageSource<IMTYPE>::Next() {
+    template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> Image<B,L>* FileImageSource<B,L>::Next() {
 	if (m_buffer != NULL) {
 	    delete m_buffer;
 	}
-	m_buffer = new Image<IMTYPE>(*m_original);
+	m_buffer = new Image<B,L>(*m_original);
 	m_buffer->SetValid(true);
 	return m_buffer;
     }

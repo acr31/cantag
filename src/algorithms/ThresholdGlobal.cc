@@ -1,5 +1,6 @@
 /*
   Copyright (C) 2004 Andrew C. Rice
+  Copyright (C) 2005 Alastair R. Beresford
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -25,29 +26,4 @@
 #include <cantag/algorithms/ThresholdGlobal.hh>
 
 namespace Cantag {
-  ThresholdGlobal::ThresholdGlobal(int threshold) : m_threshold(threshold) {}
-  
-  bool ThresholdGlobal::operator()(const Image<Colour::Grey>& image, MonochromeImage& dest) const {
-    const int width = image.GetWidth();
-    const int height = image.GetHeight();
-    for(int i=0;i<height;++i) {
-      const unsigned char* data_pointer = image.GetRow(i);
-      for(int j=0;j<width;++j) {
-	const unsigned char pixel = *data_pointer;
-	dest.SetPixel(j,i, pixel < m_threshold);
-	++data_pointer;
-      }
-    }
-
-    for(int i=0;i<height;++i) {
-      dest.SetPixel(0,i,false);
-      dest.SetPixel(width-1,i,false);
-      if (i == 0 || i == height-1) {
-	for(int j=0;j<width-1;++j) {
-	  dest.SetPixel(j,i,false);
-	}
-      }
-    }
-    return true;
-  }
 };

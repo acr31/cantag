@@ -140,7 +140,7 @@ namespace Cantag {
     /**
      * Remove radial and tangential distortion from the whole image.
      */
-    void UnDistortImage(Image<Colour::Grey>& image) const;
+    void UnDistortImage(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const;
 
     /**
      * Convert the camera coordinates (given as an array of triples) to world coordinates
@@ -155,15 +155,15 @@ namespace Cantag {
     /**
      * Draw this ellipse on the image given after removing the NPCF scale factors from it
      */
-    void DrawEllipse(Image<Colour::Grey>& image, const Ellipse& ellipse) const;
+    void DrawEllipse(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Ellipse& ellipse) const;
 
-    void Draw(Image<Colour::Grey>& image, const Ellipse& ellipse) const;
-    void Draw(Image<Colour::Grey>& image, const QuadTangle& ellipse) const;
+    void Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Ellipse& ellipse) const;
+    void Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const QuadTangle& ellipse) const;
 
     /**
      * Draw this quadtangle on the image given after removing the NPCF scale factors from it.
      */
-    void DrawQuadTangle(Image<Colour::Grey>& image, const QuadTangle& qt) const;
+    void DrawQuadTangle(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const QuadTangle& qt) const;
 
     
   };

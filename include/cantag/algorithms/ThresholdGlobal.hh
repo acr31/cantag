@@ -31,13 +31,44 @@
 
 namespace Cantag {
 
-  class ThresholdGlobal : public Function1<Image<Colour::Grey>,MonochromeImage> {
+  template<Pix::Sze::Bpp size,Pix::Fmt::Layout layout> class ThresholdGlobal 
+    : public Function1<Image<size,layout>,MonochromeImage> {
   private:
     int m_threshold;
   public:
     ThresholdGlobal(int threshold);
-    bool operator()(const Image<Colour::Grey>& source, MonochromeImage& dest) const;
+    bool operator()(const Image<size,layout>& source, MonochromeImage& dest) const;
   };
+
+  template<Pix::Sze::Bpp size,Pix::Fmt::Layout layout>
+  ThresholdGlobal<size,layout>::ThresholdGlobal(int threshold) : m_threshold(threshold) {}
+  
+  template<Pix::Sze::Bpp size,Pix::Fmt::Layout layout> 
+  bool ThresholdGlobal<size,layout>::operator()(const Image<size,layout>& image, MonochromeImage& dest) const {
+
+    const unsigned int height=image.GetHeight();
+    const unsigned int width=image.GetWidth();
+	  
+    for(unsigned int y=0;y<height;++y) {
+      const PixRow<layout> row = image.GetRow(y);
+      typename PixRow<layout>::const_iterator pixel=row.begin();
+      for(unsigned int x=0;x<width;x++) { 
+	dest.SetPixel(x,y, (*pixel).intensity() < m_threshold);
+	++pixel;
+      }
+    }
+
+    for(unsigned int i=0;i<height;++i) {
+      dest.SetPixel(0,i,false);
+      dest.SetPixel(width-1,i,false);
+      if (i == 0 || i == height-1) {
+	for(unsigned int j=0;j<width-1;++j) {
+	  dest.SetPixel(j,i,false);
+	}
+      }
+    }
+    return true;
+  }
 }
 
 #endif//THRESHOLD_GLOBAL_GUARD

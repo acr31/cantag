@@ -34,14 +34,17 @@ namespace Cantag {
   }
 
   void MonochromeImage::Save(const char* filename) const {
-    Image<Colour::Grey> image(m_width,m_height);
-    for(unsigned int i=0;i<m_height;++i) {
-      unsigned char* data_pointer = image.GetRow(i);
-      for(unsigned int j=0;j<m_width;++j) {
-	*data_pointer = GetPixel(j,i) ? 255 : 0;
-	++data_pointer;
+    Image<Pix::Sze::Byte1, Pix::Fmt::Grey8> image(m_width,m_height);
+      for(unsigned int y=0;y<m_height;++y) {
+	PixRow<Pix::Fmt::Grey8> row = image.GetRow(y);
+	PixRow<Pix::Fmt::Grey8>::iterator pixel=row.begin();
+	for(unsigned int x=0;x<m_width;++x) {
+	  unsigned char val = GetPixel(x,y) ? 255 : 0;
+	  //image.DrawPixel(x,y,Pixel<Pix::Fmt::Grey8>(val));
+	  pixel.v(val);
+	  ++pixel;
+	}
       }
-    }
-    image.Save(filename);
+      image.Save(filename);
   }
 }

@@ -50,7 +50,7 @@ extern "C" {
 
 namespace Cantag {
 
-  template <Colour::Type ColType> class V4LImageSource : public ImageSource<ColType> {
+  template <Pix::Sze::Bpp size,Pix::Fmt::Layout layout> class V4LImageSource : public ImageSource<size,layout> {
   private:
   
     class VideoDevHandle {
@@ -82,13 +82,13 @@ namespace Cantag {
     int m_image_width;
     int m_image_height;
     video_mmap* m_slots;
-    Image<ColType> * m_images;
+    Image<size,layout>** m_images;
 
   public:
 
     V4LImageSource(char* deviceName, int channel);
     virtual ~V4LImageSource();
-    virtual Image<ColType>* Next();
+    virtual Image<size,layout>* Next();
     inline int GetWidth() const { return m_image_width; }
     inline int GetHeight() const {  return m_image_height; }
 
@@ -103,7 +103,7 @@ namespace Cantag {
    *
    * Added Colour support: Alastair R. Beresford.
    */
-  template<Colour::Type ColType> V4LImageSource<ColType>::V4LImageSource(char* device, int channel) : 
+  template<Pix::Sze::Bpp size,Pix::Fmt::Layout layout> V4LImageSource<size,layout>::V4LImageSource(char* device, int channel) : 
     m_handle(-1), m_mmap((unsigned char*)MAP_FAILED,-1),
     m_slots(NULL),m_images(NULL)
   {
@@ -193,22 +193,30 @@ namespace Cantag {
       throw "Failed to ioctl (VIDIOCGPICT) video device";
     }
   
-    switch (ColType) {
-    case Colour::Grey:
+    if (size==Pix::Sze::Byte1 && layout==Pix::Fmt::Grey8) {
+#ifdef V4L_DEBUG
+      PROGRESS("Selecting Grey palatte support");
+#endif
       p.palette = VIDEO_PALETTE_GREY;
       p.depth = 8;
       if (ioctl(m_handle.Get(),VIDIOCSPICT,&p) < 0) {
 	throw "Failed to ioctl (VIDIOCSPICT) video device for GREY palette";
       } 
-      break;
-    case Colour::RGB:
-      p.palette = VIDEO_PALETTE_RGB24;
+    }
+    if (size==Pix::Sze::Byte3 && layout==Pix::Fmt::BGR24) {
+#ifdef V4L_DEBUG
+      PROGRESS("Selecting RGB24 palatte support");
+#endif
+      p.palette = VIDEO_PALETTE_RGB24; //on big-endian machines we want to reverse bytes
       p.depth = 24;
       if (ioctl(m_handle.Get(),VIDIOCSPICT,&p) < 0) {
 	throw "Failed to ioctl (VIDIOCSPICT) video device for RGB24 palette";
       } 
-      break;
-    default:
+    }
+
+    if ( !(size==Pix::Sze::Byte3 && layout==Pix::Fmt::BGR24) &&
+	 !(size==Pix::Sze::Byte1 && layout==Pix::Fmt::Grey8)) {
+      //\todo: this can be (and should) be detected at compile time
       throw "Failed: unsupported template type";
     }
       
@@ -220,7 +228,11 @@ namespace Cantag {
     // we ask the capture card to asynchronously fetch the images for
     // us.
     m_slots = new struct video_mmap[m_total_frames];
-    m_images = new Image<ColType>[m_total_frames];
+    m_images = new Image<size,layout>*[m_total_frames];
+
+    for(int i=0;i<m_total_frames;i++) {
+      m_images[i] = NULL;
+    }
 
     // populate the arrays
     for(int i=0;i<m_total_frames;i++) {
@@ -228,7 +240,17 @@ namespace Cantag {
       m_slots[i].frame = i;
       m_slots[i].width = m_image_width;
       m_slots[i].height = m_image_height;
-      m_images[i] = Image<ColType>(m_image_width,m_image_height,m_image_width,m_mmap.Get()+mbuf.offsets[i]);
+      switch(size) {
+      case Pix::Sze::Byte1:
+	m_images[i] = new Image<size,layout>(m_image_width,m_image_height,m_image_width,m_mmap.Get()+mbuf.offsets[i]);
+	break;
+      case Pix::Sze::Byte3:
+	m_images[i] = new Image<size,layout>(m_image_width,m_image_height,m_image_width*3,m_mmap.Get()+mbuf.offsets[i]);
+	break;
+      default:
+	throw "Failed: unsupported template type";
+      }
+
       // start the device asynchronously fetching the frame
       if (i>0) { // dont start capturing for this one because we'll
 	// start it when we first call next
@@ -249,15 +271,19 @@ namespace Cantag {
 #endif
   }
 
-  template<Colour::Type ColType> V4LImageSource<ColType>::~V4LImageSource() {
+  template<Pix::Sze::Bpp size,Pix::Fmt::Layout layout> V4LImageSource<size,layout>::~V4LImageSource() {
 #ifdef V4L_DEBUG
     PROGRESS("Destroying image source");
 #endif
-    if (m_images) delete[] m_images;
+    if (m_images) {
+      for (int i=0;i<m_total_frames;i++)
+	delete m_images[i];
+      delete[] m_images;
+    }
     if (m_slots) delete[] m_slots;
   }
 
- template<Colour::Type ColType> Image<ColType>* V4LImageSource<ColType>::Next() {  
+ template<Pix::Sze::Bpp size,Pix::Fmt::Layout layout> Image<size,layout>* V4LImageSource<size,layout>::Next() {  
     // start the device collecting the one we just used
     int rs;
     int retry = 0;
@@ -275,7 +301,7 @@ namespace Cantag {
       throw "Failed to ioctl (VIDIOCSYNC) video device";
     }  
 
-    Image<ColType>* result = &m_images[m_current_frame];
+    Image<size,layout>* result = m_images[m_current_frame];
     result->SetValid(true);
 
     return result;
@@ -283,9 +309,9 @@ namespace Cantag {
 
 
 
-  template<Colour::Type ColType> V4LImageSource<ColType>::VideoDevHandle::VideoDevHandle(int f_handle) : m_f_handle(f_handle) {};
-  template<Colour::Type ColType> typename V4LImageSource<ColType>::VideoDevHandle& V4LImageSource<ColType>::VideoDevHandle::SetHandle(int f_handle) { m_f_handle = f_handle; return *this;}
-  template<Colour::Type ColType> V4LImageSource<ColType>::VideoDevHandle::~VideoDevHandle() { 
+  template<Pix::Sze::Bpp size,Pix::Fmt::Layout layout> V4LImageSource<size,layout>::VideoDevHandle::VideoDevHandle(int f_handle) : m_f_handle(f_handle) {};
+  template<Pix::Sze::Bpp size,Pix::Fmt::Layout layout> typename V4LImageSource<size,layout>::VideoDevHandle& V4LImageSource<size,layout>::VideoDevHandle::SetHandle(int f_handle) { m_f_handle = f_handle; return *this;}
+  template<Pix::Sze::Bpp size,Pix::Fmt::Layout layout> V4LImageSource<size,layout>::VideoDevHandle::~VideoDevHandle() { 
     if(m_f_handle >=0) {
 #ifdef V4L_DEBUG
       PROGRESS("Closing handle");
@@ -294,15 +320,15 @@ namespace Cantag {
     }
   }
 
-  template<Colour::Type ColType> int V4LImageSource<ColType>::VideoDevHandle::Get() const { 
+  template<Pix::Sze::Bpp size,Pix::Fmt::Layout layout> int V4LImageSource<size,layout>::VideoDevHandle::Get() const { 
     return m_f_handle; 
   }
 
-  template<Colour::Type ColType> V4LImageSource<ColType>::MMapHandle::MMapHandle(unsigned char* mmap_start,int size) : m_mmap_start(mmap_start),m_size(size) {};
+  template<Pix::Sze::Bpp _size,Pix::Fmt::Layout layout> V4LImageSource<_size,layout>::MMapHandle::MMapHandle(unsigned char* mmap_start,int size) : m_mmap_start(mmap_start),m_size(size) {};
   
-template<Colour::Type ColType> typename V4LImageSource<ColType>::MMapHandle& V4LImageSource<ColType>::MMapHandle::SetHandle(unsigned char* f_handle, int size) { m_mmap_start = f_handle; m_size=size; return *this; }
+template<Pix::Sze::Bpp _size,Pix::Fmt::Layout layout> typename V4LImageSource<_size,layout>::MMapHandle& V4LImageSource<_size,layout>::MMapHandle::SetHandle(unsigned char* f_handle, int size) { m_mmap_start = f_handle; m_size=size; return *this; }
 
-  template<Colour::Type ColType> V4LImageSource<ColType>::MMapHandle::~MMapHandle() { 
+  template<Pix::Sze::Bpp size,Pix::Fmt::Layout layout> V4LImageSource<size,layout>::MMapHandle::~MMapHandle() { 
     if (m_mmap_start != (unsigned char*)MAP_FAILED) { 
 #ifdef V4L_DEBUG
       PROGRESS("Unmapping memory");
@@ -311,7 +337,7 @@ template<Colour::Type ColType> typename V4LImageSource<ColType>::MMapHandle& V4L
     }
   }
 
-  template<Colour::Type ColType> unsigned char* V4LImageSource<ColType>::MMapHandle::Get() { 
+  template<Pix::Sze::Bpp size,Pix::Fmt::Layout layout> unsigned char* V4LImageSource<size,layout>::MMapHandle::Get() { 
     return m_mmap_start; 
   }
 

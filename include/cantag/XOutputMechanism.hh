@@ -151,10 +151,10 @@ namespace Cantag {
     int m_displayed_image;
   public:
 
-    class ImageAlgorithm : public Function0<Image<Colour::Grey> > {
+    class ImageAlgorithm : public Function0<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> > {
       friend class XOutputMechanism;
     public:
-      bool operator()(Image<Colour::Grey>& dest);
+      bool operator()(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& dest);
       
     private:
       XOutputMechanism& m_output;
@@ -294,16 +294,18 @@ namespace Cantag {
     if (m_displaygot) XCloseDisplay(m_display);
   }
 
-  template<class Shape, int PAYLOAD_SIZE> bool XOutputMechanism<Shape,PAYLOAD_SIZE>::ImageAlgorithm::operator()(Image<Colour::Grey>& image) {
+  template<class Shape, int PAYLOAD_SIZE> bool XOutputMechanism<Shape,PAYLOAD_SIZE>::ImageAlgorithm::operator()(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) {
     XSHMAttachedImage& attached = *m_output.m_image[m_output.m_displayed_image ^ 0x1];
     XImage* ximage = attached.m_image;
 
     for (int y=0; y<m_output.m_height/2; ++y) {
-      const unsigned char* pointer = image.GetRow(2*y);
+      const PixRow<Pix::Fmt::Grey8> row = image.GetRow(2*y);
+      PixRow<Pix::Fmt::Grey8>::const_iterator pixel=row.begin();
+
       char* destptr = ximage->data + ximage->bytes_per_line * y;
       for (int x=0; x<m_output.m_width/2; ++x) {
-	unsigned char data = *pointer;
-	pointer+=2;
+	unsigned char data = pixel.v();
+	++pixel; ++pixel;
       
 	unsigned long rPart = data;
 	int diff = attached.m_redbits - 8;
