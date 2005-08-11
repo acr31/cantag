@@ -117,7 +117,7 @@ namespace Cantag {
 
   template<class List>
   struct Nth<List,0> {
-    enum { value = typename List::Head };
+    enum { value = List::Head };
   };
   
 }
