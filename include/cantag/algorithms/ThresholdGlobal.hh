@@ -25,14 +25,16 @@
 #ifndef THRESHOLD_GLOBAL_GUARD
 #define THRESHOLD_GLOBAL_GUARD
 
+#include <cantag/Config.hh>
+#include <cantag/Function.hh>
 #include <cantag/Image.hh>
 #include <cantag/MonochromeImage.hh>
-#include <cantag/Function.hh>
 
 namespace Cantag {
 
   template<Pix::Sze::Bpp size,Pix::Fmt::Layout layout> class ThresholdGlobal 
-    : public Function1<Image<size,layout>,MonochromeImage> {
+    : public Function<TypeList<Image<size,layout> >, // needed because the preprocessor can't parse the call to TL1(Image<size,layout>)
+		      TL1(MonochromeImage)> {
   private:
     int m_threshold;
   public:

@@ -35,7 +35,7 @@
 namespace Cantag {
 
   template<class Coder>
-  class Decode : public Function0<DecodeEntity<Coder::PayloadSize> >, private Coder {
+  class Decode : public Function<TL0,TL1(DecodeEntity<Coder::PayloadSize>)>, private Coder {
   private:
     typedef typename DecodeEntity<Coder::PayloadSize>::Data DecodeData; // needed to convince the compiler to parse this file
 
@@ -48,6 +48,7 @@ namespace Cantag {
 	  i != destination.GetPayloads().end(); 
 	  ++i) {
 	DecodeData* data = *i;	
+	std::cout << "In: " << data->payload << std::endl;
 	int rotation = DecodePayload(data->payload);
 	data->bits_rotation = rotation;
 	if (rotation >= 0) {

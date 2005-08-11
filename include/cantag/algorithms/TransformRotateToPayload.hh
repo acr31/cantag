@@ -45,7 +45,7 @@ namespace Cantag {
    * parameters
    */
   template<int PAYLOAD_SIZE>
-  class TransformRotateToPayloadObj : public Function1<DecodeEntity<PAYLOAD_SIZE>,TransformEntity> {
+  class TransformRotateToPayloadObj : public Function<TL1(DecodeEntity<PAYLOAD_SIZE>),TL1(TransformEntity)> {
   private:
     typedef typename DecodeEntity<PAYLOAD_SIZE>::Data DecodeData;
 

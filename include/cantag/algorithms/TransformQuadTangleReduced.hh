@@ -31,7 +31,7 @@
 #include <cantag/Function.hh>
 
 namespace Cantag {
-  class TransformQuadTangleReduced : public Function1<ShapeEntity<QuadTangle>,TransformEntity> {
+  class TransformQuadTangleReduced : public Function<TL1(ShapeEntity<QuadTangle>),TL1(TransformEntity)> {
   public:
     /**
      * This algorithm is as the same as

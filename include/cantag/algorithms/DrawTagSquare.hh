@@ -40,7 +40,7 @@ namespace Cantag {
    * you.
    */
   template<int SIZE>
-  class DrawTagSquareObj : public Function1<DecodeEntity<SIZE*SIZE - (SIZE*SIZE)%2>, Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> > {
+  class DrawTagSquareObj : public Function<TL1(DecodeEntity<SIZE*SIZE - (SIZE*SIZE)%2>), TypeList<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> > > {
   private:
     const TagSquare<SIZE>& m_tagspec;
     static const int PayloadSize = TagSquare<SIZE>::PayloadSize;

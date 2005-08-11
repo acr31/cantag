@@ -38,7 +38,7 @@ namespace Cantag {
    * Algorithm for encoding tag data
    */
   template<class Coder>
-  class Encode : public Function0<DecodeEntity<Coder::PayloadSize> >, private Coder {
+  class Encode : public Function<TL0,TL1(DecodeEntity<Coder::PayloadSize>) >, private Coder {
   private:
     typedef typename DecodeEntity<Coder::PayloadSize>::Data DecodeData; // needed to convince the compiler to parse this file
   public:

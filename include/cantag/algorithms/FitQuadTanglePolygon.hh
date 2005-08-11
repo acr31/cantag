@@ -31,7 +31,7 @@
 #include <cantag/Function.hh>
 
 namespace Cantag {
-  class FitQuadTanglePolygon : public Function1<ContourEntity,ShapeEntity<QuadTangle> > {
+  class FitQuadTanglePolygon : public Function<TL1(ContourEntity),TL1(ShapeEntity<QuadTangle>) > {
   public:
     typedef ContourEntity SourceType;
     typedef ShapeEntity<QuadTangle> DestinationType;

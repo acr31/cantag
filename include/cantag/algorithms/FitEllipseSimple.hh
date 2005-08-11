@@ -31,7 +31,7 @@
 #include <cantag/Function.hh>
 
 namespace Cantag {
-  class FitEllipseSimple : public Function1<ContourEntity,ShapeEntity<Ellipse> > {
+  class FitEllipseSimple : public Function<TL1(ContourEntity),TL1(ShapeEntity<Ellipse>) > {
   public:
     bool operator()(const ContourEntity& contour, ShapeEntity<Ellipse>& shape) const;
   };

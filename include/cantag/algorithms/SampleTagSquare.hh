@@ -33,7 +33,7 @@
 namespace Cantag {
 
   template<int EDGE_CELLS>
-  class SampleTagSquare : public Function2<MonochromeImage,TransformEntity, DecodeEntity<EDGE_CELLS*EDGE_CELLS-(EDGE_CELLS*EDGE_CELLS%2)> > {
+  class SampleTagSquare : public Function<TL2(MonochromeImage,TransformEntity), TL1(DecodeEntity<EDGE_CELLS*EDGE_CELLS-(EDGE_CELLS*EDGE_CELLS%2)>) > {
   private:
     const TagSquare<EDGE_CELLS>& m_tagspec;
     const Camera& m_camera;

@@ -33,7 +33,7 @@
 namespace Cantag { 
 
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
-  class TransformSelectEllipseObj : public Function0<TreeNode<TransformEntity> > {
+  class TransformSelectEllipseObj : public Function<TL0,TL1(TreeNode<TransformEntity>) > {
   private:
     const Camera& m_camera;
     const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& m_tagspec;

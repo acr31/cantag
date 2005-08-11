@@ -32,7 +32,7 @@
 
 namespace Cantag {
 
-  class TransformEllipseFull : public Function1<ShapeEntity<Ellipse>, TransformEntity> {
+  class TransformEllipseFull : public Function<TL1(ShapeEntity<Ellipse>),TL1(TransformEntity)> {
   public:
     typedef ShapeEntity<Ellipse> SourceType;
     typedef TransformEntity DestinationType;

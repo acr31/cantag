@@ -47,7 +47,8 @@ namespace Cantag {
    * average. the window used is now 2^window_size
    *
    */
-  class ThresholdAdaptive : public Function1<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>,MonochromeImage> {
+  class ThresholdAdaptive : public Function<TypeList<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> >, // needed because the preprocesser can't parse the call to TL1(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>)
+		    TL1(MonochromeImage)> {
   private:
     int m_window_size;
     int m_offset;

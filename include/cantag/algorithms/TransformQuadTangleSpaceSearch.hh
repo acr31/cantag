@@ -44,7 +44,7 @@ namespace Cantag {
    * square in real life.  Solves for four parameters: z, alpha,
    * beta, gamma, where the three angles are standarad euler angles
    */
-  class TransformQuadTangleSpaceSearch : public Function1<ShapeEntity<QuadTangle>,TransformEntity> {
+  class TransformQuadTangleSpaceSearch : public Function<TL1(ShapeEntity<QuadTangle>),TL1(TransformEntity)> {
 
     /**
      * Calculate the transform by least squares minimising the 

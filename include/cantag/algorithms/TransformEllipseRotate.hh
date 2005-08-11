@@ -39,7 +39,7 @@ namespace Cantag {
    * automatically
    */
   template<int RING_COUNT, int SECTOR_COUNT, int READ_COUNT=5>
-  class TransformEllipseRotateObj : public Function1<MonochromeImage,TransformEntity> {
+  class TransformEllipseRotateObj : public Function<TL1(MonochromeImage),TL1(TransformEntity)> {
   private:
     const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& m_tagspec;
     const Camera& m_camera;

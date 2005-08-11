@@ -40,7 +40,7 @@ namespace Cantag {
    * you.
    */
   template<int RING_COUNT, int SECTOR_COUNT, int READ_COUNT = 5>
-  class DrawTagCircleObj : public Function1<DecodeEntity<RING_COUNT*SECTOR_COUNT>, Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> > {
+  class DrawTagCircleObj : public Function<TL1(DecodeEntity<RING_COUNT*SECTOR_COUNT>), TypeList<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> > > {
   private:
     const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& m_tagspec;
     static const int PayloadSize = SECTOR_COUNT*RING_COUNT;
