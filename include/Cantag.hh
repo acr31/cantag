@@ -84,6 +84,7 @@
 #include <cantag/algorithms/DrawTagSquare.hh>
 #include <cantag/algorithms/TransformSelectEllipse.hh>
 #include <cantag/algorithms/RemoveNonConcentricEllipse.hh>
+#include <cantag/algorithms/DrawEntity.hh>
 
 ///////////////////////
 // coders
