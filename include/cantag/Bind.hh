@@ -28,13 +28,14 @@
 #include <cantag/Function.hh>
 
 namespace Cantag {
+
   template<class S, class T>
   class Bound {
   };
 
   template<class Algorithm, class ST1, class ReturnType>
-  class Bound<Algorithm, Function1<ST1,ReturnType> > : 
-    public Function0<ReturnType> {
+  class Bound<Algorithm, Function<TL1(ST1),TL1(ReturnType)> > : 
+    public Function<TL0,TL1(ReturnType)> {
   private:
     const Algorithm& m_algorithm;
     const ST1& m_source;
@@ -47,8 +48,8 @@ namespace Cantag {
   };
 
   template<class Algorithm, class ST1, class ST2, class ReturnType>
-  class Bound<Algorithm, Function2<ST1, ST2, ReturnType> > : 
-    public Function1<ST2, ReturnType> {
+  class Bound<Algorithm, Function<TL2(ST1, ST2), TL1(ReturnType)> > : 
+    public Function<TL1(ST2), TL1(ReturnType)> {
   private:
     const Algorithm& m_algorithm;
     const ST1& m_source;
@@ -60,7 +61,7 @@ namespace Cantag {
   };
 
   template<class Algorithm, class ST1, class ST2, class ST3, class ReturnType>
-  class Bound<Algorithm, Function3<ST1, ST2, ST3, ReturnType> > : public Function2<ST2, ST3, ReturnType> {
+  class Bound<Algorithm, Function<TL3(ST1, ST2, ST3), TL1(ReturnType)> > : public Function<TL2(ST2, ST3), TL1(ReturnType)> {
   private:
     const Algorithm& m_algorithm;
     const ST1& m_source;
@@ -71,7 +72,7 @@ namespace Cantag {
     }
   };
   
-  template<class Algorithm> Bound<Algorithm, typename Algorithm::FunctionType> Bind(const Algorithm& a, const typename Algorithm::SourceType1& source) {
+  template<class Algorithm> Bound<Algorithm, typename Algorithm::FunctionType> Bind(const Algorithm& a, const typename Nth<typename Algorithm::Arguments,0>::value& source) {
     return Bound<Algorithm,typename Algorithm::FunctionType>(a,source);
   }
 }
