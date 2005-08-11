@@ -199,7 +199,8 @@ namespace Cantag {
       Pixel<layout>* row = reinterpret_cast<Pixel<layout>*>
 	(m_contents+y*m_width_step);
       row += x;
-      return *row;
+      const Pixel<layout>& tmp = *row;
+      return tmp;
     }
   };
 
@@ -498,7 +499,13 @@ namespace Cantag {
      * bounds check---returns 0 if out of range.
      */
     inline const Pixel<layout>& Sample(unsigned int x, unsigned int y) const {
-      return (x < s::GetWidth() && y < s::GetHeight()) ? s::SampleNoCheck(x,y) : 0;
+      if (x < s::GetWidth() && y < s::GetHeight())  {
+	const Pixel<layout>& tmp = s::SampleNoCheck(x,y);
+	return tmp;
+      } else {
+	const Pixel<layout>& tmp = 0;
+	return tmp;
+      }
     }
 
     /**
@@ -506,7 +513,13 @@ namespace Cantag {
      * bounds check---returns 0 if out of range.
      */
     inline const Pixel<layout>& Sample(int x, int y) const {
-      return (x >= 0 && y>=0) ? Sample( (unsigned int)x, (unsigned int)y ) : 0;
+      if (x >= 0 && y>=0) {
+	const Pixel<layout>& tmp = Sample( (unsigned int)x, (unsigned int)y );
+	return tmp;
+      } else {
+	const Pixel<layout>& tmp = 0;
+	return tmp;
+      }
     }
   
     /**
@@ -514,7 +527,8 @@ namespace Cantag {
      * sample the image at that point.
      */
     inline const Pixel<layout>& Sample(float x, float y) const {
-      return Sample(Round(x),Round(y));
+      const Pixel<layout>& tmp = Sample(Round(x),Round(y));
+      return tmp;
     }
 
     /**
