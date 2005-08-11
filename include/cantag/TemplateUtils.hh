@@ -106,6 +106,22 @@ namespace Cantag {
     enum { value = 1 };
   };
 
+
+  /**
+   * Return the nth item in the list.  The first item in the list has index 0
+   */
+  template<class List,int index>
+  struct Nth {
+    enum { value = Nth<typename List::Tail,index-1>::value };
+  };
+
+  template<class List>
+  struct Nth<List,0> {
+    enum { value = typename List::Head };
+  };
+  
 }
+
+
 
 #endif//TEMPLATE_UTILS_GUARD
