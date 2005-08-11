@@ -33,18 +33,20 @@ namespace Cantag {
   /**
    * A list of types
    */
-  template<class H, class T> struct TypeList {
+  class TypeListEOL {};
+  template<class H, class T = TypeListEOL> struct TypeList {
     typedef H Head;
     typedef T Tail;
   };
-  class TypeListEOL {};
-  
+
+#define TL0 TypeListEOL
 #define TL1(x1) TypeList<x1,TypeListEOL>
 #define TL2(x1,x2) TypeList<x1,TypeList<x2,TypeListEOL> >
 #define TL3(x1,x2,x3) TypeList<x1,TypeList<x2,TypeList<x3,TypeListEOL> > >
 #define TL4(x1,x2,x3,x4) TypeList<x1,TypeList<x2,TypeList<x3,TypeList<x4, TypeListEOL> > > >
 #define TL5(x1,x2,x3,x4,x5) TypeList<x1,TypeList<x2,TypeList<x3,TypeList<x4, TypeList<x5, TypeListEOL> > > > >
-  
+#define TL6(x1,x2,x3,x4,x5,x6) TypeList<x1,TypeList<x2,TypeList<x3,TypeList<x4, TypeList<x5, TypeList<x6,TypeListEOL> > > > > >
+
   /**
    * Select the last element from a list of entities
    */
@@ -106,18 +108,17 @@ namespace Cantag {
     enum { value = 1 };
   };
 
-
   /**
    * Return the nth item in the list.  The first item in the list has index 0
    */
   template<class List,int index>
   struct Nth {
-    enum { value = Nth<typename List::Tail,index-1>::value };
+    typedef typename Nth<typename List::Tail,index-1>::value value;
   };
 
   template<class List>
   struct Nth<List,0> {
-    enum { value = List::Head };
+    typedef typename List::Head value;
   };
   
 }
