@@ -58,7 +58,7 @@ namespace Cantag {
      */
     template<class Tree, class Algorithm> bool _Apply_Tree(Tree& tree, Algorithm& algorithm) {
       PRINTFUNCTION();
-      bool result = ApplyAlternation<Tree,typename Algorithm::ResultType,Algorithm>::Choose(tree,algorithm);
+      bool result = ApplyAlternation<Tree,typename Nth<typename Algorithm::Results,0>::value,Algorithm>::Choose(tree,algorithm);
       for(typename std::vector<Tree*>::iterator i = tree.GetChildren().begin(); i != tree.GetChildren().end(); ++i) {
 	result |= _Apply_Tree<Tree,Algorithm>(*(*i),algorithm);
       }    
@@ -80,13 +80,13 @@ namespace Cantag {
      * did
      */
     template<class Algorithm, class TreeType> bool _Apply_Tree_Tree(const Tree<TreeType>& source, 
-								    TreeNode<typename Algorithm::FunctionType::ResultType>& dest_parent, 
-								    TreeNode<typename Algorithm::FunctionType::ResultType>& dest_current, 
+								    TreeNode<typename Nth<typename Algorithm::Results,0>::value >& dest_parent, 
+								    TreeNode<typename Nth<typename Algorithm::Results,0>::value >& dest_current, 
 								    const Algorithm& algorithm) {
       PRINTFUNCTION();
       bool result = Apply(*(source.GetNode()), *(dest_current.GetNode()),algorithm);
-      TreeNode<typename Algorithm::FunctionType::ResultType>* parent;
-      TreeNode<typename Algorithm::FunctionType::ResultType>* child;
+      TreeNode<typename Nth<typename Algorithm::Results,0>::value >* parent;
+      TreeNode<typename Nth<typename Algorithm::Results,0>::value >* child;
       if (result) {
 	parent = &dest_current;
 	child = parent->AddChild();
@@ -113,7 +113,7 @@ namespace Cantag {
      * order for the algorithm to be run.  The validity of the result is
      * then set according to the result of the algorithm
      */
-    template<class Algorithm> bool _Apply_Fn0(typename Algorithm::FunctionType::ResultType& result, Algorithm& algorithm) {
+    template<class Algorithm> bool _Apply_Fn0(typename Nth<typename Algorithm::Results,0>::value& result, Algorithm& algorithm) {
       PRINTFUNCTION();
       bool r = false;
       if (result.IsValid()) {
@@ -127,7 +127,7 @@ namespace Cantag {
      * Apply this 1-ary function to arg1 (if it is valid) and store the
      * result in result (setting its validity as returned by the function
      */
-    template<class Algorithm> inline bool _Apply_Fn1(const typename Algorithm::FunctionType::SourceType1& arg1, typename Algorithm::FunctionType::ResultType& result, Algorithm& algorithm) {
+    template<class Algorithm> inline bool _Apply_Fn1(const typename Nth<typename Algorithm::Arguments,0>::value& arg1, typename Nth<typename Algorithm::Results,0>::value& result, Algorithm& algorithm) {
       PRINTFUNCTION();
       bool r = false;
       if (arg1.IsValid()) {
@@ -141,7 +141,7 @@ namespace Cantag {
      * Apply this 2-ary function to the arguments (if both are valid)
      * and store the result in result and set its validity
      */
-    template<class Algorithm> bool _Apply_Fn2(const typename Algorithm::FunctionType::SourceType1& arg1, const typename Algorithm::FunctionType::SourceType2& arg2, typename Algorithm::FunctionType::ResultType& result, const Algorithm& algorithm) {
+    template<class Algorithm> bool _Apply_Fn2(const typename Nth<typename Algorithm::Arguments,0>::value& arg1, const typename Nth<typename Algorithm::Arguments,1>::value& arg2, typename Nth<typename Algorithm::Results,0>::value& result, const Algorithm& algorithm) {
       PRINTFUNCTION();
       bool r = false;
       if (arg1.IsValid() && arg2.IsValid()) {
@@ -154,7 +154,7 @@ namespace Cantag {
     /**
      * Apply this 3-ary function to the arguments 
      */
-    template<class Algorithm> bool _Apply_Fn3(const typename Algorithm::FunctionType::SourceType1& arg1, const typename Algorithm::FunctionType::SourceType2& arg2, const typename Algorithm::FunctionType::SourceType3& arg3, typename Algorithm::FunctionType::ResultType& result, Algorithm& algorithm) {
+    template<class Algorithm> bool _Apply_Fn3(const typename Nth<typename Algorithm::Arguments,0>::value& arg1, const typename Nth<typename Algorithm::Arguments,1>::value& arg2, const typename Nth<typename Algorithm::Arguments,2>::value& arg3, typename Nth<typename Algorithm::Results,0>::value& result, Algorithm& algorithm) {
       PRINTFUNCTION();
       bool r = false;
       if (arg1.IsValid() && arg2.IsValid() && arg3.IsValid()) {
@@ -170,7 +170,7 @@ namespace Cantag {
       template<class Algorithm, class Fn> class ApplyHelper {};
       
       template<class Algorithm, class ReturnType>
-      class ApplyHelper<Algorithm,Function0<ReturnType> > {
+      class ApplyHelper<Algorithm,Function<TL0,TL1(ReturnType)> > {
       public:
 	inline bool operator()(Algorithm& algorithm, const ComposedEntity& me, ReturnType& result) const {
 	  PRINTFUNCTION();
@@ -184,7 +184,7 @@ namespace Cantag {
       };
       
       template<class Algorithm, class SourceType1, class ReturnType> 
-      class ApplyHelper<Algorithm,Function1<SourceType1,ReturnType> > {
+      class ApplyHelper<Algorithm,Function<TL1(SourceType1),TL1(ReturnType)> > {
       public:
 	inline bool operator()(Algorithm& algorithm, const ComposedEntity& me, ReturnType& result) const {
 	  PRINTFUNCTION();
@@ -193,7 +193,7 @@ namespace Cantag {
       };
       
       template<class Algorithm, class SourceType1, class SourceType2, class ReturnType> 
-      class ApplyHelper<Algorithm,Function2<SourceType1,SourceType2,ReturnType> > {
+      class ApplyHelper<Algorithm,Function<TL2(SourceType1,SourceType2),TL1(ReturnType)> > {
       public:
 	inline bool operator()(Algorithm& algorithm, const ComposedEntity& me, ReturnType& result) const {
 	  PRINTFUNCTION();
@@ -202,7 +202,7 @@ namespace Cantag {
       };
       
     template<class Algorithm, class SourceType1, class SourceType2, class SourceType3, class ReturnType> 
-      class ApplyHelper<Algorithm,Function3<SourceType1,SourceType2,SourceType3, ReturnType> > {
+      class ApplyHelper<Algorithm,Function<TL3(SourceType1,SourceType2,SourceType3), TL1(ReturnType)> > {
       public:
 	inline bool operator()(Algorithm& algorithm, const ComposedEntity& me, ReturnType& result) const {
 	  PRINTFUNCTION();
@@ -228,8 +228,8 @@ namespace Cantag {
       PRINTFUNCTION();
       if (entity.IsPipelineValid()) {
 	typename Internal::ApplyHelperOuter<ComposedEntity<List> >::template ApplyHelper<Algorithm,typename Algorithm::FunctionType> a;
-	if (Position<typename Algorithm::ResultType,List>::value > entity.GetProgress()) {
-	  entity.SetProgress(Position<typename Algorithm::ResultType,List>::value);
+	if (Position<typename Nth<typename Algorithm::Results,0>::value,List>::value > entity.GetProgress()) {
+	  entity.SetProgress(Position<typename Nth<typename Algorithm::Results,0>::value,List>::value);
 	}
 	bool result = a(algorithm,entity,entity);
 	entity.SetValid(result);
@@ -242,8 +242,8 @@ namespace Cantag {
       PRINTFUNCTION();
       if (entity.IsPipelineValid()) {
 	typename Internal::ApplyHelperOuter<ComposedEntity<List> >::template ApplyHelper<Algorithm,typename Algorithm::FunctionType> a;
-	if (Position<typename Algorithm::ResultType,List>::value > entity.GetProgress()) {
-	  entity.SetProgress(Position<typename Algorithm::ResultType,List>::value);
+	if (Position<typename Nth<typename Algorithm::Results,0>::value,List>::value > entity.GetProgress()) {
+	  entity.SetProgress(Position<typename Nth<typename Algorithm::Results,0>::value,List>::value);
 	}
 	bool result = a(algorithm,entity,entity);
 	return result;
@@ -270,9 +270,9 @@ namespace Cantag {
     return Internal::_Apply_Tree<const Tree<C>,const Algorithm>(tree,algorithm);
   }
 
-  template<class Algorithm> inline bool ApplyTree(const Tree<typename Algorithm::FunctionType::SourceType1>& source, 
-					   TreeNode<typename Algorithm::FunctionType::ResultType>& dest, 
-					   const Algorithm& algorithm) {
+  template<class Algorithm> inline bool ApplyTree(const Tree<typename Nth<typename Algorithm::Arguments,0>::value>& source, 
+						  TreeNode<typename Nth<typename Algorithm::Results,0>::value>& dest, 
+						  const Algorithm& algorithm) {
     PRINTFUNCTION();
     return Internal::_Apply_Tree_Tree(source, dest,dest,algorithm);
   }
@@ -283,21 +283,22 @@ namespace Cantag {
   }
 
   
-  template<class Algorithm> inline bool Apply(typename Algorithm::FunctionType::ResultType& result, const Algorithm& algorithm) {
+  template<class Algorithm> inline bool Apply(typename Nth<typename Algorithm::Results,0>::value& result, const Algorithm& algorithm) {
     PRINTFUNCTION();
     return Internal::_Apply_Fn0<const Algorithm>(result,algorithm);
   }
-  template<class Algorithm> inline bool Apply(typename Algorithm::FunctionType::ResultType& result, Algorithm& algorithm) {
+  template<class Algorithm> inline bool Apply(typename Nth<typename Algorithm::Results,0>::value& result, Algorithm& algorithm) {
     PRINTFUNCTION();
     return Internal::_Apply_Fn0<Algorithm>(result,algorithm);
   }
 
-  template<class Algorithm> inline bool Apply(const typename Algorithm::FunctionType::SourceType1& arg1, typename Algorithm::FunctionType::ResultType& result, const Algorithm& algorithm) {
+  template<class Algorithm> inline bool Apply(const typename Nth<typename Algorithm::Arguments,0>::value& arg1, 
+					      typename Nth<typename Algorithm::Results,0>::value& result, const Algorithm& algorithm) {
     PRINTFUNCTION();
     return Internal::_Apply_Fn1<const Algorithm>(arg1,result,algorithm);
   }
 
-  template<class Algorithm> inline bool Apply(TreeNode <typename Algorithm::FunctionType::SourceType1>& tree, typename Algorithm::FunctionType::ResultType& dest, Algorithm& algorithm) {
+  template<class Algorithm> inline bool Apply(TreeNode <typename Nth<typename Algorithm::Arguments,0>::value>& tree, typename Nth<typename Algorithm::Results,0>::value& dest, Algorithm& algorithm) {
     PRINTFUNCTION();
     bool result = Apply(*(tree.GetNode()),dest,algorithm);
     for(typename std::vector<TreeNode <typename Algorithm::FunctionType::SourceType1>*>::iterator i = tree.GetChildren().begin(); i != tree.GetChildren().end(); ++i) {
@@ -306,27 +307,38 @@ namespace Cantag {
     return result;
   }
 
-  template<class Algorithm> inline bool Apply(const typename Algorithm::FunctionType::SourceType1& arg1, typename Algorithm::FunctionType::ResultType& result, Algorithm& algorithm) {
+  template<class Algorithm> inline bool Apply(const typename Nth<typename Algorithm::Arguments,0>::value& arg1, 
+					      typename Nth<typename Algorithm::Results,0>::value& result, Algorithm& algorithm) {
     PRINTFUNCTION();
     return Internal::_Apply_Fn1<Algorithm>(arg1,result,algorithm);    
   }
   
-  template<class Algorithm> inline bool Apply(const typename Algorithm::FunctionType::SourceType1& arg1, const typename Algorithm::FunctionType::SourceType2& arg2, typename Algorithm::FunctionType::ResultType& result, Algorithm& algorithm) {
+  template<class Algorithm> inline bool Apply(const typename Nth<typename Algorithm::Arguments,0>::value& arg1,
+					      const typename Nth<typename Algorithm::Arguments,1>::value& arg2, 
+					      typename Nth<typename Algorithm::Results,0>::value& result, Algorithm& algorithm) {
     PRINTFUNCTION();
     return Internal::_Apply_Fn2<Algorithm>(arg1,arg2,result,algorithm);
   }
 
-  template<class Algorithm> inline bool Apply(const typename Algorithm::FunctionType::SourceType1& arg1, const typename Algorithm::FunctionType::SourceType2& arg2, typename Algorithm::FunctionType::ResultType& result, const Algorithm& algorithm) {
+  template<class Algorithm> inline bool Apply(const typename Nth<typename Algorithm::Arguments,0>::value& arg1,
+					      const typename Nth<typename Algorithm::Arguments,1>::value& arg2, 
+					      typename Nth<typename Algorithm::Results,0>::value& result, const Algorithm& algorithm) {
     PRINTFUNCTION();
     return Internal::_Apply_Fn2<const Algorithm>(arg1,arg2,result,algorithm);
   }
 
-  template<class Algorithm> inline bool Apply(const typename Algorithm::FunctionType::SourceType1& arg1, const typename Algorithm::FunctionType::SourceType2& arg2, const typename Algorithm::FunctionType::SourceType3& arg3, typename Algorithm::FunctionType::ResultType& result, Algorithm& algorithm) {
+  template<class Algorithm> inline bool Apply(const typename Nth<typename Algorithm::Arguments,0>::value& arg1,
+					      const typename Nth<typename Algorithm::Arguments,1>::value& arg2,
+					      const typename Nth<typename Algorithm::Arguments,2>::value& arg3,
+					      typename Nth<typename Algorithm::Results,0>::value& result, Algorithm& algorithm) {
     PRINTFUNCTION();
     return Internal::_Apply_Fn3<Algorithm>(arg1,arg2,arg3,result,algorithm);
   }
 
-  template<class Algorithm> inline bool Apply(const typename Algorithm::FunctionType::SourceType1& arg1, const typename Algorithm::FunctionType::SourceType2& arg2, const typename Algorithm::FunctionType::SourceType3& arg3, typename Algorithm::FunctionType::ResultType& result, const Algorithm& algorithm) {
+  template<class Algorithm> inline bool Apply(const typename Nth<typename Algorithm::Arguments,0>::value& arg1,
+					      const typename Nth<typename Algorithm::Arguments,1>::value& arg2,
+					      const typename Nth<typename Algorithm::Arguments,2>::value& arg3,
+					      typename Nth<typename Algorithm::Results,0>::value& result, const Algorithm& algorithm) {
     PRINTFUNCTION();
     return Internal::_Apply_Fn3<const Algorithm>(arg1,arg2,arg3,result,algorithm);
   }
