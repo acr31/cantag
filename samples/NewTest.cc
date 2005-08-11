@@ -38,8 +38,8 @@ using namespace Cantag;
 int main(int argc,char* argv[]) {
 
   try {
-    //FileImageSource<Colour::Grey> fs(argv[1]);
-    //V4LImageSource<Colour::Grey> fs("/dev/video0",1);
+    //FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> fs(argv[1]);
+    //V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> fs("/dev/video0",1);
     //    IEEE1394ImageSource fs("/dev/video1394/0",0);
     IEEE1394ImageSource fs("/dev/video1394",0,0, FRAMERATE_60,125,530 );
     Camera camera;
@@ -54,17 +54,17 @@ int main(int argc,char* argv[]) {
     time_t cur_time = time(NULL);
     int count = 0;
     while(cnt<1) {
-      Image<Colour::Grey>* i = fs.Next();
+      Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* i = fs.Next();
       //      i->Save("tmp1.ppm");
       Apply(*i,o3.m_ImageAlgorithm);
       MonochromeImage m(i->GetWidth(),i->GetHeight());
       //Apply(*i,m,ThresholdAdaptive(atoi(argv[1]),atoi(argv[2])));
-      Apply(*i,m,ThresholdGlobal(atoi(argv[1])));
+      Apply(*i,m,ThresholdGlobal<Pix::Sze::Byte1,Pix::Fmt::Grey8>(atoi(argv[1])));
       //      m.Save("tmp2.ppm");
 
       Apply(m,o3.m_ThresholdAlgorithm);
 
-      Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<TagType::PayloadSize>)> > tree;
+      Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<TagType::PayloadSize>) > > tree;
       Apply(m,tree,ContourFollowerTree(tag));
       ApplyTree(tree,ConvexHull(tag));
       ApplyTree(tree,o3.m_ContourAlgorithm);

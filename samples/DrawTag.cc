@@ -89,7 +89,7 @@ main(int argc, char* argv[])
 
     
     // create the image that will hold the tag design
-    Image<Colour::Grey> i(512,512);
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> i(512,512);
     if (!DrawTag(t)(d,i)) {
       std::cerr << "Failed to draw tag. Aborting" << std::endl;
       exit(-1);

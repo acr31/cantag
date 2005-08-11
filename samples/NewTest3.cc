@@ -49,7 +49,7 @@ int main(int argc,char* argv[]) {
       exit(-1);
     }
     // create the image that will hold the tag design
-    Image<Colour::Grey> i(512,512);
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> i(512,512);
     if (!DrawTag(tag)(d,i)) {
       std::cerr << "Failed to draw tag. Aborting" << std::endl;
       exit(-1);
@@ -60,16 +60,16 @@ int main(int argc,char* argv[]) {
     fs.SetCameraParameters(camera);
     
     XOutputMechanism<Ellipse,34> o3(fs.GetWidth(),fs.GetHeight(),camera);
-    
-    
+        
     int cnt=0;
     time_t cur_time = time(NULL);
     int count = 0;
-    int angle = 90;
+    int angle = atoi(argv[2]);
     float distance = 2;
     float direction = 0.1;
     while(cnt<1) {      
-      Image<Colour::Grey>* i = fs.Next(angle++,0,0,0,2);
+      std::cout << angle << std::endl;
+      Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* i = fs.Next(angle++,0,0,0,2);
       if (angle == 270) angle = 90;
       distance += direction;
       if (distance >= 5) direction = -0.1;
@@ -80,15 +80,18 @@ int main(int argc,char* argv[]) {
       MonochromeImage m(i->GetWidth(),i->GetHeight());
       //Apply(*i,m,ThresholdAdaptive(atoi(argv[1]),atoi(argv[2])));
       //      std::cout << "** ThresholdGlobal" << std::endl;
-      Apply(*i,m,ThresholdGlobal(128));
+      Apply(*i,m,ThresholdGlobal<Pix::Sze::Byte1,Pix::Fmt::Grey8>(128));
       //      m.Save("tmp2.ppm");
 
       //      std::cout << "** ThresholdAlgorithm" << std::endl;
       Apply(m,o3.m_ThresholdAlgorithm);
 
-      Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<TagType::PayloadSize>)> > tree;
+      Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<TagType::PayloadSize>) > > tree;
       //      std::cout << "** ContourFollowerTree" << std::endl;
       Apply(m,tree,ContourFollowerTree(tag));
+
+      Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> output(i->GetWidth(),i->GetHeight());
+      ApplyTree(tree,DrawEntityContour(output));
       //      ApplyTree(tree,ConvexHull(tag));
       //      std::cout << "** ContourAlgorithm" << std::endl;
       ApplyTree(tree,o3.m_ContourAlgorithm);
@@ -100,11 +103,11 @@ int main(int argc,char* argv[]) {
       //      std::cout << "** RemoveNonConcentric" << std::endl;
       // weed out shapes that don't match
       //      std::cout << "** ShapeAlgorithm" << std::endl;
-      ApplyTree(tree,o3.m_ShapeAlgorithm);
       //      std::cout << "** TransformEllipse" << std::endl;
       ApplyTree(tree,TransformEllipseFull());
       ApplyTree(tree,TransformSelectEllipse(tag,camera));
       ApplyTree(tree,RemoveNonConcentricEllipse(tag));
+      ApplyTree(tree,o3.m_ShapeAlgorithm);
       //m.Save("tmp4.ppm");
       // select transform
       ApplyTree(tree,Bind(TransformEllipseRotate(tag,camera),m));
