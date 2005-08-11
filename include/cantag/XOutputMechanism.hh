@@ -151,7 +151,7 @@ namespace Cantag {
     int m_displayed_image;
   public:
 
-    class ImageAlgorithm : public Function0<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> > {
+    class ImageAlgorithm : public Function<TL0,TypeList<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> > > {
       friend class XOutputMechanism;
     public:
       bool operator()(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& dest);
@@ -161,7 +161,7 @@ namespace Cantag {
       ImageAlgorithm(XOutputMechanism& output) : m_output(output) {}
     };
     
-    class ThresholdAlgorithm : public Function0<MonochromeImage>{
+    class ThresholdAlgorithm : public Function<TL0,TL1(MonochromeImage)>{
       friend class XOutputMechanism;
     public:
       bool operator()(MonochromeImage& dest);
@@ -170,7 +170,7 @@ namespace Cantag {
       ThresholdAlgorithm(XOutputMechanism& output) : m_output(output) {}
     };
 
-    class ContourAlgorithm : public Function0<ContourEntity>{
+    class ContourAlgorithm : public Function<TL0,TL1(ContourEntity)>{
       friend class XOutputMechanism;
     public:
       bool operator()(ContourEntity& dest);
@@ -179,7 +179,7 @@ namespace Cantag {
       ContourAlgorithm(XOutputMechanism& output) : m_output(output) {}
     };
     
-    class ShapeAlgorithm : public Function0<ShapeEntity<Shape> > {
+    class ShapeAlgorithm : public Function<TL0,TL1(ShapeEntity<Shape>) > {
       friend class XOutputMechanism;
     public:
       bool operator()(ShapeEntity<Shape>& dest);
@@ -188,7 +188,7 @@ namespace Cantag {
       ShapeAlgorithm(XOutputMechanism& output) : m_output(output) {}
     };
     
-    class TransformAlgorithm : public Function2<TransformEntity,DecodeEntity<PAYLOAD_SIZE>,DecodeEntity<PAYLOAD_SIZE> > {
+    class TransformAlgorithm : public Function<TL2(TransformEntity,DecodeEntity<PAYLOAD_SIZE>),TL1(DecodeEntity<PAYLOAD_SIZE>) > {
       friend class XOutputMechanism;     
     public:
       bool operator()(const TransformEntity& transform, const DecodeEntity<PAYLOAD_SIZE>& decode, DecodeEntity<PAYLOAD_SIZE>& dest) const;
