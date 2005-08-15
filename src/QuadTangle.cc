@@ -138,6 +138,7 @@ namespace Cantag {
       return M_PI + atan( (y-cy) / (cx-x));
     }
     assert(false);
+    return 0.f; // to get rid of a warning from ICC
   }
 
   void QuadTangle::swap( float *a, float *b) {
@@ -181,7 +182,7 @@ namespace Cantag {
    */
   bool QuadTangle::EstimatePoseQuadrant(float n[3]) const {
 
-    float p[] = {m_x0,m_y0,m_x1,m_y1,m_x2,m_y2,m_x3,m_y3};
+    float p[] = {m_x0,m_y0,m_x1,m_y1,m_x2,m_y2,m_x3,m_y3,m_xc,m_yc};
     // Now find where a vertical line through the centre intersects the shape
     int side1=0;
     float mu = (p[8]-p[2*side1])/(p[2*(side1+1)]-p[2*side1]);
