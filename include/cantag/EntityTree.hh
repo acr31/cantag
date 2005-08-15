@@ -72,6 +72,15 @@ namespace Cantag {
       }
     }
 
+    void DeleteAll() {
+      for(typename std::vector<Tree<C>*>::const_iterator i = m_children.begin();
+	  i != m_children.end();
+	  ++i) {
+	delete *i;
+      }
+      m_children.erase(m_children.begin(),m_children.end());
+    }
+
     void Reset() {
       m_current_iterator = m_children.begin();
     }
