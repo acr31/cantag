@@ -62,19 +62,29 @@ namespace Cantag {
 	}
       }
 	
-	~Tree() {
-	    for(typename std::vector<Tree<ComposedEntity<C> >* >::const_iterator i = m_children.begin();
-		i != m_children.end();
-		++i) {
-		delete *i;
-	    }
+      ~Tree() {
+	for(typename std::vector<Tree<ComposedEntity<C> >* >::const_iterator i = m_children.begin();
+	    i != m_children.end();
+	    ++i) {
+	  delete *i;
 	}
-	
-	Tree<ComposedEntity<C> >* AddChild() {
-	    Tree<ComposedEntity<C> >* result = new Tree<ComposedEntity<C> >();
-	    m_children.push_back(result);
-	    return result;
+      }
+      
+      
+      void DeleteAll() {
+	for(typename std::vector<Tree<ComposedEntity<C> >*>::const_iterator i = m_children.begin();
+	    i != m_children.end();
+	    ++i) {
+	  delete *i;
 	}
+	m_children.erase(m_children.begin(),m_children.end());
+      }
+
+      Tree<ComposedEntity<C> >* AddChild() {
+	Tree<ComposedEntity<C> >* result = new Tree<ComposedEntity<C> >();
+	m_children.push_back(result);
+	return result;
+      }
 
       bool IsPipelineValid() const { return m_node.IsPipelineValid(); }
 
