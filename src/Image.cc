@@ -246,7 +246,7 @@ namespace Cantag {
       
       unsigned int width;
       input >> width;
-      unsigned int height
+      unsigned int height;
       input >> height;
       int colourdepth;
       input >> colourdepth;
