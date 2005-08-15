@@ -54,6 +54,7 @@ namespace Cantag {
   class TripOriginalCoder : public virtual Coder<BIT_COUNT> {
 
   public:
+    typedef TripOriginalCoder<BIT_COUNT,GRANULARITY,CHECKSUM_COUNT> CoderType;
     TripOriginalCoder();
 
     virtual bool IsErrorCorrecting() const;

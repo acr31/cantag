@@ -39,6 +39,7 @@ namespace Cantag {
   template<int BIT_COUNT, int GRANULARITY>
   class SymbolChunkCoder : public virtual Coder<BIT_COUNT> {
   public:
+    typedef SymbolChunkCoder<BIT_COUNT,GRANULARITY> CoderType;
     virtual bool IsErrorCorrecting() const;
     virtual int GetSymbolSize() const;
     virtual int GetHammingDistanceBits() const;

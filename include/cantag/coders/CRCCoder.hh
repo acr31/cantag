@@ -53,6 +53,7 @@ template<int PAYLOAD_SIZE, int CRC_SIZE,
 	 bool REFLECT_REM>
 class CRCCoder : public Coder<PAYLOAD_SIZE> {
 public:
+  typedef CRCCoder<PAYLOAD_SIZE,CRC_SIZE> CoderType;
   CRCCoder() {};
   
   virtual bool EncodePayload(const std::bitset<PAYLOAD_SIZE>& tag_data, Payload<PAYLOAD_SIZE>& payload) const;

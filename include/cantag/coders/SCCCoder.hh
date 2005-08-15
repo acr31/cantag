@@ -84,6 +84,7 @@ namespace Cantag {
     int *t;                      // will end up pointing to either t1 or t2 after extendedeuclid
   
   public:
+    typedef SCCCoder<RINGS,SECTORS,ERRORS,START> CoderType;
 
     SCCCoder();
 

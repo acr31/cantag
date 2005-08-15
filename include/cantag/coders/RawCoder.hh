@@ -37,6 +37,7 @@ namespace Cantag {
   template<int BIT_COUNT, int SYMBOLSIZE>
   class RawCoder : public virtual Coder<BIT_COUNT> {
   public:
+    typedef RawCoder<BIT_COUNT,SYMBOLSIZE> CoderType;
     virtual bool IsErrorCorrecting() const { return false; }
     virtual int GetSymbolSize() const { return 1; }
     virtual int GetHammingDistanceBits() const { return 1; }
