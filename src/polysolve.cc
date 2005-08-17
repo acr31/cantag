@@ -212,10 +212,12 @@ namespace Cantag {
       //find vector with minimal error
       double minval=vectsacc[0];
       int minnum=0;
-      for (int i=0;i<2;i++) {
-	if (minval > vectsacc[i] || minval == -1) { //minval=-1 return if isnan=1
-	  minval = vectsacc[i]; 
-	  minnum=i;
+      for (int i=1;i<3;i++) {
+	if (vectsacc[i] != -1) { //i.e. vectsacc[i] doesn't represent a nan
+	  if (minval > vectsacc[i] || minval == -1) { //minval=-1 return if isnan=1
+	    minval = vectsacc[i]; 
+	    minnum=i;
+	  }
 	}
       }
   
