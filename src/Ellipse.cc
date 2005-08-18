@@ -36,7 +36,7 @@
 # undef ELLIPSE_DEBUG
 # undef ELLIPSE_DEBUG_DUMP_POINTS
 # undef CIRCLE_TRANSFORM_DEBUG
-# undef DECOMPOSE_DEBUG
+# define DECOMPOSE_DEBUG
 #endif
 
 #define MAXFITERROR 1000
@@ -483,14 +483,15 @@ namespace Cantag {
 
 
   void Ellipse::Decompose() {
-    float a = GetA();
-    float b = GetB();
-    float c = GetC();
-    float d = GetD();
-    float e = GetE();
-    float f = GetF();
-  
+    double a = GetA();
+    double b = GetB();
+    double c = GetC();
+    double d = GetD();
+    double e = GetE();
+    double f = GetF();
+    
 #ifdef DECOMPOSE_DEBUG
+    PROGRESS("a,b,c,d,e,f = " << a << " " << b << " " << c << " " << d << " " << e << " " << f);
     PROGRESS("a+c = " << a+c);
     PROGRESS("b = " << b);
 #endif
@@ -506,11 +507,7 @@ namespace Cantag {
 #endif
     }
 
-    float disc = b*b - 4*a*c;
-#ifdef DECOMPOSE_DEBUG
-    if (disc >= 0)
-      PROGRESS("Constraint Error: this is not an ellipse");
-#endif
+    double disc = b*b - 4*a*c;
 
     m_x0 = (2*c*d - b*e) / disc;
     m_y0 = (2*a*e - b*d) / disc;
@@ -520,10 +517,10 @@ namespace Cantag {
     PROGRESS("Y= " << m_y0);
 #endif
   
-    float tmproot = sqrt( (a-c)*(a-c) + b*b );
-    float lambda1 = ((a+c) - tmproot)/2;
-    float lambda2 = ((a+c) + tmproot)/2;
-    float lambda1t = lambda1;
+    double tmproot = sqrt( (a-c)*(a-c) + b*b );
+    double lambda1 = ((a+c) - tmproot)/2;
+    double lambda2 = ((a+c) + tmproot)/2;
+    double lambda1t = lambda1;
     if (lambda1 < lambda2) {
       lambda1t = lambda2;
       lambda2 =lambda1;
@@ -538,7 +535,7 @@ namespace Cantag {
     PROGRESS("lambda2= " << lambda2);
 #endif
   
-    float scale_factor = sqrt( -f + a*m_x0*m_x0 + b*m_x0*m_y0 + c*m_y0*m_y0);
+    double scale_factor = sqrt( -f + a*m_x0*m_x0 + b*m_x0*m_y0 + c*m_y0*m_y0);
 
 #ifdef DECOMPOSE_DEBUG
     PROGRESS("scale= " << scale_factor);
