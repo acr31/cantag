@@ -50,6 +50,9 @@ namespace Cantag {
   public:
     TagSpec(int symmetry, int cells_per_rotation) : m_symmetry(symmetry),m_cells_per_rotation(cells_per_rotation) {}
 
+    /**
+     * Set vcos and vsin to the angle required to rotate the tag by the number of cells given
+     */
     inline void GetCellRotation(int cells, float& vcos, float& vsin) const {
       float angle = (float)(cells / m_cells_per_rotation) / (float)m_symmetry * 2*M_PI;
       if (angle > M_PI) angle = M_PI - angle;
@@ -57,6 +60,14 @@ namespace Cantag {
       //      vsin = DSIN(8,angle);
       vcos = cos(angle);
       vsin = sin(angle);
+    }
+
+    /**
+     * Return the number of cells that would go past if we rotated by this angle
+     */
+    inline int GetPayloadRotation(float angle) const {
+      // each rotation of 2 * M_PI / m_symmetry is a rotation of m_cells_per_rotation
+      return m_symmetry * (int)(angle / (2.f * M_PI));
     }
   };
 
