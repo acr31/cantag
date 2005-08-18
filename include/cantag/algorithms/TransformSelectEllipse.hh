@@ -37,9 +37,9 @@ namespace Cantag {
   private:
     const Camera& m_camera;
     const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& m_tagspec;
-
-    float normalVectorConfidence(float normal1[3], float normal2[3]) const;
-    float locationConfidence(float normal1[3], float normal2[3]) const;
+    
+    inline float normalVectorConfidence(float normal1[3], float normal2[3]) const;
+    inline float locationConfidence(float normal1[3], float normal2[3]) const;
   public:
     TransformSelectEllipseObj(const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec,const Camera& camera) : m_camera(camera), m_tagspec(tagspec) {};
     bool operator()(TreeNode<TransformEntity>& treenode) const;
@@ -66,8 +66,8 @@ namespace Cantag {
 		float childnormal[3];
 		(*k)->GetNormalVector(m_camera,childnormal);
 		float childlocation[3];
-		(*k)->GetLocation(location,m_tagspec.GetBullseyeInnerEdge());
-	      
+		(*k)->GetLocation(childlocation,m_tagspec.GetBullseyeInnerEdge());
+	      		
 		float angleconfidence = normalVectorConfidence(normal,childnormal);
 		float locationconfidence = locationConfidence(location,childlocation);
 		float confidence = angleconfidence * locationconfidence;
