@@ -26,7 +26,7 @@
 
 #include <cantag/algorithms/ContourFollowerTree.hh>
 
-#define CONTOUR_TREE_DEBUG
+#undef CONTOUR_TREE_DEBUG
 
 namespace Cantag {
 
@@ -88,7 +88,9 @@ namespace Cantag {
 	const int pixel_nbd = AssessPixel(raster_x,raster_y);       
 	const bool previously_visited = pixel_nbd != -1;
 	const int region_value = image.GetPixel3(raster_x,raster_y);
+#ifdef CONTOUR_TREE_DEBUG
 	PROGRESS("Assess " << raster_x << " " << raster_y << " " << m_working_store[raster_x+raster_y*m_image_height] << " " << pixel_nbd << " " << region_value);
+#endif
 	if (region_value & MonochromeImage::CENTRE_PIXEL || 
 	    previously_visited) {  // this pixel is a 1-element or it has been visited before
 	  if (previously_visited) { // this pixel has been seen before
@@ -126,7 +128,7 @@ namespace Cantag {
 	    // HOLE         HOLE       Parent of LNBD
 	    int parent_id = border_type == node_hash[LNBD]->GetNode()->GetBorderType() ?  node_hash[LNBD]->GetNode()->GetParentNBD() : LNBD;
 	    TreeNode<ContourEntity>* parent = node_hash[parent_id];
-	    TreeNode<ContourEntity>* child = parent->AddChild();	    
+	    TreeNode<ContourEntity>* child = parent->AddChild();
 	    ContourEntity* node = child->GetNode();
 #ifdef CONTOUR_TREE_DEBUG
 	    PROGRESS("Following contour from "<< raster_x << "," << raster_y);
@@ -173,7 +175,9 @@ namespace Cantag {
       position = (position - 1) & 0x7;
       sample_x = start_x+m_offset_x[position];
       sample_y = start_y+m_offset_y[position];
+#ifdef CONTOUR_TREE_DEBUG
       PROGRESS("Trying " << sample_x << " " << sample_y);
+#endif
       if (image.GetPixel(sample_x,sample_y)) { break; }
     }
     while (position != start_position);
