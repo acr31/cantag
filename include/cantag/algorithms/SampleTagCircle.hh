@@ -57,8 +57,18 @@ namespace Cantag {
 
     if (i) {
       typename DecodeEntity<RING_COUNT*SECTOR_COUNT>::Data* payload = destination.Add();
-      
-      //      Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> output(image,128);
+
+      /*
+      Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> output(image.GetWidth(),image.GetHeight());
+      for(unsigned int it = 0; it<image.GetHeight();++it) {
+	PixRow<Pix::Fmt::Grey8> row = output.GetRow(it);
+	PixRow<Pix::Fmt::Grey8>::iterator in = row.begin();
+	for(unsigned int j=0; j<image.GetWidth();++j) {
+	  in.v(image.GetPixel(j,it) ? 128 : 0);
+	  ++in;
+	}
+      }
+      */
       int index = 0;
       int readindex = READ_COUNT/2;
       for(int j=0;j<SECTOR_COUNT;++j) {
@@ -74,7 +84,7 @@ namespace Cantag {
 	  }
 	  bool sample = image.GetPixel(tpt[0],tpt[1]);
 	  //	  output.DrawPixel(tpt[0],tpt[1],255);
-	  std::cout << "Read " << sample << std::endl;
+	  //std::cout << "Read " << sample << std::endl;
 	  
 	  (payload->payload)[index] = sample;      
 	  index++;
@@ -84,7 +94,7 @@ namespace Cantag {
       }      
       payload->confidence = 1.f;
       return_result = true;
-//      output.Save("output.pnm");
+      //	  output.Save("output.pnm");
 
     }
     return return_result;
