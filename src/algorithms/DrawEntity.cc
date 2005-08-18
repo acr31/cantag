@@ -37,5 +37,21 @@ namespace Cantag {
     }    
     return true;
   }
+
+  bool DrawEntityTransform::operator()(TransformEntity& transform) const {
+    float pts[] = {-1,-1,
+		   -1,1,
+		   1,1,
+		   1,-1};
+    transform.GetPreferredTransform()->Apply(pts,4);
+    m_camera.NPCFToImage(pts,4);
+    m_image.DrawQuadTangle((int)pts[0],(int)pts[1],
+			   (int)pts[2],(int)pts[3],
+			   (int)pts[4],(int)pts[5],
+			   (int)pts[6],(int)pts[7],
+			   0,1);
+			   
+    return true;    
+  }
 }
 
