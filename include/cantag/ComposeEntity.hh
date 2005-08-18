@@ -94,11 +94,13 @@ namespace Cantag {
 
     inline bool IsPipelineValid() const {
       if (m_progress == -1) return true;
+      if (m_progress == -2) return false;
       return Check<List>::CheckValid(m_progress,*this);
     }
 
     void SetValid(bool value) {
       Check<List>::SetValid(value,m_progress,*this);
+      if (!value) m_progress = -2;
     }
 
     void SetProgress(int progress) { m_progress = progress; }
