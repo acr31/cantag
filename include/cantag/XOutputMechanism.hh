@@ -372,7 +372,6 @@ namespace Cantag {
 
   template<class Shape, int PAYLOAD_SIZE> bool XOutputMechanism<Shape,PAYLOAD_SIZE>::ShapeAlgorithm::operator()(ShapeEntity<Shape>& shape) {
     XImage* ximage = m_output.m_image[m_output.m_displayed_image ^ 0x1]->m_image;
-
     std::vector<int> points;
     shape.GetShape()->Draw(points,m_output.m_camera);
     for(std::vector<int>::const_iterator i = points.begin();
@@ -396,7 +395,7 @@ namespace Cantag {
     float pts[] = {-1,-1,
 		   -1,1,
 		   1,1,
-		   1,-1};
+		   1,-1 };
     transform.GetPreferredTransform()->Apply(pts,4);
     m_output.m_camera.NPCFToImage(pts,4);
     XDrawLine(m_output.m_display,m_output.m_window,m_output.m_gc,
@@ -423,6 +422,45 @@ namespace Cantag {
     XDrawText(m_output.m_display,m_output.m_window,m_output.m_gc,(int)(pts[0]/2),(int)(pts[1]/2),&ti,1);
     //    std::cout << (data->payload) << std::endl;
     delete[] ti.chars;
+
+    for(float height=0;height>=-1;height-=0.25) {
+      float dist = 1;
+      transform.GetPreferredTransform()->Apply(-dist,-dist,height,pts,pts+1);
+      transform.GetPreferredTransform()->Apply(-dist,dist,height,pts+2,pts+3);
+      transform.GetPreferredTransform()->Apply(dist,dist,height,pts+4,pts+5);
+      transform.GetPreferredTransform()->Apply(dist,-dist,height,pts+6,pts+7);
+      m_output.m_camera.NPCFToImage(pts,4);
+      XDrawLine(m_output.m_display,m_output.m_window,m_output.m_gc,
+		(int)(pts[0]/2),(int)(pts[1]/2),
+		(int)(pts[2]/2),(int)(pts[3]/2));
+      XDrawLine(m_output.m_display,m_output.m_window,m_output.m_gc,
+		(int)(pts[2]/2),(int)(pts[3]/2),
+		(int)(pts[4]/2),(int)(pts[5]/2));
+      XDrawLine(m_output.m_display,m_output.m_window,m_output.m_gc,
+		(int)(pts[4]/2),(int)(pts[5]/2),
+		(int)(pts[6]/2),(int)(pts[7]/2));
+      XDrawLine(m_output.m_display,m_output.m_window,m_output.m_gc,
+		(int)(pts[6]/2),(int)(pts[7]/2),
+		(int)(pts[0]/2),(int)(pts[1]/2));
+    }
+    /*
+    XDrawLine(m_output.m_display,m_output.m_window,m_output.m_gc,
+	      (int)(pts[0]/2),(int)(pts[1]/2),
+	      (int)(pts[10]/2),(int)(pts[11]/2));
+    XDrawLine(m_output.m_display,m_output.m_window,m_output.m_gc,
+	      (int)(pts[2]/2),(int)(pts[3]/2),
+	      (int)(pts[10]/2),(int)(pts[11]/2));
+    XDrawLine(m_output.m_display,m_output.m_window,m_output.m_gc,
+	      (int)(pts[4]/2),(int)(pts[5]/2),
+	      (int)(pts[10]/2),(int)(pts[11]/2));
+    XDrawLine(m_output.m_display,m_output.m_window,m_output.m_gc,
+	      (int)(pts[6]/2),(int)(pts[7]/2),
+	      (int)(pts[10]/2),(int)(pts[11]/2));
+    XDrawLine(m_output.m_display,m_output.m_window,m_output.m_gc,
+	      (int)(pts[4]/2),(int)(pts[5]/2),
+	      (int)(pts[8]/2),(int)(pts[9]/2));
+    */
+   
     XFlush(m_output.m_display);
     return true;    
   }
