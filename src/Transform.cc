@@ -88,6 +88,22 @@ namespace Cantag {
 
   }
 
+  void Transform::Apply3D(float* points ,int numpoints) const {
+    for(int i=0;i<numpoints*3;i+=3) {
+      float x = points[i];
+      float y = points[i+1];
+      float z = points[i+2];
+      points[i] = m_transform[0]*x + m_transform[1]*y + m_transform[2]*z + m_transform[3];
+      points[i+1] = m_transform[4]*x + m_transform[5]*y + m_transform[6]*z + m_transform[7];
+      points[i+2] = m_transform[8]*x + m_transform[9]*y + m_transform[10]*z + m_transform[11];
+      float projH = m_transform[12]*x + m_transform[13]*y + m_transform[14]*z + m_transform[15];
+      
+      points[i] /= projH;
+      points[i+1] /= projH;
+      points[i+2] /= projH;
+    }
+  }
+
   /**
    * Destructive rotation of the transform so the tag is rotated by
    * angle radians.
@@ -116,7 +132,7 @@ namespace Cantag {
   /**
    * Calculate the normal vector for the tag in this transform
    */
-  void Transform::GetNormalVector(const Camera& cam, float normal[3]) {
+  void Transform::GetNormalVector(const Camera& cam, float normal[3]) const {
     // project (0,0,0) and (0,0,1).  Take the difference between them and normalize it
     
     // (0,0,0)
@@ -186,7 +202,7 @@ namespace Cantag {
    *
    * \todo call cameratoworld as in GetNormal
    */
-  void Transform::GetLocation(float location[3], float tag_size) {
+  void Transform::GetLocation(float location[3], float tag_size) const {
     location[0] = tag_size*m_transform[3]/m_transform[15];
     location[1] = tag_size*m_transform[7]/m_transform[15];
     location[2] = tag_size*m_transform[11]/m_transform[15];
