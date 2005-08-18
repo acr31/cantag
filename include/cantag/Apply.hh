@@ -181,12 +181,18 @@ namespace Cantag {
 	  PRINTFUNCTION();
 	  return _Apply_Fn0<Algorithm>(result,algorithm);
 	}
+
       };
       
       template<class Algorithm, class SourceType1, class ReturnType> 
       class ApplyHelper<Algorithm,Function<TL1(SourceType1),TL1(ReturnType)> > {
       public:
 	inline bool operator()(Algorithm& algorithm, const ComposedEntity& me, ReturnType& result) const {
+	  PRINTFUNCTION();
+	  return _Apply_Fn1<Algorithm>(me,result,algorithm);
+	}
+
+	inline bool operator()(Algorithm& algorithm, const Tree<ComposedEntity>& me, ReturnType& result) const {
 	  PRINTFUNCTION();
 	  return _Apply_Fn1<Algorithm>(me,result,algorithm);
 	}
