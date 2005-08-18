@@ -86,6 +86,18 @@ namespace Cantag {
      * size, with the texture source mapped on the tag
      */
     GLImageSource(int width, int height, float fov, const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& texture_source);
+
+    /**
+     * Create the image source.  You must call Init before attempting to use the image source if created this way
+     */
+    GLImageSource(int width, int height, float fov);
+
+
+    /**
+     * Initialise the texture source and gl renderer
+     */
+    void Init(const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& texture_source);
+    
     virtual ~GLImageSource();
 
 
