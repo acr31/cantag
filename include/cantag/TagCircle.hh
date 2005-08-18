@@ -36,7 +36,7 @@
 
 namespace Cantag {
 
-  template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT=5>
+  template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT=10>
   class TagCircle : public TagSpec<PARAM_RING_COUNT*PARAM_SECTOR_COUNT>, public ContourRestrictions, public ConvexHullRestrictions, public EllipseRestrictions {
   public:
     enum { RING_COUNT = PARAM_RING_COUNT };
@@ -95,7 +95,7 @@ namespace Cantag {
     inline float GetDataOuterEdge() const { return m_data_outer_edge; }
     inline float GetDataInnerEdge() const { return m_data_inner_edge; }
     inline float GetDataRingOuterEdge(int ring) const { return m_data_ring_outer_radii[ring]; }
-    inline float GetReadAngle(int index) const { return m_sector_angles[index % PARAM_SECTOR_COUNT]; }
+    inline float GetReadAngle(int index) const { return m_sector_angles[index]; }
   };
 
   template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT> TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::~TagCircle() {
@@ -109,7 +109,7 @@ namespace Cantag {
   
   template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT> TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::TagCircle(float bullseye_inner_edge, float bullseye_outer_edge, float data_inner_edge, float data_outer_edge) :
     TagSpec<PARAM_SECTOR_COUNT*PARAM_RING_COUNT>(PARAM_SECTOR_COUNT,PARAM_RING_COUNT),
-    ContourRestrictions(30,30,30),
+    ContourRestrictions(1,1,1),
     ConvexHullRestrictions(100000),
     EllipseRestrictions(1000,0.1),
     m_bullseye_inner_edge(bullseye_inner_edge),
