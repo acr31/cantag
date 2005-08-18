@@ -28,7 +28,7 @@
 
 #ifdef TEXT_DEBUG
 #include <iostream>
-#define PROGRESS(x) std::cout << __FILE__ << ":" << __LINE__ << " " << x << std::endl
+#define PROGRESS(x) std::cout.precision(32); std::cout << __FILE__ << ":" << __LINE__ << " " << x << std::endl
 #else
 #define PROGRESS(x)
 #endif
