@@ -51,6 +51,11 @@ namespace Cantag {
     void Apply(float x, float y, float* resx, float* resy) const;
     void Apply(float x, float y, float z,float* resx, float* resy) const;
     void Apply(float* points, int num_points) const;
+
+    /**
+     * Transform 3d object co-ordinates to 3d camera co-ordinates
+     */
+    void Apply3D(float* points, int num_points) const;
     
     /**
      * Rotate the tag's object co-ordinates by a specific angle. Takes
@@ -61,12 +66,12 @@ namespace Cantag {
     /**
      * Calculate the origin for this tag.
      */
-    void GetLocation(float location[3], float tag_size);
+    void GetLocation(float location[3], float tag_size) const;
 
     /**
      * Calculate the normal vector for the tag in this transform
      */
-    void GetNormalVector(const Camera& cam, float normal[3]);
+    void GetNormalVector(const Camera& cam, float normal[3]) const;
  
   };
 }
