@@ -58,9 +58,10 @@ protected:
   float m_height;
 
   bool m_fitted;
-
-public:
+private:
   Ellipse();
+public:
+
   Ellipse(float a, float b, float c, float d, float e, float f);
   Ellipse(float x0, float y0,float width, float height, float angle);
 
