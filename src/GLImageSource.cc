@@ -66,6 +66,17 @@ namespace Cantag {
     m_fov(fov),
     m_glimage(width,height)
   {
+    Init(source);
+  }
+
+  GLImageSource::GLImageSource(int width, int height, float fov) :
+    m_width(width),
+    m_height(height),
+    m_fov(fov),
+    m_glimage(width,height) {}
+
+
+  void GLImageSource::Init(const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& source) {
     m_ctx = OSMesaCreateContext( GL_RGB, NULL );
     m_buffer = (unsigned char*)malloc(m_width*m_height*3);     
     OSMesaMakeCurrent( m_ctx, m_buffer, GL_UNSIGNED_BYTE, m_width,m_height);
