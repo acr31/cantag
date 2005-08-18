@@ -28,6 +28,9 @@
 #include <cantag/Config.hh>
 #include <cantag/Function.hh>
 #include <cantag/entities/ContourEntity.hh>
+#include <cantag/entities/ShapeEntity.hh>
+#include <cantag/entities/TransformEntity.hh>
+#include <cantag/Camera.hh>
 #include <cantag/Image.hh>
 
 
@@ -40,6 +43,42 @@ namespace Cantag {
     DrawEntityContour(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) : m_image(image) {}
     bool operator()(ContourEntity& contourentity) const ;
   };
+
+  template<class Shape>
+  class DrawEntityShape : public Function<TL0,TL1(ShapeEntity<Shape>)> {
+  private:
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
+    const Camera& m_camera;
+  public:
+    DrawEntityShape(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image,const Camera& camera) : m_image(image), m_camera(camera) {}
+    bool operator()(ShapeEntity<Shape>& contourentity) const ;
+  };
+
+  class DrawEntityTransform : public Function<TL0,TL1(TransformEntity)> {
+  private:
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
+    const Camera& m_camera;
+  public:
+    DrawEntityTransform(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera) : m_image(image), m_camera(camera) {}
+    bool operator()(TransformEntity& transform) const;
+  };
+
+  template<class Shape> bool DrawEntityShape<Shape>::operator()(ShapeEntity<Shape>& shape) const {
+    std::vector<int> points;
+    shape.GetShape()->Draw(points,m_camera);
+    for(std::vector<int>::const_iterator i = points.begin();
+	i != points.end();
+	++i) {
+      const int x = *i;
+      ++i;
+      const int y = *i;
+      
+      m_image.DrawPixel(x,y,0);
+    }  
+    return true;    
+  }
+
+
 
 }
 
