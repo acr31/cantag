@@ -48,7 +48,6 @@ namespace Cantag {
 	  i != destination.GetPayloads().end(); 
 	  ++i) {
 	DecodeData* data = *i;	
-	std::cout << "In: " << data->payload << std::endl;
 	int rotation = DecodePayload(data->payload);
 	data->bits_rotation = rotation;
 	if (rotation >= 0) {
