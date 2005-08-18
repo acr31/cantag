@@ -57,11 +57,6 @@ namespace Cantag {
     std::vector<float> m_points;
 
     /**
-     * Is this contour fitted
-     */
-    bool m_contourFitted;
-    
-    /**
      * The length of the contour.  If we move by 0,6,4,2 then we add 1
      * to the contour else we add sqrt(2).  We approximate this in
      * integer arithmetic by adding 32 for every 4-connected point and
@@ -110,7 +105,7 @@ namespace Cantag {
     int m_numPoints;
     
   public:
-    ContourEntity() : m_points(), m_contourFitted(false) {};
+    ContourEntity() : m_points() {};
     ~ContourEntity() {};
 
     inline int GetNBD() const { return m_nbd; }
@@ -121,7 +116,6 @@ namespace Cantag {
     inline void SetParentNBD(int parentid) { m_parent_id = parentid; }
 
     inline int GetNumPoints() const { return m_numPoints; }
-    inline void SetContourFitted(bool fitted) { m_contourFitted = fitted; }
 
     inline int GetLength() const { return m_length >> 5; }
     inline int GetWidth() const { return m_maxX - m_minX; }
