@@ -33,9 +33,14 @@
 namespace Cantag {
 
   class TransformEllipseLinear : public Function<TL1(ShapeEntity<Ellipse>),TL1(TransformEntity)> {
+  private:
+    float m_bullseye_size;
+
   public:
     typedef ShapeEntity<Ellipse> SourceType;
     typedef TransformEntity DestinationType;
+
+    TransformEllipseLinear(float bullseye_proportion) : m_bullseye_size(bullseye_proportion) {};
 
     bool operator()(const ShapeEntity<Ellipse>& source, TransformEntity& dest) const;
   };

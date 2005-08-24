@@ -119,7 +119,7 @@ namespace Cantag {
     }
 
     // make sure the normal vector will point in the right direction
-    if (eigvects[8] < 0) {
+    if (eigvects[8] < 0.f) {
       eigvects[2]*=-1;
       eigvects[5]*=-1;
       eigvects[8]*=-1;
@@ -204,8 +204,7 @@ namespace Cantag {
 #endif
 
     // now build the transformation matrix that goes from the unit circle to the 3d circle
-    // this is a translation in x to align on the axis  premultiplied by
-    // a scale factor premultiplied by
+    // this is a translation in x to align on the axis, a shift in the z axis
     // rotation r2 premuliplied by
     // rotation r1
   
@@ -217,22 +216,22 @@ namespace Cantag {
     PROGRESS("Translation tx = "<<tx);
 #endif
     // and another choice based on theta
-    double scale = sqrt(-eigvals[0]*eigvals[8]/eigvals[4]/eigvals[4]);
+    double scale = sqrt(-eigvals[0]*eigvals[8]/eigvals[4]/eigvals[4]) / m_bullseyesize;
 
 
 #ifdef ELLIPSE_TRANSFORM_DEBUG
     PROGRESS("Scale factor " << scale);
 #endif
+
+    double transc1[] = {1.,0,0,tx/scale,
+			0,1.,0,0,
+			0,0,1.,1./scale,
+			0,0,0,1.};
   
-    double transc1[] = {1,0,0,tx/scale,
-			0,1,0,0,
-			0,0,1,1/scale,
-			0,0,0,1};
-  
-    double transc2[] = {1,0,0,-tx/scale,
-			0,1,0,0,
-			0,0,1,1/scale,
-			0,0,0,1};
+    double transc2[] = {1.,0,0,-tx/scale,
+			0,1.,0,0,
+			0,0,1.,1./scale,
+			0,0,0,1.};
 
 
 
