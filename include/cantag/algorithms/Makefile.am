@@ -1,3 +1,11 @@
 totalincludedir = $(includedir)/total/algorithms
 
-totalinclude_HEADERS = DistortionCorrection.hh FitEllipseLS.hh FitEllipseSimple.hh TransformEllipseFull.hh TransformEllipseLinear.hh SampleTagCircle.hh FitQuadTangleCorner.hh FitQuadTangleConvexHull.hh FitQuadTanglePolygon.hh TransformQuadTangleProjective.hh TransformQuadTangleReduced.hh TransformQuadTangleSpaceSearch.hh ConvexHull.hh TransformEllipseRotate.hh TransformRotateToPayload.hh DrawTagCircle.hh DrawTagSquare.hh Encode.hh TransformSelectEllipse.hh RemoveNonConcentricEllipse.hh DrawEntity.hh TransformSelectEllipseErrorOfFit.hh
+totalinclude_HEADERS = DistortionCorrection.hh FitEllipseLS.hh FitEllipseSimple.hh TransformEllipseFull.hh TransformEllipseLinear.hh SampleTagCircle.hh FitQuadTangleCorner.hh FitQuadTangleConvexHull.hh FitQuadTanglePolygon.hh TransformQuadTangleProjective.hh TransformQuadTangleReduced.hh ConvexHull.hh TransformEllipseRotate.hh TransformRotateToPayload.hh DrawTagCircle.hh DrawTagSquare.hh Encode.hh TransformSelectEllipse.hh RemoveNonConcentricEllipse.hh DrawEntity.hh TransformSelectEllipseErrorOfFit.hh
+
+if HAVE_GSL_MULTIMIN_H
+if HAVELIB_GSLCBLAS
+if HAVELIB_GSL
+totalinclude_HEADERS += TransformQuadTangleSpaceSearch.hh TransformQuadTangleCyberCode.hh
+endif
+endif
+endif
