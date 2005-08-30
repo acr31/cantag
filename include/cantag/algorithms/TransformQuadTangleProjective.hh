@@ -32,7 +32,7 @@
 
 namespace Cantag {
   class TransformQuadTangleProjective : public Function<TL1(ShapeEntity<QuadTangle>),TL1(TransformEntity)> {
-
+  public:
     /*
      * Taken from:
      *
