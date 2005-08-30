@@ -75,8 +75,9 @@ namespace Cantag {
     minorlen = sqrt(minorlen);
 
     float theta = atan((majory-centrey)/(majorx-centrex)); // DATAN
-
-    shape.SetShape(new Ellipse(centrex,centrey,theta,majorlen,minorlen));
+    //    std::cout << majory << " " << centrey << " " << majorx << " " << centrex << std::endl;
+    //    std::cout << "theta = " << theta << std::endl;
+    shape.SetShape(new Ellipse(centrex,centrey,majorlen,minorlen,theta));
     return true;
   }
 }
