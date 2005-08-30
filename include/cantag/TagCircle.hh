@@ -37,7 +37,10 @@
 namespace Cantag {
 
   template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT=10>
-  class TagCircle : public TagSpec<PARAM_RING_COUNT*PARAM_SECTOR_COUNT>, public ContourRestrictions, public ConvexHullRestrictions, public EllipseRestrictions {
+  class TagCircle : public TagSpec<PARAM_RING_COUNT*PARAM_SECTOR_COUNT>, 
+		    public ContourRestrictions, 
+		    public ConvexHullRestrictions, 
+		    public EllipseRestrictions {
   public:
     enum { RING_COUNT = PARAM_RING_COUNT };
     enum { SECTOR_COUNT = PARAM_SECTOR_COUNT };
@@ -70,7 +73,7 @@ namespace Cantag {
      * read_angle/(PARAM_RING_COUNT*PARAM_READ_COUNT) * 360
      */
     inline float GetXSamplePoint(int read_angle, int ring) const {
-      return m_cos_read_angles[read_angle] * m_data_ring_centre_radii[ring]/m_bullseye_outer_edge;
+      return m_cos_read_angles[read_angle] * m_data_ring_centre_radii[ring];
     }
     
     /**
@@ -79,7 +82,7 @@ namespace Cantag {
      * read_angle/(PARAM_RING_COUNT*PARAM_READ_COUNT) * 360
      */
     inline float GetYSamplePoint(int read_angle, int ring) const {
-      return m_sin_read_angles[read_angle] * m_data_ring_centre_radii[ring]/m_bullseye_outer_edge;
+      return m_sin_read_angles[read_angle] * m_data_ring_centre_radii[ring];
     }   
 
     /**
