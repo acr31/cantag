@@ -45,7 +45,7 @@ namespace Cantag {
    * beta, gamma, where the three angles are standarad euler angles
    */
   class TransformQuadTangleSpaceSearch : public Function<TL1(ShapeEntity<QuadTangle>),TL1(TransformEntity)> {
-
+  public:
     /**
      * Calculate the transform by least squares minimising the 
      * euclidean distance for each point AND the angle between the
