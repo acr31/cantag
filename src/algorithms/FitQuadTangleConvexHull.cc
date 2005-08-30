@@ -28,13 +28,12 @@
 
 namespace Cantag {
 
-  bool FitQuadTangleConvexHull::operator()(const ContourEntity& contour, ShapeEntity<QuadTangle>& shape) const {
+  bool FitQuadTangleConvexHull::operator()(const ContourEntity& contour, const ConvexHullEntity& hull, ShapeEntity<QuadTangle>& shape) const {
     
     const std::vector<float>& points = contour.GetPoints();
 
-    // Take a convex hull of the polyline ( O(n) )
-    int h[points.size()/2];
-    int n = ConvexHull(points,points.size()/2,h);
+    const std::vector<int>& h = hull.GetIndices();
+    int n = h.size();
     if (n<4) return false;
     
     // Throw away vertices with large angles ~ 180
@@ -105,60 +104,4 @@ namespace Cantag {
 				  points[indexes[3]*2],points[indexes[3]*2+1]));
     return true;
   }
-  
-  float FitQuadTangleConvexHull::isLeft(const std::vector<float> &V,int l0, int l1, int p) const {
-    return (V[l1*2] - V[l0*2])*(V[p*2+1] - V[l0*2+1]) - (V[p*2] - V[l0*2])*(V[l1*2+1] - V[l0*2+1]);
-  }
-
-  /** 
-   * The hull code is adapted from softSurfer who requires the
-   * following copyright be displayed: Copyright 2001, softSurfer
-   * (www.softsurfer.com) This code may be freely used and modified
-   * for any purpose providing that this copyright notice is included
-   * with it.
-   */
-  int FitQuadTangleConvexHull::ConvexHull(const std::vector<float> &V, int n, int* H) const {
-    // initialize a deque D[] from bottom to top so that the
-    // 1st three vertices of V[] are a counterclockwise triangle
-    int D[2*n+1];
-    for (int i=0;i<2*n+1; i++) D[i]=0;
-    int bot = n-2, top = bot+3;   // initial bottom and top deque indices
-    D[bot] = D[top] = 2;       // 3rd vertex is at both bot and top
-    if (isLeft(V, 0, 1, 2) > 0) {
-      D[bot+1] = 0;
-      D[bot+2] = 1;          // ccw vertices are: 2,0,1,2
-    }
-    else {
-      D[bot+1] = 1;
-      D[bot+2] = 0;          // ccw vertices are: 2,1,0,2
-    }
-    
-    // compute the hull on the deque D[]
-    for (int i=3; i < n; i++) {   // process the rest of vertices
-      // test if next vertex is inside the deque hull
-      if ((isLeft(V, D[bot], D[bot+1], i) >= 0) &&
-	  (isLeft(V, D[top-1],D[top], i) >= 0) )
-	continue;         // skip an interior vertex
-      
-      // incrementally add an exterior vertex to the deque hull
-      // get the rightmost tangent at the deque bot
-      while (isLeft(V,D[bot], D[bot+1], i) <= 0)
-	++bot;                // remove bot of deque
-      D[--bot] = i;          // insert V[i] at bot of deque
-      
-      // get the leftmost tangent at the deque top
-      while (isLeft(V,D[top-1],D[top], i) <= 0)
-	--top;                // pop top of deque
-      D[++top] = i;          // push V[i] onto top of deque
-      if (top-bot < 2) return -1;
-    }
-    
-    // transcribe deque D[] to the output hull array H[]
-    int h;        // hull vertex counter
-    for (h=0; h <= (top-bot); h++) {
-      H[h] = D[bot + h];
-    } 
-    return h-1;
-  }
-
 }
