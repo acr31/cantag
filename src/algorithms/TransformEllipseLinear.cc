@@ -38,19 +38,19 @@ namespace Cantag {
     Transform* t = new Transform(1.f);
     dest.GetTransforms().push_back(t);
 
-    (*t)[0] = ellipse.GetWidth()*DCOS(8,ellipse.GetAngle()); // DCOS
-    (*t)[1] = -ellipse.GetHeight()*DSIN(8,ellipse.GetAngle());  // DSINE
+    (*t)[0] = ellipse.GetWidth()*DCOS(8,ellipse.GetAngle()) / m_bullseye_size; // DCOS
+    (*t)[1] = -ellipse.GetHeight()*DSIN(8,ellipse.GetAngle()) / m_bullseye_size;  // DSINE
     (*t)[2] = 0;
     (*t)[3] = ellipse.GetX0();
 
-    (*t)[4] = ellipse.GetWidth()*DSIN(8,ellipse.GetAngle()); // DSINE
-    (*t)[5] = ellipse.GetHeight()*DCOS(8,ellipse.GetAngle());  // DCOS
+    (*t)[4] = ellipse.GetWidth()*DSIN(8,ellipse.GetAngle()) / m_bullseye_size; // DSINE
+    (*t)[5] = ellipse.GetHeight()*DCOS(8,ellipse.GetAngle()) / m_bullseye_size;  // DCOS
     (*t)[6] = 0;
     (*t)[7] = ellipse.GetY0();
 
     (*t)[8] = 0;
     (*t)[9] = 0;
-    (*t)[10] = 1;
+    (*t)[10] = 1 / m_bullseye_size;
     (*t)[11] = 1;
 
     (*t)[12] = 0;
