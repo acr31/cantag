@@ -11,7 +11,7 @@ AC_PROG_CXX
 
 AC_CHECK_PROG(magicconfig,[Magick++-config --version],yes,no)
 
-CXXFLAGS="$CXXFLAGS -finline-limit=1000 -Wall -Wno-non-virtual-dtor"
+#CXXFLAGS="$CXXFLAGS -finline-limit=1000 -Wall -Wno-non-virtual-dtor"
 
 if test $magicconfig = "yes"; then
    CPPFLAGS="$CPPFLAGS `Magick-config --cppflags`"
@@ -73,8 +73,6 @@ fi
 dnl Checks for header files.
 
 CANTAG_CHECK_HEADER(Magick++.h,HAVE_MAGICKXX,have_magickxx_h)
-dnl CANTAG_CHECK_HEADER(opencv/cv.h,HAVE_OPENCV_CV_H,have_opencv_cv_h)
-dnl CANTAG_CHECK_HEADER(opencv/highgui.h,HAVE_OPENCV_HIGHGUI_H,have_opencv_highgui_h)
 CANTAG_CHECK_HEADER(GL/gl.h,HAVE_GL_GL_H,have_gl_gl_h)
 CANTAG_CHECK_HEADER(GL/glu.h,HAVE_GL_GLU_H,have_gl_glu_h)
 CANTAG_CHECK_HEADER(GL/osmesa.h,HAVE_GL_OSMESA_H,have_gl_osmesa_h)
@@ -99,8 +97,6 @@ dnl Checks for libraries.
 dnl new version of opencv needs check for cvGetErrStatus in cxcore and cvAdd in cv
 CANTAG_CHECK_LIB(Magick,MagickError,HAVELIB_MAGICK,havelib_magick)
 CANTAG_CHECK_LIB(Magick++,MagickPlusPlusDestroyMagick,HAVELIB_MAGICKXX,havelib_magickxx)
-dnl CANTAG_CHECK_LIB(opencv,cvGetErrStatus,HAVELIB_OPENCV,havelib_opencv)
-dnl CANTAG_CHECK_LIB(highgui,cvGetWindowName,HAVELIB_HIGHGUI,havelib_highgui)
 CANTAG_CHECK_LIB(GL,glFinish,HAVELIB_GL,havelib_gl)
 CANTAG_CHECK_LIB(OSMesa,OSMesaGetCurrentContext,HAVELIB_OSMESA,havelib_osmesa)
 CANTAG_CHECK_LIB(GLU,gluNewTess,HAVELIB_GLU,havelib_glu)
@@ -143,6 +139,7 @@ Makefile
 src/Makefile
 unit/Makefile
 samples/Makefile
+tests/Makefile
 include/Makefile
 include/cantag/Makefile
 include/cantag/algorithms/Makefile
