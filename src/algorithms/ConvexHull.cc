@@ -43,6 +43,7 @@ namespace Cantag {
    */
   bool ConvexHull::operator()(const ContourEntity& source, ConvexHullEntity& dest) const {
     const std::vector<float>& V = source.GetPoints();
+
     const int n = V.size()/2;
     std::vector<int>& H = dest.GetIndices();
     H.resize(V.size()/2+2);
@@ -96,7 +97,7 @@ namespace Cantag {
 	  float dist = (V[2*index]-V[2*count])*(V[2*index]-V[2*count]) +
 	    (V[2*index+1]-V[2*count+1])*(V[2*index+1]-V[2*count+1]);
 	  if (dist > m_restriction.GetMaxDeviation()) {
-	    return false;
+	    //	    return false;
 	  }
 	}
       }
