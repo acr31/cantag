@@ -71,6 +71,7 @@ namespace Cantag {
     root_contour->GetNode()->SetNBD(1);
     root_contour->GetNode()->SetBorderType(ContourEntity::HOLE_BORDER);
     root_contour->GetNode()->SetParentNBD(1);
+    root_contour->SetValid(false);
     node_hash[1] = root_contour;
     int NBD = 2;
     
