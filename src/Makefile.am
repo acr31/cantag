@@ -7,7 +7,7 @@ libtotal_la_SOURCES = Ellipse.cc QuadTangle.cc Camera.cc gaussianelimination.cc 
 if HAVE_GSL_MULTIMIN_H
 if HAVELIB_GSLCBLAS
 if HAVELIB_GSL
-libtotal_la_SOURCES += algorithms/TransformQuadTangleSpaceSearch.cc
+libtotal_la_SOURCES += algorithms/TransformQuadTangleSpaceSearch.cc algorithms/TransformQuadTangleCyberCode.cc
 endif
 endif
 endif
