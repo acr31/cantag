@@ -52,11 +52,30 @@ namespace Cantag {
     float m_xc;
     float m_yc;
 
-    
+    /**
+     * The index into the contour for the first corner point - the x co-ordinate is at m_index_0 * 2 and then y at m_index_x * 2 +1
+     */
+    int m_index_0;
+
+    /**
+     * The index into the contour for the second corner point
+     */
+    int m_index_1;
+
+    /**
+     * The index into the contour for the thrid corner point
+     */
+    int m_index_2;
+
+    /**
+     * The index into the contour for the fourth corner point
+     */
+    int m_index_3;
+
 
   public:
     QuadTangle();
-    QuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3);
+    QuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3, int index_0, int index_1, int index_2, int index_3);
     
     bool Compare(const QuadTangle& o) const;
     void Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera) const;

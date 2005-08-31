@@ -40,6 +40,9 @@
   
 namespace Cantag {
 
+  /**
+   * \todo this function does not set the indices of the located corners at all
+   */
   bool FitQuadTanglePolygon::operator()(const ContourEntity& contour, ShapeEntity<QuadTangle>& shape) const {
     const std::vector<float>& points = contour.GetPoints();
 
@@ -90,7 +93,8 @@ namespace Cantag {
 	shape.SetShape(new QuadTangle(i->first,i->second,
 				      (++i)->first,i->second,
 				      (++i)->first,i->second,
-				      (++i)->first,i->second));
+				      (++i)->first,i->second,
+				      0,0,0,0));
 	return true;
       }
     }

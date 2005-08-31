@@ -50,8 +50,8 @@ namespace Cantag {
     if (points.size() > (2<<LOGMAXWINDOW) && points.size() > 50) {
       float xcorners[4];
       float ycorners[4];
+      int cornerindices[4];
       float curvecorners[4];
-      int indexcorners[4];
       int corner_counter = 0;
       float xwindow[1<<LOGMAXWINDOW];
       float ywindow[1<<LOGMAXWINDOW];
@@ -70,8 +70,8 @@ namespace Cantag {
       if (curve2 > CURVTHRESH) {
 	xcorners[0] = xwindow[datapointer];
 	ycorners[0] = ywindow[datapointer];
+	cornerindices[0] = datapointer + loadpointer/2;
 	curvecorners[0] = curve2;
-	indexcorners[0] = 0;
 	++corner_counter;
       }
     
@@ -102,6 +102,7 @@ namespace Cantag {
 	    currentmax = curve;
 	    xcorners[corner_counter] = xwindow[datapointer];
 	    ycorners[corner_counter] = ywindow[datapointer];
+	    cornerindices[0] = datapointer+loadpointer/2;
 	  }
 	}
 	previous = curve;
@@ -111,7 +112,8 @@ namespace Cantag {
 	shape.SetShape(new QuadTangle(xcorners[0],ycorners[0],
 				      xcorners[1],ycorners[1],
 				      xcorners[2],ycorners[2],
-				      xcorners[3],ycorners[3]));
+				      xcorners[3],ycorners[3],
+				      cornerindices[0],cornerindices[1],cornerindices[2],cornerindices[3]));
 	return true;
       }
     }

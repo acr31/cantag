@@ -101,7 +101,8 @@ namespace Cantag {
     shape.SetShape(new QuadTangle(points[indexes[0]*2],points[indexes[0]*2+1],
 				  points[indexes[1]*2],points[indexes[1]*2+1],
 				  points[indexes[2]*2],points[indexes[2]*2+1],
-				  points[indexes[3]*2],points[indexes[3]*2+1]));
+				  points[indexes[3]*2],points[indexes[3]*2+1],
+				  indexes[0],indexes[1],indexes[2],indexes[3]));
     return true;
   }
 }

@@ -50,7 +50,12 @@ namespace Cantag {
   QuadTangle::QuadTangle(float x0, float y0,
 			 float x1, float y1,
 			 float x2, float y2,
-			 float x3, float y3) : m_x0(x0), m_y0(y0),m_x1(x1), m_y1(y1),m_x2(x2), m_y2(y2),m_x3(x3), m_y3(y3) {
+			 float x3, float y3,
+			 int index_0,
+			 int index_1,
+			 int index_2,
+			 int index_3) : m_x0(x0), m_y0(y0),m_x1(x1), m_y1(y1),m_x2(x2), m_y2(y2),m_x3(x3), m_y3(y3),
+					m_index_0(index_0), m_index_1(index_1), m_index_2(index_2), m_index_3(index_3) {
     compute_central_point();
     sort_points();
   }
@@ -168,15 +173,15 @@ namespace Cantag {
 
     if (z<0.0) {
       // Order is acw - fix it!
-      double x0=m_x0, y0=m_y0;
-      double x1=m_x1, y1=m_y1;
-      double x2=m_x2, y2=m_y2;
-      double x3=m_x3, y3=m_y3;
+      double x0=m_x0, y0=m_y0; int index_0 = m_index_0;
+      double x1=m_x1, y1=m_y1; int index_1 = m_index_1;
+      double x2=m_x2, y2=m_y2; int index_2 = m_index_2;
+      double x3=m_x3, y3=m_y3; int index_3 = m_index_3;
 
-      m_x0= x0; m_y0=y0;
-      m_x1= x3; m_y1=y3;
-      m_x2= x2; m_y2=y2;
-      m_x3= x1; m_y3=y1;
+      m_x0= x0; m_y0=y0; m_index_0 = index_0;
+      m_x1= x3; m_y1=y3; m_index_1 = index_3;
+      m_x2= x2; m_y2=y2; m_index_2 = index_2;
+      m_x3= x1; m_y3=y1; m_index_3 = index_3;
     }
   }
 
