@@ -76,6 +76,8 @@ namespace Cantag {
   public:
     QuadTangle();
     QuadTangle(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3, int index_0, int index_1, int index_2, int index_3);
+
+    void Set(float x0, float y0,float x1, float y1,float x2, float y2,float x3, float y3, int index_0, int index_1, int index_2, int index_3);
     
     bool Compare(const QuadTangle& o) const;
     void Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera) const;
@@ -89,6 +91,10 @@ namespace Cantag {
     inline float GetX3() const { return m_x3; }
     inline float GetY3() const { return m_y3; }
 
+    inline int GetIndex0() const { return m_index_0; }
+    inline int GetIndex1() const { return m_index_1; }
+    inline int GetIndex2() const { return m_index_2; }
+    inline int GetIndex3() const { return m_index_3; }
 
     QuadTangle(Socket& socket);
     int Save(Socket& socket) const;
