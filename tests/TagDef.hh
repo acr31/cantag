@@ -33,6 +33,7 @@
 #include "TestSquare.hh"
 
 #define L(HEAD,TAIL) Cantag::TypeList<HEAD,TAIL >
+/*
 typedef L(CircleInnerLSFull26,
         L(CircleInnerLSFull48,
 	L(CircleInnerLSFull64,
@@ -72,7 +73,27 @@ typedef L(CircleInnerLSFull26,
         L(SquarePolygonProj169,
         L(SquarePolygonProj196,	  
 	  Cantag::TypeListEOL)))))))))))))))))))))))))))))))))))))) AllTags;
+*/
+/*typedef L(CircleInnerLSFull26,
+        L(CircleInnerLSFull48,
+	L(CircleInnerLSFull64,
+	L(CircleInnerLSFull80,
+	L(CircleInnerLSFull100,
+	L(CircleInnerLSFull120,
+	L(CircleInnerLSFull144,
+	L(CircleInnerLSFull168,
+	L(CircleInnerLSFull196,
+*/
 
-//typedef L(SquareConvexHullProj36,Cantag::TypeListEOL) AllTags;
+typedef L(SquareConvexHullRegressProj25,
+        L(SquareConvexHullRegressProj49,
+        L(SquareConvexHullRegressProj64,
+        L(SquareConvexHullRegressProj81,
+        L(SquareConvexHullRegressProj100,
+        L(SquareConvexHullRegressProj121,
+        L(SquareConvexHullRegressProj169,
+        L(SquareConvexHullRegressProj196,	  
+	  Cantag::TypeListEOL)))))))) AllTags;
 
+//typedef L(SquareConvexHullRegressProj49,Cantag::TypeListEOL) AllTags;
 #endif//TAGDEF_GUARD

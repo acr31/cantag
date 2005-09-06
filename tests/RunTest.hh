@@ -47,7 +47,7 @@ private:
 public:
   RunTest(int size, float fov, Cantag::DecodeEntity<TagType::PayloadSize>& d);
   
-  Result Execute(float theta, float phi, float x, float y, float z);
+  Result Execute(double theta, double phi, double x, double y, double z);
   void ExecuteBatch(std::ostream& output, int pixel_min, int pixel_step, int theta_min, int theta_step, int jitter_step, const char* prefix = NULL);
 };
 
@@ -63,7 +63,7 @@ template<class TagType> RunTest<TagType>::RunTest(int size, float fov, Cantag::D
   if (!Cantag::DrawTag(tag)(d,i)) {
     throw "Failed to draw encoded value";
   }
-  
+
   if (!Cantag::Decode<TagType>()(d)) {
     throw "Failed to decode the encoded value";
   }
@@ -75,25 +75,24 @@ template<class TagType> RunTest<TagType>::RunTest(int size, float fov, Cantag::D
 }
 
 template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output, int pixel_min, int pixel_step, int theta_min, int theta_step, int jitter_step, const char* prefix) {
-  
-  //  Execute(125,0,0.0121775,0.00304439,13.0435);
-  //return;
+  //  Execute(180,0, 0.154046,0.322095 ,75);
+  //  return;
 
-  for(int pixels=100;pixels>=pixel_min;pixels-=pixel_step) {
-    float distance = (float)m_size/2.f/(float)pixels;
+  for(int pixels=13;pixels>=pixel_min;pixels-=pixel_step) {
+    double distance = (double)m_size/2.f/(double)pixels;
     // we want to jitter by half a pixel
-    float jitter_range = m_tan_fov*distance/(float)m_size;
-    float start = -jitter_range;
-    float end = jitter_range;
-    float step = jitter_range*2/(float)jitter_step;
-    //    float tag_size = size/2/distance;
-    float tag_size = pixels;
-    float phi =0;
+    double jitter_range = 1.f*m_tan_fov*distance/(double)m_size;
+    double start = -jitter_range;
+    double end = jitter_range;
+    double step = jitter_range*2/(double)jitter_step;
+    //    double tag_size = size/2/distance;
+    double tag_size = pixels;
+    double phi =0;
     for(int theta=180;theta>=theta_min;theta-=theta_step) {
       for(int u=0;u<jitter_step;++u) {
-	float x0 = start + step*u;
+	double x0 = start + step*u;
 	for(int v=0;v<jitter_step;++v) {
-	  float y0 = start + step*v;
+	  double y0 = start + step*v;
 	  Result result = Execute(theta,phi,x0,y0,distance);
 	  if (prefix) output << prefix << " ";
 	  output << theta << " " << phi << " " << x0 << " " << y0 << " " << distance << " " << pixels << " ";
@@ -111,7 +110,7 @@ template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output
 
 
 
-template<class TagType> Result RunTest<TagType>::Execute(float theta, float phi, float x, float y, float z) {
+template<class TagType> Result RunTest<TagType>::Execute(double theta, double phi, double x, double y, double z) {
   //  std::cout << "Execute " << theta << " " << phi << " " << x << " " << y << " " << z << std::endl;
   Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>* i = fs.Next(theta,phi,x,y,z);
   tag(*i,camera);
@@ -126,9 +125,9 @@ template<class TagType> Result RunTest<TagType>::Execute(float theta, float phi,
     float v2[] = {1,0,0};   
     te->GetPreferredTransform()->Apply3D(v1,1);
     te->GetPreferredTransform()->Apply3D(v2,1);
-    float vec[] = {v2[0]-v1[0],v2[1]-v1[1],v2[2]-v1[2]};
+    double vec[] = {v2[0]-v1[0],v2[1]-v1[1],v2[2]-v1[2]};
       
-    float angle = acos(vec[0]/sqrt(vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2]));
+    double angle = acos(vec[0]/sqrt(vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2]));
 
     Cantag::CyclicBitSet<TagType::PayloadSize> copy(de->GetPayloads()[0]->payload);
     copy.RotateRight(tag.GetPayloadRotation(angle));
@@ -137,23 +136,26 @@ template<class TagType> Result RunTest<TagType>::Execute(float theta, float phi,
     for(int i=0;i<TagType::PayloadSize;++i) {
       if (copy[i] != stored_payload[i]) errors++;
     }
-
+    //    std::cout << "!! " << TagType::PayloadSize << std::endl;
+    //    std::cout << stored_payload << std::endl;
+    //    std::cout << copy << std::endl;
+    //    std::cout << errors << std::endl;
     //    if (errors > 0)  exit(-1);
-    float nx = sin(theta/180*M_PI)*sin(phi/180*M_PI);
-    float ny = sin(theta/180*M_PI)*cos(phi/180*M_PI);
-    float nz = cos(theta/180*M_PI);
+    double nx = sin(theta/180*M_PI)*sin(phi/180*M_PI);
+    double ny = sin(theta/180*M_PI)*cos(phi/180*M_PI);
+    double nz = cos(theta/180*M_PI);
 
     float normal[3];
     te->GetPreferredTransform()->GetNormalVector(camera,normal);
-    float dotprod = normal[0]*nx + normal[1]*ny + normal[2]*nz;
-    float errorangle = acos(dotprod)/M_PI*180;
+    double dotprod = normal[0]*nx + normal[1]*ny + normal[2]*nz;
+    double errorangle = acos(dotprod)/M_PI*180;
     
     float location[3];
     te->GetPreferredTransform()->GetLocation(location,1);
     
-    float distance = sqrt( (location[0] - x)*(location[0] - x) + 
-			   (location[1] - y)*(location[1] - y) + 
-			   (location[2] - z)*(location[2] - z) );
+    double distance = sqrt( (location[0] - x)*(location[0] - x) + 
+			    (location[1] - y)*(location[1] - y) + 
+			    (location[2] - z)*(location[2] - z) );
     
     return Result(errorangle,distance,errors);
   }

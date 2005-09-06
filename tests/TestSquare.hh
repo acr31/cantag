@@ -69,6 +69,7 @@ public:
     ApplyTree(tree,Cantag::ConvexHull(*this));
     ApplyTree(tree,Cantag::DistortionCorrection(camera));
     ApplyTree(tree,FitAlgorithm()); 
+    ApplyTree(tree,FitQuadTangleRegression()); 
     ApplyTree(tree,TransformAlgorithm());
     ApplyTree(tree,Cantag::Bind(Cantag::SampleTagSquare(*this,camera),m));
     ApplyTree(tree,Cantag::Decode<CoderType>());
@@ -98,8 +99,6 @@ class SquarePolygonReduced36 : public TestSquare<6,Cantag::FitQuadTanglePolygon,
 class SquarePolygonSpaceSearch36 : public TestSquare<6,Cantag::FitQuadTanglePolygon,Cantag::TransformQuadTangleSpaceSearch> {};
 class SquarePolygonCyberCode36 : public TestSquare<6,Cantag::FitQuadTanglePolygon,Cantag::TransformQuadTangleCyberCode> {};
 
-
-
 class SquarePolygonProj25 : public TestSquare<5,Cantag::FitQuadTanglePolygon,Cantag::TransformQuadTangleProjective> {};
 class SquarePolygonProj49 : public TestSquare<7,Cantag::FitQuadTanglePolygon,Cantag::TransformQuadTangleProjective> {};
 class SquarePolygonProj64 : public TestSquare<8,Cantag::FitQuadTanglePolygon,Cantag::TransformQuadTangleProjective> {};
@@ -109,5 +108,15 @@ class SquarePolygonProj121 : public TestSquare<11,Cantag::FitQuadTanglePolygon,C
 class SquarePolygonProj141 : public TestSquare<12,Cantag::FitQuadTanglePolygon,Cantag::TransformQuadTangleProjective> {};
 class SquarePolygonProj169 : public TestSquare<13,Cantag::FitQuadTanglePolygon,Cantag::TransformQuadTangleProjective> {};
 class SquarePolygonProj196 : public TestSquare<14,Cantag::FitQuadTanglePolygon,Cantag::TransformQuadTangleProjective> {};
+
+class SquareConvexHullRegressProj25 : public TestSquare<5,Cantag::FitQuadTangleConvexHull,Cantag::TransformQuadTangleProjective> {};
+class SquareConvexHullRegressProj49 : public TestSquare<7,Cantag::FitQuadTangleConvexHull,Cantag::TransformQuadTangleProjective> {};
+class SquareConvexHullRegressProj64 : public TestSquare<8,Cantag::FitQuadTangleConvexHull,Cantag::TransformQuadTangleProjective> {};
+class SquareConvexHullRegressProj81 : public TestSquare<9,Cantag::FitQuadTangleConvexHull,Cantag::TransformQuadTangleProjective> {};
+class SquareConvexHullRegressProj100 : public TestSquare<10,Cantag::FitQuadTangleConvexHull,Cantag::TransformQuadTangleProjective> {};
+class SquareConvexHullRegressProj121 : public TestSquare<11,Cantag::FitQuadTangleConvexHull,Cantag::TransformQuadTangleProjective> {};
+class SquareConvexHullRegressProj141 : public TestSquare<12,Cantag::FitQuadTangleConvexHull,Cantag::TransformQuadTangleProjective> {};
+class SquareConvexHullRegressProj169 : public TestSquare<13,Cantag::FitQuadTangleConvexHull,Cantag::TransformQuadTangleProjective> {};
+class SquareConvexHullRegressProj196 : public TestSquare<14,Cantag::FitQuadTangleConvexHull,Cantag::TransformQuadTangleProjective> {};
 
 #endif//TEST_SQUARE_GUARD
