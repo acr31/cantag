@@ -33,7 +33,7 @@
 namespace Cantag {
 
   template<int SIZE>
-  class TagSquare :public TagSpec<SIZE*SIZE - ((SIZE*SIZE)%2)>, public ContourRestrictions, public ConvexHullRestrictions {
+  class TagSquare : public TagSpec<SIZE*SIZE - ((SIZE*SIZE)%2)>, public ContourRestrictions, public ConvexHullRestrictions {
   public:
     static const int PayloadSize = SIZE*SIZE - ((SIZE*SIZE)%2);
 
@@ -64,7 +64,7 @@ namespace Cantag {
 
   template<int SIZE> TagSquare<SIZE>::TagSquare() : 
     TagSpec<SIZE*SIZE - ((SIZE*SIZE)%2)>(4,PayloadSize/4),
-    ContourRestrictions(30,30,30),
+    ContourRestrictions(1,1,1),
     ConvexHullRestrictions(100000),
     m_cell_width(2.f/(SIZE+2)), 
     m_cell_width_2(1.f/(SIZE+2)) {
