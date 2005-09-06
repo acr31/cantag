@@ -47,7 +47,7 @@ namespace Cantag {
   bool FitQuadTangleCorner::operator()(const ContourEntity& contour, ShapeEntity<QuadTangle>& shape) const {
     const std::vector<float>& points = contour.GetPoints();
 
-    if (points.size() > (2<<LOGMAXWINDOW) && points.size() > 50) {
+    if (points.size() > (2<<LOGMAXWINDOW)) {
       float xcorners[4];
       float ycorners[4];
       int cornerindices[4];
@@ -55,7 +55,7 @@ namespace Cantag {
       int corner_counter = 0;
       float xwindow[1<<LOGMAXWINDOW];
       float ywindow[1<<LOGMAXWINDOW];
-    
+      int indexcounter = 0;
       int loadpointer = 0;
       std::vector<float>::const_iterator i = points.begin();
       for(;loadpointer < (1<<LOGMAXWINDOW);++loadpointer) {
@@ -70,7 +70,7 @@ namespace Cantag {
       if (curve2 > CURVTHRESH) {
 	xcorners[0] = xwindow[datapointer];
 	ycorners[0] = ywindow[datapointer];
-	cornerindices[0] = datapointer + loadpointer/2;
+	cornerindices[0] = datapointer;
 	curvecorners[0] = curve2;
 	++corner_counter;
       }
@@ -85,7 +85,7 @@ namespace Cantag {
 	++i;
 	ywindow[loadpointer] = *i;
 	++i;
-      
+	++indexcounter;
 	if (i == points.end()) { i = points.begin(); }
       
 	float curve = curvature(xwindow,ywindow,datapointer,10);
@@ -102,7 +102,7 @@ namespace Cantag {
 	    currentmax = curve;
 	    xcorners[corner_counter] = xwindow[datapointer];
 	    ycorners[corner_counter] = ywindow[datapointer];
-	    cornerindices[0] = datapointer+loadpointer/2;
+	    cornerindices[corner_counter] = datapointer+indexcounter;
 	  }
 	}
 	previous = curve;
