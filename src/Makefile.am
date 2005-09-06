@@ -50,4 +50,4 @@ endif
 endif
 endif
 
-AM_CPPFLAGS=-I../include
+AM_CPPFLAGS=-I$(srcdir)/../include -I$(top_builddir)/include
