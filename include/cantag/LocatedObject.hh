@@ -27,7 +27,6 @@
 #include <cantag/Config.hh>
 #include <cantag/Image.hh>
 #include <cantag/CyclicBitSet.hh>
-#include <cantag/findtransform.hh>
 #include <cantag/Camera.hh>
 
 namespace Cantag {
@@ -45,7 +44,6 @@ namespace Cantag {
      * object co-ordinates to camera co-ordinates
      */
     float transform[16];
-
 
     /**
      * A 3x1 matrix containing this located object's normal vector in
@@ -70,7 +68,9 @@ namespace Cantag {
      */
     std::vector<CyclicBitSet<PAYLOAD_SIZE>*> tag_codes;
 
-    void LoadTransform(const float transform[16],float tag_size, const Camera& camera);
+
+
+    void LoadTransform(const Transform& transform,float tag_size, const Camera& camera);
 
     LocatedObject();
     ~LocatedObject();
@@ -104,23 +104,25 @@ namespace Cantag {
 
   template<int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>::LocatedObject() : tag_codes() {}
 
-  template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(const float t[16],float tag_size,  const Camera& camera) {
+  template<int PAYLOAD_SIZE> void LocatedObject<PAYLOAD_SIZE>::LoadTransform(const Transform& tr, float tag_size,  const Camera& camera) {
     for(int i=0;i<16;i++) {
-      transform[i] = t[i];
+      transform[i] = tr[i];
     }
-    angle = 0;
-    GetNormalVector(transform,camera,normal);
-    GetLocation(transform,location,tag_size);
-    camera.CameraToWorld(location,1);
-  
+    angle = 0;    
+    tr.GetNormalVector(camera,normal);
+    tr.GetLocation(location,tag_size);
+    camera.CameraToWorld(location,1);  
   }
 
+  
   template<int PAYLOAD_SIZE> LocatedObject<PAYLOAD_SIZE>::~LocatedObject() {
+    /*
     for(typename std::vector<CyclicBitSet<PAYLOAD_SIZE>*>::const_iterator i = tag_codes.begin();
 	i != tag_codes.end();
 	++i) {
       delete *i;    
     }
+    */
   }
 }
 #endif//LOCATED_OBJECT_GUARD
