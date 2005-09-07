@@ -74,9 +74,9 @@ namespace Cantag {
     int x3 = 0;
     int y3 = image.GetHeight()-1;
 
-    int size = (image.GetWidth() < image.GetHeight() ? image.GetWidth()-1 : image.GetHeight()-1)/2;
+    float size = (image.GetWidth() < image.GetHeight() ? image.GetWidth()-1 : image.GetHeight()-1)/2.f;
 
-    int cell_size = 2*size / (SIZE+2);
+    float cell_size = 2.f*size / ((float)SIZE+2.f);
 
     image.DrawFilledQuadTangle(x0, y0,
 			       x1, y1,
@@ -84,17 +84,20 @@ namespace Cantag {
 			       x3, y3,COLOUR_BLACK);
 
     for(int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);i++) {
-      int u0 = (int)(m_tagspec.GetX0(i)*(float)size) + size;
-      int v0 = (int)(m_tagspec.GetY0(i)*(float)size) + size;
+      float ubase = m_tagspec.GetX0(i)*size + size;
+      float vbase = m_tagspec.GetY0(i)*size + size;
 
-      int u1 = u0 + cell_size;
-      int v1 = v0;
+      int u0 = round(ubase);
+      int v0 = round(vbase);
 
-      int u2 = u0 + cell_size;
-      int v2 = v0 + cell_size;
+      int u1 = round(ubase + cell_size);
+      int v1 = round(vbase);
 
-      int u3 = u0;
-      int v3 = v0 + cell_size;
+      int u2 = round(ubase + cell_size);
+      int v2 = round(vbase + cell_size);
+
+      int u3 = round(ubase);
+      int v3 = round(vbase + cell_size);
 
       int colour = chosen->payload[i] ? COLOUR_BLACK : COLOUR_WHITE;
 
