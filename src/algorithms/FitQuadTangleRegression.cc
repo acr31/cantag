@@ -58,9 +58,13 @@ namespace Cantag {
       int end = indexes[(j+1)%4]%(points.size()/2);
       
       if (end < start) end+=points.size()/2;
+
+      // If there are only a few points along the side
+      // we can't really regress anything!
+      if (end-start < 10) return false;
       
-      // Ignore the first and last 3 points
-      float lastx=points[(start+4)*2];
+      // Ignore the first and last 4 points
+      float lastx=points[((start+4)*2)%points.size()];
       bool vertical=true;
       for (int i=start+4; i<end-4; i++) {
 	int ii = i%(points.size()/2);
