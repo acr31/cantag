@@ -47,10 +47,12 @@ namespace Cantag {
     IEEE1394ImageSource(
 			char *device_name,
 			int port,
-			u_int64_t guid=0,
+			int mode=MODE_640x480_MONO,
 			int framerate= FRAMERATE_30,
 			int shutter=-1,
-			int gain=-1);
+			int gain=-1,
+			u_int64_t guid=0
+			);
     virtual ~IEEE1394ImageSource();
     virtual Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* Next();
     inline int GetWidth() const { return 640; }
