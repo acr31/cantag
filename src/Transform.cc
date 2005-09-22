@@ -28,6 +28,8 @@
 
 namespace Cantag {
 
+  Transform::Transform() : m_confidence(0.0) {}
+  
   Transform::Transform(float confidence) : m_confidence(confidence) {};
 
   Transform::Transform(float* transform, float confidence) : m_confidence(confidence) {
@@ -41,6 +43,59 @@ namespace Cantag {
       Apply(points[i],points[i+1],points+i,points+i+1);
     }
   }
+
+
+  void Transform::Invert() {
+    float a[16]={0.0}, b[16]={0.0};
+    // The inversion separates the rotation from the translation
+    // and inverts them separately, the multiplies them together
+
+    // Rotation 3x3 is transported
+    a[15]=1.0;
+    a[0]=m_transform[0];
+    a[4]=m_transform[1];
+    a[8]=m_transform[2];
+    
+    a[1]=m_transform[4];
+    a[5]=m_transform[5];
+    a[9]=m_transform[6];
+    
+    a[2]=m_transform[8];
+    a[6]=m_transform[9];
+    a[10]=m_transform[10];
+
+    // Translation is an easy inversion!
+    b[0]=1.0;
+    b[5]=1.0;
+    b[10]=1.0;
+    b[15]=1.0;
+    b[3] = -m_transform[3];
+    b[7] = -m_transform[7];
+    b[11] = -m_transform[11];
+
+    // Multiply a * b
+    m_transform[0]  = a[0]*b[0] + a[1]*b[4] + a[2]*b[8] + a[3]*b[12];
+    m_transform[1]  = a[0]*b[1] + a[1]*b[5] + a[2]*b[9] + a[3]*b[13];
+    m_transform[2]  = a[0]*b[2] + a[1]*b[6] + a[2]*b[10] + a[3]*b[14];
+    m_transform[3]  = a[0]*b[3] + a[1]*b[7] + a[2]*b[11] + a[3]*b[15];
+    
+    m_transform[4]  = a[4]*b[0] + a[5]*b[4] + a[6]*b[8] + a[7]*b[12];
+    m_transform[5]  = a[4]*b[1] + a[5]*b[5] + a[6]*b[9] + a[7]*b[13];
+    m_transform[6]  = a[4]*b[2] + a[5]*b[6] + a[6]*b[10] + a[7]*b[14];
+    m_transform[7]  = a[4]*b[3] + a[5]*b[7] + a[6]*b[11] + a[7]*b[15];
+    
+    m_transform[8]  = a[8]*b[0] + a[9]*b[4] + a[10]*b[8] + a[11]*b[12];
+    m_transform[9]  = a[8]*b[1] + a[9]*b[5] + a[10]*b[9] + a[11]*b[13];
+    m_transform[10] = a[8]*b[2] + a[9]*b[6] + a[10]*b[10] + a[11]*b[14];
+    m_transform[11] = a[8]*b[3] + a[9]*b[7] + a[10]*b[11] + a[11]*b[15];
+    
+    m_transform[12] = a[12]*b[0] + a[13]*b[4] + a[14]*b[8] + a[15]*b[12];
+    m_transform[13] = a[12]*b[1] + a[13]*b[5] + a[14]*b[9] + a[15]*b[13];
+    m_transform[14] = a[12]*b[2] + a[13]*b[6] + a[14]*b[10] + a[15]*b[14];
+    m_transform[15] = a[12]*b[3] + a[13]*b[7] + a[14]*b[11] + a[15]*b[15];
+    
+  }
+
 
   void Transform::Apply(float x, float y, float z, float* projX, float* projY) const {
     *projX = m_transform[0]*x + m_transform[1]*y + m_transform[2]*z + m_transform[3];
