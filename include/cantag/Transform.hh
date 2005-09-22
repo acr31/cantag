@@ -22,6 +22,9 @@
  * $Header$
  */
 
+#ifndef TRANSFORM_GUARD
+#define TRANSFORM_GUARD
+
 #include <cantag/Config.hh>
 #include <cantag/Camera.hh>
 
@@ -38,6 +41,7 @@ namespace Cantag {
     
   public:
     
+    Transform();
     Transform(float confidence);
     Transform(float* transform, float confidence);
     
@@ -47,6 +51,11 @@ namespace Cantag {
     inline float GetConfidence() { return m_confidence;} 
     inline void SetConfidence(float confidence) { m_confidence = confidence; }
     inline void AccrueConfidence(float confidence) { m_confidence *= confidence; }
+
+    /**
+     * Invert the transform, assuming this is a valid affine transform
+     */
+    void Invert();
     
     void Apply(float x, float y, float* resx, float* resy) const;
     void Apply(float x, float y, float z,float* resx, float* resy) const;
@@ -75,3 +84,6 @@ namespace Cantag {
  
   };
 }
+
+
+#endif
