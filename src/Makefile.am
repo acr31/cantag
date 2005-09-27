@@ -1,5 +1,5 @@
 lib_LTLIBRARIES = libtotal.la
-libtotal_la_SOURCES = Ellipse.cc QuadTangle.cc Camera.cc gaussianelimination.cc Image.cc FileImageSource.cc polysolve.cc Socket.cc algorithms/FitEllipseSimple.cc algorithms/FitEllipseLS.cc algorithms/DistortionCorrection.cc algorithms/TransformEllipseLinear.cc algorithms/TransformEllipseFull.cc Transform.cc algorithms/FitQuadTangleCorner.cc algorithms/FitQuadTangleConvexHull.cc algorithms/FitQuadTanglePolygon.cc algorithms/TransformQuadTangleProjective.cc algorithms/TransformQuadTangleReduced.cc algorithms/ContourFollowerTree.cc MonochromeImage.cc algorithms/ThresholdGlobal.cc algorithms/ThresholdAdaptive.cc algorithms/ConvexHull.cc entities/ContourEntity.cc algorithms/RemoveNonConcentricEllipse.cc algorithms/DrawEntity.cc algorithms/FitQuadTangleRegression.cc
+libtotal_la_SOURCES = Ellipse.cc QuadTangle.cc Camera.cc gaussianelimination.cc Image.cc FileImageSource.cc polysolve.cc Socket.cc algorithms/FitEllipseSimple.cc algorithms/FitEllipseLS.cc algorithms/DistortionCorrection.cc algorithms/TransformEllipseLinear.cc algorithms/TransformEllipseFull.cc Transform.cc algorithms/FitQuadTangleCorner.cc algorithms/FitQuadTangleConvexHull.cc algorithms/FitQuadTanglePolygon.cc algorithms/TransformQuadTangleProjective.cc algorithms/TransformQuadTangleReduced.cc algorithms/ContourFollowerTree.cc MonochromeImage.cc algorithms/ThresholdGlobal.cc algorithms/ThresholdAdaptive.cc algorithms/ConvexHull.cc entities/ContourEntity.cc algorithms/RemoveNonConcentricEllipse.cc algorithms/DrawEntity.cc algorithms/FitQuadTangleRegression.cc 
 
 #disabled  ImageOutputMechanism.cc Template.cc
 #obsolete findtransform.cc 
@@ -12,15 +12,15 @@ endif
 endif
 endif
 
+
 if HAVE_LINUX_VIDEODEV_H
-libtotal_la_SOURCES += V4LImageSource.cc
+libtotal_la_SOURCES += V4LImageSource.cc V4LImageSource2.cc
 endif
 
 if HAVE_GL_GL_H
 if HAVELIB_GL
 # disabled
 # libtotal_la_SOURCES += GLOutputMechanism.cc
-
 if HAVE_GL_OSMESA_H
 if HAVELIB_OSMESA
 if HAVE_GL_GLU_H
@@ -30,7 +30,19 @@ endif
 endif
 endif
 endif
+endif
+endif
 
+
+if HAVELIB_AVCODEC
+if HAVELIB_AVFORMAT
+if HAVELIB_Z
+if HAVE_AVCODEC_H
+if HAVE_AVFORMAT_H
+libtotal_la_SOURCES += VideoImageSource.cc
+endif
+endif
+endif
 endif
 endif
 
@@ -50,4 +62,4 @@ endif
 endif
 endif
 
-AM_CPPFLAGS=-I$(srcdir)/../include -I$(top_builddir)/include
+AM_CPPFLAGS=-I$(srcdir)/../include -I$(top_builddir)/include 

@@ -85,6 +85,8 @@ CANTAG_CHECK_HEADER(gsl/gsl_multimin.h,HAVE_GSL_MULTIMIN_H,have_gsl_multimin_h)
 CANTAG_CHECK_HEADER(libdc1394/dc1394_control.h,HAVE_DC1394_CONTROL_H,have_dc1394_control_h)
 CANTAG_CHECK_HEADER(X11/Xlib.h,HAVE_X11_XLIB_H,have_x11_xlib_h)
 CANTAG_CHECK_HEADER(X11/Xutil.h,HAVE_X11_XUTIL_H,have_x11_xutil_h)
+CANTAG_CHECK_HEADER(ffmpeg/avcodec.h,HAVE_AVCODEC_H,have_avcodec_h)
+CANTAG_CHECK_HEADER(ffmpeg/avformat.h,HAVE_AVFORMAT_H,have_avformat_h)
 CANTAG_CHECK_HEADER(X11/extensions/XShm.h,HAVE_X11_EXTENSIONS_XSHM_H,have_x11_extensions_xshm_h,
 [
 #ifdef HAVE_X11_XLIB_H
@@ -106,6 +108,9 @@ CANTAG_CHECK_LIB(gmpxx,__gmpz_set,HAVELIB_GMPXX,havelib_gmpxx)
 CANTAG_CHECK_LIB(gslcblas,cblas_caxpy,HAVELIB_GSLCBLAS,havelib_gslcblas)
 CANTAG_CHECK_LIB(gsl,gsl_multimin_diff,HAVELIB_GSL,havelib_gsl)
 CANTAG_CHECK_LIB(dc1394_control,dc1394_dma_setup_capture,HAVELIB_DC1394,havelib_dc1394)
+CANTAG_CHECK_LIB(avcodec, img_convert,HAVELIB_AVCODEC,havelib_avcodec)
+CANTAG_CHECK_LIB(avformat,av_register_all ,HAVELIB_AVFORMAT,havelib_avformat)
+CANTAG_CHECK_LIB(z,uncompress ,HAVELIB_Z,havelib_z)
 
 LIBSSAVEACR31="$LIBS"
 LIBS="-lboost_unit_test_framework-gcc-1_31 $LIBS"
@@ -205,6 +210,12 @@ if test "$have_magickxx_h$havelib_magick$havelib_magickxx" = "yesyesyes"; then
    echo "+ Enabled ImageMagick support"
 else
    echo "! Disabled ImageMagick support"
+fi
+
+if test "$have_avformat_h$have_avcodec_h$havelib_z$havelib_avcodec$havelib_avformat" = "yesyesyesyesyes"; then
+   echo "+ Enabled Movie support (libavcodec)"
+else
+   echo "! Disabled Movie support (libavcodec)"
 fi
 
 if test "$have_gsl_multimin_h$havelib_gsl$havelib_gslcblas" = "yesyesyes"; then
