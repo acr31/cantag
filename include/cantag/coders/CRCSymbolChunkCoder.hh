@@ -23,6 +23,7 @@ namespace Cantag {
   template<int BIT_COUNT, int CRC_BITS, int GRANULARITY>
   class CRCSymbolChunkCoder : public virtual Coder<BIT_COUNT> {
   public:
+    typedef CRCSymbolChunkCoder<BIT_COUNT,CRC_BITS,GRANULARITY> CoderType;
     virtual bool IsErrorCorrecting() const;
     virtual int GetSymbolSize() const;
     virtual int GetHammingDistanceBits() const;
