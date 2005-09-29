@@ -30,6 +30,8 @@
 #include <cantag/QuadTangle.hh>
 #include <vector>
 
+#include <gsl/gsl_multimin.h>
+
 namespace Cantag {
 
   /**
@@ -120,6 +122,9 @@ namespace Cantag {
      * \sa #ImageToNPCF()
      */
     void ImageToNPCF(float* points, int num_points) const;
+
+    void ImageToNPCFIterative(std::vector<float>& points) const;
+    static double _undistortfunc(const gsl_vector *v, void *params);
 
     /**
      * Convert a set of normalised principle co-ordinate frame (NPCF)

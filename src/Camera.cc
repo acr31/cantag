@@ -25,6 +25,8 @@
 #include <cantag/Config.hh>
 #include <cantag/Camera.hh>
 
+#include <iostream>
+
 namespace Cantag {
   Camera::Camera() :
     m_r2(0),m_r4(0),m_r6(0),
@@ -224,6 +226,75 @@ namespace Cantag {
       points[i+1] = xd2;
     }
   }
+
+   struct ParamsArray {
+     float k1, k2, x, y;
+  };
+
+
+  void Camera::ImageToNPCFIterative(std::vector<float>& points) const {
+    int numpoints = points.size();
+    for(int i=0;i<numpoints;i+=2) {
+      // 1) translate the points back to the principle point
+      points[i] -= m_intrinsic[2];
+      points[i+1] -= m_intrinsic[5];
+
+      // 2) remove the x and y scaling
+      points[i] /= m_intrinsic[0];
+      points[i+1] /= m_intrinsic[4];
+  
+      double x = points[i];
+      double y = points[i+1];
+
+      struct ParamsArray paramsarray;
+      paramsarray.k1 = m_r2;
+      paramsarray.k2 = m_r4;
+      paramsarray.x = points[i];
+      paramsarray.y = points[i+1];
+
+      gsl_vector *r = gsl_vector_alloc (2);
+      gsl_vector_set (r, 0,  points[i]);
+      gsl_vector_set (r, 1,  points[i+1]);
+      gsl_vector *step = gsl_vector_alloc (2);
+      gsl_vector_set(step,0,1.0);
+      gsl_vector_set(step,0,1.0);
+      gsl_multimin_function errfunc;
+      errfunc.f = (Cantag::Camera::_undistortfunc);
+      errfunc.n=2;
+      errfunc.params=&paramsarray;
+      const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
+      gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc (T, 2);
+      gsl_multimin_fminimizer_set (s, &errfunc, r, step); 
+      int iter=0;
+      int status=0;
+
+      do {
+	iter++;
+	status = gsl_multimin_fminimizer_iterate (s);
+	if (status)
+	  break;      
+	status = gsl_multimin_test_size(s->size,1e-3);
+      }  while (status == GSL_CONTINUE && iter < 500);  
+      if (iter==500) throw("No convergence!!!!");
+      points[i] = gsl_vector_get(r, 0);
+      points[i+1] = gsl_vector_get(r, 1);
+
+    }
+  }
+
+   double Camera::_undistortfunc(const gsl_vector *v, void *params) {
+    struct ParamsArray *p = (struct ParamsArray *) params;
+    float x= gsl_vector_get(v,0);
+    float y= gsl_vector_get(v,1);
+    float r2 = x*x+y*y;
+
+    double radialcoeff = 1 + p->k1*r2 + p->k2*r2*r2;
+    x*=radialcoeff;
+    y*=radialcoeff;
+
+    return (x-p->x)*(x-p->x)+(y-p->y)*(y-p->y);
+  }
+
 
 
   void Camera::UnDistortImage(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const {
