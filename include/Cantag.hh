@@ -130,6 +130,7 @@
 
 #if defined(HAVELIB_AVCODEC) && defined(HAVELIB_AVFORMAT) && defined(HAVELIB_Z) && defined(HAVE_AVCODEC_H) && defined(HAVE_AVFORMAT_H)
 #include <cantag/VideoImageSource.hh>
+#include <cantag/VideoOutputMechanism.hh>
 #endif
 
 #endif//CANTAG_GUARD
