@@ -64,6 +64,7 @@
 #include <cantag/algorithms/FitQuadTanglePolygon.hh>
 #include <cantag/algorithms/FitQuadTangleRegression.hh>
 #include <cantag/algorithms/DistortionCorrection.hh>
+#include <cantag/algorithms/DistortionCorrectionIterative.hh>
 #include <cantag/algorithms/TransformEllipseLinear.hh>
 #include <cantag/algorithms/TransformEllipseFull.hh>
 #include <cantag/algorithms/TransformEllipseRotate.hh>
