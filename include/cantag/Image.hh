@@ -154,6 +154,8 @@ namespace Cantag {
     }
     
   public:
+
+    unsigned char * GetContents() { return  m_contents; }
     
     /**
      * Return the width of the image
@@ -386,6 +388,8 @@ namespace Cantag {
     ImageSpecialise() : ImageBase<Pix::Fmt::BGR24>() {}
 
   public:
+    void Load(const char* filename);
+    void Save(const char* filename) const;
   };
 
   /**
