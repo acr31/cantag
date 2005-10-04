@@ -28,7 +28,7 @@ namespace Cantag {
       enum Bpp {Byte3=0,Byte1=1};
     }
     namespace Fmt {
-      enum Layout {RGB24=0,BGR24=1,Grey8=2,Mono8=3,Runtime=4};
+      enum Layout {RGB24=0,BGR24=1,Grey8=2,Mono8=3,Runtime=4,YUV420=5};
     }
   }
   
@@ -73,6 +73,17 @@ namespace Cantag {
    unsigned char v1;
   public:
     Pixel(unsigned char v) : v1(v) {}
+    inline unsigned char intensity() const {return v1; }
+  };
+
+  template<> class Pixel<Pix::Fmt::YUV420> {
+    friend class _PixelIterator<Pixel*,Pix::Fmt::YUV420>;
+    friend class _PixelIterator<const Pixel*,Pix::Fmt::YUV420>;
+    unsigned char v1;
+    unsigned char v2;
+    unsigned char v3;
+  public:
+    Pixel(unsigned char y, unsigned char u, unsigned char v) : v1(y), v2(u), v3(v) {}
     inline unsigned char intensity() const {return v1; }
   };
 
