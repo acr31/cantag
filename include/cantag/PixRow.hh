@@ -134,6 +134,25 @@ namespace Cantag {
 
 
   template<class T> 
+  class _PixelIterator<T*,Pix::Fmt::YUV420>
+    : public _BaseIterator<T*,_PixelIterator<T*,Pix::Fmt::YUV420> > {
+  private:
+    unsigned int* match;
+    typedef _BaseIterator<T*,_PixelIterator<T*,Pix::Fmt::YUV420> > self;
+  public:
+    _PixelIterator(T* ptr, unsigned int* m)
+      : _BaseIterator<T*,_PixelIterator<T*,Pix::Fmt::YUV420> >(ptr), match(m) {}
+   
+    inline unsigned char y() const {return self::m_current->v1;}
+    inline unsigned char u() const {return self::m_current->v2;}
+    inline unsigned char v() const {return self::m_current->v3;}
+    
+    inline void y(unsigned char v) {self::m_current->v1=v;}
+    inline void u(unsigned char v) {self::m_current->v2=v;}
+    inline void v(unsigned char v) {self::m_current->v3=v;}
+  };
+
+  template<class T> 
   class _PixelIterator<T*,Pix::Fmt::BGR24>
     : public _BaseIterator<T*,_PixelIterator<T*,Pix::Fmt::BGR24> > {
   private:
@@ -211,7 +230,6 @@ namespace Cantag {
     PixRow(pointer d, unsigned int l) : data(d), length(l), match(0) {}
     PixRow(pointer d, unsigned int l, unsigned int m[3]) 
       : data(d), length(l), match(m) {}
-
     iterator begin() { return iterator(data,match); }
     const_iterator begin() const { return const_iterator(data,match); }
     iterator end() { return iterator(data+length,match); }
