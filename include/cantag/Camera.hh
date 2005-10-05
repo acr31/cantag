@@ -29,6 +29,9 @@
 #include <cantag/Ellipse.hh>
 #include <cantag/QuadTangle.hh>
 #include <vector>
+#include <map>
+
+#include <iostream>
 
 #include <gsl/gsl_multimin.h>
 
@@ -41,6 +44,19 @@ namespace Cantag {
    */
   class Camera {
   private:
+
+    typedef struct dist_coord_t {
+      float x;
+      float y;
+      int operator<(const struct dist_coord_t &rhs) const {
+	if (rhs.x<x) return 1;
+	else if (rhs.x==this->x && rhs.y<this->y) return 1;
+	return 0;
+      }
+    } dist_coord;
+
+    mutable std::map<dist_coord_t,dist_coord_t> m_distortion_map;
+
     float m_extrinsic[16];
     float m_intrinsic[9];
   
@@ -111,7 +127,7 @@ namespace Cantag {
      * John Mallon and  Paul F. Whelan, 7th International Conf. on
      * Pattern Recognition (ICPR'04), Cambridge, UK. August 2004
      *
-     * Contains code by Rob Harle <rkh23@cam.ac.uk>
+     * Contains code by Robert Harle <rkh23@cam.ac.uk>
      */
     void ImageToNPCF(std::vector<float>& points) const;
 
@@ -123,7 +139,21 @@ namespace Cantag {
      */
     void ImageToNPCF(float* points, int num_points) const;
 
-    void ImageToNPCFIterative(std::vector<float>& points) const;
+    /**
+     * Convert a set of image co-ordinates to normalised principle
+     * co-ordinate frame (NPCF) points.  This involves removing the
+     * distortion predicted by the parameters set and removing the
+     * extrinsic parameters of the camera.
+     *
+     * This algorithm uses a numerical algorithm to invert
+     * the distortion. This is *much* better in terms of accuracy
+     * but costly in terms of processing. Thus we include
+     * a caching capability to cache what we've seen before. If
+     * it's not in the cache, we do the full computation
+     *
+     * Code by Robert Harle  <rkh23@cam.ac.uk>
+     */
+    void ImageToNPCFIterative(std::vector<float>& points, bool useCache) const;
     static double _undistortfunc(const gsl_vector *v, void *params);
 
     /**
