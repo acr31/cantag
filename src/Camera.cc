@@ -163,8 +163,8 @@ namespace Cantag {
 
   /**
    * \todo currently ignores  tangential parameters
+   */
  
-  */
   void Camera::ImageToNPCF(float* points, int numpoints) const {
     for(int i=0;i<numpoints*2 ;i+=2) {
       // 1) translate the points back to the principle point
@@ -232,64 +232,88 @@ namespace Cantag {
   };
 
 
-  void Camera::ImageToNPCFIterative(std::vector<float>& points) const {
-    int numpoints = points.size();
-    for(int i=0;i<numpoints;i+=2) {
-      // 1) translate the points back to the principle point
-      points[i] -= m_intrinsic[2];
-      points[i+1] -= m_intrinsic[5];
+  void Camera::ImageToNPCFIterative(std::vector<float>& points, bool useCache) const {
+    for(int i=0;i<points.size();i+=2) {
+      dist_coord d;
+      bool cached=false;
+      if (useCache) {
+	d.x=points[i];
+	d.y=points[i+1];
+	std::map<dist_coord, dist_coord>::const_iterator ci = m_distortion_map.find(d);
+	//   std::cout << m_distortion_map.size() << std::endl;;
+	if (ci!=m_distortion_map.end()) {
+	  points[i] = ci->second.x;
+	  points[i+1] = ci->second.y;
+	  cached=true;
+	}
+      }
 
-      // 2) remove the x and y scaling
-      points[i] /= m_intrinsic[0];
-      points[i+1] /= m_intrinsic[4];
-  
-      double x = points[i];
-      double y = points[i+1];
+      if (!cached) {
+	// If we're here we either don't use the cache
+	// or we didn't have the value cached
 
-      struct ParamsArray paramsarray;
-      paramsarray.k1 = m_r2;
-      paramsarray.k2 = m_r4;
-      paramsarray.x = x;
-      paramsarray.y = y;
+	// 1) translate the points back to the principle point
+	points[i] -= m_intrinsic[2];
+	points[i+1] -= m_intrinsic[5];
+      
+	// 2) remove the x and y scaling
+	points[i] /= m_intrinsic[0];
+	points[i+1] /= m_intrinsic[4];
+      
+	double x = points[i];
+	double y = points[i+1];
+      
+	struct ParamsArray paramsarray;
+	paramsarray.k1 = m_r2;
+	paramsarray.k2 = m_r4;
+	paramsarray.x = x;
+	paramsarray.y = y;
+	
+	// setup gsl minmisation
+	gsl_vector *r = gsl_vector_alloc (1);
+	gsl_vector_set (r, 0,  1.0);
+	gsl_vector *step = gsl_vector_alloc (1);
+	gsl_vector_set(step,0,1.0);
+	gsl_multimin_function errfunc;
+	errfunc.f = (Cantag::Camera::_undistortfunc);
+	errfunc.n=1;
+	errfunc.params=&paramsarray;
+	const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
+	gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc (T, 1);
+	gsl_multimin_fminimizer_set (s, &errfunc, r, step); 
+	int iter=0;
+	int status=0;
+	int max_it=100;
+	do {
+	  iter++;
+	  status = gsl_multimin_fminimizer_iterate (s);
+	  if (status)
+	    break;      
+	  status = gsl_multimin_test_size(s->size,1e-3);
+	}  while (status == GSL_CONTINUE && iter < 100); 
+	float l = gsl_vector_get(s->x,0);
+	points[i] = x*l;
+	points[i+1] = y*l;
 
-      gsl_vector *r = gsl_vector_alloc (1);
-      gsl_vector_set (r, 0,  1.0);
-      //      gsl_vector_set (r, 1,  points[i+1]);
-      gsl_vector *step = gsl_vector_alloc (1);
-      gsl_vector_set(step,0,0.5);
-      //   gsl_vector_set(step,0,0.001);
-      gsl_multimin_function errfunc;
-      errfunc.f = (Cantag::Camera::_undistortfunc);
-      errfunc.n=1;
-      errfunc.params=&paramsarray;
-      const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
-      gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc (T, 1);
-      gsl_multimin_fminimizer_set (s, &errfunc, r, step); 
-      int iter=0;
-      int status=0;
+	if (useCache) {
+	  dist_coord ip;
+	  ip.x = d.x;
+	  ip.y = d.y;
+	  dist_coord op;
+	  op.x = points[i];
+	  op.y = points[i+1];
+	  m_distortion_map[ip]=op;
+	}
 
-      do {
-	iter++;
-	status = gsl_multimin_fminimizer_iterate (s);
-	if (status)
-	  break;      
-	status = gsl_multimin_test_size(s->size,1e-5);
-      }  while (status == GSL_CONTINUE && iter < 100); 
-      if (iter==500) throw("No convergence!!!!");
-      float l = gsl_vector_get(s->x,0);
-      //   std::cout << l << std::endl;
-      points[i] = x*l;
-      points[i+1] = y*l;
-      gsl_multimin_fminimizer_free (s);
-      gsl_vector_free (r);
-      gsl_vector_free (step);
+	gsl_multimin_fminimizer_free (s);
+	gsl_vector_free (r);
+	gsl_vector_free (step);
+      }
     }
   }
 
    double Camera::_undistortfunc(const gsl_vector *v, void *params) {
     struct ParamsArray *p = (struct ParamsArray *) params;
-    // float x= gsl_vector_get(v,0);
-    //float y= gsl_vector_get(v,1);
 
     float l = gsl_vector_get(v,0);
     float x = p->x*l;
@@ -299,9 +323,7 @@ namespace Cantag {
     double radialcoeff = 1 + p->k1*r2 + p->k2*r2*r2;
     x*=radialcoeff;
     y*=radialcoeff;
-    // x << " " << p->x << "   " << y << " " << p->y << " " << gsl_vector_get(v,0) << std::endl;
-    double d =  (x-p->x)*(x-p->x)+(y-p->y)*(y-p->y);
-    return d;
+    return (x-p->x)*(x-p->x)+(y-p->y)*(y-p->y);
   }
 
 
