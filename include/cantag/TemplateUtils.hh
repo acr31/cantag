@@ -33,7 +33,9 @@ namespace Cantag {
   /**
    * A list of types
    */
-  class TypeListEOL {};
+  class TypeListEOL {
+    typedef TypeListEOL Head;
+  };
   template<class H, class T = TypeListEOL> struct TypeList {
     typedef H Head;
     typedef T Tail;
@@ -104,8 +106,8 @@ namespace Cantag {
   };
 
   template<>
-  struct Length<TypeListEOL> {
-    enum { value = 1 };
+  struct Length<Cantag::TypeListEOL> {
+    enum { value = 0 };
   };
 
   /**
@@ -120,9 +122,32 @@ namespace Cantag {
   struct Nth<List,0> {
     typedef typename List::Head value;
   };
+
+
+  template<class Element, class List, class WhenTrue, class WhenFalse>
+  struct IfContains {
+    typedef typename IfContains<Element,List::Tail,WhenTrue,WhenFalse>::value value;
+  };
   
+  template<class Element,class WhenTrue, class WhenFalse>
+  struct IfContains<Element,TypeListEOL,WhenTrue,WhenFalse> {
+    typedef WhenFalse value;
+  };
+
+  template<class Element, class Tail, class WhenTrue, class WhenFalse>
+  struct IfContains<Element,TypeList<Element,Tail>,WhenTrue,WhenFalse > {
+    typedef WhenTrue value;
+  };
+
+  template<class List, class OrderList>
+  struct Reorder {
+    typedef typename IfContains<OrderList::Head,List,TypeList<OrderList::Head, typename Reorder<List,OrderList::Tail>::value>, typename Reorder<List,OrderList::Tail>::value>::value value;
+  };
+  
+  template<class List>
+  struct Reorder<List,TypeListEOL> {
+    typedef TypeListEOL value;
+  };
 }
-
-
 
 #endif//TEMPLATE_UTILS_GUARD
