@@ -65,7 +65,8 @@ namespace Cantag {
     m_height(height),
     m_fov(fov),
     m_glimage(width,height),
-    m_supersample(4)
+    m_supersample(1),
+    m_tagrotation(0.f)
   {
     Init(source);
   }
@@ -75,7 +76,8 @@ namespace Cantag {
     m_height(height),
     m_fov(fov),
     m_glimage(width,height),
-    m_supersample(4)
+    m_supersample(1),
+    m_tagrotation(0.f)
   {}
 
 
@@ -153,7 +155,8 @@ namespace Cantag {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective((GLfloat)m_fov, (GLfloat)m_width/(GLfloat)m_height,0,100.0);
-    gluLookAt(-centre_x*m_supersample,-centre_y*m_supersample,-centre_z,-centre_x*m_supersample,-centre_y*m_supersample,-centre_z+1,0.0,-1.0,0.0);
+    //    gluLookAt(-centre_x*m_supersample,-centre_y*m_supersample,-centre_z,-centre_x*m_supersample,-centre_y*m_supersample,-centre_z+1,0.0,-1.0,0.0);
+    gluLookAt(-centre_x,-centre_y,-centre_z,-centre_x,-centre_y,-centre_z+1,0.0,-1.0,0.0);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     //     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
     //     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -209,7 +212,9 @@ namespace Cantag {
 
     glScalef(tagsizescale,tagsizescale,1);
     glMultMatrixf(rotation);
-    //    glRotatef(30,0,0,1);
+    if (m_tagrotation != 0.f) {
+      glRotatef(m_tagrotation,0,0,1);
+    }
     
 
 #ifdef GLIMAGESOURCE_DEBUG
@@ -278,13 +283,14 @@ namespace Cantag {
     */
 
     int yout = 0;
-    for(int ygl = (m_height-1)*m_supersample; ygl >= 0; ygl-=m_supersample) {
+    for(int ygl = m_height-1; ygl >= 0; --ygl) {
       int xout = 0;
-      for(int xgl = 0; xgl < m_width*m_supersample; xgl+=m_supersample) {
+      for(int xgl = 0; xgl < m_width; ++xgl) {
+	int base = (ygl * m_width * m_supersample + xgl) * m_supersample * 3;
 	unsigned long accumulator = 0;
 	for (int yave = 0; yave < m_supersample; ++yave) {
 	  for (int xave = 0; xave < m_supersample; ++ xave) {
-	    int pointer = (ygl+yave)*m_width*m_supersample*3+(xgl+xave)*3;
+	    int pointer = base + yave * 3 * m_width * m_supersample + xave *3;
 	    accumulator += (0.3*(float)m_buffer[pointer] +
 			    0.59*(float)m_buffer[pointer+1] +
 			    0.11*(float)m_buffer[pointer+2]);
@@ -296,17 +302,19 @@ namespace Cantag {
       }
       ++yout;
     }
-
     /*
-    int pointer = 0;
-    for(int i=m_height-1;i>=0;i--) {
-      for(int j=0;j<m_width;j++) {
-	unsigned char val = (unsigned char)(0.3*(float)m_buffer[pointer++] +
-					    0.59*(float)m_buffer[pointer++] +
-					    0.11*(float)m_buffer[pointer++]);
-	m_glimage.DrawPixelNoCheck(j,i,Pixel<Pix::Fmt::Grey8>(val));
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> output(m_width*m_supersample,m_height*m_supersample);
+    int pointer =0;
+    for(int u=m_height*m_supersample-1;u>=0;--u) {
+      for(int v=0;v<m_width*m_supersample;++v) {
+	unsigned char value = (0.3*(float)m_buffer[pointer++] +
+			       0.59*(float)m_buffer[pointer++] +
+			       0.11*(float)m_buffer[pointer++]);
+	output.DrawPixel(u,v,value);
       }
     }
+    output.Save("gloutput.pnm");
+    exit(-1);
     */
     return &m_glimage;
   };
