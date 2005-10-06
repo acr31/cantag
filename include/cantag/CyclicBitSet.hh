@@ -127,6 +127,8 @@ namespace Cantag {
 
     bool operator==(const CyclicBitSet<BIT_COUNT>& o) const;
 
+    void operator=(const CyclicBitSet<BIT_COUNT>& o);
+
     bool operator!=(const CyclicBitSet<BIT_COUNT>& o) const;
 
     CyclicBitSet& operator<<=(size_t shift);
@@ -175,6 +177,12 @@ namespace Cantag {
       if (!code[0]) break;
     }
   };
+
+  template<int BIT_COUNT> void CyclicBitSet<BIT_COUNT>::operator=(const CyclicBitSet<BIT_COUNT>& source) {
+    for(int i=0;i<BIT_COUNT;++i) {
+      (*this)[i] = source[i];
+    }
+  }
 
   template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet() : std::bitset<BIT_COUNT>(), m_rotation(0), m_invalid(false) {};
 
