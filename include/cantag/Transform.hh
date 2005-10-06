@@ -60,6 +60,7 @@ namespace Cantag {
     void Apply(float x, float y, float* resx, float* resy) const;
     void Apply(float x, float y, float z,float* resx, float* resy) const;
     void Apply(float* points, int num_points) const;
+    void Apply(std::vector<float>& points) const;
 
     /**
      * Transform 3d object co-ordinates to 3d camera co-ordinates
