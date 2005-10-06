@@ -53,6 +53,7 @@ namespace Cantag {
       int cornerindices[4];
       float curvecorners[4];
       int corner_counter = 0;
+      bool corner_set = false;
       float xwindow[1<<LOGMAXWINDOW];
       float ywindow[1<<LOGMAXWINDOW];
       int indexcounter = 0;
@@ -91,8 +92,9 @@ namespace Cantag {
 	float curve = curvature(xwindow,ywindow,datapointer,10);
 	curve = -fabs(curve);
 	if (curve < CURVTHRESH) { 
-	  if (previous > CURVTHRESH) {
+	  if (previous > CURVTHRESH && corner_set) {
 	    ++corner_counter;
+	    corner_set = false;
 	    currentmax = -10;
 	    if (corner_counter > 4) { return false; }
 	  }
@@ -102,6 +104,7 @@ namespace Cantag {
 	    currentmax = curve;
 	    xcorners[corner_counter] = xwindow[datapointer];
 	    ycorners[corner_counter] = ywindow[datapointer];
+	    corner_set = true;
 	    cornerindices[corner_counter] = datapointer+indexcounter;
 	  }
 	}
