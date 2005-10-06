@@ -290,4 +290,29 @@ namespace Cantag {
     //  count += socket.Send((int)m_fitted);
     return count;
   }
+
+  bool QuadTangle::CheckError(const std::vector<float>& points, float threshold) const {
+    double edge1 = (m_x1 - m_x0)*(m_x1 - m_x0) + (m_y1 - m_y0)*(m_y1 - m_y0);
+    double edge2 = (m_x2 - m_x1)*(m_x2 - m_x1) + (m_y2 - m_y1)*(m_y2 - m_y1);
+    double edge3 = (m_x3 - m_x2)*(m_x3 - m_x2) + (m_y3 - m_y2)*(m_y3 - m_y2);
+    double edge4 = (m_x0 - m_x3)*(m_x0 - m_x3) + (m_y0 - m_y3)*(m_y0 - m_y3);
+
+    for(std::vector<float>::const_iterator i = points.begin(); i != points.end(); ++i) {
+      float x = *i;
+      ++i;
+      float y = *i;
+      double distance1 = ((x - m_x0)*(m_x1 - m_x0) + (y - m_y0)*(m_y1 - m_y0))/edge1;
+      double distance2 = ((x - m_x1)*(m_x2 - m_x1) + (y - m_y1)*(m_y2 - m_y1))/edge2;
+      double distance3 = ((x - m_x2)*(m_x3 - m_x2) + (y - m_y2)*(m_y3 - m_y2))/edge3;
+      double distance4 = ((x - m_x3)*(m_x0 - m_x3) + (y - m_y3)*(m_y0 - m_y3))/edge4;
+      
+      double min = distance1;
+      if (min > distance2) min = distance2;
+      if (min > distance3) min = distance3;
+      if (min > distance4) min = distance4;
+      
+      if (min > threshold) return false;
+    }
+    return true;
+  }
 }
