@@ -541,8 +541,8 @@ namespace Cantag {
     PROGRESS("scale= " << scale_factor);
 #endif
   
-    m_width = lambda1 * scale_factor;
-    m_height = lambda2 * scale_factor;
+    m_width = lambda2 * scale_factor;
+    m_height = lambda1 * scale_factor;
     
     //  m_width = lambda1;
     //m_height = lambda2;
