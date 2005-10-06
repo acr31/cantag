@@ -72,6 +72,16 @@ namespace Cantag {
       }
     }
 
+    Tree() : m_node(), m_children() {};
+
+    Tree(TreeNode<C>& copyme) {
+      copyme.Reset();
+      TreeNode<C>* child = copyme.NextChild();
+      while(child != NULL) {
+	m_children.push_back(new Tree<C>(*child));
+      }
+    };
+
     void DeleteAll() {
       for(typename std::vector<Tree<C>*>::const_iterator i = m_children.begin();
 	  i != m_children.end();
