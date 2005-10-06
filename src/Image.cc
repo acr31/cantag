@@ -53,32 +53,6 @@ namespace Cantag {
 
 
 #if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(HAVELIB_MAGICK)
-    void ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::RGB24>::Save(const char* filename) const {
-      try {
-	Magick::Image i(Magick::Geometry(GetWidth(),GetHeight()),
-			Magick::ColorRGB(1.0,1.0,1.0));
-	i.type(Magick::TrueColorType);
-	i.colorSpace(Magick::RGBColorspace);
-	i.depth(8);
-	i.modifyImage();
-	for(unsigned int y=0;y<GetHeight();++y) {
-	  const PixRow<Pix::Fmt::RGB24> row = GetRow(y);
-	  PixRow<Pix::Fmt::RGB24>::const_iterator pixel=row.begin();
-	  for(unsigned int x=0;x<GetWidth();++x) {
-	    Magick::ColorRGB color((double)pixel.r()/255,
-				   (double)pixel.g()/255,
-				   (double)pixel.b()/255);
-	    i.pixelColor(x,y,color);
-	    ++pixel;
-	  }
-	} 
-	i.write(filename);
-      }
-      catch(Magick::Exception& e) {
-	throw e.what();
-      }
-    }
-
     void ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::BGR24>::Save(const char* filename) const {
       try {
 	Magick::Image i(Magick::Geometry(GetWidth(),GetHeight()),
@@ -104,6 +78,8 @@ namespace Cantag {
 	throw e.what();
       }
     }
+
+  
 #else
   void ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::RGB24>::Save(const char* filename) const {
       std::ofstream output(filename);

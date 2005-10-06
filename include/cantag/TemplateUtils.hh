@@ -126,7 +126,7 @@ namespace Cantag {
 
   template<class Element, class List, class WhenTrue, class WhenFalse>
   struct IfContains {
-    typedef typename IfContains<Element,List::Tail,WhenTrue,WhenFalse>::value value;
+    typedef typename IfContains<Element,typename List::Tail,WhenTrue,WhenFalse>::value value;
   };
   
   template<class Element,class WhenTrue, class WhenFalse>
@@ -141,7 +141,7 @@ namespace Cantag {
 
   template<class List, class OrderList>
   struct Reorder {
-    typedef typename IfContains<OrderList::Head,List,TypeList<OrderList::Head, typename Reorder<List,OrderList::Tail>::value>, typename Reorder<List,OrderList::Tail>::value>::value value;
+    typedef typename IfContains<typename OrderList::Head,List,TypeList<typename OrderList::Head, typename Reorder<List,typename OrderList::Tail>::value>, typename Reorder<List,typename OrderList::Tail>::value>::value value;
   };
   
   template<class List>
