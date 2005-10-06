@@ -80,7 +80,7 @@ namespace Cantag {
     OSMesaContext m_ctx;
     GLubyte* m_tmap;
     GLuint m_textureid;
-
+    float m_tagrotation;
   public:
     /**
      * Create the image source.  It will create images of the given
@@ -127,6 +127,13 @@ namespace Cantag {
       float nz = cos(theta/180*M_PI);
       return Next(nx,ny,nz,x0,y0,z0);
     };
+
+    inline void SetTagRotation(float degrees) {
+      m_tagrotation = degrees;
+    }
+    inline void SetSuperSample(int mult) {
+      m_supersample = mult;
+    }
 
   };
 }
