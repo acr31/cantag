@@ -57,25 +57,13 @@ namespace Cantag {
 
     if (i) {
       typename DecodeEntity<RING_COUNT*SECTOR_COUNT>::Data* payload = destination.Add();
-
-      /*
-      Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> output(image.GetWidth(),image.GetHeight());
-      for(unsigned int it = 0; it<image.GetHeight();++it) {
-	PixRow<Pix::Fmt::Grey8> row = output.GetRow(it);
-	PixRow<Pix::Fmt::Grey8>::iterator in = row.begin();
-	for(unsigned int j=0; j<image.GetWidth();++j) {
-	  in.v(image.GetPixel(j,it) ? 128 : 0);
-	  ++in;
-	}
-      }
-      */
       int index = 0;
       int readindex = READ_COUNT/2;
       for(int j=0;j<SECTOR_COUNT;++j) {
 	// read a chunk by sampling each ring and shifting and adding
 	for(int k=RING_COUNT-1;k>=0;--k) {
-	  float tpt[]=  {  m_tagspec.GetXSamplePoint(readindex,k),
-			   m_tagspec.GetYSamplePoint(readindex,k) };
+	  float tpt[]=  {  m_tagspec.GetXSamplePoint(readindex,RING_COUNT - 1 - k),
+			   m_tagspec.GetYSamplePoint(readindex,RING_COUNT - 1 - k) };
 	  i->Apply(tpt[0],tpt[1],tpt,tpt+1);
 	  m_camera.NPCFToImage(tpt,1);
 	  if (tpt[0] < 0 || tpt[0] >= image.GetWidth() ||
@@ -83,8 +71,6 @@ namespace Cantag {
 	    return false;
 	  }
 	  bool sample = image.GetPixel(tpt[0],tpt[1]);
-	  //	  output.DrawPixel(tpt[0],tpt[1],255);
-	  //std::cout << "Read " << sample << std::endl;
 	  
 	  (payload->payload)[index] = sample;      
 	  index++;
@@ -94,8 +80,6 @@ namespace Cantag {
       }      
       payload->confidence = 1.f;
       return_result = true;
-      //	  output.Save("output.pnm");
-
     }
     return return_result;
   }
