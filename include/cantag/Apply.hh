@@ -50,7 +50,6 @@ namespace Cantag {
       }
     };
 
-
     /**
      * Apply the algorithm to this tree node and then recursively to the
      * children. Returns true if any of the function applications return
@@ -116,9 +115,10 @@ namespace Cantag {
     template<class Algorithm> bool _Apply_Fn0(typename Nth<typename Algorithm::Results,0>::value& result, Algorithm& algorithm) {
       PRINTFUNCTION();
       bool r = false;
-      if (result.IsValid()) {
+      bool valid = result.IsValid();
+      if (!algorithm.OnlyValid || valid) {
 	r = algorithm(result);
-	result.SetValid(r);
+	if (valid) result.SetValid(r);
       }
       return r;
     }
@@ -130,9 +130,10 @@ namespace Cantag {
     template<class Algorithm> inline bool _Apply_Fn1(const typename Nth<typename Algorithm::Arguments,0>::value& arg1, typename Nth<typename Algorithm::Results,0>::value& result, Algorithm& algorithm) {
       PRINTFUNCTION();
       bool r = false;
-      if (arg1.IsValid()) {
+      bool valid = arg1.IsValid();
+      if (!algorithm.OnlyValid || valid) {
 	r = algorithm(arg1,result);
-	result.SetValid(r);
+	if (valid) result.SetValid(r);
       }
       return r;
     }
@@ -144,9 +145,20 @@ namespace Cantag {
     template<class Algorithm> bool _Apply_Fn2(const typename Nth<typename Algorithm::Arguments,0>::value& arg1, const typename Nth<typename Algorithm::Arguments,1>::value& arg2, typename Nth<typename Algorithm::Results,0>::value& result, const Algorithm& algorithm) {
       PRINTFUNCTION();
       bool r = false;
-      if (arg1.IsValid() && arg2.IsValid()) {
+      bool valid = arg1.IsValid() && arg2.IsValid();
+      if (!algorithm.OnlyValid || valid) {
 	r = algorithm(arg1,arg2,result);
-	result.SetValid(r);
+	if (valid) result.SetValid(r);
+      }
+      return r;
+    }
+
+    template<class Algorithm> bool _Apply_Fn2_0(const typename Nth<typename Algorithm::Arguments,0>::value& arg1, const typename Nth<typename Algorithm::Arguments,1>::value& arg2,const Algorithm& algorithm) {
+      PRINTFUNCTION();
+      bool r = false;
+      bool valid = arg1.IsValid() && arg2.IsValid();
+      if (!algorithm.OnlyValid || valid) {
+	r = algorithm(arg1,arg2);
       }
       return r;
     }
@@ -157,9 +169,10 @@ namespace Cantag {
     template<class Algorithm> bool _Apply_Fn3(const typename Nth<typename Algorithm::Arguments,0>::value& arg1, const typename Nth<typename Algorithm::Arguments,1>::value& arg2, const typename Nth<typename Algorithm::Arguments,2>::value& arg3, typename Nth<typename Algorithm::Results,0>::value& result, Algorithm& algorithm) {
       PRINTFUNCTION();
       bool r = false;
-      if (arg1.IsValid() && arg2.IsValid() && arg3.IsValid()) {
+      bool valid = arg1.IsValid() && arg2.IsValid() && arg3.IsValid();
+      if (!algorithm.OnlyValid || valid) {
 	r = algorithm(arg1,arg2,arg3,result);
-	result.SetValid(r);
+	if (valid) result.SetValid(r);
       }
       return r;
     }    
@@ -206,8 +219,17 @@ namespace Cantag {
 	  return _Apply_Fn2<Algorithm>(me,me,result,algorithm);
 	}
       };
+
+      template<class Algorithm, class SourceType1, class SourceType2> 
+      class ApplyHelper<Algorithm,Function<TL2(SourceType1,SourceType2),TL0> > {
+      public:
+	inline bool operator()(Algorithm& algorithm, const ComposedEntity& me, SourceType2& result) const {
+	  PRINTFUNCTION();
+	  return _Apply_Fn2_0<Algorithm>(me,me,algorithm);
+	}
+      };
       
-    template<class Algorithm, class SourceType1, class SourceType2, class SourceType3, class ReturnType> 
+      template<class Algorithm, class SourceType1, class SourceType2, class SourceType3, class ReturnType> 
       class ApplyHelper<Algorithm,Function<TL3(SourceType1,SourceType2,SourceType3), TL1(ReturnType)> > {
       public:
 	inline bool operator()(Algorithm& algorithm, const ComposedEntity& me, ReturnType& result) const {
@@ -230,15 +252,24 @@ namespace Cantag {
      * to the index of the output stage (if it is not bigger than it
      * already)
      */
-    template<class List, class Algorithm> bool _Apply_ComposedEntity(ComposedEntity<List>& entity, Algorithm& algorithm) {    
-      PRINTFUNCTION();
-      if (entity.IsPipelineValid()) {
-	typename Internal::ApplyHelperOuter<ComposedEntity<List> >::template ApplyHelper<Algorithm,typename Algorithm::FunctionType> a;
+    template<class Algorithm, class List, int N> struct Alternate {
+      static void exec(ComposedEntity<List>& entity, bool result) {
 	if (Position<typename Nth<typename Algorithm::Results,0>::value,List>::value > entity.GetProgress()) {
 	  entity.SetProgress(Position<typename Nth<typename Algorithm::Results,0>::value,List>::value);
 	}
-	bool result = a(algorithm,entity,entity);
 	entity.SetValid(result);
+      }
+    };
+    template<class Algorithm, class List> struct Alternate<Algorithm, List,0> {
+      static void exec(ComposedEntity<List>& entity, bool result);
+    };
+
+    template<class List, class Algorithm> bool _Apply_ComposedEntity(ComposedEntity<List>& entity, Algorithm& algorithm) {    
+      PRINTFUNCTION();
+      if (!algorithm.OnlyValid || entity.IsPipelineValid()) {
+	typename Internal::ApplyHelperOuter<ComposedEntity<List> >::template ApplyHelper<Algorithm,typename Algorithm::FunctionType> a;
+	bool result = a(algorithm,entity,entity);	
+	Alternate<Algorithm,List,Length<typename Algorithm::Results>::value>::exec(entity,result);
 	return result;
       }
       return false;
@@ -246,7 +277,7 @@ namespace Cantag {
 
     template<class List, class Algorithm> bool _Apply_ComposedEntityTree(Tree<ComposedEntity<List> >& entity, Algorithm& algorithm) {
       PRINTFUNCTION();
-      if (entity.IsPipelineValid()) {
+      if (!algorithm.OnlyValid || entity.IsPipelineValid()) {
 	typename Internal::ApplyHelperOuter<ComposedEntity<List> >::template ApplyHelper<Algorithm,typename Algorithm::FunctionType> a;
 	if (Position<typename Nth<typename Algorithm::Results,0>::value,List>::value > entity.GetProgress()) {
 	  entity.SetProgress(Position<typename Nth<typename Algorithm::Results,0>::value,List>::value);
