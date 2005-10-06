@@ -27,6 +27,7 @@
 
 #include <cantag/Config.hh>
 #include <cantag/Function.hh>
+#include <cantag/TagCircle.hh>
 #include <cantag/entities/ContourEntity.hh>
 #include <cantag/entities/ShapeEntity.hh>
 #include <cantag/entities/TransformEntity.hh>
@@ -36,11 +37,46 @@
 
 namespace Cantag {
 
+  struct ROI {
+    int minx;
+    int maxx;
+    int miny;
+    int maxy;
+
+    ROI(int pminx, int pmaxx, int pminy, int pmaxy) : minx(pminx), maxx(pmaxx), miny(pminy), maxy(pmaxy) {};
+    int ScaleX(int x, int imageWidth) const { return (x - minx) * imageWidth / (maxx-minx);}
+    float ScaleX(float x, int imageWidth) const { return (x - (float)minx) * (float)imageWidth / (float)(maxx-minx); }
+    int ScaleY(int y, int imageHeight) const { return (y - miny) * imageHeight / (maxy-miny);}
+    float ScaleY(float y, int imageHeight) const { return (y - (float)miny) * (float)imageHeight / (float)(maxy-miny); }
+  };
+
+  class DrawEntityImage : public Function<TL0,TypeList<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>,TypeListEOL> > {
+  private:
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
+    const ROI m_roi;
+  public:
+    DrawEntityImage(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, ROI roi) : m_image(image), m_roi(roi) {};
+    DrawEntityImage(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) : m_image(image), m_roi(0,image.GetWidth(),0,image.GetHeight()) {};
+    bool operator()(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const;
+  };
+
+  class DrawEntityMonochrome : public Function<TL0,TL1(MonochromeImage)> {
+  private:
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
+    const ROI m_roi;
+  public:
+    DrawEntityMonochrome(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, ROI roi) : m_image(image), m_roi(roi) {};
+    DrawEntityMonochrome(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) : m_image(image), m_roi(0,image.GetWidth(),0,image.GetHeight()) {};
+    bool operator()(MonochromeImage& monimage) const ;    
+  };
+
   class DrawEntityContour : public Function<TL0,TL1(ContourEntity)> {
   private:
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
+    const ROI m_roi;
   public:
-    DrawEntityContour(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) : m_image(image) {}
+    DrawEntityContour(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, ROI roi) : m_image(image), m_roi(roi) {}
+    DrawEntityContour(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) : m_image(image), m_roi(0,image.GetWidth(),0,image.GetHeight()) {}
     bool operator()(ContourEntity& contourentity) const ;
   };
 
@@ -49,17 +85,55 @@ namespace Cantag {
   private:
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
     const Camera& m_camera;
+    const ROI m_roi;
   public:
-    DrawEntityShape(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image,const Camera& camera) : m_image(image), m_camera(camera) {}
+    DrawEntityShape(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image,const Camera& camera,ROI roi) : m_image(image), m_camera(camera),m_roi(roi) {}
+    DrawEntityShape(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image,const Camera& camera) : m_image(image), m_camera(camera),m_roi(0,image.GetWidth(),0,image.GetHeight()) {}
     bool operator()(ShapeEntity<Shape>& contourentity) const ;
   };
 
+  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
+  class DrawEntitySampleCircleObj : public Function<TL0,TL1(TransformEntity)> {
+  private:
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
+    const Camera& m_camera;
+    const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& m_tagspec;
+    const ROI m_roi;
+  public:
+    DrawEntitySampleCircleObj(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera, const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec, ROI roi) : m_image(image), m_camera(camera), m_tagspec(tagspec), m_roi(roi) {}
+    DrawEntitySampleCircleObj(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera, const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec) : m_image(image), m_camera(camera), m_tagspec(tagspec),m_roi(0,image.GetWidth(),0,image.GetHeight()) {}
+    bool operator()(TransformEntity& transform) const;
+  };
+
+  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool DrawEntitySampleCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(TransformEntity& transform) const {
+    const Transform* i = transform.GetPreferredTransform();
+    if (i) {
+      int index = 0;
+      int readindex = READ_COUNT/2;
+      for(int j=0;j<SECTOR_COUNT;++j) {
+	// read a chunk by sampling each ring and shifting and adding
+	for(int k=RING_COUNT-1;k>=0;--k) {
+	  float tpt[]=  {  m_tagspec.GetXSamplePoint(readindex,RING_COUNT - 1 - k),
+			   m_tagspec.GetYSamplePoint(readindex,RING_COUNT - 1 - k) };
+	  i->Apply(tpt[0],tpt[1],tpt,tpt+1);
+	  m_camera.NPCFToImage(tpt,1);
+	  m_image.DrawPixel(m_roi.ScaleX(tpt[0],m_image.GetWidth()),m_roi.ScaleY(tpt[1],m_image.GetHeight()),0);
+	}
+	readindex+=READ_COUNT;
+	readindex %= SECTOR_COUNT * READ_COUNT;
+      }      
+    }
+    return true;
+  }
+  
   class DrawEntityTransform : public Function<TL0,TL1(TransformEntity)> {
   private:
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
     const Camera& m_camera;
+    const ROI m_roi;
   public:
-    DrawEntityTransform(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera) : m_image(image), m_camera(camera) {}
+    DrawEntityTransform(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera, ROI roi) : m_image(image), m_camera(camera),m_roi(roi) {}
+    DrawEntityTransform(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera) : m_image(image), m_camera(camera),m_roi(0,image.GetWidth(),0,image.GetHeight()) {}
     bool operator()(TransformEntity& transform) const;
   };
 
@@ -73,12 +147,10 @@ namespace Cantag {
       ++i;
       const int y = *i;
       
-      m_image.DrawPixel(x,y,0);
+      m_image.DrawPixel(m_roi.ScaleX(x,m_image.GetWidth()),m_roi.ScaleY(y,m_image.GetHeight),0);
     }  
     return true;    
   }
-
-
 
 }
 
