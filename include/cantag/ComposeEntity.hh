@@ -36,12 +36,13 @@ namespace Cantag {
   class TEntity : public List::Head, public TEntity<typename List::Tail> {
   private:
     typedef TEntity<typename List::Tail> RecSuper;
+
     template<class CopyTail> TEntity(const TEntity<TypeList<typename List::Head, CopyTail> >& copyme) : 
       List::Head(copyme), RecSuper(copyme) {};
-
+  public:
     TEntity(const TEntity<TypeList<typename List::Head, TypeListEOL> >& copyme) : List::Head(copyme), RecSuper() {};
     
-  public:
+
     TEntity() : List::Head(), RecSuper() {};
   };
 
