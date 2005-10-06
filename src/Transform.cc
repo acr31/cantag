@@ -44,6 +44,15 @@ namespace Cantag {
     }
   }
 
+  void Transform::Apply(std::vector<float>& points) const {
+    for(int i=0;i<points.size();i+=2) {
+      float resultx;
+      float resulty;
+      Apply(points[i],points[i+1],&resultx,&resulty);
+      points[i] = resultx;
+      points[i+1] = resulty;
+    }
+  }
 
   void Transform::Invert() {
     float a[16]={0.0}, b[16]={0.0};
