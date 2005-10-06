@@ -99,10 +99,7 @@ namespace Cantag {
     QuadTangle(Socket& socket);
     int Save(Socket& socket) const;
 
-    /**
-     * \todo implement the check method
-     */ 
-    bool Check(const std::vector<float>& points) const {return true;};
+    bool CheckError(const std::vector<float>& points, float threshold) const;
 
     /**
      * This function returns a good starting guess for the normal
