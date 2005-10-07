@@ -38,6 +38,10 @@ namespace Cantag {
     }
   }
 
+  Transform::Transform(const LocationElement& loc,const PoseElement& pose, const SizeElement& size) {
+    //ROB
+  }
+
   void Transform::Apply(float* points, int numpoints) const {
     for(int i=0;i<numpoints*2;i+=2) {
       Apply(points[i],points[i+1],points+i,points+i+1);

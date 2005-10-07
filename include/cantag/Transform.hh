@@ -27,7 +27,7 @@
 
 #include <cantag/Config.hh>
 #include <cantag/Camera.hh>
-
+#include <cantag/TagDictionary.hh>
 namespace Cantag {
   
   /**
@@ -44,6 +44,7 @@ namespace Cantag {
     Transform();
     Transform(float confidence);
     Transform(float* transform, float confidence);
+    Transform(const LocationElement& loc,const PoseElement& pose, const SizeElement& size);
     
     inline float& operator[](int index) { return m_transform[index]; }
     inline float operator[](int index) const { return m_transform[index]; }
