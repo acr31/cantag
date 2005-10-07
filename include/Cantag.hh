@@ -89,6 +89,13 @@
 #include <cantag/algorithms/TransformSelectEllipseErrorOfFit.hh>
 #include <cantag/algorithms/RemoveNonConcentricEllipse.hh>
 #include <cantag/algorithms/DrawEntity.hh>
+#include <cantag/algorithms/ValidateDistortionCorrection.hh>
+#include <cantag/algorithms/ValidateFitEllipse.hh>
+#include <cantag/algorithms/ValidateFitQuadTangle.hh>
+#include <cantag/algorithms/ValidateTransformQuadTangle.hh>
+#include <cantag/algorithms/ValidateDecode.hh>
+#include <cantag/algorithms/ValidateSample.hh>
+#include <cantag/algorithms/AccumulateCorrespondances.hh>
 
 ///////////////////////
 // coders
@@ -121,7 +128,7 @@
 #include <cantag/ImageOutputMechanism.hh>
 #if defined(HAVE_X11_XLIB_H) && defined(HAVE_X11_XUTIL_H) && defined(HAVE_X11_EXTENSIONS_XSHM_H)
 # include <cantag/XOutputMechanism.hh>
-//# include <cantag/XOutputStagesMechanism.hh>
+# include <cantag/XDisplay.hh>
 #endif
 
 #if defined(HAVE_GL_GL_H) && defined(HAVELIB_GL) && defined(HAVELIB_GLU) && defined(HAVELIB_GLUT)
@@ -132,5 +139,9 @@
 #include <cantag/VideoImageSource.hh>
 #include <cantag/VideoOutputMechanism.hh>
 #endif
+
+#include <cantag/TagDictionary.hh>
+#include <cantag/Correspondances.hh>
+#include <cantag/EstimateTransform.hh>
 
 #endif//CANTAG_GUARD
