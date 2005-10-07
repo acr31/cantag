@@ -60,7 +60,8 @@
 #include <GL/osmesa.h>
 
 #include <cmath>
-
+#include <list>
+#include <vector>
 #define GLIMAGESOURCE_DEBUG
 
 namespace Cantag {
@@ -78,15 +79,21 @@ namespace Cantag {
     float m_fov;
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> m_glimage;
     OSMesaContext m_ctx;
-    GLubyte* m_tmap;
-    GLuint m_textureid;
+    std::vector<GLubyte*> m_tmap;
+    std::vector<GLuint> m_textureid;
     float m_tagrotation;
+
+    void InitTexture(const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& texture_source);
+
+    void InitTexture(const std::list<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> >&  texture_source);
+
   public:
     /**
      * Create the image source.  It will create images of the given
      * size, with the texture source mapped on the tag
      */
     GLImageSource(int width, int height, float fov, const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& texture_source);
+    GLImageSource(int width, int height, float fov, const std::list<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> >& texture_source);
 
     /**
      * Create the image source.  You must call Init before attempting to use the image source if created this way
@@ -98,6 +105,9 @@ namespace Cantag {
      * Initialise the texture source and gl renderer
      */
     void Init(const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& texture_source);
+
+    void Init(const std::list<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> >&  texture_source);
+
     
     virtual ~GLImageSource();
 
@@ -113,19 +123,21 @@ namespace Cantag {
     inline int GetHeight() const { return m_height; }
 
     /**
-     * Update the buffer to contain a tag with the given rotations about
-     * the x,y, and z axes and the given central point.
+     * Update the buffer to contain a tag with the given rotations
+     * about the x,y, and z axes and the given central point.  The
+     * optional overlay parameter is used to get the image source to
+     * render on top of the provided image rather than to a new image
      *
      * \todo find some way of incorporating the lighting and occlusion
      * options.
      */
-    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* Next(float n_x, float n_y, float n_z, float centre_x, float centre_y, float centre_z);
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* Next(float n_x, float n_y, float n_z, float centre_x, float centre_y, float centre_z, int texture_index = 0, Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* overlay = NULL);
   
-    inline Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* Next(float theta, float phi, float x0, float y0, float z0) {
+    inline Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* Next(float theta, float phi, float x0, float y0, float z0, int texture_index=0,  Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* overlay = NULL) {
       float nx = sin(theta/180*M_PI)*sin(phi/180*M_PI);
       float ny = sin(theta/180*M_PI)*cos(phi/180*M_PI);
       float nz = cos(theta/180*M_PI);
-      return Next(nx,ny,nz,x0,y0,z0);
+      return Next(nx,ny,nz,x0,y0,z0,texture_index,overlay);
     };
 
     inline void SetTagRotation(float degrees) {

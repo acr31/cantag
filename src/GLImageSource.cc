@@ -71,6 +71,17 @@ namespace Cantag {
     Init(source);
   }
 
+  GLImageSource::GLImageSource(int width, int height, float fov, const std::list<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> >& source) :
+    m_width(width),
+    m_height(height),
+    m_fov(fov),
+    m_glimage(width,height),
+    m_supersample(1),
+    m_tagrotation(0.f)
+  {
+    Init(source);
+  }
+
   GLImageSource::GLImageSource(int width, int height, float fov) :
     m_width(width),
     m_height(height),
@@ -80,21 +91,37 @@ namespace Cantag {
     m_tagrotation(0.f)
   {}
 
-
+  
   void GLImageSource::Init(const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& source) {
-    m_ctx = OSMesaCreateContext( GL_RGB, NULL );
-    m_buffer = (unsigned char*)malloc(m_width*m_height*3*m_supersample*m_supersample);     
+    m_ctx = OSMesaCreateContext( GL_RGBA, NULL );
+    m_buffer = (unsigned char*)malloc(m_width*m_height*4*m_supersample*m_supersample);     
     OSMesaMakeCurrent( m_ctx, m_buffer, GL_UNSIGNED_BYTE, m_width*m_supersample,m_height*m_supersample);
+    InitTexture(source);
+  }
 
-    m_tmap = new GLubyte[source.GetHeight()*source.GetWidth()*4];
+  void GLImageSource::Init(const std::list<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> >& source) {
+    m_ctx = OSMesaCreateContext( GL_RGBA, NULL );
+    m_buffer = (unsigned char*)malloc(m_width*m_height*4*m_supersample*m_supersample);     
+    OSMesaMakeCurrent( m_ctx, m_buffer, GL_UNSIGNED_BYTE, m_width*m_supersample,m_height*m_supersample);
+    InitTexture(source);
+  }
 
+  void GLImageSource::InitTexture(const std::list<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> >& source) {
+    for(std::list<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> >::const_iterator i = source.begin(); i!=source.end();++i) {
+      InitTexture(*i);
+    }
+  }
+
+  void GLImageSource::InitTexture(const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& source) {
+    m_tmap.push_back(new GLubyte[source.GetHeight()*source.GetWidth()*4]);
+    GLubyte* tmap = *(m_tmap.rbegin());
     unsigned int pos=0;
-    for(unsigned int j=source.GetWidth();j>0;--j) {
+    for(unsigned int j=0;j<source.GetWidth();++j) {
       for(unsigned int i=0;i<source.GetHeight();++i) {
-	m_tmap[pos++] = (GLubyte)source.Sample(i,j-1).intensity();
-	m_tmap[pos++] = (GLubyte)source.Sample(i,j-1).intensity();
-	m_tmap[pos++] = (GLubyte)source.Sample(i,j-1).intensity();
-	m_tmap[pos++] = (GLubyte)255;	
+	tmap[pos++] = (GLubyte)source.Sample(i,j).intensity();
+	tmap[pos++] = (GLubyte)source.Sample(i,j).intensity();
+	tmap[pos++] = (GLubyte)source.Sample(i,j).intensity();
+	tmap[pos++] = (GLubyte)255;	
       }
     }
      
@@ -103,11 +130,13 @@ namespace Cantag {
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
      
     // create an unused name for this texture and store it in textureid
-    glGenTextures(1,&m_textureid);
-     
+    GLuint textureid;
+    glGenTextures(1,&textureid);
+    m_textureid.push_back(textureid);
+
     // create a new texture object (this textureid is guarenteed to be
     // new) and assign it this textureid.  Set the dimensionality to 2D.
-    glBindTexture(GL_TEXTURE_2D,m_textureid);
+    glBindTexture(GL_TEXTURE_2D,textureid);
      
     // set our texture to repeat in both S and T directions
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -127,14 +156,18 @@ namespace Cantag {
     // the border is 0, the texture information is RGBA format, with
     // unsigned bytes, and held in tmap
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, source.GetHeight(),source.GetWidth(),
-		 0, GL_RGBA, GL_UNSIGNED_BYTE, m_tmap);    
+		 0, GL_RGBA, GL_UNSIGNED_BYTE, tmap);    
      
   };
 
-  GLImageSource::~GLImageSource() {
-    GLuint ids[] = {m_textureid};
-    glDeleteTextures(1,ids);
-    delete[] m_tmap;
+  GLImageSource::~GLImageSource() {    
+    for(std::vector<GLuint>::const_iterator i = m_textureid.begin();i!=m_textureid.end();++i) {
+      GLuint ids[] = {*i};
+      glDeleteTextures(1,ids);
+    }
+    for(std::vector<GLubyte*>::iterator i = m_tmap.begin();i!=m_tmap.end();++i) {
+      delete[] *i;
+    }
     OSMesaDestroyContext(m_ctx);
     free(m_buffer);
   };
@@ -145,9 +178,9 @@ namespace Cantag {
 
 
   Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* GLImageSource::Next(float nx, float ny, float nz, 
-					   float centre_x, float centre_y, float centre_z) {
+					   float centre_x, float centre_y, float centre_z, int texture_id, Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* overlay ) {
     
-    glClearColor(1.0,1.0,1.0,0.0);
+    glClearColor(1.0,1.0,1.0,overlay ? 0.0 : 1.0);
     glShadeModel(GL_SMOOTH);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1.0,1.0,1.0);
@@ -238,7 +271,7 @@ namespace Cantag {
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     
     // activate the texture object for the tag
-    glBindTexture(GL_TEXTURE_2D, m_textureid);
+    glBindTexture(GL_TEXTURE_2D, m_textureid[texture_id]);
     GLfloat mat_colour[] = {1.0,1.0,1.0,1.0};
     glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,mat_colour);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT,mat_colour);
@@ -286,18 +319,29 @@ namespace Cantag {
     for(int ygl = m_height-1; ygl >= 0; --ygl) {
       int xout = 0;
       for(int xgl = 0; xgl < m_width; ++xgl) {
-	int base = (ygl * m_width * m_supersample + xgl) * m_supersample * 3;
+	int base = (ygl * m_width * m_supersample + xgl) * m_supersample * 4;
 	unsigned long accumulator = 0;
+	unsigned long alpha = 0;
 	for (int yave = 0; yave < m_supersample; ++yave) {
 	  for (int xave = 0; xave < m_supersample; ++ xave) {
-	    int pointer = base + yave * 3 * m_width * m_supersample + xave *3;
+	    int pointer = base + yave * 4 * m_width * m_supersample + xave *4;
 	    accumulator += (0.3*(float)m_buffer[pointer] +
 			    0.59*(float)m_buffer[pointer+1] +
 			    0.11*(float)m_buffer[pointer+2]);
+	    alpha += m_buffer[pointer+3];
 	  }
 	}
 	accumulator /= (m_supersample*m_supersample);
-	m_glimage.DrawPixelNoCheck(xout,yout,Pixel<Pix::Fmt::Grey8>(accumulator));	
+	alpha /= (m_supersample*m_supersample);
+
+	if (overlay) {
+	  int value = overlay->SampleNoCheck(xout,yout).intensity();
+
+	  overlay->DrawPixelNoCheck(xout,yout,Pixel<Pix::Fmt::Grey8>(accumulator * alpha / 255 + value * (255-alpha) / 255));
+	}
+	else {
+	  m_glimage.DrawPixelNoCheck(xout,yout,Pixel<Pix::Fmt::Grey8>(accumulator));	
+	}
 	++xout;
       }
       ++yout;
@@ -316,7 +360,7 @@ namespace Cantag {
     output.Save("gloutput.pnm");
     exit(-1);
     */
-    return &m_glimage;
+    return overlay ? overlay : &m_glimage;
   };
 
 
