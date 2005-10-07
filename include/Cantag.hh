@@ -141,7 +141,7 @@
 #endif
 
 #include <cantag/TagDictionary.hh>
-#include <cantag/Correspondances.hh>
+#include <cantag/Correspondance.hh>
 #include <cantag/EstimateTransform.hh>
 
 #endif//CANTAG_GUARD
