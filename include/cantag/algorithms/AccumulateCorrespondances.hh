@@ -40,13 +40,16 @@ namespace Cantag {
   class AccumulateCorrespondances : public Function<TL1(TransformEntity),TL1(DecodeEntity<PAYLOAD_SIZE>)> {
   private:
     Correspondances<LocationElement>& m_corr;
+    Transform& m_average;
     const TagDictionary<PAYLOAD_SIZE,TL1(LocationElement)>& m_dictionary;
+
   public:
-    AccumulateCorrespondances(Correspondances<LocationElement>& corr, const TagDictionary<PAYLOAD_SIZE,TL1(LocationElement)>& dictionary) : m_corr(corr), m_dictionary(dictionary) {}
+    AccumulateCorrespondances(Correspondances<LocationElement>& corr, Transform& average_transform, const TagDictionary<PAYLOAD_SIZE,TL1(LocationElement,PoseElement,SizeElement)>& dictionary) : m_corr(corr), m_average(average_transform), m_dictionary(dictionary) {}
     bool operator()(const TransformEntity& trans, DecodeEntity<PAYLOAD_SIZE>& decode) const;
   };
 
   template<int PAYLOAD_SIZE> bool AccumulateCorrespondances<PAYLOAD_SIZE>::operator()(const TransformEntity& trans, DecodeEntity<PAYLOAD_SIZE>& decode) const {
+    // ROB
     const LocationElement* lookup = m_dictionary.GetInformation((*(decode.GetPayloads().begin()))->payload);
     if (lookup)
       m_corr.Put(trans,lookup);
