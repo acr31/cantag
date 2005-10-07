@@ -26,10 +26,7 @@
 
 namespace Cantag {
 
-  Transform EstimateTransform::operator()(const Correspondances<LocationElement>& correspondances) {
-    for(std::list<std::pair<const TransformEntity,const LocationElement*> >::const_iterator i = correspondances.GetValues().begin();i!=correspondances.GetValues().end();++i) {
-      std::cout << (*i).second->x << " " << (*i).second->y << " " << (*i).second->z << std::endl;
-    }
+  Transform EstimateTransform::operator()(const std::list<Correspondance>& correspondances) {
     return Transform();
   };
 }

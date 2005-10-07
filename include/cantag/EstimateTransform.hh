@@ -25,15 +25,17 @@
 #ifndef ESTIMATETRANSFORM_GUARD
 #define ESTIMATETRANSFORM_GUARD
 
+#include <list>
+
 #include <cantag/Config.hh>
-#include <cantag/Correspondances.hh>
+#include <cantag/Correspondance.hh>
 #include <cantag/TagDictionary.hh>
 #include <cantag/Transform.hh>
 
 namespace Cantag {
   
   class EstimateTransform {    
-    Transform operator()(const Correspondances<LocationElement>& correspondances);
+    Transform operator()(const std::list<Correspondance>& correspondances);
   };
 }
 
