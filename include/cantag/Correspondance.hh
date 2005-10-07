@@ -22,8 +22,8 @@
  * $Header$
  */
 
-#ifndef CORRESPONDANCES_GUARD
-#define CORRESPONDANCES_GUARD
+#ifndef CORRESPONDANCE_GUARD
+#define CORRESPONDANCE_GUARD
 
 #include <cantag/Config.hh>
 #include <cantag/entities/TransformEntity.hh>
@@ -32,20 +32,27 @@
 
 namespace Cantag {
   /**
-   * The Correspondances class is used to maintain a set of tuples mapping between the
-   * TransformEntities of sighted tags and some knowledge from a
-   * TagDictionary.  The transform entities are stored by value but the
-   * ElementTypes that you have provided from a TagDictionary are stored
-   * by reference (ownership is not taken).
+   * The Correspondance class is used to maintain a mapping between an
+   * observed image point and a real-world co-ordinate. This is used
+   * when estimating the camera position etc.
    */
-  template<class ElementType>
-  class Correspondances {
+  class Correspondance {
   private:
-    std::list<std::pair<const TransformEntity, const ElementType*> > m_list;
+    float m_imagex;
+    float m_imagey;
+    float m_worldx;
+    float m_worldy;
+    float m_worldz;
+
   public:
-    Correspondances() : m_list() {};
-    void Put(const TransformEntity& te, const ElementType* element) { m_list.push_back(std::pair<const TransformEntity,const ElementType*>(te,element)); }
-    const std::list<std::pair<const TransformEntity,const ElementType*> >& GetValues() const { return m_list; }
+    Correspondance(float imagex,float imagey, float worldx, float worldy, float worldz) : m_imagex(imagex), m_imagey(imagey), m_worldx(worldx), m_worldy(worldy), m_worldz(worldz) {};
+
+    float GetImageX() const { return m_imagex; }
+    float GetImageY() const { return m_imagey; }
+    float GetWorldX() const { return m_worldx; }
+    float GetWorldY() const { return m_worldy; }
+    float GetWorldZ() const { return m_worldz; }
+    
   };
 }
   
