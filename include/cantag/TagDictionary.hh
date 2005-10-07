@@ -111,6 +111,44 @@ namespace Cantag {
   };
 
   template<int PAYLOAD_SIZE>
+  class TransformDirectory : public TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)> {
+  private:
+     std::map<CyclicBitSet<PAYLOAD_SIZE>, typename TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)>::Element*> m_map;
+  public:
+     TransformDirectory() : m_map() {};
+     ~TransformDirectory();
+      virtual const typename TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)>::Element* GetInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code) const;
+      void StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code,float x, float y, float z, float rho, float theta, float phi, float size);
+      void StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code, const Transform& transform);
+  };
+
+  template<int PAYLOAD_SIZE> const typename TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)>::Element* TransformDirectory<PAYLOAD_SIZE>::GetInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code) const {
+    typename std::map<CyclicBitSet<PAYLOAD_SIZE>,typename TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)>::Element*>::const_iterator i = m_map.find(tag_code);
+    if (i == m_map.end()) {
+      return NULL;
+    }
+    else {
+      return (*i).second;
+    }
+  }
+
+  template<int PAYLOAD_SIZE> void TransformDirectory<PAYLOAD_SIZE>::StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code,float x, float y, float z, float rho, float theta, float phi, float size) {
+    typename TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)>::Element* e = new typename TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)>::Element();
+    e->x = x;
+    e->y = y;
+    e->z = z;
+    e->rho = rho;
+    e->theta = threta;
+    e->phi = phi;
+    e->size = size;
+    m_map[tag_code] = e;
+  }
+  
+  template<int PAYLOAD_SIZE> void TransformDirectory<PAYLOAD_SIZE>::StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code, const Transform& transform) {
+    // ROB
+  }
+
+  template<int PAYLOAD_SIZE>
   class LocationDirectory : public TagDictionary<PAYLOAD_SIZE,TL1(LocationElement)> {
   private:
     std::map<CyclicBitSet<PAYLOAD_SIZE>, typename TagDictionary<PAYLOAD_SIZE,TL1(LocationElement)>::Element*> m_map;
@@ -144,5 +182,6 @@ namespace Cantag {
       return (*i).second;
     }
   }
+
 }
 #endif//TAGDICTIONARY_GUARD
