@@ -89,13 +89,13 @@
 #include <cantag/algorithms/TransformSelectEllipseErrorOfFit.hh>
 #include <cantag/algorithms/RemoveNonConcentricEllipse.hh>
 #include <cantag/algorithms/DrawEntity.hh>
-#include <cantag/algorithms/ValidateDistortionCorrection.hh>
-#include <cantag/algorithms/ValidateFitEllipse.hh>
-#include <cantag/algorithms/ValidateFitQuadTangle.hh>
-#include <cantag/algorithms/ValidateTransformQuadTangle.hh>
-#include <cantag/algorithms/ValidateDecode.hh>
-#include <cantag/algorithms/ValidateSample.hh>
-#include <cantag/algorithms/AccumulateCorrespondances.hh>
+//#include <cantag/algorithms/ValidateDistortionCorrection.hh>
+//#include <cantag/algorithms/ValidateFitEllipse.hh>
+//#include <cantag/algorithms/ValidateFitQuadTangle.hh>
+//#include <cantag/algorithms/ValidateTransformQuadTangle.hh>
+//#include <cantag/algorithms/ValidateDecode.hh>
+//#include <cantag/algorithms/ValidateSample.hh>
+#include <cantag/algorithms/AccumulateCorrespondences.hh>
 
 ///////////////////////
 // coders
@@ -141,7 +141,7 @@
 #endif
 
 #include <cantag/TagDictionary.hh>
-#include <cantag/Correspondance.hh>
+#include <cantag/Correspondence.hh>
 #include <cantag/EstimateTransform.hh>
 
 #endif//CANTAG_GUARD
