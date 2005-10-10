@@ -26,7 +26,7 @@
 
 namespace Cantag {
 
-  Transform EstimateTransform::operator()(const std::list<Correspondance>& correspondances) {
+  Transform EstimateTransform::operator()(const std::list<Correspondence>& correspondences) {
     return Transform();
   };
 }
