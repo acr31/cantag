@@ -22,8 +22,8 @@
  * $Header$
  */
 
-#ifndef ACCUMULATECORRESPONDANCE_GUARD
-#define ACCUMULATECORRESPONDANCE_GUARD
+#ifndef ACCUMULATECORRESPONDENCE_GUARD
+#define ACCUMULATECORRESPONDENCE_GUARD
 
 #include <set>
 
@@ -31,28 +31,28 @@
 #include <cantag/Function.hh>
 #include <cantag/entities/TransformEntity.hh>
 #include <cantag/entities/DecodeEntity.hh>
-#include <cantag/Correspondance.hh>
+#include <cantag/Correspondence.hh>
 #include <cantag/TagDictionary.hh>
 
 namespace Cantag {
 
   template<int PAYLOAD_SIZE>
-  class AccumulateCorrespondances : public Function<TL1(TransformEntity),TL1(DecodeEntity<PAYLOAD_SIZE>)> {
+  class AccumulateCorrespondences : public Function<TL1(TransformEntity),TL1(DecodeEntity<PAYLOAD_SIZE>)> {
   private:
-    std::list<Correspondance>& m_corr;
+    std::list<Correspondence>& m_corr;
     Transform& m_average;
-    const TagDictionary<PAYLOAD_SIZE,TL1(LocationElement,PoseElement,SizeElement)>& m_dictionary;
+    const TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)>& m_dictionary;
 
   public:
-    AccumulateCorrespondances(std::list<Correspondance>& corr, Transform& average_transform, const TagDictionary<PAYLOAD_SIZE,TL1(LocationElement,PoseElement,SizeElement)>& dictionary) : m_corr(corr), m_average(average_transform), m_dictionary(dictionary) {}
+    AccumulateCorrespondences(std::list<Correspondence>& corr, Transform& average_transform, const TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)>& dictionary) : m_corr(corr), m_average(average_transform), m_dictionary(dictionary) {}
     bool operator()(const TransformEntity& trans, DecodeEntity<PAYLOAD_SIZE>& decode) const;
   };
 
-  template<int PAYLOAD_SIZE> bool AccumulateCorrespondances<PAYLOAD_SIZE>::operator()(const TransformEntity& trans, DecodeEntity<PAYLOAD_SIZE>& decode) const {
+  template<int PAYLOAD_SIZE> bool AccumulateCorrespondences<PAYLOAD_SIZE>::operator()(const TransformEntity& trans, DecodeEntity<PAYLOAD_SIZE>& decode) const {
     // ROB
     const LocationElement* lookup = m_dictionary.GetInformation((*(decode.GetPayloads().begin()))->payload);
     if (lookup)
-      m_corr.push_back(Correspondance(0,0,1,1,1));
+      m_corr.push_back(Correspondence(0,0,1,1,1));
   }
 }
-#endif//ACCUMULATECORRESPONDANCE_GUARD
+#endif//ACCUMULATECORRESPONDENCE_GUARD
