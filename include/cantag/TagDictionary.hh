@@ -54,6 +54,15 @@ namespace Cantag {
     float phi;  
   };
 
+  template<class ElementList>
+  struct ElementHelper : public ElementList::Head, public ElementHelper<typename ElementList::Tail> {};
+
+  template<>
+  struct ElementHelper<TypeListEOL> {};
+
+  template<class ElementList>
+  struct Element : public ElementHelper<Reorder<ElementList,TL3(LocationElement,PoseElement,SizeElement)>::value > {};
+  
   /**
    * A virtual superclass for dictionaries that provide location information
    */
@@ -82,48 +91,36 @@ namespace Cantag {
   };
 
   template<int PAYLOAD_SIZE, class TraitList>
-  class TagDictionaryInternal {};
+  class TagDictionaryHelper {};
 
   template<int PAYLOAD_SIZE, class Tail> 
-  struct TagDictionaryInternal<PAYLOAD_SIZE,TypeList<LocationElement,Tail> > : public TagLocationDictionary<PAYLOAD_SIZE>, TagDictionaryInternal<PAYLOAD_SIZE,Tail> {
-    struct Element : public LocationElement, public TagDictionaryInternal<PAYLOAD_SIZE,Tail>::Element {};
-  };
+  struct TagDictionaryHelper<PAYLOAD_SIZE,TypeList<LocationElement,Tail> > : public TagLocationDictionary<PAYLOAD_SIZE>, public TagDictionaryHelper<PAYLOAD_SIZE,Tail> {};
 
   template<int PAYLOAD_SIZE, class Tail> 
-  struct TagDictionaryInternal<PAYLOAD_SIZE,TypeList<PoseElement,Tail> > : public TagPoseDictionary<PAYLOAD_SIZE>, TagDictionaryInternal<PAYLOAD_SIZE,Tail> {
-    struct Element : public PoseElement, public TagDictionaryInternal<PAYLOAD_SIZE,Tail>::Element {};
-  };
+  struct TagDictionaryHelper<PAYLOAD_SIZE,TypeList<PoseElement,Tail> > : public TagPoseDictionary<PAYLOAD_SIZE>,  public TagDictionaryHelper<PAYLOAD_SIZE,Tail> {};
 
   template<int PAYLOAD_SIZE, class Tail> 
-  struct TagDictionaryInternal<PAYLOAD_SIZE,TypeList<SizeElement,Tail> > : public TagSizeDictionary<PAYLOAD_SIZE>, TagDictionaryInternal<PAYLOAD_SIZE,Tail> {
-    struct Element : public SizeElement, public TagDictionaryInternal<PAYLOAD_SIZE,Tail>::Element {};
-  };
+  struct TagDictionaryHelper<PAYLOAD_SIZE,TypeList<SizeElement,Tail> > : public TagSizeDictionary<PAYLOAD_SIZE>,  public TagDictionaryHelper<PAYLOAD_SIZE,Tail> {};
 
-  template<int PAYLOAD_SIZE>
-  struct TagDictionaryInternal<PAYLOAD_SIZE,TypeListEOL> {
-    struct Element {};
-  };
-
-  
   template<int PAYLOAD_SIZE, class TraitList> 
-  struct TagDictionary : public TagDictionaryInternal<PAYLOAD_SIZE,typename Reorder<TraitList,TL3(LocationElement,PoseElement,SizeElement)>::value > {    
-    typedef typename TagDictionaryInternal<PAYLOAD_SIZE,typename Reorder<TraitList,TL3(LocationElement,PoseElement,SizeElement)>::value>::Element Element;
+  struct TagDictionary : public TagDictionaryHelper<PAYLOAD_SIZE,typename Reorder<TraitList,TL3(LocationElement,PoseElement,SizeElement)>::value > {    
+    virtual const Element<typename Reorder<TraitList,TL3(LocationElement,PoseElement,SizeElement)>::value>* GetInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code) const = 0;
   };
 
   template<int PAYLOAD_SIZE>
   class TransformDirectory : public TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)> {
   private:
-     std::map<CyclicBitSet<PAYLOAD_SIZE>, typename TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)>::Element*> m_map;
+     std::map<CyclicBitSet<PAYLOAD_SIZE>, Element<TL3(LocationElement,PoseElement,SizeElement)>* > m_map;
   public:
      TransformDirectory() : m_map() {};
      ~TransformDirectory();
-      virtual const typename TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)>::Element* GetInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code) const;
+      virtual const Element<TL3(LocationElement,PoseElement,SizeElement)>* GetInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code) const;
       void StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code,float x, float y, float z, float rho, float theta, float phi, float size);
       void StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code, const Transform& transform);
   };
 
-  template<int PAYLOAD_SIZE> const typename TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)>::Element* TransformDirectory<PAYLOAD_SIZE>::GetInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code) const {
-    typename std::map<CyclicBitSet<PAYLOAD_SIZE>,typename TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)>::Element*>::const_iterator i = m_map.find(tag_code);
+  template<int PAYLOAD_SIZE> const Element<TL3(LocationElement,PoseElement,SizeElement)>* TransformDirectory<PAYLOAD_SIZE>::GetInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code) const {
+    typename std::map<CyclicBitSet<PAYLOAD_SIZE>,Element<TL3(LocationElement,PoseElement,SizeElement)>*>::const_iterator i = m_map.find(tag_code);
     if (i == m_map.end()) {
       return NULL;
     }
@@ -132,8 +129,15 @@ namespace Cantag {
     }
   }
 
+  template<int PAYLOAD_SIZE> TransformDirectory<PAYLOAD_SIZE>::~TransformDirectory() {
+    for(typename std::map<CyclicBitSet<PAYLOAD_SIZE>,Element<TL3(LocationElement,PoseElement,SizeElement)>*>::const_iterator i = m_map.begin();i!= m_map.end(); ++i) {
+      delete (*i).second;
+    }
+  }
+
   template<int PAYLOAD_SIZE> void TransformDirectory<PAYLOAD_SIZE>::StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code,float x, float y, float z, float rho, float theta, float phi, float size) {
-    typename TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)>::Element* e = new typename TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)>::Element();
+    Element<TL3(LocationElement,PoseElement,SizeElement)>* e = new Element<TL3(LocationElement,PoseElement,SizeElement)>();
+    m_map[tag_code] = e;
     e->x = x;
     e->y = y;
     e->z = z;
@@ -141,47 +145,12 @@ namespace Cantag {
     e->theta = threta;
     e->phi = phi;
     e->size = size;
-    m_map[tag_code] = e;
   }
   
   template<int PAYLOAD_SIZE> void TransformDirectory<PAYLOAD_SIZE>::StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code, const Transform& transform) {
     // ROB
   }
 
-  template<int PAYLOAD_SIZE>
-  class LocationDirectory : public TagDictionary<PAYLOAD_SIZE,TL1(LocationElement)> {
-  private:
-    std::map<CyclicBitSet<PAYLOAD_SIZE>, typename TagDictionary<PAYLOAD_SIZE,TL1(LocationElement)>::Element*> m_map;
-  public:
-    LocationDirectory() : m_map() {};
-    ~LocationDirectory();
-    virtual const typename TagDictionary<PAYLOAD_SIZE,TL1(LocationElement)>::Element* GetInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code) const;
-    void StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code, float x, float y, float z);
-  };
-
-  template<int PAYLOAD_SIZE> void LocationDirectory<PAYLOAD_SIZE>::StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code, float x, float y, float z) {
-    typename TagDictionary<PAYLOAD_SIZE,TL1(LocationElement)>::Element* e = new typename TagDictionary<PAYLOAD_SIZE,TL1(LocationElement)>::Element();
-    e->x = x;
-    e->y = y;
-    e->z = z;
-    m_map[tag_code] = e;
-  };
-
-  template<int PAYLOAD_SIZE> LocationDirectory<PAYLOAD_SIZE>::~LocationDirectory() {
-    for( typename std::map<CyclicBitSet<PAYLOAD_SIZE>,typename TagDictionary<PAYLOAD_SIZE,TL1(LocationElement)>::Element* >::iterator i = m_map.begin();i!= m_map.end();++i) {
-      delete (*i).second;
-    }
-  };
-
-  template<int PAYLOAD_SIZE> const typename TagDictionary<PAYLOAD_SIZE,TL1(LocationElement)>::Element* LocationDirectory<PAYLOAD_SIZE>::GetInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code) const {
-    typename std::map<CyclicBitSet<PAYLOAD_SIZE>,typename TagDictionary<PAYLOAD_SIZE,TL1(LocationElement)>::Element*>::const_iterator i = m_map.find(tag_code);
-    if (i == m_map.end()) {
-      return NULL;
-    }
-    else {
-      return (*i).second;
-    }
-  }
 
 }
 #endif//TAGDICTIONARY_GUARD
