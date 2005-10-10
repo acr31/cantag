@@ -28,6 +28,7 @@
 #include <cantag/Config.hh>
 #include <cantag/TemplateUtils.hh>
 #include <cantag/CyclicBitSet.hh>
+#include <cantag/Transform.hh>
 
 namespace Cantag {
 
@@ -61,7 +62,7 @@ namespace Cantag {
   struct ElementHelper<TypeListEOL> {};
 
   template<class ElementList>
-  struct Element : public ElementHelper<Reorder<ElementList,TL3(LocationElement,PoseElement,SizeElement)>::value > {};
+  struct Element : public ElementHelper<typename Reorder<ElementList,TL3(LocationElement,PoseElement,SizeElement)>::value > {};
   
   /**
    * A virtual superclass for dictionaries that provide location information
@@ -116,7 +117,8 @@ namespace Cantag {
      ~TransformDirectory();
       virtual const Element<TL3(LocationElement,PoseElement,SizeElement)>* GetInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code) const;
       void StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code,float x, float y, float z, float rho, float theta, float phi, float size);
-      void StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code, const Transform& transform);
+      void StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code, 
+			    const Transform& transform);
   };
 
   template<int PAYLOAD_SIZE> const Element<TL3(LocationElement,PoseElement,SizeElement)>* TransformDirectory<PAYLOAD_SIZE>::GetInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code) const {
@@ -142,9 +144,9 @@ namespace Cantag {
     e->y = y;
     e->z = z;
     e->rho = rho;
-    e->theta = threta;
+    e->theta = theta;
     e->phi = phi;
-    e->size = size;
+    e->tag_size = size;
   }
   
   template<int PAYLOAD_SIZE> void TransformDirectory<PAYLOAD_SIZE>::StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code, const Transform& transform) {

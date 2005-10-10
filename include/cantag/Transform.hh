@@ -87,5 +87,6 @@ namespace Cantag {
   };
 }
 
-
+#else
+class Transform;
 #endif
