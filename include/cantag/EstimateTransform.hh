@@ -28,14 +28,14 @@
 #include <list>
 
 #include <cantag/Config.hh>
-#include <cantag/Correspondance.hh>
+#include <cantag/Correspondence.hh>
 #include <cantag/TagDictionary.hh>
 #include <cantag/Transform.hh>
 
 namespace Cantag {
   
   class EstimateTransform {    
-    Transform operator()(const std::list<Correspondance>& correspondances);
+    Transform operator()(const std::list<Correspondence>& correspondences);
   };
 }
 
