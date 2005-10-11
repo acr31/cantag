@@ -70,14 +70,14 @@ namespace Cantag {
     bool operator()(MonochromeImage& monimage) const ;    
   };
 
-  class DrawEntityContour : public Function<TL0,TL1(UncorrectedContourEntity)> {
+  class DrawEntityContour : public Function<TL0,TL1(ContourEntity)> {
   private:
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
     const ROI m_roi;
   public:
     DrawEntityContour(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, ROI roi) : m_image(image), m_roi(roi) {}
     DrawEntityContour(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) : m_image(image), m_roi(0,image.GetWidth(),0,image.GetHeight()) {}
-    bool operator()(UncorrectedContourEntity& contourentity) const ;
+    bool operator()(ContourEntity& contourentity) const ;
   };
 
   template<class Shape>
