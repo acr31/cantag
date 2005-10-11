@@ -39,29 +39,29 @@ namespace Cantag {
    * SampleTagCircle which will infer the template parameters
    */
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
-  class SampleTagCircleObj : public Function<TL2(MonochromeImage,TransformEntity),TL1(DecodeEntity<RING_COUNT*SECTOR_COUNT>) > {
+  class SampleTagCircleObj : public Function<TL2(MonochromeImage,TransformEntity),TL1(PreDecodeEntity<RING_COUNT*SECTOR_COUNT>) > {
   private:
     const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& m_tagspec;
     const Camera& m_camera;
 
   public:
     SampleTagCircleObj(const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec, const Camera& camera) : m_tagspec(tagspec),m_camera(camera) {};
-    bool operator()(const MonochromeImage& image, const TransformEntity& source, DecodeEntity<RING_COUNT*SECTOR_COUNT>& destination) const;
+    bool operator()(const MonochromeImage& image, const TransformEntity& source, PreDecodeEntity<RING_COUNT*SECTOR_COUNT>& destination) const;
   };
   
-  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool SampleTagCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(const MonochromeImage& image, const TransformEntity& source, DecodeEntity<RING_COUNT*SECTOR_COUNT>& destination) const {
+  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool SampleTagCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(const MonochromeImage& image, const TransformEntity& source, PreDecodeEntity<RING_COUNT*SECTOR_COUNT>& destination) const {
 
     bool return_result = false;
 
     const Transform* i = source.GetPreferredTransform();
 
     if (i) {
-      typename DecodeEntity<RING_COUNT*SECTOR_COUNT>::Data* payload = destination.Add();
+      typename PreDecodeEntity<RING_COUNT*SECTOR_COUNT>::Data* payload = destination.Add();
       int index = 0;
       int readindex = READ_COUNT/2;
       for(int j=0;j<SECTOR_COUNT;++j) {
 	// read a chunk by sampling each ring and shifting and adding
-	for(int k=RING_COUNT-1;k>=0;--k) {
+	for(int k=0;k<RING_COUNT;++k) {
 	  float tpt[]=  {  m_tagspec.GetXSamplePoint(readindex,RING_COUNT - 1 - k),
 			   m_tagspec.GetYSamplePoint(readindex,RING_COUNT - 1 - k) };
 	  i->Apply(tpt[0],tpt[1],tpt,tpt+1);
