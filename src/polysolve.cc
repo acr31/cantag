@@ -24,12 +24,24 @@
  */
 
 #include <cantag/Config.hh>
-
 #include <cmath>
 #include <cassert>
 #include <stdio.h>
 
 namespace Cantag {
+
+#ifdef EIGEN_DEBUG
+  void print2x2(double m[2][2]) {
+    printf("Debug=\n");
+    for (int i=0; i<2; i++) {
+      for (int j=0; j<2; j++) {
+	printf(" %lf ",m[i][j]);
+      }
+      printf("\n");
+    }
+  }
+#endif
+
   /** 
    * Solve simultaneous equations with two unknowns
    * Effectively does Gaussian elimination on a 2x2 matrix; i.e. solve:
@@ -41,8 +53,13 @@ namespace Cantag {
    */
   static inline void solve_simul2(double A[2][2], double x[2], double r[2]) {
 
+
+#ifdef EIGEN_DEBUG
+    print2x2(A);
+    printf("R=%lf %lf\n",r[0],r[1]);
+#endif
     //find largest co-efficient first column as pivot point
-    if (A[0][0] > A[0][1]) {
+    if (fabs(A[0][0]) > fabs(A[1][0])) {
       // y = (aj-ci)/(ad-cb)
       x[1] = (A[0][0]*r[1]-A[1][0]*r[0])/(A[0][0]*A[1][1]-A[1][0]*A[0][1]); 
       // x = (i-by)/a
@@ -56,6 +73,11 @@ namespace Cantag {
     }
 #ifdef EIGEN_DEBUG
     printf("Sim solve: %lf,%lf\n",x[0],x[1]);
+
+    double testi = A[0][0]*x[0]+A[0][1]*x[1]-r[0];
+    double testj = A[1][0]*x[0]+A[1][1]*x[1]-r[1];
+
+    printf("Test accuracy of sim solve: %lf %lf\n",testi,testj);
 #endif
   } 
 
@@ -171,7 +193,7 @@ namespace Cantag {
       //two cases (namely, that y==1, then z==1).
       //Here we check all three cases and select the best one
 
-      double vects[3][3]; //three sets of three eigenvects
+      double vects[3][3]; //three sets of eigenvects
       double vectsacc[3]; //accuracy of each of the eigenvectors
       for(int k=0; k<3; k++) {
 	double curvect[2] = {0,0}; //temp storage of current vect
@@ -268,37 +290,35 @@ namespace Cantag {
 		  double* eigenvals) {
     return eigensolve(a,b,f,b,c,d,f,d,e,eigenvects,eigenvals);
   }
+}
 
-  /*
-    int main(void) {
-    double A[3][3] = {{0.0066505931317806243896, 5.587231852114200592 
-    , 6.396405552513897419},
-    {5.587231852114200592, 1.1654572351835668087
-    , 3.9870005915872752666},
-    {6.396405552513897419, 3.9870005915872752666
-    , 2.2472502430900931358}};
-    //double A[3][3] = {{0.0499, 0.0424, 0.0373},
-    //{-0.2046, -0.1317, -0.0848},
-    //{0.2049, 0.1023, 0.0499}};
+/*Start of DEBUG code, uncomment for testing!*/
 
-    //double simultest[2][2] = {{5,7},{3,5}};
-    //double res[2] = {5,4};
-    //double x[2];
-    //printf("X=%lf, %lf\n",x[0],x[1]);
-    //solve_simul2(simultest, x, res);
-    //printf("X=%lf, %lf\n",x[0],x[1]);
-
-    printf("A=\n");
-    for (int i=0; i<3; i++) {
+/*
+void print3x3(double m[3][3]) {
+  printf("M=\n");
+  for (int i=0; i<3; i++) {
     for (int j=0; j<3; j++) {
-    printf(" %lf ",A[i][j]);
+      printf(" %lf ",m[i][j]);
     }
     printf("\n");
-    }
-    double evects[3][3];
-    double evals[3];
-
-    eigensolve3(A, evects, evals);
-    }
-  */
+  }
 }
+
+
+int main(void) {
+  double A[3][3] = {{-8990.1523663332627620548009872437,0,2299.4290327826952307077590376139},
+		    {-0,-21344.000000024156179279088973999,-0},
+		    {38682.24858129024505615234375,0,-8990.152366357091523241251707077}};
+
+  print3x3(A);
+
+  double evects[3][3];
+  double evals[3];
+  
+  Cantag::eigensolve3(A, evects, evals);
+
+  print3x3(evects);
+  printf("\nEvals: %lf %lf %lf\n",evals[0],evals[1],evals[2]);
+}
+*/
