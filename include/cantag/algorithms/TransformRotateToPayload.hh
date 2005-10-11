@@ -62,8 +62,8 @@ namespace Cantag {
     std::list<Transform*>::iterator j = transform.GetTransforms().begin();
     for(;i != decode.GetPayloads().end() && j != transform.GetTransforms().end();++i,++j) {
       DecodeData* data = *i;
-      float cos,sin;
       if (data->confidence > 0.f) {
+	float cos,sin;
 	m_tagspec.GetCellRotation(data->bits_rotation,cos,sin);
 	(*j)->Rotate(cos,sin);
 	return_value = true;
