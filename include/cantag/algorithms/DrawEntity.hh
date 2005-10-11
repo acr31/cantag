@@ -70,14 +70,14 @@ namespace Cantag {
     bool operator()(MonochromeImage& monimage) const ;    
   };
 
-  class DrawEntityContour : public Function<TL0,TL1(ContourEntity)> {
+  class DrawEntityContour : public Function<TL0,TL1(UncorrectedContourEntity)> {
   private:
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
     const ROI m_roi;
   public:
     DrawEntityContour(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, ROI roi) : m_image(image), m_roi(roi) {}
     DrawEntityContour(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) : m_image(image), m_roi(0,image.GetWidth(),0,image.GetHeight()) {}
-    bool operator()(ContourEntity& contourentity) const ;
+    bool operator()(UncorrectedContourEntity& contourentity) const ;
   };
 
   template<class Shape>
@@ -108,16 +108,17 @@ namespace Cantag {
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool DrawEntitySampleCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(TransformEntity& transform) const {
     const Transform* i = transform.GetPreferredTransform();
     if (i) {
-      int index = 0;
       int readindex = READ_COUNT/2;
       for(int j=0;j<SECTOR_COUNT;++j) {
 	// read a chunk by sampling each ring and shifting and adding
-	for(int k=RING_COUNT-1;k>=0;--k) {
+	for(int k=0;k<RING_COUNT;++k) {
 	  float tpt[]=  {  m_tagspec.GetXSamplePoint(readindex,RING_COUNT - 1 - k),
 			   m_tagspec.GetYSamplePoint(readindex,RING_COUNT - 1 - k) };
 	  i->Apply(tpt[0],tpt[1],tpt,tpt+1);
 	  m_camera.NPCFToImage(tpt,1);
-	  m_image.DrawPixel(m_roi.ScaleX(tpt[0],m_image.GetWidth()),m_roi.ScaleY(tpt[1],m_image.GetHeight()),0);
+	  int coordx = m_roi.ScaleX(tpt[0],m_image.GetWidth());
+	  int coordy = m_roi.ScaleY(tpt[1],m_image.GetHeight());	  
+	  m_image.DrawPixel(coordx,coordy,0);
 	}
 	readindex+=READ_COUNT;
 	readindex %= SECTOR_COUNT * READ_COUNT;
@@ -138,16 +139,17 @@ namespace Cantag {
   };
 
   template<class Shape> bool DrawEntityShape<Shape>::operator()(ShapeEntity<Shape>& shape) const {
-    std::vector<int> points;
-    shape.GetShape()->Draw(points,m_camera);
-    for(std::vector<int>::const_iterator i = points.begin();
+    std::vector<float> points;
+    shape.GetShape()->Draw(points);
+    m_camera.NPCFToImage(points);
+    for(std::vector<float>::const_iterator i = points.begin();
 	i != points.end();
 	++i) {
       const int x = *i;
       ++i;
       const int y = *i;
       
-      m_image.DrawPixel(m_roi.ScaleX(x,m_image.GetWidth()),m_roi.ScaleY(y,m_image.GetHeight),0);
+      m_image.DrawPixel(m_roi.ScaleX(x,m_image.GetWidth()),m_roi.ScaleY(y,m_image.GetHeight()),0);
     }  
     return true;    
   }

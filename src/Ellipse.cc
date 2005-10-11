@@ -45,10 +45,6 @@
 
 namespace Cantag {
 
-#ifdef ELLIPSE_DEBUG
-  static void print(const char* label, double* array, int rows, int cols);
-  static void print(const char* label, double** array, int rows, int cols);
-#endif
 
   Ellipse::Ellipse(): m_fitted(false) {}
   
@@ -56,41 +52,48 @@ namespace Cantag {
     m_a(a), m_b(b), m_c(c), m_d(d), m_e(e), m_f(f), m_fitted(true) { Decompose();}
 
   Ellipse::Ellipse(float x0, float y0, float width, float height, float angle) :
-    m_x0(x0), m_y0(y0),m_angle_radians(angle), m_width(width),m_height(height),m_fitted(true) { Compose(); }
+    m_x0(x0), m_y0(y0),m_angle_radians(angle), m_width(width),m_height(height),m_fitted(true) { 
+    assert(width >= height);
+    Compose(); 
+  }
 
   void Ellipse::Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image,const Camera& camera) const {
     if (m_fitted) {
       camera.DrawEllipse(image,*this);
     }
   }
-
-  void Ellipse::Draw(std::vector<int>& points, const Camera& camera) const {
+  void Ellipse::Draw(std::vector<float>& points) const {
     /**
-     * The parametric equation for an ellipse
+     * The parametric equation for an ellipse is
      *
-     * x = xc + a*cos(angle_radians)*cos(t) + b*sin(angle_radians)*sin(t)
-     * y = yc - a*sin(angle_radians)*cos(t) + b*cos(angle_radians)*sin(t)
+     * x = a*cos(t)
+     * y = b*sin(t)
+     *
+     * We wish to rotate by angle_radians anti-clockwise so premultiply by a rotation matrix    
+     *
+     * x = xc + a*cos(angle_radians)*cos(t) - b*sin(angle_radians)*sin(t)
+     * y = yc + a*sin(angle_radians)*cos(t) + b*cos(angle_radians)*sin(t)
      *
      * a = width/2; b=height/2
      * angle_radians is the angle between the axis given by width and the horizontal
      *
      */
-    float cosa = DCOS(8,m_angle_radians); // DCOS (later)
-    float sina = DSIN(8,m_angle_radians); // DSINE (later)
+    //    float cosa = DCOS(8,m_angle_radians); // DCOS (later)
+    //    float sina = DSIN(8,m_angle_radians); // DSINE (later)
+    float cosa = cos(m_angle_radians); // DCOS (later)
+    float sina = sin(m_angle_radians); // DSINE (later)
     float a = m_width;
     float b = m_height;
-    float currentAngle = 0;
-    while(currentAngle < 2*M_PI) {
+    float currentAngle = 0.f;
+    while(currentAngle < M_PI*2) {
       float cost = cos(currentAngle); // DCOS (later)
       float sint = sin(currentAngle); // DSINE (later)
       
-      float pointsv[] = { m_x0 + a*cosa*cost + b*sina*sint,
-			  m_y0 + a*sina*cost + b*cosa*sint };
-
-      camera.NPCFToImage(pointsv,1);
+      float pointsv[] = { m_x0 + a*cosa*cost - b*sina*sint,
+      			  m_y0 + a*sina*cost + b*cosa*sint };
       
-      points.push_back(Round(pointsv[0]));
-      points.push_back(Round(pointsv[1]));
+      points.push_back(pointsv[0]);
+      points.push_back(pointsv[1]);
       currentAngle += 0.01f;
     }
   }
@@ -435,31 +438,6 @@ namespace Cantag {
 #endif
   }
 
-#ifdef ELLIPSE_DEBUG
-  static void print(const char* label, double* array, int rows, int cols) {
-    std::cout << label << "= [ ";
-    for(int i=0;i<rows;i++) {
-      for(int j=0;j<cols;j++) {
-	std::cout << array[i*rows+j] << "\t";
-      }
-      std::cout << ";" << std::endl;
-    }
-    std::cout << "]" << std::endl;
-  }
-
-  static void print(const char* label, double** array, int rows, int cols) {
-    std::cout << "-----------------------------------" << std::endl;
-    std::cout << label << "= [ ";
-    for(int i=0;i<rows;i++) {
-      for(int j=0;j<cols;j++) {
-	std::cout << array[i][j] << "\t";
-      }
-      std::cout << ";" << std::endl;
-    }
-    std::cout << "]" << std::endl;
-  }
-#endif
-
   void Ellipse::Compose() {
     float x0 = GetX0();
     float y0 = GetY0();
@@ -468,9 +446,10 @@ namespace Cantag {
 
     float angle = GetAngle();
 
-    //    std::cout << "ARB: ***Impact" << std::endl;
-    float c = DCOS(8,angle); // DCOS
-    float s = DSIN(8,angle); // DSINE
+    //    float c = DCOS(8,angle); // DCOS
+    //    float s = DSIN(8,angle); // DSINE
+    float c = cos(angle); // DCOS
+    float s = sin(angle); // DSINE
   
     m_a = c*c/alpha1sq + s*s/alpha2sq;
     m_b = 2*c*s*(1/alpha1sq - 1/alpha2sq);
@@ -541,8 +520,8 @@ namespace Cantag {
     PROGRESS("scale= " << scale_factor);
 #endif
   
-    m_width = lambda2 * scale_factor;
-    m_height = lambda1 * scale_factor;
+    m_width = lambda1 * scale_factor;
+    m_height = lambda2 * scale_factor;
     
     //  m_width = lambda1;
     //m_height = lambda2;

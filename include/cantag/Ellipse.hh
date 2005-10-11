@@ -63,6 +63,13 @@ private:
 public:
 
   Ellipse(float a, float b, float c, float d, float e, float f);
+
+  /**
+   * Construct an ellipse centred on x0,y0.  width is the major axis
+   * of the ellipse and height is the minor axis.  angle is given in
+   * radians and is the angle between the horizontal axis and the
+   * major axis of the ellipse
+   */
   Ellipse(float x0, float y0,float width, float height, float angle);
 
   inline bool IsFitted() const { return m_fitted; }
@@ -70,7 +77,7 @@ public:
 
   void Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image,const Camera& camera) const;
   
-  void Draw(std::vector<int>& points, const Camera& camera) const;
+  void Draw(std::vector<float>& points) const;
 
   inline float GetA() const { return m_a; }
   inline float GetB() const { return m_b; }
