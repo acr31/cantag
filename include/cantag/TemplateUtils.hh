@@ -48,6 +48,7 @@ namespace Cantag {
 #define TL4(x1,x2,x3,x4) Cantag::TypeList<x1,Cantag::TypeList<x2,Cantag::TypeList<x3,Cantag::TypeList<x4, Cantag::TypeListEOL> > > >
 #define TL5(x1,x2,x3,x4,x5) Cantag::TypeList<x1,Cantag::TypeList<x2,Cantag::TypeList<x3,Cantag::TypeList<x4, Cantag::TypeList<x5, Cantag::TypeListEOL> > > > >
 #define TL6(x1,x2,x3,x4,x5,x6) Cantag::TypeList<x1,Cantag::TypeList<x2,Cantag::TypeList<x3,Cantag::TypeList<x4, Cantag::TypeList<x5, Cantag::TypeList<x6,Cantag::TypeListEOL> > > > > >
+#define TL7(x1,x2,x3,x4,x5,x6,x7) Cantag::TypeList<x1,Cantag::TypeList<x2,Cantag::TypeList<x3,Cantag::TypeList<x4, Cantag::TypeList<x5, Cantag::TypeList<x6,Cantag::TypeList<x7,Cantag::TypeListEOL> > > > > > >
 
   /**
    * Select the last element from a list of entities
