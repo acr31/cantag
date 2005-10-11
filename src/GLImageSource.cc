@@ -316,7 +316,7 @@ namespace Cantag {
     */
 
     int yout = 0;
-    for(int ygl = m_height-1; ygl >= 0; --ygl) {
+    for(int ygl = 0; ygl < m_height; ++ygl) {
       int xout = 0;
       for(int xgl = 0; xgl < m_width; ++xgl) {
 	int base = (ygl * m_width * m_supersample + xgl) * m_supersample * 4;
