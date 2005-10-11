@@ -32,6 +32,12 @@
 
 namespace Cantag {
 
+#ifdef ELLIPSE_DEBUG
+  static void print(const char* label, double* array, int rows, int cols);
+  static void print(const char* label, double** array, int rows, int cols);
+#endif
+
+
   bool FitEllipseLS::operator()(const ContourEntity& contour, ShapeEntity<Ellipse>& shape) const {
     const std::vector<float>& points = contour.GetPoints();
 
@@ -194,7 +200,6 @@ namespace Cantag {
     //  for(int i=0;i<9;i++) {
     //  eigvects[i] = -eigvects[i];
     // }
-
     for(int i = 0; i < 3; i++) {
       if (4*eigvects[i]*eigvects[i+6]-eigvects[i+3]*eigvects[i+3] >= 0.0) {
 	
@@ -226,4 +231,31 @@ namespace Cantag {
     }
     return false;
   }
+
+#ifdef ELLIPSE_DEBUG
+  static void print(const char* label, double* array, int rows, int cols) {
+    std::cout << label << "= [ ";
+    for(int i=0;i<rows;i++) {
+      for(int j=0;j<cols;j++) {
+	std::cout << array[i*rows+j] << "\t";
+      }
+      std::cout << ";" << std::endl;
+    }
+    std::cout << "]" << std::endl;
+  }
+
+  static void print(const char* label, double** array, int rows, int cols) {
+    std::cout << "-----------------------------------" << std::endl;
+    std::cout << label << "= [ ";
+    for(int i=0;i<rows;i++) {
+      for(int j=0;j<cols;j++) {
+	std::cout << array[i][j] << "\t";
+      }
+      std::cout << ";" << std::endl;
+    }
+    std::cout << "]" << std::endl;
+  }
+#endif
+
+
 }
