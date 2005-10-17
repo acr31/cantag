@@ -23,7 +23,7 @@
  */
 
 #include <cantag/Transform.hh>
-
+#include <cantag/TagDictionary.hh>
 #undef TRANSFORM_DEBUG
 
 namespace Cantag {
@@ -38,9 +38,59 @@ namespace Cantag {
     }
   }
 
-  Transform::Transform(const LocationElement& loc,const PoseElement& pose, const SizeElement& size) {
-    //ROB
+  Transform::Transform(const LocationElement& loc,const PoseElement& pose, const SizeElement& size_e) {
+    float x = loc.x;
+    float y = loc.y;
+    float z = loc.z;
+    float theta = pose.theta;
+    float phi = pose.phi;
+    float psi = pose.psi;
+    float size = size_e.tag_size;
+    SetupFromAngles(x,y,z,theta,phi,psi,size);
   }
+
+
+  Transform::Transform(float x, float y, float z, float theta, float phi, float psi, float size) {
+    SetupFromAngles(x, y, z,theta, phi, psi, size);
+  }
+
+ 
+
+  void Transform::SetupFromAngles(float x, float y, float z, float theta, float phi, float psi, float size) {
+    // See http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToMatrix/index.htm
+    // for explanation of pose computation
+    m_transform[3] = size*x;
+    m_transform[7] = size*y;
+    m_transform[11] = size*z;
+    m_transform[15] = 1.0;
+
+    // Best not to use DCOS etc here
+    // We need the precision!
+    float nx = sin(theta)*cos(phi);
+    float ny = sin(theta)*sin(phi);
+    float nz = cos(theta);
+    
+    float c = cos(psi);
+    float s = sin(psi);
+    float t = 1-cos(psi);
+
+    m_transform[0] = t*nx*nx+c;
+    m_transform[1] = t*nx*ny-nz*s;
+    m_transform[2] = t*nx*nz+ny*s;
+
+    m_transform[4] = t*nx*ny+nz*s;
+    m_transform[5] = t*ny*ny+c;
+    m_transform[6] = t*ny*nz-nx*s;
+
+    m_transform[8] = t*nx*nz-ny*s;
+    m_transform[9] = t*ny*nz+nx*s;
+    m_transform[10] = t*nz*nz+c;
+
+    m_transform[12] = 0.0;
+    m_transform[13] = 0.0;
+    m_transform[14] = 0.0;
+  }
+
 
   void Transform::Apply(float* points, int numpoints) const {
     for(int i=0;i<numpoints*2;i+=2) {
@@ -278,4 +328,93 @@ namespace Cantag {
     PROGRESS("Found location ("<<location[0]<<","<<location[1]<<","<<location[2]<<")");
 #endif
   }
+
+
+  void Transform::GetAngleRepresentation(float *theta, float *phi, float *psi) const {
+    // See http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToAngle/index.htm
+    // for explanation
+
+    static const float epsilon = 0.001;
+    
+    // Is this matrix symmetric?
+    if ( fabs(m_transform[9]-m_transform[6]) < epsilon &&
+	 fabs(m_transform[8]-m_transform[2]) < epsilon &&
+	 fabs(m_transform[4]-m_transform[1]) < epsilon ) {
+      
+      if ( fabs(m_transform[9]+m_transform[6]) < epsilon &&
+	   fabs(m_transform[8]+m_transform[2]) < epsilon &&
+	   fabs(m_transform[4]+m_transform[1]) < epsilon ) {
+	*theta=0.0;
+	*phi=0.0;
+	*psi=0.0;
+	return;
+      }
+      else {
+	*psi=M_PI;;
+
+	float x = sqrt((m_transform[0]+1.0)/2.0);
+	float y = sqrt((m_transform[5]+1.0)/2.0);
+	float z = sqrt((m_transform[10]+1.0)/2.0);
+
+	bool xZero = fabs(x)<epsilon;
+	bool yZero = fabs(y)<epsilon;
+	bool zZero = fabs(z)<epsilon;
+	bool xyPositive = (m_transform[1] > 0);
+	bool xzPositive = (m_transform[2] > 0);
+	bool yzPositive = (m_transform[6] > 0);
+	if (xZero && !yZero && !zZero) y = -y;
+	else if (yZero && !zZero) z = -z;
+	else if (zZero) x = -x;
+	else if (xyPositive && xzPositive && yzPositive) return;
+	else if (yzPositive) x=-x;
+	else if (xzPositive) y=-y;
+	else if (xyPositive) z=-z;
+
+	*phi = acos(z);
+	*theta = atan2(y,z);
+      }
+    }
+    else {
+      *psi = acos( (m_transform[0]+m_transform[5]+m_transform[10]-1.0)/2.0 );
+      float denom = sqrt( (m_transform[6]-m_transform[9])*(m_transform[6]-m_transform[9]) +
+			  (m_transform[2]-m_transform[8])*(m_transform[2]-m_transform[8]) +
+			  (m_transform[4]-m_transform[1])*(m_transform[4]-m_transform[1]) );
+      float nx = (m_transform[9] - m_transform[6])/denom;
+      float ny = (m_transform[2] - m_transform[8])/denom;
+      float nz = (m_transform[4] - m_transform[1])/denom;
+      
+      *phi = acos(nz);
+      *theta = atan2(ny,nz);
+    }
+  }
+
+
+  Transform operator*(const Transform &a, const Transform &b) {
+    Transform r;
+    r[0]  = a[0]*b[0] + a[1]*b[4] + a[2]*b[8] + a[3]*b[12];
+    r[1]  = a[0]*b[1] + a[1]*b[5] + a[2]*b[9] + a[3]*b[13];
+    r[2]  = a[0]*b[2] + a[1]*b[6] + a[2]*b[10] + a[3]*b[14];
+    r[3]  = a[0]*b[3] + a[1]*b[7] + a[2]*b[11] + a[3]*b[15];
+    
+    r[4]  = a[4]*b[0] + a[5]*b[4] + a[6]*b[8] + a[7]*b[12];
+    r[5]  = a[4]*b[1] + a[5]*b[5] + a[6]*b[9] + a[7]*b[13];
+    r[6]  = a[4]*b[2] + a[5]*b[6] + a[6]*b[10] + a[7]*b[14];
+    r[7]  = a[4]*b[3] + a[5]*b[7] + a[6]*b[11] + a[7]*b[15];
+    
+    r[8]  = a[8]*b[0] + a[9]*b[4] + a[10]*b[8] + a[11]*b[12];
+    r[9]  = a[8]*b[1] + a[9]*b[5] + a[10]*b[9] + a[11]*b[13];
+    r[10] = a[8]*b[2] + a[9]*b[6] + a[10]*b[10] + a[11]*b[14];
+    r[11] = a[8]*b[3] + a[9]*b[7] + a[10]*b[11] + a[11]*b[15];
+    
+    r[12] = a[12]*b[0] + a[13]*b[4] + a[14]*b[8] + a[15]*b[12];
+    r[13] = a[12]*b[1] + a[13]*b[5] + a[14]*b[9] + a[15]*b[13];
+    r[14] = a[12]*b[2] + a[13]*b[6] + a[14]*b[10] + a[15]*b[14];
+    r[15] = a[12]*b[3] + a[13]*b[7] + a[14]*b[11] + a[15]*b[15];
+
+    return r;
+  }
+
+
+
+
 }

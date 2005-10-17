@@ -50,9 +50,9 @@ namespace Cantag {
   };
   
   struct PoseElement {
-    float rho;
-    float theta;
-    float phi;  
+    float theta; // Spherical polars
+    float phi;   // Spherical polars
+    float psi;   // Rotation about axis
   };
 
   template<class ElementList>
@@ -116,7 +116,7 @@ namespace Cantag {
      TransformDirectory() : m_map() {};
      ~TransformDirectory();
       virtual const Element<TL3(LocationElement,PoseElement,SizeElement)>* GetInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code) const;
-      void StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code,float x, float y, float z, float rho, float theta, float phi, float size);
+      void StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code,float x, float y, float z, float alpha, float beta, float gamma, float size);
       void StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code, 
 			    const Transform& transform);
   };
@@ -137,20 +137,33 @@ namespace Cantag {
     }
   }
 
-  template<int PAYLOAD_SIZE> void TransformDirectory<PAYLOAD_SIZE>::StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code,float x, float y, float z, float rho, float theta, float phi, float size) {
+  template<int PAYLOAD_SIZE> void TransformDirectory<PAYLOAD_SIZE>::StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code,float x, float y, float z, float theta, float phi, float psi, float size) {
     Element<TL3(LocationElement,PoseElement,SizeElement)>* e = new Element<TL3(LocationElement,PoseElement,SizeElement)>();
     m_map[tag_code] = e;
     e->x = x;
     e->y = y;
     e->z = z;
-    e->rho = rho;
     e->theta = theta;
     e->phi = phi;
+    e->psi = psi;
     e->tag_size = size;
   }
   
   template<int PAYLOAD_SIZE> void TransformDirectory<PAYLOAD_SIZE>::StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code, const Transform& transform) {
-    // ROB
+ Element<TL3(LocationElement,PoseElement,SizeElement)>* e = new Element<TL3(LocationElement,PoseElement,SizeElement)>();
+    m_map[tag_code] = e;
+    e->x = transform[3];;
+    e->y = transform[7];;
+    e->z = transform[11];
+
+    float theta, phi, psi;
+    transform.GetAngleRepresentation(&theta,
+				     &phi,
+				     &psi);
+    e->theta = theta;
+    e->phi = phi;
+    e->psi = psi;
+    e->tag_size = 1.0;
   }
 
 

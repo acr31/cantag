@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2005 Andrew C. Rice
+  Copyright (C) 2005 Robert Harle
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-  Email: acr31@cam.ac.uk
+  Email: rkh23@cam.ac.uk
 */
 
 /**
@@ -34,8 +34,36 @@
 
 namespace Cantag {
   
+ /**
+   * Iteratively solves for the camera position
+   * given a series of correspondences between
+   * real world points and their NPCF equivalents
+   *
+   * The operator takes a list of correspondences
+   * and a guess for the camera transform. The
+   * AccumulateCorrespondences function produces 
+   * a good guess for this
+   * 
+   * Note that there are 6 parameters to determine
+   * and so we must have at least 6 correspondences
+   * in the list!
+   * 
+   * Exceptions are thrown if there are fewer than 6
+   * independent correspondences or the minimisation
+   * fails to converge
+   */
   class EstimateTransform {    
-    Transform operator()(const std::list<Correspondence>& correspondences);
+  public:
+    Transform operator()(const std::list<Correspondence>& correspondences,
+			 const Transform &guess);
+  private:
+
+    /**
+     * This static function is required for the 
+     * libgsl minimiser
+     */
+    static double _MinFunc(const gsl_vector *v, void *params);
+
   };
 }
 

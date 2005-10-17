@@ -27,12 +27,16 @@
 
 #include <cantag/Config.hh>
 #include <cantag/Camera.hh>
-#include <cantag/TagDictionary.hh>
+#include <iostream>
+
 namespace Cantag {
   
+  class LocationElement;
+  class PoseElement;
+  class SizeElement;
+
   /**
-   * A class to represent a transformation from camera co-ordinates to
-   * object co-ordinates
+   * A class to represent a general affine transformation
    */
   class Transform {
   private:
@@ -45,6 +49,7 @@ namespace Cantag {
     Transform(float confidence);
     Transform(float* transform, float confidence);
     Transform(const LocationElement& loc,const PoseElement& pose, const SizeElement& size);
+    Transform(float x, float y, float z, float theta, float phi, float psi, float size);
     
     inline float& operator[](int index) { return m_transform[index]; }
     inline float operator[](int index) const { return m_transform[index]; }
@@ -54,10 +59,36 @@ namespace Cantag {
     inline void AccrueConfidence(float confidence) { m_confidence *= confidence; }
 
     /**
-     * Invert the transform, assuming this is a valid affine transform
+     * Invert the transform, *assuming* this is a valid affine transform
      */
     void Invert();
-    
+
+    /**
+     * Convert the rotation matrix part of the transform
+     * into a more useful angular representation. .
+     *
+     * The convention is that theta and phi are spherical polar
+     * coordinates. Phi is the angle from the x axis in the x-y plane.
+     * Theta is the angle from the z axis. The phi and theta specify
+     * a unit vector about which we rotate by psi degrees using the
+     * right hand rule
+     *
+     * For clarity, the unit axis vector n relates as follows:
+     * nx = sin(theta)cos(phi)
+     * ny = sin(theta)sin(phi)
+     * nz = cos(theta)
+     *
+     */
+    void GetAngleRepresentation(float *theta, float *phi, float *psi) const;
+
+
+    /**
+     * Set the Transform contents based on the information supplied as a position, 
+     * pose and scale
+     */
+    void SetupFromAngles(float x, float y, float z, float theta, float phi, float psi, float size);
+  
+ 
     void Apply(float x, float y, float* resx, float* resy) const;
     void Apply(float x, float y, float z,float* resx, float* resy) const;
     void Apply(float* points, int num_points) const;
@@ -83,7 +114,19 @@ namespace Cantag {
      * Calculate the normal vector for the tag in this transform
      */
     void GetNormalVector(const Camera& cam, float normal[3]) const;
- 
+
+    void Print() const {
+      for (int i=0; i<16; i++) {
+	if (i%4==0) std::cout << std::endl;
+	std::cout << m_transform[i] << " ";
+      }
+      std::cout << std::endl;   
+    }
+
+    /**
+     * Mutiply transforms together;
+     */
+    friend Transform operator*(const Transform &a, const Transform &b);
   };
 }
 
