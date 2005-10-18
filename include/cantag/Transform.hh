@@ -131,5 +131,7 @@ namespace Cantag {
 }
 
 #else
-class Transform;
+namespace Cantag {
+  class Transform;
+}
 #endif
