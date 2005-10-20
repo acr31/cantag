@@ -102,20 +102,56 @@ namespace Cantag {
      
       SizeElement tmp;
       tmp.tag_size=1.0;
+      //   Transform tagToWorld(*loc_lookup, *pose_lookup, tmp);
+      float test[] = { 0.0,0.0,1.0,loc_lookup->x,
+		       -1.0,0.0,0.0,loc_lookup->y,
+		       0.0,-1.0,0.0,loc_lookup->z,
+		       0,0,0,1};
+      //      Transform tagToWorld(test,1.0);
       Transform tagToWorld(*loc_lookup, *pose_lookup, tmp);
 
       const Cantag::Transform *t = trans.GetPreferredTransform();
+
+      std::cout << "0000000000000" << std::endl;;
+      const  std::list< Cantag::Transform *> v = trans.GetTransforms();
+      
+      (*v.begin())->Print();
+      (*(++v.begin()))->Print();
+      std::cout << "0000000000000" << std::endl;;
+      
       
       // take a copy, scale and invert to get camera->Tag in world units
       Transform cameraToTag;
       for (int i=0; i<16;i++) cameraToTag[i] = (*t)[i];
+      cameraToTag[0]=1.0;
+      cameraToTag[1]=0.0;
+      cameraToTag[2]=0.0;
+
+      cameraToTag[4]=0.0;
+      cameraToTag[5]=1.0;
+      cameraToTag[6]=0.0;
+      
+      cameraToTag[8]=0.0;
+      cameraToTag[9]=0.0;
+      cameraToTag[10]=1.0;
+      
       cameraToTag[3]*=size_lookup->tag_size;
       cameraToTag[7]*=size_lookup->tag_size;
       cameraToTag[11]*=size_lookup->tag_size;
 
+      cameraToTag.Print();
+
       cameraToTag.Invert();
 
+      cameraToTag.Print();
+
       Transform camToWorld = tagToWorld*cameraToTag;
+
+      tagToWorld.Print();
+      
+
+      camToWorld.Print();
+
 
       float a,b,g;
       camToWorld.GetAngleRepresentation(&a,&b,&g);
@@ -148,7 +184,7 @@ namespace Cantag {
       m_corr.push_back(Correspondence(xx,yy,loc_lookup->x,loc_lookup->y,loc_lookup->z));
 
     }
-    else std::cout << "No match " << (*(decode.GetPayloads().begin()))->payload.to_ulong() << std::endl;
+    // else std::cout << "No match " << (*(decode.GetPayloads().begin()))->payload.to_ulong() << std::endl;
   }
 
 

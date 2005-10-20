@@ -34,8 +34,9 @@ namespace Cantag {
    * given a series of correspondences between
    * real world points and their NPCF equivalents
    */
-  Transform EstimateTransform::operator()(const std::list<Correspondence>& correspondences,
-					  const Transform &guess) {
+  Transform EstimateTransform::operator()(std::list<Correspondence>& correspondences,
+					  const Transform &guess,
+					  const Camera &c) {
 
     if (correspondences.size() < 6) throw("Sorry - insufficient correspondences to compute camera position");
 
@@ -70,14 +71,19 @@ namespace Cantag {
     errfunc.params = (void *)&correspondences;
 
     const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
-    gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc (T, 6);
-    
-    gsl_multimin_fminimizer_set (s, &errfunc, r, step); 
-    
-    int iter=0;
-    int status=0;
-    do {
-      iter++;
+
+    float maxResidual=100;
+    Cantag::Transform transformResult;
+
+    while (maxResidual > mMaxResidual && correspondences.size()>=6) {
+
+      gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc (T, 6);
+      gsl_multimin_fminimizer_set (s, &errfunc, r, step); 
+
+      int iter=0;
+      int status=0;
+      do {
+	iter++;
 	status = gsl_multimin_fminimizer_iterate (s);
 	if (status)  break;      
 	status = gsl_multimin_test_size(s->size,1e-4);
@@ -90,29 +96,67 @@ namespace Cantag {
 	float aa = gsl_vector_get(s->x, 3);
 	float bb = gsl_vector_get(s->x, 4);
 	float gg = gsl_vector_get(s->x, 5);
-	
-	gsl_vector_free(step);
-	gsl_vector_free(r);
-	gsl_multimin_fminimizer_free(s);
-
-	return Cantag::Transform(xx,
-				 yy,
-				 zz,
-				 aa,
-				 bb,
-				 gg,
-				 1.0);
+  
+	transformResult.SetupFromAngles(xx,
+					yy,
+					zz,
+					aa,
+					bb,
+					gg,
+					1.0);
       }
+      else throw("Failed to converge");
 
-      gsl_vector_free(step);
-      gsl_vector_free(r);
+
+
       gsl_multimin_fminimizer_free(s);
 
-      throw("Failed to converge");
+      std::list<Correspondence>::iterator it = correspondences.begin();
+      std::list<Correspondence>::iterator maxResidualIt;
+      maxResidual=-1.0;
+      for(;it!=correspondences.end(); ++it) {
+	if (maxResidual<0) {
+	  maxResidual =   EvaluateResidual(transformResult, *(it),c);
+	  maxResidualIt = it;
+	}
+	else {
+	  float r = EvaluateResidual(transformResult,*it,c);
+	  if (r>maxResidual) {
+	    maxResidual=r;
+	    maxResidualIt = it;
+	  }
+	}
+      }
 
-      return guess;
+      if (maxResidual>mMaxResidual) correspondences.erase(maxResidualIt);
+      else throw ("Failed to find maximum residual!");
+    } // while loop
 
+    gsl_vector_free(step);
+    gsl_vector_free(r);
+
+    return transformResult;
   };
+
+
+  float EstimateTransform::EvaluateResidual(const Cantag::Transform &t,
+			 const Correspondence &c,
+			 const Camera &cam) {
+    Cantag::Transform t2;
+    for (int i=0; i<16;i++) t2[i]=t[i];
+    t2.Invert();
+
+    float p[2];
+    float a,b;
+    t2.Apply(c.GetWorldX(),c.GetWorldY(),c.GetWorldZ(),p, p+1);
+    cam.NPCFToImage(p,1);
+
+    float p2[] ={c.GetImageX(),c.GetImageY()};
+    cam.NPCFToImage(p2,1); 
+
+    return (p[0]-p2[0])*(p[0]-p2[0]) +
+      (p[1]-p2[1])*(p[1]-p2[1]);
+  }
 
 
   /**

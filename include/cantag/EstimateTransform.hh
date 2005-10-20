@@ -54,15 +54,25 @@ namespace Cantag {
    */
   class EstimateTransform {    
   public:
-    Transform operator()(const std::list<Correspondence>& correspondences,
-			 const Transform &guess);
+    EstimateTransform(const float maxError) : mMaxResidual(maxError) {}
+    EstimateTransform() : mMaxResidual(1.0) {}
+
+    Transform operator()(std::list<Correspondence>& correspondences,
+			 const Transform &guess,
+			 const Camera &c);
   private:
 
+
+    float EvaluateResidual(const Transform &t,
+			   const Correspondence &c,
+			   const Camera &c);
     /**
      * This static function is required for the 
      * libgsl minimiser
      */
     static double _MinFunc(const gsl_vector *v, void *params);
+
+    float mMaxResidual;
 
   };
 }
