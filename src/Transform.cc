@@ -329,6 +329,19 @@ namespace Cantag {
 #endif
   }
 
+  /**
+   * Calculate the origin for this tag.
+   */
+  void Transform::GetLocation(const Camera& camera, float location[3], float tag_size) const {
+    location[0] = tag_size*m_transform[3]/m_transform[15];
+    location[1] = tag_size*m_transform[7]/m_transform[15];
+    location[2] = tag_size*m_transform[11]/m_transform[15];
+    camera.CameraToWorld(location[0],location[1],location[2],location,location+1,location+2);
+#ifdef APPLY_TRANSFORM_DEBUG
+    PROGRESS("Found location ("<<location[0]<<","<<location[1]<<","<<location[2]<<")");
+#endif
+  }
+
 
   void Transform::GetAngleRepresentation(float *theta, float *phi, float *psi) const {
     // See http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToAngle/index.htm
