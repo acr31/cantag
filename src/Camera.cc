@@ -50,6 +50,12 @@ namespace Cantag {
     }
   }
 
+  void Camera::SetExtrinsic(const Transform& extrinsic) {
+    for(int i=0;i<16;i++) {
+      m_extrinsic[i] = extrinsic[i];
+    }
+  }
+
   void Camera::SetIntrinsic(float intrinsic[9]) {
     for(int i=0;i<9;i++) {
       m_intrinsic[i] = intrinsic[i];
@@ -76,11 +82,9 @@ namespace Cantag {
 
   void Camera::CameraToWorld(float x, float y, float z, float *rx, float *ry, float* rz) const {
     float rh = m_extrinsic[12]*x+m_extrinsic[13]*y+m_extrinsic[14]*z+m_extrinsic[15];
-
     *rx = (m_extrinsic[0]*x+m_extrinsic[1]*y+m_extrinsic[2]*z+m_extrinsic[3])/rh;
     *ry = (m_extrinsic[4]*x+m_extrinsic[5]*y+m_extrinsic[6]*z+m_extrinsic[7])/rh;
     *rz = (m_extrinsic[8]*x+m_extrinsic[9]*y+m_extrinsic[10]*z+m_extrinsic[11])/rh;
-
   }
 
   void Camera::CameraToWorld(float* points, int numpoints) const {
