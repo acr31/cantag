@@ -43,7 +43,6 @@ namespace Cantag {
     bool m_windowgot;
     bool m_displaygot;
     bool m_colormapgot;
-    const Camera& m_camera;
     Display* m_display;
     GC m_gc;
     Window m_window;
@@ -153,18 +152,17 @@ namespace Cantag {
     ImageAlgorithm<size,layout> m_ImageAlgorithm;
   public:
 
-    XDisplay(int width,int height,const Camera& camera);
+    XDisplay(int width,int height);
     virtual ~XDisplay();
 
     void Output(const Image<size,layout>& image);
   };
 
-  template<Pix::Sze::Bpp size, Pix::Fmt::Layout layout> XDisplay<size,layout>::XDisplay(int width,int height, const Camera& camera) : 
+  template<Pix::Sze::Bpp size, Pix::Fmt::Layout layout> XDisplay<size,layout>::XDisplay(int width,int height) : 
     m_mapped(false),
     m_windowgot(false),
     m_displaygot(false),
     m_colormapgot(false),
-    m_camera(camera),
     m_width(width),
     m_height(height),
     m_needPut(false),
