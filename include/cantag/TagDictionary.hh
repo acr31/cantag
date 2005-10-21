@@ -118,7 +118,8 @@ namespace Cantag {
       virtual const Element<TL3(LocationElement,PoseElement,SizeElement)>* GetInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code) const;
       void StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code,float x, float y, float z, float alpha, float beta, float gamma, float size);
       void StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code, 
-			    const Transform& transform);
+			    const Transform& transform,
+			    const float tag_size);
   };
 
   template<int PAYLOAD_SIZE> const Element<TL3(LocationElement,PoseElement,SizeElement)>* TransformDirectory<PAYLOAD_SIZE>::GetInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code) const {
@@ -149,7 +150,7 @@ namespace Cantag {
     e->tag_size = size;
   }
   
-  template<int PAYLOAD_SIZE> void TransformDirectory<PAYLOAD_SIZE>::StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code, const Transform& transform) {
+  template<int PAYLOAD_SIZE> void TransformDirectory<PAYLOAD_SIZE>::StoreInformation(const CyclicBitSet<PAYLOAD_SIZE>& tag_code, const Transform& transform, const float tag_size) {
  Element<TL3(LocationElement,PoseElement,SizeElement)>* e = new Element<TL3(LocationElement,PoseElement,SizeElement)>();
     m_map[tag_code] = e;
     e->x = transform[3];;
@@ -163,7 +164,7 @@ namespace Cantag {
     e->theta = theta;
     e->phi = phi;
     e->psi = psi;
-    e->tag_size = 1.0;
+    e->tag_size = tag_size;
   }
 
 
