@@ -28,6 +28,7 @@
 #include <cantag/Image.hh>
 #include <cantag/Ellipse.hh>
 #include <cantag/QuadTangle.hh>
+#include <cantag/Transform.hh>
 #include <vector>
 #include <map>
 
@@ -83,6 +84,8 @@ namespace Cantag {
      * co-ordinates
      */ 
     void SetExtrinsic(float extrinsic[16]);
+
+    void SetExtrinsic(const Transform& transform);
 
     /**
      * Set the intrinsic parameters for this camera. This is a matrix
