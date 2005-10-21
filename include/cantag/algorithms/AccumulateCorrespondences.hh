@@ -93,8 +93,7 @@ namespace Cantag {
 
   template<int PAYLOAD_SIZE> bool AccumulateCorrespondences<PAYLOAD_SIZE>::operator()(const TransformEntity& trans, DecodeEntity<PAYLOAD_SIZE>& decode) const {
     // See if we have the transform Tag->World for this tag
-    //    const typename TagDictionary<PAYLOAD_SIZE,TL3(LocationElement,PoseElement,SizeElement)>::Element* element = 
-    //  m_dictionary.GetInformation((*(decode.GetPayloads().begin()))->payload);
+
     const LocationElement* loc_lookup = m_dictionary.GetInformation((*(decode.GetPayloads().begin()))->payload);
     const PoseElement* pose_lookup = m_dictionary.GetInformation((*(decode.GetPayloads().begin()))->payload);
     const SizeElement* size_lookup = m_dictionary.GetInformation((*(decode.GetPayloads().begin()))->payload);
@@ -102,24 +101,16 @@ namespace Cantag {
      
       SizeElement tmp;
       tmp.tag_size=1.0;
-      //   Transform tagToWorld(*loc_lookup, *pose_lookup, tmp);
+
       float test[] = { 0.0,0.0,1.0,loc_lookup->x,
 		       -1.0,0.0,0.0,loc_lookup->y,
 		       0.0,-1.0,0.0,loc_lookup->z,
 		       0,0,0,1};
-      //      Transform tagToWorld(test,1.0);
+
       Transform tagToWorld(*loc_lookup, *pose_lookup, tmp);
 
       const Cantag::Transform *t = trans.GetPreferredTransform();
 
-      std::cout << "0000000000000" << std::endl;;
-      const  std::list< Cantag::Transform *> v = trans.GetTransforms();
-      
-      (*v.begin())->Print();
-      (*(++v.begin()))->Print();
-      std::cout << "0000000000000" << std::endl;;
-      
-      
       // take a copy, scale and invert to get camera->Tag in world units
       Transform cameraToTag;
       for (int i=0; i<16;i++) cameraToTag[i] = (*t)[i];
@@ -139,18 +130,9 @@ namespace Cantag {
       cameraToTag[7]*=size_lookup->tag_size;
       cameraToTag[11]*=size_lookup->tag_size;
 
-      cameraToTag.Print();
-
       cameraToTag.Invert();
 
-      cameraToTag.Print();
-
       Transform camToWorld = tagToWorld*cameraToTag;
-
-      tagToWorld.Print();
-      
-
-      camToWorld.Print();
 
 
       float a,b,g;
@@ -182,11 +164,11 @@ namespace Cantag {
       float xx, yy;
       t->Apply((float)0.0,(float)0.0,(float)0.0,&xx,&yy);
       m_corr.push_back(Correspondence(xx,yy,loc_lookup->x,loc_lookup->y,loc_lookup->z));
-
+      return true;
     }
-    // else std::cout << "No match " << (*(decode.GetPayloads().begin()))->payload.to_ulong() << std::endl;
+    else {
+      return false;
+    } 
   }
-
-
 }
 #endif//ACCUMULATECORRESPONDENCE_GUARD
