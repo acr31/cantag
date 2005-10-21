@@ -72,10 +72,9 @@ namespace Cantag {
 
     const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
 
-    float maxResidual=100;
     Cantag::Transform transformResult;
 
-    while (maxResidual > mMaxResidual && correspondences.size()>=6) {
+    while (correspondences.size()>=6) {
 
       gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc (T, 6);
       gsl_multimin_fminimizer_set (s, &errfunc, r, step); 
@@ -86,10 +85,10 @@ namespace Cantag {
 	iter++;
 	status = gsl_multimin_fminimizer_iterate (s);
 	if (status)  break;      
-	status = gsl_multimin_test_size(s->size,1e-4);
-      }  while (status == GSL_CONTINUE && iter < 5000);   
+	status = gsl_multimin_test_size(s->size,1e-3);
+      }  while (status == GSL_CONTINUE && iter < 50000);   
 
-      if (iter!=5000) {
+      if (iter!=50000) {
 	float xx = gsl_vector_get(s->x, 0);
 	float yy = gsl_vector_get(s->x, 1);
 	float zz = gsl_vector_get(s->x, 2);
@@ -113,24 +112,23 @@ namespace Cantag {
 
       std::list<Correspondence>::iterator it = correspondences.begin();
       std::list<Correspondence>::iterator maxResidualIt;
-      maxResidual=-1.0;
+      float maxResidualSq=-1e10;
+      float sumsqres = 0.f;
       for(;it!=correspondences.end(); ++it) {
-	if (maxResidual<0) {
-	  maxResidual =   EvaluateResidual(transformResult, *(it),c);
+	float rsq = EvaluateResidual(transformResult,*it,c);
+	sumsqres += rsq;
+	if (rsq>maxResidualSq) {
+	  maxResidualSq=rsq;
 	  maxResidualIt = it;
 	}
-	else {
-	  float r = EvaluateResidual(transformResult,*it,c);
-	  if (r>maxResidual) {
-	    maxResidual=r;
-	    maxResidualIt = it;
-	  }
-	}
       }
-
-      if (maxResidual>mMaxResidual) correspondences.erase(maxResidualIt);
-      else throw ("Failed to find maximum residual!");
+      assert(maxResidualSq > 0.f);
+      sumsqres /= correspondences.size();
+      if (sumsqres>mMaxResidual*mMaxResidual) correspondences.erase(maxResidualIt);
+      else break;
     } // while loop
+
+    if (correspondences.size() < 6) throw "Too few correspondences remaining!";
 
     gsl_vector_free(step);
     gsl_vector_free(r);
