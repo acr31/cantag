@@ -65,7 +65,7 @@ namespace Cantag {
 
     float EvaluateResidual(const Transform &t,
 			   const Correspondence &c,
-			   const Camera &c);
+			   const Camera &c2);
     /**
      * This static function is required for the 
      * libgsl minimiser
