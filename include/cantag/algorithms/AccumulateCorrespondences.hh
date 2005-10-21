@@ -101,12 +101,6 @@ namespace Cantag {
      
       SizeElement tmp;
       tmp.tag_size=1.0;
-
-      float test[] = { 0.0,0.0,1.0,loc_lookup->x,
-		       -1.0,0.0,0.0,loc_lookup->y,
-		       0.0,-1.0,0.0,loc_lookup->z,
-		       0,0,0,1};
-
       Transform tagToWorld(*loc_lookup, *pose_lookup, tmp);
 
       const Cantag::Transform *t = trans.GetPreferredTransform();
@@ -114,18 +108,7 @@ namespace Cantag {
       // take a copy, scale and invert to get camera->Tag in world units
       Transform cameraToTag;
       for (int i=0; i<16;i++) cameraToTag[i] = (*t)[i];
-      cameraToTag[0]=1.0;
-      cameraToTag[1]=0.0;
-      cameraToTag[2]=0.0;
-
-      cameraToTag[4]=0.0;
-      cameraToTag[5]=1.0;
-      cameraToTag[6]=0.0;
-      
-      cameraToTag[8]=0.0;
-      cameraToTag[9]=0.0;
-      cameraToTag[10]=1.0;
-      
+         
       cameraToTag[3]*=size_lookup->tag_size;
       cameraToTag[7]*=size_lookup->tag_size;
       cameraToTag[11]*=size_lookup->tag_size;
@@ -163,7 +146,7 @@ namespace Cantag {
       // then compute NPCF equivalent
       float xx, yy;
       t->Apply((float)0.0,(float)0.0,(float)0.0,&xx,&yy);
-      m_corr.push_back(Correspondence(xx,yy,loc_lookup->x,loc_lookup->y,loc_lookup->z));
+      m_corr.push_back(Correspondence(xx,-yy,loc_lookup->x,loc_lookup->y,loc_lookup->z));
       return true;
     }
     else {

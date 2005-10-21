@@ -54,25 +54,40 @@ namespace Cantag {
    */
   class EstimateTransform {    
   public:
-    EstimateTransform(const float maxError) : mMaxResidual(maxError) {}
-    EstimateTransform() : mMaxResidual(1.0) {}
+
+    /**
+     * Initialise with a model fit error in
+     * (distorted) pixels. If the estimate is unable to
+     * match it, an exception is thrown
+     */
+    EstimateTransform(const float maxError) : mFitError(maxError), mSigma(-1.0) {}
+    EstimateTransform() : mFitError(1.0), mSigma(-1.0) {}
 
     Transform operator()(std::list<Correspondence>& correspondences,
 			 const Transform &guess,
 			 const Camera &c);
+
+    float GetFitError() const { return mSigma; };
   private:
 
 
-    float EvaluateResidual(const Transform &t,
-			   const Correspondence &c,
-			   const Camera &c2);
+    static float EvaluateResidualSq(const Transform &t,
+				    const Correspondence &c,
+				    const Camera &cam);
+
     /**
      * This static function is required for the 
      * libgsl minimiser
      */
     static double _MinFunc(const gsl_vector *v, void *params);
 
-    float mMaxResidual;
+    float mFitError;
+    float mSigma;
+
+    struct MinData_t {
+      const Camera *c;
+      std::list<Correspondence> *corr;
+    };
 
   };
 }

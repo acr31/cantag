@@ -38,7 +38,9 @@ namespace Cantag {
 					  const Transform &guess,
 					  const Camera &c) {
 
-    if (correspondences.size() < 6) throw("Sorry - insufficient correspondences to compute camera position");
+    if (correspondences.size() < 6) {
+      throw("Sorry - insufficient cor respondences to compute camera position");
+    }
 
 
     // Get the pose estimate for 
@@ -65,17 +67,23 @@ namespace Cantag {
     gsl_vector_set(step,4,3.141/2.0);
     gsl_vector_set(step,5,3.141);
 
+    struct MinData_t data;
+    data.corr = &correspondences;
+    data.c = &c;
+
+
     gsl_multimin_function errfunc;
     errfunc.f = &(Cantag::EstimateTransform::_MinFunc);
     errfunc.n = 6;
-    errfunc.params = (void *)&correspondences;
+    errfunc.params = (void *)&data;
 
     const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
 
-    Cantag::Transform transformResult;
+    Transform transformResult;
 
-    while (correspondences.size()>=6) {
-
+    // Model fit error estimate
+    mSigma = 1e10;
+    while (mSigma>mFitError && correspondences.size()>=6) {
       gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc (T, 6);
       gsl_multimin_fminimizer_set (s, &errfunc, r, step); 
 
@@ -110,25 +118,33 @@ namespace Cantag {
 
       gsl_multimin_fminimizer_free(s);
 
+      
+      float maxResidualsq=-1.0e10;
+
+      float sumsq=0.0;
       std::list<Correspondence>::iterator it = correspondences.begin();
       std::list<Correspondence>::iterator maxResidualIt;
       float maxResidualSq=-1e10;
       float sumsqres = 0.f;
-      for(;it!=correspondences.end(); ++it) {
-	float rsq = EvaluateResidual(transformResult,*it,c);
-	sumsqres += rsq;
-	if (rsq>maxResidualSq) {
-	  maxResidualSq=rsq;
-	  maxResidualIt = it;
+	float residualsq = EvaluateResidualSq(transformResult, *(it),c);
+	sumsq+=residualsq;
+	if (residualsq>maxResidualsq) {
+	    maxResidualsq=residualsq;
+	    maxResidualIt = it;
 	}
-      }
-      assert(maxResidualSq > 0.f);
-      sumsqres /= correspondences.size();
-      if (sumsqres>mMaxResidual*mMaxResidual) correspondences.erase(maxResidualIt);
-      else break;
+
+      // Recompute mSigma
+      mSigma=sqrt( sumsq/(correspondences.size()-2.0) );
+
+      // If it's too big, discard the largest residual
+      if (correspondences.size()==6) break;
+      else if (mSigma>mFitError && correspondences.size()) correspondences.erase(maxResidualIt);
+      
+
     } // while loop
 
-    if (correspondences.size() < 6) throw "Too few correspondences remaining!";
+
+    if (mSigma>mFitError) throw ("Unable to meet required fit error for camera localisation");
 
     gsl_vector_free(step);
     gsl_vector_free(r);
@@ -137,21 +153,29 @@ namespace Cantag {
   };
 
 
-  float EstimateTransform::EvaluateResidual(const Cantag::Transform &t,
+  float EstimateTransform::EvaluateResidualSq(const Cantag::Transform &t,
 			 const Correspondence &c,
 			 const Camera &cam) {
+
+    // World to Camera
     Cantag::Transform t2;
     for (int i=0; i<16;i++) t2[i]=t[i];
     t2.Invert();
+    
 
+    // Get image pixel of this point
     float p[2];
     float a,b;
     t2.Apply(c.GetWorldX(),c.GetWorldY(),c.GetWorldZ(),p, p+1);
+
     cam.NPCFToImage(p,1);
 
+    // Compare with image pixel in correspondence
     float p2[] ={c.GetImageX(),c.GetImageY()};
     cam.NPCFToImage(p2,1); 
 
+
+    // Return residual _squared_
     return (p[0]-p2[0])*(p[0]-p2[0]) +
       (p[1]-p2[1])*(p[1]-p2[1]);
   }
@@ -167,8 +191,10 @@ namespace Cantag {
    * correspondence image equivalent. Minimising this
    * fits to the image 
    */
- double EstimateTransform::_MinFunc(const gsl_vector *v, void *params) {
-    std::list<Correspondence> *list = (std::list<Correspondence> *) params;
+  double EstimateTransform::_MinFunc(const gsl_vector *v, void *params) {
+    struct MinData_t *md = (struct MinData_t *) params;
+    const Camera *cam = md->c;
+    std::list<Correspondence> *list = md->corr;
 
     float x = gsl_vector_get(v, 0);
     float y = gsl_vector_get(v, 1);
@@ -178,16 +204,15 @@ namespace Cantag {
     float psi = gsl_vector_get(v, 5);
 
     Cantag::Transform current_estimate(x, y, z, theta, phi, psi, 1.0);
-    current_estimate.Invert();
+    // current_estimate.Invert();
 
     double sumsq=0.0;
     std::list<Correspondence>::const_iterator it = list->begin();
-    float px,py;
+    //  float px,py;
     for(;it!=list->end(); ++it) {
-      current_estimate.Apply(it->GetWorldX(), it->GetWorldY(), it->GetWorldZ(), &px, &py);
-      sumsq += (px-it->GetImageX())*(px-it->GetImageX()) + (py-it->GetImageY())*(py-it->GetImageY());
+      sumsq += EstimateTransform::EvaluateResidualSq(current_estimate, *it, *cam);
     }
-    return sumsq;
+    return sqrt(sumsq);
   }
 
 }
