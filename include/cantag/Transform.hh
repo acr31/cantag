@@ -111,6 +111,11 @@ namespace Cantag {
     void GetLocation(float location[3], float tag_size) const;
 
     /**
+     * Calculate the origin for this tag.
+     */
+    void GetLocation(const Camera& cam, float location[3], float tag_size) const;
+
+    /**
      * Calculate the normal vector for the tag in this transform
      */
     void GetNormalVector(const Camera& cam, float normal[3]) const;
