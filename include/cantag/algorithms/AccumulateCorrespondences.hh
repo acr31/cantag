@@ -97,6 +97,7 @@ namespace Cantag {
     const LocationElement* loc_lookup = m_dictionary.GetInformation((*(decode.GetPayloads().begin()))->payload);
     const PoseElement* pose_lookup = m_dictionary.GetInformation((*(decode.GetPayloads().begin()))->payload);
     const SizeElement* size_lookup = m_dictionary.GetInformation((*(decode.GetPayloads().begin()))->payload);
+
     if (loc_lookup && pose_lookup && size_lookup) {
      
       SizeElement tmp;
@@ -146,7 +147,7 @@ namespace Cantag {
       // then compute NPCF equivalent
       float xx, yy;
       t->Apply((float)0.0,(float)0.0,(float)0.0,&xx,&yy);
-      m_corr.push_back(Correspondence(xx,-yy,loc_lookup->x,loc_lookup->y,loc_lookup->z));
+      m_corr.push_back(Correspondence(xx,yy,loc_lookup->x,loc_lookup->y,loc_lookup->z));
       return true;
     }
     else {

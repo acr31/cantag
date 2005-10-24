@@ -146,6 +146,25 @@ namespace Cantag {
 
     if (mSigma>mFitError) throw ("Unable to meet required fit error for camera localisation");
 
+
+    std::list<Correspondence>::iterator cit = correspondences.begin();
+    for(;cit!=correspondences.end(); ++cit) {
+      Cantag::Transform t2;
+      for (int i=0; i<16;i++) t2[i]=transformResult[i];
+      t2.Invert();
+      
+      // Get image pixel of this point
+      float p[2];
+      float a,b;
+      t2.Apply(cit->GetWorldX(),cit->GetWorldY(),cit->GetWorldZ(),p, p+1);
+      c.NPCFToImage(p,1);
+      
+      // Compare with image pixel in correspondence
+      float p2[] ={cit->GetImageX(),cit->GetImageY()};
+      c.NPCFToImage(p2,1); 
+    }
+
+
     gsl_vector_free(step);
     gsl_vector_free(r);
 
