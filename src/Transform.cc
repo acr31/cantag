@@ -214,7 +214,7 @@ namespace Cantag {
       points[i] = m_transform[0]*x + m_transform[1]*y + m_transform[2]*z + m_transform[3];
       points[i+1] = m_transform[4]*x + m_transform[5]*y + m_transform[6]*z + m_transform[7];
       points[i+2] = m_transform[8]*x + m_transform[9]*y + m_transform[10]*z + m_transform[11];
-      float projH = m_transform[12]*x + m_transform[13]*y + m_transform[14]*z + m_transform[15];
+      float projH = m_transform[12]*x + m_transform[3]*y + m_transform[14]*z + m_transform[15];
       
       points[i] /= projH;
       points[i+1] /= projH;
@@ -345,7 +345,8 @@ namespace Cantag {
 
   void Transform::GetAngleRepresentation(float *theta, float *phi, float *psi) const {
     // See http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToAngle/index.htm
-    // for explanation
+    // for explanation.  This code derives the angle/axis values then converts the axis to a spherical 
+    // polars representation (theta,phi), where phi is in the xy plane.
 
     static const float epsilon = 0.001;
     
@@ -383,8 +384,8 @@ namespace Cantag {
 	else if (xzPositive) y=-y;
 	else if (xyPositive) z=-z;
 
-	*phi = acos(z);
-	*theta = atan2(y,z);
+	*theta = acos(z);
+	*phi = atan2(y,z);
       }
     }
     else {
@@ -396,8 +397,8 @@ namespace Cantag {
       float ny = (m_transform[2] - m_transform[8])/denom;
       float nz = (m_transform[4] - m_transform[1])/denom;
       
-      *phi = acos(nz);
-      *theta = atan2(ny,nz);
+      *theta = acos(nz);
+      *phi = atan2(ny,nz);
     }
   }
 
