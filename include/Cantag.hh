@@ -96,6 +96,7 @@
 //#include <cantag/algorithms/ValidateDecode.hh>
 //#include <cantag/algorithms/ValidateSample.hh>
 #include <cantag/algorithms/AccumulateCorrespondences.hh>
+#include <cantag/algorithms/AccumulateCornerCorrespondences.hh>
 
 ///////////////////////
 // coders
