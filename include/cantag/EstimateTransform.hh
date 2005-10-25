@@ -60,14 +60,29 @@ namespace Cantag {
      * (distorted) pixels. If the estimate is unable to
      * match it, an exception is thrown
      */
-    EstimateTransform(const float maxError) : mFitError(maxError), mSigma(-1.0) {}
-    EstimateTransform() : mFitError(1.0), mSigma(-1.0) {}
+    EstimateTransform(const float maxResidual) : mFitError(maxResidual), mMaxResidual(-1.0) {}
+    EstimateTransform() : mFitError(1.0), mMaxResidual(-1.0) {}
 
+
+    /**
+     * Perform the minimisation based on a supplied
+     * set of correspondences, a guess for the correct 
+     * transform, a camera with the distortion model,
+     * and (optionally) a hint about the scale of the
+     * (x,y,z) space to search about the guess point
+     */
     Transform operator()(std::list<Correspondence>& correspondences,
 			 const Transform &guess,
-			 const Camera &c);
+			 const Camera &c,
+			 float x_min_scale=-1.0,
+			 float y_min_scale=-1.0,
+			 float z_min_scale=-1.0);
 
-    float GetFitError() const { return mSigma; };
+    /**
+     * Get the maximum residual for the fit
+     */
+    float GetMaxResidual() const { return mMaxResidual; };
+
   private:
 
 
@@ -82,7 +97,7 @@ namespace Cantag {
     static double _MinFunc(const gsl_vector *v, void *params);
 
     float mFitError;
-    float mSigma;
+    float mMaxResidual;
 
     struct MinData_t {
       const Camera *c;

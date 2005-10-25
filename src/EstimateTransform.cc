@@ -36,7 +36,11 @@ namespace Cantag {
    */
   Transform EstimateTransform::operator()(std::list<Correspondence>& correspondences,
 					  const Transform &guess,
-					  const Camera &c) {
+					  const Camera &c,
+					   float x_min_scale,
+					   float y_min_scale,
+					   float z_min_scale)
+  {
 
     if (correspondences.size() < 6) {
       throw("Sorry - insufficient cor respondences to compute camera position");
@@ -59,10 +63,20 @@ namespace Cantag {
     gsl_vector_set (r, 4,  phi);
     gsl_vector_set (r, 5,  psi);
    
+
+    if (x_min_scale <0.0 || y_min_scale < 0.0 || z_min_scale < 0.0) {
+      // We have to guess the size of the state space
+      // to search around the guess point
+      x_min_scale = (guess[3]>guess[7]) ? guess[3]:guess[7];
+      x_min_scale = (guess[11]>x_min_scale) ? guess[11]:x_min_scale;
+      y_min_scale=x_min_scale;
+      z_min_scale=x_min_scale;
+    }
+
     gsl_vector *step = gsl_vector_alloc (6);
-    gsl_vector_set(step,0,1.0);
-    gsl_vector_set(step,1,1.0);
-    gsl_vector_set(step,2,1.0);
+    gsl_vector_set(step,0,x_min_scale);
+    gsl_vector_set(step,1,y_min_scale);
+    gsl_vector_set(step,2,z_min_scale);
     gsl_vector_set(step,3,3.141/2.0);
     gsl_vector_set(step,4,3.141/2.0);
     gsl_vector_set(step,5,3.141);
@@ -82,8 +96,8 @@ namespace Cantag {
     Transform transformResult;
 
     // Model fit error estimate
-    mSigma = 1e10;
-    while (mSigma>mFitError && correspondences.size()>=6) {
+    mMaxResidual = 1e10;
+    while (mMaxResidual>mFitError && correspondences.size()>=6) {
       gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc (T, 6);
       gsl_multimin_fminimizer_set (s, &errfunc, r, step); 
 
@@ -94,9 +108,9 @@ namespace Cantag {
 	status = gsl_multimin_fminimizer_iterate (s);
 	if (status)  break;      
 	status = gsl_multimin_test_size(s->size,1e-3);
-      }  while (status == GSL_CONTINUE && iter < 50000);   
+      }  while (status == GSL_CONTINUE && iter < 5000);   
 
-      if (iter!=50000) {
+      if (iter!=5000) {
 	float xx = gsl_vector_get(s->x, 0);
 	float yy = gsl_vector_get(s->x, 1);
 	float zz = gsl_vector_get(s->x, 2);
@@ -114,62 +128,37 @@ namespace Cantag {
       }
       else throw("Failed to converge");
 
-
-
       gsl_multimin_fminimizer_free(s);
 
-      
-      float maxResidualsq=-1.0e10;
-
-      float sumsq=0.0;
       std::list<Correspondence>::iterator it = correspondences.begin();
       std::list<Correspondence>::iterator maxResidualIt;
-      float maxResidualSq=-1e10;
-      float sumsqres = 0.f;
+      float maxResidualsq=-1e10;
+
+      for(;it!=correspondences.end();++it) {
 	float residualsq = EvaluateResidualSq(transformResult, *(it),c);
-	sumsq+=residualsq;
 	if (residualsq>maxResidualsq) {
-	    maxResidualsq=residualsq;
-	    maxResidualIt = it;
+	  maxResidualsq=residualsq;
+	  maxResidualIt = it;
 	}
+      }
 
-      // Recompute mSigma
-      mSigma=sqrt( sumsq/(correspondences.size()-2.0) );
-
+      mMaxResidual = sqrt(maxResidualsq);
       // If it's too big, discard the largest residual
-      if (correspondences.size()==6) break;
-      else if (mSigma>mFitError && correspondences.size()) correspondences.erase(maxResidualIt);
+      if (correspondences.size()<=6) break;
+      else if (mMaxResidual>mFitError) correspondences.erase(maxResidualIt);
       
-
     } // while loop
 
 
-    if (mSigma>mFitError) throw ("Unable to meet required fit error for camera localisation");
-
-
-    std::list<Correspondence>::iterator cit = correspondences.begin();
-    for(;cit!=correspondences.end(); ++cit) {
-      Cantag::Transform t2;
-      for (int i=0; i<16;i++) t2[i]=transformResult[i];
-      t2.Invert();
-      
-      // Get image pixel of this point
-      float p[2];
-      float a,b;
-      t2.Apply(cit->GetWorldX(),cit->GetWorldY(),cit->GetWorldZ(),p, p+1);
-      c.NPCFToImage(p,1);
-      
-      // Compare with image pixel in correspondence
-      float p2[] ={cit->GetImageX(),cit->GetImageY()};
-      c.NPCFToImage(p2,1); 
-    }
-
+    if (mMaxResidual>mFitError) throw ("Unable to meet required fit error for camera localisation");
 
     gsl_vector_free(step);
     gsl_vector_free(r);
 
     return transformResult;
   };
+
+
 
 
   float EstimateTransform::EvaluateResidualSq(const Cantag::Transform &t,
@@ -184,9 +173,7 @@ namespace Cantag {
 
     // Get image pixel of this point
     float p[2];
-    float a,b;
     t2.Apply(c.GetWorldX(),c.GetWorldY(),c.GetWorldZ(),p, p+1);
-
     cam.NPCFToImage(p,1);
 
     // Compare with image pixel in correspondence
@@ -223,7 +210,6 @@ namespace Cantag {
     float psi = gsl_vector_get(v, 5);
 
     Cantag::Transform current_estimate(x, y, z, theta, phi, psi, 1.0);
-    // current_estimate.Invert();
 
     double sumsq=0.0;
     std::list<Correspondence>::const_iterator it = list->begin();
