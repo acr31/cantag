@@ -26,85 +26,103 @@
 
 #include <cmath>
 #include <cantag/algorithms/ConvexHull.hh>
+#include <map>
 
 namespace Cantag {
 
-  static inline float isLeft(const std::vector<float> &V,int l0, int l1, int p) {
-    return (V[l1*2] - V[l0*2])*(V[p*2+1] - V[l0*2+1]) - (V[p*2] - V[l0*2])*(V[l1*2+1] - V[l0*2+1]);
-  }
 
-
-  /** 
-   * The hull code is adapted from softSurfer who requires the
-   * following copyright be displayed: Copyright 2001, softSurfer
-   * (www.softsurfer.com) This code may be freely used and modified
-   * for any purpose providing that this copyright notice is included
-   * with it.
-   */
   bool ConvexHull::operator()(const ContourEntity& source, ConvexHullEntity& dest) const {
     const std::vector<float>& V = source.GetPoints();
-
-    const int n = V.size()/2;
     std::vector<int>& H = dest.GetIndices();
-    H.resize(V.size()/2+2);
-    // initialize a deque D[] from bottom to top so that the
-    // 1st three vertices of V[] are a counterclockwise triangle
-    int D[2*n+1];
-    memset(D,0,2*n+1);
-    int bot = n-2, top = bot+3;   // initial bottom and top deque indices
-    D[bot] = D[top] = 2;       // 3rd vertex is at both bot and top
-    if (isLeft(V, 0, 1, 2) > 0) {
-      D[bot+1] = 0;
-      D[bot+2] = 1;          // ccw vertices are: 2,0,1,2
-    }
-    else {
-      D[bot+1] = 1;
-      D[bot+2] = 0;          // ccw vertices are: 2,1,0,2
-    }
-    
-    // compute the hull on the deque D[]
-    for (int i=3; i < n; i++) {   // process the rest of vertices
-      // test if next vertex is inside the deque hull
-      if ((isLeft(V, D[bot], D[bot+1], i) >= 0) &&
-	  (isLeft(V, D[top-1],D[top], i) >= 0) )
-	continue;         // skip an interior vertex
-      
-      // incrementally add an exterior vertex to the deque hull
-      // get the rightmost tangent at the deque bot
-      while (isLeft(V,D[bot], D[bot+1], i) <= 0) ++bot; // remove bot of deque
-      D[--bot] = i;          // insert V[i] at bot of deque
-      
-      // get the leftmost tangent at the deque top
-      while (isLeft(V,D[top-1],D[top], i) <= 0) --top; // pop top of deque
-      D[++top] = i;          // push V[i] onto top of deque
-      if (top-bot < 2) return false;
-    }
-    
-    // transcribe deque D[] to the output hull array H[]
-    int h;        // hull vertex counter
-    for (h=0; h <= (top-bot); h++) {
-      H[h] = D[bot + h];
-    } 
 
-    // now work out if any of the points not on the convex hull are
-    // too far from the hull itself we do this by taking each pair of
-    // indices from the index list and measuring the shortest distance
-    // of each point between the indices to the line
-    int index = -1;
-    for(std::vector<int>::const_iterator i = H.begin();i!=H.end();++i) {
-      if (index != -1) {
-	for(int count=index+1;count<*i;++count) {
-	  float dist = (V[2*index]-V[2*count])*(V[2*index]-V[2*count]) +
-	    (V[2*index+1]-V[2*count+1])*(V[2*index+1]-V[2*count+1]);
-	  if (dist > m_restriction.GetMaxDeviation()) {
-	    //	    return false;
-	  }
+ int index=0;
+    float ix=V[0],iy=V[1];
+    
+    for (int i=2; i<V.size();i+=2) {
+      if (V[i]>ix) {
+	ix=V[i];
+	iy=V[i+1];
+	index=i;
+      }
+      else if (V[i]==ix && V[i+1]>iy) {
+	ix=V[i];
+	iy=V[i+1];
+	index=i;
+      }
+    }
+
+    std::map<float,int> imap;
+
+    for (int i=0; i<V.size();i+=2) {
+      if (i!=index) {
+	float x = V[i]-ix;
+	float y = V[i+1]-iy;
+	float ang=atan2(y,x);
+	if (ang<0.0) ang+=2*M_PI;
+	ang-=M_PI/2;
+	std::map<float,int>::const_iterator ci = imap.find(ang);
+	if (ci==imap.end()) imap[ang]=i/2;
+	else {
+	  int idx = ci->second;
+	  float x1=V[2*i]-ix;
+	  float y1=V[2*i+1]-iy;
+	  float x2=V[2*idx]-ix;
+	  float y2=V[2*idx+1]-iy;
+	  if ((x1*x1+y1*y1) > (x2*x2+y2*y2)) imap[ang]=i/2;
 	}
       }
-      index = *i;
+    }
+
+    int current_point=1;
+    H.push_back(index/2);
+    std::map<float,int>::const_iterator ci = imap.begin();
+    H.push_back(ci->second);
+    ++ci;
+
+    for (;ci!=imap.end();++ci) {
+      float px = V[ci->second*2];
+      float py = V[ci->second*2+1];
+      float px_last = V[(H[H.size()-1])*2];
+      float py_last = V[(H[H.size()-1])*2+1];
+      float px_last2 = V[(H[H.size()-2])*2];
+      float py_last2 = V[(H[H.size()-2])*2+1];
+
+      float s_x = (px_last2-px_last);
+      float s_y = (py_last2-py_last);
+
+      float t_x = (px-px_last);
+      float t_y = (py-py_last);
+
+      if ((s_x*t_y - s_y*t_x)<0) {
+	// Add this vertex
+	H.push_back(ci->second);
+      }
+      else {
+	// Remove the last vertex
+	H[H.size()-1]=ci->second;
+      }
+    }
+
+    float px_last = V[(H[H.size()-1])*2];
+    float py_last = V[(H[H.size()-1])*2+1];
+    float px_last2 = V[(H[H.size()-2])*2];
+    float py_last2 = V[(H[H.size()-2])*2+1];
+
+    float s_x = (px_last2-px_last);
+    float s_y = (py_last2-py_last);
+
+    float t_x = (ix-px_last);
+    float t_y = (iy-py_last);
+
+    if ((s_x*t_y - s_y*t_x)>0) {
+      // Remove the last vertex
+      std::vector<int>::iterator vi = H.end();
+      vi--;
+      H.erase(vi);
     }
 
     return true;
-    
+
+
   };
 }
