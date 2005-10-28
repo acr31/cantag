@@ -46,7 +46,7 @@ int main(int argc,char* argv[]) {
     // set the intrinsic parameters of the camera
     camera.SetIntrinsic(1284.33,1064.55,450.534, 321.569,0 );
     
-    XOutputMechanism<Ellipse,34> o3(fs.GetWidth(),fs.GetHeight(),camera);
+    XDisplay<Pix::Sze::Byte1,Pix::Fmt::Grey8> o3(fs.GetWidth(),fs.GetHeight());
     
     TagType tag;
     
@@ -55,33 +55,27 @@ int main(int argc,char* argv[]) {
     int count = 0;
     while(cnt<1) {
       Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* i = fs.Next();
-      //      i->Save("tmp1.ppm");
-      Apply(*i,o3.m_ImageAlgorithm);
+      Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> output(i->GetWidth(),i->GetHeight());
+      Apply(*i,DrawEntityImage(output));
+      output.ConvertScale(0.25,190);
+
       MonochromeImage m(i->GetWidth(),i->GetHeight());
       //Apply(*i,m,ThresholdAdaptive(atoi(argv[1]),atoi(argv[2])));
       Apply(*i,m,ThresholdGlobal<Pix::Sze::Byte1,Pix::Fmt::Grey8>(atoi(argv[1])));
-      //      m.Save("tmp2.ppm");
-
-      Apply(m,o3.m_ThresholdAlgorithm);
 
       Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<TagType::PayloadSize>) > > tree;
       Apply(m,tree,ContourFollowerTree(tag));
       ApplyTree(tree,ConvexHull(tag));
-      ApplyTree(tree,o3.m_ContourAlgorithm);
-      //m.Save("tmp3.ppm");
+      ApplyTree(tree,DrawEntityContour(output));
       ApplyTree(tree,DistortionCorrection(camera));
-      ApplyTree(tree,FitEllipseLS()); // maximum fit error and error technique
-      // weed out shapes that don't match
-      ApplyTree(tree,o3.m_ShapeAlgorithm);
-      ApplyTree(tree,TransformEllipseFull());
-      //m.Save("tmp4.ppm");
-      // select transform
+      ApplyTree(tree,FitEllipseLS()); 
+      ApplyTree(tree,TransformEllipseFull(tag.GetBullseyeOuterEdge()));
       ApplyTree(tree,Bind(TransformEllipseRotate(tag,camera),m));
       ApplyTree(tree,Bind(SampleTagCircle(tag,camera),m));
       ApplyTree(tree,Decode<TagType>());
-      ApplyTree(tree,TransformRotateToPayload(tag));
-      ApplyTree(tree,o3.m_TransformAlgorithm);
-      o3.Flush();
+      ApplyTree(tree,TransformRotateToPayload(tag));      
+      ApplyTree(tree,DrawEntityTransform(output,camera));
+      o3.Output(output);
       ++count;
       if (count == 100) {
 	time_t elapsed = time(NULL)-cur_time;
