@@ -34,10 +34,14 @@ namespace Cantag {
   bool ConvexHull::operator()(const ContourEntity& source, ConvexHullEntity& dest) const {
     const std::vector<float>& V = source.GetPoints();
     std::vector<int>& H = dest.GetIndices();
-
- int index=0;
-    float ix=V[0],iy=V[1];
     
+
+
+    // Find the point that has the greatest
+    // x value. If there is a tie, take the
+    // one with the highest y value
+    int index=0;
+    float ix=V[0],iy=V[1];
     for (int i=2; i<V.size();i+=2) {
       if (V[i]>ix) {
 	ix=V[i];
@@ -51,21 +55,21 @@ namespace Cantag {
       }
     }
 
+    // Sort the points by angle (0->2pi)
+    // with this point as origin
     std::map<float,int> imap;
-
     for (int i=0; i<V.size();i+=2) {
       if (i!=index) {
 	float x = V[i]-ix;
 	float y = V[i+1]-iy;
 	float ang=atan2(y,x);
 	if (ang<0.0) ang+=2*M_PI;
-	ang-=M_PI/2;
 	std::map<float,int>::const_iterator ci = imap.find(ang);
 	if (ci==imap.end()) imap[ang]=i/2;
 	else {
 	  int idx = ci->second;
-	  float x1=V[2*i]-ix;
-	  float y1=V[2*i+1]-iy;
+	  float x1=V[i]-ix;
+	  float y1=V[i+1]-iy;
 	  float x2=V[2*idx]-ix;
 	  float y2=V[2*idx+1]-iy;
 	  if ((x1*x1+y1*y1) > (x2*x2+y2*y2)) imap[ang]=i/2;
@@ -73,12 +77,15 @@ namespace Cantag {
       }
     }
 
-    int current_point=1;
+    // Start the hull
     H.push_back(index/2);
     std::map<float,int>::const_iterator ci = imap.begin();
     H.push_back(ci->second);
     ++ci;
 
+    // Walk through the map
+    // When we have to turn left add that vertex
+    // When we have to turn right, remove the last vertex
     for (;ci!=imap.end();++ci) {
       float px = V[ci->second*2];
       float py = V[ci->second*2+1];
@@ -98,8 +105,26 @@ namespace Cantag {
 	H.push_back(ci->second);
       }
       else {
-	// Remove the last vertex
-	H[H.size()-1]=ci->second;
+	float z=1;
+
+	while (z>0 && H.size()>1) {
+	  std::vector<int>::iterator dit = H.end();
+	  dit--;
+	  H.erase(dit);
+
+	  float px_last = V[(H[H.size()-1])*2];
+	  float py_last = V[(H[H.size()-1])*2+1];
+	  float px_last2 = V[(H[H.size()-2])*2];
+	  float py_last2 = V[(H[H.size()-2])*2+1];
+
+	  s_x = (px_last2-px_last);
+	  s_y = (py_last2-py_last);
+	  t_x = (px-px_last);
+	  t_y = (py-py_last);
+	  z=(s_x*t_y - s_y*t_x);
+	}
+	// Add the new vertex
+	H.push_back(ci->second);
       }
     }
 
@@ -122,7 +147,6 @@ namespace Cantag {
     }
 
     return true;
-
 
   };
 }
