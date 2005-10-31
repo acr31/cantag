@@ -35,7 +35,8 @@ namespace Cantag {
     const std::vector<float>& V = source.GetPoints();
     std::vector<int>& H = dest.GetIndices();
     
-  // Find the point that has the greatest
+
+// Find the point that has the greatest
     // x value. If there is a tie, take the
     // one with the highest y value
     int index=0;
@@ -68,12 +69,11 @@ namespace Cantag {
 	assert(x<=0.0);
 
 	int q=0;
-	if (x<=0 && y>0) q=0;
-	if (x<0 && y<=0) q=1;
+	if (y>0) q=0;
+	if (y<=0) q=1;
 
 	float val=y/x;
 	if (x==0.0) val=1e10;
-	if(x==0 && y<0) val=-val;
 	std::map<float,int >::const_iterator ci = quadrants[q].find(val);
 	if (ci==quadrants[q].end()) {quadrants[q][val]=i/2;}
 	else {
@@ -98,6 +98,7 @@ namespace Cantag {
       q=1;
     }
 
+
     H.push_back(index/2);
     H.push_back(ci->second);
     ++ci;
@@ -116,6 +117,8 @@ namespace Cantag {
 
       float px = V[ci->second*2];
       float py = V[ci->second*2+1];
+
+      std::cerr << px << " " << py << std::endl;
       
       float px_last = V[(H[H.size()-1])*2];
       float py_last = V[(H[H.size()-1])*2+1];
@@ -134,7 +137,7 @@ namespace Cantag {
       }
       else {
 	float z=1;
-	while (z>0 && H.size()>1) {
+	while (z>0 && H.size()>2) {
 	  std::vector<int>::iterator dit = H.end();
 	  dit--;
 	  H.erase(dit);
@@ -174,8 +177,5 @@ namespace Cantag {
     }
 
     return true;
-
-   
-
   };
 }
