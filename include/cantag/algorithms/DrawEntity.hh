@@ -28,6 +28,7 @@
 #include <cantag/Config.hh>
 #include <cantag/Function.hh>
 #include <cantag/TagCircle.hh>
+#include <cantag/TagSquare.hh>
 #include <cantag/entities/ContourEntity.hh>
 #include <cantag/entities/ShapeEntity.hh>
 #include <cantag/entities/TransformEntity.hh>
@@ -126,7 +127,62 @@ namespace Cantag {
     }
     return true;
   }
+
+  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
+  inline
+  DrawEntitySampleCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT> DrawEntitySample(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera, const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec, ROI roi) { 
+    return DrawEntitySampleSquareObj(image,camera,tags,roi);
+  }
+
+  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
+  inline
+  DrawEntitySampleCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT> DrawEntitySample(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera, const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec) { 
+    return DrawEntitySampleSquareObj(image,camera,tags);
+  }
+
+  template<int EDGE_CELLS>
+  class DrawEntitySampleSquareObj : public Function<TL0,TL1(TransformEntity)> {
+  private:
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
+    const Camera& m_camera;
+    const TagSquare<EDGE_CELLS>& m_tagspec;
+    const ROI m_roi;
+  public:
+    DrawEntitySampleSquareObj(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera, const TagSquare<EDGE_CELLS>& tagspec, ROI roi) : m_image(image), m_camera(camera), m_tagspec(tagspec), m_roi(roi) {}
+    DrawEntitySampleSquareObj(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera, const TagSquare<EDGE_CELLS>& tagspec) : m_image(image), m_camera(camera), m_tagspec(tagspec),m_roi(0,image.GetWidth(),0,image.GetHeight()) {}
+    bool operator()(TransformEntity& transform) const;
+  };
+
   
+  template<int EDGE_CELLS> bool DrawEntitySampleSquareObj<EDGE_CELLS>::operator()(TransformEntity& transform) const {
+    const Transform* i = transform.GetPreferredTransform();
+    const int payloadsize = EDGE_CELLS*EDGE_CELLS - (EDGE_CELLS*EDGE_CELLS %2);
+    if (i) {
+      for(int j=0;j<payloadsize;j++) {
+	float pts[] = { m_tagspec.GetXSamplePoint(j),
+			m_tagspec.GetYSamplePoint(j) };
+	i->Apply(pts[0],pts[1],pts,pts+1);
+	m_camera.NPCFToImage(pts,1);
+	int coordx = m_roi.ScaleX(pts[0],m_image.GetWidth());
+	int coordy = m_roi.ScaleY(pts[1],m_image.GetHeight());	  
+	m_image.DrawPixel(coordx,coordy,0);
+      }
+    }
+    return true;
+  }
+
+  template<int EDGE_CELLS>
+  inline
+  DrawEntitySampleSquareObj<EDGE_CELLS> DrawEntitySample(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera, const TagSquare<EDGE_CELLS>& tagspec, ROI roi) { 
+    return DrawEntitySampleSquareObj(image,camera,tags,roi);
+  }
+
+  template<int EDGE_CELLS>
+  inline
+  DrawEntitySampleSquareObj<EDGE_CELLS> DrawEntitySample(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera, const TagSquare<EDGE_CELLS>& tagspec) { 
+    return DrawEntitySampleSquareObj(image,camera,tags);
+  }
+
   class DrawEntityTransform : public Function<TL0,TL1(TransformEntity)> {
   private:
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
