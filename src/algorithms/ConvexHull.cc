@@ -118,8 +118,6 @@ namespace Cantag {
       float px = V[ci->second*2];
       float py = V[ci->second*2+1];
 
-      std::cerr << px << " " << py << std::endl;
-      
       float px_last = V[(H[H.size()-1])*2];
       float py_last = V[(H[H.size()-1])*2+1];
       float px_last2 = V[(H[H.size()-2])*2];
