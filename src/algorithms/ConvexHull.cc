@@ -34,9 +34,8 @@ namespace Cantag {
   bool ConvexHull::operator()(const ContourEntity& source, ConvexHullEntity& dest) const {
     const std::vector<float>& V = source.GetPoints();
     std::vector<int>& H = dest.GetIndices();
-    
 
-// Find the point that has the greatest
+    // Find the point that has the greatest
     // x value. If there is a tie, take the
     // one with the highest y value
     int index=0;
@@ -89,7 +88,8 @@ namespace Cantag {
 
     // Start the hull
     std::map<float,int>::const_iterator ci;
-   
+  
+
     int q=0;
     if (quadrants[0].size()) ci = quadrants[0].begin();
     else {
@@ -113,11 +113,11 @@ namespace Cantag {
 	ci=quadrants[1].begin();
 	q=1;
       }
-      else if (q==1 && ci==quadrants[1].end()) break;
+      if (q==1 && ci==quadrants[1].end()) break;
 
       float px = V[ci->second*2];
       float py = V[ci->second*2+1];
-
+      
       float px_last = V[(H[H.size()-1])*2];
       float py_last = V[(H[H.size()-1])*2+1];
       float px_last2 = V[(H[H.size()-2])*2];
@@ -135,7 +135,7 @@ namespace Cantag {
       }
       else {
 	float z=1;
-	while (z>0 && H.size()>2) {
+	while (z>=0 && H.size()>2) {
 	  std::vector<int>::iterator dit = H.end();
 	  dit--;
 	  H.erase(dit);
@@ -167,7 +167,7 @@ namespace Cantag {
     float t_x = (ix-px_last);
     float t_y = (iy-py_last);
 
-    if ((s_x*t_y - s_y*t_x)>0) {
+    if ((s_x*t_y - s_y*t_x)>=0) {
       // Remove the last vertex
       std::vector<int>::iterator vi = H.end();
       vi--;
@@ -175,5 +175,6 @@ namespace Cantag {
     }
 
     return true;
+
   };
 }
