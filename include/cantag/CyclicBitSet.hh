@@ -272,6 +272,7 @@ namespace Cantag {
   }
 
   template<int BIT_COUNT> bool CyclicBitSet<BIT_COUNT>::operator<(const CyclicBitSet<BIT_COUNT>& o) const {
+
     for(unsigned int i=BIT_COUNT;i>0;i--) {
       if ( !(*this)[i-1] && o[i-1] ) {
 	return true;
@@ -280,6 +281,7 @@ namespace Cantag {
 	return false;
       }
     }
+    return false;
   }
   template<int BIT_COUNT> bool CyclicBitSet<BIT_COUNT>::operator==(const CyclicBitSet<BIT_COUNT>& o) const {
     for(unsigned int i=0;i<BIT_COUNT;i++) {
