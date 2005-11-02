@@ -24,104 +24,60 @@
 
 #include <cantag/algorithms/FitQuadTangleCorner.hh>
 
-#define LOGMAXWINDOW 5
+#define WINDOWSIZE 10
 #define CURVTHRESH -0.8
-#define TOTAL_MASK(x) ((x) & ((1<<LOGMAXWINDOW)-1))
+
 namespace Cantag {
 
-  static float curvature(const float* xwindow, const float* ywindow, int datapointer, int k) {
-    float ax = xwindow[TOTAL_MASK(datapointer+k)] - xwindow[datapointer];
-    float ay = ywindow[TOTAL_MASK(datapointer+k)] - ywindow[datapointer];
-
-    float bx = xwindow[TOTAL_MASK(datapointer-k)] - xwindow[datapointer];
-    float by = ywindow[TOTAL_MASK(datapointer-k)] - ywindow[datapointer];
-
-    float moda = sqrt(ax*ax+ay*ay);
-    float modb = sqrt(bx*bx+by*by);
-
-    float result = (ax*bx+ay*by)/moda/modb;
-
-    return result;
+  static float curvature(const std::vector<float>& points, int ref, int i1, int i2) {
+    float ax = points[2*i1]-points[2*ref];
+    float ay = points[2*i1+1]-points[2*ref+1];
+    float bx = points[2*i2]-points[2*ref];
+    float by = points[2*i2+1]-points[2*ref+1];
+    return (ax*bx+ay*by)/(sqrt(ax*ax+ay*ay)*sqrt((bx*bx+by*by)));
   }
 
   bool FitQuadTangleCorner::operator()(const ContourEntity& contour, ShapeEntity<QuadTangle>& shape) const {
     const std::vector<float>& points = contour.GetPoints();
-
-    if (points.size() > (2<<LOGMAXWINDOW)) {
-      float xcorners[4];
-      float ycorners[4];
-      int cornerindices[4];
-      float curvecorners[4];
-      int corner_counter = 0;
-      bool corner_set = false;
-      float xwindow[1<<LOGMAXWINDOW];
-      float ywindow[1<<LOGMAXWINDOW];
-      int indexcounter = 0;
-      int loadpointer = 0;
-      std::vector<float>::const_iterator i = points.begin();
-      for(;loadpointer < (1<<LOGMAXWINDOW);++loadpointer) {
-	xwindow[loadpointer] = *i;
-	++i;
-	ywindow[loadpointer] = *i;
-	++i;
-      }
-      int datapointer = 1<<(LOGMAXWINDOW-1);
+    const int numindexes =  points.size()/2;
+    int corner_index=-1;
+    int corners[4];
+    bool peak=false;
+    float last_curv=curvature(points,numindexes-1, numindexes-1-WINDOWSIZE,WINDOWSIZE-1);
     
-      float curve2 = curvature(xwindow,ywindow,datapointer,10);
-      if (curve2 > CURVTHRESH) {
-	xcorners[0] = xwindow[datapointer];
-	ycorners[0] = ywindow[datapointer];
-	cornerindices[0] = datapointer;
-	curvecorners[0] = curve2;
-	++corner_counter;
-      }
-    
-      float previous = curve2;
-      float currentmax = -10;
-      int count = points.size()/2;
-      for(int c=1;c<count;++c) {
-	datapointer = TOTAL_MASK(datapointer+1);
-	loadpointer = TOTAL_MASK(loadpointer+1);
-	xwindow[loadpointer] = *i;
-	++i;
-	ywindow[loadpointer] = *i;
-	++i;
-	++indexcounter;
-	if (i == points.end()) { i = points.begin(); }
+    for(int i=0; i<points.size()/2;i++) {
+      int p1 = i-WINDOWSIZE;
+      int p2 = (i+WINDOWSIZE)%numindexes;
+      while (p1<0) p1+=numindexes;
+      float c = curvature(points,i, p1,p2);
       
-	float curve = curvature(xwindow,ywindow,datapointer,10);
-	curve = -fabs(curve);
-	if (curve < CURVTHRESH) { 
-	  if (previous > CURVTHRESH && corner_set) {
-	    ++corner_counter;
-	    corner_set = false;
-	    currentmax = -10;
-	    if (corner_counter > 4) { return false; }
-	  }
-	}
-	else {
-	  if (curve > currentmax && corner_counter < 4) { 
-	    currentmax = curve;
-	    xcorners[corner_counter] = xwindow[datapointer];
-	    ycorners[corner_counter] = ywindow[datapointer];
-	    corner_set = true;
-	    cornerindices[corner_counter] = datapointer+indexcounter;
-	  }
-	}
-	previous = curve;
-      }
-    
-      if (corner_counter == 4) {
-	shape.SetShape(new QuadTangle(xcorners[0],ycorners[0],
-				      xcorners[1],ycorners[1],
-				      xcorners[2],ycorners[2],
-				      xcorners[3],ycorners[3],
-				      cornerindices[0],cornerindices[1],cornerindices[2],cornerindices[3]));
-	return true;
-      }
+      if (c>CURVTHRESH && last_curv<=CURVTHRESH) {peak=true;corner_index++;}
+      if (c<=CURVTHRESH && last_curv>CURVTHRESH) {peak=false;}
+      if (peak && c>=last_curv) corners[corner_index]=i;
+      last_curv=c;
+      if (corner_index>3) return false;
     }
-    return false;
-
+    int i=0;
+    while (peak && corner_index==3) {
+      int p1 = i-WINDOWSIZE;
+      int p2 = (i+WINDOWSIZE)%numindexes;
+      while (p1<0) p1+=numindexes;
+      float c = curvature(points,i, p1,p2);
+      if (c<=CURVTHRESH && last_curv>CURVTHRESH) {peak=false;}
+      if (peak && c>=last_curv) corners[corner_index]=i;
+      last_curv=c;
+      i++;
+    }
+    
+    if (corner_index == 3) {
+      shape.SetShape(new QuadTangle(points[2*corners[0]],points[2*corners[0]+1],
+				    points[2*corners[1]],points[2*corners[1]+1],
+				    points[2*corners[2]],points[2*corners[2]+1],
+				    points[2*corners[3]],points[2*corners[3]+1],
+				    corners[0],corners[1],corners[2],corners[3]));
+      return true;
+    }
+    return false;   
   }
 
 }
