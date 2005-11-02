@@ -1,6 +1,29 @@
 cantagincludedir = $(includedir)/cantag/algorithms
 
-cantaginclude_HEADERS = DistortionCorrection.hh FitEllipseLS.hh FitEllipseSimple.hh TransformEllipseFull.hh TransformEllipseLinear.hh SampleTagCircle.hh FitQuadTangleCorner.hh FitQuadTangleConvexHull.hh FitQuadTanglePolygon.hh TransformQuadTangleProjective.hh TransformQuadTangleReduced.hh ConvexHull.hh TransformEllipseRotate.hh TransformRotateToPayload.hh DrawTagCircle.hh DrawTagSquare.hh Encode.hh TransformSelectEllipse.hh RemoveNonConcentricEllipse.hh DrawEntity.hh TransformSelectEllipseErrorOfFit.hh FitQuadTangleRegression.hh AccumulateCorrespondences.hh
+cantaginclude_HEADERS =  DistortionCorrection.hh
+cantaginclude_HEADERS += FitEllipseLS.hh
+cantaginclude_HEADERS += FitEllipseSimple.hh 
+cantaginclude_HEADERS += TransformEllipseFull.hh 
+cantaginclude_HEADERS += TransformEllipseLinear.hh 
+cantaginclude_HEADERS += SampleTagCircle.hh 
+cantaginclude_HEADERS += FitQuadTangleCorner.hh 
+cantaginclude_HEADERS += FitQuadTangleConvexHull.hh
+cantaginclude_HEADERS += FitQuadTanglePolygon.hh
+cantaginclude_HEADERS += TransformQuadTangleProjective.hh 
+cantaginclude_HEADERS += TransformQuadTangleReduced.hh
+cantaginclude_HEADERS += ConvexHull.hh 
+cantaginclude_HEADERS += TransformEllipseRotate.hh 
+cantaginclude_HEADERS += TransformRotateToPayload.hh 
+cantaginclude_HEADERS += DrawTagCircle.hh 
+cantaginclude_HEADERS += DrawTagSquare.hh 
+cantaginclude_HEADERS += Encode.hh 
+cantaginclude_HEADERS += TransformSelectEllipse.hh 
+cantaginclude_HEADERS += RemoveNonConcentricEllipse.hh 
+cantaginclude_HEADERS += DrawEntity.hh 
+cantaginclude_HEADERS += PrintEntity.hh 
+cantaginclude_HEADERS += TransformSelectEllipseErrorOfFit.hh 
+cantaginclude_HEADERS += FitQuadTangleRegression.hh 
+cantaginclude_HEADERS += AccumulateCorrespondences.hh
 
 # disabled acr31 branch
 #cantaginclude_HEADERS += ValidateDistortionCorrection.hh ValidateFitEllipse.hh ValidateFitQuadTangle.hh ValidateTransformQuadTangle.hh ValidateDecode.hh
@@ -8,7 +31,8 @@ cantaginclude_HEADERS = DistortionCorrection.hh FitEllipseLS.hh FitEllipseSimple
 if HAVE_GSL_MULTIMIN_H
 if HAVELIB_GSLCBLAS
 if HAVELIB_GSL
-cantaginclude_HEADERS += TransformQuadTangleSpaceSearch.hh TransformQuadTangleCyberCode.hh
+cantaginclude_HEADERS += TransformQuadTangleSpaceSearch.hh 
+cantaginclude_HEADERS += TransformQuadTangleCyberCode.hh
 endif
 endif
 endif
