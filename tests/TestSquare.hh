@@ -26,6 +26,7 @@
 #define TEST_SQUARE_GUARD
 
 #include <Cantag.hh>
+using namespace Cantag;
 
 template<int EDGE_CELLS, class FitAlgorithm, class TransformAlgorithm>
 class TestSquare : public Cantag::TagSquare<EDGE_CELLS>, public Cantag::RawCoder<EDGE_CELLS*EDGE_CELLS - (EDGE_CELLS*EDGE_CELLS %2),(EDGE_CELLS*EDGE_CELLS - (EDGE_CELLS*EDGE_CELLS %2))/4> {

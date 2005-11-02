@@ -115,7 +115,7 @@ class CircleSplitLSLinear36 : public CircleSplit<2,18,Cantag::FitEllipseLS,Canta
 class CircleSplitSimpleFull36 : public CircleSplit<2,18,Cantag::FitEllipseSimple,Cantag::TransformEllipseFull> {};
 class CircleSplitSimpleLinear36 : public CircleSplit<2,18,Cantag::FitEllipseSimple,Cantag::TransformEllipseLinear> {};
 
-class CircleInnerLSFull26 : public CircleInner<2,13,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> {};
+class CircleInnerLSFull24 : public CircleInner<2,12,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> {};
 class CircleInnerLSFull48 : public CircleInner<2,24,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> {};
 class CircleInnerLSFull64 : public CircleInner<2,32,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> {};
 class CircleInnerLSFull80 : public CircleInner<2,40,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> {};

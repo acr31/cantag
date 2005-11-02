@@ -79,7 +79,7 @@ struct Executor {
     RunTest<TagType> r(size,fov,d);
     
     try {
-      r.ExecuteBatch(std::cout,1,1,180,180,50,typeid(TagType).name());
+      r.ExecuteBatch(std::cout,1,1,180,5,5,typeid(TagType).name());
     }
     catch (const char* exception) {
       std::cerr << "Caught exception: " << exception<< std::endl;

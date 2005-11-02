@@ -29,9 +29,10 @@ struct Result {
   float distance_error;
   int bit_error;
   bool valid;
+  float simulate_min_distance;
 
   Result() : valid(false) {}
-  Result(float a, float d, int b) : angle_error(a), distance_error(d),bit_error(b),valid(true) {}
+  Result(float a, float d, int b,float c) : angle_error(a), distance_error(d),bit_error(b),simulate_min_distance(c), valid(true) {}
 };
 
 template<class TagType>
@@ -78,7 +79,7 @@ template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output
   //  Execute(180,0, 0.154046,0.322095 ,75);
   //  return;
 
-  for(int pixels=13;pixels>=pixel_min;pixels-=pixel_step) {
+  for(int pixels=50;pixels>=pixel_min;pixels-=pixel_step) {
     double distance = (double)m_size/2.f/(double)pixels;
     // we want to jitter by half a pixel
     double jitter_range = 1.f*m_tan_fov*distance/(double)m_size;
@@ -97,7 +98,7 @@ template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output
 	  if (prefix) output << prefix << " ";
 	  output << theta << " " << phi << " " << x0 << " " << y0 << " " << distance << " " << pixels << " ";
 	  if (result.valid) {
-	    output << result.distance_error << " " << result.angle_error << " " << result.bit_error << "\n";
+	    output << result.distance_error << " " << result.angle_error << " " << result.bit_error << " " << result.simulate_min_distance << "\n";
 	  }
 	  else {
 	    output << "FAIL FAIL FAIL\n";
@@ -111,6 +112,11 @@ template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output
 
 
 template<class TagType> Result RunTest<TagType>::Execute(double theta, double phi, double x, double y, double z) {
+  TransformEntity te;
+  te.GetTransforms().push_back(new Transform(x,y,z,M_PI/2,0,theta/180*M_PI,1.f));
+  Minima m;
+  SimulateMinDistance(m,tag)(te);
+
   //  std::cout << "Execute " << theta << " " << phi << " " << x << " " << y << " " << z << std::endl;
   Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>* i = fs.Next(theta,phi,x,y,z);
   tag(*i,camera);
@@ -157,7 +163,7 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
 			    (location[1] - y)*(location[1] - y) + 
 			    (location[2] - z)*(location[2] - z) );
     
-    return Result(errorangle,distance,errors);
+    return Result(errorangle,distance,errors,m.GetMinima());
   }
   return Result();
 }
