@@ -131,13 +131,13 @@ namespace Cantag {
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
   inline
   DrawEntitySampleCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT> DrawEntitySample(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera, const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec, ROI roi) { 
-    return DrawEntitySampleSquareObj(image,camera,tags,roi);
+    return DrawEntitySampleCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>(image,camera,tagspec,roi);
   }
 
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
   inline
   DrawEntitySampleCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT> DrawEntitySample(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera, const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec) { 
-    return DrawEntitySampleSquareObj(image,camera,tags);
+    return DrawEntitySampleCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>(image,camera,tagspec);
   }
 
   template<int EDGE_CELLS>
@@ -174,13 +174,13 @@ namespace Cantag {
   template<int EDGE_CELLS>
   inline
   DrawEntitySampleSquareObj<EDGE_CELLS> DrawEntitySample(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera, const TagSquare<EDGE_CELLS>& tagspec, ROI roi) { 
-    return DrawEntitySampleSquareObj(image,camera,tags,roi);
+    return DrawEntitySampleSquareObj<EDGE_CELLS>(image,camera,tagspec,roi);
   }
 
   template<int EDGE_CELLS>
   inline
   DrawEntitySampleSquareObj<EDGE_CELLS> DrawEntitySample(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera, const TagSquare<EDGE_CELLS>& tagspec) { 
-    return DrawEntitySampleSquareObj(image,camera,tags);
+    return DrawEntitySampleSquareObj<EDGE_CELLS>(image,camera,tagspec);
   }
 
   class DrawEntityTransform : public Function<TL0,TL1(TransformEntity)> {
