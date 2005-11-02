@@ -38,7 +38,7 @@ namespace Cantag {
     }
   }
 
-  Transform::Transform(const LocationElement& loc,const PoseElement& pose, const SizeElement& size_e) {
+  Transform::Transform(const LocationElement& loc,const PoseElement& pose, const SizeElement& size_e) : m_confidence(1.f) {
     float x = loc.x;
     float y = loc.y;
     float z = loc.z;
@@ -50,7 +50,7 @@ namespace Cantag {
   }
 
 
-  Transform::Transform(float x, float y, float z, float theta, float phi, float psi, float size) {
+  Transform::Transform(float x, float y, float z, float theta, float phi, float psi, float size) : m_confidence(1.f) {
     SetupFromAngles(x, y, z,theta, phi, psi, size);
   }
 
