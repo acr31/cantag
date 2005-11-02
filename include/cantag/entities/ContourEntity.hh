@@ -106,6 +106,7 @@ namespace Cantag {
     
   public:
     ContourEntity() : m_points() {};
+    ContourEntity(const std::vector<float>& points);
     ~ContourEntity() {};
 
     inline int GetNBD() const { return m_nbd; }
