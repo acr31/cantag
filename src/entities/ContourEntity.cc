@@ -23,6 +23,7 @@
  */
 
 #include <cantag/entities/ContourEntity.hh>
+#include <cantag/SpeedMath.hh>
 
 namespace Cantag {
 
@@ -41,14 +42,14 @@ namespace Cantag {
       float x = *(i++);
       float y = *i;
 
-      m_centralX += x;
-      m_centralY += y;
+      m_centralX += Round(x);
+      m_centralY += Round(y);
       ++m_numPoints;
 
-      if (x < m_minX) m_minX = x;
-      if (x > m_maxX) m_maxX = x;
-      if (y < m_minY) m_minY = y;
-      if (y > m_maxY) m_maxY = y;      
+      if (x < m_minX) m_minX = Round(x);
+      if (x > m_maxX) m_maxX = Round(x);
+      if (y < m_minY) m_minY = Round(y);
+      if (y > m_maxY) m_maxY = Round(y);      
     }
 
     m_centralX /= m_numPoints;
