@@ -1,6 +1,36 @@
 lib_LTLIBRARIES = libcantag.la
 
-libcantag_la_SOURCES = Ellipse.cc QuadTangle.cc Camera.cc gaussianelimination.cc Image.cc FileImageSource.cc polysolve.cc Socket.cc algorithms/FitEllipseSimple.cc algorithms/FitEllipseLS.cc algorithms/DistortionCorrection.cc algorithms/TransformEllipseLinear.cc algorithms/TransformEllipseFull.cc Transform.cc algorithms/FitQuadTangleCorner.cc algorithms/FitQuadTangleConvexHull.cc algorithms/FitQuadTanglePolygon.cc algorithms/TransformQuadTangleProjective.cc algorithms/TransformQuadTangleReduced.cc algorithms/ContourFollowerTree.cc MonochromeImage.cc algorithms/ThresholdGlobal.cc algorithms/ThresholdAdaptive.cc algorithms/ConvexHull.cc entities/ContourEntity.cc algorithms/RemoveNonConcentricEllipse.cc algorithms/DrawEntity.cc algorithms/FitQuadTangleRegression.cc algorithms/DistortionCorrectionIterative.cc EstimateTransform.cc 
+libcantag_la_SOURCES =  Ellipse.cc 
+libcantag_la_SOURCES += QuadTangle.cc 
+libcantag_la_SOURCES += Camera.cc
+libcantag_la_SOURCES += gaussianelimination.cc
+libcantag_la_SOURCES += Image.cc
+libcantag_la_SOURCES += FileImageSource.cc
+libcantag_la_SOURCES += polysolve.cc
+libcantag_la_SOURCES += Socket.cc
+libcantag_la_SOURCES += Transform.cc
+libcantag_la_SOURCES += MonochromeImage.cc
+libcantag_la_SOURCES += entities/ContourEntity.cc
+libcantag_la_SOURCES += algorithms/FitEllipseSimple.cc
+libcantag_la_SOURCES += algorithms/FitEllipseLS.cc
+libcantag_la_SOURCES += algorithms/DistortionCorrection.cc
+libcantag_la_SOURCES += algorithms/TransformEllipseLinear.cc
+libcantag_la_SOURCES += algorithms/TransformEllipseFull.cc
+libcantag_la_SOURCES += algorithms/FitQuadTangleCorner.cc
+libcantag_la_SOURCES += algorithms/FitQuadTangleConvexHull.cc
+libcantag_la_SOURCES += algorithms/FitQuadTanglePolygon.cc
+libcantag_la_SOURCES += algorithms/TransformQuadTangleProjective.cc
+libcantag_la_SOURCES += algorithms/TransformQuadTangleReduced.cc
+libcantag_la_SOURCES += algorithms/ContourFollowerTree.cc
+libcantag_la_SOURCES += algorithms/ThresholdGlobal.cc
+libcantag_la_SOURCES += algorithms/ThresholdAdaptive.cc
+libcantag_la_SOURCES += algorithms/ConvexHull.cc
+libcantag_la_SOURCES += algorithms/RemoveNonConcentricEllipse.cc
+libcantag_la_SOURCES += algorithms/DrawEntity.cc
+libcantag_la_SOURCES += algorithms/PrintEntity.cc
+libcantag_la_SOURCES += algorithms/FitQuadTangleRegression.cc
+libcantag_la_SOURCES += algorithms/DistortionCorrectionIterative.cc
+libcantag_la_SOURCES += algorithms/SimulateMinDistance.cc
 
 # disabled (acr31 branch)
 #libcantag_la_SOURCES += algorithms/ValidateFitEllipse.cc algorithms/ValidateFitQuadTangle.cc algorithms/ValidateTransformQuadTangle.cc algorithms/ValidateDistortionCorrection.cc ImageOutputMechanism.cc
@@ -11,7 +41,9 @@ libcantag_la_SOURCES = Ellipse.cc QuadTangle.cc Camera.cc gaussianelimination.cc
 if HAVE_GSL_MULTIMIN_H
 if HAVELIB_GSLCBLAS
 if HAVELIB_GSL
-libcantag_la_SOURCES += algorithms/TransformQuadTangleSpaceSearch.cc algorithms/TransformQuadTangleCyberCode.cc
+libcantag_la_SOURCES += algorithms/TransformQuadTangleSpaceSearch.cc 
+libcantag_la_SOURCES += algorithms/TransformQuadTangleCyberCode.cc
+libcantag_la_SOURCES += EstimateTransform.cc
 endif
 endif
 endif
@@ -57,13 +89,5 @@ libcantag_la_SOURCES += IEEE1394ImageSource.cc
 endif
 endif
 
-
-if HAVE_X11_XLIB_H
-if HAVE_X11_XUTIL_H
-if HAVE_X11_EXTENSIONS_XSHM_H
-#libcantag_la_SOURCES += XOutputStagesMechanism.cc
-endif
-endif
-endif
 
 AM_CPPFLAGS=-I$(srcdir)/../include -I$(top_builddir)/include 
