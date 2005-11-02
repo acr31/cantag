@@ -28,6 +28,12 @@
 #include <list>
 
 #include <cantag/Config.hh>
+
+#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
+#else
+#error This version has not been configured with GNU Scientific Library support!
+#endif
+
 #include <cantag/Correspondence.hh>
 #include <cantag/TagDictionary.hh>
 #include <cantag/Transform.hh>
