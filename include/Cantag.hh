@@ -127,8 +127,6 @@
 
 //////////////////////
 // output mechanisms
-// #include <cantag/TextOutputMechanism.hh>
-#include <cantag/ImageOutputMechanism.hh>
 #if defined(HAVE_X11_XLIB_H) && defined(HAVE_X11_XUTIL_H) && defined(HAVE_X11_EXTENSIONS_XSHM_H)
 # include <cantag/XOutputMechanism.hh>
 # include <cantag/XDisplay.hh>
@@ -145,6 +143,9 @@
 
 #include <cantag/TagDictionary.hh>
 #include <cantag/Correspondence.hh>
+
+#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
 #include <cantag/EstimateTransform.hh>
+#endif
 
 #endif//CANTAG_GUARD
