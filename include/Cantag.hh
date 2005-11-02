@@ -89,6 +89,7 @@
 #include <cantag/algorithms/TransformSelectEllipseErrorOfFit.hh>
 #include <cantag/algorithms/RemoveNonConcentricEllipse.hh>
 #include <cantag/algorithms/DrawEntity.hh>
+#include <cantag/algorithms/PrintEntity.hh>
 //#include <cantag/algorithms/ValidateDistortionCorrection.hh>
 //#include <cantag/algorithms/ValidateFitEllipse.hh>
 //#include <cantag/algorithms/ValidateFitQuadTangle.hh>
@@ -97,6 +98,7 @@
 //#include <cantag/algorithms/ValidateSample.hh>
 #include <cantag/algorithms/AccumulateCorrespondences.hh>
 #include <cantag/algorithms/AccumulateCornerCorrespondences.hh>
+#include <cantag/algorithms/SimulateMinDistance.hh>
 
 ///////////////////////
 // coders
