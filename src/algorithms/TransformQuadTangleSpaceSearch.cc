@@ -96,7 +96,7 @@ namespace Cantag {
 
 
     x = gsl_vector_alloc (nparam);
-    gsl_vector_set (x, 0, 10.0);
+    gsl_vector_set (x, 0, 40.0);
     gsl_vector_set (x, 1, 0.0); // theta
     gsl_vector_set (x, 2, 0.0);   // phi
     gsl_vector_set (x, 3, 0.0);   // psi
@@ -104,9 +104,9 @@ namespace Cantag {
     // Characteristic steps differ 
     // for distances and angles
     step = gsl_vector_alloc (nparam);
-    gsl_vector_set (step, 0, 10);
-    gsl_vector_set (step, 1, M_PI);
-    gsl_vector_set (step, 2, M_PI);
+    gsl_vector_set (step, 0, 40);
+    gsl_vector_set (step, 1, 2*M_PI);
+    gsl_vector_set (step, 2, 2*M_PI);
     gsl_vector_set (step, 3, 2*M_PI);
 
   
