@@ -57,8 +57,8 @@ namespace Cantag {
       //switch the order!
       p[2]=q.GetX3();
       p[3]=q.GetY3();
-      p[6]=q.GetX0();
-      p[7]=q.GetY0();
+      p[6]=q.GetX1();
+      p[7]=q.GetY1();
 
     }
     
@@ -107,7 +107,7 @@ namespace Cantag {
     gsl_vector_set (step, 0, 10);
     gsl_vector_set (step, 1, M_PI);
     gsl_vector_set (step, 2, M_PI);
-    gsl_vector_set (step, 3, M_PI);
+    gsl_vector_set (step, 3, 2*M_PI);
 
   
     T = gsl_multimin_fminimizer_nmsimplex;
