@@ -30,6 +30,7 @@
 #include <cantag/Function.hh>
 #include <cantag/Image.hh>
 #include <cantag/TagSquare.hh>
+#include <cantag/SpeedMath.hh>
 
 namespace Cantag {
   
@@ -87,17 +88,17 @@ namespace Cantag {
       float ubase = m_tagspec.GetX0(i)*size + size;
       float vbase = m_tagspec.GetY0(i)*size + size;
 
-      int u0 = round(ubase);
-      int v0 = round(vbase);
+      int u0 = Round(ubase);
+      int v0 = Round(vbase);
 
-      int u1 = round(ubase + cell_size);
-      int v1 = round(vbase);
+      int u1 = Round(ubase + cell_size);
+      int v1 = Round(vbase);
 
-      int u2 = round(ubase + cell_size);
-      int v2 = round(vbase + cell_size);
+      int u2 = Round(ubase + cell_size);
+      int v2 = Round(vbase + cell_size);
 
-      int u3 = round(ubase);
-      int v3 = round(vbase + cell_size);
+      int u3 = Round(ubase);
+      int v3 = Round(vbase + cell_size);
 
       int colour = chosen->payload[i] ? COLOUR_BLACK : COLOUR_WHITE;
 
