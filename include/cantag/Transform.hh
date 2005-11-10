@@ -120,14 +120,6 @@ namespace Cantag {
      */
     void GetNormalVector(const Camera& cam, float normal[3]) const;
 
-    /**
-     * Check the 3x3 rotation matrix and correct if
-     * the determinant is not 1. This is used
-     * to check for floating point errors
-     * which can cause the |det| to be >1
-     */
-    bool NormaliseRotation();
-
     void Print() const {
       for (int i=0; i<16; i++) {
 	if (i%4==0) std::cout << std::endl;

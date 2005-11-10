@@ -42,11 +42,7 @@ namespace Cantag {
 #endif
 
 
-    std::cout << "Calculating transform for :"
-      "("<<quadtangle.GetX0()<<","<<quadtangle.GetY0()<<"),"<<
-      "("<<quadtangle.GetX1()<<","<<quadtangle.GetY1()<<"),"<<
-      "("<<quadtangle.GetX2()<<","<<quadtangle.GetY2()<<"),"<<
-      "("<<quadtangle.GetX3()<<","<<quadtangle.GetY3()<<"),"<<std::endl;	  
+ 	  
 
     // we particularly want coeffs to be an array of pointers to arrays
     // containing the rows of the matrix - then we can swap rows
@@ -152,10 +148,6 @@ namespace Cantag {
     transform[4] = result[3]; transform[5] = result[4]; transform[6] = final[1];  transform[7] = (result[3]+result[4])+result[5]*2;
     transform[8] = result[6]; transform[9] = result[7]; transform[10] = final[2]; transform[11] = (result[6]+result[7])+c8*2;
     transform[12] = 0;          transform[13] = 0;          transform[14] = 0;  transform[15] = 1;
-
-    // We often get rounding fp errors in he rotation matrix
-    // This attempts to fix it
-    transform.NormaliseRotation();
 
 #ifdef PROJECTIVE_TRANSFORM_DEBUG
     PROGRESS("Final trans=[" << transform[0] << "," << transform[1] << "," << transform[2] << ","<<transform[3] <<";");
