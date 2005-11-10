@@ -23,12 +23,15 @@
  */
 
 #include <cantag/algorithms/TransformQuadTangleSpaceSearch.hh>
+#include <cantag/algorithms/TransformQuadTangleProjective.hh>
 #include <cantag/gaussianelimination.hh>
 #include <cantag/SpeedMath.hh>
 
 namespace Cantag {
 
   bool TransformQuadTangleSpaceSearch::operator()(const ShapeEntity<QuadTangle>& shape, TransformEntity& dest) const {
+    TransformEntity te;
+    if (!TransformQuadTangleProjective()(shape,te)) { return false; }
    
     const QuadTangle& q = *(shape.GetShape());
     size_t iter = 0;
@@ -45,7 +48,8 @@ namespace Cantag {
 		    q.GetX3(), q.GetY3(),
 		    0.0, 0.0};
 
-    // We assume that they are ordered
+
+      // We assume that they are ordered
     // Check that the order is the right way round
     float v1x = p[0]-p[2];
     float v1y = p[1]-p[3];
@@ -96,15 +100,24 @@ namespace Cantag {
 
 
     x = gsl_vector_alloc (nparam);
-    gsl_vector_set (x, 0, 40.0);
-    gsl_vector_set (x, 1, 0.0); // theta
-    gsl_vector_set (x, 2, 0.0);   // phi
-    gsl_vector_set (x, 3, 0.0);   // psi
+    const Transform* t = te.GetPreferredTransform();
+    float initz = 40.f;
+    float theta = 0.f;
+    float phi = 0.f;
+    float psi = 0.f;
+    if (t != NULL) {
+      initz = (*t)[11];
+      t->GetAngleRepresentation(&theta,&phi,&psi);
+    }
+    gsl_vector_set (x, 0, initz); // z
+    gsl_vector_set (x, 1, theta); // theta
+    gsl_vector_set (x, 2, phi);   // phi
+    gsl_vector_set (x, 3, psi);   // psi
 
     // Characteristic steps differ 
     // for distances and angles
     step = gsl_vector_alloc (nparam);
-    gsl_vector_set (step, 0, 40);
+    gsl_vector_set (step, 0, initz);
     gsl_vector_set (step, 1, 2*M_PI);
     gsl_vector_set (step, 2, 2*M_PI);
     gsl_vector_set (step, 3, 2*M_PI);
@@ -133,6 +146,7 @@ namespace Cantag {
       
       Transform* t = new Transform(p[8]*z, p[9]*z,z,
 				   theta, phi, psi, 1.0);
+
       dest.GetTransforms().push_back(t);  
       gsl_multimin_fminimizer_free (s);
       gsl_vector_free (x);
@@ -177,11 +191,12 @@ namespace Cantag {
     float YC = Y0+lambda*(Y2-Y0);
 
     // Sum of squares
-    return (X0-p[0])*(X0-p[0]) + (Y0-p[1])*(Y0-p[1]) +
+    double s= (X0-p[0])*(X0-p[0]) + (Y0-p[1])*(Y0-p[1]) +
       (X1-p[2])*(X1-p[2]) + (Y1-p[3])*(Y1-p[3]) +
       (X2-p[4])*(X2-p[4]) + (Y2-p[5])*(Y2-p[5]) +
       (X3-p[6])*(X3-p[6]) + (Y3-p[7])*(Y3-p[7])  +
       (XC-p[8])*(XC-p[8]) + (YC-p[8])*(YC-p[9]);
+    return s;
   }
 
 
