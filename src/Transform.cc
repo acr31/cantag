@@ -399,7 +399,7 @@ namespace Cantag {
       
       *theta = acos(nz);
       *phi = atan2(ny,nz);
-    }
+    }   
   }
 
 
@@ -428,6 +428,20 @@ namespace Cantag {
     return r;
   }
 
+
+  bool Transform::NormaliseRotation() {
+    // Compute the determinant of the 3x3 rottation part of the trans
+    float det = m_transform[0]*(m_transform[5]*m_transform[10]-m_transform[9]*m_transform[6]);
+    det -= m_transform[1]*(m_transform[4]*m_transform[10]-m_transform[6]*m_transform[8]);
+    det += m_transform[2]*(m_transform[4]*m_transform[9]-m_transform[5]*m_transform[8]);
+    
+    if (det==1.0) return false;
+
+    for (int i=0; i<11; i++) {
+      if ((i!=3) && (i!=7)) m_transform[i]/= det;
+    }
+    return true;
+  }
 
 
 
