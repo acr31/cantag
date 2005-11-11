@@ -105,10 +105,20 @@ namespace Cantag {
     float theta = 0.f;
     float phi = 0.f;
     float psi = 0.f;
+
+
+    float steptheta=2*M_PI;
+    float stepphi=2*M_PI;
+    float steppsi=2*M_PI;
+
     if (t != NULL) {
       initz = (*t)[11];
       t->GetAngleRepresentation(&theta,&phi,&psi);
+      steptheta=M_PI;
+      stepphi=M_PI;
+      steppsi=M_PI;
     }
+
     gsl_vector_set (x, 0, initz); // z
     gsl_vector_set (x, 1, theta); // theta
     gsl_vector_set (x, 2, phi);   // phi
@@ -118,9 +128,9 @@ namespace Cantag {
     // for distances and angles
     step = gsl_vector_alloc (nparam);
     gsl_vector_set (step, 0, initz);
-    gsl_vector_set (step, 1, 2*M_PI);
-    gsl_vector_set (step, 2, 2*M_PI);
-    gsl_vector_set (step, 3, 2*M_PI);
+    gsl_vector_set (step, 1, steptheta);
+    gsl_vector_set (step, 2, stepphi);
+    gsl_vector_set (step, 3, steppsi);
 
   
     T = gsl_multimin_fminimizer_nmsimplex;
@@ -133,7 +143,7 @@ namespace Cantag {
       status = gsl_multimin_fminimizer_iterate (s);
       if (status)
 	break;      
-      status = gsl_multimin_test_size(s->size,1e-4);
+      status = gsl_multimin_test_size(s->size,1e-3);
 
     }  while (status == GSL_CONTINUE && iter < 1000);
 
