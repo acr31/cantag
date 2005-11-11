@@ -354,7 +354,7 @@ namespace Cantag {
     if ( fabs(m_transform[9]-m_transform[6]) < epsilon &&
 	 fabs(m_transform[8]-m_transform[2]) < epsilon &&
 	 fabs(m_transform[4]-m_transform[1]) < epsilon ) {
-      
+       std::cout << "XXX 1" << std::endl;
       if ( fabs(m_transform[9]+m_transform[6]) < epsilon &&
 	   fabs(m_transform[8]+m_transform[2]) < epsilon &&
 	   fabs(m_transform[4]+m_transform[1]) < epsilon ) {
@@ -364,11 +364,21 @@ namespace Cantag {
 	return;
       }
       else {
-	*psi=M_PI;;
+	*psi=M_PI;
+	*theta=0.0;
+	*phi=0.0;
 
-	float x = sqrt((m_transform[0]+1.0)/2.0);
-	float y = sqrt((m_transform[5]+1.0)/2.0);
-	float z = sqrt((m_transform[10]+1.0)/2.0);
+	float m0=m_transform[0], m5=m_transform[5], m10=m_transform[10];
+	if (m_transform[0]<-1) m0=-1.0;
+	if (m_transform[0]>1) m0=1.0;
+	if (m_transform[5]<-1) m5=-1.0;
+	if (m_transform[5]>1) m5=1.0;
+	if (m_transform[10]<-1) m10=-1.0;
+	if (m_transform[10]>1) m10=1.0;
+
+	float x = sqrt((m0+1.0)/2.0);
+	float y = sqrt((m5+1.0)/2.0);
+	float z = sqrt((m10+1.0)/2.0);
 
 	bool xZero = fabs(x)<epsilon;
 	bool yZero = fabs(y)<epsilon;
@@ -389,6 +399,7 @@ namespace Cantag {
       }
     }
     else {
+      std::cout << "XXX 2" << std::endl;
       float s = (m_transform[0]+m_transform[5]+m_transform[10]-1.0)/2.0;
       if (s>1.0) s=1.0;
       if (s<-1.0) s=-1.0;
