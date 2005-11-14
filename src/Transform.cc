@@ -69,21 +69,21 @@ namespace Cantag {
     float nx = sin(theta)*cos(phi);
     float ny = sin(theta)*sin(phi);
     float nz = cos(theta);
-    
+
     float c = cos(psi);
     float s = sin(psi);
     float t = 1-cos(psi);
 
     m_transform[0] = t*nx*nx+c;
-    m_transform[1] = t*nx*ny-nz*s;
-    m_transform[2] = t*nx*nz+ny*s;
+    m_transform[4] = t*nx*ny-nz*s;
+    m_transform[8] = t*nx*nz+ny*s;
 
-    m_transform[4] = t*nx*ny+nz*s;
+    m_transform[1] = t*nx*ny+nz*s;
     m_transform[5] = t*ny*ny+c;
-    m_transform[6] = t*ny*nz-nx*s;
+    m_transform[9] = t*ny*nz-nx*s;
 
-    m_transform[8] = t*nx*nz-ny*s;
-    m_transform[9] = t*ny*nz+nx*s;
+    m_transform[2] = t*nx*nz-ny*s;
+    m_transform[6] = t*ny*nz+nx*s;
     m_transform[10] = t*nz*nz+c;
 
     m_transform[12] = 0.0;
@@ -354,6 +354,7 @@ namespace Cantag {
     if ( fabs(m_transform[9]-m_transform[6]) < epsilon &&
 	 fabs(m_transform[8]-m_transform[2]) < epsilon &&
 	 fabs(m_transform[4]-m_transform[1]) < epsilon ) {
+
       if ( fabs(m_transform[9]+m_transform[6]) < epsilon &&
 	   fabs(m_transform[8]+m_transform[2]) < epsilon &&
 	   fabs(m_transform[4]+m_transform[1]) < epsilon ) {
@@ -401,14 +402,17 @@ namespace Cantag {
       float s = (m_transform[0]+m_transform[5]+m_transform[10]-1.0)/2.0;
       if (s>1.0) s=1.0;
       if (s<-1.0) s=-1.0;
-      *psi = acos(s);
-      float denom = sqrt( (m_transform[6]-m_transform[9])*(m_transform[6]-m_transform[9]) +
-			  (m_transform[2]-m_transform[8])*(m_transform[2]-m_transform[8]) +
-			  (m_transform[4]-m_transform[1])*(m_transform[4]-m_transform[1]) );
-      float nx = (m_transform[9] - m_transform[6])/denom;
-      float ny = (m_transform[2] - m_transform[8])/denom;
-      float nz = (m_transform[4] - m_transform[1])/denom;
+
+      *psi = -acos(s);
+      float nx = -(m_transform[6] - m_transform[9]);
+      float ny = (m_transform[2] - m_transform[8]);
+      float nz = -(m_transform[1] - m_transform[4]);
       
+      float mag = sqrt(nx*nx + ny*ny + nz*nz);
+      nx/=mag;
+      ny/=mag;
+      nz/=mag;
+
       if (nz>1.0) nz=1.0;
       if (nz<-1.0) nz=-1.0;
       *theta = acos(nz);
