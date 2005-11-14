@@ -354,7 +354,6 @@ namespace Cantag {
     if ( fabs(m_transform[9]-m_transform[6]) < epsilon &&
 	 fabs(m_transform[8]-m_transform[2]) < epsilon &&
 	 fabs(m_transform[4]-m_transform[1]) < epsilon ) {
-       std::cout << "XXX 1" << std::endl;
       if ( fabs(m_transform[9]+m_transform[6]) < epsilon &&
 	   fabs(m_transform[8]+m_transform[2]) < epsilon &&
 	   fabs(m_transform[4]+m_transform[1]) < epsilon ) {
@@ -399,7 +398,6 @@ namespace Cantag {
       }
     }
     else {
-      std::cout << "XXX 2" << std::endl;
       float s = (m_transform[0]+m_transform[5]+m_transform[10]-1.0)/2.0;
       if (s>1.0) s=1.0;
       if (s<-1.0) s=-1.0;
@@ -414,7 +412,7 @@ namespace Cantag {
       if (nz>1.0) nz=1.0;
       if (nz<-1.0) nz=-1.0;
       *theta = acos(nz);
-      *phi = atan2(ny,nz);
+      *phi = atan2(ny,nx);
     }   
   }
 
