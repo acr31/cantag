@@ -1,4 +1,4 @@
-/*
+cout/*
   Copyright (C) 2004 Andrew C. Rice
 
   This program is free software; you can redistribute it and/or
@@ -74,16 +74,17 @@ namespace Cantag {
     float s = sin(psi);
     float t = 1-cos(psi);
 
+
     m_transform[0] = t*nx*nx+c;
-    m_transform[4] = t*nx*ny-nz*s;
-    m_transform[8] = t*nx*nz+ny*s;
+    m_transform[1] = t*nx*ny-nz*s;
+    m_transform[2] = t*nx*nz+ny*s;
 
-    m_transform[1] = t*nx*ny+nz*s;
+    m_transform[4] = t*nx*ny+nz*s;
     m_transform[5] = t*ny*ny+c;
-    m_transform[9] = t*ny*nz-nx*s;
+    m_transform[6] = t*ny*nz-nx*s;
 
-    m_transform[2] = t*nx*nz-ny*s;
-    m_transform[6] = t*ny*nz+nx*s;
+    m_transform[8] = t*nx*nz-ny*s;
+    m_transform[9] = t*ny*nz+nx*s;
     m_transform[10] = t*nz*nz+c;
 
     m_transform[12] = 0.0;
@@ -379,23 +380,51 @@ namespace Cantag {
 	float x = sqrt((m0+1.0)/2.0);
 	float y = sqrt((m5+1.0)/2.0);
 	float z = sqrt((m10+1.0)/2.0);
+	
+	int xx = x>0.0 ? 1:-1;
+	if (fabs(xx)<epsilon) xx=0;
+	int yy = y>0.0 ? 1:-1;
+	if (fabs(yy)<epsilon) yy=0;
+	int zz = z>0.0 ? 1:-1;
+	if (fabs(zz)<epsilon) zz=0;
 
-	bool xZero = fabs(x)<epsilon;
-	bool yZero = fabs(y)<epsilon;
-	bool zZero = fabs(z)<epsilon;
-	bool xyPositive = (m_transform[1] > 0);
-	bool xzPositive = (m_transform[2] > 0);
-	bool yzPositive = (m_transform[6] > 0);
-	if (xZero && !yZero && !zZero) y = -y;
-	else if (yZero && !zZero) z = -z;
-	else if (zZero) x = -x;
-	else if (xyPositive && xzPositive && yzPositive) return;
-	else if (yzPositive) x=-x;
-	else if (xzPositive) y=-y;
-	else if (xyPositive) z=-z;
+	int xy = (m_transform[1] > 0) ? 1:-1;
+	if (fabs(m_transform[1])<epsilon) xy=0.0;
+	int xz = (m_transform[2] > 0) ? 1:-1;
+	if (fabs(m_transform[2])<epsilon) xz=0.0;
+	int yz = (m_transform[6] > 0) ? 1:-1;
+	if (fabs(m_transform[6])<epsilon) yz=0.0;
+
+	if ( (xx>0 && yy>0 && zz<0) || (xx<0 && yy<0 && zz>0)) {
+	  if (xy>0 && xz<0 && yz<0) z=-z;
+	}
+	else if ( (xx>0 && yy<0 && zz>0) || (xx<0 && yy>0 && zz<0)) {
+	  if (xy<0 && xz>0 && yz<0) y=-y;
+	}
+	else if ( (xx<0 && yy>0 && zz>0) || (xx>0 && yy<0 && zz<0)) {
+	  if (xy<0 && xz<0 && yz>0) x=-x;
+	}
+	else if ( (xx==0 && yy>0 && zz<0) || (xx==0 && yy<0 && zz>0) ) {
+	  if (xy==0 && xz==0 && yz<0) z=-z;
+	}
+	else if ( (xx>0 && yy==0 && zz<0) || (xx<0 && yy==0 && zz>0) ) {
+	  if (xy==0 && xz<0 && yz==0) z=-z;
+	}
+	else if ( (xx<0 && yy>0 && zz==0) || (xx>0 && yy<0 && zz==0) ) {
+	  if (xy<0 && xz==0 && yz==0) x=-x;
+	}
+
+// 	if (xZero && !yZero && !zZero) y = -y;
+// 	else if (yZero && !zZero) z = -z;
+// 	else if (zZero) x = -x;
+// 	else if (xyPositive && xzPositive && yzPositive) return;
+// 	else if (yzPositive) x=-x;
+// 	else if (xzPositive) y=-y;
+// 	else if (xyPositive) z=-z;
+
 
 	*theta = acos(z);
-	*phi = atan2(y,z);
+	*phi = atan2(y,x); 	
       }
     }
     else {
@@ -403,7 +432,7 @@ namespace Cantag {
       if (s>1.0) s=1.0;
       if (s<-1.0) s=-1.0;
 
-      *psi = -acos(s);
+      *psi = acos(s);
       float nx = -(m_transform[6] - m_transform[9]);
       float ny = (m_transform[2] - m_transform[8]);
       float nz = -(m_transform[1] - m_transform[4]);
