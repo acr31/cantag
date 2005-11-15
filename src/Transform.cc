@@ -1,4 +1,4 @@
-cout/*
+/*
   Copyright (C) 2004 Andrew C. Rice
 
   This program is free software; you can redistribute it and/or
