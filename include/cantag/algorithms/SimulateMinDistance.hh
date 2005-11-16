@@ -31,6 +31,7 @@
 #include <cantag/Function.hh>
 #include <cantag/TagCircle.hh>
 #include <cantag/TagSquare.hh>
+#include <cantag/Camera.hh>
 #include <cantag/entities/TransformEntity.hh>
 
 namespace Cantag {
@@ -64,10 +65,10 @@ namespace Cantag {
 
     Minima& m_minimum;    
     const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& m_tagspec;
-    
+    const Camera& m_camera;    
     void InitPoints(std::vector<float>& points) const;
   public:
-    SimulateMinDistanceCircleObj(Minima& minima, const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec) : m_minimum(minima), m_tagspec(tagspec) {};
+    SimulateMinDistanceCircleObj(Minima& minima, const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec, const Camera& camera) : m_minimum(minima), m_tagspec(tagspec), m_camera(camera) {};
     bool operator()(TransformEntity& te) const;
   };
 
@@ -76,22 +77,23 @@ namespace Cantag {
   private:
     Minima& m_minimum;
     const TagSquare<EDGE_CELLS>& m_tagspec;
+    const Camera& m_camera;
     void InitPoints(std::vector<float>& points) const;
   public:
-    SimulateMinDistanceSquareObj(Minima& minima, const TagSquare<EDGE_CELLS>& tagspec) : m_minimum(minima), m_tagspec(tagspec) {};
+    SimulateMinDistanceSquareObj(Minima& minima, const TagSquare<EDGE_CELLS>& tagspec, const Camera& camera) : m_minimum(minima), m_tagspec(tagspec), m_camera(camera) {};
     bool operator()(TransformEntity& te) const;
   };
 
   template<int EDGE_CELLS>
   inline
-  SimulateMinDistanceSquareObj<EDGE_CELLS> SimulateMinDistance(Minima& minima, const TagSquare<EDGE_CELLS>& tagspec) {
-    return SimulateMinDistanceSquareObj<EDGE_CELLS>(minima,tagspec);
+  SimulateMinDistanceSquareObj<EDGE_CELLS> SimulateMinDistance(Minima& minima, const TagSquare<EDGE_CELLS>& tagspec, const Camera& camera) {
+    return SimulateMinDistanceSquareObj<EDGE_CELLS>(minima,tagspec,camera);
   }
 
   template<int RING_COUNT, int SECTOR_COUNT, int READ_COUNT>
   inline
-  SimulateMinDistanceCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT> SimulateMinDistance(Minima& minima, const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec) {
-    return SimulateMinDistanceCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>(minima,tagspec);
+  SimulateMinDistanceCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT> SimulateMinDistance(Minima& minima, const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec, const Camera& camera) {
+    return SimulateMinDistanceCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>(minima,tagspec,camera);
   }
       
   template<int EDGE_CELLS>
@@ -99,7 +101,7 @@ namespace Cantag {
     std::vector<float> points;
     InitPoints(points);
     te.GetPreferredTransform()->Apply(points);
-
+    m_camera.NPCFToImage(points);
     for(std::vector<float>::const_iterator i = points.begin(); i!=points.end();++i) {
       double pointsa[8] = { *(i++),*(i++), // x0,y0
 			    *(i++),*(i++), // x1,y1
@@ -163,6 +165,7 @@ namespace Cantag {
     std::vector<float> points;
     InitPoints(points);
     te.GetPreferredTransform()->Apply(points);
+    m_camera.NPCFToImage(points);
     for(std::vector<float>::const_iterator i = points.begin(); i!=points.end();++i) {
       double* pointsa = new double[2*(4 + TOP_APPROX_COUNT + BOTTOM_APPROX_COUNT)];
       for(int c=0;c<4+TOP_APPROX_COUNT+BOTTOM_APPROX_COUNT;++c) {
