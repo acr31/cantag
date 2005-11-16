@@ -120,12 +120,16 @@ namespace Cantag {
      */
     void GetNormalVector(const Camera& cam, float normal[3]) const;
 
-    void Print() const {
+    inline void Print() const {
+      Print(std::cout);
+    }
+
+    void Print(std::ostream& os) const {
       for (int i=0; i<16; i++) {
 	if (i%4==0) std::cout << std::endl;
-	std::cout << m_transform[i] << " ";
+	os << m_transform[i] << " ";
       }
-      std::cout << std::endl;   
+      os << std::endl;   
     }
 
     /**
