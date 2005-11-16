@@ -30,6 +30,9 @@
 #include <cantag/Config.hh>
 #include <cantag/Function.hh>
 #include <cantag/entities/ContourEntity.hh>
+#include <cantag/entities/ShapeEntity.hh>
+#include <cantag/entities/TransformEntity.hh>
+#include <cantag/QuadTangle.hh>
 
 namespace Cantag {
   class PrintEntityContour : public Function<TL0,TL1(ContourEntity)> {
@@ -38,6 +41,22 @@ namespace Cantag {
   public:
     PrintEntityContour(std::ostream& output) : m_output(output) {};
     bool operator()(ContourEntity& contourentity) const ;
+  };
+  
+  class PrintEntityShapeSquare : public Function<TL0,TL1(ShapeEntity<QuadTangle>)> {
+  private:
+    std::ostream& m_output;
+  public:
+    PrintEntityShapeSquare(std::ostream& output) : m_output(output) {};
+    bool operator()(ShapeEntity<QuadTangle>& shapeentity) const;
+  };
+
+  class PrintEntityTransform : public Function<TL0,TL1(TransformEntity)> {
+  private:
+    std::ostream& m_output;
+  public:
+    PrintEntityTransform(std::ostream& output) : m_output(output) {};
+    bool operator()(TransformEntity& t) const;
   };
 }
 #endif//PRINT_ENTITY_GUARD
