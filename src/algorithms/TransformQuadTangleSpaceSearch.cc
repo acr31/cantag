@@ -114,9 +114,10 @@ namespace Cantag {
     if (t != NULL) {
       initz = (*t)[11];
       t->GetAngleRepresentation(&theta,&phi,&psi);
-      steptheta=M_PI;
-      stepphi=M_PI;
-      steppsi=M_PI;
+    //   t->Print();
+//       std::cerr << "Guess "<< theta << " " << phi << " " << psi << std::endl;
+//       Transform aa(0,0,0,theta, phi, psi,1.0);
+//       aa.Print();
     }
 
     gsl_vector_set (x, 0, initz); // z
@@ -141,6 +142,15 @@ namespace Cantag {
     do {
       iter++;
       status = gsl_multimin_fminimizer_iterate (s);
+
+      float z = gsl_vector_get(s->x, 0);
+      float theta = gsl_vector_get(s->x, 1);
+      float phi  = gsl_vector_get(s->x, 2);
+      float psi = gsl_vector_get(s->x, 3);
+
+      //std::cerr << z << " " << theta << " " << phi << " " << psi << " " << 
+      //SpaceSearchQuadFunc(s->x,&p) << std::endl;
+      
       if (status)
 	break;      
       status = gsl_multimin_test_size(s->size,1e-3);
@@ -169,6 +179,9 @@ namespace Cantag {
     return false;
   }
 
+
+
+
   double TransformQuadTangleSpaceSearch::SpaceSearchQuadFunc(const gsl_vector *v, void *params) {
     float *p = (float *) params;
 
@@ -181,17 +194,20 @@ namespace Cantag {
     Transform t(p[8]*z, p[9]*z,z,
 		theta, phi, psi, 1.0);
     
-    float X0,Y0;
-    t.Apply(-1.0, -1.0, 0.0, &X0, &Y0);
+    float X0,Y0, X1, Y1, X2, Y2, X3, Y3;
 
-    float X1,Y1;
-    t.Apply(1.0, -1.0, 0.0, &X1, &Y1);
+    t.Apply(-1.0, -1.0, 0.0, &X3, &Y2);
+    t.Apply(1.0, -1.0, 0.0, &X0, &Y0);
+    t.Apply(1.0, 1.0, 0.0, &X1, &Y1);
+    t.Apply(-1.0, 1.0, 0.0, &X2, &Y2);
 
-    float X2,Y2;
-    t.Apply(1.0, 1.0, 0.0, &X2, &Y2);
 
-    float X3,Y3;
-    t.Apply(-1.0, 1.0, 0.0, &X3, &Y3);
+   //  std::cerr << X0 << " " << Y0 << std::endl;
+//     std::cerr << X1 << " " << Y1 << std::endl;
+//     std::cerr << X2 << " " << Y2 << std::endl;
+//     std::cerr << X3 << " " << Y3 << std::endl;
+//     std::cerr << std::endl;
+//     exit(0);
 
     // Centre point of current
     float lambda = ( (Y0-Y1)*(X3-X1) - (Y3-Y1)*(X0-X1) ) /
