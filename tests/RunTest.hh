@@ -29,10 +29,18 @@ struct Result {
   float distance_error;
   int bit_error;
   bool valid;
-  float simulate_min_distance;
 
   Result() : valid(false) {}
-  Result(float a, float d, int b,float c) : angle_error(a), distance_error(d),bit_error(b),simulate_min_distance(c), valid(true) {}
+  Result(float a, float d, int b) : angle_error(a), distance_error(d),bit_error(b), valid(true) {}
+
+  void Update(float a, float b, int c) {
+    if (!valid || bit_error > c) {
+      angle_error = a;
+      distance_error = b;
+      bit_error = c;
+      valid = true;
+    }
+  }
 };
 
 template<class TagType>
@@ -48,8 +56,9 @@ private:
 public:
   RunTest(int size, float fov, Cantag::DecodeEntity<TagType::PayloadSize>& d);
   
-  Result Execute(double theta, double phi, double x, double y, double z);
+  Result Execute(double theta, double phi, double x, double y, double z,const char* debug_name= NULL);
   void ExecuteBatch(std::ostream& output, int pixel_min, int pixel_step, int theta_min, int theta_step, int jitter_step, const char* prefix = NULL);
+  void ExecuteSingle(std::ostream& output, float x0, float y0, float z0,float theta,float phi, const char* prefix = NULL);
 };
 
 template<class TagType> RunTest<TagType>::RunTest(int size, float fov, Cantag::DecodeEntity<TagType::PayloadSize>& d) :
@@ -60,7 +69,7 @@ template<class TagType> RunTest<TagType>::RunTest(int size, float fov, Cantag::D
   }
 
   // create the image that will hold the tag design
-  Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> i(512,512);
+  Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> i(1024,1024);
   if (!Cantag::DrawTag(tag)(d,i)) {
     throw "Failed to draw encoded value";
   }
@@ -70,7 +79,7 @@ template<class TagType> RunTest<TagType>::RunTest(int size, float fov, Cantag::D
   }
 
   stored_payload = (*d.GetPayloads().begin())->payload;
-
+  fs.SetSuperSample(1);
   fs.Init(i);
   fs.SetCameraParameters(camera);
 }
@@ -95,13 +104,18 @@ template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output
 	for(int v=0;v<jitter_step;++v) {
 	  double y0 = start + step*v;
 	  Result result = Execute(theta,phi,x0,y0,distance);
+	  TransformEntity te;
+	  te.GetTransforms().push_back(new Transform(x0,y0,distance,M_PI/2.f,0.f,theta/180.f*M_PI,1.f));
+	  Minima m;
+	  SimulateMinDistance(m,tag,camera)(te);
+	  
 	  if (prefix) output << prefix << " ";
 	  output << theta << " " << phi << " " << x0 << " " << y0 << " " << distance << " " << pixels << " ";
 	  if (result.valid) {
-	    output << result.distance_error << " " << result.angle_error << " " << result.bit_error << " " << result.simulate_min_distance << "\n";
+	    output << result.distance_error << " " << result.angle_error << " " << result.bit_error << " " << m.GetMinima() << "\n";
 	  }
 	  else {
-	    output << "FAIL FAIL FAIL\n";
+	    output << "FAIL FAIL FAIL " << m.GetMinima() << "\n";
 	  }
 	}
       }
@@ -109,18 +123,33 @@ template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output
   }
 }
 
+template<class TagType> void RunTest<TagType>::ExecuteSingle(std::ostream& output,float x0, float y0, float z0, float theta, float phi, const char* prefix) {
+  int pixels = (int)((double)m_size/2.f/z0);
 
-
-template<class TagType> Result RunTest<TagType>::Execute(double theta, double phi, double x, double y, double z) {
+  Result result = Execute(theta,phi,x0,y0,z0,"debug-%0.2d.pnm");
   TransformEntity te;
-  te.GetTransforms().push_back(new Transform(x,y,z,M_PI/2,0,theta/180*M_PI,1.f));
+  te.GetTransforms().push_back(new Transform(x0,y0,z0,M_PI/2.f,0.f,theta/180.f*M_PI,1.f));
   Minima m;
-  SimulateMinDistance(m,tag)(te);
+  SimulateMinDistance(m,tag,camera)(te);
+	  
+  if (prefix) output << prefix << " ";
+  output << theta << " " << phi << " " << x0 << " " << y0 << " " << z0 << " " << pixels << " ";
+  if (result.valid) {
+    output << result.distance_error << " " << result.angle_error << " " << result.bit_error << " " << m.GetMinima() << "\n";
+  }
+  else {
+    output << "FAIL FAIL FAIL " << m.GetMinima() << "\n";
+  }
+}
 
+
+
+template<class TagType> Result RunTest<TagType>::Execute(double theta, double phi, double x, double y, double z, const char* debug_name) {
   //  std::cout << "Execute " << theta << " " << phi << " " << x << " " << y << " " << z << std::endl;
   Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>* i = fs.Next(theta,phi,x,y,z);
-  tag(*i,camera);
+  tag(*i,camera,debug_name);
   const std::vector<typename TagType::Result>& loclist = tag.GetLocatedObjects();
+  Result r;
   for(typename std::vector<typename TagType::Result>::const_iterator i = loclist.begin();i!=loclist.end();++i) {
     const typename TagType::Result& loc = *i;
     const Cantag::TransformEntity* te = loc.first;
@@ -162,8 +191,8 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
     double distance = sqrt( (location[0] - x)*(location[0] - x) + 
 			    (location[1] - y)*(location[1] - y) + 
 			    (location[2] - z)*(location[2] - z) );
-    
-    return Result(errorangle,distance,errors,m.GetMinima());
+    //    std::cerr << errorangle << " " << distance << " " << errors << std::endl;
+    r.Update(errorangle,distance,errors);
   }
-  return Result();
+  return r;
 }

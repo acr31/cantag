@@ -62,19 +62,50 @@ public:
 	     float inner_data,
 	     float outer_data) : Cantag::TagCircle<RINGS,SECTORS>(inner_bullseye,outer_bullseye,inner_data,outer_data), m_located() {}
 
-  bool operator()(const Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>& i,const Cantag::Camera& camera) {
+  bool operator()(const Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>& i,const Cantag::Camera& camera, const char* debug_name = NULL) {
+    char name_buffer[255];
+    int debug_counter = 0;
     m_located.erase(m_located.begin(),m_located.end());
     tree.DeleteAll();
     Cantag::MonochromeImage m(i.GetWidth(),i.GetHeight());
     Apply(i,m,Cantag::ThresholdGlobal<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>(128));
+    if (debug_name) {
+      snprintf(name_buffer,255,debug_name,debug_counter++);
+      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(i.GetWidth(),i.GetHeight());
+      Apply(m,Cantag::DrawEntityMonochrome(output));
+      output.Save(name_buffer);
+    }
     Apply(m,tree,Cantag::ContourFollowerTree(*this));
+    if (debug_name) {
+      snprintf(name_buffer,255,debug_name,debug_counter++);
+      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(i.GetWidth(),i.GetHeight());
+      ApplyTree(tree,Cantag::DrawEntityContour(output));
+      output.Save(name_buffer);
+    }
     ApplyTree(tree,Cantag::DistortionCorrection(camera));
     ApplyTree(tree,FitAlgorithm()); 
-    ApplyTree(tree,TransformAlgorithm(GetBullseyeOuterEdge()));
+    if (debug_name) {
+      snprintf(name_buffer,255,debug_name,debug_counter++);
+      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(i.GetWidth(),i.GetHeight());
+      Apply(m,Cantag::DrawEntityMonochrome(output));
+      output.ConvertScale(0.25,190);
+      ApplyTree(tree,Cantag::DrawEntityShape<Cantag::Ellipse>(output,camera));
+      output.Save(name_buffer);
+    }
+    ApplyTree(tree,TransformAlgorithm(this->GetBullseyeOuterEdge()));
     ApplyTree(tree,Cantag::TransformSelectEllipse(*this,camera));
     ApplyTree(tree,Cantag::RemoveNonConcentricEllipse(*this));
     ApplyTree(tree,Cantag::Bind(Cantag::TransformEllipseRotate(*this,camera),m));
     ApplyTree(tree,Cantag::Bind(Cantag::SampleTagCircle(*this,camera),m));
+    if (debug_name) {
+      snprintf(name_buffer,255,debug_name,debug_counter++);
+      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(i.GetWidth(),i.GetHeight());
+      Apply(m,Cantag::DrawEntityMonochrome(output));
+      output.ConvertScale(0.25,190);
+      ApplyTree(tree,Cantag::DrawEntityShape<Cantag::Ellipse>(output,camera));
+      ApplyTree(tree,Cantag::DrawEntitySample(output,camera,*this));
+      output.Save(name_buffer);
+    }
     ApplyTree(tree,Cantag::Decode<CoderType>());
     ApplyTree(tree,Cantag::TransformRotateToPayload(*this));
     ApplyTree(tree,AddLocatedObject(*this,camera));

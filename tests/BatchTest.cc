@@ -79,22 +79,59 @@ struct Executor {
     RunTest<TagType> r(size,fov,d);
     
     try {
-      r.ExecuteBatch(std::cout,1,1,180,5,5,typeid(TagType).name());
+      r.ExecuteBatch(std::cout,1,1,90,5,5,typeid(TagType).name());
     }
     catch (const char* exception) {
       std::cerr << "Caught exception: " << exception<< std::endl;
     }    
     Executor<typename List::Tail>::Execute();
   }  
+
+  static void ExecuteSingle(float x0, float y0, float z0, float theta, float phi) {
+    const float fov = 70.f;
+    const int size = 600;
+    DecodeEntity<TagType::PayloadSize> d;
+    typename DecodeEntity<TagType::PayloadSize>::Data* data = d.Add();
+    Chooser<typename TagType::SpecType>::CreateCode(data->payload);
+    
+    RunTest<TagType> r(size,fov,d);
+    
+    try {
+      r.ExecuteSingle(std::cout,x0,y0,z0,theta,phi,typeid(TagType).name());
+    }
+    catch (const char* exception) {
+      std::cerr << "Caught exception: " << exception<< std::endl;
+    }    
+    Executor<typename List::Tail>::ExecuteSingle(x0,y0,z0,theta,phi);
+  }
 };
 
 template<>
 struct Executor<Cantag::TypeListEOL> {
   static void Execute() {};
+  static void ExecuteSingle(float x0,float y0,float z0,float theta,float phi) {};
 };
 
+
+//typedef AllTags TagList;
+//typedef SquareTags TagList;
+//typedef TL1(SquareConvexHullProj36) TagList;
+//typedef TL1(SquareRegressCornerProj36) TagList;
+typedef TL1(SquareCornerSpaceSearch36) TagList;
+
 int main(int argc,char* argv[]) {
-  
-  Executor<AllTags>::Execute();
+  if (argc == 1) {
+    Executor<TagList>::Execute();
+  }
+  else {
+    float x0 = atof(argv[1]);
+    float y0 = atof(argv[2]);
+    float z0 = atof(argv[3]);
+    float theta = atof(argv[4]);
+    float phi = atof(argv[5]);
+
+    Executor<TagList>::ExecuteSingle(x0,y0,z0,theta,phi);
+
+  }
 }
 

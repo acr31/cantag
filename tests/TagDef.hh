@@ -84,16 +84,50 @@ typedef L(CircleInnerLSFull24,
 	L(CircleInnerLSFull168,
 	  L(CircleInnerLSFull196,Cantag::TypeListEOL))))))))) AllTags;
 */
-/*
-typedef L(SquareConvexHullRegressProj25,
-        L(SquareConvexHullRegressProj49,
-        L(SquareConvexHullRegressProj64,
-        L(SquareConvexHullRegressProj81,
-        L(SquareConvexHullRegressProj100,
-        L(SquareConvexHullRegressProj121,
-        L(SquareConvexHullRegressProj169,
-        L(SquareConvexHullRegressProj196,	  
-	  Cantag::TypeListEOL)))))))) AllTags;
-*/
+
+typedef	L(SquareCornerProj36,
+	L(SquareCornerReduced36,
+	L(SquareCornerSpaceSearch36,
+	L(SquareRegressCornerProj36,
+	L(SquareRegressCornerReduced36,
+	L(SquareRegressCornerSpaceSearch36,
+        L(SquarePolygonProj36,
+	L(SquarePolygonReduced36,
+	L(SquarePolygonSpaceSearch36,
+        L(SquareRegressPolygonProj36,
+	L(SquareRegressPolygonReduced36,
+	L(SquareRegressPolygonSpaceSearch36,
+        L(SquareConvexHullProj36,
+	L(SquareConvexHullReduced36,
+	L(SquareConvexHullSpaceSearch36,
+        L(SquareRegressConvexHullProj36,
+	L(SquareRegressConvexHullReduced36,
+	L(SquareRegressConvexHullSpaceSearch36,
+        L(SquarePolygonProj25,
+        L(SquarePolygonProj49,
+        L(SquarePolygonProj64,
+        L(SquarePolygonProj81,
+        L(SquarePolygonProj100,
+        L(SquarePolygonProj121,
+        L(SquarePolygonProj169,
+	L(SquarePolygonProj196,
+	    Cantag::TypeListEOL)))))))))))))))))))))))))) SquareTags;
+
+typedef	L(SquareCornerProj36,
+	L(SquareCornerReduced36,
+        L(SquarePolygonProj36,
+	L(SquarePolygonReduced36,
+        L(SquareConvexHullProj36,
+	L(SquareConvexHullReduced36,
+        L(SquarePolygonProj25,
+        L(SquarePolygonProj49,
+        L(SquarePolygonProj64,
+        L(SquarePolygonProj81,
+        L(SquarePolygonProj100,
+        L(SquarePolygonProj121,
+        L(SquarePolygonProj169,
+	L(SquarePolygonProj196,
+	    Cantag::TypeListEOL)))))))))))))) SquareTagsNotSpace;
+
 //typedef L(SquareConvexHullRegressProj49,Cantag::TypeListEOL) AllTags;
 #endif//TAGDEF_GUARD
