@@ -196,7 +196,7 @@ namespace Cantag {
     
     float X0,Y0, X1, Y1, X2, Y2, X3, Y3;
 
-    t.Apply(-1.0, -1.0, 0.0, &X3, &Y2);
+    t.Apply(-1.0, -1.0, 0.0, &X3, &Y3);
     t.Apply(1.0, -1.0, 0.0, &X0, &Y0);
     t.Apply(1.0, 1.0, 0.0, &X1, &Y1);
     t.Apply(-1.0, 1.0, 0.0, &X2, &Y2);
