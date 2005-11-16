@@ -198,15 +198,23 @@ namespace Cantag {
     std::vector<float> points;
     shape.GetShape()->Draw(points);
     m_camera.NPCFToImage(points);
-    for(std::vector<float>::const_iterator i = points.begin();
-	i != points.end();
-	++i) {
-      const int x = *i;
-      ++i;
-      const int y = *i;
-      
-      m_image.DrawPixel(m_roi.ScaleX(x,m_image.GetWidth()),m_roi.ScaleY(y,m_image.GetHeight()),0);
-    }  
+    std::vector<float>::const_iterator i = points.begin();
+    float firstx = *(i++);
+    float firsty = *(i++);
+    float currentx = firstx;
+    float currenty = firsty;
+    while(i != points.end()) {
+      const float x = *(i++);
+      const float y = *(i++);      
+      m_image.DrawLine(m_roi.ScaleX(currentx,m_image.GetWidth()),m_roi.ScaleY(currenty,m_image.GetHeight()),
+		       m_roi.ScaleX(x,m_image.GetWidth()),m_roi.ScaleY(y,m_image.GetHeight()),
+		       0,1);
+      currentx = x;
+      currenty = y;
+    }
+    m_image.DrawLine(m_roi.ScaleX(currentx,m_image.GetWidth()),m_roi.ScaleY(currenty,m_image.GetHeight()),
+		     m_roi.ScaleX(firstx,m_image.GetWidth()),m_roi.ScaleY(firsty,m_image.GetHeight()),
+		     0,1);
     return true;    
   }
 
