@@ -79,6 +79,13 @@ namespace Cantag {
       camera.DrawQuadTangle(image,*this);
   }
 
+  void QuadTangle::Draw(std::vector<float>& points) const {
+    points.push_back(m_x0); points.push_back(m_y0);
+    points.push_back(m_x1); points.push_back(m_y1);
+    points.push_back(m_x2); points.push_back(m_y2);
+    points.push_back(m_x3); points.push_back(m_y3);
+  }
+
   float dist(float x0, float y0, float x1, float y1) {
     return sqrt( (x0-x1)*(x0-x1) + (y0-y1)*(y0-y1) );
   }
