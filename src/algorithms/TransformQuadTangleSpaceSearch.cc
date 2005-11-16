@@ -111,19 +111,21 @@ namespace Cantag {
     float stepphi=2*M_PI;
     float steppsi=2*M_PI;
 
+    int num_start=1;
+
     if (t != NULL) {
       initz = (*t)[11];
       t->GetAngleRepresentation(&theta,&phi,&psi);
-    //   t->Print();
-//       std::cerr << "Guess "<< theta << " " << phi << " " << psi << std::endl;
-//       Transform aa(0,0,0,theta, phi, psi,1.0);
-//       aa.Print();
-    }
 
-    gsl_vector_set (x, 0, initz); // z
-    gsl_vector_set (x, 1, theta); // theta
-    gsl_vector_set (x, 2, phi);   // phi
-    gsl_vector_set (x, 3, psi);   // psi
+      Transform check(0.0,0.0,0.0,theta,phi,psi,1.0);   
+      if (check[10]<0) {
+	theta=2.20741;
+	phi=2.74889;
+	psi=-1.21712;
+	num_start=4;
+      }
+
+    }
 
     // Characteristic steps differ 
     // for distances and angles
@@ -133,47 +135,85 @@ namespace Cantag {
     gsl_vector_set (step, 2, stepphi);
     gsl_vector_set (step, 3, steppsi);
 
-  
     T = gsl_multimin_fminimizer_nmsimplex;
-    s = gsl_multimin_fminimizer_alloc (T, nparam);
-  
-    gsl_multimin_fminimizer_set (s, &errfunc, x, step); 
-  
-    do {
-      iter++;
-      status = gsl_multimin_fminimizer_iterate (s);
+    
+    float min=1e10;
+    float min_theta=0.0, min_phi=0.0, min_psi=0.0, min_z=0.0;
 
-      float z = gsl_vector_get(s->x, 0);
-      float theta = gsl_vector_get(s->x, 1);
-      float phi  = gsl_vector_get(s->x, 2);
-      float psi = gsl_vector_get(s->x, 3);
+    for (int i=0;i<num_start; i++) {
+    
+      if (i==1) {
+	theta=1.766;
+ 	phi=2.74889;
+ 	psi=-2.2643;
+      }
+      else if (i==2) {
+	theta=0.9342;
+	phi=0.3927;
+	psi=-1.21712;
+      }
+      else if (i==3) {
+	theta=1.375;
+	phi=0.3927;
+	psi=-2.2643;
+      }
 
-      //std::cerr << z << " " << theta << " " << phi << " " << psi << " " << 
-      //SpaceSearchQuadFunc(s->x,&p) << std::endl;
+      gsl_vector_set (x, 0, initz); // z
+      gsl_vector_set (x, 1, theta); // theta
+      gsl_vector_set (x, 2, phi);   // phi
+      gsl_vector_set (x, 3, psi); 
+    
+    
+      s = gsl_multimin_fminimizer_alloc (T, nparam);
       
-      if (status)
-	break;      
-      status = gsl_multimin_test_size(s->size,1e-3);
-
-    }  while (status == GSL_CONTINUE && iter < 1000);
-
-    if (iter <1000) {
-      // Converged
-      float z = gsl_vector_get(s->x, 0);
-      float theta = gsl_vector_get(s->x, 1);
-      float phi  = gsl_vector_get(s->x, 2);
-      float psi = gsl_vector_get(s->x, 3);
+      gsl_multimin_fminimizer_set (s, &errfunc, x, step); 
       
-      Transform* t = new Transform(p[8]*z, p[9]*z,z,
-				   theta, phi, psi, 1.0);
+      do {
+	iter++;
+	status = gsl_multimin_fminimizer_iterate (s);
+	
+	float z = gsl_vector_get(s->x, 0);
+	float theta = gsl_vector_get(s->x, 1);
+	float phi  = gsl_vector_get(s->x, 2);
+	float psi = gsl_vector_get(s->x, 3);
+	
+	//std::cerr << z << " " << theta << " " << phi << " " << psi << " " << 
+	//SpaceSearchQuadFunc(s->x,&p) << std::endl;
+	
+	if (status)
+	  break;      
+	status = gsl_multimin_test_size(s->size,1e-3);
+	
+      }  while (status == GSL_CONTINUE && iter < 1000);
+      
+      if (iter <1000) {
+	// Converged
+	float z = gsl_vector_get(s->x, 0);
+	float theta = gsl_vector_get(s->x, 1);
+	float phi  = gsl_vector_get(s->x, 2);
+	float psi = gsl_vector_get(s->x, 3);
+	
+	if (i==0 || (SpaceSearchQuadFunc(s->x,&p) < min)) {
+	  min = SpaceSearchQuadFunc(s->x,&p);
+	  min_theta=theta;
+	  min_phi=phi;
+	  min_psi=psi;
+	  min_z=z;
+	}
+      }
 
-      dest.GetTransforms().push_back(t);  
       gsl_multimin_fminimizer_free (s);
-      gsl_vector_free (x);
-      gsl_vector_free (step);
-      return true;
     }
-    gsl_multimin_fminimizer_free (s);
+
+    if (min!=1e10) {
+	Transform* t = new Transform(p[8]*min_z, p[9]*min_z,min_z,
+				     min_theta, min_phi, min_psi, 1.0);
+	
+	dest.GetTransforms().push_back(t);  
+	gsl_vector_free (x);
+	gsl_vector_free (step);
+	return true;
+    }
     gsl_vector_free (x);
     gsl_vector_free (step);
     return false;
