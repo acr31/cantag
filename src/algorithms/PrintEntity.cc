@@ -39,4 +39,21 @@ namespace Cantag {
     return true;
   }
 
+  bool PrintEntityShapeSquare::operator()(ShapeEntity<QuadTangle>& shape) const {
+    const QuadTangle* quad = shape.GetShape();
+    m_output << quad->GetX0() << " " << quad->GetY0() << std::endl;
+    m_output << quad->GetX1() << " " << quad->GetY1() << std::endl;
+    m_output << quad->GetX2() << " " << quad->GetY2() << std::endl;
+    m_output << quad->GetX3() << " " << quad->GetY3() << std::endl;
+    m_output << std::endl;
+    return true;
+  }
+
+  bool PrintEntityTransform::operator()(TransformEntity& te) const {
+    const Transform* t = te.GetPreferredTransform();
+    if (t==NULL) return false;
+    t->Print(m_output);
+    return true;
+  }
+
 }
