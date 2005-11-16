@@ -349,7 +349,7 @@ namespace Cantag {
     // for explanation.  This code derives the angle/axis values then converts the axis to a spherical 
     // polars representation (theta,phi), where phi is in the xy plane.
 
-    static const float epsilon = 0.001;
+    static const float epsilon = 0.01;
     
     // Is this matrix symmetric?
     if ( fabs(m_transform[9]-m_transform[6]) < epsilon &&
@@ -380,7 +380,7 @@ namespace Cantag {
 	float x = sqrt((m0+1.0)/2.0);
 	float y = sqrt((m5+1.0)/2.0);
 	float z = sqrt((m10+1.0)/2.0);
-	
+
 	int xx = x>0.0 ? 1:-1;
 	if (fabs(xx)<epsilon) xx=0;
 	int yy = y>0.0 ? 1:-1;
@@ -389,11 +389,11 @@ namespace Cantag {
 	if (fabs(zz)<epsilon) zz=0;
 
 	int xy = (m_transform[1] > 0) ? 1:-1;
-	if (fabs(m_transform[1])<epsilon) xy=0.0;
+	if (fabs(m_transform[1])<epsilon) xy=0;
 	int xz = (m_transform[2] > 0) ? 1:-1;
-	if (fabs(m_transform[2])<epsilon) xz=0.0;
+	if (fabs(m_transform[2])<epsilon) xz=0;
 	int yz = (m_transform[6] > 0) ? 1:-1;
-	if (fabs(m_transform[6])<epsilon) yz=0.0;
+	if (fabs(m_transform[6])<epsilon) yz=0;
 
 	if ( (xx>0 && yy>0 && zz<0) || (xx<0 && yy<0 && zz>0)) {
 	  if (xy>0 && xz<0 && yz<0) z=-z;
@@ -413,15 +413,6 @@ namespace Cantag {
 	else if ( (xx<0 && yy>0 && zz==0) || (xx>0 && yy<0 && zz==0) ) {
 	  if (xy<0 && xz==0 && yz==0) x=-x;
 	}
-
-// 	if (xZero && !yZero && !zZero) y = -y;
-// 	else if (yZero && !zZero) z = -z;
-// 	else if (zZero) x = -x;
-// 	else if (xyPositive && xzPositive && yzPositive) return;
-// 	else if (yzPositive) x=-x;
-// 	else if (xzPositive) y=-y;
-// 	else if (xyPositive) z=-z;
-
 
 	*theta = acos(z);
 	*phi = atan2(y,x); 	
