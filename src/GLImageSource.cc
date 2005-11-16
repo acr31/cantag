@@ -190,13 +190,15 @@ namespace Cantag {
     gluPerspective((GLfloat)m_fov, (GLfloat)m_width/(GLfloat)m_height,0,100.0);
     //    gluLookAt(-centre_x*m_supersample,-centre_y*m_supersample,-centre_z,-centre_x*m_supersample,-centre_y*m_supersample,-centre_z+1,0.0,-1.0,0.0);
     gluLookAt(-centre_x,-centre_y,-centre_z,-centre_x,-centre_y,-centre_z+1,0.0,-1.0,0.0);
+    /*
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-    //     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-    //     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-    //     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-    //     glEnable(GL_POINT_SMOOTH);
-    //     glEnable(GL_LINE_SMOOTH);
-    //     glEnable(GL_POLYGON_SMOOTH); 
+    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    */
+    //    glEnable(GL_POINT_SMOOTH);
+    //    glEnable(GL_LINE_SMOOTH);
+    //glEnable(GL_POLYGON_SMOOTH); 
     
     // select the modelview matrix - transforms object co-ordinates to eye co-ordinates
     glMatrixMode(GL_MODELVIEW);
