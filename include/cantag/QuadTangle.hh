@@ -81,6 +81,7 @@ namespace Cantag {
     
     bool Compare(const QuadTangle& o) const;
     void Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera) const;
+    void Draw(std::vector<float>& points) const;
 
     inline float GetX0() const { return m_x0; }
     inline float GetY0() const { return m_y0; }
