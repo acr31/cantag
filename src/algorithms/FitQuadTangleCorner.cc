@@ -25,7 +25,7 @@
 #include <cantag/algorithms/FitQuadTangleCorner.hh>
 
 #define WINDOWSIZE 10
-#define CURVTHRESH -0.8
+#define CURVTHRESH -0.6
 
 namespace Cantag {
 
