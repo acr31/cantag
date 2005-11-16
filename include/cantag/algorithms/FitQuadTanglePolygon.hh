@@ -29,6 +29,7 @@
 #include <cantag/entities/ShapeEntity.hh>
 #include <cantag/entities/ContourEntity.hh>
 #include <cantag/Function.hh>
+#include <cantag/TemplateUtils.hh>
 
 namespace Cantag {
   class FitQuadTanglePolygon : public Function<TL1(ContourEntity),TL1(ShapeEntity<QuadTangle>) > {
@@ -43,7 +44,7 @@ namespace Cantag {
     /**
      * Compute the cosine of the angle between the vectors pq and qr
      */
-    float DPAngle(const std::pair<float,float>& p, const std::pair<float,float>& q, const std::pair<float,float>& r) const ;
+    float DPAngle(const std::pair<std::pair<float,float>,int>& p, const std::pair<std::pair<float,float>,int>& q, const std::pair<std::pair<float,float>,int>& r) const ;
 
     /**
      * Join two lists of vertexes together.  List 1 is of the form
@@ -60,10 +61,10 @@ namespace Cantag {
      * this must be one place in the list past that pointed to by reverse_mid
      * end is an iterator pointing at the end of the list 2 window (exclusive)
      */
-    void DPJoin(std::list<std::pair<float,float> >& fulllist,
-		std::list<std::pair<float,float> >::iterator start,
-		std::list<std::pair<float,float> >::iterator mid,
-		std::list<std::pair<float,float> >::iterator end) const;
+    void DPJoin(std::list<std::pair<std::pair<float,float>,int> >& fulllist,
+		std::list<std::pair<std::pair<float,float>,int> >::iterator start,
+		std::list<std::pair<std::pair<float,float>,int> >::iterator mid,
+		std::list<std::pair<std::pair<float,float>,int> >::iterator end) const;
 
     /**
      * Split the list by finding the point on the contour that is
@@ -76,9 +77,9 @@ namespace Cantag {
      * start points to the first element in the list that our current window covers (inclusive)
      * end points to the end of our window (exclusive)
      */
-    std::list<std::pair<float,float> >::iterator DPSplit(std::list<std::pair<float,float> >& fulllist,
-							 std::list<std::pair<float,float> >::iterator start,
-							 std::list<std::pair<float,float> >::iterator end) const;
+    std::list<std::pair<std::pair<float,float>,int> >::iterator DPSplit(std::list<std::pair<std::pair<float,float>,int> >& fulllist,
+							 std::list<std::pair<std::pair<float,float>,int> >::iterator start,
+							 std::list<std::pair<std::pair<float,float>,int> >::iterator end) const;
     
     /**
      * Split the list, recurse on the two halves, and then join them
@@ -90,9 +91,9 @@ namespace Cantag {
      * start is an iterator pointing at the start of our window (inclusive)
      * end is an iterator pointing at the end of our window (exlusive)
      */
-    void DPRecurse(std::list<std::pair<float,float> >& fulllist,
-		   std::list<std::pair<float,float> >::iterator start,
-		   std::list<std::pair<float,float> >::iterator end) const;
+    void DPRecurse(std::list<std::pair<std::pair<float,float>,int> >& fulllist,
+		   std::list<std::pair<std::pair<float,float>,int> >::iterator start,
+		   std::list<std::pair<std::pair<float,float>,int> >::iterator end) const;
       
 
   };
