@@ -30,10 +30,12 @@
 namespace Cantag {
 
   bool TransformQuadTangleSpaceSearch::operator()(const ShapeEntity<QuadTangle>& shape, TransformEntity& dest) const {
+    const QuadTangle& q = *(shape.GetShape());
+
     TransformEntity te;
     if (!TransformQuadTangleProjective()(shape,te)) { return false; }
    
-    const QuadTangle& q = *(shape.GetShape());
+    //    const QuadTangle& q = *(shape.GetShape());
     size_t iter = 0;
     int status;
   
@@ -116,8 +118,9 @@ namespace Cantag {
     if (t != NULL) {
       initz = (*t)[11];
       t->GetAngleRepresentation(&theta,&phi,&psi);
-
+   
       Transform check(0.0,0.0,0.0,theta,phi,psi,1.0);   
+
       if (check[10]<0) {
 	theta=2.20741;
 	phi=2.74889;
@@ -177,15 +180,18 @@ namespace Cantag {
 	float phi  = gsl_vector_get(s->x, 2);
 	float psi = gsl_vector_get(s->x, 3);
 	
-	//std::cerr << z << " " << theta << " " << phi << " " << psi << " " << 
-	//SpaceSearchQuadFunc(s->x,&p) << std::endl;
+	//	std::cerr << z << " " << theta << " " << phi << " " << psi << " " << 
+	//  SpaceSearchQuadFunc(s->x,&p) << " " << s->size << std::endl;
 	
+	if (SpaceSearchQuadFunc(s->x,&p)<1e-7) break;
+
 	if (status)
 	  break;      
 	status = gsl_multimin_test_size(s->size,1e-3);
 	
       }  while (status == GSL_CONTINUE && iter < 1000);
       
+   
       if (iter <1000) {
 	// Converged
 	float z = gsl_vector_get(s->x, 0);
@@ -212,6 +218,7 @@ namespace Cantag {
 	dest.GetTransforms().push_back(t);  
 	gsl_vector_free (x);
 	gsl_vector_free (step);
+
 	return true;
     }
     gsl_vector_free (x);
