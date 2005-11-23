@@ -29,6 +29,7 @@ namespace Cantag {
   bool FitQuadTangleRegression::operator()(const ContourEntity& contour, ShapeEntity<QuadTangle>& shape) const {
 
     const std::vector<float>& points = contour.GetPoints();
+
     // Calculate the indexes of the current points
     std::vector<int> indexes(4);
     indexes[0] = shape.GetShape()->GetIndex0();
@@ -61,7 +62,7 @@ namespace Cantag {
 
       // If there are only a few points along the side
       // we can't really regress anything!
-      if (end-start < 10) return false;
+      if (end-start < 5) return false;
       
       // Ignore the first and last 4 points
       float lastx=points[((start+4)*2)%points.size()];
@@ -77,10 +78,10 @@ namespace Cantag {
 	xxsum+=x*x;
 	xysum+=x*y;
 	count++;
-	if (x!=lastx) vertical=false;
+	if (fabs(x-lastx) > 1e-3)  vertical=false;
 	lastx = x;
       }
-      
+
       if (vertical) {
 	c[j] = lastx;
 	yeq[j]=0;
@@ -122,6 +123,13 @@ namespace Cantag {
 	return false;
       }
     }
+
+//     std::cout << "L " << xres[0] << " " << yres[0] << std::endl;
+//     std::cout << "L " << xres[1] << " " << yres[1] << std::endl;
+//     std::cout << "L " << xres[2] << " " << yres[2] << std::endl;
+//     std::cout << "L " << xres[3] << " " << yres[3] << std::endl;
+//     std::cout << "L " << xres[0] << " " << yres[0] << std::endl;
+//     std::cout << std::endl;
 
     shape.GetShape()->Set(xres[0],yres[0],
 			  xres[1],yres[1],
