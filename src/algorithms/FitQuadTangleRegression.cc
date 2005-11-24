@@ -47,8 +47,8 @@ namespace Cantag {
     float m[4]={0.0};
     float c[4]={0.0};
     bool  yeq[4]={1};
-    
     for (int j=0; j<4; j++) {
+      //      std::cerr << std::endl;
       float xsum=0.0;
       float ysum = 0.0;
       float xxsum=0.0;
@@ -72,13 +72,13 @@ namespace Cantag {
 	
 	float x = points[ii*2];
 	float y = points[ii*2+1];
-	
+	//	std::cerr << x << "  " << y << std::endl;
 	xsum+=x;
 	ysum+=y;
 	xxsum+=x*x;
 	xysum+=x*y;
 	count++;
-	if (fabs(x-lastx) > 1e-3)  vertical=false;
+	if (fabs(x-lastx) > 1e-5)  vertical=false;
 	lastx = x;
       }
 
