@@ -46,8 +46,6 @@ namespace Cantag {
     inline const Transform* GetPreferredTransform() const { 
       float best = 0.f;
       Transform* chosen = NULL;
-      //      chosen=*(m_transforms.begin());
-      
       for(std::list<Transform*>::const_iterator i = m_transforms.begin();i!=m_transforms.end();++i) {
 	if ((*i)->GetConfidence() >= best) {
  	  chosen = *i;
@@ -56,6 +54,18 @@ namespace Cantag {
        }
       return chosen;
     }
+    inline Transform* GetPreferredTransform() { 
+      float best = 0.f;
+      Transform* chosen = NULL;
+      for(std::list<Transform*>::iterator i = m_transforms.begin();i!=m_transforms.end();++i) {
+	if ((*i)->GetConfidence() >= best) {
+ 	  chosen = *i;
+ 	  best = (*i)->GetConfidence();
+ 	}
+       }
+      return chosen;
+    }
+
     inline const Transform* GetTransform() const { return *(m_transforms.begin()); }
   private:
     TransformEntity(const TransformEntity& copyme) {}
