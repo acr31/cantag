@@ -50,6 +50,13 @@ namespace Cantag {
     Transform(float* transform, float confidence);
     Transform(const LocationElement& loc,const PoseElement& pose, const SizeElement& size);
     Transform(float x, float y, float z, float theta, float phi, float psi, float size);
+
+    /**
+     * Create a transform from the euler angles theta and phi - the
+     * third angle is assumed to be zero i.e. no roll around normal
+     * vector
+     */
+    Transform(float x, float y ,float z, float theta, float phi, float size);
     
     inline float& operator[](int index) { return m_transform[index]; }
     inline float operator[](int index) const { return m_transform[index]; }
