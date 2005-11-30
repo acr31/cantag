@@ -26,6 +26,7 @@
 #define MONOCHROME_IMAGE_GUARD
 
 #include <cassert>
+#include <cantag/SpeedMath.hh>
 #include <cantag/entities/Entity.hh>
 namespace Cantag {
   /**
@@ -59,7 +60,11 @@ namespace Cantag {
     }
 
     inline bool GetPixel(float x, float y) const {
-      return GetPixel((unsigned int)x,(unsigned int)y);
+      int xi = Round(x);
+      int yi = Round(y);
+      if (xi >= m_width) xi=m_width-1;
+      if (yi >= m_height) yi = m_height-1;
+      return GetPixel(xi,yi);
     }
     
     inline void SetPixel(unsigned int x, unsigned int y, bool value) {
