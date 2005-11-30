@@ -149,6 +149,16 @@ namespace Cantag {
   struct Reorder<List,TypeListEOL> {
     typedef TypeListEOL value;
   };
+
+  template<class List1, class List2>
+  struct Append {
+    typedef TypeList<typename List1::Head, Append<typename List1::Tail,List2>::value> value;
+  };
+
+  template<class List2>
+  struct Append<TypeListEOL,List2> {
+    typedef List2 value;
+  };
 }
 
 #endif//TEMPLATE_UTILS_GUARD
