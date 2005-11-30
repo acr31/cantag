@@ -36,7 +36,7 @@
 
 namespace Cantag {
 
-  template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT=10>
+  template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT=50>
   class TagCircle : public TagSpec<PARAM_RING_COUNT*PARAM_SECTOR_COUNT>, 
 		    public ContourRestrictions, 
 		    public ConvexHullRestrictions, 
