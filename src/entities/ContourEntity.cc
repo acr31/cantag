@@ -28,7 +28,7 @@
 namespace Cantag {
 
   ContourEntity::ContourEntity(const std::vector<float>& points) : 
-    m_points(points),
+    m_points(),
     m_length(0),
     m_minX(1<<31),
     m_maxX(-1<<31),
@@ -36,7 +36,14 @@ namespace Cantag {
     m_maxY(-1<<31),
     m_concave(false),
     m_centralX(0),
-    m_centralY(0) {    
+    m_centralY(0),
+    m_numPoints(0) {    
+    AddPoints(points);
+  }
+
+  void ContourEntity::AddPoints(const std::vector<float>& points) {
+    m_centralX *= m_numPoints;
+    m_centralY *= m_numPoints;
 
     for(std::vector<float>::const_iterator i = points.begin(); i!= points.end();++i) {
       float x = *(i++);
@@ -50,6 +57,9 @@ namespace Cantag {
       if (x > m_maxX) m_maxX = Round(x);
       if (y < m_minY) m_minY = Round(y);
       if (y > m_maxY) m_maxY = Round(y);      
+      
+      m_points.push_back(x);
+      m_points.push_back(y);
     }
 
     m_centralX /= m_numPoints;
