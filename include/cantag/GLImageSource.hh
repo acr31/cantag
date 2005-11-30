@@ -131,14 +131,7 @@ namespace Cantag {
      * \todo find some way of incorporating the lighting and occlusion
      * options.
      */
-    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* Next(float n_x, float n_y, float n_z, float centre_x, float centre_y, float centre_z, int texture_index = 0, Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* overlay = NULL);
-  
-    inline Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* Next(float theta, float phi, float x0, float y0, float z0, int texture_index=0,  Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* overlay = NULL) {
-      float nx = sin(theta/180*M_PI)*sin(phi/180*M_PI);
-      float ny = sin(theta/180*M_PI)*cos(phi/180*M_PI);
-      float nz = cos(theta/180*M_PI);
-      return Next(nx,ny,nz,x0,y0,z0,texture_index,overlay);
-    };
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* Next(float theta, float phi, float x0, float y0, float z0, int texture_index=0,  Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* overlay = NULL);
 
     inline void SetTagRotation(float degrees) {
       m_tagrotation = degrees;
