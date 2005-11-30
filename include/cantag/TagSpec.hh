@@ -66,8 +66,10 @@ namespace Cantag {
      * Return the number of cells that would go past if we rotated by this angle
      */
     inline int GetPayloadRotation(float angle) const {
+      if (angle < 0) angle += 2*M_PI;
       // each rotation of 2 * M_PI / m_symmetry is a rotation of m_cells_per_rotation
-      return m_symmetry * (int)(angle / (2.f * M_PI));
+      return (m_cells_per_rotation * Round((float)m_symmetry * (angle / 2.f / M_PI))) % PAYLOAD_SIZE;
+      //      return (int)floorf(m_symmetry * (angle / 2.f * M_PI));
     }
   };
 
