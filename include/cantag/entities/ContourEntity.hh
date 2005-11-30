@@ -109,6 +109,8 @@ namespace Cantag {
     ContourEntity(const std::vector<float>& points);
     ~ContourEntity() {};
 
+    void AddPoints(const std::vector<float>& points);
+
     inline int GetNBD() const { return m_nbd; }
     inline void SetNBD(int nbd) { m_nbd = nbd; }
     inline bordertype_t GetBorderType() const { return m_bordertype; }
