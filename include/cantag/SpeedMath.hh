@@ -25,6 +25,10 @@
 #include <cassert>
 #include <sys/param.h>
 
+extern "C" {
+#include <values.h>
+}
+
 namespace Cantag {
 
   template<unsigned int N> inline int t_fact() {
@@ -108,6 +112,26 @@ namespace Cantag {
     return (int)round(d);
     //#endif
   }
+
+  class Minima {
+  private:
+    float m_minimum;
+  public:
+    Minima() : m_minimum(INFINITY) {}
+    void UpdateMinima(float newval) { if (newval < m_minimum) m_minimum = newval; }
+    float GetMinima() const { return m_minimum; }
+  };
+
+  class Maxima {
+  private:
+    float m_maximum;
+  public:
+    Maxima() : m_maximum(-INFINITY) {}
+    void UpdateMaxima(float newval) { if (newval > m_maximum) m_maximum = newval; }
+    float GetMaxima() const { return m_maximum; }
+  };
+
+
 }
 
 #endif //SPEEDMATH_GUARD
