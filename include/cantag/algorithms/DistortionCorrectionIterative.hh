@@ -29,6 +29,11 @@
 #include <cantag/Camera.hh>
 #include <cantag/Function.hh>
 
+#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
+#else
+#error Iteratitive distortion correction requires the GNU Scientific Library
+#endif
+
 namespace Cantag {
   class DistortionCorrectionIterative : public Function<TL0,TL1(ContourEntity)> {
   private:
