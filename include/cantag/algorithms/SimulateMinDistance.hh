@@ -32,19 +32,10 @@
 #include <cantag/TagCircle.hh>
 #include <cantag/TagSquare.hh>
 #include <cantag/Camera.hh>
+#include <cantag/SpeedMath.hh>
 #include <cantag/entities/TransformEntity.hh>
 
 namespace Cantag {
-
-  class Minima {
-  private:
-    float m_minimum;
-  public:
-    Minima() : m_minimum(INFINITY) {}
-    void UpdateMinima(float newval) { if (newval < m_minimum) m_minimum = newval; }
-    float GetMinima() const { return m_minimum; }
-    
-  };
 
   namespace Simulate {
     double ComputeDistance(double xc, double yc, double x0, double y0, double x1, double y1);
@@ -60,8 +51,8 @@ namespace Cantag {
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
   class SimulateMinDistanceCircleObj : Function<TL0,TL1(TransformEntity)> {
   private:
-    enum { TOP_APPROX_COUNT = 4,
-	   BOTTOM_APPROX_COUNT = 4 };
+    enum { TOP_APPROX_COUNT = 100,
+	   BOTTOM_APPROX_COUNT = 100 };
 
     Minima& m_minimum;    
     const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& m_tagspec;
@@ -111,7 +102,6 @@ namespace Cantag {
       float yc = *i;
     
       double min = Simulate::ComputeAll(xc,yc,pointsa,4);
-      //std::cout << "S " << (edge_cells*edge_cells) << " " <<  x0 << " " << y0 << " " << z0 << " " << alpha << " " << beta << " " << gamma << " " << min << std::endl;
       m_minimum.UpdateMinima(min);
     }
     return true;
@@ -164,10 +154,11 @@ namespace Cantag {
   bool SimulateMinDistanceCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(TransformEntity& te) const {
     std::vector<float> points;
     InitPoints(points);
+
     te.GetPreferredTransform()->Apply(points);
     m_camera.NPCFToImage(points);
     for(std::vector<float>::const_iterator i = points.begin(); i!=points.end();++i) {
-      double* pointsa = new double[2*(4 + TOP_APPROX_COUNT + BOTTOM_APPROX_COUNT)];
+      double pointsa[2*(4 + TOP_APPROX_COUNT + BOTTOM_APPROX_COUNT)];
       for(int c=0;c<4+TOP_APPROX_COUNT+BOTTOM_APPROX_COUNT;++c) {
 	pointsa[2*c] = *(i++);
 	pointsa[2*c+1] = *(i++);
@@ -176,9 +167,8 @@ namespace Cantag {
       float yc = *i;
       
       double min = Simulate::ComputeAll(xc,yc,pointsa,4+TOP_APPROX_COUNT+BOTTOM_APPROX_COUNT);
-      //      std::cout << "C " << (sectors*rings) << " " << x0 << " " << y0 << " " << z0 << " " << alpha << " " << beta << " " << gamma << " " << min << std::endl;
+
       m_minimum.UpdateMinima(min);
-      delete[] pointsa;
     }
     return true;
   }
@@ -191,7 +181,7 @@ namespace Cantag {
 
       for(int i=0;i<SECTOR_COUNT;++i) {
 	double start_theta = 2*M_PI*(double)i/(double)SECTOR_COUNT;
-	double end_theta = 2*M_PI*((double)i+1.f)/(double)SECTOR_COUNT;
+	double end_theta = 2*M_PI*((double)i+1.0)/(double)SECTOR_COUNT;
 	
 	double cos_start_theta = cos(start_theta);
 	double sin_start_theta = sin(start_theta);
