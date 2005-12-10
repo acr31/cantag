@@ -46,9 +46,9 @@ namespace Cantag {
 
     ROI(int pminx, int pmaxx, int pminy, int pmaxy) : minx(pminx), maxx(pmaxx), miny(pminy), maxy(pmaxy) {};
     int ScaleX(int x, int imageWidth) const { return (x - minx) * imageWidth / (maxx-minx);}
-    float ScaleX(float x, int imageWidth) const { return (x - (float)minx) * (float)imageWidth / (float)(maxx-minx); }
+    int ScaleX(float x, int imageWidth) const { return Round((x - (float)minx) * (float)imageWidth / (float)(maxx-minx)); }
     int ScaleY(int y, int imageHeight) const { return (y - miny) * imageHeight / (maxy-miny);}
-    float ScaleY(float y, int imageHeight) const { return (y - (float)miny) * (float)imageHeight / (float)(maxy-miny); }
+    int ScaleY(float y, int imageHeight) const { return Round((y - (float)miny) * (float)imageHeight / (float)(maxy-miny)); }
   };
 
   class DrawEntityImage : public Function<TL0,TypeList<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>,TypeListEOL> > {
@@ -166,6 +166,9 @@ namespace Cantag {
 	int coordx = m_roi.ScaleX(pts[0],m_image.GetWidth());
 	int coordy = m_roi.ScaleY(pts[1],m_image.GetHeight());	  
 	m_image.DrawPixel(coordx,coordy,0);
+
+	// use this one to show the sample order
+	//m_image.DrawPixel(coordx,coordy, j*255/payloadsize);
       }
     }
     return true;
