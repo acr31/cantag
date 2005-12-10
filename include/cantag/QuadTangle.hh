@@ -71,7 +71,7 @@ namespace Cantag {
      * The index into the contour for the fourth corner point
      */
     int m_index_3;
-
+    
 
   public:
     QuadTangle();
@@ -81,7 +81,17 @@ namespace Cantag {
     
     bool Compare(const QuadTangle& o) const;
     void Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera) const;
-    void Draw(std::vector<float>& points) const;
+
+
+    /**
+     * Generate the points for this quadtangle and store the alternate
+     * x and y in the given vector.  The parameter mid_points
+     * specifies the number of points to generate between the corners
+     * of the quadtangle - normally zero is sufficient because the
+     * corners bound the straight lines which are invariant under
+     * perspective transform.
+     */
+    void Draw(std::vector<float>& points, int mid_points = 0) const;
 
     inline float GetX0() const { return m_x0; }
     inline float GetY0() const { return m_y0; }
@@ -110,6 +120,7 @@ namespace Cantag {
   private:
     void swap(float *a, float *b);
     float find_angle(float x, float y, float cx, float cy);
+    void Interpolate(std::vector<float>& points, float start, float end, float steps, int index) const;
 
   protected:
     inline void compute_central_point();
