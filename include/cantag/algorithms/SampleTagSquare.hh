@@ -55,17 +55,7 @@ namespace Cantag {
 
     if (i) {
       typename DecodeEntity<PayloadSize>::Data* payload = destination.Add();
-      /*
-      Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> output(image.GetWidth()*10,image.GetHeight()*10);
-      for(unsigned int it = 0; it<image.GetHeight()*10;++it) {
-	PixRow<Pix::Fmt::Grey8> row = output.GetRow(it);
-	PixRow<Pix::Fmt::Grey8>::iterator in = row.begin();
-	for(unsigned int j=0; j<image.GetWidth()*10;++j) {
-	  in.v(image.GetPixel(j/10,it/10) ? 128 : 0);
-	  ++in;
-	}
-      }
-      */
+
       for(int j=0;j<PayloadSize;j++) {
 	 float pts[] = { m_tagspec.GetXSamplePoint(j),
 			 m_tagspec.GetYSamplePoint(j) };
@@ -76,14 +66,9 @@ namespace Cantag {
 	     pts[1] < 0 || pts[1] >= image.GetHeight()) { 
 	   return false;
 	 }
-	 //	 output.DrawPixel(pts[0]*10,pts[1]*10,255);
 	 bool sample = image.GetPixel(pts[0],pts[1]);
 	 (payload->payload)[j] = sample;
       }
-      //      char filename[255];
-      //      sprintf(filename,"output-%d.pnm",(EDGE_CELLS*EDGE_CELLS-(EDGE_CELLS*EDGE_CELLS%2)));
-      //      output.Save(filename);
-
       return true;
     }
     return false;
