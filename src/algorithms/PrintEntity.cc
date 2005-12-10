@@ -39,12 +39,31 @@ namespace Cantag {
     return true;
   }
 
+  bool PrintEntityConvexHull::operator()(const ContourEntity& contour, ConvexHullEntity& convexhull) const {
+    const std::vector<float> points = contour.GetPoints();
+    for(std::vector<int>::const_iterator i = convexhull.GetIndices().begin();
+	i != convexhull.GetIndices().end();
+	++i) {
+      const int index = *i;
+      m_output << points[2*index] << " " << points[2*index+1] << std::endl;
+    }    
+    m_output << std::endl;
+    return true;
+  }
+
   bool PrintEntityShapeSquare::operator()(ShapeEntity<QuadTangle>& shape) const {
     const QuadTangle* quad = shape.GetShape();
-    m_output << quad->GetX0() << " " << quad->GetY0() << std::endl;
-    m_output << quad->GetX1() << " " << quad->GetY1() << std::endl;
-    m_output << quad->GetX2() << " " << quad->GetY2() << std::endl;
-    m_output << quad->GetX3() << " " << quad->GetY3() << std::endl;
+    m_output << quad->GetX0() << " " << quad->GetY0() << " " << quad->GetIndex0() << std::endl;
+    m_output << quad->GetX1() << " " << quad->GetY1() << " " << quad->GetIndex1() << std::endl;
+    m_output << quad->GetX2() << " " << quad->GetY2() << " " << quad->GetIndex2() << std::endl;
+    m_output << quad->GetX3() << " " << quad->GetY3() << " " << quad->GetIndex3() << std::endl;
+    m_output << std::endl;
+    return true;
+  }
+
+  bool PrintEntityShapeCircle::operator()(ShapeEntity<Ellipse>& shape) const {
+    const Ellipse* ell = shape.GetShape();
+    m_output << ell->GetX0() << " " << ell->GetY0() << " " << ell->GetWidth() << " " << ell->GetHeight() << " " << ell->GetAngle() << std::endl;
     m_output << std::endl;
     return true;
   }
