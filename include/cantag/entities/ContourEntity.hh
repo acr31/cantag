@@ -28,6 +28,7 @@
 #include <cassert>
 #include <cantag/Config.hh>
 #include <cantag/entities/Entity.hh>
+#include <cantag/SpeedMath.hh>
 
 namespace Cantag {
 
@@ -105,7 +106,16 @@ namespace Cantag {
     int m_numPoints;
     
   public:
-    ContourEntity() : m_points() {};
+    ContourEntity() : m_points(),
+		      m_length(0),
+		      m_minX(MAXINT),
+		      m_maxX(MININT),
+		      m_minY(MAXINT),
+		      m_maxY(MININT),
+		      m_concave(false),
+		      m_centralX(0),
+		      m_centralY(0),
+		      m_numPoints(0) {};
     ContourEntity(const std::vector<float>& points);
     ~ContourEntity() {};
 
