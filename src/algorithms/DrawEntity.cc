@@ -60,15 +60,26 @@ namespace Cantag {
     float pts[] = {-1,-1,
 		   -1,1,
 		   1,1,
-		   1,-1};
-    transform.GetPreferredTransform()->Apply(pts,4);
-    m_camera.NPCFToImage(pts,4);
+		   1,-1,
+		   0,0,
+		   1,0,
+		   0,0.5		   
+    };
+    transform.GetPreferredTransform()->Apply(pts,7);
+    m_camera.NPCFToImage(pts,7);
     m_image.DrawQuadTangle((int)m_roi.ScaleX(pts[0],m_image.GetWidth()),(int)m_roi.ScaleY(pts[1],m_image.GetHeight()),
 			   (int)m_roi.ScaleX(pts[2],m_image.GetWidth()),(int)m_roi.ScaleY(pts[3],m_image.GetHeight()),
 			   (int)m_roi.ScaleX(pts[4],m_image.GetWidth()),(int)m_roi.ScaleY(pts[5],m_image.GetHeight()),
 			   (int)m_roi.ScaleX(pts[6],m_image.GetWidth()),(int)m_roi.ScaleY(pts[7],m_image.GetHeight()),
 			   0,1);
-			   
+    
+    m_image.DrawLine((int)m_roi.ScaleX(pts[8],m_image.GetWidth()),(int)m_roi.ScaleY(pts[9],m_image.GetHeight()),
+		     (int)m_roi.ScaleX(pts[10],m_image.GetWidth()),(int)m_roi.ScaleY(pts[11],m_image.GetHeight()),
+		     0,1);
+    m_image.DrawLine((int)m_roi.ScaleX(pts[8],m_image.GetWidth()),(int)m_roi.ScaleY(pts[9],m_image.GetHeight()),
+		     (int)m_roi.ScaleX(pts[12],m_image.GetWidth()),(int)m_roi.ScaleY(pts[13],m_image.GetHeight()),
+		     0,1);
+		     
     return true;    
   }
 }
