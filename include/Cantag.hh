@@ -49,6 +49,8 @@
 
 #include <cantag/Apply.hh>
 #include <cantag/Bind.hh>
+#include <cantag/TagDictionary.hh>
+#include <cantag/Correspondence.hh>
 
 ///////////////////////
 // fundamental tag types
@@ -64,7 +66,6 @@
 #include <cantag/algorithms/FitQuadTanglePolygon.hh>
 #include <cantag/algorithms/FitQuadTangleRegression.hh>
 #include <cantag/algorithms/DistortionCorrection.hh>
-#include <cantag/algorithms/DistortionCorrectionIterative.hh>
 #include <cantag/algorithms/TransformEllipseLinear.hh>
 #include <cantag/algorithms/TransformEllipseFull.hh>
 #include <cantag/algorithms/TransformEllipseRotate.hh>
@@ -73,6 +74,7 @@
 #if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
 #include <cantag/algorithms/TransformQuadTangleSpaceSearch.hh>
 #include <cantag/algorithms/TransformQuadTangleCyberCode.hh>
+#include <cantag/algorithms/DistortionCorrectionIterative.hh>
 #endif
 #include <cantag/algorithms/TransformRotateToPayload.hh>
 #include <cantag/algorithms/SampleTagCircle.hh>
@@ -90,15 +92,11 @@
 #include <cantag/algorithms/RemoveNonConcentricEllipse.hh>
 #include <cantag/algorithms/DrawEntity.hh>
 #include <cantag/algorithms/PrintEntity.hh>
-//#include <cantag/algorithms/ValidateDistortionCorrection.hh>
-//#include <cantag/algorithms/ValidateFitEllipse.hh>
-//#include <cantag/algorithms/ValidateFitQuadTangle.hh>
-//#include <cantag/algorithms/ValidateTransformQuadTangle.hh>
-//#include <cantag/algorithms/ValidateDecode.hh>
-//#include <cantag/algorithms/ValidateSample.hh>
 #include <cantag/algorithms/AccumulateCorrespondences.hh>
 #include <cantag/algorithms/AccumulateCornerCorrespondences.hh>
 #include <cantag/algorithms/SimulateMinDistance.hh>
+#include <cantag/algorithms/SimulateMaxSampleError.hh>
+#include <cantag/algorithms/SimulateContour.hh>
 
 ///////////////////////
 // coders
@@ -140,9 +138,6 @@
 #include <cantag/VideoImageSource.hh>
 #include <cantag/VideoOutputMechanism.hh>
 #endif
-
-#include <cantag/TagDictionary.hh>
-#include <cantag/Correspondence.hh>
 
 #if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
 #include <cantag/EstimateTransform.hh>
