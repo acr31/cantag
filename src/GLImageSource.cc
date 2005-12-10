@@ -177,7 +177,7 @@ namespace Cantag {
   };
 
 
-  Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* GLImageSource::Next(float nx, float ny, float nz, 
+  Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* GLImageSource::Next(float theta, float phi, 
 					   float centre_x, float centre_y, float centre_z, int texture_id, Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* overlay ) {
     
     glClearColor(1.0,1.0,1.0,overlay ? 0.0 : 1.0);
@@ -188,8 +188,15 @@ namespace Cantag {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective((GLfloat)m_fov, (GLfloat)m_width/(GLfloat)m_height,0,100.0);
+
+    // select the modelview matrix - transforms object co-ordinates to eye co-ordinates
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
     //    gluLookAt(-centre_x*m_supersample,-centre_y*m_supersample,-centre_z,-centre_x*m_supersample,-centre_y*m_supersample,-centre_z+1,0.0,-1.0,0.0);
-    gluLookAt(-centre_x,-centre_y,-centre_z,-centre_x,-centre_y,-centre_z+1,0.0,-1.0,0.0);
+    //    gluLookAt(-centre_x,-centre_y,-centre_z,-centre_x,-centre_y,-centre_z+1,0.0,-1.0,0.0);
+    gluLookAt(0.0, 0.0,0.0,
+	      0.0, 0.0,1.0,
+	      0.0,-1.0,0.0);
     /*
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
@@ -200,9 +207,6 @@ namespace Cantag {
     //    glEnable(GL_LINE_SMOOTH);
     //glEnable(GL_POLYGON_SMOOTH); 
     
-    // select the modelview matrix - transforms object co-ordinates to eye co-ordinates
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
     GLfloat spot_position[] = {1,0,1,1};
     GLfloat spot_direction[] = {0,0,1};
     GLfloat ambient_light[] = {0.2,0.2,0.2,1.0};
@@ -217,47 +221,19 @@ namespace Cantag {
     // turn this on to do spot light stuff
     //    glEnable(GL_LIGHTING);
     //    glEnable(GL_LIGHT0);
-
-    //    float factor = sqrt(nz*nz+ny*ny);
     
-    //    float rotation[] = { -nz,  ny*nx/factor,                  nx, centre_x,
-    //			 0,    -nz*nz/factor - nx*nx/factor,  ny, centre_y,
-    //			 nx,   ny*nz/factor,                  nz, centre_z,
-    //			 0,    0,                             0,  1 };
+    // translate by x,y,z
+    glTranslatef(centre_x,centre_y,centre_z);
+    
+    // rotate by phi about the y axis
+    glRotatef(phi,0.f,1.f,0.f);
 
-    // OpenGL requires column major representation
-    //   float rotation[] = { -nz,0,nx,0,
-    //			 ny*nx/factor,-nz*nz/factor-nx*nx/factor,ny*nz/factor,0,
-    //			 nx,ny,nz,0,
-    //			 0,0,0,1};
+    // rotate by theta about the x axis
+    glRotatef(theta,1.f,0.f,0.f);
 
-    float norm = sqrt(nx*nx+ny*ny+nz*nz);
-    nx/=norm;
-    ny/=norm;
-    nz/=norm;
-
-    //float factor = -sqrt(1-ny*ny);
-    float factor = -sqrt(nx*nx+nz*nz);
-    // column major representation 
-    float rotation[] = { nz/factor, 0, -nx/factor, 0, 
-			 -ny*nx/factor, factor, -ny*nz/factor, 0,
-			 nx,ny,nz,0,
-			 0,0,0,1};
-    float tagsizescale =1;
-
-    glScalef(tagsizescale,tagsizescale,1);
-    glMultMatrixf(rotation);
     if (m_tagrotation != 0.f) {
       glRotatef(m_tagrotation,0,0,1);
     }
-    
-
-#ifdef GLIMAGESOURCE_DEBUG
-    PROGRESS("Rotation is [ " << rotation[0] << " " << rotation[4] << " " << rotation[8] << " " << rotation[12]);
-    PROGRESS("              " << rotation[1] << " " << rotation[5] << " " << rotation[9] << " " << rotation[13]);
-    PROGRESS("              " << rotation[2] << " " << rotation[6] << " " << rotation[10] << " " << rotation[14]);
-    PROGRESS("              " << rotation[3] << " " << rotation[7] << " " << rotation[11] << " " << rotation[15]);
-#endif
 
     // enable texturing mode
     glEnable(GL_TEXTURE_2D);
@@ -282,10 +258,17 @@ namespace Cantag {
     // this is a front facing polygon that we map our texture to
     glBegin(GL_QUADS);
     // set the current texture co-ordinate and then the vertex that we want it to map to 
+    /*
     glTexCoord2f(0.0, 0.0); glVertex3f(-1, -1, 0.0);
     glTexCoord2f(1.0, 0.0); glVertex3f(1, -1, 0.0);
     glTexCoord2f(1.0, 1.0); glVertex3f(1, 1, 0.0);
     glTexCoord2f(0.0, 1.0); glVertex3f(-1, 1, 0.0); 
+    */
+
+    glTexCoord2f(0.0, 1.0); glVertex3f(-1, 1, 0.0); 
+    glTexCoord2f(1.0, 1.0); glVertex3f(1, 1, 0.0);
+    glTexCoord2f(1.0, 0.0); glVertex3f(1, -1, 0.0);
+    glTexCoord2f(0.0, 0.0); glVertex3f(-1, -1, 0.0);
 
     glEnd();
     glFlush();
@@ -294,10 +277,17 @@ namespace Cantag {
     // previous polygon that is plain white
     glBegin(GL_QUADS);
     glColor3f(1.0,0.0,0.0);
+    /*
     glVertex3f(-1, 1, 0.0); 
     glVertex3f(1, 1, 0.0);
     glVertex3f(1, -1, 0.0);
     glVertex3f(-1, -1, 0.0);
+    */
+    glVertex3f(-1, -1, 0.0);
+    glVertex3f(1, -1, 0.0);
+    glVertex3f(1, 1, 0.0);
+    glVertex3f(-1, 1, 0.0); 
+
     glEnd();
     glFlush();
     
@@ -327,9 +317,9 @@ namespace Cantag {
 	for (int yave = 0; yave < m_supersample; ++yave) {
 	  for (int xave = 0; xave < m_supersample; ++ xave) {
 	    int pointer = base + yave * 4 * m_width * m_supersample + xave *4;
-	    accumulator += (0.3*(float)m_buffer[pointer] +
-			    0.59*(float)m_buffer[pointer+1] +
-			    0.11*(float)m_buffer[pointer+2]);
+	    accumulator += Round(0.3f*(float)m_buffer[pointer] +
+				 0.59f*(float)m_buffer[pointer+1] +
+				 0.11f*(float)m_buffer[pointer+2]);
 	    alpha += m_buffer[pointer+3];
 	  }
 	}
@@ -339,10 +329,10 @@ namespace Cantag {
 	if (overlay) {
 	  int value = overlay->SampleNoCheck(xout,yout).intensity();
 
-	  overlay->DrawPixelNoCheck(xout,yout,Pixel<Pix::Fmt::Grey8>(accumulator * alpha / 255 + value * (255-alpha) / 255));
+	  overlay->DrawPixelNoCheck(xout,overlay->GetHeight()-1-yout,Pixel<Pix::Fmt::Grey8>(accumulator * alpha / 255 + value * (255-alpha) / 255));
 	}
 	else {
-	  m_glimage.DrawPixelNoCheck(xout,yout,Pixel<Pix::Fmt::Grey8>(accumulator));	
+	  m_glimage.DrawPixelNoCheck(xout,m_glimage.GetHeight()-1-yout,Pixel<Pix::Fmt::Grey8>(accumulator));	
 	}
 	++xout;
       }
