@@ -1,5 +1,6 @@
-noinst_PROGRAMS= BatchTest
+noinst_PROGRAMS=  MinDistances BatchTest
 BatchTest_SOURCES=BatchTest.cc
+MinDistances_SOURCES=MinDistances.cc
 
 
 AM_CPPFLAGS=-I$(srcdir)/../include -I$(top_builddir)/include 

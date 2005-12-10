@@ -79,7 +79,7 @@ struct Executor {
     RunTest<TagType> r(size,fov,d);
     
     try {
-      r.ExecuteBatch(std::cout,1,1,90,5,5,typeid(TagType).name());
+      r.ExecuteBatch(std::cout,typeid(TagType).name());
     }
     catch (const char* exception) {
       std::cerr << "Caught exception: " << exception<< std::endl;
@@ -114,21 +114,23 @@ struct Executor<Cantag::TypeListEOL> {
 
 
 //typedef AllTags TagList;
-//typedef SquareTags TagList;
-//typedef TL1(SquareConvexHullProj36) TagList;
+typedef CircleTags TagList;
+//typedef TL1(SquareConvexHullSpaceSearch36) TagList;
 //typedef TL1(SquareRegressCornerProj36) TagList;
-typedef TL1(SquareCornerSpaceSearch36) TagList;
+//typedef TL1(CircleOuterLSFull36) TagList;
 
 int main(int argc,char* argv[]) {
+  std::cout.precision(15);
+
   if (argc == 1) {
     Executor<TagList>::Execute();
   }
   else {
-    float x0 = atof(argv[1]);
-    float y0 = atof(argv[2]);
-    float z0 = atof(argv[3]);
-    float theta = atof(argv[4]);
-    float phi = atof(argv[5]);
+    float theta = atof(argv[1]);
+    float phi = atof(argv[2]);
+    float x0 = atof(argv[3]);
+    float y0 = atof(argv[4]);
+    float z0 = atof(argv[5]);
 
     Executor<TagList>::ExecuteSingle(x0,y0,z0,theta,phi);
 

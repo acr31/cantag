@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2004 Andrew C. Rice
+  Copyright (C) 2005 Andrew C. Rice
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -26,35 +26,148 @@
 #define TEST_CIRCLE_GUARD
 
 #include <Cantag.hh>
+#include "Functions.hh"
 
 template<int RINGS, int SECTORS, class FitAlgorithm, class TransformAlgorithm>
 class TestCircle : public Cantag::TagCircle<RINGS,SECTORS>, public Cantag::RawCoder<RINGS*SECTORS,RINGS> {
 public:  
   enum { PayloadSize = Cantag::TagCircle<RINGS,SECTORS>::PayloadSize };
-  typedef std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PayloadSize>*> Result;
+  typedef std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PayloadSize>*> PipelineResult;
+
   typedef Cantag::TagCircle<RINGS,SECTORS> SpecType;
   typedef Cantag::RawCoder<RINGS*SECTORS,RINGS> CoderType;
-private:
   typedef Cantag::ComposedEntity<TL5(Cantag::ContourEntity,
 				     Cantag::ConvexHullEntity,
 				     Cantag::ShapeEntity<Cantag::Ellipse>,
 				     Cantag::TransformEntity,
 				     Cantag::DecodeEntity<PayloadSize>
 				     )> TagEntity;
+private:
   Cantag::Tree<TagEntity> tree;
-  std::vector<Result> m_located;
+  std::vector<PipelineResult> m_located;
 
-  struct AddLocatedObject : public Cantag::Function<TL1(Cantag::TransformEntity),TL1(Cantag::DecodeEntity<PayloadSize>)> {
-    TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm>& m_parent;
+  struct TransformSelect : public Cantag::Function<TL0,TL1(Cantag::TransformEntity)> {
     const Cantag::Camera& m_camera;
+    const Cantag::Transform& m_ideal_transform;
+    TransformSelect(const Cantag::Transform& ideal_transform, const Cantag::Camera& camera) : m_ideal_transform(ideal_transform), m_camera(camera) {}
+    bool operator()(Cantag::TransformEntity& te) const {
+      Cantag::Transform* min = NULL;
+      float minf = 1e10;
 
-    AddLocatedObject(TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm>& parent, const Cantag::Camera& camera) : m_parent(parent), m_camera(camera) {}
+      float ref_normal[3];
+      m_ideal_transform.GetNormalVector(m_camera,ref_normal);
 
-    bool operator()(const Cantag::TransformEntity& te, Cantag::DecodeEntity<PayloadSize>& de) const {
-      m_parent.m_located.push_back(Result(&te,&de));
+      for(std::list<Cantag::Transform*>::iterator i = te.GetTransforms().begin(); i!=te.GetTransforms().end();++i) {
+	Cantag::Transform* t = *i;
+	float normal[3];
+	t->GetNormalVector(m_camera,normal);
+
+	double dotprod = normal[0]*ref_normal[0] + normal[1]*ref_normal[1] + normal[2]*ref_normal[2];
+	if (dotprod > 1.f) dotprod = 1.f;
+
+	double errorangle = acos(dotprod);
+
+	if (errorangle < minf) {
+	  min = t;
+	  minf = errorangle;
+	}
+      }
+
+      for(std::list<Cantag::Transform*>::iterator i = te.GetTransforms().begin(); i!=te.GetTransforms().end();++i) {
+	Cantag::Transform* t = *i;
+	if (t == min) t->SetConfidence(1.f); else t->SetConfidence(0.f);
+      }
+      
       return true;
     }
   };
+
+  struct TransformRotate : public Cantag::Function<TL0,TL1(Cantag::TransformEntity)> {
+    const Cantag::Camera& m_camera;
+    TransformRotate(const Cantag::Camera& camera) : m_camera(camera) {}
+    bool operator()(Cantag::TransformEntity& te) const {
+      // find out the rotation of the tag
+      float v1[] = {0,0,0};
+      float v2[] = {1,0,0};   
+      te.GetPreferredTransform()->Apply3D(v1,1);
+      te.GetPreferredTransform()->Apply3D(v2,1);
+      double vec[] = {v2[0]-v1[0],v2[1]-v1[1],v2[2]-v1[2]};
+      double atanv = atan(fabs(vec[1]/vec[0]));
+      double angle;
+      if (vec[0] > 0.f) {
+	if (vec[1] >= 0.f) angle = atanv;
+	else angle = 2.f*M_PI - atanv;
+      }
+      else if (vec[0] == 0.f) { // unlikely
+	if (vec[1] >= 0.f) angle = M_PI / 2.f;
+	else angle = 3.f*M_PI/2.f;
+      }
+      else { // vec[0] < 0.f
+	if (vec[1] >= 0.f) angle = M_PI - atanv;
+	else angle = M_PI + atanv;
+      }
+      te.GetPreferredTransform()->Rotate(cos(angle),-sin(angle));
+      return true;
+    };
+  };
+
+  bool Process(Cantag::Tree<TagEntity>& tree,Cantag::MonochromeImage& m, const Cantag::Transform& ideal_transform, const Cantag::Camera& camera, const char* debug_name = NULL) {
+    char name_buffer[255];
+    int debug_counter = 0;
+    if (debug_name) {
+      snprintf(name_buffer,255,debug_name,debug_counter++);
+      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(m.GetWidth(),m.GetHeight());
+      Apply(m,Cantag::DrawEntityMonochrome(output));
+      output.Save(name_buffer);
+    }
+    if (debug_name) {
+      std::cout << "Contours" << std::endl;
+      ApplyTree(tree,Cantag::PrintEntityContour(std::cout));
+      std::cout << std::endl;      
+      snprintf(name_buffer,255,debug_name,debug_counter++);
+      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(m.GetWidth(),m.GetHeight());
+      ApplyTree(tree,Cantag::DrawEntityContour(output));
+      output.Save(name_buffer);
+    }
+    ApplyTree(tree,Cantag::DistortionCorrection(camera));
+    ApplyTree(tree,FitAlgorithm()); 
+    if (debug_name) {
+      std::cout << "Shapes" << std::endl;
+      ApplyTree(tree,Cantag::PrintEntityShapeCircle(std::cout));
+      std::cout << std::endl;
+      snprintf(name_buffer,255,debug_name,debug_counter++);
+      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(m.GetWidth(),m.GetHeight());
+      Apply(m,Cantag::DrawEntityMonochrome(output));
+      output.ConvertScale(0.25,190);
+      ApplyTree(tree,Cantag::DrawEntityShape<Cantag::Ellipse>(output,camera));
+      output.Save(name_buffer);
+    }
+    ApplyTree(tree,TransformAlgorithm(this->GetBullseyeOuterEdge()));
+    //    ApplyTree(tree,Cantag::TransformSelectEllipse(*this,camera));
+    ApplyTree(tree,TransformSelect(ideal_transform,camera));
+    //    ApplyTree(tree,Cantag::RemoveNonConcentricEllipse(*this));
+    //ApplyTree(tree,Cantag::Bind(Cantag::TransformEllipseRotate(*this,camera),m));
+    ApplyTree(tree,TransformRotate(camera));
+
+    ApplyTree(tree,Cantag::Bind(Cantag::SampleTagCircle(*this,camera),m));
+    if (debug_name) {
+      std::cout << "Transforms" << std::endl;
+      ApplyTree(tree,Cantag::PrintEntityTransform(std::cout));
+      std::cout << std::endl;      
+      snprintf(name_buffer,255,debug_name,debug_counter++);
+      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(m.GetWidth(),m.GetHeight());
+      Apply(m,Cantag::DrawEntityMonochrome(output));
+      output.ConvertScale(0.25,190);
+      ApplyTree(tree,Cantag::DrawEntityTransform(output,camera));
+      ApplyTree(tree,Cantag::DrawEntitySample(output,camera,*this));
+      output.Save(name_buffer);
+    }
+    ApplyTree(tree,Cantag::Decode<CoderType>());
+    ApplyTree(tree,AddLocatedObject<PayloadSize>(this->m_located));
+    return m_located.size() != 0;
+
+  }
+
 
 public:
   TestCircle(float inner_bullseye,
@@ -62,58 +175,27 @@ public:
 	     float inner_data,
 	     float outer_data) : Cantag::TagCircle<RINGS,SECTORS>(inner_bullseye,outer_bullseye,inner_data,outer_data), m_located() {}
 
-  bool operator()(const Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>& i,const Cantag::Camera& camera, const char* debug_name = NULL) {
-    char name_buffer[255];
-    int debug_counter = 0;
+  bool operator()(const Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>& i,const Cantag::ContourEntity& ideal_contour, const Cantag::Transform& ideal_transform, const Cantag::Camera& camera, const char* debug_name = NULL) {
     m_located.erase(m_located.begin(),m_located.end());
     tree.DeleteAll();
     Cantag::MonochromeImage m(i.GetWidth(),i.GetHeight());
     Apply(i,m,Cantag::ThresholdGlobal<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>(128));
-    if (debug_name) {
-      snprintf(name_buffer,255,debug_name,debug_counter++);
-      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(i.GetWidth(),i.GetHeight());
-      Apply(m,Cantag::DrawEntityMonochrome(output));
-      output.Save(name_buffer);
-    }
     Apply(m,tree,Cantag::ContourFollowerTree(*this));
-    if (debug_name) {
-      snprintf(name_buffer,255,debug_name,debug_counter++);
-      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(i.GetWidth(),i.GetHeight());
-      ApplyTree(tree,Cantag::DrawEntityContour(output));
-      output.Save(name_buffer);
-    }
-    ApplyTree(tree,Cantag::DistortionCorrection(camera));
-    ApplyTree(tree,FitAlgorithm()); 
-    if (debug_name) {
-      snprintf(name_buffer,255,debug_name,debug_counter++);
-      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(i.GetWidth(),i.GetHeight());
-      Apply(m,Cantag::DrawEntityMonochrome(output));
-      output.ConvertScale(0.25,190);
-      ApplyTree(tree,Cantag::DrawEntityShape<Cantag::Ellipse>(output,camera));
-      output.Save(name_buffer);
-    }
-    ApplyTree(tree,TransformAlgorithm(this->GetBullseyeOuterEdge()));
-    ApplyTree(tree,Cantag::TransformSelectEllipse(*this,camera));
-    ApplyTree(tree,Cantag::RemoveNonConcentricEllipse(*this));
-    ApplyTree(tree,Cantag::Bind(Cantag::TransformEllipseRotate(*this,camera),m));
-    ApplyTree(tree,Cantag::Bind(Cantag::SampleTagCircle(*this,camera),m));
-    if (debug_name) {
-      snprintf(name_buffer,255,debug_name,debug_counter++);
-      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(i.GetWidth(),i.GetHeight());
-      Apply(m,Cantag::DrawEntityMonochrome(output));
-      output.ConvertScale(0.25,190);
-      ApplyTree(tree,Cantag::DrawEntityShape<Cantag::Ellipse>(output,camera));
-      ApplyTree(tree,Cantag::DrawEntitySample(output,camera,*this));
-      output.Save(name_buffer);
-    }
-    ApplyTree(tree,Cantag::Decode<CoderType>());
-    ApplyTree(tree,Cantag::TransformRotateToPayload(*this));
-    ApplyTree(tree,AddLocatedObject(*this,camera));
-    return m_located.size() != 0;
+    ApplyTree(tree,FindContour(ideal_contour));
+    return Process(tree,m,ideal_transform,camera,debug_name);
+  }  
 
+  bool ProcessFromContourEntity(const Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>& i,const Cantag::Transform& ideal_transform, const Cantag::Camera& camera, const char* debug_name = NULL) {
+    m_located.erase(m_located.begin(),m_located.end());
+    Cantag::MonochromeImage m(i.GetWidth(),i.GetHeight());
+    Apply(i,m,Cantag::ThresholdGlobal<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>(128));
+    return Process(tree,m,ideal_transform, camera,debug_name);
   }
 
-  const std::vector<Result>& GetLocatedObjects() const {
+  
+  Cantag::Tree<TagEntity>& GetTree() { return tree; }
+
+  const std::vector<PipelineResult>& GetLocatedObjects() const {
     return m_located;
   }
 };
@@ -146,6 +228,9 @@ class CircleSplitLSLinear36 : public CircleSplit<2,18,Cantag::FitEllipseLS,Canta
 class CircleSplitSimpleFull36 : public CircleSplit<2,18,Cantag::FitEllipseSimple,Cantag::TransformEllipseFull> {};
 class CircleSplitSimpleLinear36 : public CircleSplit<2,18,Cantag::FitEllipseSimple,Cantag::TransformEllipseLinear> {};
 
+class CircleInnerLSFull4 : public CircleInner<2,2,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> {};
+class CircleInnerLSFull8 : public CircleInner<2,4,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> {};
+class CircleInnerLSFull16 : public CircleInner<2,8,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> {};
 class CircleInnerLSFull24 : public CircleInner<2,12,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> {};
 class CircleInnerLSFull48 : public CircleInner<2,24,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> {};
 class CircleInnerLSFull64 : public CircleInner<2,32,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> {};

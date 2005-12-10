@@ -35,6 +35,7 @@
 #define L(HEAD,TAIL) Cantag::TypeList<HEAD,TAIL >
 
 typedef L(CircleInnerLSFull24,
+        L(CircleInnerLSFull36,
         L(CircleInnerLSFull48,
 	L(CircleInnerLSFull64,
 	L(CircleInnerLSFull80,
@@ -43,55 +44,39 @@ typedef L(CircleInnerLSFull24,
 	L(CircleInnerLSFull144,
 	L(CircleInnerLSFull168,
 	L(CircleInnerLSFull196,
-        L(CircleOuterLSFull36,
-        L(CircleOuterLSLinear36,
+	L(CircleOuterLSFull36,
+	L(CircleSplitLSFull36,
+	  Cantag::TypeListEOL)))))))))))) BasicCircleTags;
+
+typedef L(CircleOuterLSLinear36,
         L(CircleOuterSimpleFull36,
         L(CircleOuterSimpleLinear36,
-        L(CircleInnerLSFull36,
 	L(CircleInnerLSLinear36,
 	L(CircleInnerSimpleFull36,
 	L(CircleInnerSimpleLinear36,
-	L(CircleSplitLSFull36,
 	L(CircleSplitLSLinear36,
 	L(CircleSplitSimpleFull36,
-	L(CircleSplitSimpleLinear36,
-	L(SquareCornerProj36,
-	L(SquareCornerReduced36,
-	L(SquareCornerSpaceSearch36,
+        L(CircleSplitSimpleLinear36, Cantag::TypeListEOL))))))))) OtherCircleTags;
+
+typedef Cantag::Append<BasicCircleTags,OtherCircleTags>::value CircleTags;
+
+typedef	L(SquarePolygonProj25,
         L(SquarePolygonProj36,
-	L(SquarePolygonReduced36,
-	L(SquarePolygonSpaceSearch36,
-        L(SquareConvexHullProj36,
-	L(SquareConvexHullReduced36,
-	L(SquareConvexHullSpaceSearch36,
-        L(SquarePolygonProj25,
         L(SquarePolygonProj49,
         L(SquarePolygonProj64,
         L(SquarePolygonProj81,
         L(SquarePolygonProj100,
         L(SquarePolygonProj121,
         L(SquarePolygonProj169,
-        L(SquarePolygonProj196,	  
-	  Cantag::TypeListEOL)))))))))))))))))))))))))))))))))))))) AllTags;
-/*
-typedef L(CircleInnerLSFull24,
-        L(CircleInnerLSFull48,
-	L(CircleInnerLSFull64,
-	L(CircleInnerLSFull80,
-	L(CircleInnerLSFull100,
-	L(CircleInnerLSFull120,
-	L(CircleInnerLSFull144,
-	L(CircleInnerLSFull168,
-	  L(CircleInnerLSFull196,Cantag::TypeListEOL))))))))) AllTags;
-*/
+	L(SquarePolygonProj196,
+	  Cantag::TypeListEOL))))))))) BasicSquareTags;
 
-typedef	L(SquareCornerProj36,
+typedef L(SquareCornerProj36,
 	L(SquareCornerReduced36,
 	L(SquareCornerSpaceSearch36,
 	L(SquareRegressCornerProj36,
 	L(SquareRegressCornerReduced36,
 	L(SquareRegressCornerSpaceSearch36,
-        L(SquarePolygonProj36,
 	L(SquarePolygonReduced36,
 	L(SquarePolygonSpaceSearch36,
         L(SquareRegressPolygonProj36,
@@ -103,31 +88,10 @@ typedef	L(SquareCornerProj36,
         L(SquareRegressConvexHullProj36,
 	L(SquareRegressConvexHullReduced36,
 	L(SquareRegressConvexHullSpaceSearch36,
-        L(SquarePolygonProj25,
-        L(SquarePolygonProj49,
-        L(SquarePolygonProj64,
-        L(SquarePolygonProj81,
-        L(SquarePolygonProj100,
-        L(SquarePolygonProj121,
-        L(SquarePolygonProj169,
-	L(SquarePolygonProj196,
-	    Cantag::TypeListEOL)))))))))))))))))))))))))) SquareTags;
+	    Cantag::TypeListEOL))))))))))))))))) OtherSquareTags;
 
-typedef	L(SquareCornerProj36,
-	L(SquareCornerReduced36,
-        L(SquarePolygonProj36,
-	L(SquarePolygonReduced36,
-        L(SquareConvexHullProj36,
-	L(SquareConvexHullReduced36,
-        L(SquarePolygonProj25,
-        L(SquarePolygonProj49,
-        L(SquarePolygonProj64,
-        L(SquarePolygonProj81,
-        L(SquarePolygonProj100,
-        L(SquarePolygonProj121,
-        L(SquarePolygonProj169,
-	L(SquarePolygonProj196,
-	    Cantag::TypeListEOL)))))))))))))) SquareTagsNotSpace;
+typedef Cantag::Append<BasicSquareTags,OtherSquareTags>::value SquareTags;
 
-//typedef L(SquareConvexHullRegressProj49,Cantag::TypeListEOL) AllTags;
+typedef Cantag::Append<SquareTags,CircleTags>::value AllTags;
+
 #endif//TAGDEF_GUARD

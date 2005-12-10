@@ -26,60 +26,94 @@
 #define TEST_SQUARE_GUARD
 
 #include <Cantag.hh>
-using namespace Cantag;
+#include "Functions.hh"
 
 template<int EDGE_CELLS, class FitAlgorithm, class TransformAlgorithm>
 class TestSquare : public Cantag::TagSquare<EDGE_CELLS>, public Cantag::RawCoder<EDGE_CELLS*EDGE_CELLS - (EDGE_CELLS*EDGE_CELLS %2),(EDGE_CELLS*EDGE_CELLS - (EDGE_CELLS*EDGE_CELLS %2))/4> {
 
  public:  
   enum { PayloadSize = Cantag::TagSquare<EDGE_CELLS>::PayloadSize };
-  typedef std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PayloadSize>*> Result;
   typedef Cantag::TagSquare<EDGE_CELLS> SpecType;
+  typedef std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PayloadSize>*> PipelineResult;
+
   typedef Cantag::RawCoder<EDGE_CELLS*EDGE_CELLS - (EDGE_CELLS*EDGE_CELLS %2),(EDGE_CELLS*EDGE_CELLS - (EDGE_CELLS*EDGE_CELLS %2))/4> CoderType;
-private:
   typedef Cantag::ComposedEntity<TL5(Cantag::ContourEntity,
 				     Cantag::ConvexHullEntity,
 				     Cantag::ShapeEntity<Cantag::QuadTangle>,
 				     Cantag::TransformEntity,
 				     Cantag::DecodeEntity<PayloadSize>
 				     )> TagEntity;
+ private:
   Cantag::Tree<TagEntity> tree;
-  std::vector<Result> m_located;
+  std::vector<PipelineResult> m_located;
 
-  struct AddLocatedObject : public Cantag::Function<TL1(Cantag::TransformEntity),TL1(Cantag::DecodeEntity<PayloadSize>)> {
-    TestSquare<EDGE_CELLS,FitAlgorithm,TransformAlgorithm>& m_parent;
+  struct TransformRotate : public Cantag::Function<TL1(Cantag::TransformEntity),TL1(Cantag::DecodeEntity<PayloadSize>)> {
     const Cantag::Camera& m_camera;
+    TransformRotate(const Cantag::Camera& camera) : m_camera(camera) {}
+    bool operator()(const Cantag::TransformEntity& te, const Cantag::DecodeEntity<PayloadSize>& de) const {
+      // find out the rotation of the tag
+      float v1[] = {0,0,0};
+      float v2[] = {0,1,0};   
+      te.GetPreferredTransform()->Apply3D(v1,1);
+      te.GetPreferredTransform()->Apply3D(v2,1);
+      double vec[] = {v2[0]-v1[0],v2[1]-v1[1],v2[2]-v1[2]};
+      double atanv = atan(fabs(vec[1]/vec[0]));
+      double angle;
+      if (vec[0] > 0.f) {
+	if (vec[1] >= 0.f) angle = atanv;
+	else angle = 2.f*M_PI - atanv;
+      }
+      else if (vec[0] == 0.f) { // unlikely
+	if (vec[1] >= 0.f) angle = M_PI / 2.f;
+	else angle = 3.f*M_PI/2.f;
+      }
+      else { // vec[0] < 0.f
+	if (vec[1] >= 0.f) angle = M_PI - atanv;
+	else angle = M_PI + atanv;
+      }
+    
+      if (angle < M_PI/4.f) {
+	// no rotation of payload
+      }
+      else if (angle < 3.f*M_PI/4.f) {
+	// rotate by 1 quadrant
+	(*de.GetPayloads().begin())->payload.RotateRight(PayloadSize/4);	
+      }
+      else if (angle < 5.f*M_PI/4.f) {
+	// rotate by 2 quadrant
+	(*de.GetPayloads().begin())->payload.RotateRight(PayloadSize/2);	
+      }
+      else if (angle < 7.f*M_PI/4.f) {
+	// rotate by 3 quadrant
+	(*de.GetPayloads().begin())->payload.RotateRight(3*PayloadSize/4);	
+      }
 
-    AddLocatedObject(TestSquare<EDGE_CELLS,FitAlgorithm,TransformAlgorithm>& parent, const Cantag::Camera& camera) : m_parent(parent), m_camera(camera) {}
-
-    bool operator()(const Cantag::TransformEntity& te, Cantag::DecodeEntity<PayloadSize>& de) const {
-      m_parent.m_located.push_back(Result(&te,&de));
       return true;
-    }
+    };
   };
-  
-public:
-  TestSquare() : Cantag::TagSquare<EDGE_CELLS>(), m_located() {}
 
-  virtual bool Regression() { return false; }
 
-  bool operator()(const Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>& i,const Cantag::Camera& camera, const char* debug_name = NULL) {
+  bool Process(Cantag::Tree<TagEntity>& process, Cantag::MonochromeImage& m, const Cantag::Transform& ideal_transform, const Cantag::Camera& camera, const char* debug_name = NULL) {
     char name_buffer[255];
     int debug_counter = 0;
-    m_located.erase(m_located.begin(),m_located.end());
-    tree.DeleteAll();
-    Cantag::MonochromeImage m(i.GetWidth(),i.GetHeight());
-    Apply(i,m,Cantag::ThresholdGlobal<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>(128));
-    Apply(m,tree,Cantag::ContourFollowerTree(*this));
+
     if (debug_name) {
+      std::cout << "Contours" << std::endl;
+      ApplyTree(tree,Cantag::PrintEntityContour(std::cout));
+      std::cout << std::endl;
       snprintf(name_buffer,255,debug_name,debug_counter++);
-      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(i.GetWidth(),i.GetHeight());
+      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(m.GetWidth(),m.GetHeight());
       Apply(m,Cantag::DrawEntityMonochrome(output));
       output.ConvertScale(0.25,190);
       ApplyTree(tree,Cantag::DrawEntityContour(output));
       output.Save(name_buffer);
     }
     ApplyTree(tree,Cantag::ConvexHull(*this));
+    if (debug_name) {
+      std::cout << "Convex Hulls" <<std::endl;
+      ApplyTree(tree,Cantag::PrintEntityConvexHull(std::cout));
+      std::cout << std::endl;      
+    }
     ApplyTree(tree,Cantag::DistortionCorrection(camera));
     ApplyTree(tree,FitAlgorithm());
     if (debug_name) {
@@ -87,17 +121,17 @@ public:
       ApplyTree(tree,Cantag::PrintEntityShapeSquare(std::cout));
       std::cout << std::endl;
       snprintf(name_buffer,255,debug_name,debug_counter++);
-      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(i.GetWidth(),i.GetHeight());
+      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(m.GetWidth(),m.GetHeight());
       Apply(m,Cantag::DrawEntityMonochrome(output));
       output.ConvertScale(0.25,190);
       ApplyTree(tree,Cantag::DrawEntityShape<Cantag::QuadTangle>(output,camera));
       output.Save(name_buffer);
     }
     if (Regression()) {
-      ApplyTree(tree,FitQuadTangleRegression()); 
+      ApplyTree(tree,Cantag::FitQuadTangleRegression()); 
       if (debug_name) {
 	snprintf(name_buffer,255,debug_name,debug_counter++);
-	Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(i.GetWidth(),i.GetHeight());
+	Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(m.GetWidth(),m.GetHeight());
 	Apply(m,Cantag::DrawEntityMonochrome(output));
 	output.ConvertScale(0.25,190);
 	ApplyTree(tree,Cantag::DrawEntityShape<Cantag::QuadTangle>(output,camera));
@@ -110,7 +144,7 @@ public:
       ApplyTree(tree,Cantag::PrintEntityTransform(std::cout));
       std::cout << std::endl;
       snprintf(name_buffer,255,debug_name,debug_counter++);
-      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(i.GetWidth(),i.GetHeight());
+      Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(m.GetWidth(),m.GetHeight());
       Apply(m,Cantag::DrawEntityMonochrome(output));
       output.ConvertScale(0.25,190);
       ApplyTree(tree,Cantag::DrawEntityTransform(output,camera));
@@ -118,15 +152,42 @@ public:
       output.Save(name_buffer);
     }
     ApplyTree(tree,Cantag::Bind(Cantag::SampleTagSquare(*this,camera),m));
+    ApplyTree(tree,TransformRotate(camera));
     ApplyTree(tree,Cantag::Decode<CoderType>());
-    ApplyTree(tree,AddLocatedObject(*this,camera));
+    ApplyTree(tree,AddLocatedObject<PayloadSize>(m_located));
     return m_located.size() != 0;
 
   }
 
-  const std::vector<Result>& GetLocatedObjects() const {
+public:
+  TestSquare() : Cantag::TagSquare<EDGE_CELLS>(), m_located() {}
+
+  virtual bool Regression() { return false; }
+
+  Cantag::Tree<TagEntity>& GetTree() { return tree; }
+
+  bool operator()(const Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>& i,const Cantag::ContourEntity& ideal_contour, const Cantag::Transform& ideal_transform, const Cantag::Camera& camera, const char* debug_name = NULL) {
+    m_located.erase(m_located.begin(),m_located.end());
+    tree.DeleteAll();
+    Cantag::MonochromeImage m(i.GetWidth(),i.GetHeight());
+    Apply(i,m,Cantag::ThresholdGlobal<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>(128));
+    Apply(m,tree,Cantag::ContourFollowerTree(*this));
+    ApplyTree(tree,FindContour(ideal_contour));
+    return Process(tree,m,ideal_transform,camera,debug_name);
+  }  
+
+  bool ProcessFromContourEntity(const Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>& i,const Cantag::Transform& ideal_transform,const Cantag::Camera& camera, const char* debug_name = NULL) {
+    m_located.erase(m_located.begin(),m_located.end());
+    Cantag::MonochromeImage m(i.GetWidth(),i.GetHeight());
+    Apply(i,m,Cantag::ThresholdGlobal<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>(128));
+    return Process(tree,m,ideal_transform,camera,debug_name);
+  }
+
+  const std::vector<PipelineResult>& GetLocatedObjects() const {
     return m_located;
   }
+
+		  
 };
 
 template<int EDGE_CELSS, class FitAlgorithm, class TransformAlgorithm> 
