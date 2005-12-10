@@ -29,7 +29,6 @@ libcantag_la_SOURCES += algorithms/RemoveNonConcentricEllipse.cc
 libcantag_la_SOURCES += algorithms/DrawEntity.cc
 libcantag_la_SOURCES += algorithms/PrintEntity.cc
 libcantag_la_SOURCES += algorithms/FitQuadTangleRegression.cc
-libcantag_la_SOURCES += algorithms/DistortionCorrectionIterative.cc
 libcantag_la_SOURCES += algorithms/SimulateMinDistance.cc
 
 # disabled (acr31 branch)
@@ -41,6 +40,7 @@ libcantag_la_SOURCES += algorithms/SimulateMinDistance.cc
 if HAVE_GSL_MULTIMIN_H
 if HAVELIB_GSLCBLAS
 if HAVELIB_GSL
+libcantag_la_SOURCES += algorithms/DistortionCorrectionIterative.cc
 libcantag_la_SOURCES += algorithms/TransformQuadTangleSpaceSearch.cc 
 libcantag_la_SOURCES += algorithms/TransformQuadTangleCyberCode.cc
 libcantag_la_SOURCES += EstimateTransform.cc
