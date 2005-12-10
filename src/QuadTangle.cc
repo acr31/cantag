@@ -79,11 +79,31 @@ namespace Cantag {
       camera.DrawQuadTangle(image,*this);
   }
 
-  void QuadTangle::Draw(std::vector<float>& points) const {
+  void QuadTangle::Interpolate(std::vector<float>& points, float start, float end, float index, int steps) const {
+    points.push_back( start + index * (end-start)/(float)steps );
+  }
+  
+  void QuadTangle::Draw(std::vector<float>& points, int steps) const {
     points.push_back(m_x0); points.push_back(m_y0);
+    for(int i=1;i<steps;++i) {
+      Interpolate(points,m_x0,m_x1,i,steps);
+      Interpolate(points,m_y0,m_y1,i,steps);
+    }
     points.push_back(m_x1); points.push_back(m_y1);
+    for(int i=1;i<steps;++i) {
+      Interpolate(points,m_x1,m_x2,i,steps);
+      Interpolate(points,m_y1,m_y2,i,steps);
+    }
     points.push_back(m_x2); points.push_back(m_y2);
+    for(int i=1;i<steps;++i) {
+      Interpolate(points,m_x2,m_x3,i,steps);
+      Interpolate(points,m_y2,m_y3,i,steps);
+    }
     points.push_back(m_x3); points.push_back(m_y3);
+    for(int i=1;i<steps;++i) {
+      Interpolate(points,m_x3,m_x0,i,steps);
+      Interpolate(points,m_y3,m_y0,i,steps);
+    }
   }
 
   float dist(float x0, float y0, float x1, float y1) {
