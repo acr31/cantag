@@ -56,40 +56,14 @@ namespace Cantag {
 
 
   Transform::Transform(float x, float y, float z, float theta, float phi, float size) : m_confidence(1.f) {
-    float nx = sin(theta)*sin(phi);
-    float ny = sin(theta)*cos(phi);
-    float nz = cos(theta);
+
+    // this matrix is derived from pre-multiplying the rotation matrix
+    // for a rotation about the x axis by theta by the rotation matrix
+    // for a rotation about the y axis by phi
+    m_transform[0] = cos(phi); m_transform[1] = sin(phi)*sin(theta); m_transform[2] = sin(phi)*cos(theta);
+    m_transform[4] = 0; m_transform[5] = cos(theta); m_transform[6] = -sin(theta);
+    m_transform[8] = -sin(phi); m_transform[9] = cos(phi)*sin(theta); m_transform[10]=cos(phi)*cos(theta);
     
-    /*
-    m_transform[2] = nx;
-    m_transform[6] = ny;
-    m_transform[10] = nz;
-    m_transform[14] = 0.f;
-
-    float f = -sqrt(nx*nx+nz*nz);
-
-    m_transform[0] = nz / f;
-    m_transform[4] = 0.f;
-    m_transform[8] = -nx/f;
-    m_transform[12] = 0.f;
-
-    m_transform[1] = -ny*nx/f;
-    m_transform[5] = f;
-    m_transform[9] = -ny*nz/f;
-    m_transform[13] = 0.f;
-    */
-    /*
-    float f = -sqrt(nx*nx+nz*nz);
-
-    m_transform[0] = nz / f;   m_transform[4] = 0.f;  m_transform[8] = -nx/f;
-    m_transform[1] = -ny*nx/f; m_transform[5] = f;    m_transform[9] = -ny*nz/f;
-    m_transform[2] = nx;       m_transform[6] = ny;   m_transform[10] = nz;
-    */
-
-    m_transform[0] = cos(phi); m_transform[1] = 0.f; m_transform[2] = sin(phi);
-    m_transform[4] = sin(theta)*sin(phi); m_transform[5] = cos(theta); m_transform[6] = -cos(phi)*sin(theta);
-    m_transform[8] = -sin(phi)*cos(theta); m_transform[9] = sin(theta); m_transform[10]=cos(phi)*cos(theta);
-
     m_transform[3] = size * x;
     m_transform[7] = size*y;
     m_transform[11] = size*z;
@@ -349,7 +323,7 @@ namespace Cantag {
     normal[1] = v1z * v2x - v1x * v2z;
     normal[2] = v1x * v2y - v1y * v2x;
 
-    float modulus = -sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
+    float modulus = sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
   
     normal[0]/=modulus;
     normal[1]/=modulus;
