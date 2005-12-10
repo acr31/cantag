@@ -33,6 +33,9 @@ namespace Cantag {
 
   bool ConvexHull::operator()(const ContourEntity& source, ConvexHullEntity& dest) const {
     const std::vector<float>& V = source.GetPoints();
+
+    if (V.size() < 2) return false;
+
     std::vector<int>& H = dest.GetIndices();
 
     // Find the point that has the greatest
