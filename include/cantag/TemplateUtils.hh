@@ -152,7 +152,7 @@ namespace Cantag {
 
   template<class List1, class List2>
   struct Append {
-    typedef TypeList<typename List1::Head, Append<typename List1::Tail,List2>::value> value;
+    typedef TypeList<typename List1::Head, typename Append<typename List1::Tail,List2>::value> value;
   };
 
   template<class List2>
