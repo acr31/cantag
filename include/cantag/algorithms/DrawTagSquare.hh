@@ -84,7 +84,8 @@ namespace Cantag {
 			       x2, y2,
 			       x3, y3,COLOUR_BLACK);
 
-    for(int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);i++) {
+    int ptr = 0;
+    for(int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);++i) {
       float ubase = m_tagspec.GetX0(i)*size + size;
       float vbase = m_tagspec.GetY0(i)*size + size;
 
@@ -100,14 +101,17 @@ namespace Cantag {
       int u3 = Round(ubase);
       int v3 = Round(vbase + cell_size);
 
-      int colour = chosen->payload[i] ? COLOUR_BLACK : COLOUR_WHITE;
+      int colour = chosen->payload[ptr] ? COLOUR_BLACK : COLOUR_WHITE;
 
-      //int colour = (int)((float)i/(float)(SIZE*SIZE - (SIZE*SIZE % 2)) * 128)+128;
+      // this one just draws a greyscale range starting at black and going to white
+      //int colour = (int)((float)ptr/(float)(SIZE*SIZE - (SIZE*SIZE % 2)) * 128)+128;
+
       image.DrawFilledQuadTangle(u0,v0,
 				 u1,v1,
 				 u2,v2,
 				 u3,v3,
 				 colour);
+      ++ptr;
     }
     return true;
   }
