@@ -34,7 +34,9 @@
 
 #include <iostream>
 
+#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
 #include <gsl/gsl_multimin.h>
+#endif
 
 namespace Cantag {
 
@@ -156,9 +158,10 @@ namespace Cantag {
      *
      * Code by Robert Harle  <rkh23@cam.ac.uk>
      */
+#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
     void ImageToNPCFIterative(std::vector<float>& points, bool useCache) const;
     static double _undistortfunc(const gsl_vector *v, void *params);
-
+#endif
     /**
      * Convert a set of normalised principle co-ordinate frame (NPCF)
      * points to image points.  This involves applying the correct
