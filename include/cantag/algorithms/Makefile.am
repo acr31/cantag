@@ -24,13 +24,14 @@ cantaginclude_HEADERS += PrintEntity.hh
 cantaginclude_HEADERS += TransformSelectEllipseErrorOfFit.hh 
 cantaginclude_HEADERS += FitQuadTangleRegression.hh 
 cantaginclude_HEADERS += AccumulateCorrespondences.hh
-
-# disabled acr31 branch
-#cantaginclude_HEADERS += ValidateDistortionCorrection.hh ValidateFitEllipse.hh ValidateFitQuadTangle.hh ValidateTransformQuadTangle.hh ValidateDecode.hh
+cantaginclude_HEADERS += SimulateMinDistance.hh
+cantaginclude_HEADERS += SimulateContour.hh
+cantaginclude_HEADERS += SimulateMaxSampleError.hh
 
 if HAVE_GSL_MULTIMIN_H
 if HAVELIB_GSLCBLAS
 if HAVELIB_GSL
+cantaginclude_HEADERS +=  DistortionCorrectionIterative.hh
 cantaginclude_HEADERS += TransformQuadTangleSpaceSearch.hh 
 cantaginclude_HEADERS += TransformQuadTangleCyberCode.hh
 endif
