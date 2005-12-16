@@ -74,6 +74,36 @@ namespace Cantag {
 
   }
  
+  Transform::Transform(float xc, float yc, float zc, float nx, float ny, float nz, char* dummy) : m_confidence(1.f) {
+
+    float z0 = nx;
+    float z1 = ny;
+    float z2 = nz;
+
+    float y0,y2,y1;
+
+    if (z0 != 0.f || z1 != 0.f) {
+      y0 = 0.f;
+      y1 = -z2/sqrt(z1*z1+z2*z2);
+      y2 = z1/sqrt(z1*z1+z2*z2);
+    }
+    else { // both are 0
+      y0 = 0.f;
+      y1 = 1.f;
+      y2 = 0.f;
+    }
+
+    float x0 = y1*z2 - y2*z1;
+    float x1 = z0*y2;
+    float x2 = -z0*y1;
+
+    m_transform[0] = x0;    m_transform[1] = y0;    m_transform[2] = z0;    m_transform[3] = xc;
+    m_transform[4] = x1;    m_transform[5] = y1;    m_transform[6] = z1;    m_transform[7] = yc;
+    m_transform[8] = x2;    m_transform[9] = y2;    m_transform[10]= z2;    m_transform[11]= zc;
+    m_transform[12]= 0.f;   m_transform[13]= 0.f;   m_transform[14]= 0.f;   m_transform[15]= 1.f;
+
+  }
+
 
   void Transform::SetupFromAngles(float x, float y, float z, float theta, float phi, float psi, float size) {
     // See http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToMatrix/index.htm

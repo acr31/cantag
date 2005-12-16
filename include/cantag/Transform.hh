@@ -57,6 +57,11 @@ namespace Cantag {
      * vector
      */
     Transform(float x, float y ,float z, float theta, float phi, float size);
+
+    /**
+     * Create a transform from the normal vector
+     */
+    Transform(float x0, float y0, float z0, float nx, float ny, float nz, char* dummy);
     
     inline float& operator[](int index) { return m_transform[index]; }
     inline float operator[](int index) const { return m_transform[index]; }
