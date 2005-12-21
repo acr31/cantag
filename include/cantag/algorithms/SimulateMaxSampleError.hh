@@ -72,14 +72,15 @@ namespace Cantag {
 
     std::vector<float> derived_points;
     InitPoints(tederived,derived_points);
-
+    
+    /*
     std::vector<float>::const_iterator i = perfect_points.begin();
     std::vector<float>::const_iterator j = derived_points.begin();
     for(; i!=perfect_points.end() && j!=derived_points.end();++i,++j) {
       std::cerr << *(i++) << " " << *i << " " << *(j++) << " " << *j << std::endl;
     }
     std::cerr << std::endl;
-
+    */
 
     std::vector<float>::const_iterator pi = perfect_points.begin();
     std::vector<float>::const_iterator di = derived_points.begin();
@@ -136,14 +137,14 @@ namespace Cantag {
     std::vector<float> derived_points;
     InitPoints(tederived,derived_points);
 
-
+    /*
     std::vector<float>::const_iterator j = derived_points.begin();
     std::vector<float>::const_iterator i = perfect_points.begin();
     for(; i!=perfect_points.end() && j!=derived_points.end();++i,++j) {
       std::cerr << *(i++) << " " << *i << " " << *(j++) << " " << *j << std::endl;
     }
     std::cerr << std::endl;
-
+    */
     Maxima m[4];
 
     const int rot_size = (EDGE_CELLS*EDGE_CELLS - (EDGE_CELLS*EDGE_CELLS % 2))/2;  //doubled because there are two entries in the vector for each co-ordinate
