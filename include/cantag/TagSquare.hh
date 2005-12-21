@@ -29,6 +29,10 @@
 
 #include <cantag/Config.hh>
 #include <cantag/TagSpec.hh>
+#include <cantag/Ellipse.hh>
+#include <cantag/ContourRestrictions.hh>
+#include <cantag/ConvexHullRestrictions.hh>
+#include <cantag/EllipseRestrictions.hh>
 
 namespace Cantag {
 
@@ -36,7 +40,7 @@ namespace Cantag {
   class TagSquare : public TagSpec<SIZE*SIZE - ((SIZE*SIZE)%2)>, public ContourRestrictions, public ConvexHullRestrictions {
   public:
     static const int PayloadSize = SIZE*SIZE - ((SIZE*SIZE)%2);
-
+    typedef QuadTangle Shape;
   private:
     const float m_cell_width;
     const float m_cell_width_2;
