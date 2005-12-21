@@ -46,51 +46,22 @@ namespace Cantag {
       double c1 = wx*vx+wy*vy;
       double c2 = vx*vx+vy*vy;
 
+      double result;
       if (c1 <= 0.0) {
-	return sqrt( (xc-x0)*(xc-x0) + (yc-y0)*(yc-y0) );
+	result = sqrt( (xc-x0)*(xc-x0) + (yc-y0)*(yc-y0) );
       }
-      
-      if (c2 <= c1) {
-	return sqrt( (xc-x1)*(xc-x1) + (yc-y1)*(yc-y1) );
-      }
-
-      double b = c1/c2;
-      double px = x0 + b*vx;
-      double py = y0 + b*vy;
-
-      return sqrt( (xc-px)*(xc-px) + (yc-py)*(yc-py) );
-      /*
-
-      // work out the distance along the line that we are
-      double lambda = ( yc - y0 + (x0-xc)/(y1-y0)*(x0-x1) ) / ( (y1-y0) - (x1*x1 + x0*x0)/(y1-y0) );
-
-      // r is the vector from x0,y0 to xc,yc
-      double rx = xc - x0;
-      double ry = yc - y0;
-      
-      // l is the vector for the line
-      double lx = x1 - x0;
-      double ly = y1 - y0;
-
-      // len is length of line
-      double len = sqrt(lx*lx+ly*ly);
-
-      std::cout << xc << " " << yc << " " << x0 << " " << y0 << " " << x1 << " " << y1 << " " << lambda << std::endl;
-
-      if (lambda <= 0.0) {
-	return sqrt( (x0-xc)*(x0-xc) + (y0-yc)*(y0-yc) );	
-      }
-      else if (lambda >= len) {
-	return sqrt( (x1-xc)*(x1-xc) + (y1-yc)*(y1-yc) );	
+      else if (c2 <= c1) {
+	result =  sqrt( (xc-x1)*(xc-x1) + (yc-y1)*(yc-y1) );
       }
       else {
-	double ix = x0 + lambda*rx;
-	double iy = y0 + lambda*ry;
-
-	return sqrt( (ix-xc)*(ix-xc) + (iy-yc)*(iy-yc) );
-
+	double b = c1/c2;
+	double px = x0 + b*vx;
+	double py = y0 + b*vy;
+	
+	result =  sqrt( (xc-px)*(xc-px) + (yc-py)*(yc-py) );
       }
-      */
+
+      return result;
     }
     
     double ComputeAll(double xc, double yc, double* corners, int corner_count) {
