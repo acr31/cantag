@@ -32,7 +32,7 @@
 #include <cantag/ContourRestrictions.hh>
 #include <cantag/ConvexHullRestrictions.hh>
 #include <cantag/EllipseRestrictions.hh>
-#include <cantag/coders/Coder.hh>
+#include <cantag/Ellipse.hh>
 
 namespace Cantag {
 
@@ -45,6 +45,7 @@ namespace Cantag {
     enum { RING_COUNT = PARAM_RING_COUNT };
     enum { SECTOR_COUNT = PARAM_SECTOR_COUNT };
     enum { READ_COUNT = PARAM_READ_COUNT };
+    typedef Ellipse Shape;
   private:
     const float m_bullseye_inner_edge;
     const float m_bullseye_outer_edge;
