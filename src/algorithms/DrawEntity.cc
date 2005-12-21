@@ -45,14 +45,13 @@ namespace Cantag {
   }
 
   bool DrawEntityContour::operator()(ContourEntity& contour) const {
-    for(std::vector<float>::const_iterator i = contour.GetPoints().begin();
-	i != contour.GetPoints().end();
-	++i) {
-      const float x = *i;
-      ++i;
-      const float y = *i;
-      m_image.DrawPixel(m_roi.ScaleX(x,m_image.GetWidth()),m_roi.ScaleY(y,m_image.GetHeight()),0);
-    }    
+    for(unsigned int i=0;i<contour.GetPoints().size();i+=2) {
+      const float x0 = m_roi.ScaleX(contour.GetPoints()[i],m_image.GetWidth());
+      const float y0 = m_roi.ScaleY(contour.GetPoints()[i+1],m_image.GetHeight());
+      const float x1 = m_roi.ScaleX(contour.GetPoints()[(i+2) % contour.GetPoints().size()],m_image.GetWidth());
+      const float y1 = m_roi.ScaleY(contour.GetPoints()[(i+3) % contour.GetPoints().size()],m_image.GetHeight());
+      m_image.DrawLine(x0,y0,x1,y1,0,1);
+    }
     return true;
   }
 
