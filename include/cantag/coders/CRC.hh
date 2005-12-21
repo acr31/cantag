@@ -51,8 +51,11 @@ public:
 
 
 
-
-
+template<> struct CRCPolynomial<2,2> {
+  enum {
+    Value = 3
+  };
+};
 
 template<> struct CRCPolynomial<3,0> {
 	enum {
