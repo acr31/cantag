@@ -74,10 +74,10 @@ namespace Cantag {
   private:
     int m_width;
     int m_height;
-    int m_supersample;
     unsigned char* m_buffer;
     float m_fov;
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> m_glimage;
+    int m_supersample;
     OSMesaContext m_ctx;
     std::vector<GLubyte*> m_tmap;
     std::vector<GLuint> m_textureid;
