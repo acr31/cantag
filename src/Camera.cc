@@ -237,7 +237,7 @@ namespace Cantag {
 
 #if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
   void Camera::ImageToNPCFIterative(std::vector<float>& points, bool useCache) const {
-    for(int i=0;i<points.size();i+=2) {
+    for(unsigned int i=0;i<points.size();i+=2) {
       dist_coord d;
       bool cached=false;
       if (useCache) {
@@ -287,14 +287,14 @@ namespace Cantag {
 	gsl_multimin_fminimizer_set (s, &errfunc, r, step); 
 	int iter=0;
 	int status=0;
-	int max_it=100;
+	const int max_it=100;
 	do {
 	  iter++;
 	  status = gsl_multimin_fminimizer_iterate (s);
 	  if (status)
 	    break;      
 	  status = gsl_multimin_test_size(s->size,1e-3);
-	}  while (status == GSL_CONTINUE && iter < 100); 
+	}  while (status == GSL_CONTINUE && iter < max_it); 
 	float l = gsl_vector_get(s->x,0);
 	points[i] = x*l;
 	points[i+1] = y*l;
