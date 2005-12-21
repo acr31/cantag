@@ -100,6 +100,11 @@ namespace Cantag {
      */
     void SetIntrinsic(float xscale, float yscale, float principlex, float principley, float skew);
 
+    inline float GetXScale() const { return m_intrinsic[0]; }
+    inline float GetYScale() const { return m_intrinsic[4]; }
+    inline float GetPrincipleX() const { return m_intrinsic[2]; }
+    inline float GetPrincipleY() const { return m_intrinsic[5]; }
+
     /**
      * Set the radial distortion parameters.  This method accepts
      * co-efficients for the radius squared, to the four and to the six.
