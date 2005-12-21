@@ -60,8 +60,8 @@ namespace Cantag {
     }
 
     inline bool GetPixel(float x, float y) const {
-      int xi = Round(x);
-      int yi = Round(y);
+      unsigned int xi = Round(x);
+      unsigned int yi = Round(y);
       if (xi >= m_width) xi=m_width-1;
       if (yi >= m_height) yi = m_height-1;
       return GetPixel(xi,yi);
