@@ -45,7 +45,7 @@ namespace Cantag {
     bool peak=false;
     float last_curv=curvature(points,numindexes-1, numindexes-1-WINDOWSIZE,WINDOWSIZE-1);
     
-    for(int i=0; i<points.size()/2;i++) {
+    for(unsigned int i=0; i<points.size()/2;i++) {
       int p1 = i-WINDOWSIZE;
       int p2 = (i+WINDOWSIZE)%numindexes;
       while (p1<0) p1+=numindexes;
