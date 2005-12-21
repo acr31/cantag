@@ -81,11 +81,12 @@ namespace Cantag {
     float z2 = nz;
 
     float y0,y2,y1;
-
-    if (z0 != 0.f || z1 != 0.f) {
+    
+    float numerator = sqrt(z1*z1+z2*z2);
+    if (!isnan(numerator) && numerator != 0.f) {
       y0 = 0.f;
-      y1 = -z2/sqrt(z1*z1+z2*z2);
-      y2 = z1/sqrt(z1*z1+z2*z2);
+      y1 = -z2/numerator;
+      y2 = z1/numerator;
     }
     else { // both are 0
       y0 = 0.f;
@@ -149,7 +150,7 @@ namespace Cantag {
   }
 
   void Transform::Apply(std::vector<float>& points) const {
-    for(int i=0;i<points.size();i+=2) {
+    for(unsigned int i=0;i<points.size();i+=2) {
       float resultx;
       float resulty;
       Apply(points[i],points[i+1],&resultx,&resulty);
