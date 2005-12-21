@@ -41,9 +41,9 @@ namespace Cantag {
     // Find the point that has the greatest
     // x value. If there is a tie, take the
     // one with the highest y value
-    int index=0;
+    unsigned int index=0;
     float ix=V[0],iy=V[1];
-    for (int i=2; i<V.size();i+=2) {
+    for (unsigned int i=2; i<V.size();i+=2) {
       if (V[i]>ix) {
 	ix=V[i];
 	iy=V[i+1];
@@ -63,7 +63,7 @@ namespace Cantag {
 
     std::map<float,int> quadrants[2];
     
-    for (int i=0; i<V.size();i+=2) {
+    for (unsigned int i=0; i<V.size();i+=2) {
       if (i!=index) {
 	float x = V[i]-ix;
 	float y = V[i+1]-iy;
