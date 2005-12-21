@@ -66,6 +66,14 @@ namespace Cantag {
     inline float& operator[](int index) { return m_transform[index]; }
     inline float operator[](int index) const { return m_transform[index]; }
     
+    inline Transform& operator=(const Transform& transform) {
+      for(int i=0;i<16;++i) {
+	m_transform[i] = transform[i];
+      }
+      m_confidence = transform.m_confidence;
+      return *this;
+    }
+
     inline float GetConfidence() { return m_confidence;} 
     inline void SetConfidence(float confidence) { m_confidence = confidence; }
     inline void AccrueConfidence(float confidence) { m_confidence *= confidence; }
@@ -138,7 +146,7 @@ namespace Cantag {
 
     void Print(std::ostream& os) const {
       for (int i=0; i<16; i++) {
-	if (i%4==0) std::cout << std::endl;
+	if (i%4==0) os << std::endl;
 	os << m_transform[i] << " ";
       }
       os << std::endl;   
