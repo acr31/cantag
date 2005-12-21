@@ -175,14 +175,15 @@ namespace Cantag {
 	iter++;
 	status = gsl_multimin_fminimizer_iterate (s);
 	
-	float z = gsl_vector_get(s->x, 0);
-	float theta = gsl_vector_get(s->x, 1);
-	float phi  = gsl_vector_get(s->x, 2);
-	float psi = gsl_vector_get(s->x, 3);
-	
-	//	std::cerr << z << " " << theta << " " << phi << " " << psi << " " << 
-	//  SpaceSearchQuadFunc(s->x,&p) << " " << s->size << std::endl;
-	
+	/*
+	  float z = gsl_vector_get(s->x, 0);
+	  float theta = gsl_vector_get(s->x, 1);
+	  float phi  = gsl_vector_get(s->x, 2);
+	  float psi = gsl_vector_get(s->x, 3);
+	  
+	  std::cerr << z << " " << theta << " " << phi << " " << psi << " " << 
+	  SpaceSearchQuadFunc(s->x,&p) << " " << s->size << std::endl;
+	*/
 	if (SpaceSearchQuadFunc(s->x,&p)<1e-7) break;
 
 	if (status)
