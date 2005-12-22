@@ -22,12 +22,12 @@ if test $magicconfig = "yes"; then
 fi
 
 AC_ARG_ENABLE([image-debug],
-	AS_HELP_STRING([--enable-image-debug],[enable drawing and saving to disk of debug images (disabled by default)]),
+	AC_HELP_STRING([--enable-image-debug],[enable drawing and saving to disk of debug images (disabled by default)]),
 	AC_DEFINE([IMAGE_DEBUG],[],[enable drawing and saving to disk of debug images]),
 	[])
 	
 AC_ARG_ENABLE([text-debug],
-	AS_HELP_STRING([--enable-text-debug],[enable printing of debug information (disabled by default)]),
+	AC_HELP_STRING([--enable-text-debug],[enable printing of debug information (disabled by default)]),
 	AC_DEFINE([TEXT_DEBUG],[],[enable printing of debug information]),
 	[])
 	
