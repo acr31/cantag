@@ -11,7 +11,9 @@ AC_PROG_CXX
 
 AC_CHECK_PROG(magicconfig,[Magick++-config --version],yes,no)
 
-#CXXFLAGS="$CXXFLAGS -finline-limit=1000 -Wall -Wno-non-virtual-dtor"
+if test $CXX = "g++"; then
+   CXXFLAGS="$CXXFLAGS -finline-limit=1000 -Wall -Wno-non-virtual-dtor -Werror"
+fi
 
 if test $magicconfig = "yes"; then
    CPPFLAGS="$CPPFLAGS `Magick-config --cppflags`"
@@ -75,6 +77,7 @@ dnl Checks for header files.
 CANTAG_CHECK_HEADER(Magick++.h,HAVE_MAGICKXX,have_magickxx_h)
 CANTAG_CHECK_HEADER(GL/gl.h,HAVE_GL_GL_H,have_gl_gl_h)
 CANTAG_CHECK_HEADER(GL/glu.h,HAVE_GL_GLU_H,have_gl_glu_h)
+CANTAG_CHECK_HEADER(GL/glut.h,HAVE_GL_GLUT_H,have_gl_glut_h)
 CANTAG_CHECK_HEADER(GL/osmesa.h,HAVE_GL_OSMESA_H,have_gl_osmesa_h)
 CANTAG_CHECK_HEADER(boost/random.hpp,HAVE_BOOST_RANDOM_H,have_boost_random_h)
 CANTAG_CHECK_HEADER(boost/test/unit_test.hpp,HAVE_BOOST_TEST_UNITTEST_H,have_boost_test_unittest_h)
@@ -102,7 +105,7 @@ CANTAG_CHECK_LIB(Magick++,MagickPlusPlusDestroyMagick,HAVELIB_MAGICKXX,havelib_m
 CANTAG_CHECK_LIB(GL,glFinish,HAVELIB_GL,havelib_gl)
 CANTAG_CHECK_LIB(OSMesa,OSMesaGetCurrentContext,HAVELIB_OSMESA,havelib_osmesa)
 CANTAG_CHECK_LIB(GLU,gluNewTess,HAVELIB_GLU,havelib_glu)
-CANTAG_CHECK_LIB(glut,fgActivateMenu,HAVELIB_GLUT,havelib_glut)
+CANTAG_CHECK_LIB(glut,glutSolidTeapot,HAVELIB_GLUT,havelib_glut)
 CANTAG_CHECK_LIB(gmp,__gmpz_init,HAVELIB_GMP,havelib_gmp)
 CANTAG_CHECK_LIB(gmpxx,__gmpz_set,HAVELIB_GMPXX,havelib_gmpxx)
 CANTAG_CHECK_LIB(gslcblas,cblas_caxpy,HAVELIB_GSLCBLAS,havelib_gslcblas)
