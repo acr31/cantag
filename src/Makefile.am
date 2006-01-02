@@ -7,7 +7,6 @@ libcantag_la_SOURCES += gaussianelimination.cc
 libcantag_la_SOURCES += Image.cc
 libcantag_la_SOURCES += FileImageSource.cc
 libcantag_la_SOURCES += polysolve.cc
-libcantag_la_SOURCES += Socket.cc
 libcantag_la_SOURCES += Transform.cc
 libcantag_la_SOURCES += MonochromeImage.cc
 libcantag_la_SOURCES += entities/ContourEntity.cc
@@ -30,6 +29,12 @@ libcantag_la_SOURCES += algorithms/DrawEntity.cc
 libcantag_la_SOURCES += algorithms/PrintEntity.cc
 libcantag_la_SOURCES += algorithms/FitQuadTangleRegression.cc
 libcantag_la_SOURCES += algorithms/SimulateMinDistance.cc
+
+if HAVE_SYS_SOCKET_H
+if HAVE_NETINET_IN_H
+libcantag_la_SOURCES += Socket.cc
+endif
+endif
 
 # disabled (acr31 branch)
 #libcantag_la_SOURCES += algorithms/ValidateFitEllipse.cc algorithms/ValidateFitQuadTangle.cc algorithms/ValidateTransformQuadTangle.cc algorithms/ValidateDistortionCorrection.cc ImageOutputMechanism.cc
@@ -91,3 +96,6 @@ endif
 
 
 AM_CPPFLAGS=-I$(srcdir)/../include -I$(top_builddir)/include 
+
+# uncomment this for win32
+#libcantag_la_LDFLAGS = -no-undefined -version-info 0:0:0
