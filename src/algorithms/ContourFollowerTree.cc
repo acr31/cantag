@@ -108,7 +108,7 @@ namespace Cantag {
 	  const bool next_is_1 = region_value & MonochromeImage::RIGHT_PIXEL;
 
 	  bool need_follow = false;
-	  ContourEntity::bordertype_t border_type;
+	  ContourEntity::bordertype_t border_type = ContourEntity::UNKNOWN;
 	  if (!previous_is_1) { // this pixel has not been seen before and the previous pixel is a 0-element
 	    border_type = ContourEntity::OUTER_BORDER;	  
 	    need_follow = true;
@@ -119,6 +119,8 @@ namespace Cantag {
 	  }
 
 	  if (need_follow) {
+	    assert(border_type != ContourEntity::UNKNOWN);
+
 	    // now decide the parent of this border
 	    
 	    // NewBorder    LNBDType   Parent
