@@ -297,3 +297,96 @@ namespace Cantag {
     m_accepted->Recv(buf,len);
   }
 }
+
+/*
+  int Ellipse::Save(Socket& socket) const {
+    int count = socket.Send(m_a);
+    count += socket.Send(m_b);
+    count += socket.Send(m_c);
+    count += socket.Send(m_d);
+    count += socket.Send(m_e);
+    count += socket.Send(m_f);
+    count += socket.Send(m_x0);
+    count += socket.Send(m_y0);
+    count += socket.Send(m_angle_radians);
+    count += socket.Send(m_width);
+    count += socket.Send(m_height);
+    count += socket.Send((int)m_fitted);
+    return count;
+  }
+
+  Ellipse::Ellipse(Socket& socket) {
+    m_a = socket.RecvFloat();
+    m_b = socket.RecvFloat();
+    m_c = socket.RecvFloat();
+    m_d = socket.RecvFloat();
+    m_e = socket.RecvFloat();
+    m_f = socket.RecvFloat();
+    m_x0 = socket.RecvFloat();
+    m_y0 = socket.RecvFloat();
+    m_angle_radians = socket.RecvFloat();
+    m_width = socket.RecvFloat();
+    m_height = socket.RecvFloat();    
+    m_fitted = (bool)socket.RecvInt();    
+  }
+
+   Image::ImageBase(Socket& socket) {
+    m_width = socket.RecvInt();
+    m_height = socket.RecvInt();
+    m_width_step = socket.RecvInt();
+    m_binary = socket.RecvInt() == 1;
+    m_contents = new unsigned char[m_width_step*m_height];
+    m_free_contents = true;
+    socket.Recv(m_contents,m_height*m_width_step);
+  }
+
+   int Image::Save(Socket& socket) const {
+    int count = socket.Send(m_width);
+    count += socket.Send(m_height);
+    count += socket.Send(m_width_step);
+    count += socket.Send(m_binary ? 1 : 0);
+    count += socket.Send(m_contents,m_height*m_width_step);
+    return count;
+  }
+  QuadTangle::QuadTangle(Socket& socket) {
+    m_x0 = socket.RecvFloat();
+    m_y0 = socket.RecvFloat();
+    m_x1 = socket.RecvFloat();
+    m_y1 = socket.RecvFloat();
+    m_x2 = socket.RecvFloat();
+    m_y2 = socket.RecvFloat();
+    m_x3 = socket.RecvFloat();
+    m_y3 = socket.RecvFloat();
+    m_xc = socket.RecvFloat();
+    m_yc = socket.RecvFloat();
+    //    m_fitted = (bool)socket.RecvInt();
+  }
+
+  int QuadTangle::Save(Socket& socket) const {
+    int count = socket.Send(m_x0);
+    count += socket.Send(m_y0);
+    count += socket.Send(m_x1);
+    count += socket.Send(m_y1);
+    count += socket.Send(m_x2);
+    count += socket.Send(m_y2);
+    count += socket.Send(m_x3);
+    count += socket.Send(m_y3);
+    count += socket.Send(m_xc);
+    count += socket.Send(m_yc);
+    //  count += socket.Send((int)m_fitted);
+    return count;
+  }
+
+  template<int BIT_COUNT> int CyclicBitSet<BIT_COUNT>::Save(Socket& socket) const {
+    int count = socket.Send((int)m_rotation);
+    unsigned char* buffer = new unsigned char[BIT_COUNT / 8 + 1];
+    for(int i=0;i<BIT_COUNT;++i) {
+      if (i%8==0) { buffer[i/8] = 0;}
+      if ((*this)[i]) { buffer[i/8] |= (1 << (i%8)); }
+    } 
+    count += socket.Send(buffer,BIT_COUNT/8+1);
+    return count;
+  }
+
+
+*/
