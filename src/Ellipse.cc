@@ -544,38 +544,6 @@ namespace Cantag {
   
   }
 
-
-  int Ellipse::Save(Socket& socket) const {
-    int count = socket.Send(m_a);
-    count += socket.Send(m_b);
-    count += socket.Send(m_c);
-    count += socket.Send(m_d);
-    count += socket.Send(m_e);
-    count += socket.Send(m_f);
-    count += socket.Send(m_x0);
-    count += socket.Send(m_y0);
-    count += socket.Send(m_angle_radians);
-    count += socket.Send(m_width);
-    count += socket.Send(m_height);
-    count += socket.Send((int)m_fitted);
-    return count;
-  }
-
-  Ellipse::Ellipse(Socket& socket) {
-    m_a = socket.RecvFloat();
-    m_b = socket.RecvFloat();
-    m_c = socket.RecvFloat();
-    m_d = socket.RecvFloat();
-    m_e = socket.RecvFloat();
-    m_f = socket.RecvFloat();
-    m_x0 = socket.RecvFloat();
-    m_y0 = socket.RecvFloat();
-    m_angle_radians = socket.RecvFloat();
-    m_width = socket.RecvFloat();
-    m_height = socket.RecvFloat();    
-    m_fitted = (bool)socket.RecvInt();    
-  }
-
   bool Ellipse::Check(const std::vector<float>& points) const {
     return (GetError(points) < MAXFITERROR); 
   }

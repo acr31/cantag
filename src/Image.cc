@@ -206,13 +206,7 @@ namespace Cantag {
 	const PixRow<Pix::Fmt::Grey8> row = GetRow(y);
 	for(PixRow<Pix::Fmt::Grey8>::const_iterator x=row.begin(); 
 	    x!= row.end(); ++x) {
-	  output << x.v() << std::endl;
-	  //if (m_binary) {
-	  //output << (data == 0 ? 0 : 255) << std::endl;
-	  //}
-	  //else {
-	  //output << data << std::endl;
-	  //}
+	  output << (int)x.v() << std::endl;
 	}
       }
       output.flush();
@@ -291,107 +285,6 @@ namespace Cantag {
 #endif
 
 }
-
-  /*
-   Image::ImageBase(Socket& socket) {
-    m_width = socket.RecvInt();
-    m_height = socket.RecvInt();
-    m_width_step = socket.RecvInt();
-    m_binary = socket.RecvInt() == 1;
-    m_contents = new unsigned char[m_width_step*m_height];
-    m_free_contents = true;
-    socket.Recv(m_contents,m_height*m_width_step);
-  }
-  */
-  /*
-   int Image::Save(Socket& socket) const {
-    int count = socket.Send(m_width);
-    count += socket.Send(m_height);
-    count += socket.Send(m_width_step);
-    count += socket.Send(m_binary ? 1 : 0);
-    count += socket.Send(m_contents,m_height*m_width_step);
-    return count;
-  }
-  */
-
-  /*
-   void Image::GlobalThreshold(const unsigned char threshold) {
-    const int width = GetWidth();
-    const int height = GetHeight();
-    for(int i=0;i<height;++i) {
-      unsigned char* data_pointer = GetRow(i);
-      for(int j=0;j<width;++j) {
-	unsigned char pixel = *data_pointer;
-	*data_pointer = pixel > threshold ? (pixel & 0xFC) : ((pixel & 0xFC) | 1);
-	data_pointer++;
-      }
-    }
-    m_binary = true;
-
-#ifdef IMAGE_DEBUG
-    Save("debug-globalthreshold.pnm");
-#endif
-
-  }
-  */
-  /**
-   * An implementation of Pierre Wellner's Adaptive Thresholding
-   *  @TechReport{t:europarc93:wellner,
-   *     author       = "Pierre Wellner",
-   *     title        = "Adaptive Thresholding for the {D}igital{D}esk",
-   *     institution  = "EuroPARC",
-   *     year         = "1993",
-   *     number       = "EPC-93-110",
-   *     comment      = "Nice introduction to global and adaptive thresholding.  Presents an efficient and effective adaptive thresholding technique and demonstrates on lots of example images.",
-   *     file         = "ar/ddesk-threshold.pdf"
-   *   }
-   * 
-   * Adapted to use a more efficient calculation for the moving
-   * average. the window used is now 2^window_size
-   *
-
-
-  void Image::AdaptiveThreshold(const unsigned int window_size, const unsigned char offset) {
-    int moving_average = 127;
-    const int image_width = GetWidth();
-    const int image_height = GetHeight();
-    const int useoffset = 255-offset;
-
-    int previous_line[image_width];
-    // intentionally uninitialised
-    for(int i=0;i<image_width;++i) { previous_line[i] = 127; }
-
-    for(int i=0;i<image_height-1;) { // use height-1 so we dont overrun the image if its height is an odd number
-      unsigned char* data_pointer = GetRow(i);
-      for(int j=0;j<image_width;++j) {
-	int pixel = *data_pointer;
-	moving_average = pixel + moving_average - (moving_average >> window_size);
-	int current_thresh = (moving_average + previous_line[j])>>1;
-	previous_line[j] = moving_average;      
-	*data_pointer = (pixel << window_size+8) < (current_thresh * useoffset) ? ((*data_pointer & 0xFC) | 1) : (*data_pointer & 0xFC);
-	++data_pointer;
-      }
-
-      ++i;
-      data_pointer = GetRow(i) + image_width-1;
-      for(int j=image_width-1;j>=0;--j) {
-	int pixel = *data_pointer;
-	moving_average = pixel + moving_average - (moving_average >> window_size);
-	int current_thresh = (moving_average + previous_line[j])>>1;
-	previous_line[j] = moving_average;
-	*data_pointer = (pixel << window_size+8) < (current_thresh * useoffset)  ? ((*data_pointer & 0xFC) | 1) : (*data_pointer & 0xFC);
-	--data_pointer;
-      }
-      ++i;
-    }  
-    m_binary = true;
-
-#ifdef IMAGE_DEBUG
-    Save("debug-adaptivethreshold.pnm");
-#endif
-  }
-   */
-
 
   /**
    * apply canny edge detector
