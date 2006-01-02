@@ -22,16 +22,27 @@
  * $Header$
  */
 
+
 #ifndef SOCKET_GUARD
 #define SOCKET_GUARD
 
 #include <cantag/Config.hh>
+
+#ifndef HAVE_SYS_SOCKET_H
+#error "This version has been configured without BSD-socket support (missing sys/socket.h)"
+#endif
+
+#ifndef HAVE_NETINET_IN_H
+#error "This version has been configured without BSD-socket support (missing netinet/in.h)"
+#endif
+
 #include <vector>
 #include <bitset>
 
 extern "C" {
 #include <netinet/in.h>
 }
+
 
 namespace Cantag {
 
