@@ -83,7 +83,7 @@ namespace Cantag {
     float y0,y2,y1;
     
     float numerator = sqrt(z1*z1+z2*z2);
-    if (!isnan(numerator) && numerator != 0.f) {
+    if (!std::isnan<float>(numerator) && numerator != 0.f) {
       y0 = 0.f;
       y1 = -z2/numerator;
       y2 = z1/numerator;
