@@ -122,7 +122,7 @@ namespace Cantag {
 #ifdef EIGEN_DEBUG
     printf("  Test accuracy of: (%lf,%lf,%lf),%lf\n",vect[0],vect[1],vect[2],val);
 #endif
-    if (isnan(vect[0]) || isnan(vect[1]) || isnan(vect[2]))
+    if (std::isnan<double>(vect[0]) || std::isnan<double>(vect[1]) || std::isnan<double>(vect[2]))
       return -1;
 
     //multiply out using eigenvector to measure the error
