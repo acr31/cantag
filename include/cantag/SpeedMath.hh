@@ -23,11 +23,19 @@
 
 #include <cmath>
 #include <cassert>
+#include <limits>
 #include <sys/param.h>
 
-extern "C" {
-#include <values.h>
-}
+#define FLT_INFINITY std::numeric_limits<float>::infinity()
+#define DBL_INFINITY std::numeric_limits<double>::infinity()
+
+#ifndef INT_MAX
+#define INT_MAX std::numeric_limits<int>::max()
+#endif
+
+#ifndef INT_MIN
+#define INT_MIN std::numeric_limits<int>::min()
+#endif
 
 namespace Cantag {
 
@@ -117,7 +125,7 @@ namespace Cantag {
   private:
     float m_minimum;
   public:
-    Minima() : m_minimum(INFINITY) {}
+    Minima() : m_minimum(FLT_INFINITY) {}
     void UpdateMinima(float newval) { if (newval < m_minimum) m_minimum = newval; }
     float GetMinima() const { return m_minimum; }
   };
@@ -126,7 +134,7 @@ namespace Cantag {
   private:
     float m_maximum;
   public:
-    Maxima() : m_maximum(-INFINITY) {}
+    Maxima() : m_maximum(-FLT_INFINITY) {}
     void UpdateMaxima(float newval) { if (newval > m_maximum) m_maximum = newval; }
     float GetMaxima() const { return m_maximum; }
   };
