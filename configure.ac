@@ -6,6 +6,7 @@ AM_INIT_AUTOMAKE
 AC_LANG([C++])
 
 dnl Checks for programs.
+AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
 AC_PROG_CXX
 
@@ -73,7 +74,8 @@ fi
 
 
 dnl Checks for header files.
-
+CANTAG_CHECK_HEADER(sys/socket.h,HAVE_SYS_SOCKET_H,have_sys_socket_h)
+CANTAG_CHECK_HEADER(netinet/in.h,HAVE_NETINET_IN_H,have_netinet_in_h)
 CANTAG_CHECK_HEADER(Magick++.h,HAVE_MAGICKXX,have_magickxx_h)
 CANTAG_CHECK_HEADER(GL/gl.h,HAVE_GL_GL_H,have_gl_gl_h)
 CANTAG_CHECK_HEADER(GL/glu.h,HAVE_GL_GLU_H,have_gl_glu_h)
@@ -105,6 +107,7 @@ CANTAG_CHECK_LIB(Magick++,MagickPlusPlusDestroyMagick,HAVELIB_MAGICKXX,havelib_m
 CANTAG_CHECK_LIB(GL,glFinish,HAVELIB_GL,havelib_gl)
 CANTAG_CHECK_LIB(OSMesa,OSMesaGetCurrentContext,HAVELIB_OSMESA,havelib_osmesa)
 CANTAG_CHECK_LIB(GLU,gluNewTess,HAVELIB_GLU,havelib_glu)
+CANTAG_CHECK_LIB(glu32,gluNewTess,HAVELIB_GLU32,havelib_glu32)
 CANTAG_CHECK_LIB(glut,glutSolidTeapot,HAVELIB_GLUT,havelib_glut)
 CANTAG_CHECK_LIB(gmp,__gmpz_init,HAVELIB_GMP,havelib_gmp)
 CANTAG_CHECK_LIB(gmpxx,__gmpz_set,HAVELIB_GMPXX,havelib_gmpxx)
@@ -225,5 +228,11 @@ if test "$have_gsl_multimin_h$havelib_gsl$havelib_gslcblas" = "yesyesyes"; then
    echo "+ Enabled GNU Scientific Library support"
 else
    echo "! Disabled GNU Scientific Library support"
+fi
+
+if test "$have_sys_socket_h$have_netinet_in_h" = "yesyes"; then
+   echo "+ Enabled BSD Socket support"
+else
+   echo "! Disabled BSD Socket Support"
 fi
 
