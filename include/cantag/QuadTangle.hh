@@ -107,9 +107,6 @@ namespace Cantag {
     inline int GetIndex2() const { return m_index_2; }
     inline int GetIndex3() const { return m_index_3; }
 
-    QuadTangle(Socket& socket);
-    int Save(Socket& socket) const;
-
     bool CheckError(const std::vector<float>& points, float threshold) const;
 
     /**

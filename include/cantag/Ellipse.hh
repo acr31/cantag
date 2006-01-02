@@ -27,7 +27,6 @@
 
 #include <cantag/Config.hh>
 #include <cantag/Image.hh>
-#include <cantag/Socket.hh>
 #include <cantag/Camera.hh>
 
 #include <vector>
@@ -213,9 +212,6 @@ public:
    */
   virtual void Decompose();
   void Compose();
-
-  int Save(Socket& socket) const;
-  Ellipse(Socket& socket);
 
   bool Check(const std::vector<float>& points) const;
 };

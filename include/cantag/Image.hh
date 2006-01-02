@@ -25,21 +25,21 @@
 #ifndef IMAGE_GUARD
 #define IMAGE_GUARD
 
-extern "C" {
-#include <sys/types.h>
-#include <sys/socket.h>
-}
+//extern "C" {
+//#include <sys/types.h>
+//#include <sys/socket.h>
+//}
 
 #include <fstream>
 #include <list>
 #include <iostream>
 
+#include <cantag/Config.hh>
+
 #ifdef HAVE_BOOST_RANDOM
 # include <boost/random.hpp>
 #endif
 
-#include <cantag/Config.hh>
-#include <cantag/Socket.hh>
 #include <cantag/SpeedMath.hh>
 #include <cantag/MonochromeImage.hh>
 #include <cantag/entities/Entity.hh>
@@ -732,23 +732,6 @@ namespace Cantag {
     //void Resize(ImageBase& image) const;
 
     /**
-     * Apply a global threshold to binarize the image. All pixels with
-     * intensity greater than the threshold will be set to 0 and all
-     * pixels less than the threshold will be set to 1.  In particular,
-     * this method inverts as well as binarizes.
-     */
-    //void GlobalThreshold(unsigned int threshold);
-
-    /**
-     * Apply an adaptive threshold to the image.  For each pixel a
-     * region of window_size pixels around it is averaged.  If the pixel
-     * is greater than this average+offset then it is changed to 0 and
-     * otherwise changed to 1.  Note that this method is also inverting
-     * the image in addition to binarizing it.
-     */
-    //void AdaptiveThreshold(const unsigned int window_size, const unsigned char offset);
-
-    /**
      * Apply a homogonous transform based image segmentation technique.
      * Takes the log of each image pixel,scales it and applies an edge
      * detect filter.  Suitable for finding edges but not for reading the tag.
@@ -772,12 +755,6 @@ namespace Cantag {
   
     void DrawEllipse(float xc, float yc, float width, float height, float angle_radians, const Pixel<layout>& colour, int thickness);
 
-    /**
-     * Send this image over the network using the socket proffered.
-     * Return the number of bytes written
-     */
-    //int Save(Socket& socket) const;
-  
   private:
     int AdaptiveWidthStep(int moving_average,int* previous_line,unsigned int i, unsigned int j,unsigned int s, int t);
     void ellipse_polygon_approx(float* points, int startindex, int length, float xc, float yc, float width, float height,  float angle_radians, const Pixel<layout>& colour, int thickness, float start_angle);
