@@ -26,7 +26,6 @@
 #define CYCLIC_BIT_SET
 
 #include <cantag/Config.hh>
-#include <cantag/Socket.hh>
 
 #include <cassert>
 #include <bitset>
@@ -141,20 +140,7 @@ namespace Cantag {
 
     unsigned long to_ulong() const;
     
-    int Save(Socket& socket) const;
-    CyclicBitSet(Socket& socket);
   };
-
-  template<int BIT_COUNT> int CyclicBitSet<BIT_COUNT>::Save(Socket& socket) const {
-    int count = socket.Send((int)m_rotation);
-    unsigned char* buffer = new unsigned char[BIT_COUNT / 8 + 1];
-    for(int i=0;i<BIT_COUNT;++i) {
-      if (i%8==0) { buffer[i/8] = 0;}
-      if ((*this)[i]) { buffer[i/8] |= (1 << (i%8)); }
-    } 
-    count += socket.Send(buffer,BIT_COUNT/8+1);
-    return count;
-  }
 
 
   template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet(const char* code) : std::bitset<BIT_COUNT>(),m_rotation(0),m_invalid(false) {
