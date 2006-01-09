@@ -31,15 +31,6 @@ cantaginclude_HEADERS += VideoOutputMechanism.hh
 cantaginclude_HEADERS += EstimateTransform.hh
 cantaginclude_HEADERS += Correspondence.hh
 cantaginclude_HEADERS += TagDictionary.hh
-
-if HAVE_GSL_MULTIMIN_H
-if HAVELIB_GSLCBLAS
-if HAVELIB_GSL
+cantaginclude_HEADERS += GLRenderWindow.cc
+cantaginclude_HEADERS += GLOutputMechanism.cc
 cantaginclude_HEADERS += EstimateTransform.hh
-endif
-endif
-endif
-
-
-# disabled ImageOutputMechanism.hh GLOutputMechanism.hh TextOutputMechanism.hh
-# obsolete findtransform.hh Tags.hh Tag.hh MatrixTag.hh RingTag.hh TemplateTag.hh WorldState.hh XOutputStagesMechanism.hh
