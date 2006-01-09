@@ -61,6 +61,7 @@ template<class TagType> RunTest<TagType>::RunTest(int size, float fov, Cantag::D
   }
 
   stored_payload = (*d.GetPayloads().begin())->payload;
+
   fs.SetSuperSample(1);
   fs.Init(i);
   fs.SetCameraParameters(camera);
@@ -69,22 +70,22 @@ template<class TagType> RunTest<TagType>::RunTest(int size, float fov, Cantag::D
 template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output, const char* prefix) {
   const int numsteps = 10; // odd number so we hit 0,0
   const int pixel_min = 5;
-  const int pixel_step = 5;
-  const int angle_step = 10;
+  const int pixel_step = 1;
+  const int angle_step = 5;
   for(int pixels=50;pixels>=pixel_min;pixels-=pixel_step) {
     double distance = (double)m_size/2.f/(double)pixels;
     
     // now work out the range of x and y to try for this distance
     double range = m_tan_fov * distance - 1.0;
     double step = 2*range / (double)numsteps;
-    for(int xc=-numsteps;xc<=numsteps;++xc) {
-      //int xc=0; {
+    //for(int xc=-numsteps;xc<=numsteps;++xc) {
+      int xc=0; {
       float x0 = xc * step;
-      for(int yc=-numsteps;yc<=numsteps;++yc) {
-	//int yc=0; {
+      //for(int yc=-numsteps;yc<=numsteps;++yc) {
+	int yc=0; {
 	float y0 = yc * step;
-	for(int theta = -90; theta <= 90; theta += angle_step) {
-	  //int theta = 0; {
+	//for(int theta = -90; theta <= 90; theta += angle_step) {
+	  int theta = 0; {
 	  for(int phi = -90;phi<=90;phi += angle_step) {
 	    Result result = Execute(theta,phi,x0,y0,distance);
 	    if (prefix) output << prefix << " ";
@@ -96,7 +97,7 @@ template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output
 	      output << "NONE NONE NONE " << result.min_distance << " NONE\n";
 	    }	    
 	    else {
-	      output << "FAIL FAIL FAIL " << result.min_distance << " NONE\n";
+	      output << "FAIL FAIL FAIL " << result.min_distance << " FAIL\n";
 	    }	    
 	  }
 	}
@@ -142,7 +143,7 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
   float mod = sqrt(location[0]*location[0] + location[1]*location[1] + location[2]*location[2]);
   float angle = acos((ref_normal[0]*location[0] + ref_normal[1]*location[1] + ref_normal[2]*location[2])/mod);
 
-  if (angle >= M_PI/2) {
+  if (fabs(angle) >= M_PI/2) {
     Result r;
     r.not_visible = true;
     return r;
@@ -183,6 +184,13 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
     contour->SetValid(true);
     Cantag::SimulateContour(tag,camera)(ref_te,*contour);
 
+    // uncomment this to demonstrate that the simulated contour agrees with GL
+    /*
+    Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(*i);
+    output.ConvertScale(0.25,190);
+    Apply(ce,Cantag::DrawEntityContour(output));
+    output.Save("test.pnm");
+    */
 #ifdef SIMULATE_CONTOUR
     tag.ProcessFromContourEntity(*i,ref_te,camera,debug_name);
 #else
@@ -209,13 +217,13 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
     }
   }
 
+  Result r;
+  // simulate the minimum distance for this transform
+  Cantag::Minima min;
+  Cantag::SimulateMinDistance(min,tag,camera)(ref_te);
+  r.min_distance = min.GetMinima();
+  
   if (favorite) {
-    Result r;
-    
-    // simulate the minimum distance for this transform
-    Cantag::Minima min;
-    Cantag::SimulateMinDistance(min,tag,camera)(ref_te);
-    r.min_distance = min.GetMinima();
 
     const typename TagType::PipelineResult& loc = *favorite;
     const Cantag::TransformEntity* te = loc.first;
@@ -223,6 +231,7 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
     const Cantag::DecodeEntity<TagType::PayloadSize>* de = loc.second;
 
     Cantag::CyclicBitSet<TagType::PayloadSize> copy(de->GetPayloads()[0]->payload);
+
     int errors = 0;
     for(int i=0;i<TagType::PayloadSize;++i) {
       if (copy[i] != stored_payload[i]) errors++;
@@ -250,13 +259,8 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
     Cantag::SimulateMaxSampleError(m,tag,camera)(*te,ref_te);
 
     r.Update(errorangle,distance,errors,m.GetMaxima());
-
-    return r;
-
   }
-  else {
-    Result r;
-    return r;
-  }
+  
+  return r;
  
 }

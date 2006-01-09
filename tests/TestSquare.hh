@@ -231,7 +231,7 @@ class SquarePolygonProj64 : public TestSquare<8,Cantag::FitQuadTanglePolygon,Can
 class SquarePolygonProj81 : public TestSquare<9,Cantag::FitQuadTanglePolygon,Cantag::TransformQuadTangleProjective> {};
 class SquarePolygonProj100 : public TestSquare<10,Cantag::FitQuadTanglePolygon,Cantag::TransformQuadTangleProjective> {};
 class SquarePolygonProj121 : public TestSquare<11,Cantag::FitQuadTanglePolygon,Cantag::TransformQuadTangleProjective> {};
-class SquarePolygonProj141 : public TestSquare<12,Cantag::FitQuadTanglePolygon,Cantag::TransformQuadTangleProjective> {};
+class SquarePolygonProj144 : public TestSquare<12,Cantag::FitQuadTanglePolygon,Cantag::TransformQuadTangleProjective> {};
 class SquarePolygonProj169 : public TestSquare<13,Cantag::FitQuadTanglePolygon,Cantag::TransformQuadTangleProjective> {};
 class SquarePolygonProj196 : public TestSquare<14,Cantag::FitQuadTanglePolygon,Cantag::TransformQuadTangleProjective> {};
 

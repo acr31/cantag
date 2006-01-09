@@ -31,16 +31,12 @@
 #include "TagDef.hh"
 #include "RunTest.hh"
 
-typedef CircleInnerLSFull36 TagType;
-
-using namespace Cantag;
-
 template<class TagType>
 struct Chooser {};
 
 template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
-struct Chooser<TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT> > {
-  static void CreateCode(CyclicBitSet<RING_COUNT*SECTOR_COUNT>& code) {
+struct Chooser<Cantag::TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT> > {
+  static void CreateCode(Cantag::CyclicBitSet<RING_COUNT*SECTOR_COUNT>& code) {
     bool value = true;
     int ptr = 0;
     for(int i=0;i<SECTOR_COUNT;++i) {
@@ -54,9 +50,9 @@ struct Chooser<TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT> > {
 };
 
 template<int EDGE_CELLS>
-struct Chooser<TagSquare<EDGE_CELLS> > {
+struct Chooser<Cantag::TagSquare<EDGE_CELLS> > {
   enum { PayloadSize = EDGE_CELLS * EDGE_CELLS - (EDGE_CELLS * EDGE_CELLS % 2) };
-  static void CreateCode(CyclicBitSet<PayloadSize>& code) {
+  static void CreateCode(Cantag::CyclicBitSet<PayloadSize>& code) {
     bool value = true;
     int ptr = 0;
     for(int i=0;i<PayloadSize;++i) {
@@ -72,8 +68,8 @@ struct Executor {
   static void Execute() {
     const float fov = 70.f;
     const int size = 600;
-    DecodeEntity<TagType::PayloadSize> d;
-    typename DecodeEntity<TagType::PayloadSize>::Data* data = d.Add();
+    Cantag::DecodeEntity<TagType::PayloadSize> d;
+    typename Cantag::DecodeEntity<TagType::PayloadSize>::Data* data = d.Add();
     Chooser<typename TagType::SpecType>::CreateCode(data->payload);
     
     RunTest<TagType> r(size,fov,d);
@@ -90,8 +86,8 @@ struct Executor {
   static void ExecuteSingle(float x0, float y0, float z0, float theta, float phi) {
     const float fov = 70.f;
     const int size = 600;
-    DecodeEntity<TagType::PayloadSize> d;
-    typename DecodeEntity<TagType::PayloadSize>::Data* data = d.Add();
+    Cantag::DecodeEntity<TagType::PayloadSize> d;
+    typename Cantag::DecodeEntity<TagType::PayloadSize>::Data* data = d.Add();
     Chooser<typename TagType::SpecType>::CreateCode(data->payload);
     
     RunTest<TagType> r(size,fov,d);
@@ -114,10 +110,10 @@ struct Executor<Cantag::TypeListEOL> {
 
 
 //typedef AllTags TagList;
-typedef CircleTags TagList;
+//typedef CircleTags TagList;
 //typedef TL1(SquareConvexHullSpaceSearch36) TagList;
-//typedef TL1(SquareRegressCornerProj36) TagList;
-//typedef TL1(CircleOuterLSFull36) TagList;
+typedef TL4(SquareCornerProj36,SquareRegressConvexHullProj36,SquareCornerSpaceSearch36,SquareRegressConvexHullSpaceSearch36) TagList;
+//typedef TL4(CircleInnerLSFull36,CircleInnerLSLinear36,CircleInnerSimpleFull36, CircleInnerSimpleLinear36) TagList;
 
 int main(int argc,char* argv[]) {
   std::cout.precision(15);

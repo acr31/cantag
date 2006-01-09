@@ -28,14 +28,15 @@
 #include <Cantag.hh>
 #include "Functions.hh"
 
+
 template<int RINGS, int SECTORS, class FitAlgorithm, class TransformAlgorithm>
-class TestCircle : public Cantag::TagCircle<RINGS,SECTORS>, public Cantag::RawCoder<RINGS*SECTORS,RINGS> {
+class TestCircle : public Cantag::TagCircle<RINGS,SECTORS>, public Cantag::TripOriginalCoder<RINGS*SECTORS,RINGS,2> {
 public:  
   enum { PayloadSize = Cantag::TagCircle<RINGS,SECTORS>::PayloadSize };
   typedef std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PayloadSize>*> PipelineResult;
 
   typedef Cantag::TagCircle<RINGS,SECTORS> SpecType;
-  typedef Cantag::RawCoder<RINGS*SECTORS,RINGS> CoderType;
+  typedef Cantag::TripOriginalCoder<RINGS*SECTORS,RINGS,2> CoderType;
   typedef Cantag::ComposedEntity<TL5(Cantag::ContourEntity,
 				     Cantag::ConvexHullEntity,
 				     Cantag::ShapeEntity<Cantag::Ellipse>,
@@ -161,6 +162,9 @@ private:
       ApplyTree(tree,Cantag::DrawEntityTransform(output,camera));
       ApplyTree(tree,Cantag::DrawEntitySample(output,camera,*this));
       output.Save(name_buffer);
+
+      std::cout << "Sampled" << std::endl;
+      ApplyTree(tree,Cantag::PrintEntityDecode<PayloadSize>(std::cout));
     }
     ApplyTree(tree,Cantag::Decode<CoderType>());
     ApplyTree(tree,AddLocatedObject<PayloadSize>(this->m_located));

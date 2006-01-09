@@ -1,7 +1,7 @@
-noinst_PROGRAMS=  MinDistances BatchTest
+noinst_PROGRAMS=  MinDistances BatchTest TestSimulateMinDistance
 BatchTest_SOURCES=BatchTest.cc
 MinDistances_SOURCES=MinDistances.cc
-
+TestSimulateMinDistance_SOURCES=TestSimulateMinDistance.cc
 
 AM_CPPFLAGS=-I$(srcdir)/../include -I$(top_builddir)/include 
 AM_LDFLAGS=-L../src -lcantag
