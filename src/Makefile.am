@@ -60,8 +60,8 @@ endif
 
 if HAVE_GL_GL_H
 if HAVELIB_GL
-# disabled
-# libcantag_la_SOURCES += GLOutputMechanism.cc
+libcantag_la_SOURCES += GLRenderWindow.cc
+libcantag_la_SOURCES += GLOutputMechanism.cc
 if HAVE_GL_OSMESA_H
 if HAVELIB_OSMESA
 if HAVE_GL_GLU_H
