@@ -22,8 +22,8 @@
  * $Header$
  */
 
-#ifndef GLOUTPUT_MECHANISM_GUARD
-#define GLOUTPUT_MECHANISM_GUARD
+#ifndef GLRENDERWINFOW_GUARD
+#define GLRENDERWINDOW_GUARD
 
 #include <cantag/Config.hh>
 
@@ -37,7 +37,6 @@
 
 #include <iostream>
 #include <map>
-#include <ctime>
 
 #include <GL/glx.h>
 #include <GL/gl.h>
@@ -45,30 +44,31 @@
 #include <GL/glut.h>
 #include <GL/osmesa.h>
 
-#include <cantag/GLRenderWindow.hh>
 #include <cantag/Camera.hh>
 #include <cantag/Transform.hh>
 
 namespace Cantag {
-
-  class GLOutputMechanism : protected GLRenderWindow {
+  
+  /**
+   * Superclass for GL rendering 
+   */
+  class GLRenderWindow {
   private:
-    bool m_displayListInitialised[9];
-    void SetupCamera(const Camera& camera);
-    void InitialiseScene(const Camera& camera);
-    void RenderModel(int display_list);
+    XVisualInfo* m_visual;
+    Colormap m_colormap;
+
+  protected:
+    Display *m_display;
+    Window m_window;
+    GLXContext m_context;
+    float m_ratio;
+    int m_width;
+    int m_height;
 
   public:
-    GLOutputMechanism(int width,int height,const Camera& camera);
-    void Flush();
-    void Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image);
-    void Draw(const Transform& t, int display_list);
-
-    /**
-     * Draws the text given.  The co-ordinates are (x,y,1) => so 0.5 > x > -0.5, 0.5 > y > -0.5
-     */
-    void DrawText(float x, float y, const char* s,int r = 0, int g = 0, int b = 0);
+    GLRenderWindow(int width,int height);
+    virtual ~GLRenderWindow();
   };
 }
 
-#endif//GLOUTPUT_MECHANISM_GUARD
+#endif//GLRENDER_WINDOW_GUARD
