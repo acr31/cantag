@@ -39,12 +39,12 @@
 namespace Cantag {
 
   struct ROI {
-    int minx;
-    int maxx;
-    int miny;
-    int maxy;
+    float minx;
+    float maxx;
+    float miny;
+    float maxy;
 
-    ROI(int pminx, int pmaxx, int pminy, int pmaxy) : minx(pminx), maxx(pmaxx), miny(pminy), maxy(pmaxy) {};
+    ROI(float pminx, float pmaxx, float pminy, float pmaxy) : minx(pminx), maxx(pmaxx), miny(pminy), maxy(pmaxy) {};
     int ScaleX(int x, int imageWidth) const { return (x - minx) * imageWidth / (maxx-minx);}
     int ScaleX(float x, int imageWidth) const { return Round((x - (float)minx) * (float)imageWidth / (float)(maxx-minx)); }
     int ScaleY(int y, int imageHeight) const { return (y - miny) * imageHeight / (maxy-miny);}
