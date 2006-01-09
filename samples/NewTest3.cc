@@ -69,7 +69,7 @@ int main(int argc,char* argv[]) {
     while(cnt<1) {      
       Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* i = fs.Next(angle,0,0,0,2);
       if (angle >= 270 || angle <= 90) direction = -direction;
-      angle += direction;
+      //      angle += direction;
 
       Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> output(i->GetWidth(),i->GetHeight());
       Apply(*i,DrawEntityImage(output));
@@ -80,7 +80,7 @@ int main(int argc,char* argv[]) {
 
       Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<TagType::PayloadSize>) > > tree;
       Apply(m,tree,ContourFollowerTree(tag));
-      ApplyTree(tree,DrawEntityContour(output));
+      //      ApplyTree(tree,DrawEntityContour(output));
       ApplyTree(tree,DistortionCorrection(camera));
       ApplyTree(tree,FitEllipseLS());
       ApplyTree(tree,TransformEllipseFull(tag.GetBullseyeOuterEdge()));
@@ -90,7 +90,7 @@ int main(int argc,char* argv[]) {
       ApplyTree(tree,Bind(SampleTagCircle(tag,camera),m));
       ApplyTree(tree,Decode<TagType>());
       ApplyTree(tree,TransformRotateToPayload(tag));
-      ApplyTree(tree,DrawEntityTransform(output,camera));
+      //      ApplyTree(tree,DrawEntityTransform(output,camera));
       o3.Output(output);
       ++count;
       if (count == 100) {

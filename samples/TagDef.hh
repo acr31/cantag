@@ -27,14 +27,14 @@
 
 #include <Cantag.hh>
 
-struct TestCircle : public Cantag::TagCircle<2,17>,Cantag::TripOriginalCoder<34,2,2> {
-  TestCircle() : Cantag::TagCircle<2,17>(0.8,1.0,0.2,0.6) {}
+struct TestCircle : public Cantag::TagCircle<2,32>,Cantag::TripOriginalCoder<64,2,2> {
+  TestCircle() : Cantag::TagCircle<2,32>(0.2,0.4,0.6,1) {}
+  //TestCircle() : Cantag::TagCircle<4,32>(0.8,1.0,0.2,0.6) {}
+  //TestCircle() : Cantag::TagCircle<2,17>(0.2,1.0,0.4,0.8) {}
 };
 
-struct TestSquare : public Cantag::TagSquare<6>,Cantag::SymbolChunkCoder<36,9> {
+struct TestSquare : public Cantag::TagSquare<6>,Cantag::CRCSymbolChunkCoder<36,6,9> {
   TestSquare() : Cantag::TagSquare<6>() {}
 };
-
-
 
 #endif//TAGDEF_GUARD

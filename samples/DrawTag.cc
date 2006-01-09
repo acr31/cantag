@@ -99,7 +99,7 @@ main(int argc, char* argv[])
       std::cerr << "Failed to decode encoded data.  Aborting" << std::endl;
       exit(-1);
     }
-
+    std::cout << data->payload << std::endl;
     if (data->payload != toencode) {
       std::cerr << "Warning! Failed to encode requested data " << std::endl;
     }
