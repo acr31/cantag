@@ -131,7 +131,7 @@
 #endif
 
 #if defined(HAVE_GL_GL_H) && defined(HAVELIB_GL) && defined(HAVELIB_GLU) && defined(HAVELIB_GLUT)
-//# include <cantag/GLOutputMechanism.hh>
+# include <cantag/GLOutputMechanism.hh>
 #endif
 
 #if defined(HAVELIB_AVCODEC) && defined(HAVELIB_AVFORMAT) && defined(HAVELIB_Z) && defined(HAVE_AVCODEC_H) && defined(HAVE_AVFORMAT_H)
