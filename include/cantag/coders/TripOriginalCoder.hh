@@ -108,8 +108,8 @@ namespace Cantag {
     data.reset();
 
     const CyclicBitSet<GRANULARITY> sync_sector_mask((1<<GRANULARITY)-1);
-    const BigInt<BIT_COUNT> base((1<<GRANULARITY)-1);
-    const BigInt<BIT_COUNT> checksum_mod( BigInt<BIT_COUNT>((1<<GRANULARITY)-1).Pwr(CHECKSUM_COUNT));
+    const BigInt base((1<<GRANULARITY)-1);
+    const BigInt checksum_mod( BigInt((1<<GRANULARITY)-1).Pwr(CHECKSUM_COUNT));
 
     // try all possible rotations...
     for(size_t i=0;i<BIT_COUNT;i+=GRANULARITY) {
@@ -123,22 +123,22 @@ namespace Cantag {
 #endif
 
 	// accumulate the checksum
-	BigInt<BIT_COUNT> checksum(0);
-	BigInt<BIT_COUNT> checksum_pwr(1);
+	BigInt checksum(0);
+	BigInt checksum_pwr(1);
 	for(unsigned int c=0;c<CHECKSUM_COUNT;c++) {
 	  unsigned int symbol = payload.GetSymbol(c+1,GRANULARITY);
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
 	  PROGRESS("Read Symbol "<< symbol);
 #endif
 	 
-	  checksum += checksum_pwr * BigInt<BIT_COUNT>(symbol);
+	  checksum += checksum_pwr * BigInt(symbol);
 	  checksum_pwr *= base;
 	}
 
-	BigInt<BIT_COUNT> checksum_count(0);
+	BigInt checksum_count(0);
 
-	BigInt<BIT_COUNT> pwr(1);
-	BigInt<BIT_COUNT> bi(data);
+	BigInt pwr(1);
+	BigInt bi(0);
 	
 	int data_symbol_count = (BIT_COUNT - GRANULARITY*(CHECKSUM_COUNT+1))/GRANULARITY;
 	
@@ -147,11 +147,13 @@ namespace Cantag {
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
 	  PROGRESS("Read Symbol "<< symbol);
 #endif	  
-	  BigInt<BIT_COUNT> next(symbol);
+	  BigInt next(symbol);
 	  checksum_count+=next;
 	  bi += pwr * next;
 	  pwr *= base;
 	}
+
+	bi.ToCyclicBitSetDestructive(data);
 
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
 	PROGRESS("Code is " << bi);
@@ -190,23 +192,23 @@ namespace Cantag {
     CyclicBitSet<BIT_COUNT> tag_data(data);
     data.reset();
 
-    const BigInt<BIT_COUNT> base((1<<GRANULARITY)-1);
-    const BigInt<BIT_COUNT> checksum_mod( BigInt<BIT_COUNT>((1<<GRANULARITY)-1).Pwr(CHECKSUM_COUNT));
+    const BigInt base((1<<GRANULARITY)-1);
+    const BigInt checksum_mod( BigInt((1<<GRANULARITY)-1).Pwr(CHECKSUM_COUNT));
     
     // build the code by taking the remainder of tag_data with
     // (1<<GRANULARITY)-1 to get the next symbol and then dividing
     // tag_data by (1<<GRANULARITY)-1
 
-    BigInt<BIT_COUNT> bi(tag_data);
+    BigInt bi(tag_data);
 #ifdef TRIP_ORIGINAL_CODER_DEBUG
     PROGRESS("Value to encode is "<<bi);
 #endif
-    BigInt<BIT_COUNT> checksum(0);
+    BigInt checksum(0);
     int data_symbol_count = (BIT_COUNT - GRANULARITY*(CHECKSUM_COUNT+1))/GRANULARITY;
 
     for(int i=0;i<data_symbol_count;i++) {
       unsigned int symbol = bi % base;
-      checksum+=BigInt<BIT_COUNT>(symbol);
+      checksum+=BigInt(symbol);
       data.PutSymbol(symbol,i+1+CHECKSUM_COUNT,GRANULARITY); 
       bi/=base;
     }
