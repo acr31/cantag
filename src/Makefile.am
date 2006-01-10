@@ -36,6 +36,14 @@ libcantag_la_SOURCES += Socket.cc
 endif
 endif
 
+if HAVE_GMPXX_H
+if HAVELIB_GMP
+if HAVELIB_GMPXX
+libcantag_la_SOURCES += BigInt.cc
+endif
+endif
+endif
+
 # disabled (acr31 branch)
 #libcantag_la_SOURCES += algorithms/ValidateFitEllipse.cc algorithms/ValidateFitQuadTangle.cc algorithms/ValidateTransformQuadTangle.cc algorithms/ValidateDistortionCorrection.cc ImageOutputMechanism.cc
 
