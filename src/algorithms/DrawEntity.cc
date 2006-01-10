@@ -27,8 +27,8 @@
 namespace Cantag {
 
   bool DrawEntityImage::operator()(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const {    
-    for(int i=m_roi.minx;i<m_roi.maxx;++i) {
-      for(int j=m_roi.miny;j<m_roi.maxy;++j) {
+    for(float i=m_roi.minx;i<m_roi.maxx;++i) {
+      for(float j=m_roi.miny;j<m_roi.maxy;++j) {
 	m_image.DrawPixel(m_roi.ScaleX(i,m_image.GetWidth()),m_roi.ScaleY(j,m_image.GetHeight()),image.Sample(i,j));
       }
     }

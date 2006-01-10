@@ -45,9 +45,9 @@ namespace Cantag {
     float maxy;
 
     ROI(float pminx, float pmaxx, float pminy, float pmaxy) : minx(pminx), maxx(pmaxx), miny(pminy), maxy(pmaxy) {};
-    int ScaleX(int x, int imageWidth) const { return (x - minx) * imageWidth / (maxx-minx);}
+    int ScaleX(int x, int imageWidth) const { return (x - Round(minx)) * imageWidth / Round(maxx-minx);}
     int ScaleX(float x, int imageWidth) const { return Round((x - (float)minx) * (float)imageWidth / (float)(maxx-minx)); }
-    int ScaleY(int y, int imageHeight) const { return (y - miny) * imageHeight / (maxy-miny);}
+    int ScaleY(int y, int imageHeight) const { return (y - Round(miny)) * imageHeight / Round(maxy-miny);}
     int ScaleY(float y, int imageHeight) const { return Round((y - (float)miny) * (float)imageHeight / (float)(maxy-miny)); }
   };
 
