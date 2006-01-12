@@ -68,6 +68,11 @@ namespace Cantag {
   public:
     GLRenderWindow(int width,int height);
     virtual ~GLRenderWindow();
+    
+    /**
+     * Find the next allowable texture size which is greater than the argument
+     */
+    int FindNextTextureSize(int size) const;
   };
 }
 

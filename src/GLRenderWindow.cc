@@ -98,4 +98,15 @@ namespace Cantag {
     XCloseDisplay(m_display);
   }
 
+  int GLRenderWindow::FindNextTextureSize(int size) const {
+    // texture size must be of the form 2^n + 2
+    size -= 2;
+    int count = 0;
+    while(size) {
+      ++count;
+      size>>=1;
+    }
+    return (1 << count) + 2;    
+  }
+
 };

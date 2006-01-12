@@ -29,20 +29,54 @@ extern "C" {
 
 namespace Cantag {
 
-  GLOutputMechanism::GLOutputMechanism(int width, int height, const Camera& camera) : GLRenderWindow(width,height) {
+  GLOutputMechanism::GLOutputMechanism(int window_width, int window_height, 
+				       int image_width, int image_height) 
+    : GLRenderWindow(window_width,window_height),
+      m_image_width(image_width), m_image_height(image_height),
+      m_texture_width(FindNextTextureSize(image_width)), m_texture_height(FindNextTextureSize(image_height)),m_tmap(NULL)
+  {
     for(int i=0;i<9;++i) {
       m_displayListInitialised[i] = false;
     }
-    SetupCamera(camera);
-    InitialiseScene(camera);
+    SetupCamera();
+    InitialiseScene();
+    
+    // texture dimensions must be of the form: 2^n + 2
+    // we found the closest texture size bigger than our image - now we need to work out how much of the texture we use
+    m_texture_maxx = (GLfloat)m_image_width / (GLfloat)m_texture_width;
+    m_texture_maxy = (GLfloat)m_image_height / (GLfloat)m_texture_height;
+
+    InitialiseTexture();
   };
 
-  void GLOutputMechanism::SetupCamera(const Camera& camera) {
+  GLOutputMechanism::~GLOutputMechanism() {
+    if (m_tmap) {
+      GLuint ids[] = {m_textureid};
+      glDeleteTextures(1,ids);    
+      delete[] m_tmap;
+    }
+  }
+  
+  void GLOutputMechanism::InitialiseTexture() {
+    m_tmap = new GLubyte[m_texture_width*m_texture_height];
+    memset(m_tmap,255,m_texture_width*m_texture_height);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+    glGenTextures(1,&m_textureid);
+    glBindTexture(GL_TEXTURE_2D,m_textureid);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, m_texture_width, m_texture_height,
+		 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_tmap);
+  }
+
+  void GLOutputMechanism::SetupCamera() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     // fov in the y direction
-    float fov = 2.f * atan(camera.GetYScale()/ (float)m_height / 2.f) / M_PI * 180.f;
-    //    gluPerspective((GLfloat)fov, (GLfloat)camera.GetXScale()/(GLfloat)camera.GetYScale(),0,1000.0);
+    float fov = 2.f * atan(1.f / 2.f) / M_PI * 180.f;
     gluPerspective((GLfloat)fov,1,1,1000.0);
 
     // select the modelview matrix - transforms object co-ordinates to eye co-ordinates
@@ -67,7 +101,7 @@ namespace Cantag {
     glEnable(GL_LIGHTING);
   }
 
-  void GLOutputMechanism::InitialiseScene(const Camera& camera) {}
+  void GLOutputMechanism::InitialiseScene() {}
 
   void GLOutputMechanism::RenderModel(int display_list) {
     if (m_displayListInitialised[display_list]) {
@@ -202,11 +236,24 @@ namespace Cantag {
     }
   }
 
-  void GLOutputMechanism::Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) {
-    glRasterPos3f(-0.9999999,-0.9999999,2);
-    glPixelZoom( 1.0, -1.0 );
-    glDrawPixels(m_width,m_height,GL_LUMINANCE,GL_UNSIGNED_BYTE,image.GetContents());
+  void GLOutputMechanism::Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, bool reflect) {
+
+    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,image.GetWidth(),image.GetHeight(),GL_LUMINANCE,GL_UNSIGNED_BYTE,image.GetContents());
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    glBindTexture(GL_TEXTURE_2D, m_textureid);
+    
+    glBegin(GL_QUADS);
+    glTexCoord2f(reflect ? m_texture_maxx : 0.f, m_texture_maxy); glVertex3f(-1.f, 1.f, 1.f); 
+    glTexCoord2f(reflect ? 0.f : m_texture_maxx, m_texture_maxy); glVertex3f(1.f, 1.f, 1.f);
+    glTexCoord2f(reflect ? 0.f : m_texture_maxx, 0.f); glVertex3f(1.f, -1.f, 1.f);
+    glTexCoord2f(reflect ? m_texture_maxx : 0.f, 0.f); glVertex3f(-1.f, -1.f, 1.f);
+    glEnd();
+
+    glDisable(GL_TEXTURE_2D);
+
     glClear(GL_DEPTH_BUFFER_BIT);
+
   }
 
   void GLOutputMechanism::Draw(const Transform& t, int display_list) {

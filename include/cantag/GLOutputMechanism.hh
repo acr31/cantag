@@ -43,25 +43,36 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
-#include <GL/osmesa.h>
+//#include <GL/osmesa.h>
 
 #include <cantag/GLRenderWindow.hh>
-#include <cantag/Camera.hh>
 #include <cantag/Transform.hh>
 
 namespace Cantag {
 
   class GLOutputMechanism : protected GLRenderWindow {
   private:
+    int m_image_width;
+    int m_image_height;
+    int m_texture_width;
+    int m_texture_height;
     bool m_displayListInitialised[9];
-    void SetupCamera(const Camera& camera);
-    void InitialiseScene(const Camera& camera);
+    GLuint m_textureid;
+    GLubyte* m_tmap;
+    GLfloat m_texture_maxx;
+    GLfloat m_texture_maxy;
+
+    void SetupCamera();
+    void InitialiseScene();
+    void InitialiseTexture();
     void RenderModel(int display_list);
 
   public:
-    GLOutputMechanism(int width,int height,const Camera& camera);
+    GLOutputMechanism(int window_width,int window_height,
+		      int image_width, int image_height);
+    ~GLOutputMechanism();
     void Flush();
-    void Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image);
+    void Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, bool flip);
     void Draw(const Transform& t, int display_list);
 
     /**
