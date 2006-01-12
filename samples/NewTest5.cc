@@ -89,12 +89,12 @@ struct Setting {
   
 };
 
-struct InterpretTags : public Function<TL0,TL1(DecodeEntity<TestSquare::PayloadSize>)> {
-  std::map<CyclicBitSet<TestSquare::PayloadSize>,std::pair<option_t,Setting*> >& m_map;
+struct InterpretTags : public Function<TL0,TL1(DecodeEntity<TestSquare::MaxPayloadSize>)> {
+  std::map<CyclicBitSet<TestSquare::MaxPayloadSize>,std::pair<option_t,Setting*> >& m_map;
   int m_current;
-  InterpretTags(std::map<CyclicBitSet<TestSquare::PayloadSize>,std::pair<option_t,Setting*> >& map, int current) : m_map(map), m_current(current) {};
-  bool operator()(DecodeEntity<TestSquare::PayloadSize>& de) const {
-    CyclicBitSet<TestSquare::PayloadSize>& payload = (*(de.GetPayloads().begin()))->payload;
+  InterpretTags(std::map<CyclicBitSet<TestSquare::MaxPayloadSize>,std::pair<option_t,Setting*> >& map, int current) : m_map(map), m_current(current) {};
+  bool operator()(DecodeEntity<TestSquare::MaxPayloadSize>& de) const {
+    CyclicBitSet<TestSquare::MaxPayloadSize>& payload = (*(de.GetPayloads().begin()))->payload;
     if (m_map.find(payload) != m_map.end()) {
       std::pair<option_t,Setting*>& pair = m_map[payload];
       pair.second->current_option = pair.first;
@@ -104,13 +104,13 @@ struct InterpretTags : public Function<TL0,TL1(DecodeEntity<TestSquare::PayloadS
   }
 };
 
-struct DrawAll : public Function<TL1(TransformEntity),TL1(DecodeEntity<TestSquare::PayloadSize>)> {
+struct DrawAll : public Function<TL1(TransformEntity),TL1(DecodeEntity<TestSquare::MaxPayloadSize>)> {
   GLOutputMechanism& m_m;
-  const std::map<CyclicBitSet<TestSquare::PayloadSize>,std::pair<option_t,Setting*> >& m_map;
+  const std::map<CyclicBitSet<TestSquare::MaxPayloadSize>,std::pair<option_t,Setting*> >& m_map;
   mutable bool m_found;
-  DrawAll(GLOutputMechanism& m, const std::map<CyclicBitSet<TestSquare::PayloadSize>,std::pair<option_t,Setting*> >& map) : m_m(m),m_map(map), m_found(false) {};
-  bool operator()(const TransformEntity& te,DecodeEntity<TestSquare::PayloadSize>& de) const {
-    const CyclicBitSet<TestSquare::PayloadSize>& code = (*(de.GetPayloads().begin()))->payload;
+  DrawAll(GLOutputMechanism& m, const std::map<CyclicBitSet<TestSquare::MaxPayloadSize>,std::pair<option_t,Setting*> >& map) : m_m(m),m_map(map), m_found(false) {};
+  bool operator()(const TransformEntity& te,DecodeEntity<TestSquare::MaxPayloadSize>& de) const {
+    const CyclicBitSet<TestSquare::MaxPayloadSize>& code = (*(de.GetPayloads().begin()))->payload;
     if (m_map.find((*(de.GetPayloads().begin()))->payload) != m_map.end()) {
       Transform t(*te.GetPreferredTransform());
       m_m.Draw(t,8);
@@ -123,12 +123,12 @@ struct DrawAll : public Function<TL1(TransformEntity),TL1(DecodeEntity<TestSquar
   }
 };
 
-#define ADD(x,y,z) tag_map[CyclicBitSet<TestSquare::PayloadSize>( x )] = std::pair<option_t,Setting*>( y , z )
+#define ADD(x,y,z) tag_map[CyclicBitSet<TestSquare::MaxPayloadSize>( x )] = std::pair<option_t,Setting*>( y , z )
 
 int main(int argc,char* argv[]) {
 
   try {
-    std::map<CyclicBitSet<TestSquare::PayloadSize>,std::pair<option_t,Setting*> > tag_map;
+    std::map<CyclicBitSet<TestSquare::MaxPayloadSize>,std::pair<option_t,Setting*> > tag_map;
     Setting settings[] = { Setting(DISPLAYMODE_NORMAL),
 			   Setting(THRESHOLD_ADAPTIVE),
 			   Setting(DISTORTION_SIMPLE),
@@ -162,15 +162,17 @@ int main(int argc,char* argv[]) {
     ADD("000000000000000000000000000000010010",TRANSFORM_SPACESEARCH,&settings[TRANSFORM]);
 
     IEEE1394ImageSource fs("/dev/video1394",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );
+    //    V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> fs("/dev/video0",0);
     TestSquare tag;
     tag.SetContourRestrictions(25,10,10);
 
     Camera camera;
     //camera.SetIntrinsic(1284.33,1064.55,450.534, 321.569,0 );
-    camera.SetIntrinsic(640,480,320,240,0);
+    //    camera.SetIntrinsic(640,480,320,240,0);
+    camera.SetIntrinsic(924,576,462,288,0);
     camera.SetRadial(-0.147572438077408,0.112655792817613,0.f);
     
-    GLOutputMechanism g(640,480,camera);
+    GLOutputMechanism g(640,480,fs.GetWidth(),fs.GetHeight());
    
     Transform t;
     time_t current_time = time(NULL);
@@ -180,9 +182,14 @@ int main(int argc,char* argv[]) {
 
     while(true) {
       Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* i = fs.Next();
-
-      Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> output(*i);
-      output.ConvertScale(0.25,190); 
+      Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* output;
+      if (settings[DISPLAYMODE].current_option == DISPLAYMODE_THRESHOLD) {
+	output = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(i->GetWidth(),i->GetHeight());
+      }
+      else {
+	output = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(*i);
+	output->ConvertScale(0.25,190); 
+      }
 
       MonochromeImage m(i->GetWidth(),i->GetHeight());
 
@@ -195,15 +202,15 @@ int main(int argc,char* argv[]) {
       }
 
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_THRESHOLD) { 
-	Apply(m,DrawEntityMonochrome(output));
-	output.ConvertScale(0.25,190);
+	Apply(m,DrawEntityMonochrome(*output));
+	output->ConvertScale(0.25,190);
       }
 
-      Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<QuadTangle>,TransformEntity,DecodeEntity<TestSquare::PayloadSize>) > > tree;
+      Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<QuadTangle>,TransformEntity,DecodeEntity<TestSquare::MaxPayloadSize>) > > tree;
       Apply(m,tree,ContourFollowerTree(tag));
       
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_CONTOUR) { 
-	ApplyTree(tree,DrawEntityContour(output));
+	ApplyTree(tree,DrawEntityContour(*output));
       }
 
       if (settings[SHAPEFIT].current_option == SHAPEFIT_CONVEXHULL) {
@@ -220,7 +227,7 @@ int main(int argc,char* argv[]) {
       }
 
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_UNDISTORTEDCONTOUR) { 
-	ApplyTree(tree,DrawEntityContour(output,ROI(-0.5,0.5,-0.5,0.5)));
+	ApplyTree(tree,DrawEntityContour(*output,ROI(-0.5,0.5,-0.5,0.5)));
       }
       
       switch(settings[SHAPEFIT].current_option) {
@@ -239,7 +246,7 @@ int main(int argc,char* argv[]) {
       }
 
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_SHAPE) { 
-	ApplyTree(tree,DrawEntityShape<QuadTangle>(output,camera));
+	ApplyTree(tree,DrawEntityShape<QuadTangle>(*output,camera));
       }
       
       switch(settings[TRANSFORM].current_option) {
@@ -257,11 +264,12 @@ int main(int argc,char* argv[]) {
       ApplyTree(tree,Decode<TestSquare>());
 
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_TRANSFORM) { 
-	ApplyTree(tree,DrawEntityTransform(output,camera));
+	ApplyTree(tree,DrawEntityTransform(*output,camera));
       }
 
       ApplyTree(tree,TransformRotateToPayload(tag));
-      g.Draw(output);
+      g.Draw(*output,true);
+      delete output;
       ApplyTree(tree,DrawAll(g,tag_map));
 
       time_t new_time = time(NULL);
