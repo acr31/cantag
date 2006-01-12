@@ -43,6 +43,7 @@ namespace Cantag {
   private:
     size_t m_rotation;
     bool m_invalid;
+    size_t m_size;
 
   public:
     enum { Size = BIT_COUNT };
@@ -51,6 +52,14 @@ namespace Cantag {
     CyclicBitSet(unsigned long val);
     CyclicBitSet(const CyclicBitSet<BIT_COUNT>& o);
     CyclicBitSet(const char* asciibinary);
+
+    /**
+     * Limit this CyclicBitSet to storing only the given number of
+     * bits rather than maximum capacity
+     */
+    void SetSize(size_t size);
+
+    inline size_t GetSize() const {  return m_size; }
 
     void reset();
 
@@ -139,11 +148,13 @@ namespace Cantag {
     CyclicBitSet& operator>>(size_t shift) const;
 
     unsigned long to_ulong() const;
+
+    void ToStream(std::ostream& os) const;
     
   };
 
 
-  template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet(const char* code) : std::bitset<BIT_COUNT>(),m_rotation(0),m_invalid(false) {
+  template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet(const char* code) : std::bitset<BIT_COUNT>(),m_rotation(0),m_invalid(false),m_size(BIT_COUNT) {
     SetCode(code);
   }
 
@@ -170,23 +181,29 @@ namespace Cantag {
     }
   }
 
-  template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet() : std::bitset<BIT_COUNT>(), m_rotation(0), m_invalid(false) {};
+  template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet() : std::bitset<BIT_COUNT>(), m_rotation(0), m_invalid(false),m_size(BIT_COUNT) {};
 
-  template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet(unsigned long val) : std::bitset<BIT_COUNT>(val), m_rotation(0), m_invalid(false) {};
+  template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet(unsigned long val) : std::bitset<BIT_COUNT>(val), m_rotation(0), m_invalid(false), m_size(BIT_COUNT) {};
 
-  template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet(const CyclicBitSet<BIT_COUNT>& o) : std::bitset<BIT_COUNT>(o), m_rotation(o.m_rotation), m_invalid(false) {};
+  template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>::CyclicBitSet(const CyclicBitSet<BIT_COUNT>& o) : std::bitset<BIT_COUNT>(o), m_rotation(o.m_rotation), m_invalid(false),m_size(BIT_COUNT) {};
+
+  template<int BIT_COUNT> void CyclicBitSet<BIT_COUNT>::SetSize(size_t size) {
+    assert(size < BIT_COUNT);
+    m_size = size;
+  }
 
   template<int BIT_COUNT> void CyclicBitSet<BIT_COUNT>::reset() {
     std::bitset<BIT_COUNT>::reset();
   }
+
   template<int BIT_COUNT> void CyclicBitSet<BIT_COUNT>::RotateLeft(size_t count) {
     m_rotation += count;
-    m_rotation %= BIT_COUNT;
+    m_rotation %= m_size;
   }
 
   template<int BIT_COUNT> void CyclicBitSet<BIT_COUNT>::RotateRight(size_t count) {
     m_rotation -= count;
-    while (m_rotation < 0) m_rotation+=BIT_COUNT;
+    while (m_rotation < 0) m_rotation+=m_size;
   }
 
 
@@ -197,7 +214,7 @@ namespace Cantag {
 
   template<int BIT_COUNT> size_t CyclicBitSet<BIT_COUNT>::MinRotate(size_t n) {
     size_t minindex = 0;
-    for(size_t i=n;i<BIT_COUNT;i+=n) {
+    for(size_t i=n;i<m_size;i+=n) {
       if (LessRotate(i,minindex)) {
 	minindex=i;
       }
@@ -205,10 +222,11 @@ namespace Cantag {
     RotateLeft(minindex);
     return minindex/n;
   }
+
   template<int BIT_COUNT> bool CyclicBitSet<BIT_COUNT>::LessRotate(size_t rot1, size_t rot2) const {
-    for(size_t i=BIT_COUNT;i>0;i--) {
-      int rot1_index = (i-1+rot1) % BIT_COUNT;
-      int rot2_index = (i-1+rot2) % BIT_COUNT;
+    for(size_t i=m_size;i>0;i--) {
+      int rot1_index = (i-1+rot1) % m_size;
+      int rot2_index = (i-1+rot2) % m_size;
       if ( !(*this)[rot1_index] && (*this)[rot2_index] ) {
 	return true;
       }
@@ -220,7 +238,7 @@ namespace Cantag {
   }
 
   template<int BIT_COUNT> template<int SIZE>  bool CyclicBitSet<BIT_COUNT>::Equals(const CyclicBitSet<SIZE>& target) const {
-    for(int i=0;i<SIZE;i++) {
+    for(size_t i=0;i<target.GetSize();i++) {
       if (target[i] != (*this)[i]) {
 	return false;
       }
@@ -249,17 +267,17 @@ namespace Cantag {
 
 
   template<int BIT_COUNT> bool CyclicBitSet<BIT_COUNT>::operator[](size_t n) const {
-    return std::bitset<BIT_COUNT>::operator[]((n+m_rotation) % BIT_COUNT);
+    return std::bitset<BIT_COUNT>::operator[]((n+m_rotation) % m_size);
   }
 
 
   template<int BIT_COUNT> typename std::bitset<BIT_COUNT>::reference CyclicBitSet<BIT_COUNT>::operator[](size_t n) {
-    return std::bitset<BIT_COUNT>::operator[]((n+m_rotation) % BIT_COUNT);
+    return std::bitset<BIT_COUNT>::operator[]((n+m_rotation) % m_size);
   }
 
   template<int BIT_COUNT> bool CyclicBitSet<BIT_COUNT>::operator<(const CyclicBitSet<BIT_COUNT>& o) const {
 
-    for(unsigned int i=BIT_COUNT;i>0;i--) {
+    for(unsigned int i=m_size;i>0;i--) {
       if ( !(*this)[i-1] && o[i-1] ) {
 	return true;
       }
@@ -270,7 +288,7 @@ namespace Cantag {
     return false;
   }
   template<int BIT_COUNT> bool CyclicBitSet<BIT_COUNT>::operator==(const CyclicBitSet<BIT_COUNT>& o) const {
-    for(unsigned int i=0;i<BIT_COUNT;i++) {
+    for(unsigned int i=0;i<m_size;i++) {
       if ( (*this)[i] != o[i]) { 
 	return false;
       }
@@ -282,7 +300,7 @@ namespace Cantag {
   }
 
   template<int BIT_COUNT> CyclicBitSet<BIT_COUNT>& CyclicBitSet<BIT_COUNT>::operator<<=(size_t shift) {
-    for(unsigned int i=BIT_COUNT-shift;i<BIT_COUNT;i++) { 
+    for(unsigned int i=m_size-shift;i<m_size;i++) { 
       (*this)[i] = false;
     }
     RotateRight(shift);    
@@ -303,19 +321,31 @@ namespace Cantag {
     return CyclicBitSet<BIT_COUNT>(*this)>>=shift;
   }
 
+  /*
   template<int PAYLOAD_SIZE> std::ostream& operator<<(std::ostream& os, const CyclicBitSet<PAYLOAD_SIZE>& x) {
-    for(size_t i=0;i<PAYLOAD_SIZE;i++) {
-      os << x[PAYLOAD_SIZE-1-i];
+    for(size_t i=0;i<x.GetSize();i++) {
+      os << x[x.GetSize()-1-i];
     }
     return os;
   };
+  */
+
+  template<int BIT_COUNT> void CyclicBitSet<BIT_COUNT>::ToStream(std::ostream& os) const {
+    for(size_t i=0;i<m_size;i++) {
+      os << (*this)[m_size-1-i];
+    }
+  }
+
+  template<int BIT_COUNT> std::ostream& operator<<(std::ostream& os, const CyclicBitSet<BIT_COUNT> & x) { 
+    x.ToStream(os); 
+    return os; 
+  };
+
 
   template<int BIT_COUNT> unsigned long  CyclicBitSet<BIT_COUNT>::to_ulong() const {
     std::bitset<32> b;
-    for (int i=0; i<32; i++) b[i]=std::bitset<BIT_COUNT>::operator[]((i+m_rotation) % BIT_COUNT);
+    for (int i=0; i<32 || i<m_size; i++) b[i]=(*this)[i];
     return b.to_ulong();
   }
-
-
 }
 #endif//CYCLIC_BIT_SET
