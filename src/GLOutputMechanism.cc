@@ -76,7 +76,7 @@ namespace Cantag {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     // fov in the y direction
-    float fov = 2.f * atan(1.f / 2.f) / M_PI * 180.f;
+    float fov = 2.f * atan( 1.f / 2.f ) / M_PI * 180.f;
     gluPerspective((GLfloat)fov,1,1,1000.0);
 
     // select the modelview matrix - transforms object co-ordinates to eye co-ordinates
@@ -244,10 +244,10 @@ namespace Cantag {
     glBindTexture(GL_TEXTURE_2D, m_textureid);
     
     glBegin(GL_QUADS);
-    glTexCoord2f(reflect ? m_texture_maxx : 0.f, m_texture_maxy); glVertex3f(-1.f, 1.f, 1.f); 
-    glTexCoord2f(reflect ? 0.f : m_texture_maxx, m_texture_maxy); glVertex3f(1.f, 1.f, 1.f);
-    glTexCoord2f(reflect ? 0.f : m_texture_maxx, 0.f); glVertex3f(1.f, -1.f, 1.f);
-    glTexCoord2f(reflect ? m_texture_maxx : 0.f, 0.f); glVertex3f(-1.f, -1.f, 1.f);
+    glTexCoord2f(reflect ? m_texture_maxx : 0.f, m_texture_maxy); glVertex3f(-1.f, 1.f, 2.f); 
+    glTexCoord2f(reflect ? 0.f : m_texture_maxx, m_texture_maxy); glVertex3f(1.f, 1.f, 2.f);
+    glTexCoord2f(reflect ? 0.f : m_texture_maxx, 0.f); glVertex3f(1.f, -1.f, 2.f);
+    glTexCoord2f(reflect ? m_texture_maxx : 0.f, 0.f); glVertex3f(-1.f, -1.f, 2.f);
     glEnd();
 
     glDisable(GL_TEXTURE_2D);
@@ -256,7 +256,7 @@ namespace Cantag {
 
   }
 
-  void GLOutputMechanism::Draw(const Transform& t, int display_list) {
+  void GLOutputMechanism::Draw(const Transform& t, int display_list, bool reflect) {
     /*
       timeb current_time;
       ftime(&current_time);
@@ -267,12 +267,22 @@ namespace Cantag {
     */
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
+    if (reflect) {
+      GLfloat matrix2[] = { -1,0,0,0,
+			    0,1,0,0,
+			    0,0,1,0,
+			    0,0,0,1};
+      glMultMatrixf(matrix2);
+    }
+
     GLfloat matrix[] = { t[0],t[4],t[8],t[12],
     			 t[1],t[5],t[9],t[13],
 			 t[2],t[6],t[10],t[14],
 			 t[3],t[7],t[11],t[15] };
-    glMultMatrixf(matrix);    
-    //glRotatef(angle,0,0,1);
+    glMultMatrixf(matrix); 
+
+
+   //glRotatef(angle,0,0,1);
     RenderModel(display_list);
     glPopMatrix();
   }

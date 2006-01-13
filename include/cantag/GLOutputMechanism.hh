@@ -73,7 +73,7 @@ namespace Cantag {
     ~GLOutputMechanism();
     void Flush();
     void Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, bool flip);
-    void Draw(const Transform& t, int display_list);
+    void Draw(const Transform& t, int display_list, bool flip);
 
     /**
      * Draws the text given.  The co-ordinates are (x,y,1) => so 0.5 > x > -0.5, 0.5 > y > -0.5
