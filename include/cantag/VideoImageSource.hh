@@ -31,9 +31,10 @@
 #error This version has been configured without Movie (libavcodec) support
 #endif
 
-#include <ffmpeg/avcodec.h>
-#include <ffmpeg/avformat.h>
-
+extern "C" {
+# include <ffmpeg/avcodec.h>
+# include <ffmpeg/avformat.h>
+}
 #include <cantag/ImageSource.hh>
 
 namespace Cantag {
