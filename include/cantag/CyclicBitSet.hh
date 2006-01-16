@@ -342,9 +342,9 @@ namespace Cantag {
   };
 
 
-  template<int BIT_COUNT> unsigned long  CyclicBitSet<BIT_COUNT>::to_ulong() const {
+  template<int BIT_COUNT> unsigned long CyclicBitSet<BIT_COUNT>::to_ulong() const {
     std::bitset<32> b;
-    for (int i=0; i<32 || i<m_size; i++) b[i]=(*this)[i];
+    for (int i=0; i<32 && i<m_size; ++i) b[i]=(*this)[i];
     return b.to_ulong();
   }
 }
