@@ -72,6 +72,8 @@ namespace Cantag {
      * Find the next allowable texture size which is greater than the argument
      */
     int FindNextTextureSize(int size) const;
+
+    bool ServiceEventQueue();
   };
 }
 

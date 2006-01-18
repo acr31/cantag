@@ -62,7 +62,7 @@ namespace Cantag {
     XSetWindowAttributes swa;
     swa.colormap = m_colormap;
     swa.border_pixel = 0;
-    swa.event_mask = ExposureMask | ButtonPressMask | StructureNotifyMask;
+    swa.event_mask = ExposureMask | ButtonPressMask | StructureNotifyMask | KeyPressMask;
     m_window = XCreateWindow(m_display, RootWindow(m_display, m_visual->screen), 0, 0, width, height, 0, m_visual->depth,
 			     InputOutput, m_visual->visual, CWBorderPixel | CWColormap | CWEventMask, &swa);
     XSetStandardProperties(m_display, m_window, "Cantag GL", "Cantag GL", None, (char**)0, 0, NULL);
@@ -73,13 +73,20 @@ namespace Cantag {
     /* map the window to the screen */
     XMapWindow(m_display, m_window);
   
-     
+    ServiceEventQueue();
+
+  };
+
+  bool GLRenderWindow::ServiceEventQueue() {
     /* clear the event queue - which we ignore */
     XEvent event;
+    bool returnval = true;
     while (XPending(m_display)) { 
       XNextEvent(m_display, &event);
+      if (event.type == KeyPress && ((XKeyEvent*)&event)->keycode == 9) returnval = false;
     }
-  };
+    return returnval;
+  }
 
   GLRenderWindow::~GLRenderWindow() {
     // unbind the current context

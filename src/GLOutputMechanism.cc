@@ -304,6 +304,7 @@ namespace Cantag {
 
   void GLOutputMechanism::Flush() {
     glXSwapBuffers(m_display, m_window); /* buffer swap does implicit glFlush */  
+    if (!ServiceEventQueue()) exit(-1);
   }
 };
 
