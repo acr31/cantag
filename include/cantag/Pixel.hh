@@ -76,6 +76,9 @@ namespace Cantag {
     inline unsigned char intensity() const {return v1; }
   };
 
+#define COLOUR_BLACK Pixel<Pix::Fmt::Grey8>(0)
+#define COLOUR_WHITE Pixel<Pix::Fmt::Grey8>(255)
+
   template<> class Pixel<Pix::Fmt::YUV420> {
     friend class _PixelIterator<Pixel*,Pix::Fmt::YUV420>;
     friend class _PixelIterator<const Pixel*,Pix::Fmt::YUV420>;

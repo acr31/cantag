@@ -49,9 +49,6 @@
 #include <cmath>
 #include <cassert>
 
-#define COLOUR_BLACK ((unsigned char)0)
-#define COLOUR_WHITE ((unsigned char)255)
-
 namespace Cantag {
 
 

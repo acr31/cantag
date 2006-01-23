@@ -101,10 +101,10 @@ namespace Cantag {
       int u3 = Round(ubase);
       int v3 = Round(vbase + cell_size);
 
-      int colour = chosen->payload[ptr] ? COLOUR_BLACK : COLOUR_WHITE;
+      Pixel<Pix::Fmt::Grey8> colour = chosen->payload[ptr] ? COLOUR_BLACK : COLOUR_WHITE;
 
       // this one just draws a greyscale range starting at black and going to white
-      //int colour = (int)((float)ptr/(float)(SIZE*SIZE - (SIZE*SIZE % 2)) * 128)+128;
+      //Pixel<Pix::Fmt::Grey8> colour((int)((float)ptr/(float)(SIZE*SIZE - (SIZE*SIZE % 2)) * 128)+128);
 
       image.DrawFilledQuadTangle(u0,v0,
 				 u1,v1,
