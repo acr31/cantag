@@ -130,11 +130,11 @@ int main(int argc,char* argv[]) {
   try {
     std::map<CyclicBitSet<TestSquare::PayloadSize>,std::pair<option_t,Setting*> > tag_map;
     Setting settings[] = { Setting(DISPLAYMODE_NORMAL),
-			   Setting(THRESHOLD_ADAPTIVE),
-			   Setting(DISTORTION_SIMPLE),
+			   Setting(THRESHOLD_GLOBAL),
+			   Setting(DISTORTION_NONE),
 			   Setting(SHAPEFIT_CORNER),
-			   Setting(REGRESSION_ON),
-			   Setting(TRANSFORM_SPACESEARCH) };
+			   Setting(REGRESSION_OFF),
+			   Setting(TRANSFORM_PROJECTIVE) };
     
     ADD("000000000000000000000000000000000000",DISPLAYMODE_NORMAL,&settings[DISPLAYMODE]);
     ADD("000000000000000000000000000000000001",DISPLAYMODE_THRESHOLD,&settings[DISPLAYMODE]);
@@ -183,6 +183,7 @@ int main(int argc,char* argv[]) {
 
     while(true) {
       Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* i = fs.Next();
+
       Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* output;
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_THRESHOLD) {
 	output = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(i->GetWidth(),i->GetHeight());
@@ -353,6 +354,7 @@ int main(int argc,char* argv[]) {
       g.DrawText(0.39,0.47,fps_buf);
 
       g.Flush();
+      //      exit(-1);
     }  
   }
   catch (const char* exception) {
