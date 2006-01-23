@@ -91,7 +91,7 @@ namespace Cantag {
      * corners bound the straight lines which are invariant under
      * perspective transform.
      */
-    void Draw(std::vector<float>& points, int mid_points = 0) const;
+    void Draw(std::vector<float>& points, short mid_points = 0) const;
 
     inline float GetX0() const { return m_x0; }
     inline float GetY0() const { return m_y0; }
@@ -117,7 +117,7 @@ namespace Cantag {
   private:
     void swap(float *a, float *b);
     float find_angle(float x, float y, float cx, float cy);
-    void Interpolate(std::vector<float>& points, float start, float end, float steps, int index) const;
+    void Interpolate(std::vector<float>& points, float start, float end, float steps, short index) const;
 
   protected:
     inline void compute_central_point();
