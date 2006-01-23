@@ -161,7 +161,7 @@ namespace Cantag {
       std::cout << "Best Coeff is " << bestcoeff << std::endl;
       std::cout << "Scale row "<<i<< " by "<<(1/bestcoeff)<< std::endl;
 #endif
-      if (abs(bestcoeff-1.0) <= DBL_EPSILON) {
+      if (abs(bestcoeff-1.0) > DBL_EPSILON) {
 	scale_row(A,size,i,1/bestcoeff,i); // divide row i by bestcoeff
 	X[i]/=bestcoeff;
       }
@@ -247,7 +247,7 @@ namespace Cantag {
       std::cout << "Best Coeff is " << bestcoeff << std::endl;
       std::cout << "Scale row "<<i<< " by "<<(1/bestcoeff)<< std::endl;
 #endif
-      if (abs(bestcoeff-1.0) <= DBL_EPSILON) {
+      if (abs(bestcoeff-1.0) > DBL_EPSILON) {
 	scale_row(A,size,i,1/bestcoeff,i); // divide row i by bestcoeff
 	scale_row(B,cols,i,1/bestcoeff,0); // divide row i in B by bestcoeff - do the whole row
       }
