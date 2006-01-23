@@ -47,7 +47,7 @@ namespace Cantag {
       float nx = points[h[(i+1)%n]*2] - points[h[i]*2];
       float ny = points[h[(i+1)%n]*2+1] - points[h[i]*2+1];
       float ct = (lx*nx+ly*ny)/(sqrt(lx*lx+ly*ly)*sqrt(nx*nx+ny*ny));
-      if (fabs(ct) <0.98) angles.insert( std::pair<float,int>(fabs(ct),h[i]) );
+      if (abs(ct) <0.98f) angles.insert( std::pair<float,int>(abs(ct),h[i]) );
     }
 
     // If there aren't 4 vertices left, this can't be a quadtangle

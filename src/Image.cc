@@ -65,9 +65,9 @@ namespace Cantag {
 	  const PixRow<Pix::Fmt::BGR24> row = GetRow(y);
 	  PixRow<Pix::Fmt::BGR24>::const_iterator pixel=row.begin();
 	  for(unsigned int x=0;x<GetWidth();++x) {
-	    Magick::ColorRGB color((double)pixel.r()/255,
-				   (double)pixel.g()/255,
-				   (double)pixel.b()/255);
+	    Magick::ColorRGB color((double)pixel.r()/255.0,
+				   (double)pixel.g()/255.0,
+				   (double)pixel.b()/255.0);
 	    i.pixelColor(x,y,color);
 	    ++pixel;
 	  }

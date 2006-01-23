@@ -75,7 +75,7 @@ namespace Cantag {
   
     ServiceEventQueue();
 
-  };
+  }
 
   bool GLRenderWindow::ServiceEventQueue() {
     /* clear the event queue - which we ignore */
@@ -116,4 +116,4 @@ namespace Cantag {
     return (1 << count) + 2;    
   }
 
-};
+}

@@ -30,7 +30,7 @@ namespace Cantag {
 
   Transform::Transform() : m_confidence(0.0) {}
   
-  Transform::Transform(float confidence) : m_confidence(confidence) {};
+  Transform::Transform(float confidence) : m_confidence(confidence) {}
 
   Transform::Transform(float* transform, float confidence) : m_confidence(confidence) {
     for(int i=0;i<16;++i) {
@@ -83,7 +83,7 @@ namespace Cantag {
     float y0,y2,y1;
     
     float numerator = sqrt(z1*z1+z2*z2);
-    if (!std::isnan<float>(numerator) && numerator != 0.f) {
+    if (!std::isnan<float>(numerator) && abs(numerator) > FLT_EPSILON) {
       y0 = 0.f;
       y1 = -z2/numerator;
       y2 = z1/numerator;
@@ -419,16 +419,16 @@ namespace Cantag {
 	*phi=0.0;
 
 	float m0=m_transform[0], m5=m_transform[5], m10=m_transform[10];
-	if (m_transform[0]<-1) m0=-1.0;
-	if (m_transform[0]>1) m0=1.0;
-	if (m_transform[5]<-1) m5=-1.0;
-	if (m_transform[5]>1) m5=1.0;
-	if (m_transform[10]<-1) m10=-1.0;
-	if (m_transform[10]>1) m10=1.0;
+	if (m_transform[0]<-1.f) m0=-1.f;
+	if (m_transform[0]>1.f) m0=1.f;
+	if (m_transform[5]<-1.f) m5=-1.f;
+	if (m_transform[5]>1.f) m5=1.f;
+	if (m_transform[10]<-1.f) m10=-1.f;
+	if (m_transform[10]>1.f) m10=1.f;
 
-	float x = sqrt((m0+1.0)/2.0);
-	float y = sqrt((m5+1.0)/2.0);
-	float z = sqrt((m10+1.0)/2.0);
+	float x = sqrt((m0+1.f)/2.f);
+	float y = sqrt((m5+1.f)/2.f);
+	float z = sqrt((m10+1.f)/2.f);
 
 	int xx = x>0.0 ? 1:-1;
 	if (fabs(xx)<epsilon) xx=0;
@@ -468,9 +468,9 @@ namespace Cantag {
       }
     }
     else {
-      float s = (m_transform[0]+m_transform[5]+m_transform[10]-1.0)/2.0;
-      if (s>1.0) s=1.0;
-      if (s<-1.0) s=-1.0;
+      float s = (m_transform[0]+m_transform[5]+m_transform[10]-1.f)/2.f;
+      if (s>1.f) s=1.f;
+      if (s<-1.f) s=-1.f;
 
       *psi = acos(s);
       float nx = -(m_transform[6] - m_transform[9]);

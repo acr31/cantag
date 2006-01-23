@@ -40,9 +40,9 @@ namespace Cantag {
     m_intrinsic[0] = 1;    m_intrinsic[1] = 0;    m_intrinsic[2] = 0.5;  
     m_intrinsic[3] = 0;    m_intrinsic[4] = 1;    m_intrinsic[5] = 0.5;  
     m_intrinsic[6] = 0;    m_intrinsic[7] = 0;    m_intrinsic[8] = 1;  
-  };
+  }
 
-  Camera::~Camera() {};
+  Camera::~Camera() {}
 
   void Camera::SetExtrinsic(float extrinsic[16]) {
     for(int i=0;i<16;i++) {
@@ -107,19 +107,19 @@ namespace Cantag {
       // that has been done already
 
       // 1) Compute the distance from the principle point (now 0,0)
-      double rpwr2 = x*x + y*y;
-      double rpwr4 = rpwr2*rpwr2;
-      //double rpwr6 = rpwr4*rpwr2;
+      float rpwr2 = x*x + y*y;
+      float rpwr4 = rpwr2*rpwr2;
+      //float rpwr6 = rpwr4*rpwr2;
     
-      double radialcoeff = 1 + m_r2*rpwr2 + m_r4*rpwr4;// + m_r6*rpwr6;
+      float radialcoeff = 1 + m_r2*rpwr2 + m_r4*rpwr4;// + m_r6*rpwr6;
 
       // 2) Compute the tangential offset
-      double dxx = 0; //2*m_d1*x*y + m_d2*(rpwr2+2*x*x);
-      double dxy = 0; //m_d1*(rpwr2+2*y*y)+2*m_d2*x*y;
+      float dxx = 0; //2*m_d1*x*y + m_d2*(rpwr2+2*x*x);
+      float dxy = 0; //m_d1*(rpwr2+2*y*y)+2*m_d2*x*y;
 
       // 3) Compute the new values of x and y
-      double xd1 = radialcoeff*x+dxx;
-      double xd2 = radialcoeff*y+dxy;
+      float xd1 = radialcoeff*x+dxx;
+      float xd2 = radialcoeff*y+dxy;
 
       // 4) rescale and return to image co-ordinates
       points[i] = m_intrinsic[0]*(xd1+m_intrinsic[1]*xd2)+m_intrinsic[2];
@@ -142,19 +142,19 @@ namespace Cantag {
       // that has been done already
 
       // 1) Compute the distance from the principle point (now 0,0)
-      double rpwr2 = x*x + y*y;
-      double rpwr4 = rpwr2*rpwr2;
-      //    double rpwr6 = rpwr4*rpwr2;
+      float rpwr2 = x*x + y*y;
+      float rpwr4 = rpwr2*rpwr2;
+      //    float rpwr6 = rpwr4*rpwr2;
     
-      double radialcoeff = 1 + m_r2*rpwr2 + m_r4*rpwr4; // + m_r6*rpwr6;
+      float radialcoeff = 1 + m_r2*rpwr2 + m_r4*rpwr4; // + m_r6*rpwr6;
 
       // 2) Compute the tangential offset
-      double dxx = 0; //2*m_d1*x*y + m_d2*(rpwr2+2*x*x);
-      double dxy = 0; //m_d1*(rpwr2+2*y*y)+2*m_d2*x*y;
+      float dxx = 0; //2*m_d1*x*y + m_d2*(rpwr2+2*x*x);
+      float dxy = 0; //m_d1*(rpwr2+2*y*y)+2*m_d2*x*y;
 
       // 3) Compute the new values of x and y
-      double xd1 = radialcoeff*x+dxx;
-      double xd2 = radialcoeff*y+dxy;
+      float xd1 = radialcoeff*x+dxx;
+      float xd2 = radialcoeff*y+dxy;
 
       //  xd1 = x;
       //  xd2 = y;
@@ -179,19 +179,19 @@ namespace Cantag {
       points[i] /= m_intrinsic[0];
       points[i+1] /= m_intrinsic[4];
   
-      double x = points[i];
-      double y = points[i+1];
+      float x = points[i];
+      float y = points[i+1];
 
       // 1) Compute the distance from the principle point (now 0,0)
-      double rd2 = x*x + y*y;
+      float rd2 = x*x + y*y;
     
       float factor_num = m_r2*rd2 + m_r4*rd2*rd2 + m_r2*m_r2*rd2*rd2 + m_r4*m_r4*rd2*rd2*rd2*rd2 +2*m_r2*m_r4*rd2*rd2*rd2;
-      float factor_denom = 1 + 4*m_r2*rd2 + 6*m_r4*rd2*rd2;
+      float factor_denom = 1.f + 4*m_r2*rd2 + 6*m_r4*rd2*rd2;
     
     
       // 3) Compute the new values of x and y
-      double xd1 = x- x*factor_num/factor_denom;
-      double xd2 = y- y*factor_num/factor_denom;
+      float xd1 = x- x*factor_num/factor_denom;
+      float xd2 = y- y*factor_num/factor_denom;
     
       points[i] = xd1;
       points[i+1] = xd2;
@@ -212,19 +212,19 @@ namespace Cantag {
       points[i] /= m_intrinsic[0];
       points[i+1] /= m_intrinsic[4];
 
-      double x = points[i];
-      double y = points[i+1];
+      float x = points[i];
+      float y = points[i+1];
     
       // 1) Compute the distance from the principle point (now 0,0)
-      double rd2 = x*x + y*y;
+      float rd2 = x*x + y*y;
     
       float factor_num = m_r2*rd2 + m_r4*rd2*rd2 + m_r2*m_r2*rd2*rd2 + m_r4*m_r4*rd2*rd2*rd2*rd2 +2*m_r2*m_r4*rd2*rd2*rd2;
-      float factor_denom = 1 + 4*m_r2*rd2 + 6*m_r4*rd2*rd2;
+      float factor_denom = 1.f + 4*m_r2*rd2 + 6*m_r4*rd2*rd2;
     
     
       // 3) Compute the new values of x and y
-      double xd1 = x- x*factor_num/factor_denom;
-      double xd2 = y- y*factor_num/factor_denom;
+      float xd1 = x- x*factor_num/factor_denom;
+      float xd2 = y- y*factor_num/factor_denom;
 
       points[i] = xd1;
       points[i+1] = xd2;
@@ -264,8 +264,8 @@ namespace Cantag {
 	points[i] /= m_intrinsic[0];
 	points[i+1] /= m_intrinsic[4];
       
-	double x = points[i];
-	double y = points[i+1];
+	float x = points[i];
+	float y = points[i+1];
       
 	struct ParamsArray paramsarray;
 	paramsarray.k1 = m_r2;
@@ -295,7 +295,7 @@ namespace Cantag {
 	    break;      
 	  status = gsl_multimin_test_size(s->size,1e-3);
 	}  while (status == GSL_CONTINUE && iter < max_it); 
-	float l = gsl_vector_get(s->x,0);
+	float l = float(gsl_vector_get(s->x,0));
 	points[i] = x*l;
 	points[i+1] = y*l;
 
@@ -319,12 +319,12 @@ namespace Cantag {
    double Camera::_undistortfunc(const gsl_vector *v, void *params) {
     struct ParamsArray *p = (struct ParamsArray *) params;
 
-    float l = gsl_vector_get(v,0);
+    float l = float(gsl_vector_get(v,0));
     float x = p->x*l;
     float y = p->y*l;
     float r2 = x*x+y*y;
 
-    double radialcoeff = 1 + p->k1*r2 + p->k2*r2*r2;
+    float radialcoeff = 1 + p->k1*r2 + p->k2*r2*r2;
     x*=radialcoeff;
     y*=radialcoeff;
     return (x-p->x)*(x-p->x)+(y-p->y)*(y-p->y);
@@ -334,8 +334,8 @@ namespace Cantag {
 
   void Camera::UnDistortImage(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const {
     const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> source(image);
-    for(unsigned int i=0;i<image.GetHeight();i++) {
-      for(unsigned int j=0;j<image.GetWidth();j++) {
+    for(short i=0;i<image.GetHeight();i++) {
+      for(short j=0;j<image.GetWidth();j++) {
 	float points[] = {i,j};
 	points[0] -= m_intrinsic[2];
 	points[1] -= m_intrinsic[5];
@@ -350,9 +350,10 @@ namespace Cantag {
   void Camera::DrawEllipse(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Ellipse& ellipse) const {
     float x0 = (ellipse.GetX0()*m_intrinsic[0]) + m_intrinsic[2];
     float y0 = (ellipse.GetY0()*m_intrinsic[4]) + m_intrinsic[5];
-    float width = (ellipse.GetWidth()*m_intrinsic[0]);
-    float height = (ellipse.GetHeight()*m_intrinsic[4]);
-    image.DrawEllipse(x0,y0,width*2,height*2,ellipse.GetAngle(),COLOUR_BLACK,2);
+    float width = (ellipse.GetWidth()*m_intrinsic[0]) * 2.f;
+    float height = (ellipse.GetHeight()*m_intrinsic[4]) * 2.f;
+    float angle = ellipse.GetAngle();
+    image.DrawEllipse(x0,y0,width,height,angle,COLOUR_BLACK,2);
   }
 
   void Camera::Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Ellipse& ellipse) const {

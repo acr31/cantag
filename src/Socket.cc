@@ -76,7 +76,7 @@ namespace Cantag {
     unsigned int q2 = address[2];
     unsigned int q3 = address[3];
     char addressstring[16];
-    snprintf(addressstring,16,"%d.%d.%d.%d",q0,q1,q2,q3);
+    snprintf(addressstring,16,"%u.%u.%u.%u",q0,q1,q2,q3);
     // lookup address
 
     memset(s,0,sizeof(sockaddr_in));
@@ -282,7 +282,7 @@ namespace Cantag {
   SingleSocket::SingleSocket() : Socket(), m_accepted(NULL) {}
   SingleSocket::~SingleSocket() {
     if (m_accepted) delete m_accepted;
-  };
+  }
 
   void SingleSocket::Recv(unsigned char* buf, size_t len) {
 #ifdef SOCKET_DEBUG

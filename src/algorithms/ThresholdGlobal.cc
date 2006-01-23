@@ -25,5 +25,3 @@
 
 #include <cantag/algorithms/ThresholdGlobal.hh>
 
-namespace Cantag {
-};

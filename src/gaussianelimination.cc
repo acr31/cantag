@@ -24,7 +24,7 @@
 
 #include <cantag/Config.hh>
 #include <cantag/gaussianelimination.hh>
-#include <cmath>
+#include <cantag/SpeedMath.hh>
 
 #ifdef TEXT_DEBUG
 # include <iostream>
@@ -43,24 +43,24 @@ namespace Cantag {
    * Returns the column number (from zero) of the best co-efficient.
    */
   static inline int find_best_coefficient(double** vals, int size, int column, int startrow) {
-    double max = fabs(vals[startrow][column]);
+    double max = abs(vals[startrow][column]);
     int maxrow = startrow;
-    if (max == 1) { 
+    if (abs(max-1.0) <= DBL_EPSILON) { 
       return maxrow;
     }
     for(int i=startrow+1;i<size;i++) {
-      if (vals[i][column] == 1) {
+      if (abs(vals[i][column]-1.0) <= DBL_EPSILON) {
 	return i;
       }
     
-      if (fabs(vals[i][column]) > max) {
-	max = fabs(vals[i][column]);
+      if (abs(vals[i][column]) > max) {
+	max = abs(vals[i][column]);
 	maxrow = i;
       }    
     }
 
 #ifdef GAUSSIAN_DEBUG
-    if (max==0) {
+    if (abs(max) <= DBL_EPSILON)) {
       std::cout << "Singular matrix!" << std::endl;
     }
 #endif
@@ -80,13 +80,14 @@ namespace Cantag {
   /**
    * Swap the rows c1 and c2.
    */
-  static inline void swap_columns(double** vals, int c1, int c2,int size) {
-    for(int i=0;i<size;i++) {
-      double t = vals[i][c1];
-      vals[i][c1] = vals[i][c2];
-      vals[i][c2] = t;
-    }
-  }
+// UNUSED
+//  static inline void swap_columns(double** vals, int c1, int c2,int size) {
+//    for(int i=0;i<size;i++) {
+//      double t = vals[i][c1];
+//      vals[i][c1] = vals[i][c2];
+//      vals[i][c2] = t;
+//    }
+//  }
 
   /**
    * Scale the selected row (indexed from 0) in the given matrix.
@@ -160,7 +161,7 @@ namespace Cantag {
       std::cout << "Best Coeff is " << bestcoeff << std::endl;
       std::cout << "Scale row "<<i<< " by "<<(1/bestcoeff)<< std::endl;
 #endif
-      if (bestcoeff != 1) {
+      if (abs(bestcoeff-1.0) <= DBL_EPSILON) {
 	scale_row(A,size,i,1/bestcoeff,i); // divide row i by bestcoeff
 	X[i]/=bestcoeff;
       }
@@ -246,7 +247,7 @@ namespace Cantag {
       std::cout << "Best Coeff is " << bestcoeff << std::endl;
       std::cout << "Scale row "<<i<< " by "<<(1/bestcoeff)<< std::endl;
 #endif
-      if (bestcoeff != 1) {
+      if (abs(bestcoeff-1.0) <= DBL_EPSILON) {
 	scale_row(A,size,i,1/bestcoeff,i); // divide row i by bestcoeff
 	scale_row(B,cols,i,1/bestcoeff,0); // divide row i in B by bestcoeff - do the whole row
       }

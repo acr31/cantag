@@ -47,7 +47,7 @@ namespace Cantag {
     m_texture_maxy = (GLfloat)m_image_height / (GLfloat)m_texture_height;
 
     InitialiseTexture();
-  };
+  }
 
   GLOutputMechanism::~GLOutputMechanism() {
     if (m_tmap) {
@@ -76,7 +76,7 @@ namespace Cantag {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     // fov in the y direction
-    float fov = 2.f * atan( 1.f / 2.f ) / M_PI * 180.f;
+    float fov = 2.f * atan( 1.f / 2.f ) / FLT_PI * 180.f;
     gluPerspective((GLfloat)fov,1,1,1000.0);
 
     // select the modelview matrix - transforms object co-ordinates to eye co-ordinates
@@ -306,6 +306,6 @@ namespace Cantag {
     glXSwapBuffers(m_display, m_window); /* buffer swap does implicit glFlush */  
     if (!ServiceEventQueue()) exit(-1);
   }
-};
+}
 
 

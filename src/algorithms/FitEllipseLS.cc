@@ -106,7 +106,7 @@ namespace Cantag {
     | d e f |  = a(ei-hf) - b(di-fg) + c(dh-eg)
     | g h i | 
     */
-    float determinant = 
+    double determinant = 
       s3[0][0]*(s3[1][1]*s3[2][2]-s3[1][2]*s3[2][1]) -
       s3[1][0]*(s3[0][1]*s3[2][2]-s3[2][1]*s3[0][2]) +
       s3[2][0]*(s3[0][1]*s3[1][2]-s3[1][1]*s3[0][2]);
@@ -115,7 +115,7 @@ namespace Cantag {
     PROGRESS("Determinant of S3 " << determinant);
 #endif    
 
-    if (fabs(determinant) < 1e-20) { 
+    if (abs(determinant) <= DBL_EPSILON) { 
 #ifdef ELLIPSE_DEBUG
       PROGRESS("Determinant of S3 is zero - no fit");
 #endif

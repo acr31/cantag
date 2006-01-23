@@ -23,8 +23,8 @@
  *  three-by-three matrix.
  */
 
-#include <cantag/Config.hh>
-#include <cmath>
+#include <cantag/polysolve.hh>
+#include <cantag/SpeedMath.hh>
 #include <cassert>
 #include <stdio.h>
 
@@ -59,7 +59,7 @@ namespace Cantag {
     printf("R=%lf %lf\n",r[0],r[1]);
 #endif
     //find largest co-efficient first column as pivot point
-    if (fabs(A[0][0]) > fabs(A[1][0])) {
+    if (abs(A[0][0]) > abs(A[1][0])) {
       // y = (aj-ci)/(ad-cb)
       x[1] = (A[0][0]*r[1]-A[1][0]*r[0])/(A[0][0]*A[1][1]-A[1][0]*A[0][1]); 
       // x = (i-by)/a
@@ -102,9 +102,9 @@ namespace Cantag {
   
     double theta = acos(r/sqrt(q*q*q));
 
-    res[0] = -2*sqrt(q)*cos(theta/3)-a2/3;
-    res[1] = -2*sqrt(q)*cos((theta+2*M_PI)/3)-a2/3;
-    res[2] = -2*sqrt(q)*cos((theta-2*M_PI)/3)-a2/3;
+    res[0] = -2.0*sqrt(q)*cos(theta/3.0)-a2/3.0;
+    res[1] = -2.0*sqrt(q)*cos((theta+2.0*DBL_PI)/3.0)-a2/3.0;
+    res[2] = -2.0*sqrt(q)*cos((theta-2.0*DBL_PI)/3.0)-a2/3.0;
 
     return 1;
   }
@@ -151,7 +151,7 @@ namespace Cantag {
    * evals is the memory area used to store the resulting eigenvalues
    * return value indicates whether this function was successful
    */
-  bool eigensolve3(double M[3][3], double evects[3][3], double evals[3]) {
+  static bool eigensolve3(double M[3][3], double evects[3][3], double evals[3]) {
 
     //characteristic polynomial of m
     double x[4];
@@ -235,8 +235,8 @@ namespace Cantag {
       double minval=vectsacc[0];
       int minnum=0;
       for (int i=1;i<3;i++) {
-	if (vectsacc[i] != -1) { //i.e. vectsacc[i] doesn't represent a nan
-	  if (minval > vectsacc[i] || minval == -1) { //minval=-1 return if isnan=1
+	if (abs(vectsacc[i]+1) <= DBL_EPSILON) { //i.e. vectsacc[i] doesn't represent a nan
+	  if (minval > vectsacc[i] || abs(minval+1) <= DBL_EPSILON) { //minval=-1 return if isnan=1
 	    minval = vectsacc[i]; 
 	    minnum=i;
 	  }

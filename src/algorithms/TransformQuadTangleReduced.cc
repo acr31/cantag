@@ -90,7 +90,7 @@ namespace Cantag {
 
     solve_simultaneous(xvals,coeffs,result,6);
 
-    float c88 = 1.0 /sqrt(result[0]*result[0]+result[2]*result[2] + result[4]*result[4]);
+    float c88 = 1.f /sqrt(result[0]*result[0]+result[2]*result[2] + result[4]*result[4]);
 
     if (c88!=c88) return false;
 

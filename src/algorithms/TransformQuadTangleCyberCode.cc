@@ -138,15 +138,15 @@ namespace Cantag {
       transform[10] = n[2];
     
       // Add in the 4th col (offsets)
-      transform[3]  = p[8]*2.0/m;
-      transform[7]  = p[9]*2.0/m;
-      transform[11] = 2.0/m;
+      transform[3]  = p[8]*2.f/m;
+      transform[7]  = p[9]*2.f/m;
+      transform[11] = 2.f/m;
     
       // Add in the 4th row (homogeneous coords)
-      transform[12] = 0.0;
-      transform[13] = 0.0;
-      transform[14] = 0.0;
-      transform[15] = 1.0;
+      transform[12] = 0.f;
+      transform[13] = 0.f;
+      transform[14] = 0.f;
+      transform[15] = 1.f;
 
     //   std::cout << "Final trans=[" << transform[0] << "," << transform[1] << "," << transform[2] << ","<<transform[3] <<";"<< std::endl;
 //       std::cout << "             " << transform[4] << "," << transform[5] << "," << transform[6] << ","<<transform[7] <<";"<< std::endl;

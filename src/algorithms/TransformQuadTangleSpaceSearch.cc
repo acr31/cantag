@@ -140,7 +140,7 @@ namespace Cantag {
 
     T = gsl_multimin_fminimizer_nmsimplex;
     
-    float min=1e10;
+    float min=FLT_INFINITY;
     float min_theta=0.0, min_phi=0.0, min_psi=0.0, min_z=0.0;
 
     for (int i=0;i<num_start; i++) {
@@ -212,7 +212,7 @@ namespace Cantag {
       gsl_multimin_fminimizer_free (s);
     }
 
-    if (min!=1e10) {
+    if (min!=FLT_INFINITY) {
 	Transform* t = new Transform(p[8]*min_z, p[9]*min_z,min_z,
 				     min_theta, min_phi, min_psi, 1.0);
 	

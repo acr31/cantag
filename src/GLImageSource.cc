@@ -23,6 +23,7 @@
  */
 
 #include <cantag/GLImageSource.hh>
+#include <cantag/SpeedMath.hh>
 
 namespace Cantag {
 
@@ -40,7 +41,7 @@ namespace Cantag {
     // however, we'd actually like the system to report the distance as 1
     // so set the focabl length to d
 
-    float invd = tan(m_fov/2/180*M_PI)*2;
+    float invd = tan(m_fov/2.f/180.f*FLT_PI)*2.f;
 
     cam.SetIntrinsic(m_height/invd,m_height/invd,m_width/2,m_height/2,0);
 
@@ -158,7 +159,7 @@ namespace Cantag {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, source.GetHeight(),source.GetWidth(),
 		 0, GL_RGBA, GL_UNSIGNED_BYTE, tmap);    
      
-  };
+  }
 
   GLImageSource::~GLImageSource() {    
     for(std::vector<GLuint>::const_iterator i = m_textureid.begin();i!=m_textureid.end();++i) {
@@ -170,17 +171,17 @@ namespace Cantag {
     }
     OSMesaDestroyContext(m_ctx);
     free(m_buffer);
-  };
+  }
 
   Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* GLImageSource::Next() {
     return Next(0,0,-1,0,0,2);
-  };
+  }
 
 
   Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* GLImageSource::Next(float theta, float phi, 
 					   float centre_x, float centre_y, float centre_z, int texture_id, Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* overlay ) {
     
-    glClearColor(1.0,1.0,1.0,overlay ? 0.0 : 1.0);
+    glClearColor(1.0,1.0,1.0,overlay ? 0.f : 1.f);
     glShadeModel(GL_SMOOTH);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1.0,1.0,1.0);
@@ -353,7 +354,7 @@ namespace Cantag {
     exit(-1);
     */
     return overlay ? overlay : &m_glimage;
-  };
+  }
 
 
 }

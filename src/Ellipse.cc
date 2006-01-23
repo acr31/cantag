@@ -80,8 +80,8 @@ namespace Cantag {
      */
     //    float cosa = DCOS(8,m_angle_radians); // DCOS (later)
     //    float sina = DSIN(8,m_angle_radians); // DSINE (later)
-    float cosa = cos(m_angle_radians); // DCOS (later)
-    float sina = sin(m_angle_radians); // DSINE (later)
+    float cosa = cos(m_angle_radians);
+    float sina = sin(m_angle_radians);
     float a = m_width;
     float b = m_height;
     float currentAngle = 0.f;
@@ -90,7 +90,7 @@ namespace Cantag {
       float sint = sin(currentAngle); // DSINE (later)
       
       float pointsv[] = { m_x0 + a*cosa*cost - b*sina*sint,
-      			  m_y0 + a*sina*cost + b*cosa*sint };
+			  m_y0 + a*sina*cost + b*cosa*sint };
       
       points.push_back(pointsv[0]);
       points.push_back(pointsv[1]);
@@ -103,12 +103,12 @@ namespace Cantag {
      *  \todo{this is really naive because the ellipse equation is good
      *  up to a scale factor.  Lets fix it later...}
      */
-    return ((fabs(m_a - o.m_a) < COMPARETHRESH) &&
-	    (fabs(m_b - o.m_b) < COMPARETHRESH) &&
-	    (fabs(m_c - o.m_c) < COMPARETHRESH) &&
-	    (fabs(m_d - o.m_d) < COMPARETHRESH) &&
-	    (fabs(m_e - o.m_e) < COMPARETHRESH) &&
-	    (fabs(m_f - o.m_f) < COMPARETHRESH));
+    return ((abs(m_a - o.m_a) < COMPARETHRESH) &&
+	    (abs(m_b - o.m_b) < COMPARETHRESH) &&
+	    (abs(m_c - o.m_c) < COMPARETHRESH) &&
+	    (abs(m_d - o.m_d) < COMPARETHRESH) &&
+	    (abs(m_e - o.m_e) < COMPARETHRESH) &&
+	    (abs(m_f - o.m_f) < COMPARETHRESH));
   }
 
   bool Ellipse::CheckError(const std::vector<float>& points) const {
@@ -129,7 +129,7 @@ namespace Cantag {
       float x = *i;
       ++i;
       float y = *i;
-      float dist = fabs(m_a*x*x+m_b*x*y+m_c*y*y+m_d*x+m_e*y+m_f);
+      float dist = abs(m_a*x*x+m_b*x*y+m_c*y*y+m_d*x+m_e*y+m_f);
       if (dist > maxdist) { maxdist = dist; }
       total+= dist;
     }
@@ -147,8 +147,8 @@ namespace Cantag {
   float Ellipse::GetErrorGradient(const std::vector<float>& points) const {
     // calculate the algebraic distance inversly weighted by the
     // gradient
-    float total=0;
-    float maxdist = 0;
+    float total=0.f;
+    float maxdist = 0.f;
 
     for (std::vector<float>::const_iterator i = points.begin();
 	 i != points.end();
@@ -156,7 +156,7 @@ namespace Cantag {
       float x = *i;
       ++i;
       float y = *i;
-      float dist = fabs(m_a*x*x+m_b*x*y+m_c*y*y+m_d*x+m_e*y+m_f);
+      float dist = abs(m_a*x*x+m_b*x*y+m_c*y*y+m_d*x+m_e*y+m_f);
     
       float dx = 2*m_a*x+m_b*y+m_d;
       float dy = m_b*x+2*m_c*y+m_e;
@@ -175,14 +175,14 @@ namespace Cantag {
 #ifdef MAXDISTANCE
     return maxdist;
 #else
-    return total/points.size();
+    return total/(float)points.size();
 #endif
   }
 
   float Ellipse::GetErrorNakagawa(const std::vector<float>& points) const {
   
-    float total=0;
-    float max_dist =0 ;
+    float total=0.f;
+    float max_dist =0.f;
     for (std::vector<float>::const_iterator i = points.begin();
 	 i != points.end();
 	 ++i) {  
@@ -223,7 +223,7 @@ namespace Cantag {
 	iy = y0 - a*b*k/rt;
       }
     
-      float d = fabs((ix-xi)*(ix-xi) + (iy-yi)*(iy-yi));
+      float d = abs((ix-xi)*(ix-xi) + (iy-yi)*(iy-yi));
       if (d > max_dist) { max_dist = d; }
       total+=d;
     }
@@ -235,7 +235,7 @@ namespace Cantag {
 #ifdef MAXDISTANCE
     return max_dist;
 #else
-    return total/points.size();
+    return total/(float)points.size();
 #endif
   }
 
@@ -244,8 +244,8 @@ namespace Cantag {
     // intersecting the ellipse at Ij.  The lengths of the bisected
     // portions of the ray mj and nj are determined
 
-    float total=0;
-    float max_dist = 0;
+    float total=0.f;
+    float max_dist = 0.f;
     for (std::vector<float>::const_iterator i = points.begin();
 	 i != points.end();
 	 ) {  
@@ -292,7 +292,7 @@ namespace Cantag {
       float n = sqrt((ix-xi)*(ix-xi)+(iy-yi)*(iy-yi));
       float q = m_a*xi*xi+m_b*xi*yi+m_c*yi*yi+m_d*xi+m_e*yi+m_f;
 
-      float dist =  fabs(m*(1+ n/2/a)/(1+ n/2/m)*q);
+      float dist =  abs(m*(1+ n/2/a)/(1+ n/2/m)*q);
       if (dist > max_dist) { max_dist = dist; }
       total += dist;
     }
@@ -304,13 +304,13 @@ namespace Cantag {
 #ifdef MAXDISTANCE
     return max_dist;
 #else
-    return total/points.size();
+    return total/(float)points.size();
 #endif
   }
 
   float Ellipse::GetErrorSafaeeRad2(const std::vector<float>& points) const {
-    float total=0;
-    float max_dist = 0;
+    float total=0.f;
+    float max_dist = 0.f;
     for (std::vector<float>::const_iterator i = points.begin();
 	 i != points.end();
 	 ++i) {  
@@ -356,7 +356,7 @@ namespace Cantag {
       float m = sqrt((x0-ix)*(x0-ix)+(y0-iy)*(y0-iy));
       float q = m_a*xi*xi+m_b*xi*yi+m_c*yi*yi+m_d*xi+m_e*yi+m_f;
 
-      float dist = fabs(m*q);
+      float dist = abs(m*q);
 
       if (dist > max_dist) { max_dist = dist; }
       total += dist;
@@ -366,9 +366,9 @@ namespace Cantag {
     PROGRESS("Total error from SafaeeRad2 Method is "<< total/points.size()<< " maximimum distance was " << max_dist);
 #endif
 #ifdef MAXDISTANCE
-    return max_dist;
+    return (float)max_dist;
 #else
-    return total/points.size();
+    return (float)total/(float)points.size();
 #endif
   }
 
@@ -385,7 +385,7 @@ namespace Cantag {
       a=b;
       b=swap;
     
-      theta=M_PI/2-theta;
+      theta=FLT_PI/2.f-theta;
     }
 
     float c = sqrt(a*a-b*b);
@@ -398,8 +398,8 @@ namespace Cantag {
 
     float modf1_f2 = sqrt( (f1x-f2x)*(f1x-f2x) + (f1y-f2y)*(f1y-f2y) );
 
-    float total =0;
-    float max_dist =0 ;
+    float total =0.0;
+    float max_dist =0.0 ;
     for (std::vector<float>::const_iterator i = points.begin();
 	 i != points.end();
 	 ++i) {  
@@ -407,10 +407,13 @@ namespace Cantag {
       ++i;
       float y = *i;
 
-      float aest = 0.5 * (sqrt( (x-f1x)*(x-f1x) + (y-f1y)*(y-f1y) ) + sqrt( (x-f2x)*(x-f2x) + (y-f2y)*(y-f2y)));
+      float temp = sqrt( (x-f1x)*(x-f1x) + (y-f1y)*(y-f1y) );
+      float temp2 = sqrt( (x-f2x)*(x-f2x) + (y-f2y)*(y-f2y) );
+
+      float aest = 0.5f * ( temp + temp2 );
       float best = sqrt(aest*aest - a*a + b*b);
 
-      float dest = 0.5*(aest - a + best - b);
+      float dest = 0.5f *(aest - a + best - b);
 
       float ctilde = sqrt( (a+dest)*(a+dest) - (b+dest)*(b+dest) );
 
@@ -420,9 +423,11 @@ namespace Cantag {
       float f2xtilde = (f1x + f2x)/2-ctilde*(f1x-f2x)/modf1_f2;
       float f2ytilde = (f1y + f2y)/2-ctilde*(f1y-f2y)/modf1_f2;
 
-      float atilde = 0.5*(sqrt( (x-f1xtilde)*(x-f1xtilde) + (y-f1ytilde)*(y-f1ytilde) ) + sqrt( (x-f2xtilde)*(x-f2xtilde) + (y-f2ytilde)*(y-f2ytilde) ));
+      float temp4 = sqrt( (x-f1xtilde)*(x-f1xtilde) + (y-f1ytilde)*(y-f1ytilde) );
+      float temp5 = sqrt( (x-f2xtilde)*(x-f2xtilde) + (y-f2ytilde)*(y-f2ytilde) );
+      float atilde = 0.5f * ( temp4 + temp5 );
 
-      float dist = fabs(atilde - a);
+      float dist = abs(atilde - a);
     
       if (dist > max_dist) { max_dist = dist; }
       total += dist;
@@ -434,22 +439,22 @@ namespace Cantag {
 #ifdef MAXDISTANCE
     return max_dist;
 #else
-    return total/points.size();
+    return total/(float)points.size();
 #endif
   }
 
   void Ellipse::Compose() {
-    float x0 = GetX0();
-    float y0 = GetY0();
-    float alpha1sq = GetWidth()*GetWidth();
-    float alpha2sq = GetHeight()*GetHeight();
+    float x0 = m_x0;
+    float y0 = m_y0;
+    float alpha1sq = m_width*m_width;
+    float alpha2sq = m_height*m_height;
 
-    float angle = GetAngle();
+    float angle = m_angle_radians;
 
     //    float c = DCOS(8,angle); // DCOS
     //    float s = DSIN(8,angle); // DSINE
-    float c = cos(angle); // DCOS
-    float s = sin(angle); // DSINE
+    float c = (float)cos(angle); // DCOS
+    float s = (float)sin(angle); // DSINE
   
     m_a = c*c/alpha1sq + s*s/alpha2sq;
     m_b = 2*c*s*(1/alpha1sq - 1/alpha2sq);
@@ -462,12 +467,12 @@ namespace Cantag {
 
 
   void Ellipse::Decompose() {
-    double a = GetA();
-    double b = GetB();
-    double c = GetC();
-    double d = GetD();
-    double e = GetE();
-    double f = GetF();
+    float a = GetA();
+    float b = GetB();
+    float c = GetC();
+    float d = GetD();
+    float e = GetE();
+    float f = GetF();
     
 #ifdef DECOMPOSE_DEBUG
     PROGRESS("a,b,c,d,e,f = " << a << " " << b << " " << c << " " << d << " " << e << " " << f);
@@ -486,20 +491,15 @@ namespace Cantag {
 #endif
     }
 
-    double disc = b*b - 4*a*c;
+    float disc = b*b - 4*a*c;
 
-    m_x0 = (2*c*d - b*e) / disc;
-    m_y0 = (2*a*e - b*d) / disc;
+    float x0 = (2*c*d - b*e) / disc;
+    float y0 = (2*a*e - b*d) / disc;
 
-#ifdef DECOMPOSE_DEBUG
-    PROGRESS("X= " << m_x0);
-    PROGRESS("Y= " << m_y0);
-#endif
-  
-    double tmproot = sqrt( (a-c)*(a-c) + b*b );
-    double lambda1 = ((a+c) - tmproot)/2;
-    double lambda2 = ((a+c) + tmproot)/2;
-    double lambda1t = lambda1;
+    float tmproot = sqrt( (a-c)*(a-c) + b*b );
+    float lambda1 = ((a+c) - tmproot)/2;
+    float lambda2 = ((a+c) + tmproot)/2;
+    float lambda1t = lambda1;
     if (lambda1 < lambda2) {
       lambda1t = lambda2;
       lambda2 =lambda1;
@@ -514,7 +514,7 @@ namespace Cantag {
     PROGRESS("lambda2= " << lambda2);
 #endif
   
-    double scale_factor = sqrt( -f + a*m_x0*m_x0 + b*m_x0*m_y0 + c*m_y0*m_y0);
+    float scale_factor = sqrt( -f + a*x0*x0 + b*x0*y0 + c*y0*y0);
 
 #ifdef DECOMPOSE_DEBUG
     PROGRESS("scale= " << scale_factor);
@@ -522,23 +522,21 @@ namespace Cantag {
   
     m_width = lambda1 * scale_factor;
     m_height = lambda2 * scale_factor;
-    
-    //  m_width = lambda1;
-    //m_height = lambda2;
+    m_x0 = x0;
+    m_y0 = y0;
 
+    if (abs(m_width - m_height) <= FLT_EPSILON) {
+      // obviously the angle is undefined if we have a circle
+      m_angle_radians = 0.f;
+    }
+    else {
+      m_angle_radians = atan( -(a-lambda1t*scale_factor)/(0.5f*b) ); // DATAN
+    }
 #ifdef DECOMPOSE_DEBUG
     PROGRESS("width= " << m_width);
     PROGRESS("height= " <<m_height);
-#endif
-
-    if (m_width == m_height) {
-      // obviously the angle is undefined if we have a circle
-      m_angle_radians = 0;
-    }
-    else {
-      m_angle_radians = atan( -(a-lambda1t*scale_factor)/(0.5*b) ); // DATAN
-    }
-#ifdef DECOMPOSE_DEBUG
+    PROGRESS("X= " << m_x0);
+    PROGRESS("Y= " << m_y0);
     PROGRESS("angle= " << m_angle_radians);
 #endif
   

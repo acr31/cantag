@@ -50,7 +50,7 @@ namespace Cantag {
       const float y0 = m_roi.ScaleY(contour.GetPoints()[i+1],m_image.GetHeight());
       const float x1 = m_roi.ScaleX(contour.GetPoints()[(i+2) % contour.GetPoints().size()],m_image.GetWidth());
       const float y1 = m_roi.ScaleY(contour.GetPoints()[(i+3) % contour.GetPoints().size()],m_image.GetHeight());
-      m_image.DrawLine(x0,y0,x1,y1,0,1);
+      m_image.DrawLine(x0,y0,x1,y1,COLOUR_BLACK,1);
     }
     return true;
   }
@@ -70,14 +70,14 @@ namespace Cantag {
 			   (int)m_roi.ScaleX(pts[2],m_image.GetWidth()),(int)m_roi.ScaleY(pts[3],m_image.GetHeight()),
 			   (int)m_roi.ScaleX(pts[4],m_image.GetWidth()),(int)m_roi.ScaleY(pts[5],m_image.GetHeight()),
 			   (int)m_roi.ScaleX(pts[6],m_image.GetWidth()),(int)m_roi.ScaleY(pts[7],m_image.GetHeight()),
-			   0,1);
+			   COLOUR_BLACK,1);
     
     m_image.DrawLine((int)m_roi.ScaleX(pts[8],m_image.GetWidth()),(int)m_roi.ScaleY(pts[9],m_image.GetHeight()),
 		     (int)m_roi.ScaleX(pts[10],m_image.GetWidth()),(int)m_roi.ScaleY(pts[11],m_image.GetHeight()),
-		     0,1);
+		     COLOUR_BLACK,1);
     m_image.DrawLine((int)m_roi.ScaleX(pts[8],m_image.GetWidth()),(int)m_roi.ScaleY(pts[9],m_image.GetHeight()),
 		     (int)m_roi.ScaleX(pts[12],m_image.GetWidth()),(int)m_roi.ScaleY(pts[13],m_image.GetHeight()),
-		     0,1);
+		     COLOUR_BLACK,1);
 		     
     return true;    
   }

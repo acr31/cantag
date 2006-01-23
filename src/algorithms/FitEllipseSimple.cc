@@ -30,8 +30,8 @@ namespace Cantag {
     const std::vector<float>& points = contour.GetPoints();
     if (points.size()/2 < 6) return false;
 
-    float centrex = 0;
-    float centrey = 0;
+    float centrex = 0.f;
+    float centrey = 0.f;
     int count = 0;
     for(std::vector<float>::const_iterator i = points.begin(); i!= points.end(); ++i) {
       centrex += *i;
@@ -42,13 +42,11 @@ namespace Cantag {
     centrex/=count;
     centrey/=count;
 
-    float majorx = -1;
-    float majory = -1;
-    float majorlen = 0;
+    float majorx = -1.f;
+    float majory = -1.f;
+    float majorlen = 0.f;
     
-    float minorx = -1;
-    float minory = -1;
-    float minorlen = 1e10;
+    float minorlen = FLT_INFINITY;
 
     for(std::vector<float>::const_iterator i = points.begin(); i!= points.end(); ++i) {
       float x = *i;
@@ -62,14 +60,13 @@ namespace Cantag {
       }
       
       if (distsq < minorlen) {
-	minorx = x;
-	minory = y;
 	minorlen = distsq;
       }
     }
-
+    
+    // check that we've set the values
     assert(majorlen != 0);
-    assert(minorlen != 1e10);
+    assert(minorlen != FLT_INFINITY);
 
     majorlen = sqrt(majorlen);
     minorlen = sqrt(minorlen);

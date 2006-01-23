@@ -29,7 +29,6 @@
 namespace Cantag {
 
   bool TransformQuadTangleProjective::operator()(const ShapeEntity<QuadTangle>& shape, TransformEntity& dest) const {
-    
     const QuadTangle& quadtangle = *(shape.GetShape());
 
     // see the header file for a full explanation of what's going on here
@@ -144,10 +143,10 @@ namespace Cantag {
     Transform& transform = *t;
 
     
-    transform[0] = result[0]; transform[1] = result[1]; transform[2] = final[0];  transform[3] = (result[0]+result[1])+result[2]*2;
-    transform[4] = result[3]; transform[5] = result[4]; transform[6] = final[1];  transform[7] = (result[3]+result[4])+result[5]*2;
-    transform[8] = result[6]; transform[9] = result[7]; transform[10] = final[2]; transform[11] = (result[6]+result[7])+c8*2;
-    transform[12] = 0;          transform[13] = 0;          transform[14] = 0;  transform[15] = 1;
+    transform[0] = float(result[0]); transform[1] = float(result[1]); transform[2] = float(final[0]);  transform[3] = float((result[0]+result[1])+result[2]*2.f);
+    transform[4] = float(result[3]); transform[5] = float(result[4]); transform[6] = float(final[1]);  transform[7] = float((result[3]+result[4])+result[5]*2.f);
+    transform[8] = float(result[6]); transform[9] = float(result[7]); transform[10] = float(final[2]); transform[11] = float((result[6]+result[7])+c8*2.f);
+    transform[12] = 0.f;          transform[13] = 0.f;          transform[14] = 0.f;  transform[15] = 1.f;
 
 #ifdef PROJECTIVE_TRANSFORM_DEBUG
     PROGRESS("Final trans=[" << transform[0] << "," << transform[1] << "," << transform[2] << ","<<transform[3] <<";");

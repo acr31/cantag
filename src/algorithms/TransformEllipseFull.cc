@@ -126,7 +126,7 @@ namespace Cantag {
     }
 
     // make sure that our eigenvectors do not include any reflections
-    float determinant = 
+    double determinant = 
       eigvects[0]*eigvects[4]*eigvects[8]
       - eigvects[0]*eigvects[5]*eigvects[7]
       - eigvects[1]*eigvects[3]*eigvects[8] 
@@ -275,8 +275,8 @@ namespace Cantag {
 	(*t1)[row*4+col] = 0;
 	(*t2)[row*4+col] = 0;
 	for(int k=0;k<4;k++) {
-	  (*t1)[row*4+col] += r1[row*4+k] * rtotc1[k*4+col];
-	  (*t2)[row*4+col] += r1[row*4+k] * rtotc2[k*4+col];
+	  (*t1)[row*4+col] += float(r1[row*4+k] * rtotc1[k*4+col]);
+	  (*t2)[row*4+col] += float(r1[row*4+k] * rtotc2[k*4+col]);
 	}
       }
     }

@@ -49,7 +49,7 @@ namespace Cantag {
 	iy=V[i+1];
 	index=i;
       }
-      else if (V[i]==ix && V[i+1]>iy) {
+      else if (abs(V[i]-ix) <= FLT_EPSILON && V[i+1]>iy) {
 	ix=V[i];
 	iy=V[i+1];
 	index=i;
@@ -75,16 +75,16 @@ namespace Cantag {
 	if (y<=0) q=1;
 
 	float val=y/x;
-	if (x==0.0) val=1e10;
+	if (abs(x) <= FLT_EPSILON) val=1e10f;
 	std::map<float,int >::const_iterator ci = quadrants[q].find(val);
-	if (ci==quadrants[q].end()) {quadrants[q][val]=i/2;}
+	if (ci==quadrants[q].end()) {quadrants[q][val]=i/2.f;}
 	else {
 	  int idx = ci->second;
 	  float x1=V[i]-ix;
 	  float y1=V[i+1]-iy;
 	  float x2=V[2*idx]-ix;
 	  float y2=V[2*idx+1]-iy;
-	  if ((x1*x1+y1*y1) > (x2*x2+y2*y2)) quadrants[q][val]=i/2;
+	  if ((x1*x1+y1*y1) > (x2*x2+y2*y2)) quadrants[q][val]=i/2.f;
 	}
       }
     }
@@ -179,5 +179,5 @@ namespace Cantag {
 
     return true;
 
-  };
+  }
 }

@@ -79,34 +79,35 @@ namespace Cantag {
       camera.DrawQuadTangle(image,*this);
   }
 
-  void QuadTangle::Interpolate(std::vector<float>& points, float start, float end, float index, int steps) const {
-    points.push_back( start + index * (end-start)/(float)steps );
+  void QuadTangle::Interpolate(std::vector<float>& points, float start, float end, float index, short steps) const {
+    float val = start + index * (end-start)/(float)steps;
+    points.push_back( val );
   }
   
-  void QuadTangle::Draw(std::vector<float>& points, int steps) const {
+  void QuadTangle::Draw(std::vector<float>& points, short steps) const {
     points.push_back(m_x0); points.push_back(m_y0);
-    for(int i=1;i<steps;++i) {
+    for(short i=1;i<steps;++i) {
       Interpolate(points,m_x0,m_x1,i,steps);
       Interpolate(points,m_y0,m_y1,i,steps);
     }
     points.push_back(m_x1); points.push_back(m_y1);
-    for(int i=1;i<steps;++i) {
+    for(short i=1;i<steps;++i) {
       Interpolate(points,m_x1,m_x2,i,steps);
       Interpolate(points,m_y1,m_y2,i,steps);
     }
     points.push_back(m_x2); points.push_back(m_y2);
-    for(int i=1;i<steps;++i) {
+    for(short i=1;i<steps;++i) {
       Interpolate(points,m_x2,m_x3,i,steps);
       Interpolate(points,m_y2,m_y3,i,steps);
     }
     points.push_back(m_x3); points.push_back(m_y3);
-    for(int i=1;i<steps;++i) {
+    for(short i=1;i<steps;++i) {
       Interpolate(points,m_x3,m_x0,i,steps);
       Interpolate(points,m_y3,m_y0,i,steps);
     }
   }
 
-  float dist(float x0, float y0, float x1, float y1) {
+  static float dist(float x0, float y0, float x1, float y1) {
     return sqrt( (x0-x1)*(x0-x1) + (y0-y1)*(y0-y1) );
   }
 
@@ -175,16 +176,16 @@ namespace Cantag {
 
   float QuadTangle::find_angle(float x, float y, float cx, float cy) {
     if ((x >= cx) && (y >= cy)) {
-      return M_PI/2+ atan( (y-cy) / (x-cx) );
+      return FLT_PI/2.f+ atan( (y-cy) / (x-cx) );
     }
     else if ((x >= cx) && (y < cy)) {
       return atan( (cy-y) / (x-cx) );
     }
     else if ((x < cx) && (y < cy)) {
-      return 3*M_PI/2 + atan ( (cy-y) / (cx-x) );
+      return 3*FLT_PI/2.f + atan ( (cy-y) / (cx-x) );
     }
     else if ((x < cx) && (y >= cy)) {
-      return M_PI + atan( (y-cy) / (cx-x));
+      return FLT_PI + atan( (y-cy) / (cx-x));
     }
     assert(false);
     return 0.f; // to get rid of a warning from ICC
@@ -214,10 +215,10 @@ namespace Cantag {
 
     if (z<0.0) {
       // Order is acw - fix it!
-      double x0=m_x0, y0=m_y0; int index_0 = m_index_0;
-      double x1=m_x1, y1=m_y1; int index_1 = m_index_1;
-      double x2=m_x2, y2=m_y2; int index_2 = m_index_2;
-      double x3=m_x3, y3=m_y3; int index_3 = m_index_3;
+      float x0=m_x0, y0=m_y0; int index_0 = m_index_0;
+      float x1=m_x1, y1=m_y1; int index_1 = m_index_1;
+      float x2=m_x2, y2=m_y2; int index_2 = m_index_2;
+      float x3=m_x3, y3=m_y3; int index_3 = m_index_3;
 
       m_x0= x0; m_y0=y0; m_index_0 = index_0;
       m_x1= x3; m_y1=y3; m_index_1 = index_3;
@@ -235,7 +236,7 @@ namespace Cantag {
     // Now find where a vertical line through the centre intersects the shape
     int side1=0;
     float mu = (p[8]-p[2*side1])/(p[2*(side1+1)]-p[2*side1]);
-    if (mu!=mu || mu <=0.0 || mu > 1.0) {
+    if (mu <=0.f || mu > 1.f) {
       // It doesn't intersect this side: must intersect the next
       side1++;
       mu = (p[8]-p[2*side1])/(p[2*(side1+1)]-p[2*side1]);
@@ -257,7 +258,7 @@ namespace Cantag {
     mu = (p[9]-p[2*sideh+1])/(p[2*((sideh+1)%4)+1]-p[2*sideh+1]);
     d2 = p[2*sideh] + mu*(p[2*((sideh+1)%4)]-p[2*sideh]) - p[8];
 
-    float xratio = (d1>0) ? -d1/d2:-d2/d1;
+    float xratio = (d1>0.f) ? -d1/d2:-d2/d1;
  
  //    if (xratio>0.99 && xratio<1.01 && yratio>0.99 && yratio<1.01) {
 //       // It's a rectangle
@@ -267,15 +268,15 @@ namespace Cantag {
 //     }
 
 
-    if (xratio > 1.0)  n[0]=1.0;
-    else if (xratio == 1.0) n[0]=0.0;
-    else n[1]=-1.0;
+    if (xratio > 1.f)  n[0]=1.f;
+    else if (abs(xratio-1.f)<=DBL_EPSILON) n[0]=0.f;
+    else n[1]=-1.f;
 
-    if (yratio > 1.0) n[1]=1.0;
-    else if (yratio == 1.0) n[1]=0.0;
-    else n[1]=-1.0;
+    if (yratio > 1.f) n[1]=1.f;
+    else if (abs(yratio-1.f)<=FLT_EPSILON) n[1]=0.f;
+    else n[1]=-1.f;
 
-    n[2]=1.0;
+    n[2]=1.f;
 
     float m = sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]);
     for (int i=0; i<3;i++) n[i]/=m;

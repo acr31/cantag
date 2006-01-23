@@ -156,7 +156,7 @@ namespace Cantag {
     gsl_vector_free(r);
 
     return transformResult;
-  };
+  }
 
 
 

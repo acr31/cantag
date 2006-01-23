@@ -62,7 +62,7 @@ namespace Cantag {
      mHeight = mCodecCtx->height;
      mWidth  = mCodecCtx->width;
     
-     mInterval = (int)floor((float)mCodecCtx->frame_rate_base/(float)mCodecCtx->frame_rate*1000000.0);
+     mInterval = (int)floor((float)mCodecCtx->frame_rate_base/(float)mCodecCtx->frame_rate*1000000.f);
 
      if (width!=mWidth || height!=mHeight) {
        char exception[256];
