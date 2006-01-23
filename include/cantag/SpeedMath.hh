@@ -25,9 +25,12 @@
 #include <cassert>
 #include <limits>
 #include <sys/param.h>
-
+#include <iostream>
 #define FLT_INFINITY std::numeric_limits<float>::infinity()
 #define DBL_INFINITY std::numeric_limits<double>::infinity()
+
+#define FLT_EPSILON std::numeric_limits<float>::epsilon()
+#define DBL_EPSILON std::numeric_limits<double>::epsilon()
 
 #ifndef INT_MAX
 #define INT_MAX std::numeric_limits<int>::max()
@@ -36,6 +39,9 @@
 #ifndef INT_MIN
 #define INT_MIN std::numeric_limits<int>::min()
 #endif
+
+#define FLT_PI 3.14159265358979323846F
+#define DBL_PI 3.14159265358979323846
 
 namespace Cantag {
 
@@ -75,12 +81,13 @@ namespace Cantag {
     }
   };
 
-  //#define DSIN(N,x) taylor<N,0,double>::sin(x,1)
-  //#define FSIN(N,x) taylor<N,0,float>::sin(x,1)
+#define DSIN(N,x) taylor<N,0,double>::sin(x,1)
+#define FSIN(N,x) taylor<N,0,float>::sin(x,1)
 
-  //#define DCOS(N,x) taylor<N,0,double>::sin(x-M_PI/2,1)
-  //#define FCOS(N,x) taylor<N,0,float>::sin(x-M_PI/2,1)
+#define DCOS(N,x) taylor<N,0,double>::sin(x-DBL_PI/2.0,1)
+#define FCOS(N,x) taylor<N,0,float>::sin(x-FLT_PI/2.f,1)
 
+  /*
   //temporary test values: use to make sure that values are within range
   static inline double DSIN(const int accuracy, const double x) { 
     assert(x<=M_PI);
@@ -97,7 +104,7 @@ namespace Cantag {
     }
     return taylor<8,0,double>::sin(y,1);
   }
-
+  */
   template <int N> struct IsPowerOfTwo { static const bool check = (N%2 == 0) ? IsPowerOfTwo<(N>>1)>::check : false; };
   template <> struct IsPowerOfTwo<2> { static const bool check = true; };
   template <> struct IsPowerOfTwo<0> { static const bool check = false; };
@@ -139,6 +146,38 @@ namespace Cantag {
     float GetMaxima() const { return m_maximum; }
   };
 
+  template<class C> inline C sqrt(C val) { not defined for this type }
+  template<> inline float sqrt<float>(float val) { return ::sqrtf(val); }
+  template<> inline double sqrt<double>(double val) { return ::sqrt(val); }
+
+  template<class C> inline C abs(C val) {  not defined for this type }
+  template<> inline float abs<float>(float val) { return ::fabsf(val); }
+  template<> inline double abs<double>(double val) { return ::fabs(val); }
+
+  template<class C> inline C sin(C val) {  not defined for this type }
+  template<> inline float sin<float>(float val) { return ::sinf(val); }
+  template<> inline double sin<double>(double val) { return ::sin(val); }
+
+  template<class C> inline C cos(C val) {  not defined for this type }
+  template<> inline float cos<float>(float val) { return ::cosf(val); }
+  template<> inline double cos<double>(double val) { return ::cos(val); }
+  
+  template<class C> inline C atan(C val) {  not defined for this type }
+  template<> inline float atan<float>(float val) { return ::atanf(val); }
+  template<> inline double atan<double>(double val) { return ::atan(val); }
+
+  template<class C> inline C atan2(C val, C val2) {  not defined for this type }
+  template<> inline float atan2<float>(float val, float val2) { return ::atan2f(val,val2); }
+  template<> inline double atan2<double>(double val, double val2) { return ::atan2(val,val2); }
+
+  template<class C> inline C acos(C val) { not defined for this type }
+  template<> inline float acos<float>(float val) { return ::acosf(val); }
+  template<> inline double acos<double>(double val) { return ::acos(val); }
+
+  template<class C> inline C tan(C val) { not defined for this type }
+  template<> inline float tan<float>(float val) { return ::tanf(val); }
+  template<> inline double tan<double>(double val) { return ::tan(val); }
+  
 
 }
 
