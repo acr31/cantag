@@ -29,13 +29,13 @@
 #include <cantag/Camera.hh>
 #include <cantag/Function.hh>
 
-#ifdef HAVE_GSL_MULTIMIN_H
+#ifndef HAVE_GSL_MULTIMIN_H
 #error Iteratitive distortion correction requires the GNU Scientific Library
 #endif
-#ifdef HAVELIB_GSLCBLAS
+#ifndef HAVELIB_GSLCBLAS
 #error Iteratitive distortion correction requires the GNU Scientific Library
 #endif
-#ifdef HAVELIB_GSL
+#ifndef HAVELIB_GSL
 #error Iteratitive distortion correction requires the GNU Scientific Library
 #endif
 
