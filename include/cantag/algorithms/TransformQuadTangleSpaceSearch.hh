@@ -30,8 +30,15 @@
 #include <cantag/entities/TransformEntity.hh>
 #include <cantag/Function.hh>
 
-#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
-#else
+#ifndef HAVE_GSL_MULTIMIN_H
+#error This version has not been configured with GNU Scientific Library support!
+#endif
+
+#ifndef HAVELIB_GSLCBLAS
+#error This version has not been configured with GNU Scientific Library support!
+#endif
+
+#ifndef HAVELIB_GSL
 #error This version has not been configured with GNU Scientific Library support!
 #endif
 

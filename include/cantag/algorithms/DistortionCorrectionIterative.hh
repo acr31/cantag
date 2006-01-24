@@ -29,8 +29,13 @@
 #include <cantag/Camera.hh>
 #include <cantag/Function.hh>
 
-#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
-#else
+#ifdef HAVE_GSL_MULTIMIN_H
+#error Iteratitive distortion correction requires the GNU Scientific Library
+#endif
+#ifdef HAVELIB_GSLCBLAS
+#error Iteratitive distortion correction requires the GNU Scientific Library
+#endif
+#ifdef HAVELIB_GSL
 #error Iteratitive distortion correction requires the GNU Scientific Library
 #endif
 
