@@ -83,7 +83,7 @@ namespace Cantag {
     float y0,y2,y1;
     
     float numerator = sqrt(z1*z1+z2*z2);
-    if (!std::isnan<float>(numerator) && abs(numerator) > FLT_EPSILON) {
+    if (abs(numerator) > FLT_EPSILON) {
       y0 = 0.f;
       y1 = -z2/numerator;
       y2 = z1/numerator;
@@ -414,7 +414,7 @@ namespace Cantag {
 	return;
       }
       else {
-	*psi=M_PI;
+	*psi=FLT_PI;
 	*theta=0.0;
 	*phi=0.0;
 
@@ -431,11 +431,11 @@ namespace Cantag {
 	float z = sqrt((m10+1.f)/2.f);
 
 	int xx = x>0.0 ? 1:-1;
-	if (fabs(xx)<epsilon) xx=0;
+	if (abs(xx)<epsilon) xx=0;
 	int yy = y>0.0 ? 1:-1;
-	if (fabs(yy)<epsilon) yy=0;
+	if (abs(yy)<epsilon) yy=0;
 	int zz = z>0.0 ? 1:-1;
-	if (fabs(zz)<epsilon) zz=0;
+	if (abs(zz)<epsilon) zz=0;
 
 	int xy = (m_transform[1] > 0) ? 1:-1;
 	if (fabs(m_transform[1])<epsilon) xy=0;
