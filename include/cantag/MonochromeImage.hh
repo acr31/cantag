@@ -76,7 +76,7 @@ namespace Cantag {
     inline int GetHeight() const { return m_height; }
 
     inline int GetPixel3(unsigned int x,unsigned int y) const{
-      return GetPixel(x-1,y) | (GetPixel(x,y) << 1) | (GetPixel(x+1,y)<< 2);
+		return (GetPixel(x-1,y) ? 1 : 0) | (GetPixel(x,y) ? 2 : 0) | (GetPixel(x+1,y) ?  4 : 0);
     }
   };
 }
