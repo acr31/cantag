@@ -71,10 +71,14 @@
 #include <cantag/algorithms/TransformEllipseRotate.hh>
 #include <cantag/algorithms/TransformQuadTangleProjective.hh>
 #include <cantag/algorithms/TransformQuadTangleReduced.hh>
-#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
-#include <cantag/algorithms/TransformQuadTangleSpaceSearch.hh>
-#include <cantag/algorithms/TransformQuadTangleCyberCode.hh>
-#include <cantag/algorithms/DistortionCorrectionIterative.hh>
+#ifdef HAVE_GSL_MULTIMIN_H
+#ifdef HAVELIB_GSLCBLAS
+#ifdef HAVELIB_GSL
+# include <cantag/algorithms/TransformQuadTangleSpaceSearch.hh>
+# include <cantag/algorithms/TransformQuadTangleCyberCode.hh>
+# include <cantag/algorithms/DistortionCorrectionIterative.hh>
+#endif
+#endif
 #endif
 #include <cantag/algorithms/TransformRotateToPayload.hh>
 #include <cantag/algorithms/SampleTagCircle.hh>
@@ -106,8 +110,12 @@
 #include <cantag/coders/SCCCoder.hh>
 #include <cantag/coders/SymbolChunkCoder.hh>
 #include <cantag/coders/CRCSymbolChunkCoder.hh>
-#if defined(HAVE_GMPXX_H) && defined(HAVELIB_GMP) && defined(HAVELIB_GMPXX)
+#ifdef HAVE_GMPXX_H
+#ifdef HAVELIB_GMP
+#ifdef HAVELIB_GMPXX
 # include <cantag/coders/TripOriginalCoder.hh>
+#endif
+#endif
 #endif
 
 //////////////////////
@@ -116,31 +124,67 @@
 #ifdef HAVE_LINUX_VIDEODEV_H
 # include <cantag/V4LImageSource.hh>
 #endif
-#if defined(HAVE_GL_GL_H) && defined(HAVE_GL_GLU_H) && defined(HAVE_GL_OSMESA_H) && defined(HAVELIB_GL) && defined(HAVELIB_OSMESA) && defined(HAVELIB_GLU)
+#ifdef HAVE_GL_GL_H
+#ifdef HAVE_GL_GLU_H
+#ifdef HAVE_GL_OSMESA_H
+#ifdef HAVELIB_GL
+#ifdef HAVELIB_OSMESA
+#ifdef HAVELIB_GLU
 # include <cantag/GLImageSource.hh>
 #endif
-#if defined(HAVELIB_DC1394) && defined(HAVE_DC1394_CONTROL_H)
-#include <cantag/IEEE1394ImageSource.hh>
 #endif
+#endif
+#endif
+#endif
+#endif
+#ifdef HAVELIB_DC1394
+#ifdef HAVE_DC1394_CONTROL_H
+# include <cantag/IEEE1394ImageSource.hh>
+#endif
+#endif
+
 
 //////////////////////
 // output mechanisms
-#if defined(HAVE_X11_XLIB_H) && defined(HAVE_X11_XUTIL_H) && defined(HAVE_X11_EXTENSIONS_XSHM_H)
+#ifdef HAVE_X11_XLIB_H
+#ifdef HAVE_X11_XUTIL_H
+#ifdef HAVE_X11_EXTENSIONS_XSHM_H
 # include <cantag/XOutputMechanism.hh>
 # include <cantag/XDisplay.hh>
 #endif
+#endif
+#endif
 
-#if defined(HAVE_GL_GL_H) && defined(HAVELIB_GL) && defined(HAVELIB_GLU) && defined(HAVELIB_GLUT)
+
+#ifdef HAVE_GL_GL_H
+#ifdef HAVELIB_GL
+#ifdef HAVELIB_GLU
+#ifdef HAVELIB_GLUT
 # include <cantag/GLOutputMechanism.hh>
 #endif
-
-#if defined(HAVELIB_AVCODEC) && defined(HAVELIB_AVFORMAT) && defined(HAVELIB_Z) && defined(HAVE_AVCODEC_H) && defined(HAVE_AVFORMAT_H)
-#include <cantag/VideoImageSource.hh>
-#include <cantag/VideoOutputMechanism.hh>
+#endif
+#endif
 #endif
 
-#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
-#include <cantag/EstimateTransform.hh>
+#ifdef HAVELIB_AVCODEC
+#ifdef HAVELIB_AVFORMAT
+#ifdef HAVELIB_Z
+#ifdef HAVE_AVCODEC_H
+#ifdef HAVE_AVFORMAT_H
+# include <cantag/VideoImageSource.hh>
+# include <cantag/VideoOutputMechanism.hh>
+#endif
+#endif
+#endif
+#endif
+#endif
+
+#ifdef HAVE_GSL_MULTIMIN_H
+#ifdef HAVELIB_GSLCBLAS
+#ifdef HAVELIB_GSL
+# include <cantag/EstimateTransform.hh>
+#endif
+#endif
 #endif
 
 #endif//CANTAG_GUARD
