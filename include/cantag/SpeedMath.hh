@@ -24,13 +24,17 @@
 #include <cmath>
 #include <cassert>
 #include <limits>
-#include <sys/param.h>
 #include <iostream>
 #define FLT_INFINITY std::numeric_limits<float>::infinity()
 #define DBL_INFINITY std::numeric_limits<double>::infinity()
 
+#ifndef FLT_EPSILON
 #define FLT_EPSILON std::numeric_limits<float>::epsilon()
+#endif
+
+#ifndef DBL_EPSILON
 #define DBL_EPSILON std::numeric_limits<double>::epsilon()
+#endif
 
 #ifndef INT_MAX
 #define INT_MAX std::numeric_limits<int>::max()
