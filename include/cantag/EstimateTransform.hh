@@ -29,9 +29,13 @@
 
 #include <cantag/Config.hh>
 
-#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
+#ifdef HAVE_GSL_MULTIMIN_H
+#ifdef HAVELIB_GSLCBLAS
+#ifdef HAVELIB_GSL
 #else
 #error This version has not been configured with GNU Scientific Library support!
+#endif
+#endif
 #endif
 
 #include <cantag/Correspondence.hh>
