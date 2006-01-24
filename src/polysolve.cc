@@ -122,7 +122,6 @@ namespace Cantag {
 #ifdef EIGEN_DEBUG
     printf("  Test accuracy of: (%lf,%lf,%lf),%lf\n",vect[0],vect[1],vect[2],val);
 #endif
-	
     if (is_nan(vect[0]) || is_nan(vect[1]) || is_nan(vect[2]))
       return -1;
 
