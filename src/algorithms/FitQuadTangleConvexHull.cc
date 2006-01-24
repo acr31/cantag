@@ -23,7 +23,7 @@
  */
 
 #include <map>
-
+#include <algorithm>
 #include <cantag/algorithms/FitQuadTangleConvexHull.hh>
 
 namespace Cantag {
@@ -63,7 +63,7 @@ namespace Cantag {
       indexes.push_back (ci->second);
       ++ci;
     }
-    sort(indexes.begin(), indexes.end());
+	std::sort(indexes.begin(), indexes.end());
     
 
     if (indexes.size()>4) {
