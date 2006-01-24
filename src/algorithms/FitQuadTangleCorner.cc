@@ -45,15 +45,15 @@ namespace Cantag {
     bool peak=false;
     float last_curv=curvature(points,numindexes-1, numindexes-1-WINDOWSIZE,WINDOWSIZE-1);
     
-    for(unsigned int i=0; i<points.size()/2;i++) {
-      int p1 = i-WINDOWSIZE;
-      int p2 = (i+WINDOWSIZE)%numindexes;
+    for(unsigned int ii=0; ii<points.size()/2;ii++) {
+      int p1 = ii-WINDOWSIZE;
+      int p2 = (ii+WINDOWSIZE)%numindexes;
       while (p1<0) p1+=numindexes;
-      float c = curvature(points,i, p1,p2);
+      float c = curvature(points,ii, p1,p2);
       
       if (c>CURVTHRESH && last_curv<=CURVTHRESH) {peak=true;corner_index++;}
       if (c<=CURVTHRESH && last_curv>CURVTHRESH) {peak=false;}
-      if (peak && c>=last_curv) corners[corner_index]=i;
+      if (peak && c>=last_curv) corners[corner_index]=ii;
       last_curv=c;
       if (corner_index>3) return false;
     }
