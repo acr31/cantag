@@ -34,9 +34,14 @@
 
 #include <iostream>
 
-#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
+#ifdef HAVE_GSL_MULTIMIN_H
+#ifdef HAVELIB_GSLCBLAS
+#ifdef HAVELIB_GSL
 #include <gsl/gsl_multimin.h>
 #endif
+#endif
+#endif
+
 
 namespace Cantag {
 
