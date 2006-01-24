@@ -21,7 +21,7 @@
 /**
  * $Header$
  */ 
-
+#include <algorithm>
 #include <cantag/algorithms/FitQuadTangleRegression.hh>
 
 namespace Cantag {
@@ -36,7 +36,7 @@ namespace Cantag {
     indexes[1] = shape.GetShape()->GetIndex1();
     indexes[2] = shape.GetShape()->GetIndex2();
     indexes[3] = shape.GetShape()->GetIndex3();
-    sort(indexes.begin(), indexes.end());
+	std::sort(indexes.begin(), indexes.end());
     // Now we have estimates of the corner indexes within points So do
     // some regression. We ignore the 4 points next to an estimated
     // corner since these are less reliable indicators of the side
