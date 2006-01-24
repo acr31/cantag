@@ -25,11 +25,6 @@
 #ifndef IMAGE_GUARD
 #define IMAGE_GUARD
 
-//extern "C" {
-//#include <sys/types.h>
-//#include <sys/socket.h>
-//}
-
 #include <fstream>
 #include <list>
 #include <iostream>
@@ -1157,14 +1152,6 @@ namespace Cantag {
 	     points[0],points[1],colour,thickness);
   }
 };
-//#else
 
-//#if defined(HAVE_MAGICKXX) and defined(HAVELIB_MAGICKXX) and defined(HAVELIB_MAGICK)
-//#include <Magick++.h>
-//#endif
-//
-//namespace Cantag {
-//  template<Colour::Type ColType> class Image;
-//}
 #endif//IMAGE_GUARD
 
