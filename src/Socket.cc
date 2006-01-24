@@ -22,6 +22,11 @@
  * $Header$
  */
 
+
+#include <cantag/Config.hh>
+
+#ifdef HAVE_SYS_SOCKET_H
+
 #include <cantag/Socket.hh>
 #include <cerrno>
 
@@ -390,3 +395,5 @@ namespace Cantag {
 
 
 */
+
+#endif//HAVE_SYS_SOCKET_H

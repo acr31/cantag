@@ -829,7 +829,7 @@ namespace Cantag {
 				       const Pixel<layout>& colour, int thickness) {
     assert(thickness > 0 || thickness == -1);
     
-    int numsteps = (int)(2.f*M_PI/STEPSIZE); 
+    const int numsteps = (int)(2.f*FLT_PI/(float)STEPSIZE); 
     
     float points[numsteps*2];
     ellipse_polygon_approx(points,0, numsteps, xc, yc ,width, height, angle_radians, colour, thickness, 0);

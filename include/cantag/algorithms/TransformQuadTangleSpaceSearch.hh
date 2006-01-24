@@ -25,24 +25,19 @@
 #ifndef TRANSFORMQUADTANGLESPACE_GUARD
 #define TRANSFORMQUADTANGLESPACE_GUARD
 
+#include <cantag/Config.hh>
+
+#ifndef HAVE_GSL
+#error "TransformQuadTangleSpaceSearch requires the GNU Scientific Library!"
+#endif
+
+#include <gsl/gsl_multimin.h>
+
 #include <cantag/QuadTangle.hh>
 #include <cantag/entities/ShapeEntity.hh>
 #include <cantag/entities/TransformEntity.hh>
 #include <cantag/Function.hh>
 
-#ifndef HAVE_GSL_MULTIMIN_H
-#error This version has not been configured with GNU Scientific Library support!
-#endif
-
-#ifndef HAVELIB_GSLCBLAS
-#error This version has not been configured with GNU Scientific Library support!
-#endif
-
-#ifndef HAVELIB_GSL
-#error This version has not been configured with GNU Scientific Library support!
-#endif
-
-#include <gsl/gsl_multimin.h>
 
 
 namespace Cantag {
@@ -82,5 +77,6 @@ namespace Cantag {
 
   };
 }
+
 
 #endif//TRANSFORMQUADTANGLESPACE_GUARD

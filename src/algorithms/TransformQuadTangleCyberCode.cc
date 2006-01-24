@@ -22,6 +22,9 @@
  * $Header$
  */ 
 
+#include <cantag/Config.hh>
+
+#ifdef HAVE_GSL
 #include <cantag/algorithms/TransformQuadTangleCyberCode.hh>
 
 namespace Cantag {
@@ -232,3 +235,4 @@ namespace Cantag {
   } 
 
 }
+#endif//HAVE_GSL

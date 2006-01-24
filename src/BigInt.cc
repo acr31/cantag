@@ -18,6 +18,10 @@
   Email: acr31@cam.ac.uk
 */
 
+#include <cantag/Config.hh>
+
+#ifdef HAVE_GSL_MULTIMIN_H
+
 #include <cantag/BigInt.hh>
 
 namespace Cantag {
@@ -100,3 +104,5 @@ namespace Cantag {
   }
 
 }
+
+#endif//HAVE_GSL_MULTIMIN_H

@@ -85,7 +85,7 @@ namespace Cantag {
     float a = m_width;
     float b = m_height;
     float currentAngle = 0.f;
-    while(currentAngle < M_PI*2) {
+    while(currentAngle < FLT_PI*2) {
       float cost = cos(currentAngle); // DCOS (later)
       float sint = sin(currentAngle); // DSINE (later)
       

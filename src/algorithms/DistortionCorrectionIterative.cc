@@ -22,6 +22,10 @@
  * $Header$
  */
 
+#include <cantag/Config.hh>
+
+#ifdef HAVE_GSL
+
 #include <cantag/algorithms/DistortionCorrectionIterative.hh>
 
 namespace Cantag {
@@ -31,3 +35,5 @@ namespace Cantag {
     return true;
   }
 }
+
+#endif//HAVE_GSL

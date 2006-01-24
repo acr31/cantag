@@ -22,6 +22,10 @@
  * $Header$
  */
 
+#include <cantag/Config.hh>
+
+#ifdef HAVE_GSL
+
 #include <cantag/EstimateTransform.hh>
 #include <gsl/gsl_multimin.h>
 
@@ -221,3 +225,5 @@ namespace Cantag {
   }
 
 }
+
+#endif//HAVE_GSL

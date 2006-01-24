@@ -22,6 +22,11 @@
  * $Header$
  */
 
+
+#include <cantag/Config.hh>
+
+#ifdef HAVE_GL_GL_H
+
 extern "C" {
 # include <sys/timeb.h>
 }
@@ -308,4 +313,4 @@ namespace Cantag {
   }
 }
 
-
+#endif//HAVE_GL_GL_H

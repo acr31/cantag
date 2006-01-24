@@ -235,7 +235,9 @@ namespace Cantag {
      float k1, k2, x, y;
   };
 
-#if defined(HAVE_GSL_MULTIMIN_H) and defined(HAVELIB_GSLCBLAS) and defined(HAVELIB_GSL)
+#ifdef HAVE_GSL_MULTIMIN_H
+#ifdef HAVELIB_GSLCBLAS
+#ifdef HAVELIB_GSL
   void Camera::ImageToNPCFIterative(std::vector<float>& points, bool useCache) const {
     for(unsigned int i=0;i<points.size();i+=2) {
       dist_coord d;
@@ -329,6 +331,8 @@ namespace Cantag {
     y*=radialcoeff;
     return (x-p->x)*(x-p->x)+(y-p->y)*(y-p->y);
   }
+#endif
+#endif
 #endif
 
 

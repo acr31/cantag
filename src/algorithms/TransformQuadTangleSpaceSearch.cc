@@ -22,6 +22,10 @@
  * $Header$
  */
 
+#include <cantag/Config.hh>
+
+#ifdef HAVE_GSL
+
 #include <cantag/algorithms/TransformQuadTangleSpaceSearch.hh>
 #include <cantag/algorithms/TransformQuadTangleProjective.hh>
 #include <cantag/gaussianelimination.hh>
@@ -276,3 +280,5 @@ namespace Cantag {
 
 
 }
+
+#endif//HAVE_GSL

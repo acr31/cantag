@@ -22,6 +22,10 @@
  * $Header$
  */
 
+#include <cantag/Config.hh>
+
+#ifdef HAVE_XWINDOWS
+
 #include <cantag/XOutputMechanism.hh>
 
 extern "C" {
@@ -203,3 +207,5 @@ namespace Cantag {
     XFlush(m_display);
   }
 }
+
+#endif//HAVE_XWINDOWS

@@ -27,6 +27,10 @@
 
 #include <cantag/Config.hh>
 
+#ifndef HAVE_DC1394_CONTROL_H
+#error "IEEE1394ImageSource Requires libraw1394 and libdc1394 support"
+#endif
+
 #include <cantag/ImageSource.hh>
 
 extern "C" {

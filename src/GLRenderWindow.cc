@@ -22,6 +22,10 @@
  * $Header$
  */
 
+#include <cantag/Config.hh>
+
+#ifdef HAVE_GL_GL_H
+
 #include <cantag/GLRenderWindow.hh>
 
 namespace Cantag {
@@ -117,3 +121,4 @@ namespace Cantag {
   }
 
 }
+#endif//HAVE_GL_GL_H

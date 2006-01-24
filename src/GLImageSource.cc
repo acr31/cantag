@@ -22,6 +22,10 @@
  * $Header$
  */
 
+#include <cantag/Config.hh>
+
+#ifdef HAVE_GL_OSMESA_H
+
 #include <cantag/GLImageSource.hh>
 #include <cantag/SpeedMath.hh>
 
@@ -358,3 +362,5 @@ namespace Cantag {
 
 
 }
+
+#endif//HAVE_GL_OSMESA_H

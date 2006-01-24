@@ -39,7 +39,7 @@ namespace Cantag {
    * and the additional methods.
    */
   template<int BIT_COUNT>
-  class CyclicBitSet : public std::bitset<BIT_COUNT> {
+  class CyclicBitSet : private std::bitset<BIT_COUNT> {
   private:
     size_t m_rotation;
     bool m_invalid;
@@ -130,8 +130,9 @@ namespace Cantag {
 
     bool operator[](size_t n) const;
 
-    typename std::bitset<BIT_COUNT>::reference operator[](size_t n);
-    bool operator<(const CyclicBitSet<BIT_COUNT>& o) const;
+//    typename std::bitset<BIT_COUNT>::reference operator[](size_t n);
+  
+	bool operator<(const CyclicBitSet<BIT_COUNT>& o) const;
 
     bool operator==(const CyclicBitSet<BIT_COUNT>& o) const;
 
@@ -271,9 +272,9 @@ namespace Cantag {
   }
 
 
-  template<int BIT_COUNT> typename std::bitset<BIT_COUNT>::reference CyclicBitSet<BIT_COUNT>::operator[](size_t n) {
-    return std::bitset<BIT_COUNT>::operator[]((n+m_rotation) % m_size);
-  }
+//  template<int BIT_COUNT> typename std::bitset<BIT_COUNT>::reference CyclicBitSet<BIT_COUNT>::operator[](size_t n) {
+    //return std::bitset<BIT_COUNT>::operator[]((n+m_rotation) % m_size);
+  //}
 
   template<int BIT_COUNT> bool CyclicBitSet<BIT_COUNT>::operator<(const CyclicBitSet<BIT_COUNT>& o) const {
 

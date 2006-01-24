@@ -25,18 +25,13 @@
 #ifndef DISTORTION_CORRECTION_ITERATIVE_GUARD
 #define DISTORTION_CORRECTION_ITERATIVE_GUARD
 
+#include <cantag/Config.hh>
 #include <cantag/entities/ContourEntity.hh>
 #include <cantag/Camera.hh>
 #include <cantag/Function.hh>
 
-#ifndef HAVE_GSL_MULTIMIN_H
-#error Iteratitive distortion correction requires the GNU Scientific Library
-#endif
-#ifndef HAVELIB_GSLCBLAS
-#error Iteratitive distortion correction requires the GNU Scientific Library
-#endif
-#ifndef HAVELIB_GSL
-#error Iteratitive distortion correction requires the GNU Scientific Library
+#ifndef HAVE_GSL
+#error DistortionCorrectionIterative requires the GNU Scientific Library
 #endif
 
 namespace Cantag {

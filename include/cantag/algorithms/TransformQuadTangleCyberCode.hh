@@ -28,14 +28,8 @@
 
 #include <cantag/Config.hh>
 
-#ifndef HAVE_GSL_MULTIMIN_H
-#error This version has not been configured with GNU Scientific Library support!
-#endif
-#ifndef HAVELIB_GSLCBLAS
-#error This version has not been configured with GNU Scientific Library support!
-#endif
-#ifndef HAVELIB_GSL
-#error This version has not been configured with GNU Scientific Library support!
+#ifndef HAVE_GSL
+#error "TransformQuadTangleCyberCode requires the GNU Scientific Library!"
 #endif
 
 #include <gsl/gsl_multimin.h>

@@ -33,4 +33,24 @@
 #define PROGRESS(x)
 #endif
 
+#ifdef HAVE_GSL_MULTIMIN_H
+#ifdef HAVELIB_GSLCBLAS
+#ifdef HAVELIB_GSL
+#define HAVE_GSL
+#endif
+#endif
+#endif
+
+#ifdef HAVE_X11_XLIB_H
+#ifdef HAVE_X11_XUTIL_H
+#ifdef HAVE_X11_EXTENSIONS_XSHM_H
+#define HAVE_XWINDOWS
+#endif
+#endif
+#endif
+
+#ifdef HAVE_AVCODEC_H
+#define HAVE_AVCODEC
+#endif
+
 #endif//CONFIG_GUARD

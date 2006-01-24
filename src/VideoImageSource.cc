@@ -18,6 +18,10 @@
   Email: acr31@cam.ac.uk
 */
 
+#include <cantag/Config.hh>
+
+#ifdef HAVE_AVCODEC
+
 #include <cantag/VideoImageSource.hh>
 
 #include <stdio.h>
@@ -137,7 +141,5 @@ namespace Cantag {
     return mImage;
   }
 
-
-
-
 }
+#endif//HAVE_AVCODEC

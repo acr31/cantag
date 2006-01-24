@@ -22,9 +22,14 @@
  * $Header$
  */
 
-#include <cantag/IEEE1394ImageSource.hh>
+#include <cantag/Config.hh>
+
+
+#ifdef HAVE_DC1394_CONTROL_H
 
 #include <cerrno>
+
+#include <cantag/IEEE1394ImageSource.hh>
 
 #undef IEEE1394_DEBUG
 
@@ -137,3 +142,6 @@ namespace Cantag {
   }
 
 }
+
+
+#endif//HAVE_DC1394_CONTROL_H
