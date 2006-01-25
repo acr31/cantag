@@ -44,6 +44,10 @@
 #define INT_MIN std::numeric_limits<int>::min()
 #endif
 
+#ifndef FLT_MAX
+#define FLT_MAX std::numeric_limits<float>::max()
+#endif
+
 #define FLT_PI 3.14159265358979323846F
 #define DBL_PI 3.14159265358979323846
 
@@ -157,6 +161,7 @@ namespace Cantag {
   template<class C> inline C abs(C val) {  not defined for this type }
   template<> inline float abs<float>(float val) { return ::fabsf(val); }
   template<> inline double abs<double>(double val) { return ::fabs(val); }
+  template<> inline int abs<int>(int val) { return ::fabs(val); }
 
   template<class C> inline C sin(C val) {  not defined for this type }
   template<> inline float sin<float>(float val) { return ::sinf(val); }
@@ -182,7 +187,20 @@ namespace Cantag {
   template<> inline float tan<float>(float val) { return ::tanf(val); }
   template<> inline double tan<double>(double val) { return ::tan(val); }
   
-
+  /**
+   * Taken from Boost (http://www.boost.org)
+   *
+   *  Boost interval/checking.hpp template implementation file
+   *
+   * Copyright 2002 Herv351 Br366nnimann, Guillaume Melquiond, Sylvain Pion
+   *
+   * Distributed under the Boost Software License, Version 1.0.
+   * (See accompanying file LICENSE_1_0.txt or
+   * copy at http://www.boost.org/LICENSE_1_0.txt)
+   */
+  template<class C> inline bool is_nan(C val) { 
+    return std::numeric_limits<C>::has_quiet_NaN && (val != val);
+  }
 }
 
 #endif //SPEEDMATH_GUARD
