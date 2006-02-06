@@ -36,7 +36,7 @@
 # undef ELLIPSE_DEBUG
 # undef ELLIPSE_DEBUG_DUMP_POINTS
 # undef CIRCLE_TRANSFORM_DEBUG
-# define DECOMPOSE_DEBUG
+# undef DECOMPOSE_DEBUG
 #endif
 
 #define MAXFITERROR 1000
@@ -457,22 +457,24 @@ namespace Cantag {
     float s = (float)sin(angle); // DSINE
   
     m_a = c*c/alpha1sq + s*s/alpha2sq;
-    m_b = 2*c*s*(1/alpha1sq - 1/alpha2sq);
+    m_b = 2.f*c*s*(1.f/alpha1sq - 1.f/alpha2sq);
     m_c = s*s/alpha1sq + c*c/alpha2sq;
-    m_d = -2*x0*m_a - y0*m_b;
-    m_e = -x0*m_b - 2*y0*m_c;
-    m_f = x0*x0*m_a + x0*y0*m_b + y0*y0*m_c - 1;
+    m_d = -2.f*x0*m_a - y0*m_b;
+    m_e = -x0*m_b - 2.f*y0*m_c;
+    m_f = x0*x0*m_a + x0*y0*m_b + y0*y0*m_c - 1.f;
 
   }
 
-
+  /**
+   * This function must be implemented with double precision (64-bit) floats
+   */
   void Ellipse::Decompose() {
-    float a = GetA();
-    float b = GetB();
-    float c = GetC();
-    float d = GetD();
-    float e = GetE();
-    float f = GetF();
+    double a = GetA();
+    double b = GetB();
+    double c = GetC();
+    double d = GetD();
+    double e = GetE();
+    double f = GetF();
     
 #ifdef DECOMPOSE_DEBUG
     PROGRESS("a,b,c,d,e,f = " << a << " " << b << " " << c << " " << d << " " << e << " " << f);
@@ -491,22 +493,21 @@ namespace Cantag {
 #endif
     }
 
-    float disc = b*b - 4*a*c;
+    double disc = b*b - 4.0*a*c;
 
-    float x0 = (2*c*d - b*e) / disc;
-    float y0 = (2*a*e - b*d) / disc;
+    double x0 = (2.0*c*d - b*e) / disc;
+    double y0 = (2.0*a*e - b*d) / disc;
 
-    float tmproot = sqrt( (a-c)*(a-c) + b*b );
-    float lambda1 = ((a+c) - tmproot)/2;
-    float lambda2 = ((a+c) + tmproot)/2;
-    float lambda1t = lambda1;
-    if (lambda1 < lambda2) {
-      lambda1t = lambda2;
-      lambda2 =lambda1;
+    double tmproot = sqrt( (a-c)*(a-c) + b*b );
+    double lambda1 = ((a+c) - tmproot)/2.0;
+    double lambda2 = ((a+c) + tmproot)/2.0;
+    bool swapped = false;
+    if (lambda1 > lambda2) {
+      swapped = true;
+      double lambda1t = lambda2;
+      lambda2 = lambda1;
       lambda1 = lambda1t;
     }
-    lambda1 = 1/sqrt(lambda1);
-    lambda2 = 1/sqrt(lambda2);
 
 #ifdef DECOMPOSE_DEBUG
     PROGRESS("tmproot= " << tmproot);
@@ -514,30 +515,37 @@ namespace Cantag {
     PROGRESS("lambda2= " << lambda2);
 #endif
   
-    float scale_factor = sqrt( -f + a*x0*x0 + b*x0*y0 + c*y0*y0);
+    double scale_factor = sqrt( -f + a*x0*x0 + b*x0*y0 + c*y0*y0);
 
 #ifdef DECOMPOSE_DEBUG
     PROGRESS("scale= " << scale_factor);
+    PROGRESS("dbl= " << DBL_EPSILON);
+    PROGRESS("flt= " << FLT_EPSILON);
 #endif
   
-    m_width = lambda1 * scale_factor;
-    m_height = lambda2 * scale_factor;
+    m_width = scale_factor / sqrt(lambda1);
+    m_height = scale_factor / sqrt(lambda2);
     m_x0 = x0;
     m_y0 = y0;
 
-    if (abs(m_width - m_height) <= FLT_EPSILON) {
+    
+    if (abs(m_width - m_height) <= DBL_EPSILON) {
       // obviously the angle is undefined if we have a circle
-      m_angle_radians = 0.f;
+      m_angle_radians = 0.0;
+    }
+    else if (abs(b) > DBL_EPSILON) { 
+	m_angle_radians = atan2( 2.0*(lambda1-a), b ); // DATAN	
     }
     else {
-      m_angle_radians = atan( -(a-lambda1t*scale_factor)/(0.5f*b) ); // DATAN
+      m_angle_radians = 0.0;
     }
 #ifdef DECOMPOSE_DEBUG
     PROGRESS("width= " << m_width);
     PROGRESS("height= " <<m_height);
     PROGRESS("X= " << m_x0);
     PROGRESS("Y= " << m_y0);
-    PROGRESS("angle= " << m_angle_radians);
+    PROGRESS("angle= " << m_angle_radians << " (" << (m_angle_radians/FLT_PI*180.0) << ")");
+    PROGRESS("swap = " << swapped);
 #endif
   
   }
