@@ -33,10 +33,10 @@
 
 namespace Cantag {
 
-  bool eigensolve(double a, double b, double c,
-		  double d, double e, double f,
-		  double g, double h, double i,
-		  double *eigenvects, double* eigenvals);
+  bool CANTAG_EXPORT eigensolve(double a, double b, double c,
+				double d, double e, double f,
+				double g, double h, double i,
+				double *eigenvects, double* eigenvals);
   
   /**
    * Find the eigenvalues and eigenvectors of the symmetric 3x3 matrix.
@@ -44,10 +44,10 @@ namespace Cantag {
    * eigenvector and eigenvalue arrays must contain 9 elements, they
    * will be filled in row major order.
    */
-  bool eigensolve(double a, double b, double f,
-		  /*    */  double c, double d,
-		  /*               */ double e,
-		  double* eigenvects,
-		  double* eigenvals);
+  bool CANTAG_EXPORT eigensolve(double a, double b, double f,
+				/*    */  double c, double d,
+				/*               */ double e,
+				double* eigenvects,
+				double* eigenvals);
 }
 #endif//POLYSOLVE_GUARD

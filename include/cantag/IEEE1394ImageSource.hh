@@ -40,7 +40,7 @@ extern "C" {
 
 namespace Cantag {
 
-  class IEEE1394ImageSource : public ImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> {
+  class CANTAG_EXPORT IEEE1394ImageSource : public ImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> {
   private:
     raw1394handle_t      mHandle;
     dc1394_cameracapture mCamera;

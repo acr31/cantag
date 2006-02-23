@@ -70,7 +70,7 @@ namespace Cantag {
    * An image source that synthesizes the view based on an OpenGL
    * rendering of the tag.
    */
-  class GLImageSource : public ImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> {
+  class CANTAG_EXPORT GLImageSource : public ImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> {
   private:
     int m_width;
     int m_height;

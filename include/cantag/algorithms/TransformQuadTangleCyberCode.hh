@@ -41,7 +41,7 @@
 
 namespace Cantag {
 
-  class TransformQuadTangleCyberCode : public Function<TL1(ShapeEntity<QuadTangle>),TL1(TransformEntity)> {
+  class CANTAG_EXPORT TransformQuadTangleCyberCode : public Function<TL1(ShapeEntity<QuadTangle>),TL1(TransformEntity)> {
 
   public:
     /*

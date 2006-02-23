@@ -39,17 +39,17 @@ namespace Cantag {
    * location and pose of the tag and the tag size
    */
   
-  struct LocationElement {
+  struct CANTAG_EXPORT LocationElement {
     float x;
     float y;
     float z;
   };
   
-  struct SizeElement {
+  struct CANTAG_EXPORT SizeElement {
     float tag_size;
   };
   
-  struct PoseElement {
+  struct CANTAG_EXPORT PoseElement {
     float theta; // Spherical polars
     float phi;   // Spherical polars
     float psi;   // Rotation about axis

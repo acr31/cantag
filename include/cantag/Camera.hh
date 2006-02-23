@@ -50,7 +50,7 @@ namespace Cantag {
    *
    * \todo add loading the camera parameters from disk
    */
-  class Camera {
+  class CANTAG_EXPORT Camera {
   private:
 
     typedef struct dist_coord_t {

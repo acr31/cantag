@@ -38,7 +38,7 @@
 
 namespace Cantag {
 
-  struct ROI {
+  struct CANTAG_EXPORT ROI {
     float minx;
     float maxx;
     float miny;
@@ -51,7 +51,7 @@ namespace Cantag {
     int ScaleY(float y, int imageHeight) const { return Round((y - (float)miny) * (float)imageHeight / (float)(maxy-miny)); }
   };
 
-  class DrawEntityImage : public Function<TL0,TypeList<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>,TypeListEOL> > {
+  class CANTAG_EXPORT DrawEntityImage : public Function<TL0,TypeList<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>,TypeListEOL> > {
   private:
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
     const ROI m_roi;
@@ -61,7 +61,7 @@ namespace Cantag {
     bool operator()(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const;
   };
 
-  class DrawEntityMonochrome : public Function<TL0,TL1(MonochromeImage)> {
+  class CANTAG_EXPORT DrawEntityMonochrome : public Function<TL0,TL1(MonochromeImage)> {
   private:
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
     const ROI m_roi;
@@ -71,7 +71,7 @@ namespace Cantag {
     bool operator()(MonochromeImage& monimage) const ;    
   };
 
-  class DrawEntityContour : public Function<TL0,TL1(ContourEntity)> {
+  class CANTAG_EXPORT DrawEntityContour : public Function<TL0,TL1(ContourEntity)> {
   private:
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
     const ROI m_roi;
@@ -186,7 +186,7 @@ namespace Cantag {
     return DrawEntitySampleSquareObj<EDGE_CELLS>(image,camera,tagspec);
   }
 
-  class DrawEntityTransform : public Function<TL0,TL1(TransformEntity)> {
+  class CANTAG_EXPORT DrawEntityTransform : public Function<TL0,TL1(TransformEntity)> {
   private:
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
     const Camera& m_camera;

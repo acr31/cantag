@@ -36,7 +36,7 @@ namespace Cantag {
    * observed image point and a real-world co-ordinate. This is used
    * when estimating the camera position etc.
    */
-  class Correspondence {
+  class CANTAG_EXPORT Correspondence {
   private:
     float m_imagex;
     float m_imagey;

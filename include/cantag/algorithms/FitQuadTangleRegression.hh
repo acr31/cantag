@@ -32,7 +32,7 @@
 #include <cantag/Function.hh>
 
 namespace Cantag {
-  class FitQuadTangleRegression : public Function<TL1(ContourEntity),TL1(ShapeEntity<QuadTangle>) > {
+  class CANTAG_EXPORT FitQuadTangleRegression : public Function<TL1(ContourEntity),TL1(ShapeEntity<QuadTangle>) > {
   public:
 
     /**

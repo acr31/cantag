@@ -30,7 +30,7 @@
 #include <cantag/Function.hh>
 
 namespace Cantag {
-  class DistortionCorrection : public Function<TL0,TL1(ContourEntity)> {
+  class CANTAG_EXPORT DistortionCorrection : public Function<TL0,TL1(ContourEntity)> {
   private:
     const Camera& m_camera;
   public:

@@ -39,14 +39,14 @@
 namespace Cantag {
 
   namespace Simulate {
-    double ComputeDistance(double xc, double yc, double x0, double y0, double x1, double y1);
+    double CANTAG_EXPORT ComputeDistance(double xc, double yc, double x0, double y0, double x1, double y1);
 
     /**
      * Take corner_count corners from the array corners and compute the
      * minimum distance between the centre point and the line made between
      * each sequential pair of corners.  Return the most minimal distance.
      */   
-    double ComputeAll(double xc, double yc, double* corners, int corner_count);
+    double CANTAG_EXPORT ComputeAll(double xc, double yc, double* corners, int corner_count);
   }
   
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>

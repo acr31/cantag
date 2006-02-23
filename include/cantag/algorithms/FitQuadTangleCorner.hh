@@ -31,7 +31,7 @@
 #include <cantag/Function.hh>
 
 namespace Cantag {
-  class FitQuadTangleCorner : public Function<TL1(ContourEntity),TL1(ShapeEntity<QuadTangle>) >{
+  class CANTAG_EXPORT FitQuadTangleCorner : public Function<TL1(ContourEntity),TL1(ShapeEntity<QuadTangle>) >{
   public:
     bool operator()(const ContourEntity& contour, ShapeEntity<QuadTangle>& shape) const;
   };

@@ -51,7 +51,7 @@ namespace Cantag {
   /**
    * Superclass for GL rendering 
    */
-  class GLRenderWindow {
+  class CANTAG_EXPORT GLRenderWindow {
   private:
     XVisualInfo* m_visual;
     Colormap m_colormap;

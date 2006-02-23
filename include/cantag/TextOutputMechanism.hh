@@ -33,7 +33,7 @@
 #include <ostream>
 
 namespace Cantag {
-  class TextOutputMechanism {
+  class CANTAG_EXPORT TextOutputMechanism {
   private:
     std::ostream& m_ostream;
 

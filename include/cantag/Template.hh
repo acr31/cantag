@@ -33,7 +33,7 @@ namespace Cantag {
    *
    * \todo{regression test: create various images which we expect various correlation coefficients from and try them}
    */
-  class Template {
+  class CANTAG_EXPORT Template {
   private:
     float m_average;
     unsigned int m_size;

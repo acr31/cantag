@@ -31,7 +31,7 @@
 #include <vector>
 #include <iostream>
 namespace Cantag {
-  class Entity {
+  class CANTAG_EXPORT Entity {
   protected:
     bool m_valid;
     Entity() : m_valid(false) {};
@@ -41,7 +41,7 @@ namespace Cantag {
   };
 
   
-  class LocatedEntity : public Entity {
+  class CANTAG_EXPORT LocatedEntity : public Entity {
   protected:    
     float normal[3];
     float location[3];

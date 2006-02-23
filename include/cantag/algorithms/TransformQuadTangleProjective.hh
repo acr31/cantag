@@ -31,7 +31,7 @@
 #include <cantag/Function.hh>
 
 namespace Cantag {
-  class TransformQuadTangleProjective : public Function<TL1(ShapeEntity<QuadTangle>),TL1(TransformEntity)> {
+  class CANTAG_EXPORT TransformQuadTangleProjective : public Function<TL1(ShapeEntity<QuadTangle>),TL1(TransformEntity)> {
   public:
     /*
      * Taken from:

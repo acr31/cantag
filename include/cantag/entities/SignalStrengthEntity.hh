@@ -27,7 +27,7 @@ namespace Cantag {
    * Contains the computed signal strength value.  This is a single
    * floating point number between 0 and 1.
    */
-  class SignalStrengthEntity : public Entity {
+  class CANTAG_EXPORT SignalStrengthEntity : public Entity {
   private:
     float m_signal_strength;
     int m_min;

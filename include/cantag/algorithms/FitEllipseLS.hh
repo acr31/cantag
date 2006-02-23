@@ -32,7 +32,7 @@
 
 namespace Cantag {
   
-  class FitEllipseLS : public Function<TL1(ContourEntity),TL1(ShapeEntity<Ellipse>) > {
+  class CANTAG_EXPORT FitEllipseLS : public Function<TL1(ContourEntity),TL1(ShapeEntity<Ellipse>) > {
   public:
     bool operator()(const ContourEntity&  contour, ShapeEntity<Ellipse>& shape) const;
   };

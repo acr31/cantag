@@ -64,7 +64,7 @@ namespace Cantag {
    * independent correspondences or the minimisation
    * fails to converge
    */
-  class EstimateTransform {    
+  class CANTAG_EXPORT EstimateTransform {    
   public:
 
     /**

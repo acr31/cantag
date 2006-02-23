@@ -33,7 +33,7 @@
 #include <cantag/ContourRestrictions.hh>
 
 namespace Cantag {
-  class ContourFollowerTree : public Function<TL1(MonochromeImage),TL1(TreeNode<ContourEntity>)>{
+  class CANTAG_EXPORT ContourFollowerTree : public Function<TL1(MonochromeImage),TL1(TreeNode<ContourEntity>)>{
   private:
     /**
      * An array of lookup values for each pixel.  The low two bits

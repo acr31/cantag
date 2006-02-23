@@ -35,7 +35,7 @@
 
 namespace Cantag {
 
-  class RemoveNonConcentricEllipse : public Function<TL0,TL1(TreeNode<ShapeEntity<Ellipse> >)> {
+  class CANTAG_EXPORT RemoveNonConcentricEllipse : public Function<TL0,TL1(TreeNode<ShapeEntity<Ellipse> >)> {
   private:
     const EllipseRestrictions& m_restrict;
   public:

@@ -55,7 +55,7 @@ namespace Cantag {
    *
    * \todo Change the implementation so it actually uses the backing store
    */
-  class BigInt  {
+  class CANTAG_EXPORT BigInt  {
   private:
 
     const mpz_class m_bit1;

@@ -39,7 +39,7 @@ extern "C" {
 
 namespace Cantag {
 
-  class VideoImageSource :  public ImageSource<Pix::Sze::Byte3,Pix::Fmt::BGR24> {
+  class CANTAG_EXPORT VideoImageSource :  public ImageSource<Pix::Sze::Byte3,Pix::Fmt::BGR24> {
 
   public:
     VideoImageSource(const char *file, int width, int height, bool attempt_realtime);

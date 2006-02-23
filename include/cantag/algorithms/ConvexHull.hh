@@ -32,7 +32,7 @@
 #include <cantag/ConvexHullRestrictions.hh>
 
 namespace Cantag {
-  class ConvexHull : public Function<TL1(ContourEntity),TL1(ConvexHullEntity)> {
+  class CANTAG_EXPORT ConvexHull : public Function<TL1(ContourEntity),TL1(ConvexHullEntity)> {
   private:
     const ConvexHullRestrictions& m_restriction;
   public:

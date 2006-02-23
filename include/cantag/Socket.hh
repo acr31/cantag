@@ -46,7 +46,7 @@ extern "C" {
 
 namespace Cantag {
 
-  class Socket {
+  class CANTAG_EXPORT Socket {
   private:
     int m_socket;
     int m_byte_count;
@@ -93,7 +93,7 @@ namespace Cantag {
    * socket (that can recieve) that accepts the first waiting connection
    * and reads from that until it is closed
    */
-  class SingleSocket : public Socket {
+  class CANTAG_EXPORT SingleSocket : public Socket {
   private:
     Socket* m_accepted;
   public:

@@ -43,7 +43,7 @@ namespace Cantag {
    * additional N*N/2 subtractions and multiplications to back
    * substitute the final values.
    */
-  void solve_simultaneous(double* X, double** A, double* R, int size);
+  void CANTAG_EXPORT solve_simultaneous(double* X, double** A, double* R, int size);
 
 
   /**
@@ -59,7 +59,7 @@ namespace Cantag {
    * containing _rows_ of the result.
    *
    */
-  void invert_matrix(double** A, double **R, int size);
+  void CANTAG_EXPORT invert_matrix(double** A, double **R, int size);
 
   /**
    * Takes a matrix A and a matrix B and returns inv(A)*B stored in B.
@@ -72,6 +72,6 @@ namespace Cantag {
    * simultaneously.  This function destroys the contents of A and B.
    *
    */
-  void predivide(double** A, double **B, int size, int cols);
+  void CANTAG_EXPORT predivide(double** A, double **B, int size, int cols);
 }
 #endif//GAUSSIAN_ELIMINATION_GUARD

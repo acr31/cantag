@@ -37,7 +37,7 @@
 #include <cantag/QuadTangle.hh>
 
 namespace Cantag {
-  class PrintEntityContour : public Function<TL0,TL1(ContourEntity)> {
+  class CANTAG_EXPORT PrintEntityContour : public Function<TL0,TL1(ContourEntity)> {
   private:
     std::ostream& m_output;
   public:
@@ -45,7 +45,7 @@ namespace Cantag {
     bool operator()(ContourEntity& contourentity) const ;
   };
 
-  class PrintEntityConvexHull : public Function<TL1(ContourEntity),TL1(ConvexHullEntity)> {
+  class CANTAG_EXPORT PrintEntityConvexHull : public Function<TL1(ContourEntity),TL1(ConvexHullEntity)> {
   private:
     std::ostream& m_output;
   public:
@@ -53,7 +53,7 @@ namespace Cantag {
     bool operator()(const ContourEntity& contourentity, ConvexHullEntity& convexhull) const ;
   };
   
-  class PrintEntityShapeSquare : public Function<TL0,TL1(ShapeEntity<QuadTangle>)> {
+  class CANTAG_EXPORT PrintEntityShapeSquare : public Function<TL0,TL1(ShapeEntity<QuadTangle>)> {
   private:
     std::ostream& m_output;
   public:
@@ -61,7 +61,7 @@ namespace Cantag {
     bool operator()(ShapeEntity<QuadTangle>& shapeentity) const;
   };
 
-  class PrintEntityShapeCircle : public Function<TL0,TL1(ShapeEntity<Ellipse>)> {
+  class CANTAG_EXPORT PrintEntityShapeCircle : public Function<TL0,TL1(ShapeEntity<Ellipse>)> {
   private:
     std::ostream& m_output;
   public:
@@ -69,7 +69,7 @@ namespace Cantag {
     bool operator()(ShapeEntity<Ellipse>& shapeentity) const;
   };
 
-  class PrintEntityTransform : public Function<TL0,TL1(TransformEntity)> {
+  class CANTAG_EXPORT PrintEntityTransform : public Function<TL0,TL1(TransformEntity)> {
   private:
     std::ostream& m_output;
   public:

@@ -32,7 +32,7 @@ namespace Cantag {
   /**
    * \todo pack the data into ints
    */
-  class MonochromeImage : public Entity {
+  class CANTAG_EXPORT MonochromeImage : public Entity {
   public:
     enum {
       LEFT_PIXEL = 0x1,

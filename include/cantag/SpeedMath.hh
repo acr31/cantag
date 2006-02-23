@@ -28,6 +28,8 @@
 #include <queue>
 #include <vector>
 
+#include <cantag/Config.hh>
+
 #define FLT_INFINITY std::numeric_limits<float>::infinity()
 #define DBL_INFINITY std::numeric_limits<double>::infinity()
 
@@ -139,7 +141,7 @@ namespace Cantag {
     //#endif
   }
 
-  class Minima {
+  class CANTAG_EXPORT Minima {
   private:
     float m_minimum;
   public:
@@ -148,7 +150,7 @@ namespace Cantag {
     float GetMinima() const { return m_minimum; }
   };
 
-  class MinimaQueue {
+  class CANTAG_EXPORT MinimaQueue {
   public:
     typedef std::priority_queue<float,std::vector<float>, std::greater<float> > Queue;
   private:
@@ -160,7 +162,7 @@ namespace Cantag {
     Queue& GetQueue() { return m_minima; }
   };
 
-  class Maxima {
+  class CANTAG_EXPORT Maxima {
   private:
     float m_maximum;
   public:

@@ -201,7 +201,7 @@ namespace Cantag {
   /**
    * A wrapper object for an image, specialised with runtime layout support
    */
-  template<> class ImageBase<Pix::Fmt::Runtime> : public Entity {
+  template<> class CANTAG_EXPORT ImageBase<Pix::Fmt::Runtime> : public Entity {
 
   private:
     unsigned int m_width;
@@ -332,7 +332,7 @@ namespace Cantag {
   /**
    * Functions whose body is specific to RGB images are placed in here.
    */
-  template<> class ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::RGB24> 
+  template<> class CANTAG_EXPORT ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::RGB24> 
     : public ImageBase<Pix::Fmt::RGB24> { 
 
   protected:
@@ -360,7 +360,7 @@ namespace Cantag {
   /**
    * Functions whose body is specific to BGR images are placed in here.
    */
-  template<> class ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::BGR24> 
+  template<> class CANTAG_EXPORT ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::BGR24> 
     : public ImageBase<Pix::Fmt::BGR24> { 
 
   protected:
@@ -387,7 +387,7 @@ namespace Cantag {
   /**
    * Functions whose body is specific to BGR images are placed in here.
    */
-  template<> class ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::Runtime> 
+  template<> class CANTAG_EXPORT ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::Runtime> 
     : public ImageBase<Pix::Fmt::Runtime> { 
 
   protected:
@@ -412,7 +412,7 @@ namespace Cantag {
   /**
    * Functions whose body is specific to Grey images are placed in here.
    */
-  template<> class ImageSpecialise<Pix::Sze::Byte1,Pix::Fmt::Grey8> 
+  template<> class CANTAG_EXPORT ImageSpecialise<Pix::Sze::Byte1,Pix::Fmt::Grey8> 
     : public ImageBase<Pix::Fmt::Grey8> { 
 
   protected:
@@ -752,7 +752,7 @@ namespace Cantag {
     void ellipse_polygon_approx(float* points, int startindex, int length, float xc, float yc, float width, float height,  float angle_radians, const Pixel<layout>& colour, int thickness, float start_angle);
     void ScanLineFill(float* points,int numpoints,const Pixel<layout>& colour);
 
-    class Edge {
+    class CANTAG_EXPORT Edge {
     public:
       int miny;
       int maxy;

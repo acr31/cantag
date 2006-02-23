@@ -31,7 +31,7 @@ namespace Cantag {
 /**
  * Compute the "signal strength" for this tag
  */
-  class SignalStrengthContour : public Function<TL1(ContourEntity),TL1(SignalStrengthEntity)> {
+  class CANTAG_EXPORT SignalStrengthContour : public Function<TL1(ContourEntity),TL1(SignalStrengthEntity)> {
   public:
     bool operator()(const ContourEntity& ce, SignalStrengthEntity& se) const;
   };

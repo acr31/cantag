@@ -35,7 +35,7 @@ namespace Cantag {
    * Represent the convex hull of a contour.  We store the indices of
    * the points that lie on the convex hull.
    */
-  class ConvexHullEntity : public Entity {
+  class CANTAG_EXPORT ConvexHullEntity : public Entity {
   private:
     std::vector<int> m_indices;
   public:

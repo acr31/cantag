@@ -30,7 +30,7 @@
 
 
 namespace Cantag {
-  class TransformEntity : public Entity  {
+  class CANTAG_EXPORT TransformEntity : public Entity  {
   private:
     std::list<Transform*> m_transforms;
   public:

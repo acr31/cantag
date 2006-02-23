@@ -26,6 +26,10 @@
 
 #include <cantag/CompilationOptions.h>
 
+#ifndef CANTAG_EXPORT
+#define CANTAG_EXPORT
+#endif
+
 #ifdef TEXT_DEBUG
 #include <iostream>
 #define PROGRESS(x) std::cout.precision(32); std::cout << __FILE__ << ":" << __LINE__ << " " << x << std::endl

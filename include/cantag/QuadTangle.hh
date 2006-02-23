@@ -38,7 +38,7 @@ namespace Cantag {
    *
    * \todo regression test give it sets of points we see if it fits them properly
    */
-  class QuadTangle{
+  class CANTAG_EXPORT QuadTangle{
   protected:
     float m_x0;
     float m_y0;

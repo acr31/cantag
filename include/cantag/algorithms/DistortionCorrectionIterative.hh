@@ -35,7 +35,7 @@
 #endif
 
 namespace Cantag {
-  class DistortionCorrectionIterative : public Function<TL0,TL1(ContourEntity)> {
+  class CANTAG_EXPORT DistortionCorrectionIterative : public Function<TL0,TL1(ContourEntity)> {
   private:
     const Camera& m_camera;
     const bool    m_cache;

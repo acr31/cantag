@@ -41,7 +41,7 @@ namespace Cantag {
  * \todo regression test by giving it a set of points derived from an
  * ellipse and asking it to fit them
  */
-class Ellipse  {
+class CANTAG_EXPORT Ellipse  {
 protected:
   float m_a;
   float m_b;

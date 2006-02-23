@@ -32,7 +32,7 @@
 
 namespace Cantag {
 
-  class TransformEllipseFull : public Function<TL1(ShapeEntity<Ellipse>),TL1(TransformEntity)> {
+  class CANTAG_EXPORT TransformEllipseFull : public Function<TL1(ShapeEntity<Ellipse>),TL1(TransformEntity)> {
   private:
     float m_bullseyesize;
 

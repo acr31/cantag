@@ -32,7 +32,7 @@
 
 namespace Cantag {
 
-  class ContourEntity : public Entity {
+  class CANTAG_EXPORT ContourEntity : public Entity {
   public:
     enum bordertype_t { UNKNOWN = 2, OUTER_BORDER = 1, HOLE_BORDER = 0};
   private:

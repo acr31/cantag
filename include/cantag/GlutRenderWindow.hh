@@ -55,7 +55,7 @@
 
 namespace Cantag {
   
-  class GlutRenderWindow {
+  class CANTAG_EXPORT GlutRenderWindow {
 
   protected:
     int m_width;

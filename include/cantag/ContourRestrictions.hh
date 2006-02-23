@@ -26,7 +26,7 @@
 #define CONTOUR_RESTRICTIONS_GUARD
 
 namespace Cantag {
-  class ContourRestrictions {
+  class CANTAG_EXPORT ContourRestrictions {
   private:
     int m_minContourLength;
     int m_minContourWidth;

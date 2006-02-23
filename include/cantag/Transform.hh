@@ -38,7 +38,7 @@ namespace Cantag {
   /**
    * A class to represent a general affine transformation
    */
-  class Transform {
+  class CANTAG_EXPORT Transform {
   private:
     float m_transform[16];
     float m_confidence;
