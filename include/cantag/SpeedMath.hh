@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2004,2005 Alastair R. Beresford
+  Copyright (C) 2004,2005 Alastair R. Beresford and Andrew C. Rice
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -25,6 +25,9 @@
 #include <cassert>
 #include <limits>
 #include <iostream>
+#include <queue>
+#include <vector>
+
 #define FLT_INFINITY std::numeric_limits<float>::infinity()
 #define DBL_INFINITY std::numeric_limits<double>::infinity()
 
@@ -140,9 +143,21 @@ namespace Cantag {
   private:
     float m_minimum;
   public:
-    Minima() : m_minimum(FLT_INFINITY) {}
+    Minima() : m_minimum(FLT_MAX) {}
     void UpdateMinima(float newval) { if (newval < m_minimum) m_minimum = newval; }
     float GetMinima() const { return m_minimum; }
+  };
+
+  class MinimaQueue {
+  public:
+    typedef std::priority_queue<float,std::vector<float>, std::greater<float> > Queue;
+  private:
+    Queue m_minima;
+  public:
+    MinimaQueue() : m_minima() {}
+    void UpdateMinima(float newval) { m_minima.push(newval); }
+    float GetMinima() const { return m_minima.top(); }
+    Queue& GetQueue() { return m_minima; }
   };
 
   class Maxima {
@@ -154,36 +169,36 @@ namespace Cantag {
     float GetMaxima() const { return m_maximum; }
   };
 
-  template<class C> inline C sqrt(C val) { not defined for this type }
+  template<class C> inline C sqrt(C val) { }
   template<> inline float sqrt<float>(float val) { return ::sqrtf(val); }
   template<> inline double sqrt<double>(double val) { return ::sqrt(val); }
 
-  template<class C> inline C abs(C val) {  not defined for this type }
+  template<class C> inline C abs(C val) {   }
   template<> inline float abs<float>(float val) { return ::fabsf(val); }
   template<> inline double abs<double>(double val) { return ::fabs(val); }
-  template<> inline int abs<int>(int val) { return ::fabs(val); }
+  template<> inline int abs<int>(int val) { return ::abs(val); }
 
-  template<class C> inline C sin(C val) {  not defined for this type }
+  template<class C> inline C sin(C val) {   }
   template<> inline float sin<float>(float val) { return ::sinf(val); }
   template<> inline double sin<double>(double val) { return ::sin(val); }
 
-  template<class C> inline C cos(C val) {  not defined for this type }
+  template<class C> inline C cos(C val) {   }
   template<> inline float cos<float>(float val) { return ::cosf(val); }
   template<> inline double cos<double>(double val) { return ::cos(val); }
   
-  template<class C> inline C atan(C val) {  not defined for this type }
+  template<class C> inline C atan(C val) {  }
   template<> inline float atan<float>(float val) { return ::atanf(val); }
   template<> inline double atan<double>(double val) { return ::atan(val); }
 
-  template<class C> inline C atan2(C val, C val2) {  not defined for this type }
+  template<class C> inline C atan2(C val, C val2) {   }
   template<> inline float atan2<float>(float val, float val2) { return ::atan2f(val,val2); }
   template<> inline double atan2<double>(double val, double val2) { return ::atan2(val,val2); }
 
-  template<class C> inline C acos(C val) { not defined for this type }
+  template<class C> inline C acos(C val) {  }
   template<> inline float acos<float>(float val) { return ::acosf(val); }
   template<> inline double acos<double>(double val) { return ::acos(val); }
 
-  template<class C> inline C tan(C val) { not defined for this type }
+  template<class C> inline C tan(C val) {  }
   template<> inline float tan<float>(float val) { return ::tanf(val); }
   template<> inline double tan<double>(double val) { return ::tan(val); }
   
