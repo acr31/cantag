@@ -137,7 +137,7 @@ namespace Cantag {
     return *(int*)&t;
 #else
     */
-    return (int)round(d);
+    return (int)floor(d+0.5);
     //#endif
   }
 
