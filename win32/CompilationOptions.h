@@ -23,6 +23,8 @@
  * Manual compilation options file for windows builds
  */
 
+#include <Cantag-Win32.h>
+
 /**
  * OpenGL
  */
