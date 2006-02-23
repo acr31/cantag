@@ -29,6 +29,7 @@ libcantag_la_SOURCES += algorithms/DrawEntity.cc
 libcantag_la_SOURCES += algorithms/PrintEntity.cc
 libcantag_la_SOURCES += algorithms/FitQuadTangleRegression.cc
 libcantag_la_SOURCES += algorithms/SimulateMinDistance.cc
+libcantag_la_SOURCES += algorithms/SignalStrengthContour.cc
 
 if HAVE_SYS_SOCKET_H
 if HAVE_NETINET_IN_H
