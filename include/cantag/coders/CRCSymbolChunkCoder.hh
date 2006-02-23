@@ -75,7 +75,7 @@ namespace Cantag {
       unsigned int pld=0;
       for (int i=0; i<BIT_COUNT; i+=GRANULARITY) {
 	for (int j=0; j<GRANULARITY-1-CRC_BITS; j++) {
-	  data[pld++]=data_copy[i+j+1];
+	  data.Set(pld++,data_copy[i+j+1]);
 	}
       }
       return rotation;
@@ -99,12 +99,12 @@ namespace Cantag {
       int toenci=0;
 
       // First the marker
-      data[payload_pointer++] = (i==0);  // encode a 1 if this is the first symbol
+      data.Set(payload_pointer++,i==0);  // encode a 1 if this is the first symbol
       toenc[toenci++] = (i==0); 
 
       // Now the data
       for(int j=0;j<GRANULARITY-1-CRC_BITS;j++) {
-	data[payload_pointer++] = data_copy[i+j];
+	data.Set(payload_pointer++,data_copy[i+j]);
 	toenc[toenci++] = data_copy[i+j];
       }
 
@@ -113,7 +113,7 @@ namespace Cantag {
       std::bitset<CRC_BITS> c = crc.GetCRC(toenc);
 
       for (int k=0; k<CRC_BITS; k++) {
-	data[payload_pointer++] = c[k];
+	data.Set(payload_pointer++,c[k]);
       }
     }
     return true;
