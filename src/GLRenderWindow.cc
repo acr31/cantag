@@ -120,5 +120,9 @@ namespace Cantag {
     return (1 << count) + 2;    
   }
 
+  void GLRenderWindow::Flush() {
+    glXSwapBuffers(m_display, m_window); /* buffer swap does implicit glFlush */  
+    if (!ServiceEventQueue()) exit(-1);
+  }
 }
 #endif//HAVE_GL_GL_H
