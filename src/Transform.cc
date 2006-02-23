@@ -83,7 +83,7 @@ namespace Cantag {
     float y0,y2,y1;
     
     float numerator = sqrt(z1*z1+z2*z2);
-    if (abs(numerator) > FLT_EPSILON) {
+    if (abs(numerator) > 1e-10) {
       y0 = 0.f;
       y1 = -z2/numerator;
       y2 = z1/numerator;
