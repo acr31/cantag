@@ -72,7 +72,7 @@ namespace Cantag {
 	  }
 	  bool sample = image.GetPixel(tpt[0],tpt[1]);
 	  
-	  (payload->payload)[index] = sample;      
+	  payload->payload.Set(index,sample);      
 	  index++;
 	}
 	readindex+=READ_COUNT;

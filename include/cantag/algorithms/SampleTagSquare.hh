@@ -67,7 +67,7 @@ namespace Cantag {
 	   return false;
 	 }
 	 bool sample = image.GetPixel(pts[0],pts[1]);
-	 (payload->payload)[j] = sample;
+	 payload->payload.Set(j,sample);
       }
       return true;
     }
