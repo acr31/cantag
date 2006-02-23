@@ -67,9 +67,14 @@ libcantag_la_SOURCES += V4LImageSource.cc
 endif
 
 if HAVE_GL_GL_H
+if HAVE_GL_GLUT_H
 if HAVELIB_GL
 libcantag_la_SOURCES += GLRenderWindow.cc
-libcantag_la_SOURCES += GLOutputMechanism.cc
+if HAVE_GL_FREEGLUT_H
+if HAVELIB_GLUT
+libcantag_la_SOURCES += GlutRenderWindow.cc
+endif
+endif
 if HAVE_GL_OSMESA_H
 if HAVELIB_OSMESA
 if HAVE_GL_GLU_H
@@ -81,7 +86,7 @@ endif
 endif
 endif
 endif
-
+endif
 
 if HAVELIB_AVCODEC
 if HAVELIB_AVFORMAT
@@ -105,5 +110,3 @@ endif
 
 AM_CPPFLAGS=-I$(srcdir)/../include -I$(top_builddir)/include 
 
-# uncomment this for win32
-#libcantag_la_LDFLAGS = -no-undefined -version-info 0:0:0
