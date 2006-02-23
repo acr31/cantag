@@ -101,6 +101,7 @@
 #include <cantag/algorithms/SimulateMinDistance.hh>
 #include <cantag/algorithms/SimulateMaxSampleError.hh>
 #include <cantag/algorithms/SimulateContour.hh>
+#include <cantag/algorithms/SignalStrengthContour.hh>
 
 ///////////////////////
 // coders
@@ -160,6 +161,8 @@
 #ifdef HAVELIB_GL
 #ifdef HAVELIB_GLU
 #ifdef HAVELIB_GLUT
+# include <cantag/GLRenderWindow.hh>
+# include <cantag/GlutRenderWindow.hh>
 # include <cantag/GLOutputMechanism.hh>
 #endif
 #endif
