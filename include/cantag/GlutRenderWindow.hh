@@ -22,8 +22,8 @@
  * $Header$
  */
 
-#ifndef GLRENDERWINFOW_GUARD
-#define GLRENDERWINDOW_GUARD
+#ifndef GLUTRENDERWINFOW_GUARD
+#define GLUTRENDERWINDOW_GUARD
 
 #include <cantag/Config.hh>
 
@@ -31,42 +31,43 @@
 #error "This version has been configured without OpenGL support"
 #endif
 
+#ifndef HAVE_GL_FREEGLUT_H
+#error "This version has been configured without Freeglut support"
+#endif
+
 #ifndef HAVELIB_GL
 # error "This version has been configured without OpenGL support"
+#endif
+
+#ifndef HAVELIB_GLUT
+# error "This version has been configured without GLUT support"
 #endif
 
 #include <iostream>
 #include <map>
 
-#include <GL/glx.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 
 #include <cantag/Camera.hh>
 #include <cantag/Transform.hh>
 
 namespace Cantag {
   
-  /**
-   * Superclass for GL rendering 
-   */
-  class GLRenderWindow {
-  private:
-    XVisualInfo* m_visual;
-    Colormap m_colormap;
+  class GlutRenderWindow {
 
   protected:
-    Display *m_display;
-    Window m_window;
-    GLXContext m_context;
-    float m_ratio;
     int m_width;
     int m_height;
+    float m_ratio;
+
+  private:
+    int m_window_id;
 
   public:
-    GLRenderWindow(int width,int height);
-    virtual ~GLRenderWindow();
+    GlutRenderWindow(int width,int height);
+    virtual ~GlutRenderWindow();
     
     /**
      * Find the next allowable texture size which is greater than the argument
@@ -79,4 +80,4 @@ namespace Cantag {
   };
 }
 
-#endif//GLRENDER_WINDOW_GUARD
+#endif//GLUTRENDER_WINDOW_GUARD
