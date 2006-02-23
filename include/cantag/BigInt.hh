@@ -119,7 +119,7 @@ namespace Cantag {
 
   template<int SIZE> void BigInt::ToCyclicBitSetDestructive(CyclicBitSet<SIZE>& t)  {
     for(int i=0;i<SIZE;i++) {
-      t[i] = ((m_gmpint & m_bit1) == m_bit1 ? true : false);
+      t.Set(i,((m_gmpint & m_bit1) == m_bit1 ? true : false));
       m_gmpint >>= 1;
     }
   }
