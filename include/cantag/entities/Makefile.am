@@ -1,3 +1,7 @@
-totalincludedir = $(includedir)/total/entities
-totalinclude_HEADERS = Entity.hh ContourEntity.hh ConvexHullEntity.hh TransformEntity.hh ShapeEntity.hh
-
+cantagincludedir = $(includedir)/cantag/entities
+cantaginclude_HEADERS = Entity.hh
+cantaginclude_HEADERS += ContourEntity.hh
+cantaginclude_HEADERS += ConvexHullEntity.hh
+cantaginclude_HEADERS += TransformEntity.hh
+cantaginclude_HEADERS += ShapeEntity.hh
+cantaginclude_HEADERS += SignalStrengthEntity.hh
