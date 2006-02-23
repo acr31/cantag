@@ -24,7 +24,7 @@
 
 #include <cantag/Config.hh>
 
-#ifdef HAVE_GL_GL_H
+#ifdef HAVE_GL_GLX_H
 
 #include <cantag/GLRenderWindow.hh>
 
