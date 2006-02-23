@@ -53,14 +53,17 @@ AC_COMPILE_IFELSE(
 AC_LANG_SOURCE([[
 struct A {
     virtual A* Get() = 0;
+    virtual ~A() {};
 };
 
 struct B {
     virtual B* Get() = 0;
+    virtual ~B() {};
 };
 
 struct C : public A, public B {
     virtual C* Get() = 0;
+    virtual ~C() {};
 };
 ]]),
 [
@@ -80,6 +83,7 @@ CANTAG_CHECK_HEADER(Magick++.h,HAVE_MAGICKXX,have_magickxx_h)
 CANTAG_CHECK_HEADER(GL/gl.h,HAVE_GL_GL_H,have_gl_gl_h)
 CANTAG_CHECK_HEADER(GL/glu.h,HAVE_GL_GLU_H,have_gl_glu_h)
 CANTAG_CHECK_HEADER(GL/glut.h,HAVE_GL_GLUT_H,have_gl_glut_h)
+CANTAG_CHECK_HEADER(GL/freeglut.h,HAVE_GL_FREEGLUT_H,have_gl_freeglut_h)
 CANTAG_CHECK_HEADER(GL/osmesa.h,HAVE_GL_OSMESA_H,have_gl_osmesa_h)
 CANTAG_CHECK_HEADER(boost/random.hpp,HAVE_BOOST_RANDOM_H,have_boost_random_h)
 CANTAG_CHECK_HEADER(boost/test/unit_test.hpp,HAVE_BOOST_TEST_UNITTEST_H,have_boost_test_unittest_h)
@@ -113,13 +117,14 @@ CANTAG_CHECK_LIB(gmp,__gmpz_init,HAVELIB_GMP,havelib_gmp)
 CANTAG_CHECK_LIB(gmpxx,__gmpz_set,HAVELIB_GMPXX,havelib_gmpxx)
 CANTAG_CHECK_LIB(gslcblas,cblas_caxpy,HAVELIB_GSLCBLAS,havelib_gslcblas)
 CANTAG_CHECK_LIB(gsl,gsl_multimin_diff,HAVELIB_GSL,havelib_gsl)
+CANTAG_CHECK_LIB(raw1394,raw1394_iso_stop,HAVELIB_RAW1394,havelib_raw1394)
 CANTAG_CHECK_LIB(dc1394_control,dc1394_dma_setup_capture,HAVELIB_DC1394,havelib_dc1394)
 CANTAG_CHECK_LIB(avcodec, img_convert,HAVELIB_AVCODEC,havelib_avcodec)
 CANTAG_CHECK_LIB(avformat,av_register_all ,HAVELIB_AVFORMAT,havelib_avformat)
 CANTAG_CHECK_LIB(z,uncompress ,HAVELIB_Z,havelib_z)
 
 LIBSSAVEACR31="$LIBS"
-LIBS="-lboost_unit_test_framework-gcc-1_31 $LIBS"
+LIBS="-lboost_unit_test_framework-gcc-1_32 $LIBS"
 AC_LINK_IFELSE(
 AC_LANG_SOURCE([[
 #ifdef __cplusplus
