@@ -130,9 +130,9 @@ namespace Cantag {
 
     bool operator[](size_t n) const;
 
-//    typename std::bitset<BIT_COUNT>::reference operator[](size_t n);
+    void Set(size_t n, bool value);
   
-	bool operator<(const CyclicBitSet<BIT_COUNT>& o) const;
+    bool operator<(const CyclicBitSet<BIT_COUNT>& o) const;
 
     bool operator==(const CyclicBitSet<BIT_COUNT>& o) const;
 
@@ -165,12 +165,12 @@ namespace Cantag {
     int length = strlen(code);
     
     for(int i=0;i<BIT_COUNT;++i) {
-      (*this)[i] = 0;
+      this->Set(i,false);
     }
     
     if (length > BIT_COUNT) length = BIT_COUNT;
     for(int i=length-1;i>=0;i--) {
-      (*this)[i] = (*code == '1');
+      this->Set(i,*code == '1');
       code++;
       if (!code[0]) break;
     }
@@ -178,7 +178,7 @@ namespace Cantag {
 
   template<int BIT_COUNT> void CyclicBitSet<BIT_COUNT>::operator=(const CyclicBitSet<BIT_COUNT>& source) {
     for(int i=0;i<BIT_COUNT;++i) {
-      (*this)[i] = source[i];
+      this->Set(i,source[i]);
     }
   }
 
@@ -261,7 +261,7 @@ namespace Cantag {
     assert(symbol_size < 8*sizeof(unsigned int));
     for(unsigned int i=0;i<symbol_size;i++) {
       bool value = (symbol & 0x1 == 0x1);
-      (*this)[symbol_number*symbol_size+i] = value;
+      this->Set(symbol_number*symbol_size+i,value);
       symbol>>=1;
     }
   }
@@ -271,10 +271,9 @@ namespace Cantag {
     return std::bitset<BIT_COUNT>::operator[]((n+m_rotation) % m_size);
   }
 
-
-//  template<int BIT_COUNT> typename std::bitset<BIT_COUNT>::reference CyclicBitSet<BIT_COUNT>::operator[](size_t n) {
-    //return std::bitset<BIT_COUNT>::operator[]((n+m_rotation) % m_size);
-  //}
+  template<int BIT_COUNT> void CyclicBitSet<BIT_COUNT>::Set(size_t n, bool b) {
+    this->set((n+m_rotation) % m_size,b);
+  }
 
   template<int BIT_COUNT> bool CyclicBitSet<BIT_COUNT>::operator<(const CyclicBitSet<BIT_COUNT>& o) const {
 
