@@ -98,7 +98,7 @@ namespace Cantag {
     friend std::ostream& operator<<(std::ostream& s, const BigInt& z);
   };
 
-  std::ostream& operator<<(std::ostream& s, const BigInt& z) {
+  inline std::ostream& CANTAG_EXPORT operator<<(std::ostream& s, const BigInt& z) {
     s << z.m_gmpint;
     return s;
   }
