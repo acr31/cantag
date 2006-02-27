@@ -22,7 +22,7 @@
  * $Header$
  */
 
-#ifndef GLUTRENDERWINFOW_GUARD
+#ifndef GLUTRENDERWINDOW_GUARD
 #define GLUTRENDERWINDOW_GUARD
 
 #include <cantag/Config.hh>
@@ -46,9 +46,6 @@
 #include <iostream>
 #include <map>
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/freeglut.h>
 
 #include <cantag/Camera.hh>
 #include <cantag/Transform.hh>
