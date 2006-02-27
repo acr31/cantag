@@ -33,8 +33,9 @@ namespace Cantag {
   /**
    * A list of types
    */
-  class TypeListEOL {
+  struct CANTAG_EXPORT TypeListEOL {
     typedef TypeListEOL Head;
+	typedef TypeListEOL Tail;
   };
   template<class H, class T = TypeListEOL> struct TypeList {
     typedef H Head;
