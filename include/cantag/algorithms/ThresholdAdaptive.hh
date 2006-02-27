@@ -73,7 +73,7 @@ namespace Cantag {
     const int image_height = image.GetHeight();
     const int useoffset = 255-m_offset;
     
-    int previous_line[image_width];
+    int* previous_line = new int[image_width];
     for(int i=0;i<image_width;++i) { previous_line[i] = 127; }
     
     for(int i=0;i<image_height-1;) { // use height-1 so we dont overrun the image if its height is an odd number
@@ -110,6 +110,7 @@ namespace Cantag {
 	}
       }
     }
+	delete[] previous_line;
     return true;
   }
 
