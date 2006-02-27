@@ -143,7 +143,9 @@
 # include <cantag/IEEE1394ImageSource.hh>
 #endif
 #endif
-
+#ifdef WIN32
+# include <cantag/VFWImageSource.hh>
+#endif
 
 //////////////////////
 // output mechanisms
@@ -161,8 +163,12 @@
 #ifdef HAVELIB_GL
 #ifdef HAVELIB_GLU
 #ifdef HAVELIB_GLUT
+#ifdef HAVE_GL_GLX_H
 # include <cantag/GLRenderWindow.hh>
+#endif
+#ifdef HAVE_GL_FREEGLUT_H
 # include <cantag/GlutRenderWindow.hh>
+#endif
 # include <cantag/GLOutputMechanism.hh>
 #endif
 #endif
