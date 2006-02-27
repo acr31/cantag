@@ -33,6 +33,72 @@
 
 namespace Cantag {
 
+	struct MinData_t {
+      const Camera *c;
+      std::list<Correspondence> *corr;
+    };
+
+
+	  static float EvaluateResidualSq(const Cantag::Transform &t,
+			 const Correspondence &c,
+			 const Camera &cam) {
+
+    // World to Camera
+    Cantag::Transform t2;
+    for (int i=0; i<16;i++) t2[i]=t[i];
+    t2.Invert();
+    
+
+    // Get image pixel of this point
+    float p[2];
+    t2.Apply(c.GetWorldX(),c.GetWorldY(),c.GetWorldZ(),p, p+1);
+    cam.NPCFToImage(p,1);
+
+    // Compare with image pixel in correspondence
+    float p2[] ={c.GetImageX(),c.GetImageY()};
+    cam.NPCFToImage(p2,1); 
+
+
+    // Return residual _squared_
+    return (p[0]-p2[0])*(p[0]-p2[0]) +
+      (p[1]-p2[1])*(p[1]-p2[1]);
+  }
+
+
+/**
+   * Here we calculate the transform for camera->world
+   * from the parameters, then invert it to get the transform
+   * world->camera. Then we supply the world parts of the
+   * correspondences, apply the transform and project.
+   *
+   * Then we calculate the distance of the point from the
+   * correspondence image equivalent. Minimising this
+   * fits to the image 
+   */
+  static double _MinFunc(const gsl_vector *v, void *params) {
+    struct MinData_t *md = (struct MinData_t *) params;
+    const Camera *cam = md->c;
+    std::list<Correspondence> *list = md->corr;
+
+    float x = gsl_vector_get(v, 0);
+    float y = gsl_vector_get(v, 1);
+    float z = gsl_vector_get(v, 2);
+    float theta = gsl_vector_get(v, 3);
+    float phi = gsl_vector_get(v, 4);
+    float psi = gsl_vector_get(v, 5);
+
+    Cantag::Transform current_estimate(x, y, z, theta, phi, psi, 1.0);
+
+    double sumsq=0.0;
+    std::list<Correspondence>::const_iterator it = list->begin();
+    //  float px,py;
+    for(;it!=list->end(); ++it) {
+      sumsq += EvaluateResidualSq(current_estimate, *it, *cam);
+    }
+    return sqrt(sumsq);
+  }
+
+
   /**
    * Iteratively solves for the camera position
    * given a series of correspondences between
@@ -91,7 +157,7 @@ namespace Cantag {
 
 
     gsl_multimin_function errfunc;
-    errfunc.f = &(Cantag::EstimateTransform::_MinFunc);
+    errfunc.f = &(_MinFunc);
     errfunc.n = 6;
     errfunc.params = (void *)&data;
 
@@ -165,65 +231,8 @@ namespace Cantag {
 
 
 
-  float EstimateTransform::EvaluateResidualSq(const Cantag::Transform &t,
-			 const Correspondence &c,
-			 const Camera &cam) {
 
-    // World to Camera
-    Cantag::Transform t2;
-    for (int i=0; i<16;i++) t2[i]=t[i];
-    t2.Invert();
-    
-
-    // Get image pixel of this point
-    float p[2];
-    t2.Apply(c.GetWorldX(),c.GetWorldY(),c.GetWorldZ(),p, p+1);
-    cam.NPCFToImage(p,1);
-
-    // Compare with image pixel in correspondence
-    float p2[] ={c.GetImageX(),c.GetImageY()};
-    cam.NPCFToImage(p2,1); 
-
-
-    // Return residual _squared_
-    return (p[0]-p2[0])*(p[0]-p2[0]) +
-      (p[1]-p2[1])*(p[1]-p2[1]);
-  }
-
-
-  /**
-   * Here we calculate the transform for camera->world
-   * from the parameters, then invert it to get the transform
-   * world->camera. Then we supply the world parts of the
-   * correspondences, apply the transform and project.
-   *
-   * Then we calculate the distance of the point from the
-   * correspondence image equivalent. Minimising this
-   * fits to the image 
-   */
-  double EstimateTransform::_MinFunc(const gsl_vector *v, void *params) {
-    struct MinData_t *md = (struct MinData_t *) params;
-    const Camera *cam = md->c;
-    std::list<Correspondence> *list = md->corr;
-
-    float x = gsl_vector_get(v, 0);
-    float y = gsl_vector_get(v, 1);
-    float z = gsl_vector_get(v, 2);
-    float theta = gsl_vector_get(v, 3);
-    float phi = gsl_vector_get(v, 4);
-    float psi = gsl_vector_get(v, 5);
-
-    Cantag::Transform current_estimate(x, y, z, theta, phi, psi, 1.0);
-
-    double sumsq=0.0;
-    std::list<Correspondence>::const_iterator it = list->begin();
-    //  float px,py;
-    for(;it!=list->end(); ++it) {
-      sumsq += EstimateTransform::EvaluateResidualSq(current_estimate, *it, *cam);
-    }
-    return sqrt(sumsq);
-  }
-
+  
 }
 
 #endif//HAVE_GSL

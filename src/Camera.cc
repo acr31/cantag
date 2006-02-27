@@ -23,9 +23,19 @@
  */
 
 #include <cantag/Config.hh>
-#include <cantag/Camera.hh>
+
 
 #include <iostream>
+
+#ifdef HAVE_GSL_MULTIMIN_H
+#ifdef HAVELIB_GSLCBLAS
+#ifdef HAVELIB_GSL
+#include <gsl/gsl_multimin.h>
+#endif
+#endif
+#endif
+
+#include <cantag/Camera.hh>
 
 namespace Cantag {
   Camera::Camera() :
@@ -238,6 +248,21 @@ namespace Cantag {
 #ifdef HAVE_GSL_MULTIMIN_H
 #ifdef HAVELIB_GSLCBLAS
 #ifdef HAVELIB_GSL
+
+   static double _undistortfunc(const gsl_vector *v, void *params) {
+	struct ParamsArray *p = (struct ParamsArray *) params;
+
+    float l = float(gsl_vector_get(v,0));
+    float x = p->x*l;
+    float y = p->y*l;
+    float r2 = x*x+y*y;
+
+    float radialcoeff = 1 + p->k1*r2 + p->k2*r2*r2;
+    x*=radialcoeff;
+    y*=radialcoeff;
+    return (x-p->x)*(x-p->x)+(y-p->y)*(y-p->y);
+   }
+
   void Camera::ImageToNPCFIterative(std::vector<float>& points, bool useCache) const {
     for(unsigned int i=0;i<points.size();i+=2) {
       dist_coord d;
@@ -281,7 +306,7 @@ namespace Cantag {
 	gsl_vector *step = gsl_vector_alloc (1);
 	gsl_vector_set(step,0,1.0);
 	gsl_multimin_function errfunc;
-	errfunc.f = (Cantag::Camera::_undistortfunc);
+	errfunc.f = (&_undistortfunc);
 	errfunc.n=1;
 	errfunc.params=&paramsarray;
 	const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
@@ -317,20 +342,7 @@ namespace Cantag {
       }
     }
   }
-
-   double Camera::_undistortfunc(const gsl_vector *v, void *params) {
-    struct ParamsArray *p = (struct ParamsArray *) params;
-
-    float l = float(gsl_vector_get(v,0));
-    float x = p->x*l;
-    float y = p->y*l;
-    float r2 = x*x+y*y;
-
-    float radialcoeff = 1 + p->k1*r2 + p->k2*r2*r2;
-    x*=radialcoeff;
-    y*=radialcoeff;
-    return (x-p->x)*(x-p->x)+(y-p->y)*(y-p->y);
-  }
+    
 #endif
 #endif
 #endif
