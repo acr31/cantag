@@ -25,6 +25,7 @@
 #include <cantag/Config.hh>
 
 #ifdef HAVE_GSL
+#include <gsl/gsl_multimin.h>
 #include <cantag/algorithms/TransformQuadTangleCyberCode.hh>
 
 namespace Cantag {
@@ -39,6 +40,83 @@ namespace Cantag {
       if (x) gsl_vector_free (x);
     }
   };
+	
+   static bool ComputeCameraPointsFromAngles(const gsl_vector *v, void *vp, float *pts, float *n) {
+    float *p = (float *)vp;
+    // v contains the theta/phi for spherical polars
+    float theta = gsl_vector_get(v, 0);
+    float phi   = gsl_vector_get(v, 1);
+    
+    // theta=0, phi=0 points along 1,0,0
+    float nx = sin(theta)*cos(phi);
+    float ny = sin(theta)*sin(phi);
+    float nz = cos(theta);
+
+    // std::cout << theta/M_PI*180.0 << " " << phi/M_PI*180.0 << " " << nx << " " << ny << " " << nz << std::endl;
+    
+    float Xc = p[8];
+    float Yc = p[9];
+    
+    for (int i=0; i<4; i++) {
+      float lambda = (Xc*nx + Yc*ny + nz) / 
+	(p[i*2]*nx + p[i*2+1]*ny +nz);
+      pts[3*i]   = lambda*p[2*i];
+      pts[3*i+1] = lambda*p[2*i+1];
+      pts[3*i+2] = lambda;
+      if (lambda <= 1e-05) return false;
+    }
+
+    n[0] = nx;
+    n[1] = ny;
+    n[2] = nz;
+    return true;
+  } 
+
+
+  static double QuadFunc(const gsl_vector *v, void *vp) {
+    float *p = (float *)vp;
+    float pts[12]={0.0};
+    float n[3]={0.0};
+    if (!ComputeCameraPointsFromAngles(v,p,pts,n)) return 1000.0;
+
+    // Compute the vectors for the four sides
+    float s[18]={0.0};
+
+    for (int i=0; i<12; i+=3) {
+      // vector from this to next
+      s[i] = pts[i] - pts[(i+3)%12];
+      s[i+1] = pts[i+1] - pts[(i+4)%12];
+      s[i+2] = pts[i+2] - pts[(i+5)%12];
+    }
+
+
+    // Add diagonals
+    s[12]  = pts[0]-pts[6];
+    s[13]  = pts[1]-pts[7];
+    s[14]  = pts[2]-pts[8];
+    s[15]  = pts[3]-pts[9];
+    s[16]  = pts[4]-pts[10];
+    s[17]  = pts[5]-pts[11];
+    
+    float sumsq=0.0;
+    for (int i=0; i<12; i+=3) {
+      float dotprod = s[i]*s[(i+3)%12] + 
+	s[i+1]*s[(i+4)%12] +
+	s[i+2]*s[(i+5)%12];
+      float m1 = sqrt(s[i]*s[i]+s[i+1]*s[i+1] + s[i+2]*s[i+2]);
+      float m2 = sqrt(s[(i+3)%12]*s[(i+3)%12] + s[(i+4)%12]*s[(i+4)%12] + s[(i+5)%12]*s[(i+5)%12]);
+      sumsq += dotprod*dotprod/(m1*m1*m2*m2);
+    }
+
+    float diagdp = (s[12]*s[15] +
+      s[13]*s[16] +
+      s[14]*s[17])/ (sqrt(s[12]*s[12]+s[13]*s[13]+s[14]*s[14])*sqrt(s[15]*s[15]+s[16]*s[16]+s[17]*s[17]));
+    sumsq += diagdp*diagdp;
+    //   std::cout << "S " << sumsq << std::endl;
+    return sumsq;
+  }
+
+ 
 
   bool TransformQuadTangleCyberCode::operator()(const ShapeEntity<QuadTangle>& shape, TransformEntity& dest) const {
 
@@ -73,7 +151,7 @@ namespace Cantag {
 
     int nparam = 2;
   
-    errfunc.f = &(Cantag::TransformQuadTangleCyberCode::QuadFunc);
+    errfunc.f = &(QuadFunc);
     errfunc.n = nparam;
     errfunc.params = &p;
    
@@ -160,79 +238,6 @@ namespace Cantag {
     return false;
   }
 
-  double TransformQuadTangleCyberCode::QuadFunc(const gsl_vector *v, void *vp) {
-    float *p = (float *)vp;
-    float pts[12]={0.0};
-    float n[3]={0.0};
-    if (!ComputeCameraPointsFromAngles(v,p,pts,n)) return 1000.0;
-
-    // Compute the vectors for the four sides
-    float s[18]={0.0};
-
-    for (int i=0; i<12; i+=3) {
-      // vector from this to next
-      s[i] = pts[i] - pts[(i+3)%12];
-      s[i+1] = pts[i+1] - pts[(i+4)%12];
-      s[i+2] = pts[i+2] - pts[(i+5)%12];
-    }
-
-
-    // Add diagonals
-    s[12]  = pts[0]-pts[6];
-    s[13]  = pts[1]-pts[7];
-    s[14]  = pts[2]-pts[8];
-    s[15]  = pts[3]-pts[9];
-    s[16]  = pts[4]-pts[10];
-    s[17]  = pts[5]-pts[11];
-    
-    float sumsq=0.0;
-    for (int i=0; i<12; i+=3) {
-      float dotprod = s[i]*s[(i+3)%12] + 
-	s[i+1]*s[(i+4)%12] +
-	s[i+2]*s[(i+5)%12];
-      float m1 = sqrt(s[i]*s[i]+s[i+1]*s[i+1] + s[i+2]*s[i+2]);
-      float m2 = sqrt(s[(i+3)%12]*s[(i+3)%12] + s[(i+4)%12]*s[(i+4)%12] + s[(i+5)%12]*s[(i+5)%12]);
-      sumsq += dotprod*dotprod/(m1*m1*m2*m2);
-    }
-
-    float diagdp = (s[12]*s[15] +
-      s[13]*s[16] +
-      s[14]*s[17])/ (sqrt(s[12]*s[12]+s[13]*s[13]+s[14]*s[14])*sqrt(s[15]*s[15]+s[16]*s[16]+s[17]*s[17]));
-    sumsq += diagdp*diagdp;
-    //   std::cout << "S " << sumsq << std::endl;
-    return sumsq;
-  }
-
-  bool TransformQuadTangleCyberCode::ComputeCameraPointsFromAngles(const gsl_vector *v, void *vp, float *pts, float *n) {
-    float *p = (float *)vp;
-    // v contains the theta/phi for spherical polars
-    float theta = gsl_vector_get(v, 0);
-    float phi   = gsl_vector_get(v, 1);
-    
-    // theta=0, phi=0 points along 1,0,0
-    float nx = sin(theta)*cos(phi);
-    float ny = sin(theta)*sin(phi);
-    float nz = cos(theta);
-
-    // std::cout << theta/M_PI*180.0 << " " << phi/M_PI*180.0 << " " << nx << " " << ny << " " << nz << std::endl;
-    
-    float Xc = p[8];
-    float Yc = p[9];
-    
-    for (int i=0; i<4; i++) {
-      float lambda = (Xc*nx + Yc*ny + nz) / 
-	(p[i*2]*nx + p[i*2+1]*ny +nz);
-      pts[3*i]   = lambda*p[2*i];
-      pts[3*i+1] = lambda*p[2*i+1];
-      pts[3*i+2] = lambda;
-      if (lambda <= 1e-05) return false;
-    }
-
-    n[0] = nx;
-    n[1] = ny;
-    n[2] = nz;
-    return true;
-  } 
 
 }
 #endif//HAVE_GSL

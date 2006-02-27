@@ -25,13 +25,56 @@
 #include <cantag/Config.hh>
 
 #ifdef HAVE_GSL
-
+#include <gsl/gsl_multimin.h>
 #include <cantag/algorithms/TransformQuadTangleSpaceSearch.hh>
 #include <cantag/algorithms/TransformQuadTangleProjective.hh>
 #include <cantag/gaussianelimination.hh>
 #include <cantag/SpeedMath.hh>
 
 namespace Cantag {
+
+	static double SpaceSearchQuadFunc(const gsl_vector *v, void *params) {
+    float *p = (float *) params;
+
+    float z = gsl_vector_get(v, 0);
+    float theta = gsl_vector_get(v, 1);
+    float phi  = gsl_vector_get(v, 2);
+    float psi = gsl_vector_get(v, 3);
+
+
+    Transform t(p[8]*z, p[9]*z,z,
+		theta, phi, psi, 1.0);
+    
+    float X0,Y0, X1, Y1, X2, Y2, X3, Y3;
+
+    t.Apply(-1.0, -1.0, 0.0, &X3, &Y3);
+    t.Apply(1.0, -1.0, 0.0, &X0, &Y0);
+    t.Apply(1.0, 1.0, 0.0, &X1, &Y1);
+    t.Apply(-1.0, 1.0, 0.0, &X2, &Y2);
+
+
+   //  std::cerr << X0 << " " << Y0 << std::endl;
+//     std::cerr << X1 << " " << Y1 << std::endl;
+//     std::cerr << X2 << " " << Y2 << std::endl;
+//     std::cerr << X3 << " " << Y3 << std::endl;
+//     std::cerr << std::endl;
+//     exit(0);
+
+    // Centre point of current
+    float lambda = ( (Y0-Y1)*(X3-X1) - (Y3-Y1)*(X0-X1) ) /
+      ( (X2-X0)*(Y3-Y1) - (Y2-Y0)*(X3-X1) );
+  
+    float XC = X0+lambda*(X2-X0);
+    float YC = Y0+lambda*(Y2-Y0);
+
+    // Sum of squares
+    double s= (X0-p[0])*(X0-p[0]) + (Y0-p[1])*(Y0-p[1]) +
+      (X1-p[2])*(X1-p[2]) + (Y1-p[3])*(Y1-p[3]) +
+      (X2-p[4])*(X2-p[4]) + (Y2-p[5])*(Y2-p[5]) +
+      (X3-p[6])*(X3-p[6]) + (Y3-p[7])*(Y3-p[7])  +
+      (XC-p[8])*(XC-p[8]) + (YC-p[8])*(YC-p[9]);
+    return s;
+  }
 
   bool TransformQuadTangleSpaceSearch::operator()(const ShapeEntity<QuadTangle>& shape, TransformEntity& dest) const {
     const QuadTangle& q = *(shape.GetShape());
@@ -85,7 +128,7 @@ namespace Cantag {
 
     int nparam = 4;
   
-    errfunc.f = &(Cantag::TransformQuadTangleSpaceSearch::SpaceSearchQuadFunc);
+    errfunc.f = &(SpaceSearchQuadFunc);
     errfunc.n = nparam;
     errfunc.params = &p;
 
@@ -234,48 +277,7 @@ namespace Cantag {
 
 
 
-  double TransformQuadTangleSpaceSearch::SpaceSearchQuadFunc(const gsl_vector *v, void *params) {
-    float *p = (float *) params;
-
-    float z = gsl_vector_get(v, 0);
-    float theta = gsl_vector_get(v, 1);
-    float phi  = gsl_vector_get(v, 2);
-    float psi = gsl_vector_get(v, 3);
-
-
-    Transform t(p[8]*z, p[9]*z,z,
-		theta, phi, psi, 1.0);
-    
-    float X0,Y0, X1, Y1, X2, Y2, X3, Y3;
-
-    t.Apply(-1.0, -1.0, 0.0, &X3, &Y3);
-    t.Apply(1.0, -1.0, 0.0, &X0, &Y0);
-    t.Apply(1.0, 1.0, 0.0, &X1, &Y1);
-    t.Apply(-1.0, 1.0, 0.0, &X2, &Y2);
-
-
-   //  std::cerr << X0 << " " << Y0 << std::endl;
-//     std::cerr << X1 << " " << Y1 << std::endl;
-//     std::cerr << X2 << " " << Y2 << std::endl;
-//     std::cerr << X3 << " " << Y3 << std::endl;
-//     std::cerr << std::endl;
-//     exit(0);
-
-    // Centre point of current
-    float lambda = ( (Y0-Y1)*(X3-X1) - (Y3-Y1)*(X0-X1) ) /
-      ( (X2-X0)*(Y3-Y1) - (Y2-Y0)*(X3-X1) );
   
-    float XC = X0+lambda*(X2-X0);
-    float YC = Y0+lambda*(Y2-Y0);
-
-    // Sum of squares
-    double s= (X0-p[0])*(X0-p[0]) + (Y0-p[1])*(Y0-p[1]) +
-      (X1-p[2])*(X1-p[2]) + (Y1-p[3])*(Y1-p[3]) +
-      (X2-p[4])*(X2-p[4]) + (Y2-p[5])*(Y2-p[5]) +
-      (X3-p[6])*(X3-p[6]) + (Y3-p[7])*(Y3-p[7])  +
-      (XC-p[8])*(XC-p[8]) + (YC-p[8])*(YC-p[9]);
-    return s;
-  }
 
 
 
