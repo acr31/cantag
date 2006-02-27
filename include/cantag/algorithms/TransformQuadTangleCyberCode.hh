@@ -32,8 +32,6 @@
 #error "TransformQuadTangleCyberCode requires the GNU Scientific Library!"
 #endif
 
-#include <gsl/gsl_multimin.h>
-
 #include <cantag/Function.hh>
 #include <cantag/entities/ShapeEntity.hh>
 #include <cantag/entities/TransformEntity.hh>
@@ -44,12 +42,6 @@ namespace Cantag {
   class CANTAG_EXPORT TransformQuadTangleCyberCode : public Function<TL1(ShapeEntity<QuadTangle>),TL1(TransformEntity)> {
 
   public:
-    /*
-     * Static function so it can be passed as a function pointer
-     * to GNU Scientific Library
-     */
-    static double QuadFunc(const gsl_vector *v, void *params);
-    static bool ComputeCameraPointsFromAngles(const gsl_vector *v, void *p, float *pts, float *n);
 
     /*
      * An implementation of the CyberCode algorithm
