@@ -98,24 +98,11 @@ namespace Cantag {
   private:
 
 
-    static float EvaluateResidualSq(const Transform &t,
-				    const Correspondence &c,
-				    const Camera &cam);
-
-    /**
-     * This static function is required for the 
-     * libgsl minimiser
-     */
-    static double _MinFunc(const gsl_vector *v, void *params);
-
-    float mFitError;
+    
+   float mFitError;
     float mMaxResidual;
 
-    struct MinData_t {
-      const Camera *c;
-      std::list<Correspondence> *corr;
-    };
-
+    
   };
 }
 
