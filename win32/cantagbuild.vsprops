@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="cantagbuild"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories=".;../include;&quot;$(GslHome)&quot;;&quot;$(GmpHome)&quot;;&quot;$(FreeglutHome)/include&quot;"
+		PreprocessorDefinitions="GSL_DLL"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		AdditionalDependencies="libgsl_dll_d.lib libgslcblas_dll_d.lib gmpDebug.lib"
+		AdditionalLibraryDirectories="&quot;$(GslHome)\VC7\libgslcblas_dll\Debug&quot;;&quot;$(GslHome)\VC7\libgsl_dll\Debug&quot;;&quot;$(GmpHome)\..\lib&quot;;&quot;$(FreeglutHome)\Debug&quot;"
+	/>
+	<UserMacro
+		Name="GslHome"
+		Value="C:\acr31\GSL\src\gsl\1.6\gsl-1.6"
+	/>
+	<UserMacro
+		Name="GmpHome"
+		Value="c:\acr31\gmp-4.1"
+	/>
+	<UserMacro
+		Name="FreeglutHome"
+		Value="C:\acr31\freeglut-2.4.0"
+	/>
+</VisualStudioPropertySheet>

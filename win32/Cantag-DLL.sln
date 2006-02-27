@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Cantag-DLL", "Cantag-DLL.vcproj", "{D3148E62-70F3-49EE-B97A-87F626C3E9F9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AllSquares", "AllSquares.vcproj", "{8E126731-BCF4-4B90-8E45-FA7501DEBC39}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D3148E62-70F3-49EE-B97A-87F626C3E9F9} = {D3148E62-70F3-49EE-B97A-87F626C3E9F9}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "capturetest", "..\capturetest\capturetest.vcproj", "{7AC70E3E-C6E8-4BF0-9559-D2DE6F8E67E8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D3148E62-70F3-49EE-B97A-87F626C3E9F9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D3148E62-70F3-49EE-B97A-87F626C3E9F9}.Debug|Win32.Build.0 = Debug|Win32
+		{D3148E62-70F3-49EE-B97A-87F626C3E9F9}.Release|Win32.ActiveCfg = Release|Win32
+		{D3148E62-70F3-49EE-B97A-87F626C3E9F9}.Release|Win32.Build.0 = Release|Win32
+		{8E126731-BCF4-4B90-8E45-FA7501DEBC39}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8E126731-BCF4-4B90-8E45-FA7501DEBC39}.Debug|Win32.Build.0 = Debug|Win32
+		{8E126731-BCF4-4B90-8E45-FA7501DEBC39}.Release|Win32.ActiveCfg = Release|Win32
+		{8E126731-BCF4-4B90-8E45-FA7501DEBC39}.Release|Win32.Build.0 = Release|Win32
+		{7AC70E3E-C6E8-4BF0-9559-D2DE6F8E67E8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7AC70E3E-C6E8-4BF0-9559-D2DE6F8E67E8}.Debug|Win32.Build.0 = Debug|Win32
+		{7AC70E3E-C6E8-4BF0-9559-D2DE6F8E67E8}.Release|Win32.ActiveCfg = Release|Win32
+		{7AC70E3E-C6E8-4BF0-9559-D2DE6F8E67E8}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
