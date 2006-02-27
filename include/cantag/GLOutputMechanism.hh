@@ -43,7 +43,10 @@
 #include <map>
 #include <ctime>
 
-#include <GL/glx.h>
+#ifdef WIN32
+# include <windows.h>
+#endif
+
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
