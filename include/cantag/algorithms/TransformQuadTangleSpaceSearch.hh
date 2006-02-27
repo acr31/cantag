@@ -31,7 +31,7 @@
 #error "TransformQuadTangleSpaceSearch requires the GNU Scientific Library!"
 #endif
 
-#include <gsl/gsl_multimin.h>
+
 
 #include <cantag/QuadTangle.hh>
 #include <cantag/entities/ShapeEntity.hh>
@@ -69,11 +69,6 @@ namespace Cantag {
      */
     bool operator()(const ShapeEntity<QuadTangle>& shape, TransformEntity& transform) const;
 
-    /**
-     * Static function so it can be passed as a function pointer
-     * to GNU Scientific Library
-     */
-    static double SpaceSearchQuadFunc(const gsl_vector *v, void *params);
 
   };
 }
