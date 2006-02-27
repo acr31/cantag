@@ -34,13 +34,6 @@
 
 #include <iostream>
 
-#ifdef HAVE_GSL_MULTIMIN_H
-#ifdef HAVELIB_GSLCBLAS
-#ifdef HAVELIB_GSL
-#include <gsl/gsl_multimin.h>
-#endif
-#endif
-#endif
 
 
 namespace Cantag {
@@ -172,7 +165,6 @@ namespace Cantag {
 #ifdef HAVELIB_GSLCBLAS
 #ifdef HAVELIB_GSL
     void ImageToNPCFIterative(std::vector<float>& points, bool useCache) const;
-    static double _undistortfunc(const gsl_vector *v, void *params);
 #endif
 #endif
 #endif
@@ -226,6 +218,6 @@ namespace Cantag {
 
 #else
 namespace Cantag {
-  class Camera;
+  class CANTAG_EXPORT Camera;
 }
 #endif//CAMERA_GAURD
