@@ -54,8 +54,8 @@ namespace Cantag {
      * Set vcos and vsin to the angle required to rotate the tag by the number of cells given
      */
     inline void GetCellRotation(int cells, float& vcos, float& vsin) const {
-      float angle = (float)(cells / m_cells_per_rotation) / (float)m_symmetry * 2*M_PI;
-      if (angle > M_PI) angle = M_PI - angle;
+      float angle = (float)(cells / m_cells_per_rotation) / (float)m_symmetry * 2*FLT_PI;
+      if (angle > FLT_PI) angle = FLT_PI - angle;
       //      vcos = DCOS(8,angle);
       //      vsin = DSIN(8,angle);
       vcos = cos(angle);
@@ -66,10 +66,10 @@ namespace Cantag {
      * Return the number of cells that would go past if we rotated by this angle
      */
     inline int GetPayloadRotation(float angle) const {
-      if (angle < 0) angle += 2*M_PI;
-      // each rotation of 2 * M_PI / m_symmetry is a rotation of m_cells_per_rotation
-      return (m_cells_per_rotation * Round((float)m_symmetry * (angle / 2.f / M_PI))) % PAYLOAD_SIZE;
-      //      return (int)floorf(m_symmetry * (angle / 2.f * M_PI));
+      if (angle < 0) angle += 2*FLT_PI;
+      // each rotation of 2 * FLT_PI / m_symmetry is a rotation of m_cells_per_rotation
+      return (m_cells_per_rotation * Round((float)m_symmetry * (angle / 2.f / FLT_PI))) % PAYLOAD_SIZE;
+      //      return (int)floorf(m_symmetry * (angle / 2.f * FLT_PI));
     }
   };
 
