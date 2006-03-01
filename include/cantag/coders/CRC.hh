@@ -27,13 +27,13 @@ public:
 
     std::bitset<CRC_BITS+1> numer(0);
     std::bitset<CRC_BITS> result(0);
-    
-    for (int i=0; i<CRC_BITS+1; i++) {
+	int extent = CRC_BITS + 1;
+	if (extent > DATA_BITS) extent = DATA_BITS;
+    for (int i=0; i<extent; i++) {
       if (payload[DATA_BITS-1-i]) numer.set(CRC_BITS-i,1);
     }
     
-    for (int it=0; it<(DATA_BITS+CRC_BITS-CRC_BITS); it++) {
-      
+    for (int it=0; it<DATA_BITS; it++) {
       if (numer[CRC_BITS]) numer = numer ^ gen_poly;  
       numer <<= 1;
       int idx = DATA_BITS-1-(CRC_BITS+1)-it;
