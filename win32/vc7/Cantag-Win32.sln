@@ -1,0 +1,38 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{EAF909A5-FA59-4C3D-9431-0FCC20D5BCF9}") = "Cantag-DLL", "Cantag-DLL\Cantag-DLL.icproj", "{DEA0FCDE-BAB8-4F58-A9D3-20CB5F39C248}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{EAF909A5-FA59-4C3D-9431-0FCC20D5BCF9}") = "AllSquares", "AllSquares\AllSquares.icproj", "{E8BAD562-CCEA-4FC7-ADAB-996745DA9BDD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DEA0FCDE-BAB8-4F58-A9D3-20CB5F39C248} = {DEA0FCDE-BAB8-4F58-A9D3-20CB5F39C248}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{DEA0FCDE-BAB8-4F58-A9D3-20CB5F39C248}.Debug.ActiveCfg = Debug|Win32
+		{DEA0FCDE-BAB8-4F58-A9D3-20CB5F39C248}.Debug.Build.0 = Debug|Win32
+		{DEA0FCDE-BAB8-4F58-A9D3-20CB5F39C248}.Release.ActiveCfg = Release|Win32
+		{DEA0FCDE-BAB8-4F58-A9D3-20CB5F39C248}.Release.Build.0 = Release|Win32
+		{E8BAD562-CCEA-4FC7-ADAB-996745DA9BDD}.Debug.ActiveCfg = Debug|Win32
+		{E8BAD562-CCEA-4FC7-ADAB-996745DA9BDD}.Debug.Build.0 = Debug|Win32
+		{E8BAD562-CCEA-4FC7-ADAB-996745DA9BDD}.Release.ActiveCfg = Release|Win32
+		{E8BAD562-CCEA-4FC7-ADAB-996745DA9BDD}.Release.Build.0 = Release|Win32
+		{1C7B11E4-9EF1-4155-A009-AA7E7C12CEB2}.Debug.ActiveCfg = Debug|Win32
+		{1C7B11E4-9EF1-4155-A009-AA7E7C12CEB2}.Debug.Build.0 = Debug|Win32
+		{1C7B11E4-9EF1-4155-A009-AA7E7C12CEB2}.Release.ActiveCfg = Release|Win32
+		{1C7B11E4-9EF1-4155-A009-AA7E7C12CEB2}.Release.Build.0 = Release|Win32
+		{15AFF854-9375-4702-AAFF-455128345AE9}.Debug.ActiveCfg = Debug|Win32
+		{15AFF854-9375-4702-AAFF-455128345AE9}.Debug.Build.0 = Debug|Win32
+		{15AFF854-9375-4702-AAFF-455128345AE9}.Release.ActiveCfg = Release|Win32
+		{15AFF854-9375-4702-AAFF-455128345AE9}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
