@@ -28,15 +28,18 @@
 #endif
 
 
+#include <windows.h>
+#include <vfw.h>
+
 #include <cantag/Image.hh>
 #include <cantag/ImageSource.hh>
 
 namespace Cantag {
-	class VFWImageSource : public ImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> {
+	class CANTAG_EXPORT VFWImageSource : public ImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> {
 	public:
 		bool m_running;
 		static VFWImageSource* m_self;
-		void* m_captureWindow;
+		HWND m_captureWindow;
 		int m_width;
 		int m_height;
 		int m_bitcount;
