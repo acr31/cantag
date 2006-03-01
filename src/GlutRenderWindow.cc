@@ -47,17 +47,16 @@ namespace Cantag {
     int argc = 0;
     glutInit(&argc,&argvp);
     glutInitWindowSize(width, height);
-    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     m_window_id = glutCreateWindow("CantagGL");
     glutSetWindow(m_window_id);
-    ServiceEventQueue();
-
+	glClearColor(1.f,1.f,1.f,1.f);
+	ServiceEventQueue();
   }
 
   
 
   bool GlutRenderWindow::ServiceEventQueue() {
-
     glutMainLoopEvent();
     return true;
   }
@@ -67,18 +66,18 @@ namespace Cantag {
   }
 
   int GlutRenderWindow::FindNextTextureSize(int size) const {
-    // texture size must be of the form 2^n + 2
-    size -= 2;
+    // texture size must be of the form 2^n 
     int count = 0;
     while(size) {
       ++count;
       size>>=1;
     }
-    return (1 << count) + 2;    
+    return (1 << count);
   }
   
   void GlutRenderWindow::Flush() {
     glutSwapBuffers();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (!ServiceEventQueue()) exit(-1);
   }
   
