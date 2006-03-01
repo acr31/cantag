@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\acr31\dsvl-0.0.8b\src&quot;;&quot;C:\acr31\freeglut-2.4.0\include&quot;;&quot;C:\acr31\gmp-4.1&quot;;C:\acr31\svn\Cantag\trunk\win32;C:\acr31\svn\Cantag\trunk\include;&quot;$(Inherit)&quot;"
+				AdditionalIncludeDirectories="../../../include;../../build/include;../../;&quot;$(Inherit)&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -32,10 +32,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(Inherit) freeglut.lib gmpdebug.lib vfw32.lib DSVL.lib"
-				OutputFile="$(OutDir)/AllSquares.exe"
+				AdditionalDependencies="$(Inherit) freeglut.lib gmp.lib vfw32.lib DSVL.lib libgsl_dll.lib"
+				OutputFile="../../build/bin/AllSquaresd.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;C:\acr31\dsvl-0.0.8b\lib&quot;;C:\acr31\lib;&quot;C:\acr31\freeglut-2.4.0\Debug&quot;;&quot;$(Inherit)&quot;"
+				AdditionalLibraryDirectories="../../build/lib;&quot;$(Inherit)&quot;"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/AllSquares.pdb"
 				SubSystem="1"
@@ -70,7 +70,11 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../../../include;../../addins/include;../../;&quot;$(Inherit)&quot;"
+				Optimization="3"
+				GlobalOptimizations="TRUE"
+				ImproveFloatingPointConsistency="FALSE"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="../../../include;../../build/include;../../;&quot;$(Inherit)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -82,9 +86,9 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(Inherit) freeglut.lib gmp.lib vfw32.lib DSVL.lib libgsl_dll.lib"
-				OutputFile="../../addins/bin/AllSquares.exe"
+				OutputFile="../../build/bin/AllSquares.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="../../addins/lib;&quot;$(Inherit)&quot;"
+				AdditionalLibraryDirectories="../../build/lib;&quot;$(Inherit)&quot;"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"

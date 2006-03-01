@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../;../../addins/include;../../../include;&quot;$(Inherit)&quot;"
+				AdditionalIncludeDirectories="../../;../../build/include;../../../include;&quot;$(Inherit)&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;CANTAGDLL_EXPORT;GSL_DLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -33,13 +33,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(Inherit) freeglut.lib gmp.lib libgsl_dll.lib vfw32.lib DSVL.lib"
-				OutputFile="$(OutDir)/Cantag-DLL.dll"
+				OutputFile="../../build/bin/Cantag-DLLd.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="../../addins/lib;&quot;$(Inherit)&quot;"
+				AdditionalLibraryDirectories="../../build/lib;&quot;$(Inherit)&quot;"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/Cantag-DLL.pdb"
 				SubSystem="2"
-				ImportLibrary="$(OutDir)/Cantag-DLL.lib"
+				ImportLibrary="../../build/lib/Cantag-DLLd.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -70,7 +70,11 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../../;../../addins/include;../../../include;&quot;$(Inherit)&quot;"
+				Optimization="3"
+				GlobalOptimizations="TRUE"
+				ImproveFloatingPointConsistency="FALSE"
+				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="../../;../../build/include;../../../include;&quot;$(Inherit)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;CANTAGDLL_EXPORT"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -82,14 +86,14 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(Inherit) freeglut.lib gmp.lib libgsl_dll.lib vfw32.lib DSVL.lib"
-				OutputFile="../../addins/bin/Cantag-DLL.dll"
+				OutputFile="../../build/bin/Cantag-DLL.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="../../addins/lib;&quot;$(Inherit)&quot;"
+				AdditionalLibraryDirectories="../../build/lib;&quot;$(Inherit)&quot;"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ImportLibrary="../../addins/lib/Cantag-DLL.lib"
+				ImportLibrary="../../build/lib/Cantag-DLL.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -133,7 +137,7 @@
 				RelativePath="..\..\..\src\Camera.cc">
 			</File>
 			<File
-				RelativePath="..\..\..\src\DVSLImageSource.cc">
+				RelativePath="..\..\..\src\DSVLImageSource.cc">
 			</File>
 			<File
 				RelativePath="..\..\..\src\Ellipse.cc">
