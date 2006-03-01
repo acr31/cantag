@@ -117,7 +117,6 @@ namespace Cantag {
   template<class C> void GLOutputMechanism<C>::InitialiseTexture() {
     m_tmap = new GLubyte[m_texture_width*m_texture_height];
     memset(m_tmap,255,m_texture_width*m_texture_height);
-
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
     glGenTextures(1,&m_textureid);
     glBindTexture(GL_TEXTURE_2D,m_textureid);
@@ -151,11 +150,12 @@ namespace Cantag {
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, white);
     glLightfv(GL_LIGHT0, GL_POSITION, position);
-    glEnable(GL_LIGHT0);  
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);  
     glDepthFunc(GL_LESS);
     glDepthRange(0,1);
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LIGHTING);
+	glDisable(GL_CULL_FACE);
   }
 
   template<class C> void GLOutputMechanism<C>::InitialiseScene() {}
@@ -294,20 +294,19 @@ namespace Cantag {
   }
 
   template<class C> void GLOutputMechanism<C>::Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, bool reflect) {
+	glEnable(GL_TEXTURE_2D);
 
     glTexSubImage2D(GL_TEXTURE_2D,0,0,0,image.GetWidth(),image.GetHeight(),GL_LUMINANCE,GL_UNSIGNED_BYTE,image.GetContents());
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-    glBindTexture(GL_TEXTURE_2D, m_textureid);
     
-    glBegin(GL_QUADS);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+	glBindTexture(GL_TEXTURE_2D, m_textureid);	
+	glBegin(GL_QUADS);
     glTexCoord2f(reflect ? m_texture_maxx : 0.f, m_texture_maxy); glVertex3f(-1.f, 1.f, 2.f); 
     glTexCoord2f(reflect ? 0.f : m_texture_maxx, m_texture_maxy); glVertex3f(1.f, 1.f, 2.f);
     glTexCoord2f(reflect ? 0.f : m_texture_maxx, 0.f); glVertex3f(1.f, -1.f, 2.f);
     glTexCoord2f(reflect ? m_texture_maxx : 0.f, 0.f); glVertex3f(-1.f, -1.f, 2.f);
     glEnd();
-
-    glDisable(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_2D);
 
     glClear(GL_DEPTH_BUFFER_BIT);
 
