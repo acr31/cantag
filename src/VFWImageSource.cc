@@ -23,15 +23,12 @@
 #ifdef WIN32
 
 
-
-#include <windows.h>
-#include <vfw.h>
-
 #include <cantag/VFWImageSource.hh>
 
 namespace Cantag {
 
 LRESULT CALLBACK FrameCallbackProc(HWND hWnd, LPVIDEOHDR lpVHdr) { 
+	std::cout << "Got callback" << std::endl;
 	assert(VFWImageSource::m_self->m_bitcount == 16);
 	VFWImageSource::m_self->m_running = false;
 	capCaptureStop(hWnd);
@@ -42,7 +39,8 @@ LRESULT CALLBACK FrameCallbackProc(HWND hWnd, LPVIDEOHDR lpVHdr) {
 			int val = *buffer;
 			++buffer;
 			val <<= 8;
-			val += *buffer;
+			val |= *buffer;
+			++buffer;
 
 			int blue = val & 0x1F;
 			val >>=5;
@@ -63,28 +61,28 @@ VFWImageSource::VFWImageSource() {
 		m_self = this;
 		if (!m_captureWindow) throw "Failed to create capture window!";
 
-		ShowWindow((HWND)m_captureWindow, SW_HIDE);
-		UpdateWindow((HWND)m_captureWindow);
+		ShowWindow(m_captureWindow, SW_HIDE);
+		UpdateWindow(m_captureWindow);
 		
-		if (!capSetCallbackOnVideoStream((HWND)m_captureWindow, &FrameCallbackProc))
+		if (!capSetCallbackOnFrame(m_captureWindow, &FrameCallbackProc))
 			throw "Failed to set VideoStream callback";
 
-		if (!capDriverConnect((HWND)m_captureWindow, 0)) 
+		if (!capDriverConnect(m_captureWindow, 0)) 
 			throw "Failed to connect default video driver to capture window";
 
 		CAPTUREPARMS capParms = {0};
-		if (!capCaptureGetSetup((HWND)m_captureWindow,&capParms,sizeof(capParms))) 
+		if (!capCaptureGetSetup(m_captureWindow,&capParms,sizeof(capParms))) 
 			throw "Failed to get setup information from capture device";
 		capParms.fAbortLeftMouse = FALSE;
 	    capParms.fAbortRightMouse = FALSE;
 	    capParms.fYield = TRUE;
 		capParms.fCaptureAudio = FALSE;
 		capParms.wPercentDropForError = 100;
-		if (!capCaptureSetSetup((HWND)m_captureWindow,&capParms,sizeof(capParms))) 
+		if (!capCaptureSetSetup(m_captureWindow,&capParms,sizeof(capParms))) 
 			throw "Failed to set setup information to capture device";
 
 		BITMAPINFO info = {0};
-		if (!capGetVideoFormat((HWND)m_captureWindow,&info,sizeof(info))) 
+		if (!capGetVideoFormat(m_captureWindow,&info,sizeof(info))) 
 			throw "Failed to get video format information from capture device";
 		m_width = info.bmiHeader.biWidth;
 		m_height = info.bmiHeader.biHeight;
@@ -97,22 +95,24 @@ VFWImageSource::VFWImageSource() {
 }	
 
 VFWImageSource::~VFWImageSource() {
-		capSetCallbackOnVideoStream((HWND)m_captureWindow,NULL);
-		capCaptureAbort((HWND)m_captureWindow);
-		capDriverDisconnect((HWND)m_captureWindow);
-		DestroyWindow((HWND)m_captureWindow);
+		capSetCallbackOnVideoStream(m_captureWindow,NULL);
+		capCaptureAbort(m_captureWindow);
+		capDriverDisconnect(m_captureWindow);
+		DestroyWindow(m_captureWindow);
 }
 
 Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* VFWImageSource::Next() {
+	std::cout << "Next called" << std::endl;
 		m_running = true;
-		capCaptureSequenceNoFile((HWND)m_captureWindow);		
+		
+		capGrabFrame(m_captureWindow);		
+		//while (m_running) ::Sleep(1);
 		MSG msg;
 		while(m_running && GetMessage(&msg,NULL,0,0)) {
 			TranslateMessage (&msg) ;
             DispatchMessage (&msg) ;
 		}
-
-
+		std::cout << "next done" << std::endl;
 		return m_image;	
 }
 
