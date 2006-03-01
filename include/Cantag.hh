@@ -145,6 +145,7 @@
 #endif
 #ifdef WIN32
 # include <cantag/VFWImageSource.hh>
+# include <cantag/DSVLImageSource.hh>
 #endif
 
 //////////////////////
