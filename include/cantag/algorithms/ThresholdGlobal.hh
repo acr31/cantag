@@ -59,16 +59,6 @@ namespace Cantag {
 	++pixel;
       }
     }
-
-    for(unsigned int i=0;i<height;++i) {
-      dest.SetPixel(0,i,false);
-      dest.SetPixel(width-1,i,false);
-      if (i == 0 || i == height-1) {
-	for(unsigned int j=0;j<width-1;++j) {
-	  dest.SetPixel(j,i,false);
-	}
-      }
-    }
     return true;
   }
 }

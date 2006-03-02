@@ -101,15 +101,6 @@ namespace Cantag {
       ++i;
     }  
 
-    for(int i=0;i<image_height;++i) {
-      dest.SetPixel(0,i,false);
-      dest.SetPixel(image_width-1,i,false);
-      if (i == 0 || i == image_height-1) {
-	for(int j=0;j<image_width-1;++j) {
-	  dest.SetPixel(j,i,false);
-	}
-      }
-    }
 	delete[] previous_line;
     return true;
   }
