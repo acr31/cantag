@@ -43,6 +43,7 @@ namespace Cantag {
     unsigned int m_width;
     unsigned int m_height;
     bool* m_data;    
+	bool m_flipv;
 
   public:
     MonochromeImage(unsigned int width, unsigned int height);
@@ -67,8 +68,13 @@ namespace Cantag {
       return GetPixel(xi,yi);
     }
     
+	inline void FlipVertical(bool flip) {
+		m_flipv = flip;
+	}
+
     inline void SetPixel(unsigned int x, unsigned int y, bool value) {
-      m_data[x+m_width*y] = value;
+		const int sampley = m_flipv ? m_height - y - 1 : y;
+      m_data[x+m_width*sampley] = value;
     }
 
     inline int GetWidth() const { return m_width; }
