@@ -27,7 +27,7 @@
 
 namespace Cantag {
 
-  MonochromeImage::MonochromeImage(unsigned int width, unsigned int height) : m_width(width),m_height(height),m_data(new bool[width*height])  {}
+  MonochromeImage::MonochromeImage(unsigned int width, unsigned int height) : m_width(width),m_height(height),m_data(new bool[width*height]),m_flipv(false)  {}
 
   MonochromeImage::~MonochromeImage() {
     delete[] m_data;
