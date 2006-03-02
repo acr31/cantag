@@ -33,6 +33,9 @@ namespace Cantag {
    */
   template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> class ImageSource {
   public:
+	typedef Image<B,L> ImageType;
+	static const Pix::Sze::Bpp PixSze = B;
+	static const Pix::Fmt::Layout PixFmt = L;
       /**
        * Get the next frame.  This method may or may not invalidate the
        * current pointer to the buffer.
