@@ -83,6 +83,7 @@
 #include <cantag/algorithms/TransformRotateToPayload.hh>
 #include <cantag/algorithms/SampleTagCircle.hh>
 #include <cantag/algorithms/SampleTagSquare.hh>
+#include <cantag/algorithms/ContourFollowerClearImageBorder.hh>
 #include <cantag/algorithms/ContourFollowerTree.hh>
 #include <cantag/algorithms/Encode.hh>
 #include <cantag/algorithms/Decode.hh>
