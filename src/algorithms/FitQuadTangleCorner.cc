@@ -41,7 +41,7 @@ namespace Cantag {
     const std::vector<float>& points = contour.GetPoints();
     const int numindexes =  points.size()/2;
     int corner_index=-1;
-    int corners[4];
+	int corners[4] = {0};
     bool peak=false;
     float last_curv=curvature(points,numindexes-1, numindexes-1-WINDOWSIZE,WINDOWSIZE-1);
     
