@@ -68,9 +68,9 @@ namespace Cantag {
       return GetPixel(xi,yi);
     }
     
-	inline void FlipVertical(bool flip) {
-		m_flipv = flip;
-	}
+    inline void FlipVertical(bool flip) {
+      m_flipv = flip;
+    }
 
     inline void SetPixel(unsigned int x, unsigned int y, bool value) {
 		const int sampley = m_flipv ? m_height - y - 1 : y;
