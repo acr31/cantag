@@ -37,11 +37,12 @@
 
 #include <cantag/GlutRenderWindow.hh>
 
+
 namespace Cantag {
 
   GlutRenderWindow::GlutRenderWindow(int width, int height) : m_width(width), m_height(height) {
     m_ratio=(float)width/(float)height;
-
+    m_self = this;
     char argv = '\0';
     char* argvp = &argv;
     int argc = 0;
@@ -50,15 +51,127 @@ namespace Cantag {
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     m_window_id = glutCreateWindow("CantagGL");
     glutSetWindow(m_window_id);
-	glClearColor(1.f,1.f,1.f,1.f);
-	ServiceEventQueue();
+    glClearColor(1.f,1.f,1.f,1.f);
+    ServiceEventQueue();
+    glutKeyboardFunc(&GlutRenderWindow::KeyboardCallback);
   }
 
-  
+  GlutRenderWindow* GlutRenderWindow::m_self = NULL;
 
-  bool GlutRenderWindow::ServiceEventQueue() {
+  void GlutRenderWindow::KeyboardCallback(unsigned char key,int x,int y) {
+    switch(key) {
+    case 27:
+      GlutRenderWindow::m_self->m_presses.push_back(Key::ESC);
+      break;
+    case 'A':
+    case 'a':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::A);
+      break;
+    case 'B':
+    case 'b':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::B);
+      break;
+    case 'C':
+    case 'c':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::C);
+      break;
+    case 'D':
+    case 'd':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::D);
+      break;
+    case 'E':
+    case 'e':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::E);
+      break;
+    case 'F':
+    case 'f':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::F);
+      break;
+    case 'G':
+    case 'g':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::G);
+      break;
+    case 'H':
+    case 'h':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::H);
+      break;
+    case 'I':
+    case 'i':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::I);
+      break;
+    case 'J':
+    case 'j':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::J);
+      break;
+    case 'K':
+    case 'k':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::K);
+      break;
+    case 'L':
+    case 'l':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::L);
+      break;
+    case 'M':
+    case 'm':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::M);
+      break;
+    case 'N':
+    case 'n':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::N);
+      break;
+    case 'O':
+    case 'o':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::O);
+      break;
+    case 'P':
+    case 'p':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::P);
+      break;
+    case 'Q':
+    case 'q':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::Q);
+      break;
+    case 'R':
+    case 'r':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::R);
+      break;
+    case 'S':
+    case 's':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::S);
+      break;
+    case 'T':
+    case 't':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::T);
+      break;
+    case 'U':
+    case 'u':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::U);
+      break;
+    case 'V':
+    case 'v':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::V);
+      break;
+    case 'W':
+    case 'w':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::W);
+      break;
+    case 'X':
+    case 'x':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::X);
+      break;
+    case 'Y':
+    case 'y':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::Y);
+      break;
+    case 'Z':
+    case 'z':
+      GlutRenderWindow::m_self->m_presses.push_back(Key::Z);
+      break;
+    }
+  }
+
+  void GlutRenderWindow::ServiceEventQueue() {
     glutMainLoopEvent();
-    return true;
   }
 
   GlutRenderWindow::~GlutRenderWindow() {
@@ -76,9 +189,10 @@ namespace Cantag {
   }
   
   void GlutRenderWindow::Flush() {
+    m_presses.clear();
     glutSwapBuffers();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if (!ServiceEventQueue()) exit(-1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    ServiceEventQueue();
   }
   
 }

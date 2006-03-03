@@ -81,15 +81,20 @@ namespace Cantag {
 
   }
 
-  bool GLRenderWindow::ServiceEventQueue() {
-    /* clear the event queue - which we ignore */
+  void GLRenderWindow::ServiceEventQueue() {
+    /* clear the event queue */
     XEvent event;
     bool returnval = true;
     while (XPending(m_display)) { 
       XNextEvent(m_display, &event);
-      if (event.type == KeyPress && ((XKeyEvent*)&event)->keycode == 9) returnval = false;
+      if (event.type == KeyPress) {
+	switch (((XKeyEvent*)&event)->keycode) {
+	case 9:
+	  m_presses.push_back(Key::ESC);
+	  break;
+	}
+      }
     }
-    return returnval;
   }
 
   GLRenderWindow::~GLRenderWindow() {
@@ -121,6 +126,7 @@ namespace Cantag {
   }
 
   void GLRenderWindow::Flush() {
+    m_presses.clear();
     glXSwapBuffers(m_display, m_window); /* buffer swap does implicit glFlush */  
     if (!ServiceEventQueue()) exit(-1);
   }
