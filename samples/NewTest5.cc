@@ -105,10 +105,10 @@ struct InterpretTags : public Function<TL0,TL1(DecodeEntity<TestSquare::PayloadS
 };
 
 struct DrawAll : public Function<TL1(TransformEntity),TL1(DecodeEntity<TestSquare::PayloadSize>)> {
-  GLOutputMechanism& m_m;
+  GLOutputMechanism<GlutRenderWindow>& m_m;
   const std::map<CyclicBitSet<TestSquare::PayloadSize>,std::pair<option_t,Setting*> >& m_map;
   mutable bool m_found;
-  DrawAll(GLOutputMechanism& m, const std::map<CyclicBitSet<TestSquare::PayloadSize>,std::pair<option_t,Setting*> >& map) : m_m(m),m_map(map), m_found(false) {};
+  DrawAll(GLOutputMechanism<GlutRenderWindow>& m, const std::map<CyclicBitSet<TestSquare::PayloadSize>,std::pair<option_t,Setting*> >& map) : m_m(m),m_map(map), m_found(false) {};
   bool operator()(const TransformEntity& te,DecodeEntity<TestSquare::PayloadSize>& de) const {
     const CyclicBitSet<TestSquare::PayloadSize>& code = (*(de.GetPayloads().begin()))->payload;
     if (m_map.find((*(de.GetPayloads().begin()))->payload) != m_map.end()) {
@@ -129,7 +129,7 @@ int main(int argc,char* argv[]) {
 
   try {
     std::map<CyclicBitSet<TestSquare::PayloadSize>,std::pair<option_t,Setting*> > tag_map;
-    Setting settings[] = { Setting(DISPLAYMODE_NORMAL),
+    Setting settings[] = { Setting(DISPLAYMODE_TRANSFORM),
 			   Setting(THRESHOLD_GLOBAL),
 			   Setting(DISTORTION_NONE),
 			   Setting(SHAPEFIT_CORNER),
@@ -161,18 +161,22 @@ int main(int argc,char* argv[]) {
     ADD("000000000000000000000000000000010001",TRANSFORM_CYBERCODE,&settings[TRANSFORM]);
     ADD("000000000000000000000000000000010010",TRANSFORM_SPACESEARCH,&settings[TRANSFORM]);
 
-    IEEE1394ImageSource fs("/dev/video1394",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );
+	typedef DSVLImageSource ImageSource ;
+//    IEEE1394ImageSource fs("/dev/video1394",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );
     //V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> fs("/dev/video0",0);
+	ImageSource fs(argv[5]);
+	//FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8>fs("draw.pnm");
     TestSquare tag;
     tag.SetContourRestrictions(25,10,10);
 
     Camera camera;
     //camera.SetIntrinsic(1284.33,1064.55,450.534, 321.569,0 );
-    //    camera.SetIntrinsic(640,480,320,240,0);
-    camera.SetIntrinsic(924,576,462,288,0);
+       //camera.SetIntrinsic(640,480,320,240,0);
+	camera.SetIntrinsic(320,240,160,120,0);
+    //camera.SetIntrinsic(924,576,462,288,0);
     camera.SetRadial(-0.147572438077408,0.112655792817613,0.f);
     
-    GLOutputMechanism g(atoi(argv[1]),atoi(argv[2]),fs.GetWidth(),fs.GetHeight());
+    GLOutputMechanism<GlutRenderWindow> g(atoi(argv[1]),atoi(argv[2]),fs.GetWidth(),fs.GetHeight());
     //GLOutputMechanism g(fs.GetWidth(),fs.GetHeight(),fs.GetWidth(),fs.GetHeight());
    
     Transform t;
@@ -180,36 +184,37 @@ int main(int argc,char* argv[]) {
     int fcount = 0;
     char fps_buf[255];
     sprintf(fps_buf,"FPS: ?");
-
+	int counter = 0;
     while(true) {
-      Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* i = fs.Next();
-
+		ImageSource::ImageType* i = fs.Next();
       Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* output;
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_THRESHOLD) {
-	output = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(i->GetWidth(),i->GetHeight());
+		output = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(i->GetWidth(),i->GetHeight());
       }
       else {
-	output = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(*i);
-	output->ConvertScale(0.25,190); 
-      }
+		output = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(i->GetWidth(),i->GetHeight());
+	    output->ConvertScale(0,190);
+	  }
 
       MonochromeImage m(i->GetWidth(),i->GetHeight());
-
+		m.FlipVertical(true);
       switch(settings[THRESHOLD].current_option) {
       case THRESHOLD_GLOBAL:
-	Apply(*i,m,ThresholdGlobal<Pix::Sze::Byte1,Pix::Fmt::Grey8>(128));
+		  Apply(*i,m,ThresholdGlobal<ImageSource::PixSze,ImageSource::PixFmt>(128));
 	break;
-      case THRESHOLD_ADAPTIVE:
-	Apply(*i,m,ThresholdAdaptive<Pix::Sze::Byte1,Pix::Fmt::Grey8>(atoi(argv[3]),atoi(argv[4])));
+	  case THRESHOLD_ADAPTIVE:
+		  Apply(*i,m,ThresholdAdaptive<ImageSource::PixSze,ImageSource::PixFmt>(atoi(argv[4]),atoi(argv[5])));
       }
 
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_THRESHOLD) { 
-	Apply(m,DrawEntityMonochrome(*output));
-	output->ConvertScale(0.25,190);
-      }
+		Apply(m,DrawEntityMonochrome(*output));
+		output->ConvertScale(0.25,190);
+	  }
+
+		Apply(m,ContourFollowerClearImageBorder());
 
       Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<QuadTangle>,TransformEntity,DecodeEntity<TestSquare::PayloadSize>) > > tree;
-      Apply(m,tree,ContourFollowerTree(tag));
+      Apply<ContourFollowerTree>(m,tree,ContourFollowerTree(tag));
       
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_CONTOUR) { 
 	ApplyTree(tree,DrawEntityContour(*output));
@@ -264,7 +269,6 @@ int main(int argc,char* argv[]) {
 
       ApplyTree(tree,Bind(SampleTagSquare(tag,camera),m));
       ApplyTree(tree,Decode<TestSquare>());
-
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_TRANSFORM) { 
 	ApplyTree(tree,DrawEntityTransform(*output,camera));
       }
@@ -272,6 +276,7 @@ int main(int argc,char* argv[]) {
       ApplyTree(tree,TransformRotateToPayload(tag));
       g.Draw(*output,true);
       delete output;
+	  
       ApplyTree(tree,DrawAll(g,tag_map));
 
       time_t new_time = time(NULL);
@@ -351,10 +356,11 @@ int main(int argc,char* argv[]) {
 	current_time = new_time;
 	fcount = 0;
       }
-      g.DrawText(0.39,0.47,fps_buf);
+	  
+	  g.DrawText(0.39,0.47,fps_buf);
 
       g.Flush();
-      //      exit(-1);
+    //        exit(-1);
     }  
   }
   catch (const char* exception) {
