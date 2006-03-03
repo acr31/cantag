@@ -21,6 +21,7 @@ libcantag_la_SOURCES += algorithms/FitQuadTanglePolygon.cc
 libcantag_la_SOURCES += algorithms/TransformQuadTangleProjective.cc
 libcantag_la_SOURCES += algorithms/TransformQuadTangleReduced.cc
 libcantag_la_SOURCES += algorithms/ContourFollowerTree.cc
+libcantag_la_SOURCES += algorithms/ContourFollowerClearImageBorder.cc
 libcantag_la_SOURCES += algorithms/ThresholdGlobal.cc
 libcantag_la_SOURCES += algorithms/ThresholdAdaptive.cc
 libcantag_la_SOURCES += algorithms/ConvexHull.cc
