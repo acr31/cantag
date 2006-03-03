@@ -62,11 +62,6 @@ endif
 endif
 endif
 
-
-if HAVE_LINUX_VIDEODEV_H
-libcantag_la_SOURCES += V4LImageSource.cc
-endif
-
 if HAVE_GL_GL_H
 if HAVE_GL_GLUT_H
 if HAVELIB_GL
