@@ -27,6 +27,8 @@ cantaginclude_HEADERS += AccumulateCorrespondences.hh
 cantaginclude_HEADERS += SimulateMinDistance.hh
 cantaginclude_HEADERS += SimulateContour.hh
 cantaginclude_HEADERS += SimulateMaxSampleError.hh
+cantaginclude_HEADERS += ContourFollowerTree.hh
+cantaginclude_HEADERS += ContourFollowerClearImageBorder.hh
 
 if HAVE_GSL_MULTIMIN_H
 if HAVELIB_GSLCBLAS
