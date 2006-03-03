@@ -33,18 +33,19 @@ namespace Cantag {
    */
   template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> class ImageSource {
   public:
-	typedef Image<B,L> ImageType;
-	static const Pix::Sze::Bpp PixSze = B;
-	static const Pix::Fmt::Layout PixFmt = L;
-      /**
-       * Get the next frame.  This method may or may not invalidate the
-       * current pointer to the buffer.
-       */
-      virtual Image<B,L>* Next() = 0;
+    typedef Image<B,L> ImageType;
+    static const Pix::Sze::Bpp PixSze = B;
+    static const Pix::Fmt::Layout PixFmt = L;
 
-      virtual int GetWidth() const = 0;
-      virtual int GetHeight() const = 0;
+    /**
+     * Get the next frame.  This method may or may not invalidate the
+     * current pointer to the buffer.
+     */
+    virtual Image<B,L>* Next() = 0;
+    
+    virtual int GetWidth() const = 0;
+    virtual int GetHeight() const = 0;
   };
-
+  
 }
 #endif//IMAGE_SOURCE_GUARD
