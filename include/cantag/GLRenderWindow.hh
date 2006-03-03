@@ -45,6 +45,7 @@
 
 #include <cantag/Camera.hh>
 #include <cantag/Transform.hh>
+#include <cantag/Keypress.hh>
 
 namespace Cantag {
   
@@ -55,6 +56,7 @@ namespace Cantag {
   private:
     XVisualInfo* m_visual;
     Colormap m_colormap;
+    std::vector<Key::Code> m_presses;
 
   protected:
     Display *m_display;
@@ -73,9 +75,11 @@ namespace Cantag {
      */
     int FindNextTextureSize(int size) const;
 
-    bool ServiceEventQueue();
+    void ServiceEventQueue();
 
     void Flush();
+    
+    const std::vector<Key::Code>& GetKeypresses() { return m_presses; }
   };
 }
 

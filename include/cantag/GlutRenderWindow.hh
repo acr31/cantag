@@ -49,6 +49,7 @@
 
 #include <cantag/Camera.hh>
 #include <cantag/Transform.hh>
+#include <cantag/Keypress.hh>
 
 namespace Cantag {
   
@@ -58,10 +59,12 @@ namespace Cantag {
     int m_width;
     int m_height;
     float m_ratio;
+    std::vector<Key::Code> m_presses;
 
   private:
     int m_window_id;
-
+    static GlutRenderWindow* m_self;
+    
   public:
     GlutRenderWindow(int width,int height);
     virtual ~GlutRenderWindow();
@@ -71,9 +74,13 @@ namespace Cantag {
      */
     int FindNextTextureSize(int size) const;
 
-    bool ServiceEventQueue();
+    void ServiceEventQueue();
 
     void Flush();
+
+    const std::vector<Key::Code>& GetKeypresses() { return m_presses; }
+
+    static void KeyboardCallback(unsigned char key, int x, int y);
   };
 }
 
