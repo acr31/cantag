@@ -151,6 +151,7 @@
 
 //////////////////////
 // output mechanisms
+#include <cantag/Keypress.hh>
 #ifdef HAVE_X11_XLIB_H
 #ifdef HAVE_X11_XUTIL_H
 #ifdef HAVE_X11_EXTENSIONS_XSHM_H
