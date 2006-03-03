@@ -129,7 +129,7 @@ int main(int argc,char* argv[]) {
 
   try {
     std::map<CyclicBitSet<TestSquare::PayloadSize>,std::pair<option_t,Setting*> > tag_map;
-    Setting settings[] = { Setting(DISPLAYMODE_TRANSFORM),
+    Setting settings[] = { Setting(DISPLAYMODE_THRESHOLD),
 			   Setting(THRESHOLD_GLOBAL),
 			   Setting(DISTORTION_NONE),
 			   Setting(SHAPEFIT_CORNER),
@@ -161,58 +161,67 @@ int main(int argc,char* argv[]) {
     ADD("000000000000000000000000000000010001",TRANSFORM_CYBERCODE,&settings[TRANSFORM]);
     ADD("000000000000000000000000000000010010",TRANSFORM_SPACESEARCH,&settings[TRANSFORM]);
 
-	typedef DSVLImageSource ImageSource ;
-//    IEEE1394ImageSource fs("/dev/video1394",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );
+    //typedef IEEE1394ImageSource ImageSource ;
+    //IEEE1394ImageSource fs("/dev/video1394",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );
+    //IEEE1394ImageSource fs("/dev/video1394",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );
+    typedef V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> ImageSource ;
+    V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> fs("/dev/video0",0);
     //V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> fs("/dev/video0",0);
-	ImageSource fs(argv[5]);
-	//FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8>fs("draw.pnm");
+    //typedef DSVLImageSource ImageSource ;
+    //DSVLImageSource fs(argv[5]);
+    //typedef FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> ImageSource ;
+    //FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8>fs("draw.pnm");
     TestSquare tag;
     tag.SetContourRestrictions(25,10,10);
 
     Camera camera;
     //camera.SetIntrinsic(1284.33,1064.55,450.534, 321.569,0 );
-       //camera.SetIntrinsic(640,480,320,240,0);
-	camera.SetIntrinsic(320,240,160,120,0);
+    //camera.SetIntrinsic(640,480,320,240,0);
+    camera.SetIntrinsic(320,240,160,120,0);
     //camera.SetIntrinsic(924,576,462,288,0);
     camera.SetRadial(-0.147572438077408,0.112655792817613,0.f);
     
     GLOutputMechanism<GlutRenderWindow> g(atoi(argv[1]),atoi(argv[2]),fs.GetWidth(),fs.GetHeight());
-    //GLOutputMechanism g(fs.GetWidth(),fs.GetHeight(),fs.GetWidth(),fs.GetHeight());
    
     Transform t;
     time_t current_time = time(NULL);
     int fcount = 0;
     char fps_buf[255];
     sprintf(fps_buf,"FPS: ?");
-	int counter = 0;
+    int counter = 0;
+    int adaptive_window = 8;
+    int adaptive_threshold = 10;
+    int global_threshold = 128;
+    
     while(true) {
-		ImageSource::ImageType* i = fs.Next();
+      ImageSource::ImageType* i = fs.Next();
       Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* output;
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_THRESHOLD) {
-		output = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(i->GetWidth(),i->GetHeight());
+	output = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(i->GetWidth(),i->GetHeight());
       }
       else {
-		output = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(i->GetWidth(),i->GetHeight());
-	    output->ConvertScale(0,190);
-	  }
-
+	output = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(i->GetWidth(),i->GetHeight());
+	output->ConvertScale(0,190);
+      }
+      
       MonochromeImage m(i->GetWidth(),i->GetHeight());
-		m.FlipVertical(true);
+      m.FlipVertical(true);
+      
       switch(settings[THRESHOLD].current_option) {
       case THRESHOLD_GLOBAL:
-		  Apply(*i,m,ThresholdGlobal<ImageSource::PixSze,ImageSource::PixFmt>(128));
+	Apply(*i,m,ThresholdGlobal<ImageSource::PixSze,ImageSource::PixFmt>(global_threshold));
 	break;
-	  case THRESHOLD_ADAPTIVE:
-		  Apply(*i,m,ThresholdAdaptive<ImageSource::PixSze,ImageSource::PixFmt>(atoi(argv[4]),atoi(argv[5])));
+      case THRESHOLD_ADAPTIVE:
+	Apply(*i,m,ThresholdAdaptive<ImageSource::PixSze,ImageSource::PixFmt>(adaptive_window,adaptive_threshold));
       }
-
+      
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_THRESHOLD) { 
-		Apply(m,DrawEntityMonochrome(*output));
-		output->ConvertScale(0.25,190);
-	  }
-
-		Apply(m,ContourFollowerClearImageBorder());
-
+	Apply(m,DrawEntityMonochrome(*output));
+	output->ConvertScale(0.25,190);
+      }
+      
+      Apply(m,ContourFollowerClearImageBorder());
+      
       Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<QuadTangle>,TransformEntity,DecodeEntity<TestSquare::PayloadSize>) > > tree;
       Apply<ContourFollowerTree>(m,tree,ContourFollowerTree(tag));
       
@@ -270,7 +279,7 @@ int main(int argc,char* argv[]) {
       ApplyTree(tree,Bind(SampleTagSquare(tag,camera),m));
       ApplyTree(tree,Decode<TestSquare>());
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_TRANSFORM) { 
-	ApplyTree(tree,DrawEntityTransform(*output,camera));
+	ApplyTree(tree,DrawEntitySample(*output,camera,tag));
       }
 
       ApplyTree(tree,TransformRotateToPayload(tag));
@@ -284,10 +293,14 @@ int main(int argc,char* argv[]) {
 
       switch (settings[THRESHOLD].current_option) {
       case THRESHOLD_GLOBAL:
-	g.DrawText(-0.47,y,"ThresholdGlobal",settings[THRESHOLD].GetR(new_time), settings[THRESHOLD].GetG(new_time), settings[THRESHOLD].GetB(new_time)); y += 0.05;
+	char glob_buf[255];
+	sprintf(glob_buf,"ThresholdGlobal(%d)",global_threshold);
+	g.DrawText(-0.47,y,glob_buf,settings[THRESHOLD].GetR(new_time), settings[THRESHOLD].GetG(new_time), settings[THRESHOLD].GetB(new_time)); y += 0.05;
 	break;
       case THRESHOLD_ADAPTIVE:
-	g.DrawText(-0.47,y,"ThresholdAdaptive",settings[THRESHOLD].GetR(new_time), settings[THRESHOLD].GetG(new_time), settings[THRESHOLD].GetB(new_time)); y += 0.05;
+	char adap_buf[255];
+	sprintf(adap_buf,"ThresholdAdaptive(%d,%d)",adaptive_window,adaptive_threshold);
+	g.DrawText(-0.47,y,adap_buf,settings[THRESHOLD].GetR(new_time), settings[THRESHOLD].GetG(new_time), settings[THRESHOLD].GetB(new_time)); y += 0.05;
       }
 
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_THRESHOLD) {
@@ -357,11 +370,46 @@ int main(int argc,char* argv[]) {
 	fcount = 0;
       }
 	  
-	  g.DrawText(0.39,0.47,fps_buf);
+      g.DrawText(0.39,0.47,fps_buf);
 
       g.Flush();
-    //        exit(-1);
-    }  
+
+      for(std::vector<Key::Code>::const_iterator i = g.GetKeypresses().begin();i!=g.GetKeypresses().end();++i) {
+	switch(*i) {
+	case Key::ESC:
+	  exit(-1);
+	case Key::R:
+	  settings[0] = Setting(DISPLAYMODE_NORMAL);
+	  settings[1] = Setting(THRESHOLD_GLOBAL);
+	  settings[2] = Setting(DISTORTION_NONE);
+	  settings[3] = Setting(SHAPEFIT_CORNER);
+	  settings[4] = Setting(REGRESSION_OFF);
+	  settings[5] = Setting(TRANSFORM_PROJECTIVE);
+	  global_threshold = 128;
+	  adaptive_threshold = 10;
+	  adaptive_window = 8;
+	  break;
+	case Key::A:
+	  adaptive_window++;
+	  break;
+	case Key::Z:
+	  adaptive_window--;
+	  break;
+	case Key::S:
+	  adaptive_threshold++;
+	  break;
+	case Key::X:
+	  adaptive_threshold--;
+	  break;
+	case Key::D:
+	  global_threshold++;
+	  break;
+	case Key::C:
+	  global_threshold--;
+	  break;
+	}
+      }
+    }
   }
   catch (const char* exception) {
     std::cerr << "Caught exception: " << exception<< std::endl;
