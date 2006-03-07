@@ -49,8 +49,8 @@ namespace Cantag {
       std::list<std::pair<std::pair<float,float>,int> >::iterator maxi;
       float maxd=0;
 
-      float firstx=*points.begin();
-      float firsty=*++points.begin();
+      float firstx=points[0];
+      float firsty=points[1];
     
       //must copy since we want to modify this datastructure and vector is const!
       int counter = 0;
