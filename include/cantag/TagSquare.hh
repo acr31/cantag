@@ -45,6 +45,7 @@ namespace Cantag {
     const float m_cell_width;
     const float m_cell_width_2;
     float m_cells_corner[SIZE*SIZE*2];
+    int m_cell_indices[SIZE*SIZE];  // a mapping from col + SIZE*row to the index number of that cell in the payload array
 
   public:
     TagSquare();
@@ -63,6 +64,10 @@ namespace Cantag {
 
     inline float GetY0(int cell_number) const {
       return m_cells_corner[2*cell_number+1];     
+    }
+
+    inline int GetCellNumber(int row,int col) const {
+      return m_cell_indices[row*SIZE + col];
     }
   };
 
@@ -92,30 +97,38 @@ namespace Cantag {
      */
     int triangle_size = SIZE*SIZE / 2;
     int position = 0;
+
     for(int height = 0; height < SIZE/2; height++) {
       for(int i=height;i<SIZE-1-height;i++) {
 	m_cells_corner[position] = 2*(float)(i+1)/(SIZE+2) - 1;
 	m_cells_corner[position+1] = 2*(float)(height+1)/(SIZE+2) - 1;
+	m_cell_indices[height * SIZE + i] = position/2;
 
 	m_cells_corner[position+triangle_size] = 2*(float)(SIZE-height)/(SIZE+2) - 1;
 	m_cells_corner[position+triangle_size+1] = 2*(float)(i+1)/(SIZE+2) - 1;
+	m_cell_indices[i * SIZE + SIZE - height-1] = (position + triangle_size)/2;
 
 	m_cells_corner[position+triangle_size*2] = 2*(float)(SIZE-i)/(SIZE+2) - 1;
 	m_cells_corner[position+triangle_size*2+1] = 2*(float)(SIZE-height)/(SIZE+2) - 1;
+	m_cell_indices[SIZE*SIZE -1 - i  - height * SIZE] = (position + 2*triangle_size)/2;
 
 	m_cells_corner[position+triangle_size*3] = 2*(float)(height+1)/(SIZE+2) - 1;
 	m_cells_corner[position+triangle_size*3+1] = 2*(float)(SIZE-i)/(SIZE+2) - 1;
-
+	m_cell_indices[ SIZE * (SIZE - 1)- i * SIZE + height] = (position + 3*triangle_size)/2;
 	position+=2;
       }
     }
     
+    if (SIZE*SIZE % 2 != 0) {
+      m_cell_indices[(SIZE*SIZE -1) / 2] = 0;
+    }
+
 #ifdef SQUARE_DEBUG_POINTS
     for (int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);i++) {
       std::cout << m_cells_corner[2*i] << " " << m_cells_corner[2*i+1] << std::endl;
     }
 #endif
   }
-
+  
 }
 #endif//TAG_SQUARE_GUARD
