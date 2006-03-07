@@ -96,7 +96,7 @@ namespace Cantag {
 	di++;
       }
     }
-    sort(indexes.begin(), indexes.end());
+    std::sort(indexes.begin(), indexes.end());
 
     shape.SetShape(new QuadTangle(points[indexes[0]*2],points[indexes[0]*2+1],
 				  points[indexes[1]*2],points[indexes[1]*2+1],
