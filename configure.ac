@@ -13,7 +13,7 @@ AC_PROG_CXX
 AC_CHECK_PROG(magicconfig,[Magick++-config --version],yes,no)
 
 if test $CXX = "g++"; then
-   CXXFLAGS="$CXXFLAGS -finline-limit=1000 -Wall -Wno-non-virtual-dtor -Werror"
+   CXXFLAGS="$CXXFLAGS -finline-limit=1000 -Wall -Wno-non-virtual-dtor"
 fi
 
 if test $magicconfig = "yes"; then
