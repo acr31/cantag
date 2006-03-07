@@ -26,9 +26,9 @@
  *
  * $Header$
  */
-#include <tripover/GF4Poly.hh>
+#include <cantag/GF4Poly.hh>
 
-namespace Tripover {
+namespace Cantag {
   /**
    * This representation has two bits for each of the elements of the field
    *
