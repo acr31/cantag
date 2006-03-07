@@ -28,12 +28,12 @@
 template<class Tag>
 void RunTest(Tag& tag,const Cantag::Camera& camera, int size, double tan_fov, const char* prefix) {
 
-  const int numsteps = 2;
-    const int pixel_min = 5;
-    const int pixel_step = 10;
-    const int normal_numsteps = 50;
-    for(int pixels=50;pixels>=pixel_min;pixels-=pixel_step) {
-      double distance = (double)size/2.f/(double)pixels;
+  const int numsteps = 1;
+  const int pixel_min = 10;
+  const int pixel_step = 1;
+  const int normal_numsteps = 10;
+  for(int pixels=100;pixels>=pixel_min;pixels-=pixel_step) {
+    double distance = (double)size/(double)pixels*2.f;
     
       // now work out the range of x and y to try for this distance
       double range = tan_fov * distance - 1.0;
@@ -54,24 +54,33 @@ void RunTest(Tag& tag,const Cantag::Camera& camera, int size, double tan_fov, co
 
 	      Cantag::TransformEntity te;
 	      te.GetTransforms().push_back(new Cantag::Transform(x0,y0,distance,nx,ny,nz,"normal vector"));
-
 	      float normal[3];
 	      te.GetPreferredTransform()->GetNormalVector(camera,normal);
 	      float location[3];
 	      te.GetPreferredTransform()->GetLocation(location,1.f);
-	      
+
 	      float mod = sqrt(location[0]*location[0] + location[1]*location[1] + location[2]*location[2]);
 	      
 	      float angle = acos((normal[0]*location[0] + normal[1]*location[1] + normal[2]*location[2])/mod);
 
 	      if (angle >= M_PI/2) {
-		std::cout <<  prefix << " " << x0 << " " << y0 << " " << distance << " " << pixels << " " << xc << " " << yc << " " << " SKIP " << normal[0] << " " << normal[1] << " " << normal[2] << " " << nx << " " << ny << " " << nz << std::endl;
+		std::cout <<  prefix << " " << x0 << " " << y0 << " " << distance << " " << pixels << " " << xc << " " << yc << " " << nx << " " << ny << " " << nz << " " << angle << " SKIP" << std::endl;
 		continue;
 	      }
 
-	      Cantag::Minima m;
+	      std::vector<float> m;
 	      Cantag::SimulateMinDistance(m,tag,camera)(te);
-	      std::cout << prefix << " " << x0 << " " << y0 << " " << distance << " " << pixels << " " << xc << " " << yc << " " << m.GetMinima() << " " << normal[0] << " " << normal[1] << " " << normal[2] << " " << nx << " " << ny << " " << nz << std::endl;
+	      std::cout << prefix << " " << x0 << " " << y0 << " " << distance << " " << pixels << " " << xc << " " << yc << " " << nx << " " << ny << " " << nz << " " << angle;
+	      float min = 1e10;
+	      for(std::vector<float>::const_iterator i = m.begin();i!=m.end();++i) {
+		float v = *i;
+		if (v < min) min = v;
+	      }
+	      std::cout << " " << min;
+	      for(std::vector<float>::const_iterator i = m.begin();i!=m.end();++i) {
+		std::cout << " " << *i;
+	      }
+	      std::cout << std::endl;
 	    }
 	  }
 	}
@@ -166,7 +175,7 @@ int main(int argc,char** argv) {
 
     float invd = tan(fov/2/180*M_PI)*2;
     Cantag::Camera cam;
-    cam.SetIntrinsic(size/invd,size/invd,size/2,size/2,0);
+    cam.SetIntrinsic(size,size,size/2,size/2,0);
 
     Executor<TL2(CircleInnerLSFull36,SquarePolygonProj36)>::Execute(cam,size,tan(fov/2.f/180.f*M_PI));
     //Executor<Cantag::Append<BasicCircleTags,BasicSquareTags>::value>::Execute(cam,size,tan(fov/2.f/180.f*M_PI));
