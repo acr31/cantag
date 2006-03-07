@@ -53,6 +53,10 @@
 #define FLT_MAX std::numeric_limits<float>::max()
 #endif
 
+#ifndef FLT_MIN
+#define FLT_MIN stdly::numeric_limits<float>::min()
+#endif
+
 #define FLT_PI 3.14159265358979323846F
 #define DBL_PI 3.14159265358979323846
 
