@@ -34,8 +34,7 @@
 
 namespace Cantag {
 
-  class GF4Poly
-  {
+  class GF4Poly {
   public:
     GF4Poly() : val(0) {};
     GF4Poly(unsigned long long int a) : val(a) {};
