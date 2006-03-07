@@ -90,7 +90,7 @@ namespace Cantag {
 							    int image_width, int image_height) 
     : C(window_width,window_height),
       m_image_width(image_width), m_image_height(image_height),
-      m_texture_width(FindNextTextureSize(image_width)), m_texture_height(FindNextTextureSize(image_height)),m_tmap(NULL)
+      m_texture_width(C::FindNextTextureSize(image_width)), m_texture_height(C::FindNextTextureSize(image_height)),m_tmap(NULL)
   {
     for(int i=0;i<9;++i) {
       m_displayListInitialised[i] = false;
