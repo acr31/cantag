@@ -15,6 +15,7 @@ cantaginclude_HEADERS += ConvexHull.hh
 cantaginclude_HEADERS += TransformEllipseRotate.hh 
 cantaginclude_HEADERS += TransformRotateToPayload.hh 
 cantaginclude_HEADERS += DrawTagCircle.hh 
+cantaginclude_HEADERS += DrawTagCircleSVG.hh 
 cantaginclude_HEADERS += DrawTagSquare.hh 
 cantaginclude_HEADERS += Encode.hh 
 cantaginclude_HEADERS += TransformSelectEllipse.hh 
