@@ -52,6 +52,7 @@ namespace Cantag {
     const float m_data_inner_edge;
     const float m_data_outer_edge;
 
+    float *m_data_ring_inner_radii;
     float *m_data_ring_outer_radii;
     float *m_data_ring_centre_radii;
     float *m_sector_angles;
@@ -99,10 +100,12 @@ namespace Cantag {
     inline float GetDataOuterEdge() const { return m_data_outer_edge; }
     inline float GetDataInnerEdge() const { return m_data_inner_edge; }
     inline float GetDataRingOuterEdge(int ring) const { return m_data_ring_outer_radii[ring]; }
+    inline float GetDataRingInnerEdge(int ring) const { return m_data_ring_inner_radii[ring]; }
     inline float GetReadAngle(int index) const { return m_sector_angles[index]; }
   };
 
   template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT> TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::~TagCircle() {
+    delete[] m_data_ring_inner_radii;
     delete[] m_data_ring_outer_radii;
     delete[] m_data_ring_centre_radii;
     delete[] m_sector_angles;
@@ -139,11 +142,13 @@ namespace Cantag {
     // Lets give each one an equal amount - first pass
   
     m_data_ring_centre_radii = new float[PARAM_RING_COUNT];
+    m_data_ring_inner_radii = new float[PARAM_RING_COUNT];
     m_data_ring_outer_radii = new float[PARAM_RING_COUNT];
   
     float ring_width = (m_data_outer_edge-m_data_inner_edge)/PARAM_RING_COUNT;
     
     for(int i=0;i<PARAM_RING_COUNT;i++) {
+      m_data_ring_inner_radii[i] = m_data_inner_edge + ring_width*(i);
       m_data_ring_outer_radii[i] = m_data_inner_edge + ring_width*(i+1);
       m_data_ring_centre_radii[i] = m_data_ring_outer_radii[i]-ring_width/2;    
     }
