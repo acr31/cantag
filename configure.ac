@@ -96,6 +96,7 @@ CANTAG_CHECK_HEADER(X11/Xlib.h,HAVE_X11_XLIB_H,have_x11_xlib_h)
 CANTAG_CHECK_HEADER(X11/Xutil.h,HAVE_X11_XUTIL_H,have_x11_xutil_h)
 CANTAG_CHECK_HEADER(ffmpeg/avcodec.h,HAVE_AVCODEC_H,have_avcodec_h)
 CANTAG_CHECK_HEADER(ffmpeg/avformat.h,HAVE_AVFORMAT_H,have_avformat_h)
+CANTAG_CHECK_HEADER(uEye.h,HAVE_UEYE_H,have_ueye_h)
 CANTAG_CHECK_HEADER(X11/extensions/XShm.h,HAVE_X11_EXTENSIONS_XSHM_H,have_x11_extensions_xshm_h,
 [
 #ifdef HAVE_X11_XLIB_H
@@ -122,6 +123,7 @@ CANTAG_CHECK_LIB(dc1394_control,dc1394_dma_setup_capture,HAVELIB_DC1394,havelib_
 CANTAG_CHECK_LIB(avcodec, img_convert,HAVELIB_AVCODEC,havelib_avcodec)
 CANTAG_CHECK_LIB(avformat,av_register_all ,HAVELIB_AVFORMAT,havelib_avformat)
 CANTAG_CHECK_LIB(z,uncompress ,HAVELIB_Z,havelib_z)
+CANTAG_CHECK_LIB(ueye_api,is_InitCamera ,HAVELIB_UEYE_API,havelib_ueye_api)
 
 LIBSSAVEACR31="$LIBS"
 LIBS="-lboost_unit_test_framework-gcc-1_32 $LIBS"
