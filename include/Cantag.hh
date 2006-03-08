@@ -47,6 +47,7 @@
 #include <cantag/ComposeEntityTree.hh>
 #endif
 
+#include <cantag/SpeedMath.hh>
 #include <cantag/Apply.hh>
 #include <cantag/Bind.hh>
 #include <cantag/TagDictionary.hh>
@@ -91,7 +92,9 @@
 #include <cantag/algorithms/ThresholdGlobal.hh>
 #include <cantag/algorithms/ConvexHull.hh>
 #include <cantag/algorithms/DrawTagCircle.hh>
+#include <cantag/algorithms/DrawTagCircleSVG.hh>
 #include <cantag/algorithms/DrawTagSquare.hh>
+#include <cantag/algorithms/DrawTagSquareSVG.hh>
 #include <cantag/algorithms/TransformSelectEllipse.hh>
 #include <cantag/algorithms/TransformSelectEllipseErrorOfFit.hh>
 #include <cantag/algorithms/RemoveNonConcentricEllipse.hh>
@@ -148,7 +151,9 @@
 # include <cantag/VFWImageSource.hh>
 # include <cantag/DSVLImageSource.hh>
 #endif
-
+#ifdef HAVE_UEYE_H
+# include <cantag/UEyeImageSource.hh>
+#endif
 //////////////////////
 // output mechanisms
 #include <cantag/Keypress.hh>
