@@ -129,7 +129,7 @@ int main(int argc,char* argv[]) {
 
   try {
     std::map<CyclicBitSet<TestSquare::PayloadSize>,std::pair<option_t,Setting*> > tag_map;
-    Setting settings[] = { Setting(DISPLAYMODE_THRESHOLD),
+    Setting settings[] = { Setting(DISPLAYMODE_CONTOUR),
 			   Setting(THRESHOLD_GLOBAL),
 			   Setting(DISTORTION_NONE),
 			   Setting(SHAPEFIT_CORNER),
@@ -162,22 +162,25 @@ int main(int argc,char* argv[]) {
     ADD("000000000000000000000000000000010010",TRANSFORM_SPACESEARCH,&settings[TRANSFORM]);
 
     //typedef IEEE1394ImageSource ImageSource ;
+    //IEEE1394ImageSource fs("/dev/video1394/0",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );
     //IEEE1394ImageSource fs("/dev/video1394",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );
-    //IEEE1394ImageSource fs("/dev/video1394",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );
-    typedef V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> ImageSource ;
-    V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> fs("/dev/video0",0);
+    //typedef V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> ImageSource ;
+    //V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> fs("/dev/video0",0);
     //V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> fs("/dev/video0",0);
     //typedef DSVLImageSource ImageSource ;
     //DSVLImageSource fs(argv[5]);
     //typedef FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> ImageSource ;
     //FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8>fs("draw.pnm");
+    typedef UEyeImageSource ImageSource;
+    UEyeImageSource fs;
     TestSquare tag;
     tag.SetContourRestrictions(25,10,10);
 
     Camera camera;
     //camera.SetIntrinsic(1284.33,1064.55,450.534, 321.569,0 );
     //camera.SetIntrinsic(640,480,320,240,0);
-    camera.SetIntrinsic(320,240,160,120,0);
+//    camera.SetIntrinsic(320,240,160,120,0);
+    camera.SetIntrinsic(fs.GetWidth(),fs.GetHeight(),fs.GetWidth()/2,fs.GetHeight()/2,0);
     //camera.SetIntrinsic(924,576,462,288,0);
     camera.SetRadial(-0.147572438077408,0.112655792817613,0.f);
     
@@ -192,20 +195,21 @@ int main(int argc,char* argv[]) {
     int adaptive_window = 8;
     int adaptive_threshold = 10;
     int global_threshold = 128;
-    
     while(true) {
       ImageSource::ImageType* i = fs.Next();
       Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* output;
-      if (settings[DISPLAYMODE].current_option == DISPLAYMODE_THRESHOLD) {
-	output = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(i->GetWidth(),i->GetHeight());
+      const bool enable_output = settings[DISPLAYMODE].current_option != DISPLAYMODE_NORMAL;
+    
+      if (enable_output) {
+	  if (settings[DISPLAYMODE].current_option == DISPLAYMODE_THRESHOLD) {
+	      output = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(i->GetWidth(),i->GetHeight());
+	  }
+	  else {
+	      output = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(*i);
+	      output->ConvertScale(0.25,190);
+	  }
       }
-      else {
-	output = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(i->GetWidth(),i->GetHeight());
-	output->ConvertScale(0,190);
-      }
-      
       MonochromeImage m(i->GetWidth(),i->GetHeight());
-      m.FlipVertical(true);
       
       switch(settings[THRESHOLD].current_option) {
       case THRESHOLD_GLOBAL:
@@ -215,7 +219,7 @@ int main(int argc,char* argv[]) {
 	Apply(*i,m,ThresholdAdaptive<ImageSource::PixSze,ImageSource::PixFmt>(adaptive_window,adaptive_threshold));
       }
       
-      if (settings[DISPLAYMODE].current_option == DISPLAYMODE_THRESHOLD) { 
+      if (enable_output && settings[DISPLAYMODE].current_option == DISPLAYMODE_THRESHOLD) { 
 	Apply(m,DrawEntityMonochrome(*output));
 	output->ConvertScale(0.25,190);
       }
@@ -225,7 +229,7 @@ int main(int argc,char* argv[]) {
       Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<QuadTangle>,TransformEntity,DecodeEntity<TestSquare::PayloadSize>) > > tree;
       Apply<ContourFollowerTree>(m,tree,ContourFollowerTree(tag));
       
-      if (settings[DISPLAYMODE].current_option == DISPLAYMODE_CONTOUR) { 
+      if (enable_output && settings[DISPLAYMODE].current_option == DISPLAYMODE_CONTOUR) { 
 	ApplyTree(tree,DrawEntityContour(*output));
       }
 
@@ -242,7 +246,7 @@ int main(int argc,char* argv[]) {
 	ApplyTree(tree,DistortionCorrectionIterative(camera,true));
       }
 
-      if (settings[DISPLAYMODE].current_option == DISPLAYMODE_UNDISTORTEDCONTOUR) { 
+      if (enable_output && settings[DISPLAYMODE].current_option == DISPLAYMODE_UNDISTORTEDCONTOUR) { 
 	ApplyTree(tree,DrawEntityContour(*output,ROI(-0.5,0.5,-0.5,0.5)));
       }
       
@@ -261,7 +265,7 @@ int main(int argc,char* argv[]) {
 	ApplyTree(tree,FitQuadTangleRegression());
       }
 
-      if (settings[DISPLAYMODE].current_option == DISPLAYMODE_SHAPE) { 
+      if (enable_output && settings[DISPLAYMODE].current_option == DISPLAYMODE_SHAPE) { 
 	ApplyTree(tree,DrawEntityShape<QuadTangle>(*output,camera));
       }
       
@@ -278,15 +282,20 @@ int main(int argc,char* argv[]) {
 
       ApplyTree(tree,Bind(SampleTagSquare(tag,camera),m));
       ApplyTree(tree,Decode<TestSquare>());
-      if (settings[DISPLAYMODE].current_option == DISPLAYMODE_TRANSFORM) { 
+      if (enable_output && settings[DISPLAYMODE].current_option == DISPLAYMODE_TRANSFORM) { 
+	ApplyTree(tree,DrawEntityTransform(*output,camera));
 	ApplyTree(tree,DrawEntitySample(*output,camera,tag));
       }
 
       ApplyTree(tree,TransformRotateToPayload(tag));
-      g.Draw(*output,true);
-      delete output;
-	  
-      ApplyTree(tree,DrawAll(g,tag_map));
+
+      if (enable_output) {
+	  g.Draw(*output,true);
+	  delete output;
+      }
+      
+      if (settings[DISPLAYMODE].current_option != DISPLAYMODE_TRANSFORM) 
+	  ApplyTree(tree,DrawAll(g,tag_map));
 
       time_t new_time = time(NULL);
       float y = -0.45;
