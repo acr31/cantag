@@ -115,6 +115,8 @@ namespace Cantag {
     void SetTangential(float d1, float d2);
 
 
+    void ImageToNPCF(std::vector<float>& points) const;
+
     /**
      * Convert a set of image co-ordinates to normalised principle
      * co-ordinate frame (NPCF) points.  This involves removing the
@@ -137,7 +139,7 @@ namespace Cantag {
      *
      * Contains code by Robert Harle <rkh23@cam.ac.uk>
      */
-    void ImageToNPCF(std::vector<float>& points) const;
+    void ImageToNPCFSimple(std::vector<float>& points) const;
 
     /**
      * Convert a set of image co-ordinates to normalised principle

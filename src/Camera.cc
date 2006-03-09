@@ -208,10 +208,23 @@ namespace Cantag {
     }
   }
 
+  void Camera::ImageToNPCF(std::vector<float>& points) const {  
+    int numpoints = points.size();
+    for(int i=0;i<numpoints;i+=2) {
+      // 1) translate the points back to the principle point
+      points[i] -= m_intrinsic[2];
+      points[i+1] -= m_intrinsic[5];
+
+      // 2) remove the x and y scaling
+      points[i] /= m_intrinsic[0];
+      points[i+1] /= m_intrinsic[4];
+    }
+  }
+
   /**
    * \todo currently ignores  tangential parameters
    */
-  void Camera::ImageToNPCF(std::vector<float>& points) const {  
+  void Camera::ImageToNPCFSimple(std::vector<float>& points) const {  
     int numpoints = points.size();
     for(int i=0;i<numpoints;i+=2) {
       // 1) translate the points back to the principle point
