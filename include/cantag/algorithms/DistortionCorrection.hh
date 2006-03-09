@@ -22,21 +22,21 @@
  * $Header$
  */
 
-#ifndef DISTORTION_CORRECTION_GUARD
-#define DISTORTION_CORRECTION_GUARD
+#ifndef DISTORTION_CORRECTION_SIMPLE_GUARD
+#define DISTORTION_CORRECTION_SIMPLE_GUARD
 
 #include <cantag/entities/ContourEntity.hh>
 #include <cantag/Camera.hh>
 #include <cantag/Function.hh>
 
 namespace Cantag {
-  class CANTAG_EXPORT DistortionCorrection : public Function<TL0,TL1(ContourEntity)> {
+  class CANTAG_EXPORT DistortionCorrectionSimple : public Function<TL0,TL1(ContourEntity)> {
   private:
     const Camera& m_camera;
   public:
-    DistortionCorrection(const Camera& camera) : m_camera(camera) {};
+    DistortionCorrectionSimple(const Camera& camera) : m_camera(camera) {};
     bool operator()(ContourEntity& dest) const;
   };
 }
 
-#endif//DISTORTION_CORRECTION_GUARD
+#endif//DISTORTION_CORRECTION_SIMPLE_GUARD

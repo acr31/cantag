@@ -22,12 +22,12 @@
  * $Header$
  */
 
-#include <cantag/algorithms/DistortionCorrection.hh>
+#include <cantag/algorithms/DistortionCorrectionSimple.hh>
 
 namespace Cantag {
 
-  bool DistortionCorrection::operator()(ContourEntity& destination) const {
-    m_camera.ImageToNPCF(destination.GetPoints());
+  bool DistortionCorrectionSimple::operator()(ContourEntity& destination) const {
+    m_camera.ImageToNPCFSimple(destination.GetPoints());
     return true;
   }
 }
