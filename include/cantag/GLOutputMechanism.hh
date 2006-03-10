@@ -68,14 +68,21 @@ namespace Cantag {
     GLfloat m_texture_maxx;
     GLfloat m_texture_maxy;
 
-    void SetupCamera();
+      float m_gl_minx;
+      float m_gl_maxx;
+      float m_gl_miny;
+      float m_gl_maxy;
+
+
+    void SetupGLCamera(const Camera& camera);
     void InitialiseScene();
     void InitialiseTexture();
     void RenderModel(int display_list);
 
   public:
     GLOutputMechanism(int window_width,int window_height,
-		      int image_width, int image_height);
+		      int image_width, int image_height, 
+		      const Camera& camera);
     ~GLOutputMechanism();
     void Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, bool flip);
     void Draw(const Transform& t, int display_list, bool flip);
@@ -87,7 +94,8 @@ namespace Cantag {
   };
 
   template<class C> GLOutputMechanism<C>::GLOutputMechanism(int window_width, int window_height, 
-							    int image_width, int image_height) 
+							    int image_width, int image_height,
+							    const Camera& camera) 
     : C(window_width,window_height),
       m_image_width(image_width), m_image_height(image_height),
       m_texture_width(C::FindNextTextureSize(image_width)), m_texture_height(C::FindNextTextureSize(image_height)),m_tmap(NULL)
@@ -95,10 +103,10 @@ namespace Cantag {
     for(int i=0;i<9;++i) {
       m_displayListInitialised[i] = false;
     }
-    SetupCamera();
+    SetupGLCamera(camera);
     InitialiseScene();
     
-    // texture dimensions must be of the form: 2^n + 2
+    // texture dimensions must be of the form: 2^n 
     // we found the closest texture size bigger than our image - now we need to work out how much of the texture we use
     m_texture_maxx = (GLfloat)m_image_width / (GLfloat)m_texture_width;
     m_texture_maxy = (GLfloat)m_image_height / (GLfloat)m_texture_height;
@@ -128,12 +136,18 @@ namespace Cantag {
 		 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_tmap);
   }
 
-  template<class C> void GLOutputMechanism<C>::SetupCamera() {
+  template<class C> void GLOutputMechanism<C>::SetupGLCamera(const Camera& camera) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     // fov in the y direction
-    float fov = 2.f * atan( 1.f / 2.f ) / FLT_PI * 180.f;
-    gluPerspective((GLfloat)fov,1,1,1000.0);
+//    float fov = 2.f * atan( 1.f / 2.f ) / FLT_PI * 180.f;
+//    gluPerspective((GLfloat)fov,1.f,1,1000.0);
+    
+    m_gl_minx = -camera.GetPrincipleX()/camera.GetXScale();
+    m_gl_maxx = (m_image_width - camera.GetPrincipleX())/camera.GetXScale();
+    m_gl_miny = -camera.GetPrincipleY()/camera.GetYScale();
+    m_gl_maxy = (m_image_height - camera.GetPrincipleY())/camera.GetYScale();
+    glFrustum(m_gl_minx,m_gl_maxx,m_gl_miny,m_gl_maxy,1.f,100.f);
 
     // select the modelview matrix - transforms object co-ordinates to eye co-ordinates
     glMatrixMode(GL_MODELVIEW);
@@ -150,12 +164,12 @@ namespace Cantag {
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, white);
     glLightfv(GL_LIGHT0, GL_POSITION, position);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);  
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);  
     glDepthFunc(GL_LESS);
     glDepthRange(0,1);
     glEnable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
+    glDisable(GL_CULL_FACE);
   }
 
   template<class C> void GLOutputMechanism<C>::InitialiseScene() {}
@@ -299,14 +313,14 @@ namespace Cantag {
     glTexSubImage2D(GL_TEXTURE_2D,0,0,0,image.GetWidth(),image.GetHeight(),GL_LUMINANCE,GL_UNSIGNED_BYTE,image.GetContents());
     
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-	glBindTexture(GL_TEXTURE_2D, m_textureid);	
-	glBegin(GL_QUADS);
-    glTexCoord2f(reflect ? m_texture_maxx : 0.f, m_texture_maxy); glVertex3f(-1.f, 1.f, 2.f); 
-    glTexCoord2f(reflect ? 0.f : m_texture_maxx, m_texture_maxy); glVertex3f(1.f, 1.f, 2.f);
-    glTexCoord2f(reflect ? 0.f : m_texture_maxx, 0.f); glVertex3f(1.f, -1.f, 2.f);
-    glTexCoord2f(reflect ? m_texture_maxx : 0.f, 0.f); glVertex3f(-1.f, -1.f, 2.f);
+    glBindTexture(GL_TEXTURE_2D, m_textureid);	
+    glBegin(GL_QUADS);
+    glTexCoord2f(reflect ? m_texture_maxx : 0.f, m_texture_maxy); glVertex3f(m_gl_minx, m_gl_maxy, 1.f); 
+    glTexCoord2f(reflect ? 0.f : m_texture_maxx, m_texture_maxy); glVertex3f(m_gl_maxx, m_gl_maxy, 1.f);
+    glTexCoord2f(reflect ? 0.f : m_texture_maxx, 0.f); glVertex3f(m_gl_maxx, m_gl_miny, 1.f);
+    glTexCoord2f(reflect ? m_texture_maxx : 0.f, 0.f); glVertex3f(m_gl_minx, m_gl_miny, 1.f);
     glEnd();
-	glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_2D);
 
     glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -350,7 +364,10 @@ namespace Cantag {
     glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,mat);
     glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,0.f);
     glColor4f((float)r/255.f,(float)g/255.f,(float)b/255.f,1.f);
-    glRasterPos3f(x,y,1);
+    float xrange = m_gl_maxx - m_gl_minx;
+    float yrange = m_gl_maxy - m_gl_miny;
+
+    glRasterPos3f(x*xrange + m_gl_minx,y*yrange+m_gl_miny,1);
     size_t len = strlen(s);
     for (size_t i = 0; i < len; ++i) {
       glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, s[i]);
