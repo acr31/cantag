@@ -139,10 +139,7 @@ namespace Cantag {
   template<class C> void GLOutputMechanism<C>::SetupGLCamera(const Camera& camera) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    // fov in the y direction
-//    float fov = 2.f * atan( 1.f / 2.f ) / FLT_PI * 180.f;
-//    gluPerspective((GLfloat)fov,1.f,1,1000.0);
-    
+
     m_gl_minx = -camera.GetPrincipleX()/camera.GetXScale();
     m_gl_maxx = (m_image_width - camera.GetPrincipleX())/camera.GetXScale();
     m_gl_miny = -camera.GetPrincipleY()/camera.GetYScale();
@@ -308,8 +305,7 @@ namespace Cantag {
   }
 
   template<class C> void GLOutputMechanism<C>::Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, bool reflect) {
-	glEnable(GL_TEXTURE_2D);
-
+    glEnable(GL_TEXTURE_2D);
     glTexSubImage2D(GL_TEXTURE_2D,0,0,0,image.GetWidth(),image.GetHeight(),GL_LUMINANCE,GL_UNSIGNED_BYTE,image.GetContents());
     
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
