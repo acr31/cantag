@@ -13,7 +13,8 @@ libcantag_la_SOURCES += GF4Poly.cc
 libcantag_la_SOURCES += entities/ContourEntity.cc
 libcantag_la_SOURCES += algorithms/FitEllipseSimple.cc
 libcantag_la_SOURCES += algorithms/FitEllipseLS.cc
-libcantag_la_SOURCES += algorithms/DistortionCorrection.cc
+libcantag_la_SOURCES += algorithms/DistortionCorrectionNone.cc
+libcantag_la_SOURCES += algorithms/DistortionCorrectionSimple.cc
 libcantag_la_SOURCES += algorithms/TransformEllipseLinear.cc
 libcantag_la_SOURCES += algorithms/TransformEllipseFull.cc
 libcantag_la_SOURCES += algorithms/FitQuadTangleCorner.cc
@@ -31,7 +32,7 @@ libcantag_la_SOURCES += algorithms/DrawEntity.cc
 libcantag_la_SOURCES += algorithms/PrintEntity.cc
 libcantag_la_SOURCES += algorithms/FitQuadTangleRegression.cc
 libcantag_la_SOURCES += algorithms/SimulateMinDistance.cc
-libcantag_la_SOURCES += algorithms/SignalStrengthContour.cc
+#libcantag_la_SOURCES += algorithms/SignalStrengthContour.cc
 libcantag_la_SOURCES += UEyeImageSource.cc
 
 if HAVE_SYS_SOCKET_H
