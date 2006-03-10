@@ -33,11 +33,12 @@ template<int RINGS, int SECTORS, class FitAlgorithm, class TransformAlgorithm>
 class TestCircle : public Cantag::TagCircle<RINGS,SECTORS>, public Cantag::TripOriginalCoder<RINGS*SECTORS,RINGS,2> {
 public:  
   enum { PayloadSize = Cantag::TagCircle<RINGS,SECTORS>::PayloadSize };
-  typedef std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PayloadSize>*> PipelineResult;
+  typedef std::pair<const Cantag::SignalStrengthEntity*,std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PayloadSize>*> > PipelineResult;
 
   typedef Cantag::TagCircle<RINGS,SECTORS> SpecType;
   typedef Cantag::TripOriginalCoder<RINGS*SECTORS,RINGS,2> CoderType;
-  typedef Cantag::ComposedEntity<TL5(Cantag::ContourEntity,
+  typedef Cantag::ComposedEntity<TL6(Cantag::ContourEntity,
+				     Cantag::SignalStrengthEntity,
 				     Cantag::ConvexHullEntity,
 				     Cantag::ShapeEntity<Cantag::Ellipse>,
 				     Cantag::TransformEntity,
@@ -121,6 +122,7 @@ private:
       Apply(m,Cantag::DrawEntityMonochrome(output));
       output.Save(name_buffer);
     }
+
     if (debug_name) {
       std::cout << "Contours" << std::endl;
       ApplyTree(tree,Cantag::PrintEntityContour(std::cout));
@@ -130,7 +132,14 @@ private:
       ApplyTree(tree,Cantag::DrawEntityContour(output));
       output.Save(name_buffer);
     }
-    ApplyTree(tree,Cantag::DistortionCorrection(camera));
+
+    ApplyTree(tree,Cantag::SignalStrengthContour());
+    if (debug_name) {
+      std::cout << "SignalStrengthContour" << std::endl;
+    }
+
+
+    ApplyTree(tree,Cantag::DistortionCorrectionNone(camera));
     ApplyTree(tree,FitAlgorithm()); 
     if (debug_name) {
       std::cout << "Shapes" << std::endl;

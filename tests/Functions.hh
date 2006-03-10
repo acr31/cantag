@@ -32,6 +32,9 @@ struct Result {
   float min_distance;
   float max_distance;
 
+  float signal_strength;
+  int min_width;
+
   Result() : valid(false), not_visible(false) {}
   Result(float a, float d, int b) : angle_error(a), distance_error(d),bit_error(b), valid(true),not_visible(false) {}
 
@@ -43,6 +46,11 @@ struct Result {
       max_distance = d;
       valid = true;
     }
+  }
+
+  void SetSignalStrength(float w,int i) {
+    signal_strength = w;
+    min_width = i;
   }
 };
 
@@ -66,13 +74,13 @@ struct FindContour : public Cantag::Function<TL0,TL1(Cantag::ContourEntity)> {
 };
 
 template<int PAYLOAD_SIZE>
-struct AddLocatedObject : public Cantag::Function<TL1(Cantag::TransformEntity),TL1(Cantag::DecodeEntity<PAYLOAD_SIZE>)> {
-  std::vector<std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PAYLOAD_SIZE>*> >& m_list;
+struct AddLocatedObject : public Cantag::Function<TL2(Cantag::SignalStrengthEntity,Cantag::TransformEntity),TL1(Cantag::DecodeEntity<PAYLOAD_SIZE>)> {
+  std::vector<std::pair<const Cantag::SignalStrengthEntity*, std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PAYLOAD_SIZE>*> > >& m_list;
 
-  AddLocatedObject(std::vector<std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PAYLOAD_SIZE>*> >& lists) : m_list(lists) {};
+  AddLocatedObject(std::vector<std::pair<const Cantag::SignalStrengthEntity*,std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PAYLOAD_SIZE>*> > >& lists) : m_list(lists) {};
   
-  bool operator()(const Cantag::TransformEntity& te, Cantag::DecodeEntity<PAYLOAD_SIZE>& de) const {
-    m_list.push_back(std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PAYLOAD_SIZE>*>(&te,&de));
+  bool operator()(const Cantag::SignalStrengthEntity& ce, const Cantag::TransformEntity& te, Cantag::DecodeEntity<PAYLOAD_SIZE>& de) const {
+    m_list.push_back(std::pair<const Cantag::SignalStrengthEntity*,std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PAYLOAD_SIZE>*> >(&ce,std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PAYLOAD_SIZE>*>(&te,&de)));
     return true;
   }
 };

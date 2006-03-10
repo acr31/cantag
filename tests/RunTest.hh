@@ -78,26 +78,26 @@ template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output
     // now work out the range of x and y to try for this distance
     double range = m_tan_fov * distance - 1.0;
     double step = 2*range / (double)numsteps;
-    //for(int xc=-numsteps;xc<=numsteps;++xc) {
-      int xc=0; {
+    for(int xc=-numsteps;xc<=numsteps;++xc) {
+      //  int xc=0; {
       float x0 = xc * step;
-      //for(int yc=-numsteps;yc<=numsteps;++yc) {
-	int yc=0; {
+      for(int yc=-numsteps;yc<=numsteps;++yc) {
+	//int yc=0; {
 	float y0 = yc * step;
-	//for(int theta = -90; theta <= 90; theta += angle_step) {
-	  int theta = 0; {
+	for(int theta = -90; theta <= 90; theta += angle_step) {
+	  //  int theta = 0; {
 	  for(int phi = -90;phi<=90;phi += angle_step) {
 	    Result result = Execute(theta,phi,x0,y0,distance);
 	    if (prefix) output << prefix << " ";
 	    output << theta << " " << phi << " " << x0 << " " << y0 << " " << distance << " " << pixels << " " << xc << " " << yc << " ";
 	    if (result.valid) {
-	      output << result.distance_error << " " << result.angle_error << " " << result.bit_error << " " << result.min_distance << " " << result.max_distance << "\n";
+	      output << result.distance_error << " " << result.angle_error << " " << result.bit_error << " " << result.min_distance << " " << result.max_distance << " " << result.signal_strength << " " << result.min_width << "\n";
 	    }
 	    else if (result.not_visible) {
-	      output << "NONE NONE NONE " << result.min_distance << " NONE\n";
+	      output << "NONE NONE NONE " << result.min_distance << " NONE NONE NONE\n";
 	    }	    
 	    else {
-	      output << "FAIL FAIL FAIL " << result.min_distance << " FAIL\n";
+	      output << "FAIL FAIL FAIL " << result.min_distance << " FAIL FAIL FAIL\n";
 	    }	    
 	  }
 	}
@@ -114,13 +114,13 @@ template<class TagType> void RunTest<TagType>::ExecuteSingle(std::ostream& outpu
   if (prefix) output << prefix << " ";
   output << theta << " " << phi << " " << x0 << " " << y0 << " " << z0 << " " << pixels << " ";
   if (result.valid) {
-    output << result.distance_error << " " << result.angle_error << " " << result.bit_error << " " << result.min_distance << " " << result.max_distance << "\n";
+    output << result.distance_error << " " << result.angle_error << " " << result.bit_error << " " << result.min_distance << " " << result.max_distance << " " << result.signal_strength << " " << result.min_width << "\n";
   }
   else if (result.not_visible) {
-    output << "NONE NONE NONE " << result.min_distance << " NONE\n";
+    output << "NONE NONE NONE " << result.min_distance << " NONE NONE NONE\n";
   }
   else {
-    output << "FAIL FAIL FAIL " << result.min_distance << " NONE\n";
+    output << "FAIL FAIL FAIL " << result.min_distance << " FAIL FAIL FAIL\n";
   }
 }
 
@@ -128,13 +128,12 @@ template<class TagType> void RunTest<TagType>::ExecuteSingle(std::ostream& outpu
 
 template<class TagType> Result RunTest<TagType>::Execute(double theta, double phi, double x, double y, double z, const char* debug_name) {
 
-
-
   // work out if the tag will be visible if the angle between the
   // normal vector of the tag and the vector from the camera to the
   // tag if greater than 90 degrees then we will be looking at the
   // back
   Cantag::TransformEntity ref_te;
+
   ref_te.GetTransforms().push_back(new Cantag::Transform(x,y,z,theta/180.f*M_PI,phi/180.f*M_PI,1.f));
   float ref_normal[3];
   ref_te.GetPreferredTransform()->GetNormalVector(camera,ref_normal);
@@ -168,7 +167,6 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
 
   // get the next image from the image source
   Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>* i = fs.Next(theta,phi,x,y,z);
-
   // simulate the contour and decode from there
   Cantag::ContourEntity* contour;
 #undef SIMULATE_CONTOUR
@@ -204,7 +202,7 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
   const std::vector<typename TagType::PipelineResult>& loclist = tag.GetLocatedObjects();
   for(typename std::vector<typename TagType::PipelineResult>::const_iterator i = loclist.begin();i!=loclist.end();++i) {
     const typename TagType::PipelineResult& loc = *i;
-    const Cantag::TransformEntity* te = loc.first;
+    const Cantag::TransformEntity* te = loc.second.first;
 
     float location[3];
     te->GetPreferredTransform()->GetLocation(location,1);
@@ -219,16 +217,22 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
 
   Result r;
   // simulate the minimum distance for this transform
-  Cantag::Minima min;
+  std::vector<float> min;
   Cantag::SimulateMinDistance(min,tag,camera)(ref_te);
-  r.min_distance = min.GetMinima();
-  
+  float minv = FLT_MAX;
+  for(std::vector<float>::const_iterator i = min.begin();i!=min.end();++i) {
+    float v = *i;
+    if (v < minv) minv = v;
+  }    
+  r.min_distance = minv;
+
   if (favorite) {
 
     const typename TagType::PipelineResult& loc = *favorite;
-    const Cantag::TransformEntity* te = loc.first;
+    const Cantag::SignalStrengthEntity* ce = loc.first;
+    const Cantag::TransformEntity* te = loc.second.first;
 
-    const Cantag::DecodeEntity<TagType::PayloadSize>* de = loc.second;
+    const Cantag::DecodeEntity<TagType::PayloadSize>* de = loc.second.second;
 
     Cantag::CyclicBitSet<TagType::PayloadSize> copy(de->GetPayloads()[0]->payload);
 
@@ -259,6 +263,8 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
     Cantag::SimulateMaxSampleError(m,tag,camera)(*te,ref_te);
 
     r.Update(errorangle,distance,errors,m.GetMaxima());
+
+    r.SetSignalStrength(ce->GetSignalStrength(),ce->GetMin());
   }
   
   return r;

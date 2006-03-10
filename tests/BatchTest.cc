@@ -41,7 +41,7 @@ struct Chooser<Cantag::TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT> > {
     int ptr = 0;
     for(int i=0;i<SECTOR_COUNT;++i) {
       for(int j=0;j<RING_COUNT;++j) {
-	code[ptr++] = value;
+	code.Set(ptr++,value);
 	value ^= true;      
       }
       value ^= true;
@@ -56,7 +56,7 @@ struct Chooser<Cantag::TagSquare<EDGE_CELLS> > {
     bool value = true;
     int ptr = 0;
     for(int i=0;i<PayloadSize;++i) {
-      code[ptr++] = value;
+      code.Set(ptr++,value);
       value ^= true;      
     }
   }
@@ -111,9 +111,9 @@ struct Executor<Cantag::TypeListEOL> {
 
 //typedef AllTags TagList;
 //typedef CircleTags TagList;
-//typedef TL1(SquareConvexHullSpaceSearch36) TagList;
-typedef TL4(SquareCornerProj36,SquareRegressConvexHullProj36,SquareCornerSpaceSearch36,SquareRegressConvexHullSpaceSearch36) TagList;
-//typedef TL4(CircleInnerLSFull36,CircleInnerLSLinear36,CircleInnerSimpleFull36, CircleInnerSimpleLinear36) TagList;
+//typedef TL1(SquareCornerProj36) TagList;
+//typedef TL4(SquareCornerProj36,SquareRegressConvexHullProj36,SquareCornerSpaceSearch36,SquareRegressConvexHullSpaceSearch36) TagList;
+typedef TL1(SquareCornerProj36) TagList;
 
 int main(int argc,char* argv[]) {
   std::cout.precision(15);
