@@ -129,10 +129,10 @@ int main(int argc,char* argv[]) {
 
   try {
     std::map<CyclicBitSet<TestSquare::PayloadSize>,std::pair<option_t,Setting*> > tag_map;
-    Setting settings[] = { Setting(DISPLAYMODE_CONTOUR),
+    Setting settings[] = { Setting(DISPLAYMODE_SHAPE),
 			   Setting(THRESHOLD_GLOBAL),
 			   Setting(DISTORTION_NONE),
-			   Setting(SHAPEFIT_CORNER),
+			   Setting(SHAPEFIT_CONVEXHULL),
 			   Setting(REGRESSION_OFF),
 			   Setting(TRANSFORM_PROJECTIVE) };
     
@@ -164,24 +164,23 @@ int main(int argc,char* argv[]) {
     //typedef IEEE1394ImageSource ImageSource ;
     //IEEE1394ImageSource fs("/dev/video1394/0",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );
     //IEEE1394ImageSource fs("/dev/video1394",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );
-    //typedef V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> ImageSource ;
-    //V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> fs("/dev/video0",0);
-    //V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> fs("/dev/video0",0);
+    typedef V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> ImageSource;
+    V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> fs("/dev/video0",0);
     //typedef DSVLImageSource ImageSource ;
     //DSVLImageSource fs(argv[5]);
     //typedef FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> ImageSource ;
-    //FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8>fs("draw.pnm");
-    typedef UEyeImageSource ImageSource;
-    UEyeImageSource fs;
+    //FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8>fs("processing-original.bmp");
+    //typedef UEyeImageSource ImageSource;
+    //    UEyeImageSource fs;
+
     TestSquare tag;
-    tag.SetContourRestrictions(25,10,10);
+    tag.SetContourRestrictions(25,20,20);
 
     Camera camera;
-    camera.SetIntrinsic(614.768442508106773, 615.591645133047336,362.127084457907699,230.668279169791020,0);
+    //camera.SetIntrinsic(614.768442508106773, 615.591645133047336,362.127084457907699,230.668279169791020,0);
+    camera.SetIntrinsic(fs.GetWidth(),fs.GetWidth(),fs.GetWidth()/2,fs.GetHeight()/2,0);
 //    camera.SetIntrinsic(752,480,362.127084457907699,230.668279169791020,0);
 
-    //camera.SetIntrinsic(640,480,320,240,0);
-//    camera.SetIntrinsic(320,240,160,120,0);
     //camera.SetIntrinsic(fs.GetWidth(),fs.GetHeight(),fs.GetWidth()/2,fs.GetHeight()/2,0);
     //camera.SetIntrinsic(924,576,462,288,0);
     camera.SetRadial(-0.246574651979379,0.103141587733613,-0.000374087230627);
@@ -211,7 +210,9 @@ int main(int argc,char* argv[]) {
 	      output->ConvertScale(0.25,190);
 	  }
       }
+
       MonochromeImage m(i->GetWidth(),i->GetHeight());
+      //      m.FlipVertical(true);
       
       switch(settings[THRESHOLD].current_option) {
       case THRESHOLD_GLOBAL:
@@ -307,7 +308,7 @@ int main(int argc,char* argv[]) {
 	  ApplyTree(tree,DrawAll(g,tag_map));
 
       time_t new_time = time(NULL);
-      float y = 0.01;
+      float y = 0.1;
 
       switch (settings[THRESHOLD].current_option) {
       case THRESHOLD_GLOBAL:
