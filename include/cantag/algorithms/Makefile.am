@@ -1,6 +1,7 @@
 cantagincludedir = $(includedir)/cantag/algorithms
 
-cantaginclude_HEADERS =  DistortionCorrection.hh
+cantaginclude_HEADERS =  DistortionCorrectionNone.hh
+cantaginclude_HEADERS +=  DistortionCorrectionSimple.hh
 cantaginclude_HEADERS += FitEllipseLS.hh
 cantaginclude_HEADERS += FitEllipseSimple.hh 
 cantaginclude_HEADERS += TransformEllipseFull.hh 
