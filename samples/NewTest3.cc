@@ -81,7 +81,7 @@ int main(int argc,char* argv[]) {
       Tree<ComposedEntity<TL5(ContourEntity,ConvexHullEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<TagType::PayloadSize>) > > tree;
       Apply(m,tree,ContourFollowerTree(tag));
       //      ApplyTree(tree,DrawEntityContour(output));
-      ApplyTree(tree,DistortionCorrection(camera));
+      ApplyTree(tree,DistortionCorrectionSimple(camera));
       ApplyTree(tree,FitEllipseLS());
       ApplyTree(tree,TransformEllipseFull(tag.GetBullseyeOuterEdge()));
       ApplyTree(tree,TransformSelectEllipse(tag,camera));

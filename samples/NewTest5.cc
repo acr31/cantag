@@ -177,14 +177,16 @@ int main(int argc,char* argv[]) {
     tag.SetContourRestrictions(25,10,10);
 
     Camera camera;
-    //camera.SetIntrinsic(1284.33,1064.55,450.534, 321.569,0 );
+    camera.SetIntrinsic(614.768442508106773, 615.591645133047336,362.127084457907699,230.668279169791020,0);
+//    camera.SetIntrinsic(752,480,362.127084457907699,230.668279169791020,0);
+
     //camera.SetIntrinsic(640,480,320,240,0);
 //    camera.SetIntrinsic(320,240,160,120,0);
-    camera.SetIntrinsic(fs.GetWidth(),fs.GetHeight(),fs.GetWidth()/2,fs.GetHeight()/2,0);
+    //camera.SetIntrinsic(fs.GetWidth(),fs.GetHeight(),fs.GetWidth()/2,fs.GetHeight()/2,0);
     //camera.SetIntrinsic(924,576,462,288,0);
-    camera.SetRadial(-0.147572438077408,0.112655792817613,0.f);
-    
-    GLOutputMechanism<GlutRenderWindow> g(atoi(argv[1]),atoi(argv[2]),fs.GetWidth(),fs.GetHeight());
+    camera.SetRadial(-0.246574651979379,0.103141587733613,-0.000374087230627);
+    std::cout << fs.GetWidth() << " " << fs.GetHeight() << std::endl;
+    GLOutputMechanism<GlutRenderWindow> g(atoi(argv[1]),atoi(argv[2]),fs.GetWidth(),fs.GetHeight(),camera);
    
     Transform t;
     time_t current_time = time(NULL);
@@ -239,15 +241,22 @@ int main(int argc,char* argv[]) {
 
       switch(settings[DISTORTION].current_option) {
       case DISTORTION_NONE:
+	ApplyTree(tree,DistortionCorrectionNone(camera));
+	break;
       case DISTORTION_SIMPLE:
-	ApplyTree(tree,DistortionCorrection(camera));
+	ApplyTree(tree,DistortionCorrectionSimple(camera));
 	break;
       case DISTORTION_ITERATIVE:
 	ApplyTree(tree,DistortionCorrectionIterative(camera,true));
       }
 
       if (enable_output && settings[DISPLAYMODE].current_option == DISPLAYMODE_UNDISTORTEDCONTOUR) { 
-	ApplyTree(tree,DrawEntityContour(*output,ROI(-0.5,0.5,-0.5,0.5)));
+	  float minx = -camera.GetPrincipleX() / camera.GetXScale();
+	  float maxx = (fs.GetWidth()-camera.GetPrincipleX()) / camera.GetXScale();
+	  float miny = -camera.GetPrincipleY() / camera.GetYScale();
+	  float maxy = (fs.GetHeight()-camera.GetPrincipleY()) / camera.GetYScale();
+//	  ApplyTree(tree,DrawEntityContour(*output,ROI(-0.5,0.5,-0.5,0.5)));
+	  ApplyTree(tree,DrawEntityContour(*output,ROI(minx,maxx,miny,maxy)));
       }
       
       switch(settings[SHAPEFIT].current_option) {
@@ -266,7 +275,7 @@ int main(int argc,char* argv[]) {
       }
 
       if (enable_output && settings[DISPLAYMODE].current_option == DISPLAYMODE_SHAPE) { 
-	ApplyTree(tree,DrawEntityShape<QuadTangle>(*output,camera));
+	  ApplyTree(tree,DrawEntityShape<QuadTangle>(*output,camera));
       }
       
       switch(settings[TRANSFORM].current_option) {
@@ -298,76 +307,75 @@ int main(int argc,char* argv[]) {
 	  ApplyTree(tree,DrawAll(g,tag_map));
 
       time_t new_time = time(NULL);
-      float y = -0.45;
+      float y = 0.01;
 
       switch (settings[THRESHOLD].current_option) {
       case THRESHOLD_GLOBAL:
 	char glob_buf[255];
 	sprintf(glob_buf,"ThresholdGlobal(%d)",global_threshold);
-	g.DrawText(-0.47,y,glob_buf,settings[THRESHOLD].GetR(new_time), settings[THRESHOLD].GetG(new_time), settings[THRESHOLD].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,glob_buf,settings[THRESHOLD].GetR(new_time), settings[THRESHOLD].GetG(new_time), settings[THRESHOLD].GetB(new_time)); y += 0.05;
 	break;
       case THRESHOLD_ADAPTIVE:
 	char adap_buf[255];
 	sprintf(adap_buf,"ThresholdAdaptive(%d,%d)",adaptive_window,adaptive_threshold);
-	g.DrawText(-0.47,y,adap_buf,settings[THRESHOLD].GetR(new_time), settings[THRESHOLD].GetG(new_time), settings[THRESHOLD].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,adap_buf,settings[THRESHOLD].GetR(new_time), settings[THRESHOLD].GetG(new_time), settings[THRESHOLD].GetB(new_time)); y += 0.05;
       }
 
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_THRESHOLD) {
-	g.DrawText(-0.47,y,"DrawEntityMonochrome",settings[DISPLAYMODE].GetR(new_time), settings[DISPLAYMODE].GetG(new_time), settings[DISPLAYMODE].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"DrawEntityMonochrome",settings[DISPLAYMODE].GetR(new_time), settings[DISPLAYMODE].GetG(new_time), settings[DISPLAYMODE].GetB(new_time)); y += 0.05;
       }
 
-      g.DrawText(-0.47,y,"ContourFollowerTree"); y += 0.05;
+      g.DrawText(0.01,y,"ContourFollowerTree"); y += 0.05;
 
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_CONTOUR) {
-	g.DrawText(-0.47,y,"DrawEntityContour",settings[DISPLAYMODE].GetR(new_time), settings[DISPLAYMODE].GetG(new_time), settings[DISPLAYMODE].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"DrawEntityContour",settings[DISPLAYMODE].GetR(new_time), settings[DISPLAYMODE].GetG(new_time), settings[DISPLAYMODE].GetB(new_time)); y += 0.05;
       }
       if (settings[SHAPEFIT].current_option == SHAPEFIT_CONVEXHULL) {
-	g.DrawText(-0.47,y,"ConvexHull",settings[SHAPEFIT].GetR(new_time), settings[SHAPEFIT].GetG(new_time), settings[SHAPEFIT].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"ConvexHull",settings[SHAPEFIT].GetR(new_time), settings[SHAPEFIT].GetG(new_time), settings[SHAPEFIT].GetB(new_time)); y += 0.05;
       }
       switch (settings[DISTORTION].current_option) {
       case DISTORTION_NONE:
       case DISTORTION_SIMPLE:
-	g.DrawText(-0.47,y,"DistortionCorrection",settings[DISTORTION].GetR(new_time), settings[DISTORTION].GetG(new_time), settings[DISTORTION].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"DistortionCorrection",settings[DISTORTION].GetR(new_time), settings[DISTORTION].GetG(new_time), settings[DISTORTION].GetB(new_time)); y += 0.05;
 	break;
       case DISTORTION_ITERATIVE:
-	g.DrawText(-0.47,y,"DistortionCorrectionIterative",settings[DISTORTION].GetR(new_time), settings[DISTORTION].GetG(new_time), settings[DISTORTION].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"DistortionCorrectionIterative",settings[DISTORTION].GetR(new_time), settings[DISTORTION].GetG(new_time), settings[DISTORTION].GetB(new_time)); y += 0.05;
       }
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_UNDISTORTEDCONTOUR) {
-	g.DrawText(-0.47,y,"DrawEntityContour",settings[DISPLAYMODE].GetR(new_time), settings[DISPLAYMODE].GetG(new_time), settings[DISPLAYMODE].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"DrawEntityContour",settings[DISPLAYMODE].GetR(new_time), settings[DISPLAYMODE].GetG(new_time), settings[DISPLAYMODE].GetB(new_time)); y += 0.05;
       }
       switch (settings[SHAPEFIT].current_option) {
       case SHAPEFIT_CORNER:
-	g.DrawText(-0.47,y,"FitQuadTangleCorner",settings[SHAPEFIT].GetR(new_time), settings[SHAPEFIT].GetG(new_time), settings[SHAPEFIT].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"FitQuadTangleCorner",settings[SHAPEFIT].GetR(new_time), settings[SHAPEFIT].GetG(new_time), settings[SHAPEFIT].GetB(new_time)); y += 0.05;
 	break;
       case SHAPEFIT_POLYGON:
-	g.DrawText(-0.47,y,"FitQuadTanglePolygon",settings[SHAPEFIT].GetR(new_time), settings[SHAPEFIT].GetG(new_time), settings[SHAPEFIT].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"FitQuadTanglePolygon",settings[SHAPEFIT].GetR(new_time), settings[SHAPEFIT].GetG(new_time), settings[SHAPEFIT].GetB(new_time)); y += 0.05;
 	break;
       case SHAPEFIT_CONVEXHULL:
-	g.DrawText(-0.47,y,"FitQuadTangleConvexHull",settings[SHAPEFIT].GetR(new_time), settings[SHAPEFIT].GetG(new_time), settings[SHAPEFIT].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"FitQuadTangleConvexHull",settings[SHAPEFIT].GetR(new_time), settings[SHAPEFIT].GetG(new_time), settings[SHAPEFIT].GetB(new_time)); y += 0.05;
       }
       if (settings[REGRESSION].current_option == REGRESSION_ON) {
-	g.DrawText(-0.47,y,"FitQuadTangleRegression",settings[REGRESSION].GetR(new_time), settings[REGRESSION].GetG(new_time), settings[REGRESSION].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"FitQuadTangleRegression",settings[REGRESSION].GetR(new_time), settings[REGRESSION].GetG(new_time), settings[REGRESSION].GetB(new_time)); y += 0.05;
       }
       if (settings[DISPLAYMODE].current_option == DISPLAYMODE_SHAPE) {
-	g.DrawText(-0.47,y,"DrawEntityShape",settings[DISPLAYMODE].GetR(new_time), settings[DISPLAYMODE].GetG(new_time), settings[DISPLAYMODE].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"DrawEntityShape",settings[DISPLAYMODE].GetR(new_time), settings[DISPLAYMODE].GetG(new_time), settings[DISPLAYMODE].GetB(new_time)); y += 0.05;
       }
       switch (settings[TRANSFORM].current_option) { 
       case TRANSFORM_PROJECTIVE:
-	g.DrawText(-0.47,y,"TransformQuadTangleProjective",settings[TRANSFORM].GetR(new_time), settings[TRANSFORM].GetG(new_time), settings[TRANSFORM].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"TransformQuadTangleProjective",settings[TRANSFORM].GetR(new_time), settings[TRANSFORM].GetG(new_time), settings[TRANSFORM].GetB(new_time)); y += 0.05;
 	break;
       case TRANSFORM_SPACESEARCH:
-	g.DrawText(-0.47,y,"TransformQuadTangleSpaceSearch",settings[TRANSFORM].GetR(new_time), settings[TRANSFORM].GetG(new_time), settings[TRANSFORM].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"TransformQuadTangleSpaceSearch",settings[TRANSFORM].GetR(new_time), settings[TRANSFORM].GetG(new_time), settings[TRANSFORM].GetB(new_time)); y += 0.05;
 	break;
       case TRANSFORM_CYBERCODE:
-	g.DrawText(-0.47,y,"TransformQuadTangleCyberCode",settings[TRANSFORM].GetR(new_time), settings[TRANSFORM].GetG(new_time), settings[TRANSFORM].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"TransformQuadTangleCyberCode",settings[TRANSFORM].GetR(new_time), settings[TRANSFORM].GetG(new_time), settings[TRANSFORM].GetB(new_time)); y += 0.05;
       }
-      g.DrawText(-0.47,y,"SampleTagSquare"); y += 0.05;
-      g.DrawText(-0.47,y,"Decode"); y += 0.05;
+      g.DrawText(0.01,y,"SampleTagSquare"); y += 0.05;
+      g.DrawText(0.01,y,"Decode"); y += 0.05;
       if (settings[DISPLAYMODE].current_option == TRANSFORM) {
-	g.DrawText(-0.47,y,"DrawEntityTransform",settings[DISPLAYMODE].GetR(new_time), settings[DISPLAYMODE].GetG(new_time), settings[DISPLAYMODE].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"DrawEntityTransform",settings[DISPLAYMODE].GetR(new_time), settings[DISPLAYMODE].GetG(new_time), settings[DISPLAYMODE].GetB(new_time)); y += 0.05;
       }
-      g.DrawText(-0.47,y,"TransformRotateToPayload"); y += 0.05;
-
+      g.DrawText(0.01,y,"TransformRotateToPayload"); y += 0.05;
 
       ApplyTree(tree,InterpretTags(tag_map,new_time));
 
@@ -379,7 +387,7 @@ int main(int argc,char* argv[]) {
 	fcount = 0;
       }
 	  
-      g.DrawText(0.39,0.47,fps_buf);
+      g.DrawText(0.9,0.95,fps_buf);
 
       g.Flush();
 
