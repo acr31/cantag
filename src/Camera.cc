@@ -179,7 +179,7 @@ namespace Cantag {
    * \todo currently ignores  tangential parameters
    */
  
-  void Camera::ImageToNPCF(float* points, int numpoints) const {
+  void Camera::ImageToNPCFSimple(float* points, int numpoints) const {
     for(int i=0;i<numpoints*2 ;i+=2) {
       // 1) translate the points back to the principle point
       points[i] -= m_intrinsic[2];

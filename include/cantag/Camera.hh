@@ -147,7 +147,7 @@ namespace Cantag {
      *
      * \sa #ImageToNPCF()
      */
-    void ImageToNPCF(float* points, int num_points) const;
+    void ImageToNPCFSimple(float* points, int num_points) const;
 
     /**
      * Convert a set of image co-ordinates to normalised principle
