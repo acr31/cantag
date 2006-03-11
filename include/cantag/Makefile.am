@@ -34,3 +34,4 @@ cantaginclude_HEADERS += TagDictionary.hh
 cantaginclude_HEADERS += GLRenderWindow.hh
 cantaginclude_HEADERS += GLOutputMechanism.hh
 cantaginclude_HEADERS += EstimateTransform.hh
+cantaginclude_HEADERS += UEyeImageSource.hh
