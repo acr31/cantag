@@ -200,7 +200,7 @@ namespace Cantag {
   template<class Shape> bool DrawEntityShape<Shape>::operator()(ShapeEntity<Shape>& shape) const {
     std::vector<float> points;
     shape.GetShape()->Draw(points);
-    m_camera.NPCFToImage(points);
+    //    m_camera.NPCFToImage(points);
     std::vector<float>::const_iterator i = points.begin();
     float firstx = *(i++);
     float firsty = *(i++);
