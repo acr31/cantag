@@ -129,7 +129,7 @@ int main(int argc,char* argv[]) {
 
   try {
     std::map<CyclicBitSet<TestSquare::PayloadSize>,std::pair<option_t,Setting*> > tag_map;
-    Setting settings[] = { Setting(DISPLAYMODE_SHAPE),
+    Setting settings[] = { Setting(DISPLAYMODE_THRESHOLD),
 			   Setting(THRESHOLD_GLOBAL),
 			   Setting(DISTORTION_NONE),
 			   Setting(SHAPEFIT_CONVEXHULL),
@@ -164,14 +164,14 @@ int main(int argc,char* argv[]) {
     //typedef IEEE1394ImageSource ImageSource ;
     //IEEE1394ImageSource fs("/dev/video1394/0",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );
     //IEEE1394ImageSource fs("/dev/video1394",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );
-    typedef V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> ImageSource;
-    V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> fs("/dev/video0",0);
+    //typedef V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> ImageSource;
+    //    V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> fs("/dev/video0",0);
     //typedef DSVLImageSource ImageSource ;
     //DSVLImageSource fs(argv[5]);
     //typedef FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> ImageSource ;
     //FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8>fs("processing-original.bmp");
-    //typedef UEyeImageSource ImageSource;
-    //    UEyeImageSource fs;
+    typedef UEyeImageSource ImageSource;
+    UEyeImageSource fs;
 
     TestSquare tag;
     tag.SetContourRestrictions(25,20,20);
@@ -183,8 +183,11 @@ int main(int argc,char* argv[]) {
 
     //camera.SetIntrinsic(fs.GetWidth(),fs.GetHeight(),fs.GetWidth()/2,fs.GetHeight()/2,0);
     //camera.SetIntrinsic(924,576,462,288,0);
-    camera.SetRadial(-0.246574651979379,0.103141587733613,-0.000374087230627);
-    std::cout << fs.GetWidth() << " " << fs.GetHeight() << std::endl;
+
+    float radial1 = -0.246574651979379;
+    float radial2 = 0.103141587733613;
+    float radial3 = -0.000374087230627;
+    //    camera.SetRadial(radial1,radial2,radial3);
     GLOutputMechanism<GlutRenderWindow> g(atoi(argv[1]),atoi(argv[2]),fs.GetWidth(),fs.GetHeight(),camera);
    
     Transform t;
@@ -196,6 +199,12 @@ int main(int argc,char* argv[]) {
     int adaptive_window = 8;
     int adaptive_threshold = 10;
     int global_threshold = 128;
+
+    const float minx = -camera.GetPrincipleX() / camera.GetXScale();
+    const float maxx = (fs.GetWidth()-camera.GetPrincipleX()) / camera.GetXScale();
+    const float miny = -camera.GetPrincipleY() / camera.GetYScale();
+    const float maxy = (fs.GetHeight()-camera.GetPrincipleY()) / camera.GetYScale();
+
     while(true) {
       ImageSource::ImageType* i = fs.Next();
       Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* output;
@@ -243,20 +252,18 @@ int main(int argc,char* argv[]) {
       switch(settings[DISTORTION].current_option) {
       case DISTORTION_NONE:
 	ApplyTree(tree,DistortionCorrectionNone(camera));
+	camera.SetRadial(0,0,0);
 	break;
       case DISTORTION_SIMPLE:
 	ApplyTree(tree,DistortionCorrectionSimple(camera));
+	camera.SetRadial(radial1,radial2,radial3);
 	break;
       case DISTORTION_ITERATIVE:
-	ApplyTree(tree,DistortionCorrectionIterative(camera,true));
+	ApplyTree(tree,DistortionCorrectionIterative(camera,false));
+	camera.SetRadial(radial1,radial2,radial3);
       }
 
       if (enable_output && settings[DISPLAYMODE].current_option == DISPLAYMODE_UNDISTORTEDCONTOUR) { 
-	  float minx = -camera.GetPrincipleX() / camera.GetXScale();
-	  float maxx = (fs.GetWidth()-camera.GetPrincipleX()) / camera.GetXScale();
-	  float miny = -camera.GetPrincipleY() / camera.GetYScale();
-	  float maxy = (fs.GetHeight()-camera.GetPrincipleY()) / camera.GetYScale();
-//	  ApplyTree(tree,DrawEntityContour(*output,ROI(-0.5,0.5,-0.5,0.5)));
 	  ApplyTree(tree,DrawEntityContour(*output,ROI(minx,maxx,miny,maxy)));
       }
       
@@ -276,7 +283,7 @@ int main(int argc,char* argv[]) {
       }
 
       if (enable_output && settings[DISPLAYMODE].current_option == DISPLAYMODE_SHAPE) { 
-	  ApplyTree(tree,DrawEntityShape<QuadTangle>(*output,camera));
+	  ApplyTree(tree,DrawEntityShape<QuadTangle>(*output,camera,ROI(minx,maxx,miny,maxy)));
       }
       
       switch(settings[TRANSFORM].current_option) {
@@ -336,8 +343,10 @@ int main(int argc,char* argv[]) {
       }
       switch (settings[DISTORTION].current_option) {
       case DISTORTION_NONE:
+	g.DrawText(0.01,y,"DistortionCorrectionNone",settings[DISTORTION].GetR(new_time), settings[DISTORTION].GetG(new_time), settings[DISTORTION].GetB(new_time)); y += 0.05;
+	break;
       case DISTORTION_SIMPLE:
-	g.DrawText(0.01,y,"DistortionCorrection",settings[DISTORTION].GetR(new_time), settings[DISTORTION].GetG(new_time), settings[DISTORTION].GetB(new_time)); y += 0.05;
+	g.DrawText(0.01,y,"DistortionCorrectionSimple",settings[DISTORTION].GetR(new_time), settings[DISTORTION].GetG(new_time), settings[DISTORTION].GetB(new_time)); y += 0.05;
 	break;
       case DISTORTION_ITERATIVE:
 	g.DrawText(0.01,y,"DistortionCorrectionIterative",settings[DISTORTION].GetR(new_time), settings[DISTORTION].GetG(new_time), settings[DISTORTION].GetB(new_time)); y += 0.05;
@@ -396,8 +405,8 @@ int main(int argc,char* argv[]) {
 	switch(*i) {
 	case Key::ESC:
 	  exit(-1);
-	case Key::R:
-	  settings[0] = Setting(DISPLAYMODE_NORMAL);
+	case Key::R:  // reset
+	  settings[0] = Setting(DISPLAYMODE_THRESHOLD);
 	  settings[1] = Setting(THRESHOLD_GLOBAL);
 	  settings[2] = Setting(DISTORTION_NONE);
 	  settings[3] = Setting(SHAPEFIT_CORNER);
