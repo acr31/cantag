@@ -179,7 +179,7 @@ int main(int argc,char** argv) {
 
     Executor<TL2(CircleInnerLSFull36,SquarePolygonProj36)>::Execute(cam,size,tan(fov/2.f/180.f*M_PI));
     //Executor<Cantag::Append<BasicCircleTags,BasicSquareTags>::value>::Execute(cam,size,tan(fov/2.f/180.f*M_PI));
-    //    Executor<MinDistanceTags>::Execute(cam,size,tan(fov/2.f/180.f*M_PI));
+    Executor<MinDistanceTags>::Execute(cam,size,tan(fov/2.f/180.f*M_PI));
     /*
     float step=0.1;
     for(float i=0.4;i<1.0; i+=step) {
