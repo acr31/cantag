@@ -48,6 +48,7 @@
 #endif
 
 #include <cantag/SpeedMath.hh>
+#include <cantag/Aggregation.hh>
 #include <cantag/Apply.hh>
 #include <cantag/Bind.hh>
 #include <cantag/TagDictionary.hh>
