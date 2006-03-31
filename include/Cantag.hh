@@ -108,6 +108,13 @@
 #include <cantag/algorithms/SimulateMaxSampleError.hh>
 #include <cantag/algorithms/SimulateContour.hh>
 #include <cantag/algorithms/SignalStrengthContour.hh>
+#include <cantag/algorithms/CheckEllipseAlgebraic.hh>
+#include <cantag/algorithms/CheckEllipseGradient.hh>
+#include <cantag/algorithms/CheckEllipseNakagawa.hh>
+#include <cantag/algorithms/CheckEllipseSafaeeRad.hh>
+#include <cantag/algorithms/CheckEllipseSafaeeRad2.hh>
+#include <cantag/algorithms/CheckEllipseStricker.hh>
+
 
 ///////////////////////
 // coders
