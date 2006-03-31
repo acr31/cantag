@@ -220,13 +220,8 @@ namespace Cantag {
 		 t[2][0]*eigvects[i]+t[2][1]*eigvects[i+3]+t[2][2]*eigvects[i+6]);	
 #endif      
 
-	if (e->CheckError(points)) {
-	  shape.SetShape(e);
-	  return true;
-	}
-	else {
-	  delete e;
-	}
+	shape.SetShape(e);
+	return true;
       }
     }
     return false;
