@@ -98,12 +98,29 @@ namespace Cantag {
     }
   };
 
+  /*
 #define DSIN(N,x) taylor<N,0,double>::sin(x,1)
 #define FSIN(N,x) taylor<N,0,float>::sin(x,1)
 
 #define DCOS(N,x) taylor<N,0,double>::sin(x-DBL_PI/2.0,1)
 #define FCOS(N,x) taylor<N,0,float>::sin(x-FLT_PI/2.f,1)
+  */
 
+  static inline double DCOS(const int accuracy, const double x) {
+    return cos(x);
+  }
+
+  static inline double DSIN(const int accuracy, const double x) {
+    return sin(x);
+  }
+
+  static inline float FCOS(const int accuracy, const float x) {
+    return cos(x);
+  }
+
+  static inline float FSIN(const int accuracy, const float x) {
+    return sin(x);
+  }
   /*
   //temporary test values: use to make sure that values are within range
   static inline double DSIN(const int accuracy, const double x) { 
