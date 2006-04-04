@@ -57,6 +57,9 @@
 ///////////////////////
 // fundamental tag types
 #include <cantag/TagCircle.hh>
+#include <cantag/TagCircleInner.hh>
+#include <cantag/TagCircleOuter.hh>
+#include <cantag/TagCircleSplit.hh>
 #include <cantag/TagSquare.hh>
 
 ///////////////////////

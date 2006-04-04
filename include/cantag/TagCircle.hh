@@ -25,8 +25,6 @@
 #ifndef TAG_CIRCLE_GUARD
 #define TAG_CIRCLE_GUARD
 
-#include <cmath>
-
 #include <cantag/Config.hh>
 #include <cantag/TagSpec.hh>
 #include <cantag/ContourRestrictions.hh>
@@ -65,9 +63,14 @@ namespace Cantag {
     int m_minContourWidth;
     int m_minContourHeight;    
 
+  protected:
+    static float ComputeDelta();
+    static float ComputeAlpha();
+
   public:
+
     TagCircle(float bullseye_inner_edge, float bullseye_outer_edge, float data_inner_edge, float data_outer_edge);
-    ~TagCircle();
+    virtual ~TagCircle();
     
     /**
      * Return the x-coordinate to sample the tag.  The sample point
@@ -113,8 +116,8 @@ namespace Cantag {
     delete[] m_sin_read_angles;
     delete[] m_cos_read_angles;
   }
-  
-  template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT> TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::TagCircle(float bullseye_inner_edge, float bullseye_outer_edge, float data_inner_edge, float data_outer_edge) :
+ 
+   template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT> TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::TagCircle(float bullseye_inner_edge, float bullseye_outer_edge, float data_inner_edge, float data_outer_edge) :
     TagSpec<PARAM_SECTOR_COUNT*PARAM_RING_COUNT>(PARAM_SECTOR_COUNT,PARAM_RING_COUNT),
     ContourRestrictions(1,1,1),
     ConvexHullRestrictions(100000),
@@ -124,8 +127,8 @@ namespace Cantag {
     m_data_inner_edge(data_inner_edge),
     m_data_outer_edge(data_outer_edge)
   {
-    assert(bullseye_inner_edge < bullseye_outer_edge);
-    assert(data_inner_edge < data_outer_edge);
+    assert(m_bullseye_inner_edge < m_bullseye_outer_edge);
+    assert(m_data_inner_edge < m_data_outer_edge);
   
     // bullseye_inner_edge < bullseye_outer_edge < data_inner_edge < data_outer_edge
     // data_inner_edge < data_outer_edge < bullseye_inner_edge < bullseye_outer_edge
@@ -171,5 +174,16 @@ namespace Cantag {
       m_cos_read_angles[i] = cos(m_read_angles[i]);
     }
   }  
+
+  template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT> float TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeDelta()  {
+    float s = sin(FLT_PI / (float)PARAM_SECTOR_COUNT);
+    float r = (float)PARAM_RING_COUNT;
+    return (1.f - s)/( (2*(r-1)*s+1.f) );
+  }
+  
+  template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT> float TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeAlpha()  {
+    return (float)PARAM_RING_COUNT / (1.f - ComputeDelta());
+  }
+  
 }
 #endif//TAG_CIRCLE_GUARD
