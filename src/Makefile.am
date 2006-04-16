@@ -32,7 +32,7 @@ libcantag_la_SOURCES += algorithms/DrawEntity.cc
 libcantag_la_SOURCES += algorithms/PrintEntity.cc
 libcantag_la_SOURCES += algorithms/FitQuadTangleRegression.cc
 libcantag_la_SOURCES += algorithms/SimulateMinDistance.cc
-#libcantag_la_SOURCES += algorithms/SignalStrengthContour.cc
+libcantag_la_SOURCES += algorithms/SignalStrengthContour.cc
 libcantag_la_SOURCES += UEyeImageSource.cc
 
 if HAVE_SYS_SOCKET_H
