@@ -33,7 +33,7 @@
 namespace Cantag { 
 
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
-  class TransformSelectEllipseErrorOfFitObj : public Function<TL1(TreeNode<ShapeEntity<Ellipse> >),TL1(TreeNode<TransformEntity>) > {
+  class TransformSelectEllipseErrorOfFitObj : public Function<TL1(TreeNode<TransformEntity>),TL1(TreeNode<ShapeEntity<Ellipse> >) > {
   private:
     const Camera& m_camera;
     const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& m_tagspec;
@@ -43,7 +43,39 @@ namespace Cantag {
     bool operator()(const TreeNode<ShapeEntity<Ellipse> >& shape, TreeNode<TransformEntity>& treenode) const;
   };
 
-  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool TransformSelectEllipseErrorOfFitObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(const TreeNode<ShapeEntity<Ellipse> >& shape, TreeNode<TransformEntity>& node) const {
+  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool TransformSelectEllipseErrorOfFitObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(const TreeNode<TransformEntity>& transnode, TreeNode<ShapeEntity<Ellipse> >& shapenode) const {
+    // need a shape entity
+    shapenode.Reset();
+
+    while(shapenode.HasNext()) {
+      const TreeNode<ShapeEntity<Ellipse> >* child = shapenode.NextChild();
+      const ShapeEntity<Ellipse>& treenode = *(child.GetNode());
+      
+      // estimate the two transforms
+      const int count = 200;
+      std::vector<float> projected1;
+      std::vector<float> projected2;
+
+      for(int i=0;i<count*2;i+=2) {
+	float x = cos( (float)i*FLT_PI/(float)count );
+	float innerx = x * m_tagspec.GetBullseyeInnerEdge() / m_tagspec.GetBullseyeOuterEdge();
+	float midx = x * (1-m_tagspec.GetBullseyeInnerEdge() / m_tagspec.GetBullseyeOuterEdge())/2.f;
+	float y = sin( (float)i*FLT_PI/(float)count );
+	float innery = y * m_tagspec.GetBullseyeInnerEdge() / m_tagspec.GetBullseyeOuterEdge();
+	float midy = y * (1-m_tagspec.GetBullseyeInnerEdge() / m_tagspec.GetBullseyeOuterEdge())/2.f;
+
+
+	ApplyTransform(transform1,innerx,innery,projected1);
+	ApplyTransform(transform2,innerx,innery,projected2);
+	
+	ApplyTransform(transform1,midx,midy,projected1b);
+	ApplyTransform(transform2,midx,midy,projected2b);
+      }     
+    
+
+      
+      
+    }
     return true;
   }
 
