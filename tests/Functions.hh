@@ -61,10 +61,10 @@ struct FindContour : public Cantag::Function<TL0,TL1(Cantag::ContourEntity)> {
   FindContour(const Cantag::ContourEntity& ref) : m_reference(ref) {};
   bool operator()(Cantag::ContourEntity& tocheck) const {
     
-    if ((fabs(m_reference.GetMinX() - tocheck.GetMinX()) < 2) &&
-	(fabs(m_reference.GetMinY() - tocheck.GetMinY()) < 2) &&
-	(fabs(m_reference.GetMaxX() - tocheck.GetMaxX()) < 2) &&
-	(fabs(m_reference.GetMaxY() - tocheck.GetMaxY()) < 2)) {
+    if ((fabs(m_reference.GetMinX() - tocheck.GetMinX()) < 5) &&
+	(fabs(m_reference.GetMinY() - tocheck.GetMinY()) < 5) &&
+	(fabs(m_reference.GetMaxX() - tocheck.GetMaxX()) < 5) &&
+	(fabs(m_reference.GetMaxY() - tocheck.GetMaxY()) < 5)) {
       return true;
     }
     else {

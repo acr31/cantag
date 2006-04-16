@@ -113,23 +113,29 @@ struct Executor<Cantag::TypeListEOL> {
 //typedef CircleTags TagList;
 //typedef TL1(SquareCornerProj36) TagList;
 //typedef TL4(SquareCornerProj36,SquareRegressConvexHullProj36,SquareCornerSpaceSearch36,SquareRegressConvexHullSpaceSearch36) TagList;
-typedef TL1(SquareCornerProj36) TagList;
-
+//typedef TL1(SquareCornerProj36) TagList;
+//typedef TL1(SquareCornerProj36) TagList;
+//typedef TL5(CircleInnerLSLinear36,CircleInnerLSLinear36,CircleOuterLSFull36,CircleOuterLSLinear36,SquareRegressConvexHullProj36) TagList;
+typedef Cantag::TypeList<CircleInnerFixed<3,24,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> > TagList;
 int main(int argc,char* argv[]) {
-  std::cout.precision(15);
-
-  if (argc == 1) {
-    Executor<TagList>::Execute();
+  try {
+    std::cout.precision(15);
+    
+    if (argc == 1) {
+      Executor<TagList>::Execute();
+    }
+    else {
+      float theta = atof(argv[1]);
+      float phi = atof(argv[2]);
+      float x0 = atof(argv[3]);
+      float y0 = atof(argv[4]);
+      float z0 = atof(argv[5]);
+      
+      Executor<TagList>::ExecuteSingle(x0,y0,z0,theta,phi);
+    }
   }
-  else {
-    float theta = atof(argv[1]);
-    float phi = atof(argv[2]);
-    float x0 = atof(argv[3]);
-    float y0 = atof(argv[4]);
-    float z0 = atof(argv[5]);
-
-    Executor<TagList>::ExecuteSingle(x0,y0,z0,theta,phi);
-
+  catch (const char* message) {
+    std::cerr << "Exception: " << message << std::endl;
   }
 }
 

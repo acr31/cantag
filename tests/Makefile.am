@@ -1,4 +1,6 @@
-noinst_PROGRAMS=  MinDistances BatchTest 
+#noinst_PROGRAMS=  MinDistances BatchTest 
+noinst_PROGRAMS=  MinDistances EllipseErrorContours BatchTest
+EllipseErrorContours_SOURCES=EllipseErrorContours.cc
 BatchTest_SOURCES=BatchTest.cc
 MinDistances_SOURCES=MinDistances.cc
 #TestSimulateMinDistance_SOURCES=TestSimulateMinDistance.cc

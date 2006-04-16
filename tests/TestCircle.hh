@@ -29,8 +29,8 @@
 #include "Functions.hh"
 
 
-template<int RINGS, int SECTORS, class FitAlgorithm, class TransformAlgorithm>
-class TestCircle : public Cantag::TagCircle<RINGS,SECTORS>, public Cantag::TripOriginalCoder<RINGS*SECTORS,RINGS,2> {
+template<int RINGS, int SECTORS, class FitAlgorithm, class TransformAlgorithm, class SpecClass>
+class TestCircle : public SpecClass, public Cantag::TripOriginalCoder<RINGS*SECTORS,RINGS,2> {
 public:  
   enum { PayloadSize = Cantag::TagCircle<RINGS,SECTORS>::PayloadSize };
   typedef std::pair<const Cantag::SignalStrengthEntity*,std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PayloadSize>*> > PipelineResult;
@@ -68,7 +68,7 @@ private:
 	if (dotprod > 1.f) dotprod = 1.f;
 
 	double errorangle = acos(dotprod);
-
+	std::cout << "ERROR " << errorangle << std::endl;
 	if (errorangle < minf) {
 	  min = t;
 	  minf = errorangle;
@@ -113,6 +113,7 @@ private:
     };
   };
 
+
   bool Process(Cantag::Tree<TagEntity>& tree,Cantag::MonochromeImage& m, const Cantag::Transform& ideal_transform, const Cantag::Camera& camera, const char* debug_name = NULL) {
     char name_buffer[255];
     int debug_counter = 0;
@@ -153,9 +154,9 @@ private:
       output.Save(name_buffer);
     }
     ApplyTree(tree,TransformAlgorithm(this->GetBullseyeOuterEdge()));
-    //    ApplyTree(tree,Cantag::TransformSelectEllipse(*this,camera));
+    //ApplyTree(tree,Cantag::TransformSelectEllipse(*this,camera));
     ApplyTree(tree,TransformSelect(ideal_transform,camera));
-    //    ApplyTree(tree,Cantag::RemoveNonConcentricEllipse(*this));
+    //ApplyTree(tree,Cantag::RemoveNonConcentricEllipse(*this));
     //ApplyTree(tree,Cantag::Bind(Cantag::TransformEllipseRotate(*this,camera),m));
     ApplyTree(tree,TransformRotate(camera));
 
@@ -183,16 +184,27 @@ private:
 
 
 public:
-  TestCircle(float inner_bullseye,
-	     float outer_bullseye,
-	     float inner_data,
-	     float outer_data) : Cantag::TagCircle<RINGS,SECTORS>(inner_bullseye,outer_bullseye,inner_data,outer_data), m_located() {}
+
+  std::string Prefix() const {
+    std::ostringstream result;
+    result << typeid(*this).name() << " " << 
+      RINGS << " " << 
+      SECTORS << " " <<
+      GetBullseyeInnerEdge() << " " <<
+      GetBullseyeOuterEdge() << " " <<
+      GetDataInnerEdge() << " " <<
+      GetDataOuterEdge();
+    return result.str();
+  }
+
+
 
   bool operator()(const Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>& i,const Cantag::ContourEntity& ideal_contour, const Cantag::Transform& ideal_transform, const Cantag::Camera& camera, const char* debug_name = NULL) {
     m_located.erase(m_located.begin(),m_located.end());
     tree.DeleteAll();
     Cantag::MonochromeImage m(i.GetWidth(),i.GetHeight());
     Apply(i,m,Cantag::ThresholdGlobal<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>(128));
+    Apply(m,Cantag::ContourFollowerClearImageBorder());
     Apply(m,tree,Cantag::ContourFollowerTree(*this));
     ApplyTree(tree,FindContour(ideal_contour));
     return Process(tree,m,ideal_transform,camera,debug_name);
@@ -202,6 +214,7 @@ public:
     m_located.erase(m_located.begin(),m_located.end());
     Cantag::MonochromeImage m(i.GetWidth(),i.GetHeight());
     Apply(i,m,Cantag::ThresholdGlobal<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>(128));
+    Apply(m,Cantag::ContourFollowerClearImageBorder());    
     return Process(tree,m,ideal_transform, camera,debug_name);
   }
 
@@ -213,20 +226,24 @@ public:
   }
 };
 
-template<int RINGS,int SECTORS, class FitAlgorithm, class TransformAlgorithm>
-struct CircleInner : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm> {
-  CircleInner() : TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm>(0.2,0.4,0.6,1.0) {}
+template<int RINGS,int SECTORS> 
+class TagCircleFixed : public Cantag::TagCircle<RINGS,SECTORS> {
+public:
+  //  TagCircleFixed() : Cantag::TagCircle<RINGS,SECTORS>(0.2,0.4,0.6,1.0) {}
+  TagCircleFixed() : Cantag::TagCircle<RINGS,SECTORS>(0.272727,0.454545,0.5454545,1.0) {}
 };
 
 template<int RINGS,int SECTORS, class FitAlgorithm, class TransformAlgorithm>
-struct CircleSplit : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm> {
-  CircleSplit() : TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm>(0.2,1.0,0.4,0.8) {}
-};
+struct CircleInnerFixed : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,TagCircleFixed<RINGS,SECTORS> > {};
 
 template<int RINGS,int SECTORS, class FitAlgorithm, class TransformAlgorithm>
-struct CircleOuter : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm> {
-  CircleOuter() : TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm>(0.8,1.0,0.2,0.6) {}
-};
+struct CircleInner : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,Cantag::TagCircleInner<RINGS,SECTORS> > {};
+
+template<int RINGS,int SECTORS, class FitAlgorithm, class TransformAlgorithm>
+struct CircleSplit : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,Cantag::TagCircleSplit<RINGS,SECTORS> > {};
+
+template<int RINGS,int SECTORS, class FitAlgorithm, class TransformAlgorithm>
+struct CircleOuter : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,Cantag::TagCircleOuter<RINGS,SECTORS> > {};
 
 class CircleOuterLSFull36 : public CircleOuter<2,18,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> {};
 class CircleOuterLSLinear36 : public CircleOuter<2,18,Cantag::FitEllipseLS,Cantag::TransformEllipseLinear> {};

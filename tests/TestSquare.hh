@@ -166,6 +166,14 @@ class TestSquare : public Cantag::TagSquare<EDGE_CELLS>, public Cantag::RawCoder
   }
 
 public:
+
+  std::string Prefix() const {
+    std::ostringstream result;
+    result << typeid(*this).name() << " " <<
+      PayloadSize << " 1 0 0 0 0";
+    return result.str();
+  }
+
   TestSquare() : Cantag::TagSquare<EDGE_CELLS>(), m_located() {}
 
   virtual bool Regression() { return false; }
@@ -177,6 +185,7 @@ public:
     tree.DeleteAll();
     Cantag::MonochromeImage m(i.GetWidth(),i.GetHeight());
     Apply(i,m,Cantag::ThresholdGlobal<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>(128));
+    Apply(m,Cantag::ContourFollowerClearImageBorder());
     Apply(m,tree,Cantag::ContourFollowerTree(*this));
     ApplyTree(tree,FindContour(ideal_contour));
     return Process(tree,m,ideal_transform,camera,debug_name);
@@ -186,6 +195,7 @@ public:
     m_located.erase(m_located.begin(),m_located.end());
     Cantag::MonochromeImage m(i.GetWidth(),i.GetHeight());
     Apply(i,m,Cantag::ThresholdGlobal<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>(128));
+    Apply(m,Cantag::ContourFollowerClearImageBorder());
     return Process(tree,m,ideal_transform,camera,debug_name);
   }
 

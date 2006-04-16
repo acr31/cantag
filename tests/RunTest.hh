@@ -68,24 +68,24 @@ template<class TagType> RunTest<TagType>::RunTest(int size, float fov, Cantag::D
 }
 
 template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output, const char* prefix) {
-  const int numsteps = 10; // odd number so we hit 0,0
+  const int numsteps = 5;
   const int pixel_min = 5;
-  const int pixel_step = 1;
-  const int angle_step = 5;
-  for(int pixels=50;pixels>=pixel_min;pixels-=pixel_step) {
+  const int pixel_step = 10;
+  const int angle_step = 30;
+  for(int pixels=100;pixels>=pixel_min;pixels-=pixel_step) {
     double distance = (double)m_size/2.f/(double)pixels;
     
     // now work out the range of x and y to try for this distance
     double range = m_tan_fov * distance - 1.0;
     double step = 2*range / (double)numsteps;
     for(int xc=-numsteps;xc<=numsteps;++xc) {
-      //  int xc=0; {
+      //int xc=0; {
       float x0 = xc * step;
       for(int yc=-numsteps;yc<=numsteps;++yc) {
 	//int yc=0; {
 	float y0 = yc * step;
 	for(int theta = -90; theta <= 90; theta += angle_step) {
-	  //  int theta = 0; {
+	  //int theta = 0; {
 	  for(int phi = -90;phi<=90;phi += angle_step) {
 	    Result result = Execute(theta,phi,x0,y0,distance);
 	    if (prefix) output << prefix << " ";
