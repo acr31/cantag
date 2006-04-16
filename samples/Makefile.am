@@ -1,15 +1,20 @@
-noinst_PROGRAMS= NewTest NewTest3 DrawTag test PositioningTest NewTest4 NewTest5
-test_SOURCES=test.cc
-PositioningTest_SOURCES=PositioningTest.cc
+#noinst_PROGRAMS= NewTest NewTest3 DrawTag PositioningTest NewTest4 LSEllipseFit 
+noinst_PROGRAMS=FollowContour DrawTag NewTest5 AllCircles DrawTag2
+#LSEllipseFit_SOURCES=LSEllipseFit.cc
+FollowContour_SOURCES=FollowContour.cc
+AllCircles_SOURCES=AllCircles.cc
+#test_SOURCES=test.cc
+#PositioningTest_SOURCES=PositioningTest.cc
 #TextOnly DrawTag
 #GnuplotOutput
 #TextOnly_SOURCES=TextOnly.cc 
 #TextFinder_SOURCES=TextFinder.cc
 DrawTag_SOURCES=DrawTag.cc
-NewTest3_SOURCES=NewTest3.cc
-NewTest4_SOURCES=NewTest4.cc
+DrawTag2_SOURCES=DrawTag2.cc
+#NewTest3_SOURCES=NewTest3.cc
+#NewTest4_SOURCES=NewTest4.cc
 NewTest5_SOURCES=NewTest5.cc
-NewTest_SOURCES=NewTest.cc
+#NewTest_SOURCES=NewTest.cc
 #GnuplotOutput_SOURCES=GnuplotOutput.cc
 
 if HAVE_LINUX_VIDEODEV_H

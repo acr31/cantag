@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2004 Andrew C. Rice
+  Copyright (C) 2005 Andrew C. Rice
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -18,28 +18,28 @@
   Email: acr31@cam.ac.uk
 */
 
-/** 
- $Header$
- */
-
-#ifndef TAGDEF_GUARD
-#define TAGDEF_GUARD
+#include <iostream>
 
 #include <Cantag.hh>
 
-struct TestCircle : public Cantag::TagCircle<2,18>,Cantag::TripOriginalCoder<36,2,2> {
-  TestCircle() : Cantag::TagCircle<2,18>(0.2,0.4,0.6,1) {}
-  //TestCircle() : Cantag::TagCircle<4,32>(0.8,1.0,0.2,0.6) {}
-  //TestCircle() : Cantag::TagCircle<2,17>(0.2,1.0,0.4,0.8) {}
-};
+using namespace Cantag;
 
-//struct TestSquare : public Cantag::TagSquare<8>,Cantag::CRCSymbolChunkCoder<64,4,16> {
-//  TestSquare() : Cantag::TagSquare<8>() {}
-//};
-
-struct TestSquare : public Cantag::TagSquare<6>,Cantag::CRCSymbolChunkCoder<36,6,9> {
-  TestSquare() : Cantag::TagSquare<6>() {}
-};
-
-
-#endif//TAGDEF_GUARD
+int main(int argc,char** argv) {
+  try {
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> i(atoi(argv[1]),atoi(argv[2]));
+    i.Load(argv[3]);
+    MonochromeImage m(i.GetWidth(),i.GetHeight());
+    ThresholdGlobal<Pix::Sze::Byte1,Pix::Fmt::Grey8>(128)(i,m);
+    
+    Tree<ComposedEntity<TL1(ContourEntity)> > tree;
+    
+    ContourRestrictions res(5,5,5);
+    ContourFollowerTree follower(res);
+    follower(m,tree);
+    
+    ApplyTree(tree,PrintEntityContour(std::cout));
+  }
+  catch (const char* e) {
+    std::cout << e << std::endl;
+  }
+}
