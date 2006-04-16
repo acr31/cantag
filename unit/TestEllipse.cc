@@ -40,6 +40,7 @@ void test_compose() {
   float maxy0 = 0;
   float maxwidth = 0;
   float maxheight = 0;
+  float maxtheta = 0;
   for(int i=0;i<1e5;i++) {
     float x = numbers();
     float y = numbers();
@@ -50,7 +51,7 @@ void test_compose() {
       width = height;
       height = width;
     }
-    float theta = (float)numbers()/500*PI;
+    float theta = (float)numbers()/500.f*FLT_PI;
 
     Ellipse e(x,y,width,height,theta);
     Ellipse e2(e.GetA(),e.GetB(),e.GetC(),e.GetD(),e.GetE(),e.GetF());
@@ -65,16 +66,33 @@ void test_compose() {
     float wdiff = fabs(e2.GetWidth() - width);
     float hdiff = fabs(e2.GetHeight() - height);
 
+    if (theta < 0.f) theta += 2*FLT_PI;
+    while(theta >= FLT_PI) theta -= FLT_PI;
+    float angle = e2.GetAngle();
+    if (angle < 0.f) angle += 2*FLT_PI;
+    while(angle >= FLT_PI) angle -= FLT_PI;
+
+    float thetadiff = (fabs(width - height) <= FLT_EPSILON) ? 0.f : fabs(angle - theta);
+
     if (xdiff > maxx0) maxx0 = xdiff;
     if (ydiff > maxy0) maxy0 = ydiff;
     if (wdiff > maxwidth) maxwidth = wdiff;
     if (hdiff > maxheight) maxheight = hdiff;
+
+    if (thetadiff > 0.1) {
+      std::cout << x << " " << y << " " << width << " " << height << " " << theta << " (" << (theta/FLT_PI*180.f) << ")" << std::endl;
+      std::cout << xdiff << " " << ydiff << " " << wdiff << " " << hdiff << " " << (thetadiff/FLT_PI*180) << std::endl;
+      throw "angle error";
+    }
+
+    if (thetadiff > maxtheta) maxtheta = thetadiff;
   }
 
   std::cout << "Max X0 Error " << maxx0 << std::endl;
   std::cout << "Max Y0 Error " << maxy0 << std::endl;
   std::cout << "Max Width Error " << maxwidth << std::endl;
   std::cout << "Max Height Error " << maxheight << std::endl;
+  std::cout << "Theta Error " << maxtheta << std::endl;
   
 }
 
