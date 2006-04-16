@@ -35,6 +35,7 @@ namespace Cantag {
   class CANTAG_EXPORT CheckEllipseAlgebraic : public Function<TL1(ContourEntity),TL1(ShapeEntity<Ellipse>) > {
   private:
     const EllipseRestrictions& m_restrict;
+
   public:
     CheckEllipseAlgebraic(const EllipseRestrictions& restrict) : m_restrict(restrict) {};
     bool operator()(const ContourEntity& contour_entity, ShapeEntity<Ellipse>& ellipse_entity) const;
