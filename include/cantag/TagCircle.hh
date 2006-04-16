@@ -127,8 +127,14 @@ namespace Cantag {
     m_data_inner_edge(data_inner_edge),
     m_data_outer_edge(data_outer_edge)
   {
-    assert(m_bullseye_inner_edge < m_bullseye_outer_edge);
-    assert(m_data_inner_edge < m_data_outer_edge);
+
+    if (m_bullseye_inner_edge >= m_bullseye_outer_edge) {
+      throw "Bullseye inner edge >= bullseye outer edge";
+    }
+
+    if (m_data_inner_edge >= m_data_outer_edge) {
+      throw "Data inner edge >= data outer edge";
+    }
   
     // bullseye_inner_edge < bullseye_outer_edge < data_inner_edge < data_outer_edge
     // data_inner_edge < data_outer_edge < bullseye_inner_edge < bullseye_outer_edge
@@ -178,7 +184,19 @@ namespace Cantag {
   template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT> float TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeDelta()  {
     float s = sin(FLT_PI / (float)PARAM_SECTOR_COUNT);
     float r = (float)PARAM_RING_COUNT;
+
+    // mid point of inner ring
     return (1.f - s)/( (2*(r-1)*s+1.f) );
+
+    // mid point of outer ring
+    //float invs = 1.f / sin(FLT_PI / (float)PARAM_SECTOR_COUNT);
+    //return (2.f * r - 1.f - invs) / ( 1.f - invs);
+
+    //mid point of outer ring
+    //return (1.f - 2.f*r*s + s) / (s + 1.f);
+
+    // mid point of data rings
+    //return ( 1.f / r - s ) / ( 2.f * s - s + 1.f/r );
   }
   
   template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT> float TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeAlpha()  {
