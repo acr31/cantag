@@ -33,13 +33,28 @@ namespace Cantag {
 
   template<class AggregationFunction = AggregateMean<float> >
   class CANTAG_EXPORT CheckEllipseAlgebraic : public Function<TL1(ContourEntity),TL1(ShapeEntity<Ellipse>) > {
+  public:
+      typedef AggregationFunction Aggregator;
+
   private:
     const EllipseRestrictions& m_restrict;
 
   public:
     CheckEllipseAlgebraic(const EllipseRestrictions& restrict) : m_restrict(restrict) {};
     bool operator()(const ContourEntity& contour_entity, ShapeEntity<Ellipse>& ellipse_entity) const;
+    static float eval(const Ellipse& e, float x, float y);
   };
+
+    template<class AggregationFunction>
+    float CheckEllipseAlgebraic<AggregationFunction>::eval(const Ellipse& e, float x, float y) {
+      float dist = abs(e.GetA()*x*x+
+		       e.GetB()*x*y+
+		       e.GetC()*y*y+
+		       e.GetD()*x+
+		       e.GetE()*y+
+		       e.GetF());
+      return dist;
+    }
 
   template<class AggregationFunction>
   bool CheckEllipseAlgebraic<AggregationFunction>::operator()(const ContourEntity& c, ShapeEntity<Ellipse>& e_ent) const {
@@ -56,13 +71,7 @@ namespace Cantag {
       float x = *i;
       ++i;
       float y = *i;
-      float dist = abs(e.GetA()*x*x+
-		       e.GetB()*x*y+
-		       e.GetC()*y*y+
-		       e.GetD()*x+
-		       e.GetE()*y+
-		       e.GetF());
-      f(dist);
+      f(eval(e,x,y));
     }
     return f() < m_restrict.GetMaxFitError();
   }

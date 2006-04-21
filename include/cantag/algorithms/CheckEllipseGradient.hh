@@ -33,12 +33,43 @@ namespace Cantag {
 
   template<class AggregationFunction = AggregateMean<float> >
   class CANTAG_EXPORT CheckEllipseGradient : public Function<TL1(ContourEntity),TL1(ShapeEntity<Ellipse>) > {
+  public:
+      typedef AggregationFunction Aggregator;
   private:
     const EllipseRestrictions& m_restrict;
   public:
     CheckEllipseGradient(const EllipseRestrictions& restrict) : m_restrict(restrict) {};
     bool operator()(const ContourEntity& contour_entity, ShapeEntity<Ellipse>& ellipse_entity) const;
+    static float eval(const Ellipse& e, float x, float y);
   };
+
+    template<class AggregationFunction>
+    float CheckEllipseGradient<AggregationFunction>::eval(const Ellipse& e, float x, float y) {
+	float dist = abs(e.GetA()*x*x+
+			 e.GetB()*x*y+
+			 e.GetC()*y*y+
+			 e.GetD()*x+
+			 e.GetE()*y+
+			 e.GetF());
+	
+	float dx = (e.GetA()*2*x+
+		    e.GetB()*y+
+		    e.GetD());
+	float dy = (e.GetB()*x+
+		    e.GetC()*2*y+
+		    e.GetE());
+	
+	float norm = sqrt(dx*dx + dy*dy);
+	
+	if (norm != 0.f) {
+	    dist /= norm;
+	    return dist;
+	}
+	else {
+	    return(0.f);
+	}	
+    }
+    
 
   /**
    * calculate the algebraic distance inversely weighted by the gradient
@@ -55,30 +86,7 @@ namespace Cantag {
       float x = *i;
       ++i;
       float y = *i;
-      float dist = abs(e.GetA()*x*x+
-		       e.GetB()*x*y+
-		       e.GetC()*y*y+
-		       e.GetD()*x+
-		       e.GetE()*y+
-		       e.GetF());
-    
-      float dx = (e.GetA()*2*x+
-		  e.GetB()*y+
-		  e.GetD());
-      float dy = (e.GetB()*x+
-		  e.GetC()*2*y+
-		  e.GetE());
-
-      float norm = sqrt(dx*dx + dy*dy);
-
-      if (norm != 0.f) {
-	dist /= norm;
-	f(dist);
-      }
-      else {
-	f(0.f);
-      }
-
+      f(eval(e,x,y));
     }
     return f() < m_restrict.GetMaxFitError();
   }

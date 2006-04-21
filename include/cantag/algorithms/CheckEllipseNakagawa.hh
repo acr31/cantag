@@ -33,30 +33,18 @@ namespace Cantag {
 
   template<class AggregationFunction = AggregateMean<float> >
   class CANTAG_EXPORT CheckEllipseNakagawa : public Function<TL1(ContourEntity),TL1(ShapeEntity<Ellipse>) > {
+  public:
+      typedef AggregationFunction Aggregator;
   private:
     const EllipseRestrictions& m_restrict;
   public:
     CheckEllipseNakagawa(const EllipseRestrictions& restrict) : m_restrict(restrict) {};
     bool operator()(const ContourEntity& contour_entity, ShapeEntity<Ellipse>& ellipse_entity) const;
+    static float eval(const Ellipse& e, float x, float y);
   };
 
-  /**
-   * calculate the algebraic distance inversely weighted by the nakagawa
-   */
-  template<class AggregationFunction>
-  bool CheckEllipseNakagawa<AggregationFunction>::operator()(const ContourEntity& c, ShapeEntity<Ellipse>& e_ent) const {
-    if (!e_ent.IsValid()) return false;
-
-    AggregationFunction f;
-
-    const Ellipse& e = *(e_ent.GetShape());
-
-    for (std::vector<float>::const_iterator i = c.GetPoints().begin();
-	 i != c.GetPoints().end();
-	 ++i) {  
-      float xi = *i;
-      ++i;
-      float yi = *i;
+    template<class AggregationFunction>
+    float CheckEllipseNakagawa<AggregationFunction>::eval(const Ellipse& e, float xi, float yi) {
 
       float a = e.GetWidth();
       float b = e.GetHeight();
@@ -92,7 +80,26 @@ namespace Cantag {
       }
     
       float d = abs((ix-xi)*(ix-xi) + (iy-yi)*(iy-yi));
-      f(d);
+      return d;
+    }
+
+  /**
+   */
+  template<class AggregationFunction>
+  bool CheckEllipseNakagawa<AggregationFunction>::operator()(const ContourEntity& c, ShapeEntity<Ellipse>& e_ent) const {
+    if (!e_ent.IsValid()) return false;
+
+    AggregationFunction f;
+
+    const Ellipse& e = *(e_ent.GetShape());
+
+    for (std::vector<float>::const_iterator i = c.GetPoints().begin();
+	 i != c.GetPoints().end();
+	 ++i) {  
+      float xi = *i;
+      ++i;
+      float yi = *i;
+      f(eval(e,xi,yi));
     }
     return f() < m_restrict.GetMaxFitError();
   }
