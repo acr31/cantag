@@ -37,7 +37,7 @@ namespace Cantag {
 	void operator()(const T& val) { m_total += val; ++m_count; }
 	T operator()() const { 
 	    assert(m_count > 0);
-	    return m_total / m_count; 
+	    return m_total / (T)m_count; 
 	}
     };
     
