@@ -32,8 +32,8 @@
 
 namespace Cantag { 
 
-  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
-  class TransformSelectEllipseErrorOfFitObj : public Function<TL1(TreeNode<TransformEntity>),TL1(TreeNode<ShapeEntity<Ellipse> >) > {
+  template<class ErrorAlg, int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
+  class TransformSelectEllipseErrorOfFitObj : public Function<TL1(TreeNode<ShapeEntity<Ellipse> >),TL1(TreeNode<TransformEntity>)> {
   private:
     const Camera& m_camera;
     const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& m_tagspec;
@@ -43,47 +43,61 @@ namespace Cantag {
     bool operator()(const TreeNode<ShapeEntity<Ellipse> >& shape, TreeNode<TransformEntity>& treenode) const;
   };
 
-  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool TransformSelectEllipseErrorOfFitObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(const TreeNode<TransformEntity>& transnode, TreeNode<ShapeEntity<Ellipse> >& shapenode) const {
-    // need a shape entity
-    shapenode.Reset();
+  template<class ErrorAlg, int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool TransformSelectEllipseErrorOfFitObj<ErrorAlg,RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(const TreeNode<ShapeEntity<Ellipse> >& shapenode,  TreeNode<TransformEntity>& transnode) const {
+      // need a shape entity
+      TreeNode<ShapeEntity<Ellipse> >* shapeptr = (TreeNode<ShapeEntity<Ellipse> >*)&shapenode;
+      shapeptr->Reset();
 
-    while(shapenode.HasNext()) {
-      const TreeNode<ShapeEntity<Ellipse> >* child = shapenode.NextChild();
-      const ShapeEntity<Ellipse>& treenode = *(child.GetNode());
-      
-      // estimate the two transforms
+      if (!transnode.GetNode()->IsValid()) return false;
+
+    TransformEntity& t_ent = *(transnode.GetNode());
+    while(shapeptr->HasNext()) {
+      const TreeNode<ShapeEntity<Ellipse> >* child = shapeptr->NextChild();
+      const ShapeEntity<Ellipse>& treenode = *(child->GetNode());
+
+      if (!treenode.IsValid()) continue;
+
+      // estimate the transforms
       const int count = 200;
-      std::vector<float> projected1;
-      std::vector<float> projected2;
+      float points[count*2];
+      for(int i=0;i<count;++i) {
+	  float x = cos( (float)i*2.f*FLT_PI/(float)count );
+	  float innerx = x * m_tagspec.GetBullseyeInnerEdge() / m_tagspec.GetBullseyeOuterEdge();
+//	  float midx = x * (1-m_tagspec.GetBullseyeInnerEdge() / m_tagspec.GetBullseyeOuterEdge())/2.f;
+	  float y = sin( (float)i*2.f*FLT_PI/(float)count );
+	  float innery = y * m_tagspec.GetBullseyeInnerEdge() / m_tagspec.GetBullseyeOuterEdge();
+//	  float midy = y * (1-m_tagspec.GetBullseyeInnerEdge() / m_tagspec.GetBullseyeOuterEdge())/2.f;
+	  points[i*2] = innerx;
+	  points[i*2 + 1] = innery;
+      }
 
-      for(int i=0;i<count*2;i+=2) {
-	float x = cos( (float)i*FLT_PI/(float)count );
-	float innerx = x * m_tagspec.GetBullseyeInnerEdge() / m_tagspec.GetBullseyeOuterEdge();
-	float midx = x * (1-m_tagspec.GetBullseyeInnerEdge() / m_tagspec.GetBullseyeOuterEdge())/2.f;
-	float y = sin( (float)i*FLT_PI/(float)count );
-	float innery = y * m_tagspec.GetBullseyeInnerEdge() / m_tagspec.GetBullseyeOuterEdge();
-	float midy = y * (1-m_tagspec.GetBullseyeInnerEdge() / m_tagspec.GetBullseyeOuterEdge())/2.f;
+      for(std::list<Transform*>::iterator i = t_ent.GetTransforms().begin();
+	  i != t_ent.GetTransforms().end();
+	  ++i) {
+	  Transform* t = *i;
+	  typename ErrorAlg::Aggregator agg;
+	  for(int c=0;c<count;++c) {
+	      float x;
+	      float y;
+	      t->Apply(points[2*c],points[2*c+1],&x,&y);
+	      agg(ErrorAlg::eval(*(treenode.GetShape()),x,y));
+	  }
 
-
-	ApplyTransform(transform1,innerx,innery,projected1);
-	ApplyTransform(transform2,innerx,innery,projected2);
-	
-	ApplyTransform(transform1,midx,midy,projected1b);
-	ApplyTransform(transform2,midx,midy,projected2b);
-      }     
-    
-
-      
-      
+	  float result = agg();
+	  assert(result>0.f);
+//	  if (result > t->GetConfidence()) {
+	      t->SetConfidence(result);
+//	  }
+      }
     }
     return true;
   }
 
-  template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
+  template<class ErrFunc, int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
   inline
-  TransformSelectEllipseErrorOfFitObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>
+  TransformSelectEllipseErrorOfFitObj<ErrFunc,RING_COUNT,SECTOR_COUNT,READ_COUNT>
   TransformSelectEllipseErrorOfFit(const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec, const Camera& camera) {
-    return TransformSelectEllipseErrorOfFitObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>(tagspec,camera);
+    return TransformSelectEllipseErrorOfFitObj<ErrFunc, RING_COUNT,SECTOR_COUNT,READ_COUNT>(tagspec,camera);
   }
 
 }
