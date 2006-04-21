@@ -46,12 +46,12 @@ namespace Cantag {
 
   template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT> TagCircleOuter<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::TagCircleOuter() :
     TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>
-  (1.f - 1.f / (ComputeAlpha()+2),
+  (1.f - 1.f / (TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeAlpha()+2),
    1.f,
-   ComputeDelta() * ( 1.f - 2.f / (ComputeAlpha()+2.f) ),
-   1.f - 2.f / (ComputeAlpha()+2.f))
+   TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeDelta() * ( 1.f - 2.f / (TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeAlpha()+2.f) ),
+   1.f - 2.f / (TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeAlpha()+2.f))
   {
-    if (GetDataInnerEdge() < 1.f / (ComputeAlpha() + 2.f)) {
+    if (TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::GetDataInnerEdge() < 1.f / (TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeAlpha() + 2.f)) {
       throw "Cannot generate an optimal CircleOuter tag design for these parameters";
     }
   }  

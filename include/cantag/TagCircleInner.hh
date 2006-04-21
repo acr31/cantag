@@ -46,12 +46,12 @@ namespace Cantag {
 
   template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT> TagCircleInner<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::TagCircleInner() :
     TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>
-  (ComputeDelta() - 2.f*(1.f / ComputeAlpha()),
-   ComputeDelta() - (1.f / ComputeAlpha()),
-   ComputeDelta(),
+  (TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeDelta() - 2.f*(1.f / TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeAlpha()),
+   TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeDelta() - (1.f / TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeAlpha()),
+   TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeDelta(),
    1.f)
   {
-    if (GetBullseyeInnerEdge() < 1.f / ComputeAlpha()) {
+    if (TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::GetBullseyeInnerEdge() < 1.f / TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeAlpha()) {
       throw "Cannot generate an optimal CircleInner tag design for these parameters";
 
     }
