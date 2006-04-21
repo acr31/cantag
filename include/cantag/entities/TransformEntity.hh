@@ -44,7 +44,7 @@ namespace Cantag {
     inline std::list<Transform*>& GetTransforms() { return m_transforms; }
     inline const std::list<Transform*>& GetTransforms() const { return m_transforms; }
     inline const Transform* GetPreferredTransform() const { 
-      float best = 0.f;
+      float best = -1e10f;
       Transform* chosen = NULL;
       for(std::list<Transform*>::const_iterator i = m_transforms.begin();i!=m_transforms.end();++i) {
 	if ((*i)->GetConfidence() >= best) {
