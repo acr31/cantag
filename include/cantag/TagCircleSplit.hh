@@ -45,12 +45,12 @@ namespace Cantag {
 
   template<int PARAM_RING_COUNT,int PARAM_SECTOR_COUNT,int PARAM_READ_COUNT> TagCircleSplit<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::TagCircleSplit() :
     TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>
-  (ComputeDelta() * (1.f - (1.f / ( ComputeAlpha() + 1.f))) - 1.f / ( ComputeAlpha() + 1.f),
+  (TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeDelta() * (1.f - (1.f / ( TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeAlpha() + 1.f))) - 1.f / ( TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeAlpha() + 1.f),
    1.f,
-   ComputeDelta() * (1.f - (1.f / ( ComputeAlpha() + 1.f))),
-   1.f - (1.f / ( ComputeAlpha() + 1.f)))
+   TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeDelta() * (1.f - (1.f / ( TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeAlpha() + 1.f))),
+   1.f - (1.f / ( TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeAlpha() + 1.f)))
   {
-    if (GetBullseyeInnerEdge() < 1.f / ( ComputeAlpha() + 1.f)) {
+    if (TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::GetBullseyeInnerEdge() < 1.f / ( TagCircle<PARAM_RING_COUNT,PARAM_SECTOR_COUNT,PARAM_READ_COUNT>::ComputeAlpha() + 1.f)) {
       throw "Cannot generate an optimal CircleSplit tag design for these parameters";
     }
   }
