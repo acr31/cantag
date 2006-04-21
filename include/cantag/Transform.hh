@@ -74,8 +74,8 @@ namespace Cantag {
       return *this;
     }
 
-    inline float GetConfidence() { return m_confidence;} 
-    inline void SetConfidence(float confidence) { m_confidence = confidence; }
+    inline float GetConfidence() const { return m_confidence;} 
+      inline void SetConfidence(float confidence) { m_confidence = confidence; }
     inline void AccrueConfidence(float confidence) { m_confidence *= confidence; }
 
     /**
