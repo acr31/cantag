@@ -71,34 +71,47 @@ template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output
   const int numsteps = 5;
   const int pixel_min = 5;
   const int pixel_step = 10;
-  const int angle_step = 30;
-  for(int pixels=100;pixels>=pixel_min;pixels-=pixel_step) {
+  const int angle_step = 10;
+  for(int pixels=300;pixels>=pixel_min;pixels-=pixel_step) {
     double distance = (double)m_size/2.f/(double)pixels;
     
     // now work out the range of x and y to try for this distance
     double range = m_tan_fov * distance - 1.0;
     double step = 2*range / (double)numsteps;
-    for(int xc=-numsteps;xc<=numsteps;++xc) {
-      //int xc=0; {
+//    for(int xc=-numsteps;xc<=numsteps;++xc) {
+      int xc=0; {
       float x0 = xc * step;
-      for(int yc=-numsteps;yc<=numsteps;++yc) {
-	//int yc=0; {
+      //for(int yc=-numsteps;yc<=numsteps;++yc) {
+	int yc=0; {
 	float y0 = yc * step;
-	for(int theta = -90; theta <= 90; theta += angle_step) {
-	  //int theta = 0; {
+//	for(int theta = -90; theta <= 90; theta += angle_step) {
+	  int theta = 0; {
 	  for(int phi = -90;phi<=90;phi += angle_step) {
 	    Result result = Execute(theta,phi,x0,y0,distance);
 	    if (prefix) output << prefix << " ";
 	    output << theta << " " << phi << " " << x0 << " " << y0 << " " << distance << " " << pixels << " " << xc << " " << yc << " ";
 	    if (result.valid) {
-	      output << result.distance_error << " " << result.angle_error << " " << result.bit_error << " " << result.min_distance << " " << result.max_distance << " " << result.signal_strength << " " << result.min_width << "\n";
+	      output << result.distance_error << " " << result.angle_error << " " << result.bit_error << " " << result.min_distance << " " << result.max_distance << " " << result.signal_strength << " " << result.min_width << " ";
 	    }
 	    else if (result.not_visible) {
-	      output << "NONE NONE NONE " << result.min_distance << " NONE NONE NONE\n";
+	      output << "NONE NONE NONE " << result.min_distance << " NONE NONE NONE ";
 	    }	    
 	    else {
-	      output << "FAIL FAIL FAIL " << result.min_distance << " FAIL FAIL FAIL\n";
+	      output << "FAIL FAIL FAIL " << result.min_distance << " FAIL FAIL FAIL ";
 	    }	    
+
+	    if (result.error_valid) {
+		output << result.correct_transform_error;
+		for(std::vector<float>::const_iterator i = result.incorrect_transform_errors.begin();
+		    i!= result.incorrect_transform_errors.end();
+		    ++i) {
+		    output << " " << *i;
+		}
+		output << "\n";
+	    }
+	    else {
+		output << "\n";
+	    }
 	  }
 	}
       }
@@ -114,15 +127,28 @@ template<class TagType> void RunTest<TagType>::ExecuteSingle(std::ostream& outpu
   if (prefix) output << prefix << " ";
   output << theta << " " << phi << " " << x0 << " " << y0 << " " << z0 << " " << pixels << " ";
   if (result.valid) {
-    output << result.distance_error << " " << result.angle_error << " " << result.bit_error << " " << result.min_distance << " " << result.max_distance << " " << result.signal_strength << " " << result.min_width << "\n";
+    output << result.distance_error << " " << result.angle_error << " " << result.bit_error << " " << result.min_distance << " " << result.max_distance << " " << result.signal_strength << " " << result.min_width << " ";
   }
   else if (result.not_visible) {
-    output << "NONE NONE NONE " << result.min_distance << " NONE NONE NONE\n";
+    output << "NONE NONE NONE " << result.min_distance << " NONE NONE NONE ";
   }
   else {
-    output << "FAIL FAIL FAIL " << result.min_distance << " FAIL FAIL FAIL\n";
+    output << "FAIL FAIL FAIL " << result.min_distance << " FAIL FAIL FAIL ";
+  }
+  if (result.error_valid) {
+      output << result.correct_transform_error;
+      for(std::vector<float>::const_iterator i = result.incorrect_transform_errors.begin();
+	  i!= result.incorrect_transform_errors.end();
+	  ++i) {
+	  output << " " << *i;
+      }
+      output << "\n";
+  }
+  else {
+      output << "\n";
   }
 }
+
 
 
 
@@ -265,6 +291,20 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
     r.Update(errorangle,distance,errors,m.GetMaxima());
 
     r.SetSignalStrength(ce->GetSignalStrength(),ce->GetMin());
+
+    // now work out the error of fit values for the transforms
+    for(std::list<Cantag::Transform*>::const_iterator i = te->GetTransforms().begin();
+	i!=te->GetTransforms().end();
+	++i) {
+	const Cantag::Transform* t = *i;
+	float error = Cantag::abs<float>(t->GetConfidence());
+	if (t->GetConfidence() > 0.f) { // this one corresponds to the correct transform
+	    r.SetCorrectTransformError(error);
+	}
+	else {
+	    r.AddIncorrectTransformError(error);
+	}
+    }
   }
   
   return r;

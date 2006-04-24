@@ -33,10 +33,14 @@ struct Result {
   float max_distance;
 
   float signal_strength;
-  int min_width;
+  float min_width;
 
-  Result() : valid(false), not_visible(false) {}
-  Result(float a, float d, int b) : angle_error(a), distance_error(d),bit_error(b), valid(true),not_visible(false) {}
+    float correct_transform_error;
+    bool error_valid;
+    std::vector<float> incorrect_transform_errors;
+
+  Result() : valid(false), not_visible(false),error_valid(false) {}
+  Result(float a, float d, int b) : angle_error(a), distance_error(d),bit_error(b), valid(true),not_visible(false),error_valid(false) {}
 
   void Update(float a, float b, int c, float d) {
     if (!valid || bit_error > c) {
@@ -48,10 +52,19 @@ struct Result {
     }
   }
 
-  void SetSignalStrength(float w,int i) {
+  void SetSignalStrength(float w, float i) {
     signal_strength = w;
     min_width = i;
   }
+
+    void SetCorrectTransformError(float v) {
+	correct_transform_error = v;
+	error_valid=true;
+    }
+    void AddIncorrectTransformError(float v) {
+	incorrect_transform_errors.push_back(v);
+    }
+
 };
 
 

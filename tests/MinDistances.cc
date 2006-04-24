@@ -40,18 +40,25 @@ void RunTest(Tag& tag,const Cantag::Camera& camera, int size, double tan_fov, co
       double range = tan_fov * distance - 1.0;
       double step = range / (double)numsteps;
       double normal_step = 1.f/normal_numsteps;
-      int xc=0; {
-      //for(int xc=-numsteps;xc<=numsteps;++xc) {
+      //int xc=0; {
+      for(int xc=-numsteps;xc<=numsteps;++xc) {
 	float x0 = xc * step;
-	int yc=0; {
-	  //for(int yc=-numsteps;yc<=numsteps;++yc) {
+	//int yc=0; {
+	for(int yc=-numsteps;yc<=numsteps;++yc) {
 	  float y0 = yc * step;
-	  int nxc = 0; {
-	    //	  for(int nxc = -normal_numsteps; nxc <= normal_numsteps; ++nxc) {
-	    float nx = nxc * normal_step;
-	    int nxy = 0; {
-	      //	    for(int nxy = -normal_numsteps; nxy <= normal_numsteps; ++nxy) {
-	      float ny = nxy * normal_step;
+	  //int nxc = 0; {
+	  for(int nxc = -normal_numsteps; nxc <= normal_numsteps; ++nxc) {
+	      // treat nxc as an angle and then nx = cos(nxc)
+	      // NOT THIS float nx = nxc * normal_step;
+	      float nxangle = nxc / normal_numsteps * FLT_PI / 2.f;
+	      float nxdegrees = nxc / normal_numsteps * 90;
+	      float nx = cos(nxangle);
+	    //int nxy = 0; {
+	    for(int nxy = -normal_numsteps; nxy <= normal_numsteps; ++nxy) {
+	      float nyangle = nxy / normal_numsteps * FLT_PI / 2.f;
+	      float nydegrees = nxy / normal_numsteps * 90;
+	      //float ny = nxy * normal_step;
+	      float ny = cos(nyangle);
 	      float len = nx*nx+ny*ny;
 	      if (len > 1.f) continue;
 	      float nz = sqrt(1.f-nx*nx-ny*ny);
@@ -67,7 +74,7 @@ void RunTest(Tag& tag,const Cantag::Camera& camera, int size, double tan_fov, co
 	      float mod = sqrt(location[0]*location[0] + location[1]*location[1] + location[2]*location[2]);
 	      
 	      float angle = acos((normal[0]*location[0] + normal[1]*location[1] + normal[2]*location[2])/mod);
-	      std::cout <<  prefix <<  " " << x0 << " " << y0 << " " << distance << " " << pixels << " " << xc << " " << yc << " " << nx << " " << ny << " " << nz << " " << angle;
+	      std::cout <<  prefix <<  " " << x0 << " " << y0 << " " << distance << " " << pixels << " " << xc << " " << yc << " " << nxdegrees << " " << nydegrees << " " << angle;
 	      if (angle >= M_PI/2) {
 		std::cout <<  " SKIP" << std::endl;
 		continue;
@@ -117,7 +124,7 @@ struct FreeCircle : public Cantag::TagCircle<RINGS,SECTORS>, public Cantag::RawC
 
 template<int CURRENT_EDGE>
 struct SquareList {
-  typedef Cantag::TypeList<TestSquare<CURRENT_EDGE,Cantag::FitQuadTangleCorner,Cantag::TransformQuadTangleProjective>, SquareList<CURRENT_EDGE-1>::List> List;
+  typedef Cantag::TypeList<TestSquare<CURRENT_EDGE,Cantag::FitQuadTangleCorner,Cantag::TransformQuadTangleProjective>, typename SquareList<CURRENT_EDGE-1>::List> List;
 };
 
 template<>
@@ -127,11 +134,11 @@ struct SquareList<2> {
 
 
 template<int RINGS, int SECTORS = 100> struct CircleInnerList {
-  typedef Cantag::TypeList<CircleInner<RINGS,SECTORS,Cantag::FitEllipseLS,Cantag::TransformEllipseFull>, CircleInnerList<RINGS,SECTORS-10>::List> List;
+  typedef Cantag::TypeList<CircleInner<RINGS,SECTORS,Cantag::FitEllipseLS,Cantag::TransformEllipseFull>, typename CircleInnerList<RINGS,SECTORS-10>::List> List;
 };
 
 template<int RINGS> struct CircleInnerList<RINGS,10> {
-  typedef CircleInnerList<RINGS-1,500/(RINGS-1) - (500/(RINGS-1) % 10)>::List List;
+  typedef typename CircleInnerList<RINGS-1,500/(RINGS-1) - (500/(RINGS-1) % 10)>::List List;
 };
 
 template<int SECTORS> struct CircleInnerList<1,SECTORS> {
@@ -140,11 +147,11 @@ template<int SECTORS> struct CircleInnerList<1,SECTORS> {
 
 
 template<int RINGS, int SECTORS = 100> struct CircleFixedList {
-  typedef Cantag::TypeList<CircleInnerFixed<RINGS,SECTORS,Cantag::FitEllipseLS,Cantag::TransformEllipseFull>, CircleFixedList<RINGS,SECTORS-10>::List> List;
+  typedef Cantag::TypeList<CircleInnerFixed<RINGS,SECTORS,Cantag::FitEllipseLS,Cantag::TransformEllipseFull>, typename CircleFixedList<RINGS,SECTORS-10>::List> List;
 };
 
 template<int RINGS> struct CircleFixedList<RINGS,10> {
-  typedef CircleFixedList<RINGS-1,500/(RINGS-1) - (500/(RINGS-1) % 10)>::List List;
+  typedef typename CircleFixedList<RINGS-1,500/(RINGS-1) - (500/(RINGS-1) % 10)>::List List;
 };
 
 template<int SECTORS> struct CircleFixedList<1,SECTORS> {
@@ -152,23 +159,22 @@ template<int SECTORS> struct CircleFixedList<1,SECTORS> {
 };
 
 
-template<int BIT_COUNT> struct Search {
-  template<int RINGS> struct Iterator {
+template<int BIT_COUNT, int RINGS> struct Iterator {
     template<int COND, int SECTORS> struct Alternation {
-      typedef Iterator<RINGS-1>::List List;
+	typedef typename Iterator<BIT_COUNT,RINGS-1>::List List;
     };
     template<int SECTORS> struct Alternation<0,SECTORS> {
-      typedef Cantag::TypeList<CircleInner<RINGS,SECTORS,Cantag::FitEllipseLS, Cantag::TransformEllipseFull>, Iterator<RINGS-1>::List> List;
+	typedef Cantag::TypeList<CircleInner<RINGS,SECTORS,Cantag::FitEllipseLS, Cantag::TransformEllipseFull>, typename Iterator<BIT_COUNT,RINGS-1>::List> List;
     };
-    typedef Alternation<BIT_COUNT % RINGS,BIT_COUNT/RINGS>::List List;
-  };
-  template<> struct Iterator<1> {
+    typedef typename Alternation<BIT_COUNT % RINGS,BIT_COUNT/RINGS>::List List;
+};
+
+template<int BIT_COUNT> struct Iterator<BIT_COUNT,1> {
     typedef Cantag::TypeListEOL List;
-  };
 };
 
 template<int MAX_BITS> struct SearchList {
-  typedef Cantag::Append<Search<MAX_BITS>::Iterator<5>::List, SearchList<MAX_BITS-1>::List>::value List;
+  typedef typename Cantag::Append<typename Iterator<MAX_BITS,5>::List, typename SearchList<MAX_BITS-1>::List>::value List;
 };
 
 template<> struct SearchList<10> {
@@ -180,7 +186,8 @@ using namespace Cantag;
 //typedef SquareList<15>::List MinDistanceTags;
 //typedef CircleInnerList<5>::List MinDistanceTags;
 //typedef CircleFixedList<5>::List MinDistanceTags;
-typedef Search<400>::Iterator<10>::List MinDistanceTags;
+//typedef Iterator<400,10>::List MinDistanceTags;
+typedef TL2(CircleInnerLSFull36,SquarePolygonProj36) MinDistanceTags;
 
 int main(int argc,char** argv) {
   try {

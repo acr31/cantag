@@ -25,6 +25,8 @@
 #ifndef TEST_CIRCLE_GUARD
 #define TEST_CIRCLE_GUARD
 
+#include <sstream>
+
 #include <Cantag.hh>
 #include "Functions.hh"
 
@@ -49,8 +51,8 @@ private:
   std::vector<PipelineResult> m_located;
 
   struct TransformSelect : public Cantag::Function<TL0,TL1(Cantag::TransformEntity)> {
-    const Cantag::Camera& m_camera;
     const Cantag::Transform& m_ideal_transform;
+    const Cantag::Camera& m_camera;
     TransformSelect(const Cantag::Transform& ideal_transform, const Cantag::Camera& camera) : m_ideal_transform(ideal_transform), m_camera(camera) {}
     bool operator()(Cantag::TransformEntity& te) const {
       Cantag::Transform* min = NULL;
@@ -68,7 +70,6 @@ private:
 	if (dotprod > 1.f) dotprod = 1.f;
 
 	double errorangle = acos(dotprod);
-	std::cout << "ERROR " << errorangle << std::endl;
 	if (errorangle < minf) {
 	  min = t;
 	  minf = errorangle;
@@ -77,7 +78,13 @@ private:
 
       for(std::list<Cantag::Transform*>::iterator i = te.GetTransforms().begin(); i!=te.GetTransforms().end();++i) {
 	Cantag::Transform* t = *i;
-	if (t == min) t->SetConfidence(1.f); else t->SetConfidence(0.f);
+	if (t != min) {
+	    t->AccrueConfidence(-1.f);
+	}
+	else {
+	    float conf = t->GetConfidence();
+	    if (conf < 1e-5) t->SetConfidence(1.f);
+	}
       }
       
       return true;
@@ -88,11 +95,18 @@ private:
     const Cantag::Camera& m_camera;
     TransformRotate(const Cantag::Camera& camera) : m_camera(camera) {}
     bool operator()(Cantag::TransformEntity& te) const {
-      // find out the rotation of the tag
+	// find out the rotation of the tag
       float v1[] = {0,0,0};
       float v2[] = {1,0,0};   
-      te.GetPreferredTransform()->Apply3D(v1,1);
-      te.GetPreferredTransform()->Apply3D(v2,1);
+      Cantag::Transform* t = te.GetPreferredTransform();
+
+      if (t == NULL) {
+	  std::cerr << "No preferred transform" << std::endl;
+	  return false;
+      }
+
+      t->Apply3D(v1,1);
+      t->Apply3D(v2,1);
       double vec[] = {v2[0]-v1[0],v2[1]-v1[1],v2[2]-v1[2]};
       double atanv = atan(fabs(vec[1]/vec[0]));
       double angle;
@@ -108,7 +122,7 @@ private:
 	if (vec[1] >= 0.f) angle = M_PI - atanv;
 	else angle = M_PI + atanv;
       }
-      te.GetPreferredTransform()->Rotate(cos(angle),-sin(angle));
+      t->Rotate(cos(angle),-sin(angle));
       return true;
     };
   };
@@ -154,7 +168,7 @@ private:
       output.Save(name_buffer);
     }
     ApplyTree(tree,TransformAlgorithm(this->GetBullseyeOuterEdge()));
-    //ApplyTree(tree,Cantag::TransformSelectEllipse(*this,camera));
+    ApplyTree(tree,Cantag::TransformSelectEllipseErrorOfFit<Cantag::CheckEllipseStricker<Cantag::AggregateMean<float> > >(*this,camera));
     ApplyTree(tree,TransformSelect(ideal_transform,camera));
     //ApplyTree(tree,Cantag::RemoveNonConcentricEllipse(*this));
     //ApplyTree(tree,Cantag::Bind(Cantag::TransformEllipseRotate(*this,camera),m));
@@ -187,13 +201,13 @@ public:
 
   std::string Prefix() const {
     std::ostringstream result;
-    result << typeid(*this).name() << " " << 
+    result << typeid(*this).name();/* << " " << 
       RINGS << " " << 
       SECTORS << " " <<
-      GetBullseyeInnerEdge() << " " <<
-      GetBullseyeOuterEdge() << " " <<
-      GetDataInnerEdge() << " " <<
-      GetDataOuterEdge();
+	Cantag::TagCircle<RINGS,SECTORS>::GetBullseyeInnerEdge() << " " <<
+      Cantag::TagCircle<RINGS,SECTORS>::GetBullseyeOuterEdge() << " " <<
+      Cantag::TagCircle<RINGS,SECTORS>::GetDataInnerEdge() << " " <<
+      Cantag::TagCircle<RINGS,SECTORS>::GetDataOuterEdge(); */
     return result.str();
   }
 
@@ -206,7 +220,7 @@ public:
     Apply(i,m,Cantag::ThresholdGlobal<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>(128));
     Apply(m,Cantag::ContourFollowerClearImageBorder());
     Apply(m,tree,Cantag::ContourFollowerTree(*this));
-    ApplyTree(tree,FindContour(ideal_contour));
+//    ApplyTree(tree,FindContour(ideal_contour));
     return Process(tree,m,ideal_transform,camera,debug_name);
   }  
 
