@@ -1,8 +1,9 @@
 #noinst_PROGRAMS= NewTest NewTest3 DrawTag PositioningTest NewTest4 LSEllipseFit 
-noinst_PROGRAMS=FollowContour DrawTag NewTest5 AllCircles DrawTag2
+noinst_PROGRAMS=FollowContour DrawTag NewTest5 AllCircles DrawTag2 CircleLocate
 #LSEllipseFit_SOURCES=LSEllipseFit.cc
 FollowContour_SOURCES=FollowContour.cc
 AllCircles_SOURCES=AllCircles.cc
+CircleLocate_SOURCES=CircleLocate.cc
 #test_SOURCES=test.cc
 #PositioningTest_SOURCES=PositioningTest.cc
 #TextOnly DrawTag

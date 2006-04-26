@@ -20,38 +20,44 @@
 
 /**
  * Galois Field(4) coder.  
- *
- * $Header$
- *
- * \todo update this for the general coding framework.  Reincorporate ian's error correction and mindecode stuff.
  */
+
 #ifndef GF4_CODER_GUARD
 #define GF4_CODER_GUARD
 
 #include <cantag/Config.hh>
-#include <cantag/coders/Coder.hh>
 #include <cantag/GF4Poly.hh>
-#include <cmath>
+#include <cantag/CyclicBitSet.hh>
 
 namespace Cantag {
-class GF4Coder : public Coder {
-private:
-  int m_symbol_range;
-  int m_symbol_count;
-  unsigned long long m_accum_code;
-  int m_current_chunk;
-  int m_base;
-  
-  GF4Poly m_genpoly;
-  GF4Poly m_encoded;
+  template<int BIT_COUNT, int GRANULARITY>
+  class GF4Coder : public Coder<BIT_COUNT> {
+  public:
+    typedef GF4Coder<BIT_COUNT,GRANULARITY> CoderType;
 
-  int m_maxerrors;
+  private:
+    GF4Poly m_genpoly;
+    
+  public:
+    GF4Coder();
 
-public:
-  GF4Coder(int symbol_range,int symbol_count);
-  
-  virtual unsigned long long Encode(unsigned long long value);
-  virtual unsigned long long Decode(unsigned long long value);
-};
+    virtual bool IsErrorCorrecting() const;
+    virtual int GetSymbolSize() const;
+    virtual int GetHammingDistanceBits() const;
+    virtual int GetHammingDistanceSymbols() const;
+
+
+    virtual int DecodePayload(CyclicBitSet<BIT_COUNT>& data) const;
+    virtual bool EncodePayload(CyclicBitSet<BIT_COUNT>& data) const;
+  };
+
+  template<int BIT_COUNT,int GRANULARITY> GF4Coder<BIT_COUNT,GRANULARITY>::GF4Coder() {}
+  template<int BIT_COUNT,int GRANULARITY> bool GF4Coder<BIT_COUNT,GRANULARITY>::IsErrorCorrecting() const { return false; }
+  template<int BIT_COUNT,int GRANULARITY> int GF4Coder<BIT_COUNT,GRANULARITY>::GetSymbolSize() const { return 2; }
+  template<int BIT_COUNT,int GRANULARITY> int GF4Coder<BIT_COUNT,GRANULARITY>::GetHammingDistanceBits() const { }
+  template<int BIT_COUNT,int GRANULARITY> int GF4Coder<BIT_COUNT,GRANULARITY>::GetHammingDistanceSymbols() const { }
+  template<int BIT_COUNT,int GRANULARITY> int GF4Coder<BIT_COUNT,GRANULARITY>::DecodePayload(CyclicBitSet<BIT_COUNT>& data) const {}
+  template<int BIT_COUNT,int GRANULARITY> bool GF4Coder<BIT_COUNT,GRANULARITY>::EncodePayload(CyclicBitSet<BIT_COUNT>& data) const {}
+
 }
 #endif//GF4_CODER_GUARD

@@ -186,7 +186,7 @@ namespace Cantag {
     float r = (float)PARAM_RING_COUNT;
 
     // mid point of inner ring
-    return (1.f - s)/( (2*(r-1)*s+1.f) );
+    return (1.f - s)/( (2*r-1)*s+1.f );
 
     // mid point of outer ring
     //float invs = 1.f / sin(FLT_PI / (float)PARAM_SECTOR_COUNT);

@@ -55,7 +55,7 @@ namespace Cantag {
      */
     inline void GetCellRotation(int cells, float& vcos, float& vsin) const {
       float angle = (float)(cells / m_cells_per_rotation) / (float)m_symmetry * 2*FLT_PI;
-      if (angle > FLT_PI) angle = FLT_PI - angle;
+      //      if (angle > FLT_PI) angle = FLT_PI - angle;
       //      vcos = DCOS(8,angle);
       //      vsin = DSIN(8,angle);
       vcos = cos(angle);

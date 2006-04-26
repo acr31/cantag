@@ -201,13 +201,13 @@ public:
 
   std::string Prefix() const {
     std::ostringstream result;
-    result << typeid(*this).name();/* << " " << 
+    result << typeid(*this).name() << " " << 
       RINGS << " " << 
       SECTORS << " " <<
 	Cantag::TagCircle<RINGS,SECTORS>::GetBullseyeInnerEdge() << " " <<
       Cantag::TagCircle<RINGS,SECTORS>::GetBullseyeOuterEdge() << " " <<
       Cantag::TagCircle<RINGS,SECTORS>::GetDataInnerEdge() << " " <<
-      Cantag::TagCircle<RINGS,SECTORS>::GetDataOuterEdge(); */
+      Cantag::TagCircle<RINGS,SECTORS>::GetDataOuterEdge(); 
     return result.str();
   }
 

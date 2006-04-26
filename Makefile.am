@@ -1,3 +1,3 @@
-SUBDIRS = src include samples tests
+SUBDIRS = src include samples unit  tests
 
 AM_CPPFLAGS=

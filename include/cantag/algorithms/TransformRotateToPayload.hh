@@ -58,18 +58,28 @@ namespace Cantag {
   template<int PAYLOAD_SIZE> bool TransformRotateToPayloadObj<PAYLOAD_SIZE>::operator()(const DecodeEntity<PAYLOAD_SIZE>& decode, TransformEntity& transform) const {
     if (!transform.IsValid()) return false;
     bool return_value = false;
-    typename std::vector<DecodeData*>::const_iterator i = decode.GetPayloads().begin();
-    std::list<Transform*>::iterator j = transform.GetTransforms().begin();
-    for(;i != decode.GetPayloads().end() && j != transform.GetTransforms().end();++i,++j) {
+
+    Transform* t = transform.GetPreferredTransform();
+    if (t == NULL) return false;
+
+    DecodeData* preferred = NULL;
+    float conf = -1e10;
+    for(typename std::vector<DecodeData*>::const_iterator i = decode.GetPayloads().begin();i != decode.GetPayloads().end();++i) {
       DecodeData* data = *i;
-      if (data->confidence > 0.f) {
-	float cos,sin;
-	m_tagspec.GetCellRotation(data->bits_rotation,cos,sin);
-	(*j)->Rotate(cos,sin);
-	return_value = true;
+      if (data->confidence > conf) {
+	preferred = data;
+	conf = data->confidence;
       }
     }
-    return return_value;
+
+    if (preferred == NULL) return false;
+
+
+    float cos;
+    float sin;
+    m_tagspec.GetCellRotation(preferred->bits_rotation,cos,sin);
+    t->Rotate(cos,sin);
+    return true;
   }
 
   template<int PAYLOAD_SIZE>

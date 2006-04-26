@@ -50,7 +50,7 @@ namespace Cantag {
     is_SetEdgeEnhancement( m_hCamera, IS_EDGE_EN_STRONG);
     is_SetPixelClock( m_hCamera, 30);
     double newFps;
-    is_SetFrameRate( m_hCamera, 10, &newFps);
+    is_SetFrameRate( m_hCamera, 20, &newFps);
     for(int i=0;i<BUFFER_SIZE;++i) {
       if (is_AllocImageMem(m_hCamera, m_width, m_height, 8 , &m_ring_buffer[i].m_buf, &m_ring_buffer[i].m_imageID ) != IS_SUCCESS )
 	throw "Failed to allocate memory buffer";

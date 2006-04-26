@@ -39,7 +39,7 @@
 using namespace Cantag;
 
 
-struct TestCircle : public Cantag::TagCircleOuter<2,20>,Cantag::TripOriginalCoder<40,2,2> {
+struct TestCircle : public Cantag::TagCircleInner<2,20>,Cantag::TripOriginalCoder<40,2,6> {
   //  TestCircle() : TagCircle<2,16>(0.272727,0.454545,0.5454545,1.0) {}
   //  TestCircle() : TagCircle<4,40>(0.2,0.4,0.6,1.0) {}
 };

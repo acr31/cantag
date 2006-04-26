@@ -31,7 +31,7 @@ void RunTest(Tag& tag,const Cantag::Camera& camera, int size, double tan_fov, co
   const int numsteps = 1;
   const int pixel_min = 10;
   const int pixel_step = 10;
-  const int normal_numsteps = 10;
+  const int normal_numsteps = 20;
   for(int pixels=100;pixels>=pixel_min;pixels-=pixel_step) {
     //int pixels=100; {
     double distance = (double)size/(double)pixels*2.f;
@@ -50,15 +50,15 @@ void RunTest(Tag& tag,const Cantag::Camera& camera, int size, double tan_fov, co
 	  for(int nxc = -normal_numsteps; nxc <= normal_numsteps; ++nxc) {
 	      // treat nxc as an angle and then nx = cos(nxc)
 	      // NOT THIS float nx = nxc * normal_step;
-	      float nxangle = nxc / normal_numsteps * FLT_PI / 2.f;
-	      float nxdegrees = nxc / normal_numsteps * 90;
-	      float nx = cos(nxangle);
+	      float nxangle = (float)nxc / (float)normal_numsteps * FLT_PI / 2.f;
+	      float nxdegrees = (float)nxc / (float)normal_numsteps * 90;
+	      float nx = sin(nxangle);
 	    //int nxy = 0; {
 	    for(int nxy = -normal_numsteps; nxy <= normal_numsteps; ++nxy) {
-	      float nyangle = nxy / normal_numsteps * FLT_PI / 2.f;
-	      float nydegrees = nxy / normal_numsteps * 90;
+	      float nyangle = (float)nxy / (float)normal_numsteps * FLT_PI / 2.f;
+	      float nydegrees = (float)nxy / (float)normal_numsteps * 90;
 	      //float ny = nxy * normal_step;
-	      float ny = cos(nyangle);
+	      float ny = sin(nyangle);
 	      float len = nx*nx+ny*ny;
 	      if (len > 1.f) continue;
 	      float nz = sqrt(1.f-nx*nx-ny*ny);
@@ -187,7 +187,7 @@ using namespace Cantag;
 //typedef CircleInnerList<5>::List MinDistanceTags;
 //typedef CircleFixedList<5>::List MinDistanceTags;
 //typedef Iterator<400,10>::List MinDistanceTags;
-typedef TL2(CircleInnerLSFull36,SquarePolygonProj36) MinDistanceTags;
+typedef TL2(CircleInnerLSFull48,SquarePolygonProj49) MinDistanceTags;
 
 int main(int argc,char** argv) {
   try {
