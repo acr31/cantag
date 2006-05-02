@@ -1,7 +1,7 @@
 cantagincludedir = $(includedir)/cantag/algorithms
 
 cantaginclude_HEADERS =  DistortionCorrectionNone.hh
-cantaginclude_HEADERS +=  DistortionCorrectionSimple.hh
+cantaginclude_HEADERS += DistortionCorrectionSimple.hh
 cantaginclude_HEADERS += FitEllipseLS.hh
 cantaginclude_HEADERS += FitEllipseSimple.hh 
 cantaginclude_HEADERS += TransformEllipseFull.hh 
@@ -31,6 +31,7 @@ cantaginclude_HEADERS += SimulateContour.hh
 cantaginclude_HEADERS += SimulateMaxSampleError.hh
 cantaginclude_HEADERS += ContourFollowerTree.hh
 cantaginclude_HEADERS += ContourFollowerClearImageBorder.hh
+cantaginclude_HEADERS += EstimateMaxSampleStrength.hh
 
 if HAVE_GSL_MULTIMIN_H
 if HAVELIB_GSLCBLAS

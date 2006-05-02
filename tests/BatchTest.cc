@@ -116,7 +116,7 @@ struct Executor<Cantag::TypeListEOL> {
 //typedef TL1(SquareCornerProj36) TagList;
 //typedef TL1(SquareCornerProj36) TagList;
 //typedef TL5(CircleInnerLSLinear36,CircleInnerLSLinear36,CircleOuterLSFull36,CircleOuterLSLinear36,SquareRegressConvexHullProj36) TagList;
-typedef Cantag::TypeList<CircleInner<3,24,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> > TagList;
+typedef Cantag::TypeList<CircleInner<2,24,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> > TagList;
 int main(int argc,char* argv[]) {
   try {
     std::cout.precision(15);

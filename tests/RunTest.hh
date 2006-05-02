@@ -91,7 +91,7 @@ template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output
 	    if (prefix) output << prefix << " ";
 	    output << theta << " " << phi << " " << x0 << " " << y0 << " " << distance << " " << pixels << " " << xc << " " << yc << " ";
 	    if (result.valid) {
-	      output << result.distance_error << " " << result.angle_error << " " << result.bit_error << " " << result.min_distance << " " << result.max_distance << " " << result.signal_strength << " " << result.min_width << " ";
+		output << result.distance_error << " " << result.angle_error << " " << result.bit_error << " " << result.min_distance << " " << result.max_distance << " " << result.signal_strength << " " << result.min_width << " ";
 	    }
 	    else if (result.not_visible) {
 	      output << "NONE NONE NONE " << result.min_distance << " NONE NONE NONE ";
@@ -99,6 +99,10 @@ template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output
 	    else {
 	      output << "FAIL FAIL FAIL " << result.min_distance << " FAIL FAIL FAIL ";
 	    }	    
+
+	    if (result.sample_strength_valid) {
+		output << result.sample_strength << " ";
+	    }
 
 	    if (result.error_valid) {
 		output << result.correct_transform_error;
@@ -135,6 +139,12 @@ template<class TagType> void RunTest<TagType>::ExecuteSingle(std::ostream& outpu
   else {
     output << "FAIL FAIL FAIL " << result.min_distance << " FAIL FAIL FAIL ";
   }
+
+
+  if (result.sample_strength_valid) {
+      output << result.sample_strength << " ";
+  }
+
   if (result.error_valid) {
       output << result.correct_transform_error;
       for(std::vector<float>::const_iterator i = result.incorrect_transform_errors.begin();
@@ -228,7 +238,7 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
   const std::vector<typename TagType::PipelineResult>& loclist = tag.GetLocatedObjects();
   for(typename std::vector<typename TagType::PipelineResult>::const_iterator i = loclist.begin();i!=loclist.end();++i) {
     const typename TagType::PipelineResult& loc = *i;
-    const Cantag::TransformEntity* te = loc.second.first;
+    const Cantag::TransformEntity* te = loc.te;
 
     float location[3];
     te->GetPreferredTransform()->GetLocation(location,1);
@@ -255,10 +265,10 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
   if (favorite) {
 
     const typename TagType::PipelineResult& loc = *favorite;
-    const Cantag::SignalStrengthEntity* ce = loc.first;
-    const Cantag::TransformEntity* te = loc.second.first;
-
-    const Cantag::DecodeEntity<TagType::PayloadSize>* de = loc.second.second;
+    const Cantag::SignalStrengthEntity* ce = loc.se;
+    const Cantag::TransformEntity* te = loc.te;
+    const Cantag::DecodeEntity<TagType::PayloadSize>* de = loc.de;
+    const Cantag::MaxSampleStrengthEntity* me = loc.me;
 
     Cantag::CyclicBitSet<TagType::PayloadSize> copy(de->GetPayloads()[0]->payload);
 
@@ -305,7 +315,9 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
 	    r.AddIncorrectTransformError(error);
 	}
     }
+    r.SetSampleStrength(me->GetSampleStrength());
   }
+
   
   return r;
  

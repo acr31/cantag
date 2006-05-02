@@ -39,6 +39,7 @@
 #include <cantag/entities/TransformEntity.hh>
 #include <cantag/entities/ShapeEntity.hh>
 #include <cantag/entities/DecodeEntity.hh>
+#include <cantag/entities/MaxSampleStrengthEntity.hh>
 
 ///////////////////////
 // composed entities
@@ -117,7 +118,7 @@
 #include <cantag/algorithms/CheckEllipseSafaeeRad.hh>
 #include <cantag/algorithms/CheckEllipseSafaeeRad2.hh>
 #include <cantag/algorithms/CheckEllipseStricker.hh>
-
+#include <cantag/algorithms/EstimateMaxSampleStrength.hh>
 
 ///////////////////////
 // coders
@@ -164,7 +165,7 @@
 # include <cantag/DSVLImageSource.hh>
 #endif
 #ifdef HAVE_UEYE_H
-# include <cantag/UEyeImageSource.hh>
+//# include <cantag/UEyeImageSource.hh>
 #endif
 //////////////////////
 // output mechanisms

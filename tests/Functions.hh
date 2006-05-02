@@ -35,12 +35,15 @@ struct Result {
   float signal_strength;
   float min_width;
 
+    float sample_strength;
+    bool sample_strength_valid;
+
     float correct_transform_error;
     bool error_valid;
     std::vector<float> incorrect_transform_errors;
 
   Result() : valid(false), not_visible(false),error_valid(false) {}
-  Result(float a, float d, int b) : angle_error(a), distance_error(d),bit_error(b), valid(true),not_visible(false),error_valid(false) {}
+  Result(float a, float d, int b) : angle_error(a), distance_error(d),bit_error(b), valid(true),not_visible(false),error_valid(false), sample_strength_valid(false) {}
 
   void Update(float a, float b, int c, float d) {
     if (!valid || bit_error > c) {
@@ -65,6 +68,10 @@ struct Result {
 	incorrect_transform_errors.push_back(v);
     }
 
+    void SetSampleStrength(float s) {
+	sample_strength = s;
+	sample_strength_valid = true;
+    }
 };
 
 
@@ -87,15 +94,31 @@ struct FindContour : public Cantag::Function<TL0,TL1(Cantag::ContourEntity)> {
 };
 
 template<int PAYLOAD_SIZE>
-struct AddLocatedObject : public Cantag::Function<TL2(Cantag::SignalStrengthEntity,Cantag::TransformEntity),TL1(Cantag::DecodeEntity<PAYLOAD_SIZE>)> {
-  std::vector<std::pair<const Cantag::SignalStrengthEntity*, std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PAYLOAD_SIZE>*> > >& m_list;
+struct Container {
+    const Cantag::SignalStrengthEntity* se;
+    const Cantag::MaxSampleStrengthEntity* me;
+    const Cantag::TransformEntity* te;
+    const Cantag::DecodeEntity<PAYLOAD_SIZE>* de;
+    
+    Container(const Cantag::SignalStrengthEntity* cse,    
+	      const Cantag::MaxSampleStrengthEntity* cme,
+	      const Cantag::TransformEntity* cte,
+	      const Cantag::DecodeEntity<PAYLOAD_SIZE>* cde) : se(cse),me(cme),te(cte),de(cde) {};
+};
 
-  AddLocatedObject(std::vector<std::pair<const Cantag::SignalStrengthEntity*,std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PAYLOAD_SIZE>*> > >& lists) : m_list(lists) {};
+template<int PAYLOAD_SIZE>
+struct AddLocatedObject : public Cantag::Function<TL3(Cantag::SignalStrengthEntity,Cantag::TransformEntity,Cantag::DecodeEntity<PAYLOAD_SIZE>),TL1(Cantag::MaxSampleStrengthEntity)> {
+    std::vector<Container<PAYLOAD_SIZE> >& m_list;
+
+    AddLocatedObject(std::vector<Container<PAYLOAD_SIZE> >& lists) : m_list(lists) {}
   
-  bool operator()(const Cantag::SignalStrengthEntity& ce, const Cantag::TransformEntity& te, Cantag::DecodeEntity<PAYLOAD_SIZE>& de) const {
-    m_list.push_back(std::pair<const Cantag::SignalStrengthEntity*,std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PAYLOAD_SIZE>*> >(&ce,std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PAYLOAD_SIZE>*>(&te,&de)));
-    return true;
-  }
+    bool operator()(const Cantag::SignalStrengthEntity& ce, 
+		    const Cantag::TransformEntity& te, 
+		    const Cantag::DecodeEntity<PAYLOAD_SIZE>& de, 
+		    Cantag::MaxSampleStrengthEntity& me) const {
+	m_list.push_back(Container<PAYLOAD_SIZE>(&ce,&me,&te,&de));
+	return true;
+    }
 };
 
 

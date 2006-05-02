@@ -34,15 +34,16 @@ class TestSquare : public Cantag::TagSquare<EDGE_CELLS>, public Cantag::RawCoder
  public:  
   enum { PayloadSize = Cantag::TagSquare<EDGE_CELLS>::PayloadSize };
   typedef Cantag::TagSquare<EDGE_CELLS> SpecType;
-  typedef std::pair<const Cantag::SignalStrengthEntity*, std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PayloadSize>*> > PipelineResult;
+  typedef Container<PayloadSize> PipelineResult;
   
   typedef Cantag::RawCoder<EDGE_CELLS*EDGE_CELLS - (EDGE_CELLS*EDGE_CELLS %2),(EDGE_CELLS*EDGE_CELLS - (EDGE_CELLS*EDGE_CELLS %2))/4> CoderType;
-  typedef Cantag::ComposedEntity<TL6(Cantag::ContourEntity,
+  typedef Cantag::ComposedEntity<TL7(Cantag::ContourEntity,
 				     Cantag::SignalStrengthEntity,
 				     Cantag::ConvexHullEntity,
 				     Cantag::ShapeEntity<Cantag::QuadTangle>,
 				     Cantag::TransformEntity,
-				     Cantag::DecodeEntity<PayloadSize>
+				     Cantag::DecodeEntity<PayloadSize>,
+				     Cantag::MaxSampleStrengthEntity
 				     )> TagEntity;
  private:
   Cantag::Tree<TagEntity> tree;

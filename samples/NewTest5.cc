@@ -168,10 +168,10 @@ int main(int argc,char* argv[]) {
     //    V4LImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> fs("/dev/video0",0);
     //typedef DSVLImageSource ImageSource ;
     //DSVLImageSource fs(argv[5]);
-    //typedef FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> ImageSource ;
-    //FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8>fs("processing-original.bmp");
-    typedef UEyeImageSource ImageSource;
-    UEyeImageSource fs;
+    typedef FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> ImageSource ;
+    FileImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8>fs("processing-original.bmp");
+//    typedef UEyeImageSource ImageSource;
+//    UEyeImageSource fs;
 
     TestSquare tag;
     tag.SetContourRestrictions(25,20,20);

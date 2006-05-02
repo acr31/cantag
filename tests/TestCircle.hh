@@ -35,16 +35,16 @@ template<int RINGS, int SECTORS, class FitAlgorithm, class TransformAlgorithm, c
 class TestCircle : public SpecClass, public Cantag::TripOriginalCoder<RINGS*SECTORS,RINGS,2> {
 public:  
   enum { PayloadSize = Cantag::TagCircle<RINGS,SECTORS>::PayloadSize };
-  typedef std::pair<const Cantag::SignalStrengthEntity*,std::pair<const Cantag::TransformEntity*,const Cantag::DecodeEntity<PayloadSize>*> > PipelineResult;
-
+    typedef Container<PayloadSize> PipelineResult;
   typedef Cantag::TagCircle<RINGS,SECTORS> SpecType;
   typedef Cantag::TripOriginalCoder<RINGS*SECTORS,RINGS,2> CoderType;
-  typedef Cantag::ComposedEntity<TL6(Cantag::ContourEntity,
+  typedef Cantag::ComposedEntity<TL7(Cantag::ContourEntity,
 				     Cantag::SignalStrengthEntity,
 				     Cantag::ConvexHullEntity,
 				     Cantag::ShapeEntity<Cantag::Ellipse>,
 				     Cantag::TransformEntity,
-				     Cantag::DecodeEntity<PayloadSize>
+				     Cantag::DecodeEntity<PayloadSize>,
+				     Cantag::MaxSampleStrengthEntity
 				     )> TagEntity;
 private:
   Cantag::Tree<TagEntity> tree;
@@ -191,6 +191,8 @@ private:
       ApplyTree(tree,Cantag::PrintEntityDecode<PayloadSize>(std::cout));
     }
     ApplyTree(tree,Cantag::Decode<CoderType>());
+    ApplyTree(tree,Cantag::Bind(Cantag::EstimateMaxSampleStrength(*this,camera),m));
+
     ApplyTree(tree,AddLocatedObject<PayloadSize>(this->m_located));
     return m_located.size() != 0;
 

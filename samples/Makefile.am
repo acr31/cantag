@@ -1,4 +1,4 @@
-#noinst_PROGRAMS= NewTest NewTest3 DrawTag PositioningTest NewTest4 LSEllipseFit 
+#noinst_PROGRAMS= NewTest NewTest3 DrawTag PositioningTest NewTest4 LSEllipseFit
 noinst_PROGRAMS=FollowContour DrawTag NewTest5 AllCircles DrawTag2 CircleLocate
 #LSEllipseFit_SOURCES=LSEllipseFit.cc
 FollowContour_SOURCES=FollowContour.cc
