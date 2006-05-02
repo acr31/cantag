@@ -27,12 +27,37 @@
 
 #include <cantag/entities/Entity.hh>
 #include <cantag/entities/TransformEntity.hh>
+#include <cantag/entities/MaxSampleStrengthEntity.hh>
 #include <cantag/TagCircle.hh>
 #include <cantag/MonochromeImage.hh>
 #include <cantag/Function.hh>
 #include <cantag/Camera.hh>
 
 namespace Cantag {
+
+  static float FindDistance(const MonochromeImage& image,bool sought, bool* buffer, int startx, int starty, float current) {
+    bool currentPix = image.GetPixel(startx,starty);
+    if (currentPix == sought) return current;
+    
+    int dirx[] = {-1,0,1,1,1,0,-1,-1};
+    int diry[] = {-1,-1,-1,0,1,1,1,0};
+    
+    buffer[startx + starty*image.GetWidth()] = true;
+    float min = 1e10;
+    for(int c=0;c<8;++c) {
+      int nextx = startx + dirx[c];
+      int nexty = starty + diry[c];
+      if (nextx >= 0 && nextx < image.GetWidth() &&
+	  nexty >= 0 && nexty < image.GetHeight() &&
+	  !buffer[nextx + nexty*image.GetWidth()]) {
+	float step = c % 2 == 0 ? sqrt(2.f) : 1.f;
+	float est = FindDistance(image,sought,buffer,nextx,nexty,current+step);
+	if (est < min) min = est;
+      }
+    }
+    return min;
+  }
+
     
   /**
    * This algorithm estimates the sample points on a circular tag and searches
@@ -42,18 +67,17 @@ namespace Cantag {
    * EstimateMaxSampleStrength which will infer the template parameters
    */
     template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
-    class EstimateMaxSampleStrengthObj : public Function<TL2(MonochromeImage,TransformEntity),TL1(MaxSampleStrengthEntity) > {
+    class EstimateMaxSampleStrengthCircleObj : public Function<TL2(MonochromeImage,TransformEntity),TL1(MaxSampleStrengthEntity) > {
     private:
 	const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& m_tagspec;
 	const Camera& m_camera;
 
-	float FindDistance(const MonochromeImage& image,bool sought, bool* buffer, int startx, int starty, float current) const;
     public:
-	EstimateMaxSampleStrengthObj(const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec, const Camera& camera) : m_tagspec(tagspec),m_camera(camera) {};
+	EstimateMaxSampleStrengthCircleObj(const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec, const Camera& camera) : m_tagspec(tagspec),m_camera(camera) {};
 	bool operator()(const MonochromeImage& image, const TransformEntity& source, MaxSampleStrengthEntity& strength) const;
     };
     
-    template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool EstimateMaxSampleStrengthObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(const MonochromeImage& image, const TransformEntity& source, MaxSampleStrengthEntity& strength) const {
+    template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> bool EstimateMaxSampleStrengthCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::operator()(const MonochromeImage& image, const TransformEntity& source, MaxSampleStrengthEntity& strength) const {
 
     bool return_result = false;
     const Transform* i = source.GetPreferredTransform();
@@ -68,8 +92,11 @@ namespace Cantag {
 			   m_tagspec.GetYSamplePoint(readindex,RING_COUNT - 1 - k) };
 	  i->Apply(tpt[0],tpt[1],tpt,tpt+1);
 	  m_camera.NPCFToImage(tpt,1);
-	  if (tpt[0] < 0 || tpt[0] >= image.GetWidth() ||
-	      tpt[1] < 0 || tpt[1] >= image.GetHeight()) { 
+	  int samplex = Round(tpt[0]);
+	  int sampley = Round(tpt[1]);
+
+	  if (samplex < 0 || samplex >= image.GetWidth() ||
+	      sampley < 0 || sampley >= image.GetHeight()) { 
 	    return false;
 	  }
 
@@ -77,8 +104,6 @@ namespace Cantag {
 	  for(size_t i = 0;i<image.GetWidth()*image.GetHeight();++i) { 
 	      buffer[i] = false; 
 	  }
-	  int samplex = Round(tpt[0]);
-	  int sampley = Round(tpt[1]);
 	  float strength = FindDistance(image,!image.GetPixel(samplex,sampley),buffer,samplex,sampley, 0.f);
 	  delete[] buffer;
 	  assert(strength <= 1e9);
@@ -94,29 +119,66 @@ namespace Cantag {
     return return_result;
   }
 
-    template<int RING_COUNT, int SECTOR_COUNT, int READ_COUNT> float EstimateMaxSampleStrengthObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::FindDistance(const MonochromeImage& image,bool sought, bool* buffer, int startx, int starty, float current) const {
-	bool currentPix = image.GetPixel(startx,starty);
-	if (currentPix == sought) return current;
 
-	int dirx[] = {-1,0,1,1,1,0,-1,-1};
-	int diry[] = {-1,-1,-1,0,1,1,1,0};
+  /**
+   * This algorithm estimates the sample points on a square tag and searches
+   * outwards from that point to the edge of the sector.  The minimum of these
+   * distances for the tag is the estimate of the sample strength.  This is a
+   * helper object you can create using the inline template function
+   * EstimateMaxSampleStrength which will infer the template parameters
+   */
+  template<int EDGE_COUNT>
+    class EstimateMaxSampleStrengthSquareObj : public Function<TL2(MonochromeImage,TransformEntity),TL1(MaxSampleStrengthEntity) > {
+    private:
+	const TagSquare<EDGE_COUNT>& m_tagspec;
+	const Camera& m_camera;
 
-	buffer[startx + starty*image.GetWidth()] = true;
-	float min = 1e10;
- 	for(int c=0;c<8;++c) {
-	    int nextx = startx + dirx[c];
-	    int nexty = starty + diry[c];
-	    if (nextx >= 0 && nextx < image.GetWidth() &&
-		nexty >= 0 && nexty < image.GetHeight() &&
-		!buffer[nextx + nexty*image.GetWidth()]) {
-		float step = c % 2 == 0 ? sqrt(2.f) : 1.f;
-		float est = FindDistance(image,sought,buffer,nextx,nexty,current+step);
-		if (est < min) min = est;
-	    }
+    public:
+	EstimateMaxSampleStrengthSquareObj(const TagSquare<EDGE_COUNT>& tagspec, const Camera& camera) : m_tagspec(tagspec),m_camera(camera) {};
+	bool operator()(const MonochromeImage& image, const TransformEntity& source, MaxSampleStrengthEntity& strength) const;
+    };
+    
+    template<int EDGE_COUNT> bool EstimateMaxSampleStrengthSquareObj<EDGE_COUNT>::operator()(const MonochromeImage& image, const TransformEntity& source, MaxSampleStrengthEntity& strength) const {
+
+      bool return_result = false;
+      const Transform* i = source.GetPreferredTransform();
+      
+      if (i) {
+	AggregateMin<float> maxfn;
+	
+	for(int j=0;j<TagSquare<EDGE_COUNT>::PayloadSize;j++) {
+	  float pts[] = { m_tagspec.GetXSamplePoint(j),
+			  m_tagspec.GetYSamplePoint(j) };
+	  i->Apply(pts[0],pts[1],pts,pts+1);
+	  m_camera.NPCFToImage(pts,1);
+	  
+	  int samplex = Round(pts[0]);
+	  int sampley = Round(pts[1]);
+
+	  if (samplex < 0 || samplex >= image.GetWidth() ||
+	      sampley < 0 || sampley >= image.GetHeight()) { 
+	    return false;
+	  }
+
+	  bool* buffer = new bool[image.GetWidth() * image.GetHeight()]();
+	  for(size_t i = 0;i<image.GetWidth()*image.GetHeight();++i) { 
+	      buffer[i] = false; 
+	  }
+
+	  float strength = FindDistance(image,!image.GetPixel(samplex,sampley),buffer,samplex,sampley, 0.f);
+	  delete[] buffer;
+	  assert(strength <= 1e9);
+	  maxfn(strength);
+
 	}
-	return min;
+
+	strength.SetSampleStrength(maxfn());
+	return_result = true;
+      }
+      return return_result;
     }
 
+  
 /**
  * the estimate should always be more conservative or equal to the actual
  * value because we might miss the worst case due to there not being a data
@@ -126,8 +188,15 @@ namespace Cantag {
 
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT>
   inline
-  EstimateMaxSampleStrengthObj<RING_COUNT,SECTOR_COUNT,READ_COUNT> EstimateMaxSampleStrength(const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec, const Camera& camera) {
-    return EstimateMaxSampleStrengthObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>(tagspec,camera);
+  EstimateMaxSampleStrengthCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT> EstimateMaxSampleStrength(const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec, const Camera& camera) {
+    return EstimateMaxSampleStrengthCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>(tagspec,camera);
+  }
+
+
+  template<int EDGE_COUNT>
+  inline
+  EstimateMaxSampleStrengthSquareObj<EDGE_COUNT> EstimateMaxSampleStrength(const TagSquare<EDGE_COUNT>& tagspec, const Camera& camera) {
+    return EstimateMaxSampleStrengthSquareObj<EDGE_COUNT>(tagspec,camera);
   }
 }
 #endif//ESTIMATE_MAX_SAMPLE_ERROR_GUARD
