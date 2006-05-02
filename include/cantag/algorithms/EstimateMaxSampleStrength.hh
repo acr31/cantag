@@ -50,8 +50,7 @@ namespace Cantag {
       if (nextx >= 0 && nextx < image.GetWidth() &&
 	  nexty >= 0 && nexty < image.GetHeight() &&
 	  !buffer[nextx + nexty*image.GetWidth()]) {
-	//	float step = c % 2 == 0 ? sqrt(2.f) : 1.f;
-	float step = 1.f;
+	float step = c % 2 == 0 ? sqrt(2.f) : 1.f;
 	float est = FindDistance(image,sought,buffer,nextx,nexty,current+step);
 	if (est < min) min = est;
       }
