@@ -34,34 +34,9 @@
 #include <cantag/Camera.hh>
 
 namespace Cantag {
-  /*
-  static float FindDistance(const MonochromeImage& image,bool sought, bool* buffer, int startx, int starty, float current) {
-    bool currentPix = image.GetPixel(startx,starty);
-    if (currentPix == sought) return current;
-    
-    int dirx[] = {-1,0,1,1,1,0,-1,-1};
-    int diry[] = {-1,-1,-1,0,1,1,1,0};
-    
-    buffer[startx + starty*image.GetWidth()] = true;
-    float min = 1e10;
-    for(int c=0;c<8;++c) {
-      int nextx = startx + dirx[c];
-      int nexty = starty + diry[c];
-      if (nextx >= 0 && nextx < image.GetWidth() &&
-	  nexty >= 0 && nexty < image.GetHeight() &&
-	  !buffer[nextx + nexty*image.GetWidth()]) {
-	float step = c % 2 == 0 ? sqrt(2.f) : 1.f;
-	if (c%2 == 0) continue;
-	float est = FindDistance(image,sought,buffer,nextx,nexty,current+step);
-	if (est < min) min = est;
-      }
-    }
-    return min;
-  }
-  */
 
   static bool CheckPoints(const MonochromeImage& image, bool sought, int startx, int starty, int radius) {
-    const int numpoints = 200;
+    const int numpoints = 2000;
     for(int count = 0; count < numpoints; ++count) {
       float angle = (float)count / (float)numpoints * 2.f*FLT_PI;
       int pollx = Round((float)startx + (float)radius * sin(angle));
@@ -76,7 +51,7 @@ namespace Cantag {
     return false;
   }
 
-  static float FindDistance(const MonochromeImage& image, bool sought, bool* buffer, int startx, int starty, float current) {
+  static float FindDistance(const MonochromeImage& image, bool sought, int startx, int starty, float current) {
     int radius = 1;
     while(radius<50 && !CheckPoints(image,sought,startx,starty,radius)) ++radius;
     return radius;
@@ -123,12 +98,7 @@ namespace Cantag {
 	    return false;
 	  }
 
-	  bool* buffer = new bool[image.GetWidth() * image.GetHeight()]();
-	  for(size_t i = 0;i<image.GetWidth()*image.GetHeight();++i) { 
-	      buffer[i] = false; 
-	  }
-	  float strength = FindDistance(image,!image.GetPixel(samplex,sampley),buffer,samplex,sampley, 0.f);
-	  delete[] buffer;
+	  float strength = FindDistance(image,!image.GetPixel(samplex,sampley),samplex,sampley, 0.f);
 	  assert(strength <= 1e9);
 	  maxfn(strength);
 
@@ -183,13 +153,7 @@ namespace Cantag {
 	    return false;
 	  }
 
-	  bool* buffer = new bool[image.GetWidth() * image.GetHeight()]();
-	  for(size_t i = 0;i<image.GetWidth()*image.GetHeight();++i) { 
-	      buffer[i] = false; 
-	  }
-
-	  float strength = FindDistance(image,!image.GetPixel(samplex,sampley),buffer,samplex,sampley, 0.f);
-	  delete[] buffer;
+	  float strength = FindDistance(image,!image.GetPixel(samplex,sampley),samplex,sampley, 0.f);
 	  assert(strength <= 1e9);
 	  maxfn(strength);
 
