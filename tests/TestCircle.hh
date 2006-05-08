@@ -32,7 +32,8 @@
 
 
 template<int RINGS, int SECTORS, class FitAlgorithm, class TransformAlgorithm, class SpecClass>
-class TestCircle : public SpecClass, public Cantag::TripOriginalCoder<RINGS*SECTORS,RINGS,2> {
+//class TestCircle : public SpecClass, public Cantag::TripOriginalCoder<RINGS*SECTORS,RINGS,2> {
+class TestCircle : public SpecClass, public Cantag::RawCoder<RINGS*SECTORS,RINGS> {
 public:  
   enum { PayloadSize = Cantag::TagCircle<RINGS,SECTORS>::PayloadSize };
     typedef Container<PayloadSize> PipelineResult;
@@ -79,11 +80,13 @@ private:
       for(std::list<Cantag::Transform*>::iterator i = te.GetTransforms().begin(); i!=te.GetTransforms().end();++i) {
 	Cantag::Transform* t = *i;
 	if (t != min) {
-	    t->AccrueConfidence(-1.f);
+	  //	    t->AccrueConfidence(-1.f);
+	  t->SetConfidence(0.f);
 	}
 	else {
 	    float conf = t->GetConfidence();
-	    if (conf < 1e-5) t->SetConfidence(1.f);
+	    //	    if (conf < 1e-5)
+	    t->SetConfidence(1.f);
 	}
       }
       
@@ -93,36 +96,38 @@ private:
 
   struct TransformRotate : public Cantag::Function<TL0,TL1(Cantag::TransformEntity)> {
     const Cantag::Camera& m_camera;
-    TransformRotate(const Cantag::Camera& camera) : m_camera(camera) {}
+    const Cantag::Transform& m_ideal_transform;
+    TransformRotate(const Cantag::Transform& ideal_transform,const Cantag::Camera& camera) : m_ideal_transform(ideal_transform), m_camera(camera) {}
     bool operator()(Cantag::TransformEntity& te) const {
 	// find out the rotation of the tag
+      
+      const Cantag::Transform* t = te.GetPreferredTransform();
+      
+      if (t == NULL) {
+	std::cerr << "No preferred transform" << std::endl;
+	return false;
+      }
+      
       float v1[] = {0,0,0};
       float v2[] = {1,0,0};   
-      Cantag::Transform* t = te.GetPreferredTransform();
-
-      if (t == NULL) {
-	  std::cerr << "No preferred transform" << std::endl;
-	  return false;
-      }
-
       t->Apply3D(v1,1);
       t->Apply3D(v2,1);
       double vec[] = {v2[0]-v1[0],v2[1]-v1[1],v2[2]-v1[2]};
-      double atanv = atan(fabs(vec[1]/vec[0]));
-      double angle;
-      if (vec[0] > 0.f) {
-	if (vec[1] >= 0.f) angle = atanv;
-	else angle = 2.f*M_PI - atanv;
-      }
-      else if (vec[0] == 0.f) { // unlikely
-	if (vec[1] >= 0.f) angle = M_PI / 2.f;
-	else angle = 3.f*M_PI/2.f;
-      }
-      else { // vec[0] < 0.f
-	if (vec[1] >= 0.f) angle = M_PI - atanv;
-	else angle = M_PI + atanv;
-      }
-      t->Rotate(cos(angle),-sin(angle));
+      double vec_mod = sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
+      
+      float v3[] = {0,0,0};
+      float v4[] = {1,0,0};	
+      m_ideal_transform.Apply3D(v3,1);
+      m_ideal_transform.Apply3D(v4,1);
+      double vec2[] = {v4[0]-v3[0],v4[1]-v3[1],v4[2]-v3[2]};
+      double vec2_mod = sqrt(vec2[0]*vec2[0] + vec2[1]*vec2[1] + vec2[2]*vec2[2]);
+      
+      double dot_prod = vec[0] * vec2[0] + vec[1] * vec2[1] + vec[2] * vec2[2];
+	
+      double angle = acos(dot_prod / vec_mod / vec2_mod);
+      
+      
+      te.GetPreferredTransform()->Rotate(cos(angle),sin(angle));
       return true;
     };
   };
@@ -168,11 +173,11 @@ private:
       output.Save(name_buffer);
     }
     ApplyTree(tree,TransformAlgorithm(this->GetBullseyeOuterEdge()));
-    ApplyTree(tree,Cantag::TransformSelectEllipseErrorOfFit<Cantag::CheckEllipseStricker<Cantag::AggregateMean<float> > >(*this,camera));
+    //    ApplyTree(tree,Cantag::TransformSelectEllipseErrorOfFit<Cantag::CheckEllipseStricker<Cantag::AggregateMean<float> > >(*this,camera));
     ApplyTree(tree,TransformSelect(ideal_transform,camera));
     //ApplyTree(tree,Cantag::RemoveNonConcentricEllipse(*this));
     //ApplyTree(tree,Cantag::Bind(Cantag::TransformEllipseRotate(*this,camera),m));
-    ApplyTree(tree,TransformRotate(camera));
+    ApplyTree(tree,TransformRotate(ideal_transform,camera));
 
     ApplyTree(tree,Cantag::Bind(Cantag::SampleTagCircle(*this,camera),m));
     if (debug_name) {
@@ -189,8 +194,10 @@ private:
 
       std::cout << "Sampled" << std::endl;
       ApplyTree(tree,Cantag::PrintEntityDecode<PayloadSize>(std::cout));
+      ApplyTree(tree,Cantag::PrintEntityDecode<PayloadSize>(std::cout));
     }
     ApplyTree(tree,Cantag::Decode<CoderType>());
+    //    ApplyTree(tree,Cantag::TransformRotateToPayload(*this));
     ApplyTree(tree,Cantag::Bind(Cantag::EstimateMaxSampleStrength(*this,camera),m));
 
     ApplyTree(tree,AddLocatedObject<PayloadSize>(this->m_located));
@@ -249,6 +256,12 @@ public:
   TagCircleFixed() : Cantag::TagCircle<RINGS,SECTORS>(0.272727,0.454545,0.5454545,1.0) {}
 };
 
+template<int RINGS,int SECTORS> 
+class TagCircleSplitFixed : public Cantag::TagCircle<RINGS,SECTORS> {
+public:
+  TagCircleSplitFixed() : Cantag::TagCircle<RINGS,SECTORS>(0.2,1.0,0.4,0.8) {}
+};
+
 template<int RINGS,int SECTORS, class FitAlgorithm, class TransformAlgorithm>
 struct CircleInnerFixed : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,TagCircleFixed<RINGS,SECTORS> > {};
 
@@ -256,7 +269,8 @@ template<int RINGS,int SECTORS, class FitAlgorithm, class TransformAlgorithm>
 struct CircleInner : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,Cantag::TagCircleInner<RINGS,SECTORS> > {};
 
 template<int RINGS,int SECTORS, class FitAlgorithm, class TransformAlgorithm>
-struct CircleSplit : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,Cantag::TagCircleSplit<RINGS,SECTORS> > {};
+//struct CircleSplit : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,Cantag::TagCircleSplit<RINGS,SECTORS> > {};
+struct CircleSplit : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,TagCircleSplitFixed<RINGS,SECTORS> > {};
 
 template<int RINGS,int SECTORS, class FitAlgorithm, class TransformAlgorithm>
 struct CircleOuter : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,Cantag::TagCircleOuter<RINGS,SECTORS> > {};
