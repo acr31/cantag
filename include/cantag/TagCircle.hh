@@ -175,7 +175,7 @@ namespace Cantag {
     m_sin_read_angles = new float[PARAM_SECTOR_COUNT*PARAM_READ_COUNT];
     m_cos_read_angles = new float[PARAM_SECTOR_COUNT*PARAM_READ_COUNT];
     for(int i=0;i<PARAM_SECTOR_COUNT*PARAM_READ_COUNT;i++) {
-      m_read_angles[i] = 2*M_PI/PARAM_SECTOR_COUNT/PARAM_READ_COUNT * i;
+      m_read_angles[i] = 2.f*FLT_PI/(float)PARAM_SECTOR_COUNT/(float)PARAM_READ_COUNT * (float)i;
       m_sin_read_angles[i] = sin(m_read_angles[i]);
       m_cos_read_angles[i] = cos(m_read_angles[i]);
     }
