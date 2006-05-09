@@ -105,7 +105,7 @@ namespace Cantag {
 
       float cos,sin;
       m_tagspec.GetAngle(leftindex,cos,sin);
-      transform->Rotate(cos,sin);
+      transform->Rotate(cos,-sin);
     }
     return true;
   }
