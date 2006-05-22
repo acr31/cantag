@@ -91,6 +91,9 @@ namespace Cantag {
 	float atilde = 0.5f * ( temp4 + temp5 );
 	
 	float dist = abs(atilde - a);	
+
+	if (is_nan(dist)) return 0;
+
 	return dist;	
     }
 
