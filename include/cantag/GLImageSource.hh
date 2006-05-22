@@ -82,7 +82,8 @@ namespace Cantag {
     std::vector<GLubyte*> m_tmap;
     std::vector<GLuint> m_textureid;
     float m_tagrotation;
-
+    float m_inner_radius;
+    float m_outer_radius;
     void InitTexture(const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& texture_source);
 
     void InitTexture(const std::list<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> >&  texture_source);
@@ -98,7 +99,7 @@ namespace Cantag {
     /**
      * Create the image source.  You must call Init before attempting to use the image source if created this way
      */
-    GLImageSource(int width, int height, float fov);
+    GLImageSource(int width, int height, float fov, float inner, float outer);
 
 
     /**

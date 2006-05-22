@@ -87,13 +87,15 @@ namespace Cantag {
     Init(source);
   }
 
-  GLImageSource::GLImageSource(int width, int height, float fov) :
+  GLImageSource::GLImageSource(int width, int height, float fov,float inner, float outer) :
     m_width(width),
     m_height(height),
     m_fov(fov),
     m_glimage(width,height),
     m_supersample(1),
-    m_tagrotation(0.f)
+    m_tagrotation(0.f),
+    m_inner_radius(inner),
+    m_outer_radius(outer)
   {}
 
   
@@ -202,15 +204,15 @@ namespace Cantag {
     gluLookAt(0.0, 0.0,0.0,
 	      0.0, 0.0,1.0,
 	      0.0,-1.0,0.0);
-    /*
+
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-    */
-    //    glEnable(GL_POINT_SMOOTH);
-    //    glEnable(GL_LINE_SMOOTH);
-    //glEnable(GL_POLYGON_SMOOTH); 
+    
+    glEnable(GL_POINT_SMOOTH);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_POLYGON_SMOOTH); 
     
     GLfloat spot_position[] = {1,0,1,1};
     GLfloat spot_direction[] = {0,0,1};
@@ -294,9 +296,16 @@ namespace Cantag {
     glVertex3f(-1, 1, 0.0); 
 
     glEnd();
+    glDisable(GL_CULL_FACE);
+
+    if (m_inner_radius != m_outer_radius) {
+      GLUquadricObj* quad_obj = gluNewQuadric();
+      gluDisk(quad_obj,m_inner_radius,m_inner_radius+0.05,100,5);
+      gluDisk(quad_obj,m_outer_radius-0.05,m_inner_radius+0.05,100,5);
+      gluDeleteQuadric(quad_obj);
+    }
     glFlush();
     
-    glDisable(GL_CULL_FACE);
     glDisable(GL_TEXTURE_2D);
     
     // add some occlusion
