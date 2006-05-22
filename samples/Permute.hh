@@ -14,8 +14,8 @@ struct Permute : public Cantag::Function<TL0,TL1(Cantag::DecodeEntity<PAYLOAD_SI
 
       for(int j=0;j<PAYLOAD_SIZE;j+=2) {
 	// swap alternate bits
-	p[j] = clone[j+1];
-	p[j+1] = clone[j];
+	p.Set(j,clone[j+1]);
+	p.Set(j+1,clone[j]);
       }
     }
     return true;
@@ -33,7 +33,7 @@ struct Permute2 : public Cantag::Function<TL0,TL1(Cantag::DecodeEntity<PAYLOAD_S
       Cantag::CyclicBitSet<PAYLOAD_SIZE> clone(p);
 
       for(int j=0;j<PAYLOAD_SIZE;j++) {
-	p[j] = clone[PAYLOAD_SIZE-1-j];
+	p.Set(j,clone[PAYLOAD_SIZE-1-j]);
       }
     }
     return true;
