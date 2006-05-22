@@ -175,13 +175,13 @@ namespace Cantag {
 
     // find the first point that we will start searching from
     do {
-      position = (position - 1) & 0x7;
       sample_x = start_x+m_offset_x[position];
       sample_y = start_y+m_offset_y[position];
 #ifdef CONTOUR_TREE_DEBUG
       PROGRESS("Trying " << sample_x << " " << sample_y);
 #endif
       if (image.GetPixel(sample_x,sample_y)) { break; }
+      position = (position - 1) & 0x7;
     }
     while (position != start_position);
 
