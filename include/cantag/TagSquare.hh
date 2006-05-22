@@ -69,6 +69,10 @@ namespace Cantag {
     inline int GetCellNumber(int row,int col) const {
       return m_cell_indices[row*SIZE + col];
     }
+
+    inline float GetBullseyeOuterEdge() const { return 0.f; }
+    inline float GetBullseyeInnerEdge() const { return 0.f; }
+
   };
 
   template<int SIZE> TagSquare<SIZE>::TagSquare() : 
