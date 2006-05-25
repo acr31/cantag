@@ -44,14 +44,14 @@ public:
 };
 
 template<class TagType> RunTest<TagType>::RunTest(int size, float fov, Cantag::DecodeEntity<TagType::PayloadSize>& d) :
-  tag(),camera(),fs(size,size,fov),m_size(size),m_fov(fov),m_tan_fov(tan(fov/180.f*M_PI/2.f)) {
+  tag(),camera(),fs(size,size,fov,tag.GetBullseyeInnerEdge(),tag.GetBullseyeOuterEdge()),m_size(size),m_fov(fov),m_tan_fov(tan(fov/180.f*M_PI/2.f)) {
   
   if (!Cantag::Encode<TagType>()(d)) {
     throw "Failed to encode value";
   }
 
   // create the image that will hold the tag design
-  Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> i(1024,1024);
+  Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> i(256,256);
   if (!Cantag::DrawTag(tag)(d,i)) {
     throw "Failed to draw encoded value";
   }
@@ -65,6 +65,7 @@ template<class TagType> RunTest<TagType>::RunTest(int size, float fov, Cantag::D
   fs.SetSuperSample(1);
   fs.Init(i);
   fs.SetCameraParameters(camera);
+
 }
 
 template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output, const char* prefix) {
@@ -72,21 +73,34 @@ template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output
   const int pixel_min = 5;
   const int pixel_step = 10;
   const int angle_step = 10;
-  for(int pixels=300;pixels>=pixel_min;pixels-=pixel_step) {
-    double distance = (double)m_size/2.f/(double)pixels;
-    
+  //  for(int pixels=300;pixels>=pixel_min;pixels-=pixel_step) {
+  // 1.45 // CircleSplit 45
+  // 1.5  // CircleSplit 0 / Corner 0
+  // 1.54 // Corner 45
+
+  for(float dist = 1.54;dist<=4.5;dist+=0.1f) {
+    //double distance = (double)m_size/2.f/(double)pixels;
+    double distance = dist / 0.03;
+    int pixels = (int)((double)m_size/2.f/distance);
     // now work out the range of x and y to try for this distance
     double range = m_tan_fov * distance - 1.0;
     double step = 2*range / (double)numsteps;
-//    for(int xc=-numsteps;xc<=numsteps;++xc) {
+    //    for(int xc=-numsteps;xc<=numsteps;++xc) {
       int xc=0; {
-      float x0 = xc * step;
+	//float x0 = xc * step;
+	//float x0 = -1.5438498055; // CircleSplit 45
+      //float x0 = -2.1833333333; // CircleSplit 0
+      //float x0 = 2.25;          // Corner 0
+      float x0 = 1.5909902576;  // Corner 45
       //for(int yc=-numsteps;yc<=numsteps;++yc) {
 	int yc=0; {
-	float y0 = yc * step;
-//	for(int theta = -90; theta <= 90; theta += angle_step) {
-	  int theta = 0; {
-	  for(int phi = -90;phi<=90;phi += angle_step) {
+	  //float y0 = yc * step;
+	  //float y0 = -3.6; // CircleSplit
+	float y0 = 3.4666666666; // Corner
+	//	for(int theta = -90; theta <= 90; theta += angle_step) {
+	int theta = 0; {
+	  //	  for(int phi = -90;phi<=90;phi += angle_step) {
+	  int phi = 0; {
 	    Result result = Execute(theta,phi,x0,y0,distance);
 	    if (prefix) output << prefix << " ";
 	    output << theta << " " << phi << " " << x0 << " " << y0 << " " << distance << " " << pixels << " " << xc << " " << yc << " ";
@@ -124,9 +138,11 @@ template<class TagType> void RunTest<TagType>::ExecuteBatch(std::ostream& output
 }
 
 template<class TagType> void RunTest<TagType>::ExecuteSingle(std::ostream& output,float x0, float y0, float z0, float theta, float phi, const char* prefix) {
-  int pixels = (int)((double)m_size/2.f/z0);
+  //  int pixels = (int)((double)m_size/2.f/z0);
+  int pixels = Cantag::Round(1.0 / z0 / tan((double)m_fov * DBL_PI / 360.0) * (double)m_size);
 
-  Result result = Execute(theta,phi,x0,y0,z0,"debug-%0.2d.pnm");
+  //Result result = Execute(theta,phi,x0,y0,z0,"debug-%0.2d.pnm");
+  Result result = Execute(theta,phi,x0,y0,z0);
 	  
   if (prefix) output << prefix << " ";
   output << theta << " " << phi << " " << x0 << " " << y0 << " " << z0 << " " << pixels << " ";
@@ -163,7 +179,7 @@ template<class TagType> void RunTest<TagType>::ExecuteSingle(std::ostream& outpu
 
 
 template<class TagType> Result RunTest<TagType>::Execute(double theta, double phi, double x, double y, double z, const char* debug_name) {
-
+  
   // work out if the tag will be visible if the angle between the
   // normal vector of the tag and the vector from the camera to the
   // tag if greater than 90 degrees then we will be looking at the
@@ -200,8 +216,11 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
       return r;
     }
   }
-
   // get the next image from the image source
+  int pixel_size = Cantag::Round(1.0 / z / tan((double)m_fov * DBL_PI / 360.0) * (double)m_size);
+  pixel_size--;
+  double new_z = 1.0 / (double)pixel_size / tan((double)m_fov * DBL_PI / 360.0) * (double)m_size;
+
   Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8>* i = fs.Next(theta,phi,x,y,z);
   // simulate the contour and decode from there
   Cantag::ContourEntity* contour;
@@ -226,7 +245,7 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
     output.Save("test.pnm");
     */
 #ifdef SIMULATE_CONTOUR
-    tag.ProcessFromContourEntity(*i,ref_te,camera,debug_name);
+    tag.ProcessFromContourEntity(*i,*(ref_te.GetPreferredTransform()),camera,debug_name);
 #else
   // process the tag
   tag(*i,*contour,*(ref_te.GetPreferredTransform()),camera,debug_name);
@@ -263,7 +282,6 @@ template<class TagType> Result RunTest<TagType>::Execute(double theta, double ph
   r.min_distance = minv;
 
   if (favorite) {
-
     const typename TagType::PipelineResult& loc = *favorite;
     const Cantag::SignalStrengthEntity* ce = loc.se;
     const Cantag::TransformEntity* te = loc.te;

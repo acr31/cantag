@@ -62,12 +62,15 @@ struct Chooser<Cantag::TagSquare<EDGE_CELLS> > {
   }
 };
 
+//    const float fov = 70.f;
+//const int size = 600;
+const float fov = 50.9205f;
+const int size = 2614;
+
 template<class List> 
 struct Executor {
   typedef typename List::Head TagType;
   static void Execute() {
-    const float fov = 70.f;
-    const int size = 600;
     Cantag::DecodeEntity<TagType::PayloadSize> d;
     typename Cantag::DecodeEntity<TagType::PayloadSize>::Data* data = d.Add();
     Chooser<typename TagType::SpecType>::CreateCode(data->payload);
@@ -84,8 +87,6 @@ struct Executor {
   }  
 
   static void ExecuteSingle(float x0, float y0, float z0, float theta, float phi) {
-    const float fov = 70.f;
-    const int size = 600;
     Cantag::DecodeEntity<TagType::PayloadSize> d;
     typename Cantag::DecodeEntity<TagType::PayloadSize>::Data* data = d.Add();
     Chooser<typename TagType::SpecType>::CreateCode(data->payload);
@@ -113,10 +114,11 @@ struct Executor<Cantag::TypeListEOL> {
 //typedef CircleTags TagList;
 //typedef TL1(SquareCornerProj36) TagList;
 //typedef TL4(SquareCornerProj36,SquareRegressConvexHullProj36,SquareCornerSpaceSearch36,SquareRegressConvexHullSpaceSearch36) TagList;
-//typedef TL1(SquareCornerProj36) TagList;
-//typedef TL1(SquareCornerProj36) TagList;
+//typedef TL1(CircleSplitLSFull36) TagList;
+typedef TL2(CircleOuterLSFull36,CircleOuterSimpleFull36) TagList;
+//typedef TL2(SquareCornerSpaceSearch36,SquareRegressConvexHullSpaceSearch36) TagList;
 //typedef TL5(CircleInnerLSLinear36,CircleInnerLSLinear36,CircleOuterLSFull36,CircleOuterLSLinear36,SquareRegressConvexHullProj36) TagList;
-typedef Cantag::TypeList<CircleInner<2,24,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> > TagList;
+//typedef Cantag::TypeList<CircleInner<2,24,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> > TagList;
 int main(int argc,char* argv[]) {
   try {
     std::cout.precision(15);

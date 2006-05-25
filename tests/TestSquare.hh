@@ -161,6 +161,7 @@ class TestSquare : public Cantag::TagSquare<EDGE_CELLS>, public Cantag::RawCoder
     ApplyTree(tree,Cantag::Bind(Cantag::SampleTagSquare(*this,camera),m));
     ApplyTree(tree,TransformRotate(camera));
     ApplyTree(tree,Cantag::Decode<CoderType>());
+    ApplyTree(tree,Cantag::Bind(Cantag::EstimateMaxSampleStrength(*this,camera),m));
     ApplyTree(tree,AddLocatedObject<PayloadSize>(m_located));
     return m_located.size() != 0;
 
@@ -214,6 +215,7 @@ public:
 };
 
 
+class SquareCornerProj49 : public TestSquare<7,Cantag::FitQuadTangleCorner,Cantag::TransformQuadTangleProjective> {};
 
 class SquareCornerProj36 : public TestSquare<6,Cantag::FitQuadTangleCorner,Cantag::TransformQuadTangleProjective> {};
 class SquareCornerReduced36 : public TestSquare<6,Cantag::FitQuadTangleCorner,Cantag::TransformQuadTangleReduced> {};

@@ -134,6 +134,12 @@ private:
 
 
   bool Process(Cantag::Tree<TagEntity>& tree,Cantag::MonochromeImage& m, const Cantag::Transform& ideal_transform, const Cantag::Camera& camera, const char* debug_name = NULL) {
+    
+    const float minx = -camera.GetPrincipleX() / camera.GetXScale();
+    const float maxx = (m.GetWidth()-camera.GetPrincipleX()) / camera.GetXScale();
+    const float miny = -camera.GetPrincipleY() / camera.GetYScale();
+    const float maxy = (m.GetHeight()-camera.GetPrincipleY()) / camera.GetYScale();
+
     char name_buffer[255];
     int debug_counter = 0;
     if (debug_name) {
@@ -169,7 +175,7 @@ private:
       Cantag::Image<Cantag::Pix::Sze::Byte1,Cantag::Pix::Fmt::Grey8> output(m.GetWidth(),m.GetHeight());
       Apply(m,Cantag::DrawEntityMonochrome(output));
       output.ConvertScale(0.25,190);
-      ApplyTree(tree,Cantag::DrawEntityShape<Cantag::Ellipse>(output,camera));
+      ApplyTree(tree,Cantag::DrawEntityShape<Cantag::Ellipse>(output,camera,Cantag::ROI(minx,maxx,miny,maxy)));
       output.Save(name_buffer);
     }
     ApplyTree(tree,TransformAlgorithm(this->GetBullseyeOuterEdge()));
@@ -194,9 +200,8 @@ private:
 
       std::cout << "Sampled" << std::endl;
       ApplyTree(tree,Cantag::PrintEntityDecode<PayloadSize>(std::cout));
-      ApplyTree(tree,Cantag::PrintEntityDecode<PayloadSize>(std::cout));
     }
-    ApplyTree(tree,Cantag::Decode<CoderType>());
+    //ApplyTree(tree,Cantag::Decode<CoderType>());
     //    ApplyTree(tree,Cantag::TransformRotateToPayload(*this));
     ApplyTree(tree,Cantag::Bind(Cantag::EstimateMaxSampleStrength(*this,camera),m));
 
@@ -250,10 +255,10 @@ public:
 };
 
 template<int RINGS,int SECTORS> 
-class TagCircleFixed : public Cantag::TagCircle<RINGS,SECTORS> {
+class TagCircleInnerFixed : public Cantag::TagCircle<RINGS,SECTORS> {
 public:
-  //  TagCircleFixed() : Cantag::TagCircle<RINGS,SECTORS>(0.2,0.4,0.6,1.0) {}
-  TagCircleFixed() : Cantag::TagCircle<RINGS,SECTORS>(0.272727,0.454545,0.5454545,1.0) {}
+  TagCircleInnerFixed() : Cantag::TagCircle<RINGS,SECTORS>(0.2,0.4,0.6,1.0) {}
+  //TagCircleFixed() : Cantag::TagCircle<RINGS,SECTORS>(0.272727,0.454545,0.5454545,1.0) {}
 };
 
 template<int RINGS,int SECTORS> 
@@ -262,18 +267,26 @@ public:
   TagCircleSplitFixed() : Cantag::TagCircle<RINGS,SECTORS>(0.2,1.0,0.4,0.8) {}
 };
 
-template<int RINGS,int SECTORS, class FitAlgorithm, class TransformAlgorithm>
-struct CircleInnerFixed : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,TagCircleFixed<RINGS,SECTORS> > {};
+template<int RINGS,int SECTORS> 
+class TagCircleOuterFixed : public Cantag::TagCircle<RINGS,SECTORS> {
+public:
+  TagCircleOuterFixed() : Cantag::TagCircle<RINGS,SECTORS>(0.8,1.0,0.2,0.6) {}
+};
 
 template<int RINGS,int SECTORS, class FitAlgorithm, class TransformAlgorithm>
-struct CircleInner : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,Cantag::TagCircleInner<RINGS,SECTORS> > {};
+struct CircleInnerFixed : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,TagCircleInnerFixed<RINGS,SECTORS> > {};
+
+template<int RINGS,int SECTORS, class FitAlgorithm, class TransformAlgorithm>
+//struct CircleInner : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,Cantag::TagCircleInner<RINGS,SECTORS> > {};
+struct CircleInner : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,TagCircleInnerFixed<RINGS,SECTORS> > {};
 
 template<int RINGS,int SECTORS, class FitAlgorithm, class TransformAlgorithm>
 //struct CircleSplit : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,Cantag::TagCircleSplit<RINGS,SECTORS> > {};
 struct CircleSplit : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,TagCircleSplitFixed<RINGS,SECTORS> > {};
 
 template<int RINGS,int SECTORS, class FitAlgorithm, class TransformAlgorithm>
-struct CircleOuter : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,Cantag::TagCircleOuter<RINGS,SECTORS> > {};
+//struct CircleOuter : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,Cantag::TagCircleOuter<RINGS,SECTORS> > {};
+struct CircleOuter : public TestCircle<RINGS,SECTORS,FitAlgorithm,TransformAlgorithm,TagCircleOuterFixed<RINGS,SECTORS> > {};
 
 class CircleOuterLSFull36 : public CircleOuter<2,18,Cantag::FitEllipseLS,Cantag::TransformEllipseFull> {};
 class CircleOuterLSLinear36 : public CircleOuter<2,18,Cantag::FitEllipseLS,Cantag::TransformEllipseLinear> {};

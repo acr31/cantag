@@ -40,25 +40,29 @@ void RunTest(Tag& tag,const Cantag::Camera& camera, int size, double tan_fov, co
       double range = tan_fov * distance - 1.0;
       double step = range / (double)numsteps;
       double normal_step = 1.f/normal_numsteps;
-      //int xc=0; {
-      for(int xc=-numsteps;xc<=numsteps;++xc) {
+      int xc=0; {
+	//for(int xc=-numsteps;xc<=numsteps;++xc) {
 	float x0 = xc * step;
-	//int yc=0; {
-	for(int yc=-numsteps;yc<=numsteps;++yc) {
+	int yc=0; {
+	  //for(int yc=-numsteps;yc<=numsteps;++yc) {
 	  float y0 = yc * step;
 	  //int nxc = 0; {
-	  for(int nxc = -normal_numsteps; nxc <= normal_numsteps; ++nxc) {
+	  //	  for(int nxc = -normal_numsteps; nxc <= normal_numsteps; ++nxc) {
+	  for(int nxdegrees = 0; nxdegrees < 90; nxdegrees+=10) {
 	      // treat nxc as an angle and then nx = cos(nxc)
 	      // NOT THIS float nx = nxc * normal_step;
-	      float nxangle = (float)nxc / (float)normal_numsteps * FLT_PI / 2.f;
-	      float nxdegrees = (float)nxc / (float)normal_numsteps * 90;
-	      float nx = sin(nxangle);
+	    //	      float nxangle = (float)nxc / (float)normal_numsteps * FLT_PI / 2.f;
+	    //	      float nxdegrees = (float)nxc / (float)normal_numsteps * 90;
+	    //float nx = sin(nxangle);
+	      float nx = sin(nxdegrees / 180.f * FLT_PI);
 	    //int nxy = 0; {
-	    for(int nxy = -normal_numsteps; nxy <= normal_numsteps; ++nxy) {
-	      float nyangle = (float)nxy / (float)normal_numsteps * FLT_PI / 2.f;
-	      float nydegrees = (float)nxy / (float)normal_numsteps * 90;
+	      //	    for(int nxy = -normal_numsteps; nxy <= normal_numsteps; ++nxy) {
+	      for(int nydegrees = 0; nydegrees < 90; nydegrees+=10) {
+		//	      float nyangle = (float)nxy / (float)normal_numsteps * FLT_PI / 2.f;
+		//	      float nydegrees = (float)nxy / (float)normal_numsteps * 90;
 	      //float ny = nxy * normal_step;
-	      float ny = sin(nyangle);
+		//	      float ny = sin(nyangle);
+	      float ny = sin(nydegrees / 180.f * FLT_PI);
 	      float len = nx*nx+ny*ny;
 	      if (len > 1.f) continue;
 	      float nz = sqrt(1.f-nx*nx-ny*ny);
