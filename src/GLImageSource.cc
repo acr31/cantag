@@ -301,7 +301,7 @@ namespace Cantag {
     if (m_inner_radius != m_outer_radius) {
       GLUquadricObj* quad_obj = gluNewQuadric();
       gluDisk(quad_obj,m_inner_radius,m_inner_radius+0.05,100,5);
-      gluDisk(quad_obj,m_outer_radius-0.05,m_inner_radius+0.05,100,5);
+      gluDisk(quad_obj,m_outer_radius-0.05,m_outer_radius,100,5);
       gluDeleteQuadric(quad_obj);
     }
     glFlush();
