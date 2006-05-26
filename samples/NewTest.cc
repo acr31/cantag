@@ -40,12 +40,12 @@ struct TestSquare : public Cantag::TagSquare<6>,Cantag::TripOriginalCoder<36,3,2
 
 using namespace Cantag;
 
-struct RecogniseSquare : public Function<TL3(SignalStrengthEntity,TransformEntity,DecodeEntity<36>),TL1(MaxSampleStrengthEntity)> {
+struct RecogniseSquare : public Function<TL4(SignalStrengthEntity,ShapeEntity<QuadTangle>,TransformEntity,DecodeEntity<36>),TL1(MaxSampleStrengthEntity)> {
   const Camera& m_camera;
   const char* m_prefix;
   RecogniseSquare(const Camera& cam, const char* prefix) : m_camera(cam),m_prefix(prefix) {};
   
-  bool operator()(const SignalStrengthEntity& se, const TransformEntity& te, const DecodeEntity<36>& de, MaxSampleStrengthEntity& me) const {
+  bool operator()(const SignalStrengthEntity& se, const ShapeEntity<QuadTangle>& shape, const TransformEntity& te, const DecodeEntity<36>& de, MaxSampleStrengthEntity& me) const {
     const CyclicBitSet<36>& code = de.GetPayloads()[0]->payload;
     
     const Transform* t = te.GetPreferredTransform();
@@ -68,17 +68,17 @@ struct RecogniseSquare : public Function<TL3(SignalStrengthEntity,TransformEntit
     std::cout << m_prefix << " " << code << " ";
     std::cout << normal[0] << " " << normal[1] << " " << normal[2] << " ";
     std::cout << location[0] << " " << location[1] << " " << location[2] << " ";
-    std::cout << me.GetSampleStrength() << " " << se.GetMin() << std::endl;
+    std::cout << me.GetSampleStrength() << " " << se.GetMin() << " X" << std::endl;
     return true;
   }
 };
 
-struct RecogniseCircle : public Function<TL3(SignalStrengthEntity,TransformEntity,DecodeEntity<34>),TL1(MaxSampleStrengthEntity)> {
+struct RecogniseCircle : public Function<TL4(SignalStrengthEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<34>),TL1(MaxSampleStrengthEntity)> {
   const Camera& m_camera;
   const char* m_prefix;
   RecogniseCircle(const Camera& cam, const char* prefix) : m_camera(cam),m_prefix(prefix) {};
 
-  bool operator()(const SignalStrengthEntity& se, const TransformEntity& te, const DecodeEntity<34>& de, MaxSampleStrengthEntity& me) const {
+  bool operator()(const SignalStrengthEntity& se, const ShapeEntity<Ellipse>& shape, const TransformEntity& te, const DecodeEntity<34>& de, MaxSampleStrengthEntity& me) const {
     const CyclicBitSet<34>& code = de.GetPayloads()[0]->payload;
 
     const Transform* t = te.GetPreferredTransform();
@@ -112,7 +112,7 @@ struct RecogniseCircle : public Function<TL3(SignalStrengthEntity,TransformEntit
     std::cout << m_prefix << " " << code << " ";
     std::cout << normal[0] << " " << normal[1] << " " << normal[2] << " ";
     std::cout << location[0] << " " << location[1] << " " << location[2] << " ";
-    std::cout << me.GetSampleStrength() << " " << se.GetMin() << std::endl;
+    std::cout << me.GetSampleStrength() << " " << se.GetMin() << " " << shape.GetShape()->GetFitError() << std::endl;
     return true;
   }
 };
@@ -180,6 +180,7 @@ void process_circle(MonochromeImage& m,const Camera& camera, const TagCircle<2,1
   ApplyTree(tree,DistortionCorrectionIterative(camera,true));
   ApplyTree(tree,FitAlgorithm()); 
   ApplyTree(tree,RemoveNonConcentricEllipse(tag));
+  ApplyTree(tree,CheckEllipseAlgebraic<AggregateMax<float> >(tag));
 #ifdef DRAW_IMAGE
   Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> output3(output);
   ApplyTree(tree,DrawEntityShape<Ellipse>(output3,camera,ROI(minx,maxx,miny,maxy)));
