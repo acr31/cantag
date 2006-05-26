@@ -40,12 +40,12 @@ struct TestSquare : public Cantag::TagSquare<6>,Cantag::TripOriginalCoder<36,3,2
 
 using namespace Cantag;
 
-struct RecogniseSquare : public Function<TL2(TransformEntity,DecodeEntity<36>),TL1(MaxSampleStrengthEntity)> {
+struct RecogniseSquare : public Function<TL3(SignalStrengthEntity,TransformEntity,DecodeEntity<36>),TL1(MaxSampleStrengthEntity)> {
   const Camera& m_camera;
   const char* m_prefix;
   RecogniseSquare(const Camera& cam, const char* prefix) : m_camera(cam),m_prefix(prefix) {};
   
-  bool operator()(const TransformEntity& te, const DecodeEntity<36>& de, MaxSampleStrengthEntity& me) const {
+  bool operator()(const SignalStrengthEntity& se, const TransformEntity& te, const DecodeEntity<36>& de, MaxSampleStrengthEntity& me) const {
     const CyclicBitSet<36>& code = de.GetPayloads()[0]->payload;
     
     const Transform* t = te.GetPreferredTransform();
@@ -68,17 +68,17 @@ struct RecogniseSquare : public Function<TL2(TransformEntity,DecodeEntity<36>),T
     std::cout << m_prefix << " " << code << " ";
     std::cout << normal[0] << " " << normal[1] << " " << normal[2] << " ";
     std::cout << location[0] << " " << location[1] << " " << location[2] << " ";
-    std::cout << me.GetSampleStrength() << std::endl;
+    std::cout << me.GetSampleStrength() << " " << se.GetMin() << std::endl;
     return true;
   }
 };
 
-struct RecogniseCircle : public Function<TL2(TransformEntity,DecodeEntity<34>),TL1(MaxSampleStrengthEntity)> {
+struct RecogniseCircle : public Function<TL3(SignalStrengthEntity,TransformEntity,DecodeEntity<34>),TL1(MaxSampleStrengthEntity)> {
   const Camera& m_camera;
   const char* m_prefix;
   RecogniseCircle(const Camera& cam, const char* prefix) : m_camera(cam),m_prefix(prefix) {};
 
-  bool operator()(const TransformEntity& te, const DecodeEntity<34>& de, MaxSampleStrengthEntity& me) const {
+  bool operator()(const SignalStrengthEntity& se, const TransformEntity& te, const DecodeEntity<34>& de, MaxSampleStrengthEntity& me) const {
     const CyclicBitSet<34>& code = de.GetPayloads()[0]->payload;
 
     const Transform* t = te.GetPreferredTransform();
@@ -112,7 +112,7 @@ struct RecogniseCircle : public Function<TL2(TransformEntity,DecodeEntity<34>),T
     std::cout << m_prefix << " " << code << " ";
     std::cout << normal[0] << " " << normal[1] << " " << normal[2] << " ";
     std::cout << location[0] << " " << location[1] << " " << location[2] << " ";
-    std::cout << me.GetSampleStrength() << std::endl;
+    std::cout << me.GetSampleStrength() << " " << se.GetMin() << std::endl;
     return true;
   }
 };
@@ -125,7 +125,7 @@ void process_square(MonochromeImage& m,const Camera& camera, const TagSquare<6>&
   output.ConvertScale(0.25,190);   
 #endif
 
-  Tree<ComposedEntity<TL6(ContourEntity,ConvexHullEntity,ShapeEntity<QuadTangle>,TransformEntity,DecodeEntity<36>,MaxSampleStrengthEntity) > > tree;
+  Tree<ComposedEntity<TL7(ContourEntity,SignalStrengthEntity,ConvexHullEntity,ShapeEntity<QuadTangle>,TransformEntity,DecodeEntity<36>,MaxSampleStrengthEntity) > > tree;
   Apply(m,tree,ContourFollowerTree(tag));
   ApplyTree(tree,ConvexHull(tag));
 #ifdef DRAW_IMAGE
@@ -133,6 +133,7 @@ void process_square(MonochromeImage& m,const Camera& camera, const TagSquare<6>&
   ApplyTree(tree,DrawEntityContour(output2));
   output2.Save("debug-02-contour.pnm");
 #endif
+  ApplyTree(tree,SignalStrengthContour());
   ApplyTree(tree,DistortionCorrectionIterative(camera,true));
   ApplyTree(tree,FitAlgorithm()); 
   if (regress) ApplyTree(tree,FitQuadTangleRegression());
@@ -167,7 +168,7 @@ void process_circle(MonochromeImage& m,const Camera& camera, const TagCircle<2,1
   output.ConvertScale(0.25,190);   
 #endif
 
-  Tree<ComposedEntity<TL6(ContourEntity,ConvexHullEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<34>,MaxSampleStrengthEntity) > > tree;
+  Tree<ComposedEntity<TL7(ContourEntity,SignalStrengthEntity,ConvexHullEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<34>,MaxSampleStrengthEntity) > > tree;
   Apply(m,tree,ContourFollowerTree(tag));
   ApplyTree(tree,ConvexHull(tag));
 #ifdef DRAW_IMAGE
@@ -175,6 +176,7 @@ void process_circle(MonochromeImage& m,const Camera& camera, const TagCircle<2,1
   ApplyTree(tree,DrawEntityContour(output2));
   output2.Save("debug-02-contour.pnm");
 #endif
+  ApplyTree(tree,SignalStrengthContour());
   ApplyTree(tree,DistortionCorrectionIterative(camera,true));
   ApplyTree(tree,FitAlgorithm()); 
   ApplyTree(tree,RemoveNonConcentricEllipse(tag));
@@ -264,22 +266,24 @@ int main(int argc,char* argv[]) {
     prefix3 += ":CH";
     process_square<FitQuadTangleConvexHull>(m,camera,tag,prefix3.c_str(),false);
     */
+    /*
     std::string prefix4(argv[1]);
     prefix4 += ":Regress";
     process_square<FitQuadTangleConvexHull>(m,camera,tag,prefix4.c_str(),true);
-    
+    */
     TestCircle inner(0.2,0.4,0.6,1);
     inner.SetContourRestrictions(5,2,2);
+
     std::string prefix5(argv[1]);
     prefix5 += ":InnerLS";
     process_circle<FitEllipseLS,TransformEllipseFull>(m,camera,inner,prefix5.c_str());
-    /*
+
     std::string prefix6(argv[1]);
     prefix6 += ":InnerSimple";
     process_circle<FitEllipseSimple,TransformEllipseFull>(m,camera,inner,prefix6.c_str());
-    */
 
-    if (1==1) {
+
+    if (1==0) {
       TestCircle split(0.2,1.0,0.4,0.8);
       split.SetContourRestrictions(5,2,2);
       
@@ -300,7 +304,7 @@ int main(int argc,char* argv[]) {
       */
     }
 
-    if (1==1) {
+    if (1==0) {
       TestCircle inner(0.2,0.4,0.6,1);
       inner.SetContourRestrictions(5,2,2);
 
@@ -319,12 +323,13 @@ int main(int argc,char* argv[]) {
       process_circle<FitEllipseLS,TransformEllipseLinear>(m,camera,inner,prefix12.c_str());
       */
     }
-
+    /*
     TestCircle outer(0.8,1.0,0.2,0.6);
     outer.SetContourRestrictions(5,2,2);
     std::string prefix9(argv[1]);
     prefix9 += ":OuterLS";
     process_circle<FitEllipseLS,TransformEllipseFull>(m,camera,outer,prefix9.c_str());
+    */
     /*
     std::string prefix10(argv[1]);
     prefix10 += ":OuterLS";
