@@ -56,6 +56,8 @@ protected:
   float m_width;
   float m_height;
 
+  float m_fit_error;
+
   bool m_fitted;
 private:
   Ellipse();
@@ -84,21 +86,14 @@ public:
   inline float GetD() const { return m_d; }
   inline float GetE() const { return m_e; }
   inline float GetF() const { return m_f; }
+  inline void SetFitError(float fit_error) { m_fit_error = fit_error; }
 
+  inline float GetFitError() const { return m_fit_error; }
   inline float GetX0() const { return m_x0; }
   inline float GetY0() const { return m_y0; }
   inline float GetWidth() const { return m_width; }
   inline float GetHeight() const { return m_height; }
   inline float GetAngle() const {  return m_angle_radians; }
-
-  bool CheckError(const std::vector<float>& points) const;
-  float GetError(const std::vector<float>& points) const;
-  float GetErrorAlgebraic(const std::vector<float>& points) const;
-  float GetErrorGradient(const std::vector<float>& points) const;
-  float GetErrorNakagawa(const std::vector<float>& points) const;
-  float GetErrorSafaeeRad(const std::vector<float>& points) const;
-  float GetErrorSafaeeRad2(const std::vector<float>& points) const;
-  float GetErrorStricker(const std::vector<float>& points) const;
 
   /**
    * Calculate the ellipse transform based on decomposing the general
@@ -213,7 +208,7 @@ public:
   virtual void Decompose();
   void Compose();
 
-  bool Check(const std::vector<float>& points) const;
+  //bool Check(const std::vector<float>& points) const;
 };
 
 }
