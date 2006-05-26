@@ -176,6 +176,20 @@ namespace Cantag {
       }
       return r;
     }    
+
+    /**
+     * Apply this 4-ary function to the arguments 
+     */
+    template<class Algorithm> bool _Apply_Fn4(const typename Nth<typename Algorithm::Arguments,0>::value& arg1, const typename Nth<typename Algorithm::Arguments,1>::value& arg2, const typename Nth<typename Algorithm::Arguments,2>::value& arg3, const typename Nth<typename Algorithm::Arguments,3>::value& arg4, typename Nth<typename Algorithm::Results,0>::value& result, Algorithm& algorithm) {
+      PRINTFUNCTION();
+      bool r = false;
+      bool valid = arg1.IsValid() && arg2.IsValid() && arg3.IsValid() && arg4.IsValid();
+      if (!algorithm.OnlyValid || valid) {
+	r = algorithm(arg1,arg2,arg3,arg4,result);
+	if (valid) result.SetValid(r);
+      }
+      return r;
+    }    
     
 
     template<class ComposedEntity> 
@@ -235,6 +249,15 @@ namespace Cantag {
 	inline bool operator()(Algorithm& algorithm, const ComposedEntity& me, ReturnType& result) const {
 	  PRINTFUNCTION();
 	  return _Apply_Fn3<Algorithm>(me,me,me,result,algorithm);
+	}
+      };
+
+      template<class Algorithm, class SourceType1, class SourceType2, class SourceType3, class SourceType4, class ReturnType> 
+      class ApplyHelper<Algorithm,Function<TL4(SourceType1,SourceType2,SourceType3,SourceType4), TL1(ReturnType)> > {
+      public:
+	inline bool operator()(Algorithm& algorithm, const ComposedEntity& me, ReturnType& result) const {
+	  PRINTFUNCTION();
+	  return _Apply_Fn4<Algorithm>(me,me,me,me,result,algorithm);
 	}
       };
     };
@@ -378,6 +401,24 @@ namespace Cantag {
 					      typename Nth<typename Algorithm::Results,0>::value& result, const Algorithm& algorithm) {
     PRINTFUNCTION();
     return Internal::_Apply_Fn3<const Algorithm>(arg1,arg2,arg3,result,algorithm);
+  }
+
+  template<class Algorithm> inline bool Apply(const typename Nth<typename Algorithm::Arguments,0>::value& arg1,
+					      const typename Nth<typename Algorithm::Arguments,1>::value& arg2,
+					      const typename Nth<typename Algorithm::Arguments,2>::value& arg3,
+					      const typename Nth<typename Algorithm::Arguments,3>::value& arg4,
+					      typename Nth<typename Algorithm::Results,0>::value& result, Algorithm& algorithm) {
+    PRINTFUNCTION();
+    return Internal::_Apply_Fn4<Algorithm>(arg1,arg2,arg3,arg4,result,algorithm);
+  }
+
+  template<class Algorithm> inline bool Apply(const typename Nth<typename Algorithm::Arguments,0>::value& arg1,
+					      const typename Nth<typename Algorithm::Arguments,1>::value& arg2,
+					      const typename Nth<typename Algorithm::Arguments,2>::value& arg3,
+					      const typename Nth<typename Algorithm::Arguments,3>::value& arg4,
+					      typename Nth<typename Algorithm::Results,0>::value& result, const Algorithm& algorithm) {
+    PRINTFUNCTION();
+    return Internal::_Apply_Fn4<const Algorithm>(arg1,arg2,arg3,arg4,result,algorithm);
   }
 };
 
