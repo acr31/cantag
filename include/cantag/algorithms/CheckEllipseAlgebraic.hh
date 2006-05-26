@@ -73,7 +73,9 @@ namespace Cantag {
       float y = *i;
       f(eval(e,x,y));
     }
-    return f() < m_restrict.GetMaxFitError();
+    float fit = f();
+    e_ent.GetShape()->SetFitError(fit);
+    return fit < m_restrict.GetMaxFitError();
   }
 }
 
