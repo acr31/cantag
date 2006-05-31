@@ -52,6 +52,9 @@ namespace Cantag {
     float m_xc;
     float m_yc;
 
+    float m_fit_error;
+
+
     /**
      * The index into the contour for the first corner point - the x co-ordinate is at m_index_0 * 2 and then y at m_index_x * 2 +1
      */
@@ -81,6 +84,10 @@ namespace Cantag {
     
     bool Compare(const QuadTangle& o) const;
     void Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera) const;
+    
+    inline void SetFitError(float fit_error) { m_fit_error = fit_error; }
+
+    inline float GetFitError() const { return m_fit_error; }
 
 
     /**
