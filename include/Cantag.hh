@@ -119,6 +119,7 @@
 #include <cantag/algorithms/CheckEllipseSafaeeRad2.hh>
 #include <cantag/algorithms/CheckEllipseStricker.hh>
 #include <cantag/algorithms/EstimateMaxSampleStrength.hh>
+#include <cantag/algorithms/CompareBullseyeRadii.hh>
 
 ///////////////////////
 // coders
@@ -165,7 +166,7 @@
 # include <cantag/DSVLImageSource.hh>
 #endif
 #ifdef HAVE_UEYE_H
-//# include <cantag/UEyeImageSource.hh>
+# include <cantag/UEyeImageSource.hh>
 #endif
 //////////////////////
 // output mechanisms
