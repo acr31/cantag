@@ -112,7 +112,7 @@ struct RecogniseCircle : public Function<TL4(SignalStrengthEntity,ShapeEntity<El
     std::cout << m_prefix << " " << code << " ";
     std::cout << normal[0] << " " << normal[1] << " " << normal[2] << " ";
     std::cout << location[0] << " " << location[1] << " " << location[2] << " ";
-    std::cout << me.GetSampleStrength() << " " << se.GetMin() << " " << shape.GetShape()->GetFitError() << std::endl;
+    std::cout << me.GetSampleStrength() << " " << se.GetMin() << " " << shape.GetShape()->GetFitError() << " " << te.GetRadiusError() << std::endl;
     return true;
   }
 };
@@ -187,6 +187,7 @@ void process_circle(MonochromeImage& m,const Camera& camera, const TagCircle<2,1
   output3.Save("debug-03-shape.pnm");
 #endif
   ApplyTree(tree,TransformAlgorithm(tag.GetBullseyeOuterEdge()));
+  ApplyTree(tree,CompareBullseyeRadii(tag,camera));
   ApplyTree(tree,Bind(TransformEllipseRotate(tag,camera),m));
   ApplyTree(tree,Bind(SampleTagCircle(tag,camera),m));
 #ifdef DRAW_IMAGE
@@ -254,7 +255,7 @@ int main(int argc,char* argv[]) {
     Apply(m,ContourFollowerClearImageBorder());
     TestSquare tag;
     tag.SetContourRestrictions(5,2,2);
-    /*
+
     std::string prefix(argv[1]);
     prefix += ":Corner";
     process_square<FitQuadTangleCorner>(m,camera,tag,prefix.c_str(),false);
@@ -266,12 +267,11 @@ int main(int argc,char* argv[]) {
     std::string prefix3(argv[1]);
     prefix3 += ":CH";
     process_square<FitQuadTangleConvexHull>(m,camera,tag,prefix3.c_str(),false);
-    */
-    /*
+
     std::string prefix4(argv[1]);
     prefix4 += ":Regress";
     process_square<FitQuadTangleConvexHull>(m,camera,tag,prefix4.c_str(),true);
-    */
+
     TestCircle inner(0.2,0.4,0.6,1);
     inner.SetContourRestrictions(5,2,2);
 
@@ -284,18 +284,19 @@ int main(int argc,char* argv[]) {
     process_circle<FitEllipseSimple,TransformEllipseFull>(m,camera,inner,prefix6.c_str());
 
 
-    if (1==0) {
+    if (1==1) {
       TestCircle split(0.2,1.0,0.4,0.8);
       split.SetContourRestrictions(5,2,2);
       
       std::string prefix7(argv[1]);
       prefix7 += ":SplitLS";
       process_circle<FitEllipseLS,TransformEllipseFull>(m,camera,split,prefix7.c_str());
-      /*
+
       std::string prefix8(argv[1]);
       prefix8 += ":SplitSimple";
       process_circle<FitEllipseSimple,TransformEllipseFull>(m,camera,split,prefix8.c_str());
 
+      /*
       std::string prefix11(argv[1]);
       prefix11 += ":SplitSimpleLinear";
       process_circle<FitEllipseSimple,TransformEllipseLinear>(m,camera,split,prefix11.c_str());
@@ -305,17 +306,17 @@ int main(int argc,char* argv[]) {
       */
     }
 
-    if (1==0) {
+    if (1==1) {
       TestCircle inner(0.2,0.4,0.6,1);
       inner.SetContourRestrictions(5,2,2);
 
       std::string prefix7(argv[1]);
       prefix7 += ":InnerLS";
       process_circle<FitEllipseLS,TransformEllipseFull>(m,camera,inner,prefix7.c_str());
-      /*
       std::string prefix8(argv[1]);
       prefix8 += ":InnerSimple";
       process_circle<FitEllipseSimple,TransformEllipseFull>(m,camera,inner,prefix8.c_str());
+      /*
       std::string prefix11(argv[1]);
       prefix11 += ":InnerSimpleLinear";
       process_circle<FitEllipseSimple,TransformEllipseLinear>(m,camera,inner,prefix11.c_str());
@@ -324,18 +325,16 @@ int main(int argc,char* argv[]) {
       process_circle<FitEllipseLS,TransformEllipseLinear>(m,camera,inner,prefix12.c_str());
       */
     }
-    /*
+
     TestCircle outer(0.8,1.0,0.2,0.6);
     outer.SetContourRestrictions(5,2,2);
     std::string prefix9(argv[1]);
     prefix9 += ":OuterLS";
     process_circle<FitEllipseLS,TransformEllipseFull>(m,camera,outer,prefix9.c_str());
-    */
-    /*
     std::string prefix10(argv[1]);
-    prefix10 += ":OuterLS";
+    prefix10 += ":OuterSimple";
     process_circle<FitEllipseSimple,TransformEllipseFull>(m,camera,outer,prefix10.c_str());
-    */
+
   }
   catch (const char* exception) {
     std::cerr << "Caught exception: " << exception<< std::endl;
