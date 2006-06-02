@@ -33,13 +33,17 @@ namespace Cantag {
   class CANTAG_EXPORT TransformEntity : public Entity  {
   private:
     std::list<Transform*> m_transforms;
+    float m_radius_error;
   public:
-    TransformEntity() : Entity() {}
+    TransformEntity() : Entity(),m_radius_error(0.f) {}
     ~TransformEntity() {
       for(std::list<Transform*>::const_iterator i = m_transforms.begin(); i != m_transforms.end(); ++i) {
 	delete *i;
       }
     };
+
+    inline float GetRadiusError() const { return m_radius_error; }
+    inline void SetRadiusError(float radius_error) { m_radius_error = radius_error; }
 
     inline std::list<Transform*>& GetTransforms() { return m_transforms; }
     inline const std::list<Transform*>& GetTransforms() const { return m_transforms; }
