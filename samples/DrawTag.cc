@@ -34,23 +34,8 @@
 // this file includes the definition of the type of tag used in the
 // samples.  This is then typedef'd to be of type TagType which is
 // used below
-//#include "TagDef.hh"
+#include "TagDef.hh"
 
-using namespace Cantag;
-
-
-struct TestCircle : public Cantag::TagCircleInner<2,20>,Cantag::TripOriginalCoder<40,2,6> {
-  //  TestCircle() : TagCircle<2,16>(0.272727,0.454545,0.5454545,1.0) {}
-  //  TestCircle() : TagCircle<4,40>(0.2,0.4,0.6,1.0) {}
-};
-
-/*
-struct TestCircle : public Cantag::TagCircleInner<4,50>,Cantag::TripOriginalCoder<200,4,10> {
-  TestCircle() {}
-};
-*/
-
-typedef TestCircle TagType;
 
 int
 main(int argc, char* argv[]) 
@@ -84,14 +69,14 @@ main(int argc, char* argv[])
       code = newcode;
     }
 
-    DecodeEntity<TagType::PayloadSize> d;
-    DecodeEntity<TagType::PayloadSize>::Data* data = d.Add();
+    Cantag::DecodeEntity<TagType::PayloadSize> d;
+    Cantag::DecodeEntity<TagType::PayloadSize>::Data* data = d.Add();
     data->payload.SetCode(code);
     
     // keep a copy of original code so we can warn if we cannot encode it
-    CyclicBitSet<TagType::PayloadSize> toencode = data->payload; // copy construct
+    Cantag::CyclicBitSet<TagType::PayloadSize> toencode = data->payload; // copy construct
       
-    if (!Encode<TagType>()(d)) {
+    if (!Cantag::Encode<TagType>()(d)) {
       std::cerr << "Failed to encode this value. Aborting" << std::endl;
       exit(-1);
     }
@@ -100,25 +85,19 @@ main(int argc, char* argv[])
 
     std::cout << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.0\">" << std::endl;
 
-    // create the image that will hold the tag design
-    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> i(512,512);
-    if (!DrawTagSVG(t,std::cout)(d)) {
+    if (!Cantag::DrawTagSVG(t,std::cout)(d)) {
       std::cerr << "Failed to draw tag. Aborting" << std::endl;
       exit(-1);
     }
     std::cout <<  "</svg>" << std::endl;
 
-    if (!Decode<TagType>()(d)) {
+    if (!Cantag::Decode<TagType>()(d)) {
       std::cerr << "Failed to decode encoded data.  Aborting" << std::endl;
       exit(-1);
     }
     if (data->payload != toencode) {
       std::cerr << "Warning! Failed to encode requested data " << std::endl;
     }
-  
-    // save the image to disk
-    i.Save("draw.pnm");
-	
   }
   catch (const char* message) {
     std::cerr << "Caught exception (aborting): " << message << std::endl;
