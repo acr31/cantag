@@ -27,19 +27,59 @@
 
 #include <Cantag.hh>
 
-struct TestCircle : public Cantag::TagCircle<2,18>,Cantag::TripOriginalCoder<36,2,2> {
-  TestCircle() : Cantag::TagCircle<2,18>(0.2,0.4,0.6,1) {}
-  //TestCircle() : Cantag::TagCircle<4,32>(0.8,1.0,0.2,0.6) {}
-  //TestCircle() : Cantag::TagCircle<2,17>(0.2,1.0,0.4,0.8) {}
+template<int RINGS, int SECTORS>
+struct TestCircleCoder {
+  typedef typename Cantag::ParityCoder<RINGS*SECTORS> ParityCoder;
+#ifdef HAVE_GMPXX_H
+  typedef typename Cantag::TripOriginalCoder<RINGS*SECTORS,RINGS,2> TripCoder;
+#endif
+  typedef typename Cantag::SCCCoder<RINGS,SECTORS,5,1> SCCCoder;  /* try rings = 5, sectors = 31 */
+  typedef ParityCoder Coder;
 };
 
-//struct TestSquare : public Cantag::TagSquare<8>,Cantag::CRCSymbolChunkCoder<64,4,16> {
-//  TestSquare() : Cantag::TagSquare<8>() {}
-//};
-
-struct TestSquare : public Cantag::TagSquare<6>,Cantag::CRCSymbolChunkCoder<36,6,9> {
-  TestSquare() : Cantag::TagSquare<6>() {}
+struct CircleInnerTrip : public Cantag::TagCircle<2,16>, public TestCircleCoder<2,16>::Coder {
+  CircleInnerTrip() : Cantag::TagCircle<2,16>(0.272727f,0.454545f,0.5454545f,1.0f) {}
 };
 
+template<int RINGS, int SECTORS>
+struct CircleInnerFixed : public Cantag::TagCircle<RINGS,SECTORS>, public TestCircleCoder<RINGS,SECTORS>::Coder {
+  CircleInnerFixed() : Cantag::TagCircle<RINGS,SECTORS>(0.2f,0.4f,0.6f,1.0f) {}
+};
+
+template<int RINGS, int SECTORS>
+struct CircleSplitFixed : public Cantag::TagCircle<RINGS,SECTORS>, public TestCircleCoder<RINGS,SECTORS>::Coder {
+  CircleSplitFixed() : Cantag::TagCircle<RINGS,SECTORS>(0.2f,1.0f,0.4f,0.8f) {}
+};
+
+template<int RINGS, int SECTORS>
+struct CircleOuterFixed : public Cantag::TagCircle<RINGS,SECTORS>, public TestCircleCoder<RINGS,SECTORS>::Coder {
+  CircleOuterFixed() : Cantag::TagCircle<RINGS,SECTORS>(0.8f,1.0f,0.2f,0.6f) {}
+};
+
+template<int RINGS, int SECTORS>
+struct CircleInnerOpt : public Cantag::TagCircleInner<RINGS,SECTORS>, public TestCircleCoder<RINGS,SECTORS>::Coder {};
+
+template<int RINGS, int SECTORS>
+struct CircleSplitOpt : public Cantag::TagCircleSplit<RINGS,SECTORS>, public TestCircleCoder<RINGS,SECTORS>::Coder {};
+
+template<int RINGS, int SECTORS>
+struct CircleOuterOpt : public Cantag::TagCircleOuter<RINGS,SECTORS>, public TestCircleCoder<RINGS,SECTORS>::Coder {};
+
+
+template<int SIZE>
+struct TestSquareCoder {
+  enum { PAYLOAD_SIZE = SIZE*SIZE - (SIZE*SIZE % 2) };
+  typedef typename Cantag::CRCSymbolChunkCoder<PAYLOAD_SIZE,4,PAYLOAD_SIZE/4> CRCCoder;
+
+  typedef CRCCoder Coder;
+};
+
+template<int SIZE>
+struct Square : public Cantag::TagSquare<SIZE>, public TestSquareCoder<SIZE>::Coder {};
+
+
+typedef CircleInnerOpt<2,20> CircleTagType;
+typedef Square<6> SquareTagType;
+typedef CircleTagType TagType;
 
 #endif//TAGDEF_GUARD

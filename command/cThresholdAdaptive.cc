@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2005 Andrew C. Rice
+  Copyright (C) 2006 Andrew C. Rice
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -18,28 +18,26 @@
   Email: acr31@cam.ac.uk
 */
 
+/**
+ * $Header$
+ */
+
 #include <iostream>
 
 #include <Cantag.hh>
+#include "Threshold.hh"
 
 using namespace Cantag;
 
-int main(int argc,char** argv) {
+int main(int argc,char* argv[]) {
+  const int lg_window_size   = argc == 3 ? atoi(argv[1]) : 7;
+  const int offset           = argc == 3 ? atoi(argv[2]) : 10;
   try {
-    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> i(atoi(argv[1]),atoi(argv[2]));
-    i.Load(argv[3]);
-    MonochromeImage m(i.GetWidth(),i.GetHeight());
-    ThresholdGlobal<Pix::Sze::Byte1,Pix::Fmt::Grey8>(128)(i,m);
-    
-    Tree<ComposedEntity<TL1(ContourEntity)> > tree;
-    
-    ContourRestrictions res(5,5,5);
-    ContourFollowerTree follower(res);
-    follower(m,tree);
-    
-    ApplyTree(tree,PrintEntityContour(std::cout));
+    ThresholdAdaptive<Pix::Sze::Byte1,Pix::Fmt::Grey8> t(lg_window_size,offset);
+    Process(t);
   }
-  catch (const char* e) {
-    std::cout << e << std::endl;
+  catch (const char* exception) {
+    std::cerr << "Caught exception: " << exception<< std::endl;
   }
 }
+
