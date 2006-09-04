@@ -61,7 +61,7 @@ namespace Cantag {
 	parity = !parity;
       }
     }
-    data[BIT_COUNT-1] = !parity;
+    data.Set(BIT_COUNT-1,!parity);
     return true;
   }
 
@@ -73,7 +73,7 @@ namespace Cantag {
 	parity = !parity;
       }
     }
-    data[BIT_COUNT-1] = false;
+    data.Set(BIT_COUNT-1,false);
 
 #ifdef PARITY_DEBUG
     PROGRESS("Parity is "<<parity);
