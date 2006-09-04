@@ -155,9 +155,8 @@ dnl Checks for library functions.
 AC_OUTPUT([
 Makefile
 src/Makefile
-unit/Makefile
 samples/Makefile
-tests/Makefile
+command/Makefile
 include/Makefile
 include/cantag/Makefile
 include/cantag/algorithms/Makefile
@@ -240,6 +239,11 @@ fi
 if test "$have_sys_socket_h$have_netinet_in_h" = "yesyes"; then
    echo "+ Enabled BSD Socket support"
 else
-   echo "! Disabled BSD Socket Support"
+   echo "! Disabled BSD Socket support"
 fi
 
+if test "$have_ueye_h$havelib_ueye_api" = "yesyes"; then
+   echo "+ Enabled uEye Camera support"
+else
+   echo "! Disabled uEye Camera support"
+fi
