@@ -35,13 +35,13 @@ namespace Cantag {
   UEyeImageSource::UEyeImageSource() : m_image(NULL),m_hCamera(NULL) {
     
     if ( is_InitCamera( &m_hCamera, 0 ) != IS_SUCCESS ) 
-      throw "Failed to open camera";
+      throw "UEye: Failed to open camera";
 
     if ( is_GetCameraInfo( m_hCamera, &m_CamInfo ) != IS_SUCCESS )
-      throw "Failed to get camera info";
+      throw "UEye: Failed to get camera info";
 
     if ( is_GetSensorInfo( m_hCamera, &m_SensorInfo ) != IS_SUCCESS ) 
-      throw "Failed to initialise sensor array";
+      throw "UEye: Failed to initialise sensor array";
 
     m_width  = m_SensorInfo.nMaxWidth;
     m_height = m_SensorInfo.nMaxHeight;
@@ -53,10 +53,10 @@ namespace Cantag {
     is_SetFrameRate( m_hCamera, 20, &newFps);
     for(int i=0;i<BUFFER_SIZE;++i) {
       if (is_AllocImageMem(m_hCamera, m_width, m_height, 8 , &m_ring_buffer[i].m_buf, &m_ring_buffer[i].m_imageID ) != IS_SUCCESS )
-	throw "Failed to allocate memory buffer";
+	throw "UEye: Failed to allocate memory buffer";
 
       if (is_AddToSequence( m_hCamera, m_ring_buffer[i].m_buf, m_ring_buffer[i].m_imageID ) != IS_SUCCESS )
-	throw "Failed to add memory to ring buffer";
+	throw "UEye: Failed to add memory to ring buffer";
     }
 
     is_EnableEvent( m_hCamera, IS_SET_EVENT_FRAME );
@@ -73,7 +73,7 @@ namespace Cantag {
   Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* UEyeImageSource::Next() {
     if (m_image) delete m_image;
     if (is_WaitEvent( m_hCamera, IS_SET_EVENT_FRAME, 500 ) != IS_SUCCESS )
-          throw "Failed to get new frame event before timeout";
+          throw "UEye: Failed to get new frame event before timeout";
     
     INT num;
     char* current_mem;
