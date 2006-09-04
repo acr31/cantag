@@ -334,7 +334,9 @@ namespace Cantag {
    */
   template<> class CANTAG_EXPORT ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::RGB24> 
     : public ImageBase<Pix::Fmt::RGB24> { 
-
+  public:
+    enum { SIZE = Pix::Sze::Byte3,
+	   FORMAT = Pix::Fmt::RGB24 };
   protected:
     ImageSpecialise(int w,int h) 
       : ImageBase<Pix::Fmt::RGB24>() {
@@ -362,7 +364,9 @@ namespace Cantag {
    */
   template<> class CANTAG_EXPORT ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::BGR24> 
     : public ImageBase<Pix::Fmt::BGR24> { 
-
+  public:
+    enum { SIZE = Pix::Sze::Byte3,
+	   FORMAT = Pix::Fmt::BGR24 };
   protected:
     ImageSpecialise(int w,int h) 
       : ImageBase<Pix::Fmt::BGR24>() {
@@ -389,7 +393,9 @@ namespace Cantag {
    */
   template<> class CANTAG_EXPORT ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::Runtime> 
     : public ImageBase<Pix::Fmt::Runtime> { 
-
+  public:
+    enum { SIZE = Pix::Sze::Byte3,
+	   FORMAT = Pix::Fmt::Runtime };
   protected:
     ImageSpecialise(int w,int h) 
       : ImageBase<Pix::Fmt::Runtime>() {
@@ -414,7 +420,9 @@ namespace Cantag {
    */
   template<> class CANTAG_EXPORT ImageSpecialise<Pix::Sze::Byte1,Pix::Fmt::Grey8> 
     : public ImageBase<Pix::Fmt::Grey8> { 
-
+  public:
+    enum { SIZE = Pix::Sze::Byte1,
+	   FORMAT = Pix::Fmt::Grey8 };
   protected:
     ImageSpecialise(int w, int h)
       : ImageBase<Pix::Fmt::Grey8>() {
@@ -785,7 +793,6 @@ namespace Cantag {
     };
   };
 
-
 #define STEPSIZE 0.01f
   template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> void Image<type,layout>::ellipse_polygon_approx(float* points, int startindex, int length, float xc, float yc, float width, float height,  float angle_radians, const Pixel<layout>& colour, int thickness, float start_angle) {
     /**
@@ -1072,7 +1079,7 @@ namespace Cantag {
       typename std::list<Edge*>::iterator j = active_edges.begin();
       while(j != active_edges.end()) {
 	if ( (*j)->intx == currentx ) {
-	  //	DrawPixel(currentx,scanline,colour);
+	  //DrawPixel(currentx,scanline,colour);
 	  parity ^= true;
 	  ++j;
 	}
@@ -1151,6 +1158,8 @@ namespace Cantag {
     DrawLine(points[2*numpoints-2],points[2*numpoints-1],
 	     points[0],points[1],colour,thickness);
   }
+
+  typedef Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> GreyImage;
 };
 
 #endif//IMAGE_GUARD
