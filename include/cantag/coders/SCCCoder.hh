@@ -227,16 +227,16 @@ namespace Cantag {
     }
 
     bool return_code;
-    if (alpha>=prim) {
+    //    if (alpha>=prim) {
 #ifdef SCCCODER_DEBUG
       PROGRESS("Message is too large");
 #endif
       alpha %=prim;
-      return_code =false;
-    }
-    else {
-      return_code = true;
-    }
+      return_code =true;
+      //   }
+//    else {
+//      return_code = true;
+//    }
 
     int R[SECTORS];              // Stores the codeword
     encode(alpha,m,R);
@@ -301,7 +301,7 @@ namespace Cantag {
     
     int pointer = m_size;
     while(alpha) {
-      data[pointer++] = (alpha & 0x1);
+      data.Set(pointer++,(alpha & 0x1));
       alpha>>=1;
     }
 
