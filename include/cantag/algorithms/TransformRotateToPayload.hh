@@ -57,7 +57,6 @@ namespace Cantag {
 
   template<int PAYLOAD_SIZE> bool TransformRotateToPayloadObj<PAYLOAD_SIZE>::operator()(const DecodeEntity<PAYLOAD_SIZE>& decode, TransformEntity& transform) const {
     if (!transform.IsValid()) return false;
-    bool return_value = false;
 
     Transform* t = transform.GetPreferredTransform();
     if (t == NULL) return false;
