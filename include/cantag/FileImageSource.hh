@@ -49,30 +49,30 @@ namespace Cantag {
     int GetHeight() const;
   };
 
-    template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> FileImageSource<B,L>::FileImageSource(char* filename) : m_original(new Image<B,L>(filename)), m_buffer(new Image<B,L>(filename)) {}    
-    
-    template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> int FileImageSource<B,L>::GetWidth() const {
-	return m_original->GetWidth();
+  template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> FileImageSource<B,L>::FileImageSource(char* filename) : m_original(new Image<B,L>(filename)), m_buffer(new Image<B,L>(filename)) {}    
+  
+  template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> int FileImageSource<B,L>::GetWidth() const {
+    return m_original->GetWidth();
+  }
+  
+  template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> int FileImageSource<B,L>::GetHeight() const {
+    return m_original->GetHeight();
+  }
+  
+  template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> FileImageSource<B,L>::~FileImageSource() { 
+    if (m_buffer != NULL) {
+      delete m_buffer;
     }
-
-    template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> int FileImageSource<B,L>::GetHeight() const {
-	return m_original->GetHeight();
+  }
+  
+  template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> Image<B,L>* FileImageSource<B,L>::Next() {
+    if (m_buffer != NULL) {
+      delete m_buffer;
     }
-
-    template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> FileImageSource<B,L>::~FileImageSource() { 
-	if (m_buffer != NULL) {
-	    delete m_buffer;
-	}
-    }
-    
-    template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> Image<B,L>* FileImageSource<B,L>::Next() {
-	if (m_buffer != NULL) {
-	    delete m_buffer;
-	}
-	m_buffer = new Image<B,L>(*m_original);
-	m_buffer->SetValid(true);
-	return m_buffer;
-    }
-
+    m_buffer = new Image<B,L>(*m_original);
+    m_buffer->SetValid(true);
+    return m_buffer;
+  }
+  
 }
 #endif//FILE_IMAGE_SOURCE
