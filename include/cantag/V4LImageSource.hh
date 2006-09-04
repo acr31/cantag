@@ -111,7 +111,7 @@ namespace Cantag {
     // When this instance is free'd the video port will be closed
 
     if ((m_handle.SetHandle(open(device,O_RDWR))).Get() < 0) {
-      throw "Failed to open video port";
+      throw "V4L: Failed to open video device";
     }
 
 
@@ -122,7 +122,7 @@ namespace Cantag {
     // load the capabilities of the video device
     video_capability capability;
     if (ioctl(m_handle.Get(),VIDIOCGCAP,&capability) < 0) {
-      throw "Failed to ioctl (VIDIOCGCAP) video device";
+      throw "V4L: Failed to ioctl (VIDIOCGCAP) video device";
     }
 
 #ifdef V4L_DEBUG
@@ -139,7 +139,7 @@ namespace Cantag {
   
     // check if this is a capture device
     if (capability.type & VID_TYPE_CAPTURE == 0) {
-      throw "This device is not capable of video capture";
+      throw "V4L: This device is not capable of video capture";
     }
 
 #ifdef V4L_DEBUG
@@ -148,7 +148,7 @@ namespace Cantag {
 
     // check that the requested channel is in range
     if (channel > capability.channels-1) {
-      throw "Channel out of range";
+      throw "V4L: Channel out of range";
     }
     m_channel = channel;
 
@@ -159,7 +159,7 @@ namespace Cantag {
     // find out the details of the buffer needed
     video_mbuf mbuf;
     if (ioctl(m_handle.Get(),VIDIOCGMBUF,&mbuf) < 0) {
-      throw "Failed to ioctl (VIDIOCGMBUF) video device";
+      throw "V4L: Failed to ioctl (VIDIOCGMBUF) video device";
     }
 
 #ifdef V4L_DEBUG
@@ -176,7 +176,7 @@ namespace Cantag {
     // however the _total_ amount of memory needed for all of these
     // frames if given by mbuf.size
     if ((m_mmap.SetHandle((unsigned char*)mmap(0,mbuf.size,PROT_READ | PROT_WRITE,MAP_SHARED,m_handle.Get(),0),mbuf.size)).Get() == (unsigned char*)MAP_FAILED) {
-      throw "Failed to mmap suitable buffer size";
+      throw "V4L: Failed to mmap suitable buffer size";
     }
     m_total_frames = mbuf.frames;
   
@@ -190,7 +190,7 @@ namespace Cantag {
     // configure the device to give us greyscale images
     struct video_picture p;
     if (ioctl(m_handle.Get(),VIDIOCGPICT,&p) < 0) {
-      throw "Failed to ioctl (VIDIOCGPICT) video device";
+      throw "V4L: Failed to ioctl (VIDIOCGPICT) video device";
     }
   
     if (size==Pix::Sze::Byte1 && layout==Pix::Fmt::Grey8) {
@@ -200,7 +200,7 @@ namespace Cantag {
       p.palette = VIDEO_PALETTE_GREY;
       p.depth = 8;
       if (ioctl(m_handle.Get(),VIDIOCSPICT,&p) < 0) {
-	throw "Failed to ioctl (VIDIOCSPICT) video device for GREY palette";
+	throw "V4L: Failed to ioctl (VIDIOCSPICT) video device for GREY palette";
       } 
     }
     if (size==Pix::Sze::Byte3 && layout==Pix::Fmt::BGR24) {
@@ -210,14 +210,14 @@ namespace Cantag {
       p.palette = VIDEO_PALETTE_RGB24; //on big-endian machines we want to reverse bytes
       p.depth = 24;
       if (ioctl(m_handle.Get(),VIDIOCSPICT,&p) < 0) {
-	throw "Failed to ioctl (VIDIOCSPICT) video device for RGB24 palette";
+	throw "V4L: Failed to ioctl (VIDIOCSPICT) video device for RGB24 palette";
       } 
     }
 
     if ( !(size==Pix::Sze::Byte3 && layout==Pix::Fmt::BGR24) &&
 	 !(size==Pix::Sze::Byte1 && layout==Pix::Fmt::Grey8)) {
       //\todo: this can be (and should) be detected at compile time
-      throw "Failed: unsupported template type";
+      throw "V4L: Failed: unsupported template type";
     }
       
 #ifdef V4L_DEBUG
@@ -248,14 +248,14 @@ namespace Cantag {
 	m_images[i] = new Image<size,layout>(m_image_width,m_image_height,m_image_width*3,m_mmap.Get()+mbuf.offsets[i]);
 	break;
       default:
-	throw "Failed: unsupported template type";
+	throw "V4L: Failed: unsupported template type";
       }
 
       // start the device asynchronously fetching the frame
       if (i>0) { // dont start capturing for this one because we'll
 	// start it when we first call next
 	if (ioctl(m_handle.Get(),VIDIOCMCAPTURE,&(m_slots[i])) < 0) {
-	  throw "Failed to ioctl (VIDIOCMCAPTURE) video device";
+	  throw "V4L: Failed to ioctl (VIDIOCMCAPTURE) video device";
 	}
       }
     }
@@ -289,7 +289,7 @@ namespace Cantag {
     int retry = 0;
     while( (rs = ioctl(m_handle.Get(),VIDIOCMCAPTURE,&(m_slots[m_current_frame]))) == EBUSY && ++retry<=5);
     if (rs < 0) {
-      throw "Failed to ioctl (VIDIOCMCAPTURE) video device";
+      throw "V4L: Failed to ioctl (VIDIOCMCAPTURE) video device";
     }
 
     m_current_frame++;
@@ -298,7 +298,7 @@ namespace Cantag {
     // collect the next image - block until its there
     while( (rs = ioctl(m_handle.Get(),VIDIOCSYNC,&(m_slots[m_current_frame].frame))) == EINTR);
     if (rs < 0) {
-      throw "Failed to ioctl (VIDIOCSYNC) video device";
+      throw "V4L: Failed to ioctl (VIDIOCSYNC) video device";
     }  
 
     Image<size,layout>* result = m_images[m_current_frame];
