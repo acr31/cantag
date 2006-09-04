@@ -77,4 +77,4 @@ namespace Cantag {
 
   };
 }
-#endif//V4L_IMAGE_SOURCE_GUARD
+#endif//UEYE_IMAGE_SOURCE_GUARD
