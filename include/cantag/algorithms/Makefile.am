@@ -32,11 +32,25 @@ cantaginclude_HEADERS += SimulateMaxSampleError.hh
 cantaginclude_HEADERS += ContourFollowerTree.hh
 cantaginclude_HEADERS += ContourFollowerClearImageBorder.hh
 cantaginclude_HEADERS += EstimateMaxSampleStrength.hh
+cantaginclude_HEADERS += AccumulateCornerCorrespondences.hh
+cantaginclude_HEADERS += CheckEllipseAlgebraic.hh
+cantaginclude_HEADERS += CheckEllipseGradient.hh
+cantaginclude_HEADERS += CheckEllipseNakagawa.hh
+cantaginclude_HEADERS += CheckEllipseSafaeeRad2.hh
+cantaginclude_HEADERS += CheckEllipseSafaeeRad.hh
+cantaginclude_HEADERS += CheckEllipseStricker.hh
+cantaginclude_HEADERS += CompareBullseyeRadii.hh
+cantaginclude_HEADERS += Decode.hh
+cantaginclude_HEADERS += DrawTagSquareSVG.hh
+cantaginclude_HEADERS += SampleTagSquare.hh
+cantaginclude_HEADERS += SignalStrengthContour.hh
+cantaginclude_HEADERS += ThresholdAdaptive.hh
+cantaginclude_HEADERS += ThresholdGlobal.hh
 
 if HAVE_GSL_MULTIMIN_H
 if HAVELIB_GSLCBLAS
 if HAVELIB_GSL
-cantaginclude_HEADERS +=  DistortionCorrectionIterative.hh
+cantaginclude_HEADERS += DistortionCorrectionIterative.hh
 cantaginclude_HEADERS += TransformQuadTangleSpaceSearch.hh 
 cantaginclude_HEADERS += TransformQuadTangleCyberCode.hh
 endif
