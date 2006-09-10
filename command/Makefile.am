@@ -1,4 +1,4 @@
-noinst_PROGRAMS  = cGrabImage cThresholdGlobal cThresholdAdaptive cSaveImage cFollowContour
+bin_PROGRAMS  = cGrabImage cThresholdGlobal cThresholdAdaptive cSaveImage cFollowContour
 cGrabImage_SOURCES = cGrabImage.cc
 cThresholdGlobal_SOURCES = cThresholdGlobal.cc
 cThresholdAdaptive_SOURCES = cThresholdAdaptive.cc
