@@ -54,9 +54,26 @@ namespace Cantag {
     glClearColor(1.f,1.f,1.f,1.f);
     ServiceEventQueue();
     glutKeyboardFunc(&GlutRenderWindow::KeyboardCallback);
+    glutSpecialFunc(&GlutRenderWindow::SpecialCallback);
   }
 
   GlutRenderWindow* GlutRenderWindow::m_self = NULL;
+
+    void GlutRenderWindow::SpecialCallback(int key, int x,int y) {
+	switch(key) {
+	    case GLUT_KEY_UP:
+		GlutRenderWindow::m_self->m_presses.push_back(Key::CURSOR_UP);
+		break;
+	    case GLUT_KEY_DOWN:
+		GlutRenderWindow::m_self->m_presses.push_back(Key::CURSOR_DOWN);
+		break;
+	    case GLUT_KEY_LEFT:
+		GlutRenderWindow::m_self->m_presses.push_back(Key::CURSOR_LEFT);
+		break;
+	    case GLUT_KEY_RIGHT:
+		GlutRenderWindow::m_self->m_presses.push_back(Key::CURSOR_RIGHT);
+	}
+    }
 
   void GlutRenderWindow::KeyboardCallback(unsigned char key,int x,int y) {
     switch(key) {
