@@ -1,7 +1,8 @@
 SUBDIRS = algorithms coders entities
 cantagincludedir = $(includedir)/cantag
 
-cantaginclude_HEADERS =  BigInt.hh
+cantaginclude_HEADERS = testsym.hh
+cantaginclude_HEADERS += BigInt.hh
 cantaginclude_HEADERS += Camera.hh
 cantaginclude_HEADERS += CompilationOptions.h
 cantaginclude_HEADERS += Config.hh
