@@ -53,35 +53,36 @@
 
 namespace Cantag {
   
-  class CANTAG_EXPORT GlutRenderWindow {
+    class CANTAG_EXPORT GlutRenderWindow {
 
-  protected:
-    int m_width;
-    int m_height;
-    float m_ratio;
-    std::vector<Key::Code> m_presses;
+    protected:
+	int m_width;
+	int m_height;
+	float m_ratio;
+	std::vector<Key::Code> m_presses;
 
-  private:
-    int m_window_id;
-    static GlutRenderWindow* m_self;
+    private:
+	int m_window_id;
+	static GlutRenderWindow* m_self;
     
-  public:
-    GlutRenderWindow(int width,int height);
-    virtual ~GlutRenderWindow();
+    public:
+	GlutRenderWindow(int width,int height);
+	virtual ~GlutRenderWindow();
     
-    /**
-     * Find the next allowable texture size which is greater than the argument
-     */
-    int FindNextTextureSize(int size) const;
+	/**
+	 * Find the next allowable texture size which is greater than the argument
+	 */
+	int FindNextTextureSize(int size) const;
 
-    void ServiceEventQueue();
+	void ServiceEventQueue();
 
-    void Flush();
+	void Flush();
 
-    const std::vector<Key::Code>& GetKeypresses() { return m_presses; }
+	const std::vector<Key::Code>& GetKeypresses() { return m_presses; }
 
-    static void KeyboardCallback(unsigned char key, int x, int y);
-  };
+	static void KeyboardCallback(unsigned char key, int x, int y);
+	static void SpecialCallback(int key, int x,int y);
+    };
 }
 
 #endif//GLUTRENDER_WINDOW_GUARD
