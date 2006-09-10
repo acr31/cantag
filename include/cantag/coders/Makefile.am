@@ -1,4 +1,11 @@
-totalincludedir = $(includedir)/total/coders
-totalinclude_HEADERS = Coder.hh  CRCCoder.hh  GF4Coder.hh  ParityCoder.hh  RawCoder.hh  SCCCoder.hh  SymbolChunkCoder.hh  TripOriginalCoder.hh
-
-
+cantagincludedir = $(includedir)/cantag/coders
+cantaginclude_HEADERS =  Coder.hh
+cantaginclude_HEADERS += CRCCoder.hh
+cantaginclude_HEADERS += GF4Coder.hh
+cantaginclude_HEADERS += ParityCoder.hh
+cantaginclude_HEADERS += RawCoder.hh
+cantaginclude_HEADERS += SCCCoder.hh
+cantaginclude_HEADERS += SymbolChunkCoder.hh
+cantaginclude_HEADERS += TripOriginalCoder.hh
+cantaginclude_HEADERS += CRC.hh
+cantaginclude_HEADERS += CRCSymbolChunkCoder.hh
