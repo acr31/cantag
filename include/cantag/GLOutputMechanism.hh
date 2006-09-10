@@ -90,7 +90,9 @@ namespace Cantag {
     /**
      * Draws the text given.  The co-ordinates are (x,y,1) => so 0.5 > x > -0.5, 0.5 > y > -0.5
      */
-    void DrawText(float x, float y, const char* s,int r = 0, int g = 0, int b = 0);
+    void DrawText(float x, float y, const char* s,int r = 0, int g = 0, int b = 0, bool blank_bg = false);
+
+      void DrawBar(float height=0.1, int r=255, int g=255, int b=255);
   };
 
   template<class C> GLOutputMechanism<C>::GLOutputMechanism(int window_width, int window_height, 
@@ -352,17 +354,37 @@ namespace Cantag {
     RenderModel(display_list);
     glPopMatrix();
   }
+
+  template <class C> void GLOutputMechanism<C>::DrawBar(float height, int r, int g, int b) {
+      glDisable(GL_LIGHTING);
+      
+      float yrange = m_gl_maxy - m_gl_miny;
+      GLfloat mat[] = {255.f-(float)r/255.f,(float)g/255.f,(float)b/255.f,1.0};
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,mat);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,mat);
+      glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,0.f);
+      glColor4f((float)r/255.f,(float)g/255.f,(float)b/255.f,1.f);
+      glBegin(GL_QUADS);
+      glVertex3f(m_gl_minx, m_gl_maxy, 1.f); 
+      glVertex3f(m_gl_maxx, m_gl_maxy, 1.f);
+      glVertex3f(m_gl_maxx, m_gl_maxy - height*yrange, 1.f);
+      glVertex3f(m_gl_minx, m_gl_maxy - height*yrange, 1.f);
+      glEnd();
+    glEnable(GL_LIGHTING);
+    glClear(GL_DEPTH_BUFFER_BIT);
+  }
   
-  template<class C> void GLOutputMechanism<C>::DrawText(float x, float y, const char* s,int r, int g, int b) {
+  template<class C> void GLOutputMechanism<C>::DrawText(float x, float y, const char* s,int r, int g, int b, bool blank_bg) {
     glDisable(GL_LIGHTING);
+
+    float xrange = m_gl_maxx - m_gl_minx;
+    float yrange = m_gl_maxy - m_gl_miny;
+
     GLfloat mat[] = {(float)r/255.f,(float)g/255.f,(float)b/255.f,1.0};
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,mat);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,mat);
     glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,0.f);
     glColor4f((float)r/255.f,(float)g/255.f,(float)b/255.f,1.f);
-    float xrange = m_gl_maxx - m_gl_minx;
-    float yrange = m_gl_maxy - m_gl_miny;
-
     glRasterPos3f(x*xrange + m_gl_minx,y*yrange+m_gl_miny,1);
     size_t len = strlen(s);
     for (size_t i = 0; i < len; ++i) {
