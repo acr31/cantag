@@ -36,7 +36,6 @@ cantaginclude_HEADERS += Correspondence.hh
 cantaginclude_HEADERS += TagDictionary.hh
 cantaginclude_HEADERS += GLRenderWindow.hh
 cantaginclude_HEADERS += GLOutputMechanism.hh
-cantaginclude_HEADERS += EstimateTransform.hh
 cantaginclude_HEADERS += UEyeImageSource.hh
 cantaginclude_HEADERS += Aggregation.hh
 cantaginclude_HEADERS += Apply.hh
@@ -57,12 +56,4 @@ cantaginclude_HEADERS += TemplateUtils.hh
 cantaginclude_HEADERS += TextOutputMechanism.hh
 cantaginclude_HEADERS += VFWImageSource.hh
 cantaginclude_HEADERS += XDisplay.hh
-
-
-
-
-
-
-
-
-
+cantaginclude_HEADERS += Transform.hh
