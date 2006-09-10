@@ -1,5 +1,5 @@
 SUBDIRS = algorithms coders entities
-cantagincludedir = $(includedir)/total
+cantagincludedir = $(includedir)/cantag
 
 cantaginclude_HEADERS =  BigInt.hh
 cantaginclude_HEADERS += Camera.hh
@@ -39,3 +39,30 @@ cantaginclude_HEADERS += GLOutputMechanism.hh
 cantaginclude_HEADERS += EstimateTransform.hh
 cantaginclude_HEADERS += UEyeImageSource.hh
 cantaginclude_HEADERS += Aggregation.hh
+cantaginclude_HEADERS += Apply.hh
+cantaginclude_HEADERS += Bind.hh
+cantaginclude_HEADERS += ComposeEntity.hh
+cantaginclude_HEADERS += ComposeEntityTree.hh
+cantaginclude_HEADERS += ConvexHullRestrictions.hh
+cantaginclude_HEADERS += DSVLImageSource.hh
+cantaginclude_HEADERS += Ellipse.hh
+cantaginclude_HEADERS += EntityTree.hh
+cantaginclude_HEADERS += Function.hh
+cantaginclude_HEADERS += GlutRenderWindow.hh
+cantaginclude_HEADERS += Keypress.hh
+cantaginclude_HEADERS += Pixel.hh
+cantaginclude_HEADERS += PixRow.hh
+cantaginclude_HEADERS += QuadTangle.hh
+cantaginclude_HEADERS += TemplateUtils.hh
+cantaginclude_HEADERS += TextOutputMechanism.hh
+cantaginclude_HEADERS += VFWImageSource.hh
+cantaginclude_HEADERS += XDisplay.hh
+
+
+
+
+
+
+
+
+
