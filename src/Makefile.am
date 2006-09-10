@@ -1,6 +1,7 @@
 lib_LTLIBRARIES = libcantag.la
 
-libcantag_la_SOURCES =  Ellipse.cc 
+libcantag_la_SOURCES = testsym.cc
+libcantag_la_SOURCES += Ellipse.cc 
 libcantag_la_SOURCES += QuadTangle.cc 
 libcantag_la_SOURCES += Camera.cc
 libcantag_la_SOURCES += gaussianelimination.cc
