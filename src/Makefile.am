@@ -34,7 +34,7 @@ libcantag_la_SOURCES += algorithms/PrintEntity.cc
 libcantag_la_SOURCES += algorithms/FitQuadTangleRegression.cc
 libcantag_la_SOURCES += algorithms/SimulateMinDistance.cc
 libcantag_la_SOURCES += algorithms/SignalStrengthContour.cc
-libcantag_la_SOURCES += UEyeImageSource.cc
+libcantag_la_SOURCES += AutoThresholdGlobal.cc
 
 if HAVE_SYS_SOCKET_H
 if HAVE_NETINET_IN_H
@@ -101,10 +101,15 @@ endif
 endif
 endif
 
-
 if HAVE_DC1394_CONTROL_H
 if HAVELIB_DC1394
 libcantag_la_SOURCES += IEEE1394ImageSource.cc
+endif
+endif
+
+if HAVE_UEYE_H
+if HAVELIB_UEYE_API
+libcantag_la_SOURCES += UEyeImageSource.cc
 endif
 endif
 
