@@ -40,6 +40,7 @@ namespace Cantag {
   class TagSquare : public TagSpec<SIZE*SIZE - ((SIZE*SIZE)%2)>, public ContourRestrictions, public ConvexHullRestrictions {
   public:
     static const int PayloadSize = SIZE*SIZE - ((SIZE*SIZE)%2);
+    static const int EdgeLength = SIZE;
     typedef QuadTangle Shape;
   private:
     const float m_cell_width;
