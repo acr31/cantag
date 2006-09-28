@@ -50,15 +50,18 @@ namespace Cantag {
 
     const unsigned int height=image.GetHeight();
     const unsigned int width=image.GetWidth();
-	  
+    int setpixels = 0;
     for(unsigned int y=0;y<height;++y) {
       const PixRow<layout> row = image.GetRow(y);
       typename PixRow<layout>::const_iterator pixel=row.begin();
       for(unsigned int x=0;x<width;x++) { 
-	dest.SetPixel(x,y, (*pixel).intensity() < m_threshold);
+	bool value = (*pixel).intensity() < m_threshold;
 	++pixel;
+	if (value) ++setpixels;
+	dest.SetPixel(x,y,value);
       }
     }
+    dest.SetVariation(setpixels);
     return true;
   }
 }

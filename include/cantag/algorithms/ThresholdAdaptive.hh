@@ -73,6 +73,8 @@ namespace Cantag {
     const int image_height = image.GetHeight();
     const int useoffset = 255-m_offset;
     
+    int setpixels = 0;
+
     int* previous_line = new int[image_width];
     for(int i=0;i<image_width;++i) { previous_line[i] = 127; }
     
@@ -85,7 +87,9 @@ namespace Cantag {
 	moving_average = pixel + moving_average - (moving_average >> m_window_size);
 	int current_thresh = (moving_average + previous_line[j])>>1;
 	previous_line[j] = moving_average;      
-	dest.SetPixel(j,i, (pixel << m_window_size+8) < (current_thresh * useoffset) );
+	bool value = (pixel << m_window_size+8) < (current_thresh * useoffset);
+	if (value) ++setpixels;
+	dest.SetPixel(j,i,value);
       }
 
       ++i;
@@ -96,12 +100,15 @@ namespace Cantag {
 	moving_average = pixel + moving_average - (moving_average >> m_window_size);
 	int current_thresh = (moving_average + previous_line[j])>>1;
 	previous_line[j] = moving_average;
-	dest.SetPixel(j,i, (pixel << m_window_size+8) < (current_thresh * useoffset) );
+	bool value =  (pixel << m_window_size+8) < (current_thresh * useoffset);
+	if (value) ++setpixels;
+	dest.SetPixel(j,i, value);
       }
       ++i;
     }  
 
-	delete[] previous_line;
+    delete[] previous_line;
+    dest.SetVariation(setpixels);
     return true;
   }
 
