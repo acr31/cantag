@@ -42,13 +42,23 @@ namespace Cantag {
   private:
     unsigned int m_width;
     unsigned int m_height;
+    unsigned int m_size;
+    int m_variation;
     bool* m_data;    
-	bool m_flipv;
-
+    bool m_flipv;
+    
   public:
     MonochromeImage(unsigned int width, unsigned int height);
     ~MonochromeImage();
     void Save(const char* filename) const;
+
+    inline void SetVariation(int variation) {
+      m_variation = variation;
+    }
+
+    inline int GetVariation() const {
+      return m_variation;
+    }
 
     inline bool GetPixel(unsigned int x, unsigned int y) const {
       assert(x<m_width);
@@ -73,7 +83,7 @@ namespace Cantag {
     }
 
     inline void SetPixel(unsigned int x, unsigned int y, bool value) {
-		const int sampley = m_flipv ? m_height - y - 1 : y;
+      const int sampley = m_flipv ? m_height - y - 1 : y;
       m_data[x+m_width*sampley] = value;
     }
 
@@ -81,8 +91,10 @@ namespace Cantag {
 
     inline int GetHeight() const { return m_height; }
 
+    inline int GetSize() const { return m_size; }
+
     inline int GetPixel3(unsigned int x,unsigned int y) const{
-		return (GetPixel(x-1,y) ? 1 : 0) | (GetPixel(x,y) ? 2 : 0) | (GetPixel(x+1,y) ?  4 : 0);
+      return (GetPixel(x-1,y) ? 1 : 0) | (GetPixel(x,y) ? 2 : 0) | (GetPixel(x+1,y) ?  4 : 0);
     }
   };
 }
