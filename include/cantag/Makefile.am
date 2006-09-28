@@ -58,3 +58,4 @@ cantaginclude_HEADERS += TextOutputMechanism.hh
 cantaginclude_HEADERS += VFWImageSource.hh
 cantaginclude_HEADERS += XDisplay.hh
 cantaginclude_HEADERS += Transform.hh
+cantaginclude_HEADERS += AutoThresholdGlobal.hh
