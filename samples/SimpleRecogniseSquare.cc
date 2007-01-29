@@ -51,11 +51,13 @@ int main(int argc,char* argv[]) {
     Apply(m,tree,ContourFollowerTree(tag));
     ApplyTree(tree,DrawEntityContour(output));
     ApplyTree(tree,DistortionCorrectionSimple(camera));
+    ApplyTree(tree,ConvexHull(tag));
     ApplyTree(tree,FitQuadTangleConvexHull());
     ApplyTree(tree,FitQuadTangleRegression());
     ApplyTree(tree,TransformQuadTangleProjective());
     ApplyTree(tree,Bind(SampleTagSquare(tag,camera),m));
     ApplyTree(tree,Decode<SquareTagType>());
+    ApplyTree(tree,DrawEntitySample(output,camera,tag));
     ApplyTree(tree,TransformRotateToPayload(tag));
     ApplyTree(tree,DrawEntityTransform(output,camera));
     output.Save("output.pnm");
