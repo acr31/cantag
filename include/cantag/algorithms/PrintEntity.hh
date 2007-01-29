@@ -118,6 +118,7 @@ namespace Cantag {
 	m_output << normal[0] << " " << normal[1] << " " << normal[2] << " ";
 	m_output << location[0] << " " << location[1] << " " << location[2] << std::endl;
       }
+      return true;
   }
 
   
