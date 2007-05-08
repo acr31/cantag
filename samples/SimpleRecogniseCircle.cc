@@ -48,6 +48,7 @@ int main(int argc,char* argv[]) {
     MonochromeImage m(i->GetWidth(),i->GetHeight());
     Apply(*i,m,ThresholdGlobal<Pix::Sze::Byte1,Pix::Fmt::Grey8>(128));
     Tree<ComposedEntity<TL4(ContourEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<CircleTagType::PayloadSize>) > > tree;
+    Apply(m,ContourFollowerClearImageBorder());
     Apply(m,tree,ContourFollowerTree(tag));
     ApplyTree(tree,DrawEntityContour(output));
     ApplyTree(tree,DistortionCorrectionSimple(camera));
