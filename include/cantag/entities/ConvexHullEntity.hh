@@ -37,6 +37,12 @@ namespace Cantag {
    */
   class CANTAG_EXPORT ConvexHullEntity : public Entity {
   private:
+    /*
+     * A value of n in this vector means that the n'th co-ordinate on the contour lies on the convex hull.
+     *
+     * In particular, as of writing this comment, the co-ordinates are stored in the corresponding ContourEntity ce as two elements of a vector m_points.
+     * Therefore, the co-ordinates of the point on the convex hull are (ce.m_points[2*n], ce.m_points[2*n + 1]).
+     */
     std::vector<int> m_indices;
   public:
     ConvexHullEntity() : m_indices() {}

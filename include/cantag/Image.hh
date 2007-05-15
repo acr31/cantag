@@ -40,6 +40,7 @@
 #include <cantag/entities/Entity.hh>
 #include <cantag/Pixel.hh>
 #include <cantag/PixRow.hh>
+#include <cantag/ROI.hh>
 
 #include <cmath>
 #include <cassert>
@@ -64,7 +65,7 @@ namespace Cantag {
    * 2) Declare a protected base class called ImageBase which holds data and functions common to all 
    * image formats.
    *
-   * 3) Derive partially specialised, templated, classes which inherits the ImageBase and 
+   * 3) Derive partially specialised, templated, classes which inherit the ImageBase and 
    * which support functions which require knowledge of the type of image being supported.
    *
    * 4) Define a final templated "Image" class which inherits from the specialised classes and defines
@@ -583,6 +584,17 @@ namespace Cantag {
      */
     inline void DrawLine(float x0,float y0, float x1,float y1, const Pixel<layout>& colour, unsigned int thickness) {
       DrawLine(Round(x0),Round(y0),Round(x1),Round(y1),colour,thickness);
+    }
+
+    /**
+     * Scale the line to the specified ROI and pass the result to DrawLine.
+     */
+    inline void ScaleAndDrawLine(float x0, float y0, float x1, float y1, const Pixel<layout>& colour, unsigned int thickness, const ROI& roi) {
+      const float sx0 = roi.ScaleX(x0, s::GetWidth());
+      const float sy0 = roi.ScaleY(y0, s::GetHeight());
+      const float sx1 = roi.ScaleX(x1, s::GetWidth());
+      const float sy1 = roi.ScaleY(y1, s::GetHeight());
+      DrawLine(sx0, sy0, sx1, sy1, colour, thickness);
     }
   
     /**

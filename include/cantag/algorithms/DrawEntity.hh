@@ -30,26 +30,15 @@
 #include <cantag/TagCircle.hh>
 #include <cantag/TagSquare.hh>
 #include <cantag/entities/ContourEntity.hh>
+#include <cantag/entities/ConvexHullEntity.hh>
 #include <cantag/entities/ShapeEntity.hh>
 #include <cantag/entities/TransformEntity.hh>
 #include <cantag/Camera.hh>
 #include <cantag/Image.hh>
+#include <cantag/ROI.hh>
 
 
 namespace Cantag {
-
-  struct CANTAG_EXPORT ROI {
-    float minx;
-    float maxx;
-    float miny;
-    float maxy;
-
-    ROI(float pminx, float pmaxx, float pminy, float pmaxy) : minx(pminx), maxx(pmaxx), miny(pminy), maxy(pmaxy) {};
-    int ScaleX(int x, int imageWidth) const { return (x - Round(minx)) * imageWidth / Round(maxx-minx);}
-    int ScaleX(float x, int imageWidth) const { return Round((x - (float)minx) * (float)imageWidth / (float)(maxx-minx)); }
-    int ScaleY(int y, int imageHeight) const { return (y - Round(miny)) * imageHeight / Round(maxy-miny);}
-    int ScaleY(float y, int imageHeight) const { return Round((y - (float)miny) * (float)imageHeight / (float)(maxy-miny)); }
-  };
 
   class CANTAG_EXPORT DrawEntityImage : public Function<TL0,TypeList<Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>,TypeListEOL> > {
   private:
@@ -79,6 +68,16 @@ namespace Cantag {
     DrawEntityContour(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, ROI roi) : m_image(image), m_roi(roi) {}
     DrawEntityContour(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) : m_image(image), m_roi(0,image.GetWidth(),0,image.GetHeight()) {}
     bool operator()(ContourEntity& contourentity) const ;
+  };
+
+  class CANTAG_EXPORT DrawEntityConvexHull : public Function<TL1(ContourEntity), TL1(ConvexHullEntity)> {
+  private:
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
+    const ROI m_roi;
+  public:
+    DrawEntityConvexHull(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, ROI roi) : m_image(image), m_roi(roi) {}
+    DrawEntityConvexHull(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) : m_image(image), m_roi(0,image.GetWidth(),0,image.GetHeight()) {}
+    bool operator()(const ContourEntity& contour, ConvexHullEntity& convexHull) const;
   };
 
   template<class Shape>

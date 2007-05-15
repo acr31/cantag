@@ -44,14 +44,48 @@ namespace Cantag {
     return true;
   }
 
+  template<Cantag::Pix::Sze::Bpp a, Cantag::Pix::Fmt::Layout b>
+  void ScaleAndDrawLine(const float x0, const float y0, const float x1, const float y1, Image<a, b>& image, const ROI& roi) {
+    const float sx0 = roi.ScaleX(x0, image.GetWidth());
+    const float sy0 = roi.ScaleY(y0, image.GetHeight());
+    const float sx1 = roi.ScaleX(x1, image.GetWidth());
+    const float sy1 = roi.ScaleY(y1, image.GetHeight());
+    image.DrawLine(sx0, sy0, sx1, sy1, COLOUR_BLACK, 1);
+  }
+
   bool DrawEntityContour::operator()(ContourEntity& contour) const {
+    // There should be an even number of points.
+    assert(contour.GetPoints().size() / 2 == (contour.GetPoints().size() + 1) / 2);
+
     for(unsigned int i=0;i<contour.GetPoints().size();i+=2) {
-      const float x0 = m_roi.ScaleX(contour.GetPoints()[i],m_image.GetWidth());
-      const float y0 = m_roi.ScaleY(contour.GetPoints()[i+1],m_image.GetHeight());
-      const float x1 = m_roi.ScaleX(contour.GetPoints()[(i+2) % contour.GetPoints().size()],m_image.GetWidth());
-      const float y1 = m_roi.ScaleY(contour.GetPoints()[(i+3) % contour.GetPoints().size()],m_image.GetHeight());
-      m_image.DrawLine(x0,y0,x1,y1,COLOUR_BLACK,1);
+      m_image.ScaleAndDrawLine(contour.GetPoints()[i],
+			       contour.GetPoints()[i+1],
+			       contour.GetPoints()[(i+2) % contour.GetPoints().size()],
+			       contour.GetPoints()[(i+3) % contour.GetPoints().size()],
+			       COLOUR_BLACK, 1, m_roi);
     }
+    return true;
+  }
+
+  bool DrawEntityConvexHull::operator()(const ContourEntity& contour, ConvexHullEntity& convexHull) const {
+    const std::vector<int>& indices = convexHull.GetIndices();
+    const std::vector<float>& points = contour.GetPoints();
+
+    std::vector<float> hullPoints;
+    for (int i = 0; i < indices.size(); i++) {
+      int index = indices[i];
+      hullPoints.push_back(points[2 * index]);
+      hullPoints.push_back(points[2 * index + 1]);
+    }
+
+    for(unsigned int i=0;i<hullPoints.size();i+=2) {
+      m_image.ScaleAndDrawLine(hullPoints[i],
+			       hullPoints[i+1],
+			       hullPoints[(i+2) % hullPoints.size()],
+			       hullPoints[(i+3) % hullPoints.size()],
+			       COLOUR_BLACK, 1, m_roi);
+    }
+
     return true;
   }
 
