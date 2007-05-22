@@ -589,7 +589,7 @@ namespace Cantag {
     /**
      * Scale the line to the specified ROI and pass the result to DrawLine.
      */
-    inline void ScaleAndDrawLine(float x0, float y0, float x1, float y1, const Pixel<layout>& colour, unsigned int thickness, const ROI& roi) {
+    inline void DrawLine(float x0, float y0, float x1, float y1, const Pixel<layout>& colour, unsigned int thickness, const ROI& roi) {
       const float sx0 = roi.ScaleX(x0, s::GetWidth());
       const float sy0 = roi.ScaleY(y0, s::GetHeight());
       const float sx1 = roi.ScaleX(x1, s::GetWidth());

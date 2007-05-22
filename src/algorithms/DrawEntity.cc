@@ -44,25 +44,16 @@ namespace Cantag {
     return true;
   }
 
-  template<Cantag::Pix::Sze::Bpp a, Cantag::Pix::Fmt::Layout b>
-  void ScaleAndDrawLine(const float x0, const float y0, const float x1, const float y1, Image<a, b>& image, const ROI& roi) {
-    const float sx0 = roi.ScaleX(x0, image.GetWidth());
-    const float sy0 = roi.ScaleY(y0, image.GetHeight());
-    const float sx1 = roi.ScaleX(x1, image.GetWidth());
-    const float sy1 = roi.ScaleY(y1, image.GetHeight());
-    image.DrawLine(sx0, sy0, sx1, sy1, COLOUR_BLACK, 1);
-  }
-
   bool DrawEntityContour::operator()(ContourEntity& contour) const {
     // There should be an even number of points.
     assert(contour.GetPoints().size() / 2 == (contour.GetPoints().size() + 1) / 2);
 
     for(unsigned int i=0;i<contour.GetPoints().size();i+=2) {
-      m_image.ScaleAndDrawLine(contour.GetPoints()[i],
-			       contour.GetPoints()[i+1],
-			       contour.GetPoints()[(i+2) % contour.GetPoints().size()],
-			       contour.GetPoints()[(i+3) % contour.GetPoints().size()],
-			       COLOUR_BLACK, 1, m_roi);
+      m_image.DrawLine(contour.GetPoints()[i],
+		       contour.GetPoints()[i+1],
+		       contour.GetPoints()[(i+2) % contour.GetPoints().size()],
+		       contour.GetPoints()[(i+3) % contour.GetPoints().size()],
+		       COLOUR_BLACK, 1, m_roi);
     }
     return true;
   }
@@ -79,11 +70,11 @@ namespace Cantag {
     }
 
     for(unsigned int i=0;i<hullPoints.size();i+=2) {
-      m_image.ScaleAndDrawLine(hullPoints[i],
-			       hullPoints[i+1],
-			       hullPoints[(i+2) % hullPoints.size()],
-			       hullPoints[(i+3) % hullPoints.size()],
-			       COLOUR_BLACK, 1, m_roi);
+      m_image.DrawLine(hullPoints[i],
+		       hullPoints[i+1],
+		       hullPoints[(i+2) % hullPoints.size()],
+		       hullPoints[(i+3) % hullPoints.size()],
+		       COLOUR_BLACK, 1, m_roi);
     }
 
     return true;
