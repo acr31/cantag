@@ -46,7 +46,7 @@ namespace Cantag {
 
   bool DrawEntityContour::operator()(ContourEntity& contour) const {
     // There should be an even number of points.
-    assert(contour.GetPoints().size() / 2 == (contour.GetPoints().size() + 1) / 2);
+    assert(contour.GetPoints().size() % 2 == 0);
 
     for(unsigned int i=0;i<contour.GetPoints().size();i+=2) {
       m_image.DrawLine(contour.GetPoints()[i],
@@ -63,7 +63,7 @@ namespace Cantag {
     const std::vector<float>& points = contour.GetPoints();
 
     std::vector<float> hullPoints;
-    for (int i = 0; i < indices.size(); i++) {
+    for (int i = 0; i < indices.size(); ++i) {
       int index = indices[i];
       hullPoints.push_back(points[2 * index]);
       hullPoints.push_back(points[2 * index + 1]);
