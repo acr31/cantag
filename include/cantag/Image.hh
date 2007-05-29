@@ -596,6 +596,12 @@ namespace Cantag {
       const float sy1 = roi.ScaleY(y1, s::GetHeight());
       DrawLine(sx0, sy0, sx1, sy1, colour, thickness);
     }
+
+    /**
+     * Draw the line with the given perpendicular distance from, and at the given angle to, the origin.
+     * \todo Make take an ROI.
+     */
+    void DrawPolarLine(float perp_dist, float angle, const Pixel<layout>& colour, unsigned int thickness);
   
     /**
      * Draw a point of given size at (x,y).
@@ -912,10 +918,44 @@ namespace Cantag {
 			   angle_radians, colour, thickness, start_angle); 
   }
 
-   template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
-   void Image<type,layout>::DrawLine(int x0,int y0, int x1,int y1, 
-				     const Pixel<layout>& colour, 
-				     unsigned int thickness) {
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout>
+  void Image<type, layout>::DrawPolarLine(float perp_dist,
+					  float angle,
+					  const Pixel<layout>& colour,
+					  unsigned int thickness)
+  {
+    // Work out the Cartesian coordinates between which to draw a line.
+    float x0, y0, x1, y1;
+    if (s::GetWidth() * abs(tan(angle - DBL_PI / 2.0)) < 1) { // then approximate by a horizontal line
+      x0 = 0;
+      y0 = perp_dist;
+      x1 = s::GetWidth();
+      y1 = perp_dist;
+    } else if (s::GetHeight() * abs(tan(angle)) < 1) { // then approximate by a vertical line
+      x0 = perp_dist;
+      y0 = 0;
+      x1 = perp_dist;
+      y1 = s::GetHeight();
+    } else {
+      x0 = 0;
+      y0 = perp_dist / sin(angle);
+      x1 = perp_dist / cos(angle);
+      y1 = 0;
+    }
+
+    /*
+     * N.B. At the moment we draw from (x0,y0) to (x1,y1).
+     * This causes the coordinates to be rounded to the nearest integer.
+     * We could increase accuracy if we chose two points on the honest-to-God line whose
+     * co-ordinates were close to integers.
+     */
+    DrawLine(x0, y0, x1, y1, colour, thickness);
+  }
+
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
+  void Image<type,layout>::DrawLine(int x0,int y0, int x1,int y1, 
+				    const Pixel<layout>& colour, 
+				    unsigned int thickness) {
     if (x1 < x0 || (x0 == x1 && y1 < y0)) {
       DrawLine(x1,y1,x0,y0,colour,thickness);
     }
@@ -988,10 +1028,10 @@ namespace Cantag {
     }
   }
 
-   template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
-   void Image<type,layout>::DrawPolygon(float* points, int numpoints, 
-					const Pixel<layout>& colour, 
-					unsigned int thickness) {
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
+  void Image<type,layout>::DrawPolygon(float* points, int numpoints, 
+                                       const Pixel<layout>& colour, 
+				       unsigned int thickness) {
     for(int i=2;i<2*numpoints;i+=2) {
       DrawLine(points[i-2],points[i-1],points[i],points[i+1],colour,thickness);
     }  
