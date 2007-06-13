@@ -30,6 +30,9 @@ using std::min;
 #include <iostream>
 using std::cout;
 using std::endl;
+#include <utility>
+using std::make_pair;
+using std::pair;
 
 namespace Cantag {
 
@@ -52,17 +55,27 @@ namespace Cantag {
   }
 
   bool DrawEntityHoughHPS::operator()(HoughEntity& hough_entity) const {
+    unsigned char pixval = (unsigned char) min(float(255), 256 * hough_entity.GetAccumulator() / max(1, m_normalisation_factor));
     m_image.DrawPoint(int(hough_entity.GetAngle() * 180 / DBL_PI + 360 - m_start_angle) % 360,
 		      int(hough_entity.GetPerpendicularDistance()),
-		      Pixel<Pix::Fmt::Grey8>(min(float(255), 256 * hough_entity.GetAccumulator() / max(1, m_normalisation_factor))),
+		      Pixel<Pix::Fmt::Grey8>(pixval),
 		      1 /*, m_roi*/);
     return true;
   }
 
-  bool DrawEntityHoughCPS::operator()(HoughEntity& hough_entity) const {
-    m_image.DrawPolarLine(hough_entity.GetPerpendicularDistance(), hough_entity.GetAngle(),
-			  COLOUR_BLACK, 1 /*, m_roi*/);
+  bool DrawEntityHoughCPS::operator()(HoughEntity& hough_entity) {
+    m_acc_lines.insert(make_pair(hough_entity.GetAccumulator(), hough_entity));
     return true;
+  }
+
+  void DrawEntityHoughCPS::Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const
+  {
+    for (std::multimap<int, HoughEntity>::const_iterator iter = m_acc_lines.begin(); iter != m_acc_lines.end(); ++iter)
+    {
+      int colour = 255 * iter->first / m_normalisation_factor;
+      image.DrawPolarLine(iter->second.GetPerpendicularDistance(), iter->second.GetAngle(),
+			  Pixel<Pix::Fmt::Grey8>(colour), 1);
+    }
   }
 
   bool DrawEntityContour::operator()(ContourEntity& contour) const {

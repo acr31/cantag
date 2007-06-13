@@ -38,6 +38,8 @@
 #include <cantag/Image.hh>
 #include <cantag/ROI.hh>
 
+#include <map>
+using std::multimap;
 
 namespace Cantag {
 
@@ -77,12 +79,16 @@ namespace Cantag {
   /** CPS = Cartesian parameter space */
   class CANTAG_EXPORT DrawEntityHoughCPS : public Function<TL0, TL1(HoughEntity)> {
   private:
-    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
-    const ROI m_roi;
+    //Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
+    //const ROI m_roi;
+    int m_normalisation_factor;
+    multimap<int, HoughEntity> m_acc_lines;
   public:
-    DrawEntityHoughCPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, ROI roi) : m_image(image), m_roi(roi) {};
-    DrawEntityHoughCPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) : m_image(image), m_roi(0,image.GetWidth(),0,image.GetHeight()) {};
-    bool operator()(HoughEntity& hough_entity) const;
+    //DrawEntityHoughCPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, ROI roi) : m_image(image), m_roi(roi) {};
+    //DrawEntityHoughCPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) : m_image(image), m_roi(0,image.GetWidth(),0,image.GetHeight()) {};
+    DrawEntityHoughCPS(int normalisation_factor) : m_normalisation_factor(normalisation_factor) {};
+    bool operator()(HoughEntity& hough_entity);
+    void Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const;
   };
 
   class CANTAG_EXPORT DrawEntityContour : public Function<TL0,TL1(ContourEntity)> {

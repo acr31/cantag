@@ -46,6 +46,7 @@ cantaginclude_HEADERS += SampleTagSquare.hh
 cantaginclude_HEADERS += SignalStrengthContour.hh
 cantaginclude_HEADERS += ThresholdAdaptive.hh
 cantaginclude_HEADERS += ThresholdGlobal.hh
+cantaginclude_HEADERS += HoughTransform.hh
 
 if HAVE_GSL_MULTIMIN_H
 if HAVELIB_GSLCBLAS

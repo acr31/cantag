@@ -35,15 +35,14 @@ namespace Cantag
     float m_r;
     float m_theta;
     int m_acc;
-    HoughEntity(const HoughEntity& rhs);
   public:
     HoughEntity() : m_r(0), m_theta(0), m_acc(0) {}
     HoughEntity(float r, float theta) : m_r(r), m_theta(theta), m_acc(0) {}
-    float GetPerpendicularDistance() { return m_r; }
+    float GetPerpendicularDistance() const { return m_r; }
     void SetPerpendicularDistance(float r) { m_r = r; }
-    float GetAngle() { return m_theta; }
+    float GetAngle() const { return m_theta; }
     void SetAngle(float theta) { m_theta = theta; }
-    float GetAccumulator() { return m_acc; }
+    float GetAccumulator() const { return m_acc; }
     void IncrementAccumulator() { ++m_acc; }
     void SetAccumulator(int acc) { m_acc = acc; }
   };
