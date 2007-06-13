@@ -70,7 +70,7 @@ namespace Cantag {
   template<> class Pixel<Pix::Fmt::Grey8> {
     friend class _PixelIterator<Pixel*,Pix::Fmt::Grey8>;
     friend class _PixelIterator<const Pixel*,Pix::Fmt::Grey8>;
-   unsigned char v1;
+    unsigned char v1;
   public:
     Pixel(unsigned char v) : v1(v) {}
     inline unsigned char intensity() const {return v1; }

@@ -26,7 +26,7 @@
 
 #include <cantag/algorithms/ContourFollowerTree.hh>
 
-#undef CONTOUR_TREE_DEBUG
+#define CONTOUR_TREE_DEBUG
 
 namespace Cantag {
 

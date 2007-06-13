@@ -31,6 +31,7 @@
 #include <cantag/TagSquare.hh>
 #include <cantag/entities/ContourEntity.hh>
 #include <cantag/entities/ConvexHullEntity.hh>
+#include <cantag/entities/HoughEntity.hh>
 #include <cantag/entities/ShapeEntity.hh>
 #include <cantag/entities/TransformEntity.hh>
 #include <cantag/Camera.hh>
@@ -60,6 +61,30 @@ namespace Cantag {
     bool operator()(MonochromeImage& monimage) const ;    
   };
 
+  /** HPS = Hough parameter space */
+  class CANTAG_EXPORT DrawEntityHoughHPS : public Function<TL0, TL1(HoughEntity)> {
+  private:
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
+    int m_normalisation_factor;
+    int m_start_angle;
+    const ROI m_roi;
+  public:
+    DrawEntityHoughHPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, int normalisation_factor, int start_angle, ROI roi) : m_image(image), m_normalisation_factor(normalisation_factor), m_start_angle(start_angle), m_roi(roi) {};
+    DrawEntityHoughHPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, int normalisation_factor, int start_angle) : m_image(image), m_normalisation_factor(normalisation_factor), m_start_angle(start_angle), m_roi(0,image.GetWidth(),0,image.GetHeight()) {};
+    bool operator()(HoughEntity& hough_entity) const;
+  };
+
+  /** CPS = Cartesian parameter space */
+  class CANTAG_EXPORT DrawEntityHoughCPS : public Function<TL0, TL1(HoughEntity)> {
+  private:
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
+    const ROI m_roi;
+  public:
+    DrawEntityHoughCPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, ROI roi) : m_image(image), m_roi(roi) {};
+    DrawEntityHoughCPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) : m_image(image), m_roi(0,image.GetWidth(),0,image.GetHeight()) {};
+    bool operator()(HoughEntity& hough_entity) const;
+  };
+
   class CANTAG_EXPORT DrawEntityContour : public Function<TL0,TL1(ContourEntity)> {
   private:
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
@@ -77,7 +102,7 @@ namespace Cantag {
   public:
     DrawEntityConvexHull(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, ROI roi) : m_image(image), m_roi(roi) {}
     DrawEntityConvexHull(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) : m_image(image), m_roi(0,image.GetWidth(),0,image.GetHeight()) {}
-    bool operator()(const ContourEntity& contour, ConvexHullEntity& convexHull) const;
+    bool operator()(const ContourEntity& contour, ConvexHullEntity& convex_hull) const;
   };
 
   template<class Shape>

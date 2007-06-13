@@ -161,6 +161,11 @@ namespace Cantag {
     inline unsigned int GetHeight() const { return m_height; }
 
     /**
+     * Return the diagonal length of the image.
+     */
+    inline float GetDiagonalLength() const { return sqrt(pow(GetWidth(), 2.0) + pow(GetHeight(), 2.0)); }
+
+    /**
      * Return a vector to the current row
      */
     inline PixRow<layout> GetRow(int y) {
@@ -273,6 +278,11 @@ namespace Cantag {
      * Return the height of the image
      */
     inline int GetHeight() const { return m_height; }
+
+    /**
+     * Return the diagonal length of the image.
+     */
+    inline float GetDiagonalLength() const { return sqrt(pow(GetWidth(), 2.0) + pow(GetHeight(), 2.0)); }
 
     /**
      * Set the mapping between bytes and values to be configured at runtime
@@ -622,6 +632,11 @@ namespace Cantag {
     inline void DrawPoint(float x,float y, const Pixel<layout>& colour, unsigned int pointsize) {
       DrawPoint(Round(x),Round(y),colour,pointsize);
     }
+
+    /**
+     * Fill image entirely with given colour.
+     */
+    inline void Fill(const Pixel<layout>& colour);
 
     /**
      * Draw a polygon.  points is a pointer to vector of floats
@@ -1028,6 +1043,14 @@ namespace Cantag {
     }
   }
 
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout>
+  void Image<type, layout>::Fill(const Pixel<layout>& colour)
+  {
+    for (int x = 0; x < s::GetWidth(); x++)
+      for (int y = 0; y < s::GetHeight(); y++)
+	DrawPixel(x, y, colour);
+  }
+
   template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
   void Image<type,layout>::DrawPolygon(float* points, int numpoints, 
                                        const Pixel<layout>& colour, 
@@ -1173,7 +1196,7 @@ namespace Cantag {
 
   }
 
-  /*
+  /**
    * Recursive fill.  OK, so it's not pretty, but
    * we don't need high performance and it works fine!
    *
@@ -1182,7 +1205,7 @@ namespace Cantag {
   template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
   void Image<type,layout>::SeedFill(int x, int y,const Pixel<layout>& colour) {
 
-    /**
+    /*
      * Sadly gcc4 is too stupid to infer that parent class variables & methods exist
      * so we have to manually tell the compiler where to find the names; 
      * typedef makes this manual defn easier (well, at least more succinct).

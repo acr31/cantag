@@ -92,6 +92,7 @@
 #include <cantag/algorithms/SampleTagSquare.hh>
 #include <cantag/algorithms/ContourFollowerClearImageBorder.hh>
 #include <cantag/algorithms/ContourFollowerTree.hh>
+#include <cantag/algorithms/HoughTransform.hh>
 #include <cantag/algorithms/Encode.hh>
 #include <cantag/algorithms/Decode.hh>
 #include <cantag/algorithms/ThresholdAdaptive.hh>
@@ -120,6 +121,8 @@
 #include <cantag/algorithms/CheckEllipseStricker.hh>
 #include <cantag/algorithms/EstimateMaxSampleStrength.hh>
 #include <cantag/algorithms/CompareBullseyeRadii.hh>
+#include <cantag/algorithms/InvertGreys.hh>
+#include <cantag/algorithms/Convolution.hh>
 
 ///////////////////////
 // coders

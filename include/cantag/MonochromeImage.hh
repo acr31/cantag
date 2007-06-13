@@ -91,6 +91,8 @@ namespace Cantag {
 
     inline int GetHeight() const { return m_height; }
 
+    inline float GetDiagonalLength() const { return sqrt(pow(GetWidth(), 2.0) + pow(GetHeight(), 2.0)); }
+
     inline int GetSize() const { return m_size; }
 
     inline int GetPixel3(unsigned int x,unsigned int y) const{

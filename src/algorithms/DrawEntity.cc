@@ -24,9 +24,16 @@
 
 #include <cantag/algorithms/DrawEntity.hh>
 
+#include <algorithm>
+using std::max;
+using std::min;
+#include <iostream>
+using std::cout;
+using std::endl;
+
 namespace Cantag {
 
-  bool DrawEntityImage::operator()(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const {    
+  bool DrawEntityImage::operator()(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const {
     for(float i=m_roi.minx;i<m_roi.maxx;++i) {
       for(float j=m_roi.miny;j<m_roi.maxy;++j) {
 	m_image.DrawPixel(m_roi.ScaleX(i,m_image.GetWidth()),m_roi.ScaleY(j,m_image.GetHeight()),image.Sample(i,j));
@@ -44,6 +51,20 @@ namespace Cantag {
     return true;
   }
 
+  bool DrawEntityHoughHPS::operator()(HoughEntity& hough_entity) const {
+    m_image.DrawPoint(int(hough_entity.GetAngle() * 180 / DBL_PI + 360 - m_start_angle) % 360,
+		      int(hough_entity.GetPerpendicularDistance()),
+		      Pixel<Pix::Fmt::Grey8>(min(float(255), 256 * hough_entity.GetAccumulator() / max(1, m_normalisation_factor))),
+		      1 /*, m_roi*/);
+    return true;
+  }
+
+  bool DrawEntityHoughCPS::operator()(HoughEntity& hough_entity) const {
+    m_image.DrawPolarLine(hough_entity.GetPerpendicularDistance(), hough_entity.GetAngle(),
+			  COLOUR_BLACK, 1 /*, m_roi*/);
+    return true;
+  }
+
   bool DrawEntityContour::operator()(ContourEntity& contour) const {
     // There should be an even number of points.
     assert(contour.GetPoints().size() % 2 == 0);
@@ -58,22 +79,22 @@ namespace Cantag {
     return true;
   }
 
-  bool DrawEntityConvexHull::operator()(const ContourEntity& contour, ConvexHullEntity& convexHull) const {
-    const std::vector<int>& indices = convexHull.GetIndices();
+  bool DrawEntityConvexHull::operator()(const ContourEntity& contour, ConvexHullEntity& convex_hull) const {
+    const std::vector<int>& indices = convex_hull.GetIndices();
     const std::vector<float>& points = contour.GetPoints();
 
-    std::vector<float> hullPoints;
+    std::vector<float> hull_points;
     for (int i = 0; i < indices.size(); ++i) {
       int index = indices[i];
-      hullPoints.push_back(points[2 * index]);
-      hullPoints.push_back(points[2 * index + 1]);
+      hull_points.push_back(points[2 * index]);
+      hull_points.push_back(points[2 * index + 1]);
     }
 
-    for(unsigned int i=0;i<hullPoints.size();i+=2) {
-      m_image.DrawLine(hullPoints[i],
-		       hullPoints[i+1],
-		       hullPoints[(i+2) % hullPoints.size()],
-		       hullPoints[(i+3) % hullPoints.size()],
+    for(unsigned int i=0;i<hull_points.size();i+=2) {
+      m_image.DrawLine(hull_points[i],
+		       hull_points[i+1],
+		       hull_points[(i+2) % hull_points.size()],
+		       hull_points[(i+3) % hull_points.size()],
 		       COLOUR_BLACK, 1, m_roi);
     }
 
