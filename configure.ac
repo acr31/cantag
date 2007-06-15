@@ -91,7 +91,8 @@ CANTAG_CHECK_HEADER(gmpxx.h,HAVE_GMPXX_H,have_gmpxx_h)
 CANTAG_CHECK_HEADER(asm/types.h,HAVE_ASM_TYPES_H,have_asm_types_h)
 CANTAG_CHECK_HEADER(linux/videodev.h,HAVE_LINUX_VIDEODEV_H,have_linux_videodev_h)
 CANTAG_CHECK_HEADER(gsl/gsl_multimin.h,HAVE_GSL_MULTIMIN_H,have_gsl_multimin_h)
-CANTAG_CHECK_HEADER(libdc1394/dc1394_control.h,HAVE_DC1394_CONTROL_H,have_dc1394_control_h)
+CANTAG_CHECK_HEADER(libdc1394/dc1394_control.h,HAVE_DC1394_CONTROL_H_V1,have_dc1394_control_h_v1)
+CANTAG_CHECK_HEADER(dc1394/control.h,HAVE_DC1394_CONTROL_H_V2,have_dc1394_control_h_v2)
 CANTAG_CHECK_HEADER(X11/Xlib.h,HAVE_X11_XLIB_H,have_x11_xlib_h)
 CANTAG_CHECK_HEADER(X11/Xutil.h,HAVE_X11_XUTIL_H,have_x11_xutil_h)
 CANTAG_CHECK_HEADER(ffmpeg/avcodec.h,HAVE_AVCODEC_H,have_avcodec_h)
@@ -119,7 +120,8 @@ CANTAG_CHECK_LIB(gmpxx,__gmpz_set,HAVELIB_GMPXX,havelib_gmpxx)
 CANTAG_CHECK_LIB(gslcblas,cblas_caxpy,HAVELIB_GSLCBLAS,havelib_gslcblas)
 CANTAG_CHECK_LIB(gsl,gsl_multimin_diff,HAVELIB_GSL,havelib_gsl)
 CANTAG_CHECK_LIB(raw1394,raw1394_iso_stop,HAVELIB_RAW1394,havelib_raw1394)
-CANTAG_CHECK_LIB(dc1394_control,dc1394_dma_setup_capture,HAVELIB_DC1394,havelib_dc1394)
+CANTAG_CHECK_LIB(dc1394_control,dc1394_dma_setup_capture,HAVELIB_DC1394_V1,havelib_dc1394_v1)
+CANTAG_CHECK_LIB(dc1394, dc1394_find_cameras,HAVELIB_DC1394_V2,havelib_dc1394_v2)
 CANTAG_CHECK_LIB(avcodec, img_convert,HAVELIB_AVCODEC,havelib_avcodec)
 CANTAG_CHECK_LIB(avformat,av_register_all ,HAVELIB_AVFORMAT,havelib_avformat)
 CANTAG_CHECK_LIB(z,uncompress ,HAVELIB_Z,havelib_z)
@@ -170,10 +172,14 @@ else
    echo "! Disabled ComposedEntity classes"
 fi
 
-if test "$havelib_dc1394$have_dc1394_control_h" = "yesyes"; then
-   echo "+ Enabled use of IEEE1394 (Firewire) Cameras"
+if test "$havelib_dc1394_v2$have_dc1394_control_h_v2" = "yesyes"; then
+   echo "+ Enabled use of IEEE1394 (Firewire) Cameras with libdc1394 v2 spec"
 else
-   echo "! Disabled use of IEEE1394 (Firewire) Cameras"
+	if test "$havelib_dc1394_v1$have_dc1394_control_h_v1" = "yesyes"; then
+	   echo "+ Enabled use of IEEE1394 (Firewire) Cameras with libdc1394 v1 spec"
+	else
+	   echo "! Disabled use of IEEE1394 (Firewire) Cameras"
+	fi
 fi
 
 if test "$have_gl_gl_h$havelib_gl$havelib_glu$havelib_glut" = "yesyesyesyes"; then
