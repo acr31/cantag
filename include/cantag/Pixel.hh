@@ -73,6 +73,7 @@ namespace Cantag {
     unsigned char v1;
   public:
     Pixel(unsigned char v) : v1(v) {}
+    inline bool operator<(const Pixel<Pix::Fmt::Grey8>& rhs) const { return intensity() < rhs.intensity(); }
     inline unsigned char intensity() const {return v1; }
   };
 

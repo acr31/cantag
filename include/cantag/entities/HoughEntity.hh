@@ -34,7 +34,7 @@ namespace Cantag
   private:
     float m_r;
     float m_theta;
-    int m_acc;
+    float m_acc;
   public:
     HoughEntity() : m_r(0), m_theta(0), m_acc(0) {}
     HoughEntity(float r, float theta) : m_r(r), m_theta(theta), m_acc(0) {}
@@ -44,7 +44,7 @@ namespace Cantag
     void SetAngle(float theta) { m_theta = theta; }
     float GetAccumulator() const { return m_acc; }
     void IncrementAccumulator() { ++m_acc; }
-    void SetAccumulator(int acc) { m_acc = acc; }
+    void SetAccumulator(float acc) { m_acc = acc; }
   };
 
 }

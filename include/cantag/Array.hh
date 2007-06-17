@@ -53,7 +53,7 @@ namespace Cantag {
     bool InRange(int i1) const { return (i1 >= 0 && i1 < n1); }
   public:
     Array1() {}
-    Array1(T* array);
+    Array1(const T* array);
     T& operator[](int i) { if (InRange(i)) return m_vals[i]; else throw xOutOfRange(i); }
     const T& operator[](int i) const { if (InRange(i)) return m_vals[i]; else throw xOutOfRange(i); }
     void Print(const string& separator1) const;
@@ -66,13 +66,13 @@ namespace Cantag {
     bool InRange(int i2) const { return (i2 >= 0 && i2 < n2); }
   public:
     Array2() {}
-    Array2(T* array);
+    Array2(const T* array);
     Array1<T, n1>& operator[](int i) { if (InRange(i)) return m_vals[i]; else throw xOutOfRange(i); }
     const Array1<T, n1>& operator[](int i) const { if (InRange(i)) return m_vals[i]; else throw xOutOfRange(i); }
     void Print(const string& separator1, const string& separator2) const;
   };
 
-  template<class T, int n1> Array1<T, n1>::Array1(T* array)
+  template<class T, int n1> Array1<T, n1>::Array1(const T* array)
   {
     if (array != NULL)
       memcpy(m_vals, array, n1 * sizeof(T));
@@ -84,7 +84,7 @@ namespace Cantag {
       cout << m_vals[i] << separator1;
   }
 
-  template<class T, int n1, int n2> Array2<T, n1, n2>::Array2(T* array)
+  template<class T, int n1, int n2> Array2<T, n1, n2>::Array2(const T* array)
   {
     if (array != NULL)
       for (int i = 0; i < n2; i++)

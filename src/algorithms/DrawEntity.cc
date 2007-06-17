@@ -55,7 +55,7 @@ namespace Cantag {
   }
 
   bool DrawEntityHoughHPS::operator()(HoughEntity& hough_entity) const {
-    unsigned char pixval = (unsigned char) min(float(255), 256 * hough_entity.GetAccumulator() / max(1, m_normalisation_factor));
+    unsigned char pixval = (unsigned char) min(float(255), 256 * hough_entity.GetAccumulator() / max(float(1), m_normalisation_factor));
     m_image.DrawPoint(int(hough_entity.GetAngle() * 180 / DBL_PI + 360 - m_start_angle) % 360,
 		      int(hough_entity.GetPerpendicularDistance()),
 		      Pixel<Pix::Fmt::Grey8>(pixval),
@@ -64,18 +64,33 @@ namespace Cantag {
   }
 
   bool DrawEntityHoughCPS::operator()(HoughEntity& hough_entity) {
-    m_acc_lines.insert(make_pair(hough_entity.GetAccumulator(), hough_entity));
+    float x0, y0, x1, y1;
+    m_image.GetPolarLineEndpoints(x0, y0, x1, y1, hough_entity.GetPerpendicularDistance(), hough_entity.GetAngle());
+    float polar_line_length = sqrt(pow(x1 - x0, 2.0) + pow(y1 - y0, 2.0));
+    float FUDGE_FACTOR = 200; // avoid divide by near-zeros
+    polar_line_length = max(FUDGE_FACTOR, polar_line_length);
+    float key = hough_entity.GetAccumulator() * m_image.GetDiagonalLength() / polar_line_length;
+    cout << "Adding to " << key << endl << "(acc = " << hough_entity.GetAccumulator() << ", pll = " << polar_line_length << ")" << endl;
+    m_acc_lines.insert(make_pair(key, hough_entity));
     return true;
   }
 
-  void DrawEntityHoughCPS::Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const
+  void DrawEntityHoughCPS::Draw() const
   {
-    for (std::multimap<int, HoughEntity>::const_iterator iter = m_acc_lines.begin(); iter != m_acc_lines.end(); ++iter)
+    // Draw the extracted lines.
+    float normalisation_factor = m_acc_lines.rbegin()->first;
+    for (std::multimap<float, HoughEntity>::const_iterator iter = m_acc_lines.begin(); iter != m_acc_lines.end(); ++iter)
     {
-      int colour = 255 * iter->first / m_normalisation_factor;
-      image.DrawPolarLine(iter->second.GetPerpendicularDistance(), iter->second.GetAngle(),
-			  Pixel<Pix::Fmt::Grey8>(colour), 1);
+      float colour = 255.0 * iter->first / normalisation_factor;
+      m_image.DrawPolarLine(iter->second.GetPerpendicularDistance(), iter->second.GetAngle(),
+			    Pixel<Pix::Fmt::Grey8>((unsigned char) colour), 1);
     }
+    // Overlay the original image (brighter pixels only).
+    if (m_original != NULL)
+      for (unsigned int x = 0; x < m_original->GetWidth(); ++x)
+	for (unsigned int y = 0; y < m_original->GetHeight(); ++y)
+	  if (m_image.Sample(x, y) < m_original->Sample(x, y))
+	    m_image.DrawPixel(x, y, m_original->Sample(x, y));
   }
 
   bool DrawEntityContour::operator()(ContourEntity& contour) const {
@@ -97,7 +112,7 @@ namespace Cantag {
     const std::vector<float>& points = contour.GetPoints();
 
     std::vector<float> hull_points;
-    for (int i = 0; i < indices.size(); ++i) {
+    for (unsigned int i = 0; i < indices.size(); ++i) {
       int index = indices[i];
       hull_points.push_back(points[2 * index]);
       hull_points.push_back(points[2 * index + 1]);

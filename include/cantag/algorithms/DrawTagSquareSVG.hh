@@ -76,8 +76,6 @@ namespace Cantag {
     m_ostream << "<rect x='0' y='0' width='" << size << "' height='" << size << "' fill='black'/>" << std::endl;
     
     int ptr = 0;
-    int row = 0;
-    int col = 0;
     for(int col=0;col<SIZE;++col) {
       for(int row=0;row<SIZE;++row) {
 	int u0 = (col+1)*cellsize;

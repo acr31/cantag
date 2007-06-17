@@ -23,11 +23,14 @@
  */
 
 #include <cantag/algorithms/HoughTransform.hh>
+#include <cantag/Point.hh>
 #include <cantag/SpeedMath.hh>
 
 #include <iostream>
 using std::cout;
 using std::endl;
+#include <map>
+using std::multimap;
 #include <utility>
 using std::make_pair;
 using std::pair;
@@ -37,15 +40,22 @@ using std::vector;
 namespace Cantag
 {
 
-  bool HoughTransform::operator()(const MonochromeImage& source, TreeNode<HoughEntity>& result) const
+  template<Pix::Sze::Bpp size, Pix::Fmt::Layout layout>
+  bool HoughTransform<size, layout>::operator()(const Image<size, layout>& source,
+						TreeNode<HoughEntity>& result) const
   {
     // Make a note of all the points in our picture.
-    vector<pair<int, int> > points;
-    for (int y = 0; y < source.GetHeight(); ++y)
-      for (int x = 0; x < source.GetWidth(); ++x)
-	if (source.GetPixel(x, y))
-	  points.push_back(make_pair(x, y));
-    cout << "There are " << points.size() << " points in the picture." << endl;
+    multimap<unsigned char, Point> points_by_value;
+    for (unsigned int y = 0; y < source.GetHeight(); ++y)
+    {
+      for (unsigned int x = 0; x < source.GetWidth(); ++x)
+      {
+	unsigned char pixval = source.Sample(x, y).intensity();
+	if (pixval)
+	  points_by_value.insert(make_pair(pixval, Point(x, y)));
+      }
+    }
+    cout << "There are " << points_by_value.size() << " points in the picture." << endl;
     
     /* 
      * Construct a discrete Hough parameter space.
@@ -70,24 +80,28 @@ namespace Cantag
       r = 0;
       for (unsigned int j = 0; j < NUM_R_STEPS; ++j)
       {
-	int acc = 0;
-	for (unsigned int k = 0; k < points.size(); ++k)
+	float acc = 0;
+	for (std::multimap<unsigned char, Point>::const_iterator iter = points_by_value.begin();
+	     iter != points_by_value.end(); ++iter)
 	{
-	  int x = points[k].first;
-	  int y = points[k].second;
-	  float theta0 = theta;
-	  float theta1 = theta + THETA_STEP;
-	  float r0 = r;
-	  float r1 = r + R_STEP;
-	  float r_at_theta0 = float(x) * cos(theta0) + float(y) * sin(theta0);
-	  float r_at_theta1 = float(x) * cos(theta1) + float(y) * sin(theta1);
+	  const float pixval = iter->first;
+	  const Point& point = iter->second;
+
+	  const int x = point.x();
+	  const int y = point.y();
+	  const float theta0 = theta;
+	  const float theta1 = theta + THETA_STEP;
+	  const float r0 = r;
+	  const float r1 = r + R_STEP;
+	  const float r_at_theta0 = float(x) * cos(theta0) + float(y) * sin(theta0);
+	  const float r_at_theta1 = float(x) * cos(theta1) + float(y) * sin(theta1);
 
 	  if ((r_at_theta0 >= r0 && r_at_theta0 <= r1)
 	      || (r_at_theta1 >= r0 && r_at_theta1 <= r1)
 	      || (r_at_theta0 < r0 && r_at_theta1 > r1)
 	      || (r_at_theta0 > r1 && r_at_theta1 < r0))
 	  {
-	    acc++;
+	    acc += pixval / 256.0;
 	  }
 	}
 	

@@ -166,6 +166,11 @@ namespace Cantag {
     inline float GetDiagonalLength() const { return sqrt(pow(GetWidth(), 2.0) + pow(GetHeight(), 2.0)); }
 
     /**
+     * Get the endpoints of a polar line that stretches as far as it can across the image.
+     */
+    inline void GetPolarLineEndpoints(float& x0, float& y0, float& x1, float& y1, float perp_dist, float angle) const;
+
+    /**
      * Return a vector to the current row
      */
     inline PixRow<layout> GetRow(int y) {
@@ -510,6 +515,13 @@ namespace Cantag {
     Image(const MonochromeImage& mono, const char blackval); 
 
     /**
+     * Returns whether the argument has the same dimensions as this image.
+     */
+    inline bool SameDimensions(const Image<size, layout>& rhs) const {
+      return s::GetHeight() == rhs.GetHeight() && s::GetWidth() == rhs.GetWidth();
+    }
+
+    /**
      * Read the pixel at the given x and y co-ordinates. Includes a
      * bounds check---returns 0 if out of range.
      */
@@ -546,7 +558,12 @@ namespace Cantag {
       return tmp;
     }
 
-    /**
+   /**
+    * Get the endpoints of a polar line that stretches as far as it can across the image.
+    */
+   inline void GetPolarLineEndpoints(float& x0, float& y0, float& x1, float& y1, float perp_dist, float angle) const;
+
+   /**
      * Plot a point in the image with the given colour.  x and y are
      * bounds checked; out of range values will be ignored.
      */ 
@@ -941,22 +958,7 @@ namespace Cantag {
   {
     // Work out the Cartesian coordinates between which to draw a line.
     float x0, y0, x1, y1;
-    if (s::GetWidth() * abs(tan(angle - DBL_PI / 2.0)) < 1) { // then approximate by a horizontal line
-      x0 = 0;
-      y0 = perp_dist;
-      x1 = s::GetWidth();
-      y1 = perp_dist;
-    } else if (s::GetHeight() * abs(tan(angle)) < 1) { // then approximate by a vertical line
-      x0 = perp_dist;
-      y0 = 0;
-      x1 = perp_dist;
-      y1 = s::GetHeight();
-    } else {
-      x0 = 0;
-      y0 = perp_dist / sin(angle);
-      x1 = perp_dist / cos(angle);
-      y1 = 0;
-    }
+    GetPolarLineEndpoints(x0, y0, x1, y1, perp_dist, angle);
 
     /*
      * N.B. At the moment we draw from (x0,y0) to (x1,y1).
@@ -1046,8 +1048,8 @@ namespace Cantag {
   template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout>
   void Image<type, layout>::Fill(const Pixel<layout>& colour)
   {
-    for (int x = 0; x < s::GetWidth(); x++)
-      for (int y = 0; y < s::GetHeight(); y++)
+    for (unsigned int x = 0; x < s::GetWidth(); x++)
+      for (unsigned int y = 0; y < s::GetHeight(); y++)
 	DrawPixel(x, y, colour);
   }
 
@@ -1232,6 +1234,27 @@ namespace Cantag {
     }
     DrawLine(points[2*numpoints-2],points[2*numpoints-1],
 	     points[0],points[1],colour,thickness);
+  }
+
+  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout>
+  void Image<type, layout>::GetPolarLineEndpoints(float& x0, float& y0, float& x1, float& y1, float perp_dist, float angle) const
+  {
+    if (s::GetWidth() * abs(tan(angle - DBL_PI / 2.0)) < 1) { // then approximate by a horizontal line
+      x0 = 0;
+      y0 = perp_dist;
+      x1 = s::GetWidth();
+      y1 = perp_dist;
+    } else if (s::GetHeight() * abs(tan(angle)) < 1) { // then approximate by a vertical line
+      x0 = perp_dist;
+      y0 = 0;
+      x1 = perp_dist;
+      y1 = s::GetHeight();
+    } else {
+      x0 = 0;
+      y0 = perp_dist / sin(angle);
+      x1 = perp_dist / cos(angle);
+      y1 = 0;
+    }
   }
 
   typedef Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> GreyImage;

@@ -28,22 +28,27 @@
 #include <cantag/Config.hh>
 #include <cantag/EntityTree.hh>
 #include <cantag/Function.hh>
+#include <cantag/Image.hh>
 #include <cantag/MonochromeImage.hh>
+#include <cantag/Pixel.hh>
 #include <cantag/entities/HoughEntity.hh>
 
 namespace Cantag
 {
-  class CANTAG_EXPORT HoughTransform : public Function<TL1(MonochromeImage), TL1(TreeNode<HoughEntity>)>
+  template<Pix::Sze::Bpp size, Pix::Fmt::Layout layout>
+  class CANTAG_EXPORT HoughTransform
+    : public Function<TypeList<Image<size, layout> >,
+		      TL1(TreeNode<HoughEntity>)>
   {
   private:
-    mutable int m_latest_max_accumulator;
+    mutable float m_latest_max_accumulator;
     int m_num_angle_divisions;
     int m_num_perpdist_divisions;
   public:
     HoughTransform(int num_angle_divisions, int num_perpdist_divisions)
       : m_latest_max_accumulator(0), m_num_angle_divisions(num_angle_divisions), m_num_perpdist_divisions(num_perpdist_divisions) {}
-    bool operator()(const MonochromeImage& source, TreeNode<HoughEntity>& result) const;
-    int GetLatestMaxAccumulator() const { return m_latest_max_accumulator; }
+    bool operator()(const Image<size, layout>& source, TreeNode<HoughEntity>& result) const;
+    float GetLatestMaxAccumulator() const { return m_latest_max_accumulator; }
   };
 }
 

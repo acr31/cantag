@@ -43,25 +43,25 @@ namespace Cantag {
     ConvolutionFilter<win_halfwidth, win_halfheight> m_window;
   public:
     Convolution(const ConvolutionFilter<win_halfwidth, win_halfheight>& window) : m_window(window) {}
-    bool operator()(const Image<size, layout>& source, Image<size, layout>& dest) const;
+    bool operator()(const Image<size, layout>& src, Image<size, layout>& dest) const;
   };
 
   template<Pix::Sze::Bpp size, Pix::Fmt::Layout layout, int win_halfwidth, int win_halfheight> 
-  bool Convolution<size, layout, win_halfwidth, win_halfheight>::operator()(const Image<size, layout>& source, Image<size, layout>& dest) const
+  bool Convolution<size, layout, win_halfwidth, win_halfheight>::operator()(const Image<size, layout>& src, Image<size, layout>& dest) const
   {
-    if (source.GetWidth() != dest.GetWidth() || source.GetHeight() != dest.GetHeight())
+    if (!src.SameDimensions(dest))
       return false;
 
-    for (int i = 0; i < source.GetWidth(); i++)
+    for (unsigned int i = 0; i < src.GetWidth(); i++)
     {
-      for (int j = 0; j < source.GetHeight(); j++)
+      for (unsigned int j = 0; j < src.GetHeight(); j++)
       {
 	int newpix = 0;
-	for (int k = 0; k < 2 * win_halfwidth + 1; k++)
+	for (unsigned int k = 0; k < 2 * win_halfwidth + 1; k++)
 	{
-	  for (int l = 0; l < 2 * win_halfheight + 1; l++)
+	  for (unsigned int l = 0; l < 2 * win_halfheight + 1; l++)
 	  {
-	    newpix += m_window.GetValue(k, l) * (int) (source.Sample(i + k - win_halfwidth, j + l - win_halfheight).intensity());
+	    newpix += m_window.GetValue(k, l) * (int) (src.Sample(i + k - win_halfwidth, j + l - win_halfheight).intensity());
 	  }
 	}
 	newpix /= m_window.GetNormalisationFactor();

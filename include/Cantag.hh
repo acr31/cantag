@@ -123,6 +123,8 @@
 #include <cantag/algorithms/CompareBullseyeRadii.hh>
 #include <cantag/algorithms/InvertGreys.hh>
 #include <cantag/algorithms/Convolution.hh>
+#include <cantag/algorithms/ExtractGradients.hh>
+#include <cantag/algorithms/PixelMapping.hh>
 
 ///////////////////////
 // coders

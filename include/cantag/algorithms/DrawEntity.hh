@@ -67,28 +67,28 @@ namespace Cantag {
   class CANTAG_EXPORT DrawEntityHoughHPS : public Function<TL0, TL1(HoughEntity)> {
   private:
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
-    int m_normalisation_factor;
+    float m_normalisation_factor;
     int m_start_angle;
     const ROI m_roi;
   public:
-    DrawEntityHoughHPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, int normalisation_factor, int start_angle, ROI roi) : m_image(image), m_normalisation_factor(normalisation_factor), m_start_angle(start_angle), m_roi(roi) {};
-    DrawEntityHoughHPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, int normalisation_factor, int start_angle) : m_image(image), m_normalisation_factor(normalisation_factor), m_start_angle(start_angle), m_roi(0,image.GetWidth(),0,image.GetHeight()) {};
+    DrawEntityHoughHPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, float normalisation_factor, int start_angle, ROI roi) : m_image(image), m_normalisation_factor(normalisation_factor), m_start_angle(start_angle), m_roi(roi) {};
+    DrawEntityHoughHPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, float normalisation_factor, int start_angle) : m_image(image), m_normalisation_factor(normalisation_factor), m_start_angle(start_angle), m_roi(0,image.GetWidth(),0,image.GetHeight()) {};
     bool operator()(HoughEntity& hough_entity) const;
   };
 
   /** CPS = Cartesian parameter space */
   class CANTAG_EXPORT DrawEntityHoughCPS : public Function<TL0, TL1(HoughEntity)> {
   private:
-    //Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
+    const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* m_original;
     //const ROI m_roi;
-    int m_normalisation_factor;
-    multimap<int, HoughEntity> m_acc_lines;
+    multimap<float, HoughEntity> m_acc_lines;
   public:
     //DrawEntityHoughCPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, ROI roi) : m_image(image), m_roi(roi) {};
     //DrawEntityHoughCPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) : m_image(image), m_roi(0,image.GetWidth(),0,image.GetHeight()) {};
-    DrawEntityHoughCPS(int normalisation_factor) : m_normalisation_factor(normalisation_factor) {};
+    DrawEntityHoughCPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Image<Pix::Sze::Byte1, Pix::Fmt::Grey8>* original = NULL) : m_image(image), m_original(original) {};
     bool operator()(HoughEntity& hough_entity);
-    void Draw(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) const;
+    void Draw() const;
   };
 
   class CANTAG_EXPORT DrawEntityContour : public Function<TL0,TL1(ContourEntity)> {
