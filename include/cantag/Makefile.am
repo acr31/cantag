@@ -59,3 +59,6 @@ cantaginclude_HEADERS += VFWImageSource.hh
 cantaginclude_HEADERS += XDisplay.hh
 cantaginclude_HEADERS += Transform.hh
 cantaginclude_HEADERS += AutoThresholdGlobal.hh
+cantaginclude_HEADERS += ROI.hh
+cantaginclude_HEADERS += ConvolutionFilter.hh
+cantaginclude_HEADERS += Array.hh

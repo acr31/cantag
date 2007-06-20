@@ -47,6 +47,10 @@ cantaginclude_HEADERS += SignalStrengthContour.hh
 cantaginclude_HEADERS += ThresholdAdaptive.hh
 cantaginclude_HEADERS += ThresholdGlobal.hh
 cantaginclude_HEADERS += HoughTransform.hh
+cantaginclude_HEADERS += InvertGreys.hh
+cantaginclude_HEADERS += Convolution.hh
+cantaginclude_HEADERS += ExtractGradients.hh
+cantaginclude_HEADERS += PixelMapping.hh
 
 if HAVE_GSL_MULTIMIN_H
 if HAVELIB_GSLCBLAS

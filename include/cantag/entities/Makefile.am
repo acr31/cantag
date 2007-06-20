@@ -7,5 +7,5 @@ cantaginclude_HEADERS += ShapeEntity.hh
 cantaginclude_HEADERS += SignalStrengthEntity.hh
 cantaginclude_HEADERS += MaxSampleStrengthEntity.hh
 cantaginclude_HEADERS += DecodeEntity.hh
-
+cantaginclude_HEADERS += HoughEntity.hh
 
