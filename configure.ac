@@ -122,8 +122,8 @@ CANTAG_CHECK_LIB(gsl,gsl_multimin_diff,HAVELIB_GSL,havelib_gsl)
 CANTAG_CHECK_LIB(raw1394,raw1394_iso_stop,HAVELIB_RAW1394,havelib_raw1394)
 CANTAG_CHECK_LIB(dc1394_control,dc1394_dma_setup_capture,HAVELIB_DC1394_V1,havelib_dc1394_v1)
 CANTAG_CHECK_LIB(dc1394, dc1394_find_cameras,HAVELIB_DC1394_V2,havelib_dc1394_v2)
-CANTAG_CHECK_LIB(avcodec, img_convert,HAVELIB_AVCODEC,havelib_avcodec)
-CANTAG_CHECK_LIB(avformat,av_register_all ,HAVELIB_AVFORMAT,havelib_avformat)
+CANTAG_CHECK_LIB(avcodec, img_convertno,HAVELIB_AVCODEC,havelib_avcodec)
+CANTAG_CHECK_LIB(avformat,av_register_allno ,HAVELIB_AVFORMAT,havelib_avformat)
 CANTAG_CHECK_LIB(z,uncompress ,HAVELIB_Z,havelib_z)
 CANTAG_CHECK_LIB(ueye_api,is_InitCamera ,HAVELIB_UEYE_API,havelib_ueye_api)
 
@@ -174,9 +174,11 @@ fi
 
 if test "$havelib_dc1394_v2$have_dc1394_control_h_v2" = "yesyes"; then
    echo "+ Enabled use of IEEE1394 (Firewire) Cameras with libdc1394 v2 spec"
+   AC_DEFINE(HAVE_FIREWIRE,,[Have one of the firewire IIDC libraries])
 else
 	if test "$havelib_dc1394_v1$have_dc1394_control_h_v1" = "yesyes"; then
 	   echo "+ Enabled use of IEEE1394 (Firewire) Cameras with libdc1394 v1 spec"
+	   AC_DEFINE(HAVE_FIREWIRE,,[Have one of the firewire IIDC libraries])
 	else
 	   echo "! Disabled use of IEEE1394 (Firewire) Cameras"
 	fi

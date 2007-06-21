@@ -23,18 +23,120 @@
  */
 
 #include <cantag/Config.hh>
-
-
-#ifdef HAVE_DC1394_CONTROL_H
-
 #include <cerrno>
 
+
+
+#ifdef HAVE_DC1394_CONTROL_H_V2
 #include <cantag/IEEE1394ImageSource.hh>
 
 #undef IEEE1394_DEBUG
 
 namespace Cantag {
 
+#ifdef HAVE_DC1394_CONTROL_H_V2
+
+  ////////////////////////////////////////////////////////
+  // v2 api
+  ////////////////////////////////////////////////////////
+  IEEE1394ImageSource::IEEE1394ImageSource(
+					   int dc1394_video_mode,
+					   int width,
+					   int height,
+					   int dc1394_framerate,
+					   dc1394speed_t dc1394_iso_speed
+					   ) 
+    : mCamera(0), mWidth(width), mHeight(height), mFrame(0), mImage(0)
+  {
+
+    if (dc1394_find_cameras(&mCameras,&mNumCameras)!=DC1394_SUCCESS) {
+      throw "Failed to find any firewire cameras on the bus";
+    }
+
+    // Reset as much as we can!
+    for (unsigned int i=0; i<mNumCameras; i++) {
+      dc1394_reset_camera(mCameras[i]);
+      dc1394_reset_bus(mCameras[i]);
+      dc1394_video_set_transmission(mCameras[i], DC1394_OFF);
+      dc1394_capture_stop(mCameras[i]);
+
+      dc1394_video_set_iso_speed(mCameras[i],dc1394_iso_speed);
+      dc1394_video_set_mode(mCameras[i], (dc1394video_mode_t)dc1394_video_mode);
+    }
+
+
+    for (int i=0; i<32; i++) {
+      mInit[i]=false;
+    }
+  }
+
+
+  bool  IEEE1394ImageSource::SetDC1394Feature(unsigned int camera, int feature, int value, bool is_mode) {
+    if (mInit[camera]) throw "IEEE1394ImageSource: Attempt to set feature after initialisation";
+    if (camera >= mNumCameras) throw "Illegal camera ID";
+    if (!is_mode) {
+      if(dc1394_feature_set_value(mCameras[camera], (dc1394feature_t)feature, value)!=DC1394_SUCCESS) return false;
+    }
+    else {
+      if(dc1394_feature_set_mode(mCameras[camera], (dc1394feature_t)feature, (dc1394feature_mode_t)value)!=DC1394_SUCCESS) return false;
+    }
+    return true;
+  }
+
+  dc1394camera_t ** IEEE1394ImageSource::GetCameraArray(int *size) { 
+    *size = mNumCameras;
+    return mCameras;
+  }
+
+  bool IEEE1394ImageSource::Initialise(unsigned int camera_id, int numBuffers=10) {
+    if (mInit[camera_id]) throw "IEEE1394ImageSource: Attempt to set feature after initialisation";
+    if (camera_id >= mNumCameras) throw "Illegal camera ID";
+    if (dc1394_capture_setup(mCameras[camera_id], numBuffers, DC1394_CAPTURE_FLAGS_DEFAULT)) {
+      throw "Failed to setup capture transmission";
+    };
+
+    if (dc1394_video_set_transmission(mCameras[camera_id],DC1394_ON) !=DC1394_SUCCESS) {
+      throw "Failed to set transmission";
+    }
+    mInit[camera_id]=true;
+    return true;
+  }
+
+
+  IEEE1394ImageSource::~IEEE1394ImageSource() {
+    for (unsigned int i=0; i<mNumCameras; i++) {
+      if (mInit[i]) {
+	dc1394_video_set_transmission(mCameras[i], DC1394_OFF);
+	dc1394_capture_stop(mCameras[i]);
+      }
+    }
+  }
+
+  void IEEE1394ImageSource::SelectCamera(unsigned int id) {
+    if (id >= mNumCameras) throw "Illegal camera ID";
+    mCamera=id;
+  }
+
+  Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* IEEE1394ImageSource::Next() {
+    if (!mInit[mCamera]) throw "Call to Next() on initialised camera!";
+    if (mFrame!=0)dc1394_capture_enqueue(mCameras[mCamera],mFrame);
+    dc1394_capture_dequeue(mCameras[mCamera], DC1394_CAPTURE_POLICY_WAIT, &mFrame);
+    if (!mImage) mImage = new Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>(mWidth, mHeight);
+    unsigned char *img = mFrame->image;
+    for (int i=0; i<GetWidth(); i++) {
+      for (int j=0; j<GetHeight(); j++) {
+	mImage->DrawPixelNoCheck(i,j,img[i+j*mWidth]);
+      }
+    }
+    mImage->SetValid(true);
+    return mImage;
+  }
+
+#else
+
+  ////////////////////////////////////////////////////////
+  // v1 api
+  ////////////////////////////////////////////////////////
 
   IEEE1394ImageSource::IEEE1394ImageSource(
 					   char *device_name,
@@ -143,5 +245,7 @@ namespace Cantag {
 
 }
 
+#endif
 
+};
 #endif//HAVE_DC1394_CONTROL_H
