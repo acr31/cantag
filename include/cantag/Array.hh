@@ -36,14 +36,11 @@ namespace Cantag {
   class CANTAG_EXPORT xOutOfRange : public std::exception
   {
   private:
-    static const char* WHAT;
     int m_index;
   public:
     xOutOfRange(int index) : m_index(index) {}
-    const char* what() const throw() { cout << m_index << endl; return WHAT; }
+    const char* what() const throw() { cout << m_index << endl; return "Out of range"; }
   };
-
-  const char* xOutOfRange::WHAT = "Out of range";
 
   template<class T, int n1> class CANTAG_EXPORT Array1
   {
