@@ -36,10 +36,12 @@ namespace Cantag {
     indexes[1] = shape.GetShape()->GetIndex1();
     indexes[2] = shape.GetShape()->GetIndex2();
     indexes[3] = shape.GetShape()->GetIndex3();
-	std::sort(indexes.begin(), indexes.end());
+    std::sort(indexes.begin(), indexes.end());
     // Now we have estimates of the corner indexes within points So do
-    // some regression. We ignore the 4 points next to an estimated
+    // some regression. We ignore the {buffer} points next to an estimated
     // corner since these are less reliable indicators of the side
+    int buffer=4;
+
 
     // Each line has equation y=mx+c
     // OR x=c
@@ -63,11 +65,15 @@ namespace Cantag {
       // If there are only a few points along the side
       // we can't really regress anything!
       if (end-start < 5) return false;
+
+      if (end-start < 20) {
+	buffer=1;
+      }
       
       // Ignore the first and last 4 points
-      float lastx=points[((start+4)*2)%points.size()];
+      float lastx=points[((start+buffer)*2)%points.size()];
       bool vertical=true;
-      for (int i=start+4; i<end-4; i++) {
+      for (int i=start+buffer; i<end-buffer; i++) {
 	int ii = i%(points.size()/2);
 	
 	float x = points[ii*2];
