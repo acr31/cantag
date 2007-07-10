@@ -278,8 +278,8 @@ namespace Cantag {
    * angle radians.
    */
   void Transform::Rotate(float cos,float sin) {
-    float rotation[16] = { cos, -sin,0,0,
-			   sin, cos,0,0,
+    float rotation[16] = { cos, sin,0,0,
+			   -sin, cos,0,0,
 			   0,0,1,0,
 			   0,0,0,1};
 
