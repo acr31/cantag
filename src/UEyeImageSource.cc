@@ -32,7 +32,7 @@
 namespace Cantag {
 
 
-  UEyeImageSource::UEyeImageSource() : m_image(NULL),m_hCamera(NULL) {
+  UEyeImageSource::UEyeImageSource(double fps,double exposure, int gain) : m_image(NULL),m_hCamera(NULL) {
     
     if ( is_InitCamera( &m_hCamera, 0 ) != IS_SUCCESS ) 
       throw "UEye: Failed to open camera";
@@ -50,15 +50,15 @@ namespace Cantag {
     is_SetEdgeEnhancement( m_hCamera, IS_EDGE_EN_STRONG);
     is_SetPixelClock( m_hCamera, 30);
     double newFps;
-    is_SetFrameRate( m_hCamera, 60, &newFps);
+    is_SetFrameRate( m_hCamera, fps, &newFps);
 
     double newExposure;
-    is_SetExposureTime( m_hCamera, 1, &newExposure);
+    is_SetExposureTime( m_hCamera, exposure, &newExposure);
 
-    is_SetHardwareGain( m_hCamera, 100,100,100,100);
+    is_SetHardwareGain( m_hCamera, gain,gain,gain,gain);
 
-    std::cout << "FPS " << newFps << std::endl;
-    std::cout << "Exp " << newExposure << std::endl;
+    //    std::cout << "FPS " << newFps << std::endl;
+    //    std::cout << "Exp " << newExposure << std::endl;
     is_SetFrameRate( m_hCamera, 20, &newFps);
 
     for(int i=0;i<BUFFER_SIZE;++i) {
