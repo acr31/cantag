@@ -69,7 +69,7 @@ namespace Cantag {
 
   public:
 
-    UEyeImageSource();
+    UEyeImageSource(double fps = 60, double exposure = 0.0, int gain = 1);
     virtual ~UEyeImageSource();
     virtual Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* Next();
     inline int GetWidth() const { return m_width; }
