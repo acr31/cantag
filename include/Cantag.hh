@@ -40,6 +40,7 @@
 #include <cantag/entities/ShapeEntity.hh>
 #include <cantag/entities/DecodeEntity.hh>
 #include <cantag/entities/MaxSampleStrengthEntity.hh>
+#include <cantag/entities/AnalogueEntity.hh>
 
 ///////////////////////
 // composed entities
@@ -125,6 +126,7 @@
 #include <cantag/algorithms/Convolution.hh>
 #include <cantag/algorithms/ExtractGradients.hh>
 #include <cantag/algorithms/PixelMapping.hh>
+#include <cantag/algorithms/DecodeAnalogue.hh>
 
 ///////////////////////
 // coders

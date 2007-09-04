@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2004 Andrew C. Rice
+  Copyright (C) 2007 Tom Craig
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -15,15 +15,15 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-  Email: acr31@cam.ac.uk
+  Email: jatc2@cam.ac.uk
 */
 
 /**
  * $Header$
  */
 
-#ifndef DRAW_TAG_SQUARE_GUARD
-#define DRAW_TAG_SQUARE_GUARD
+#ifndef DRAW_TAG_ANALOGUE_GUARD
+#define DRAW_TAG_ANALOGUE_GUARD
 
 #include <cantag/Config.hh>
 #include <cantag/entities/DecodeEntity.hh>
@@ -80,9 +80,9 @@ namespace Cantag {
     float cell_size = 2.f*size / ((float)SIZE+2.f);
 
     image.DrawFilledQuadTangle(x0, y0,
-			       x1, y1,
-			       x2, y2,
-			       x3, y3,COLOUR_BLACK);
+                   x1, y1,
+                   x2, y2,
+                   x3, y3,COLOUR_BLACK);
 
     int ptr = 0;
     for(int i=0;i<SIZE*SIZE - (SIZE*SIZE % 2);++i) {
@@ -107,10 +107,10 @@ namespace Cantag {
       //Pixel<Pix::Fmt::Grey8> colour((int)((float)ptr/(float)(SIZE*SIZE - (SIZE*SIZE % 2)) * 128)+128);
 
       image.DrawFilledQuadTangle(u0,v0,
-				 u1,v1,
-				 u2,v2,
-				 u3,v3,
-				 colour);
+                 u1,v1,
+                 u2,v2,
+                 u3,v3,
+                 colour);
       ++ptr;
     }
     return true;
@@ -129,4 +129,4 @@ namespace Cantag {
   }
 }
 
-#endif//DRAW_TAG_SQUARE_GUARD
+#endif//DRAW_TAG_ANALOGUE_GUARD

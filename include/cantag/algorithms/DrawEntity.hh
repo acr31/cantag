@@ -29,6 +29,7 @@
 #include <cantag/Function.hh>
 #include <cantag/TagCircle.hh>
 #include <cantag/TagSquare.hh>
+#include <cantag/entities/AnalogueEntity.hh>
 #include <cantag/entities/ContourEntity.hh>
 #include <cantag/entities/ConvexHullEntity.hh>
 #include <cantag/entities/HoughEntity.hh>
@@ -169,6 +170,15 @@ namespace Cantag {
   DrawEntitySampleCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT> DrawEntitySample(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera, const TagCircle<RING_COUNT,SECTOR_COUNT,READ_COUNT>& tagspec) { 
     return DrawEntitySampleCircleObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>(image,camera,tagspec);
   }
+  
+  class DrawEntitySampleAnalogue : public Function<TL1(TransformEntity), TL1(AnalogueEntity)> {
+  private:
+    Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
+    const Camera& m_camera;
+  public:
+    DrawEntitySampleAnalogue(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera) : m_image(image), m_camera(camera) {}
+    bool operator()(const TransformEntity& transform, AnalogueEntity& analogue) const;
+  };
 
   template<int EDGE_CELLS>
   class DrawEntitySampleSquareObj : public Function<TL0,TL1(TransformEntity)> {

@@ -1,8 +1,9 @@
-bin_PROGRAMS  = DrawTagSVG DrawTagImage SimpleRecogniseCircle SimpleRecogniseSquare GLOverlayCircle GLOverlaySquare 
+bin_PROGRAMS  = DrawTagSVG DrawTagImage SimpleRecogniseCircle SimpleRecogniseSquare SimpleRecogniseAnalogue GLOverlayCircle GLOverlaySquare 
 DrawTagSVG_SOURCES  = DrawTagSVG.cc
 DrawTagImage_SOURCES = DrawTagImage.cc
 SimpleRecogniseCircle_SOURCES = SimpleRecogniseCircle.cc
 SimpleRecogniseSquare_SOURCES = SimpleRecogniseSquare.cc
+SimpleRecogniseAnalogue_SOURCES = SimpleRecogniseAnalogue.cc
 GLOverlayCircle_SOURCES = GLOverlayCircle.cc
 GLOverlaySquare_SOURCES = GLOverlaySquare.cc
 

@@ -34,6 +34,7 @@ libcantag_la_SOURCES += algorithms/PrintEntity.cc
 libcantag_la_SOURCES += algorithms/FitQuadTangleRegression.cc
 libcantag_la_SOURCES += algorithms/SimulateMinDistance.cc
 libcantag_la_SOURCES += algorithms/SignalStrengthContour.cc
+libcantag_la_SOURCES += algorithms/DecodeAnalogue.cc
 libcantag_la_SOURCES += algorithms/HoughTransform.cc
 libcantag_la_SOURCES += AutoThresholdGlobal.cc
 

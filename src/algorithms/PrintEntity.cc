@@ -74,5 +74,10 @@ namespace Cantag {
     t->Print(m_output);
     return true;
   }
+  
+  bool PrintEntityDecodeAnalogue::operator()(AnalogueEntity& ae) const {
+    m_output << ae.GetPayload() << " " << ae.GetMaxError() << std::endl;
+    return true;
+  }
 
 }
