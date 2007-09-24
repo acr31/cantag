@@ -165,11 +165,19 @@
 #endif
 #endif
 #endif
-#ifdef HAVELIB_DC1394
-#ifdef HAVE_DC1394_CONTROL_H
-# include <cantag/IEEE1394ImageSource.hh>
+
+#ifdef HAVELIB_DC1394_V1
+#ifdef HAVE_DC1394_CONTROL_H_V1
+# include <cantag/IEEE1394ImageSource_V1.hh>
 #endif
 #endif
+
+#ifdef HAVELIB_DC1394_V2
+#ifdef HAVE_DC1394_CONTROL_H_V2
+# include <cantag/IEEE1394ImageSource_V2.hh>
+#endif
+#endif
+
 #ifdef WIN32
 # include <cantag/VFWImageSource.hh>
 # include <cantag/DSVLImageSource.hh>

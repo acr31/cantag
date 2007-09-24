@@ -173,15 +173,16 @@ else
 fi
 
 if test "$havelib_dc1394_v2$have_dc1394_control_h_v2" = "yesyes"; then
-   echo "+ Enabled use of IEEE1394 (Firewire) Cameras with libdc1394 v2 spec"
-   AC_DEFINE(HAVE_FIREWIRE,,[Have one of the firewire IIDC libraries])
+   echo "+ Enabled IEEE1394 API version 2"
 else
-	if test "$havelib_dc1394_v1$have_dc1394_control_h_v1" = "yesyes"; then
-	   echo "+ Enabled use of IEEE1394 (Firewire) Cameras with libdc1394 v1 spec"
-	   AC_DEFINE(HAVE_FIREWIRE,,[Have one of the firewire IIDC libraries])
-	else
-	   echo "! Disabled use of IEEE1394 (Firewire) Cameras"
-	fi
+   echo "| Disabled IEEE1943 API version 2"
+fi
+
+
+if test "$havelib_dc1394_v1$have_dc1394_control_h_v1" = "yesyes"; then
+   echo "+ Enabled IEEE1934 API version 1"
+else
+   echo "! Disabled IEEE1394 API version 1"
 fi
 
 if test "$have_gl_gl_h$havelib_gl$havelib_glu$havelib_glut" = "yesyesyesyes"; then

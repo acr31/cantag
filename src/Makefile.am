@@ -105,13 +105,13 @@ endif
 
 if HAVE_DC1394_CONTROL_H_V1
 if HAVELIB_DC1394_V1
-libcantag_la_SOURCES += IEEE1394ImageSource.cc
+libcantag_la_SOURCES += IEEE1394ImageSource_V1.cc
 endif
 endif
 
 if HAVE_DC1394_CONTROL_H_V2
 if HAVELIB_DC1394_V2
-libcantag_la_SOURCES += IEEE1394ImageSource.cc
+libcantag_la_SOURCES += IEEE1394ImageSource_V2.cc
 endif
 endif
 

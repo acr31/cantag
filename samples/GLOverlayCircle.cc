@@ -63,13 +63,20 @@ int main(int argc,char* argv[]) {
       throw "Image source selection V4LImageSource is not available";
 #endif
     case 1:
-#ifdef HAVE_DC1394_CONTROL_H
+#ifdef HAVE_DC1394_CONTROL_H_V1
       source = new IEEE1394ImageSource("/dev/video1394/0",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );      
       break;
 #else
-      throw "Image source selection IEEE1394ImageSource is not available";
+      throw "Image source selection IEEE1394ImageSource_V1 is not available";
 #endif
     case 2:
+#ifdef HAVE_DC1394_CONTROL_H_V2
+      source = new IEEE1394ImageSource_V2(DC1394_VIDEO_MODE_640x480_MONO8, 640, 480, DC1394_FRAMERATE_30, DC1394_ISO_SPEED_400,0,10);
+      break;
+#else
+      throw "Image source selection IEEE1394ImageSource_V2 is not available";
+#endif
+    case 3:
 #ifdef HAVE_UEYE_H
       source = new UEyeImageSource();
       break;
@@ -77,7 +84,7 @@ int main(int argc,char* argv[]) {
       throw "Image source selection UEyeImageSource is not available";
 #endif
     default:
-      throw "Unrecognised image source. Valid options are 0 - V4LImageSource; 1 - IEEE1394ImageSource; 2 - UEyeImageSource";
+      throw "Unrecognised image source. Valid options are 0 - V4LImageSource; 1 - IEEE1394ImageSource_V1; 2 - IEEE1394ImageSource_V2; 3 - UEyeImageSource";
     }
 
     Camera camera;
