@@ -23,8 +23,8 @@
 namespace Cantag {
 
   bool ContourFollowerClearImageBorder::operator()(MonochromeImage& dest) const {
-    const int height = dest.GetHeight();
-    const int width = dest.GetWidth();
+    const unsigned int height = dest.GetHeight();
+    const unsigned int width = dest.GetWidth();
     for(unsigned int i=0;i<height;++i) {
       dest.SetPixel(0,i,false);
       dest.SetPixel(width-1,i,false);
