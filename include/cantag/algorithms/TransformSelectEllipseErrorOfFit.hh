@@ -84,7 +84,7 @@ namespace Cantag {
 	  }
 
 	  float result = agg();
-	  assert(result>0.f);
+	  assert(result>=0.f);
 //	  if (result > t->GetConfidence()) {
 	      t->SetConfidence(result);
 //	  }
