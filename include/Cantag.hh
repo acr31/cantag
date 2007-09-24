@@ -34,6 +34,7 @@
 #include <cantag/entities/Entity.hh>
 #include <cantag/EntityTree.hh>
 
+#include <cantag/MonochromeImage.hh>
 #include <cantag/entities/ContourEntity.hh>
 #include <cantag/entities/ConvexHullEntity.hh>
 #include <cantag/entities/TransformEntity.hh>
@@ -98,6 +99,7 @@
 #include <cantag/algorithms/Decode.hh>
 #include <cantag/algorithms/ThresholdAdaptive.hh>
 #include <cantag/algorithms/ThresholdGlobal.hh>
+#include <cantag/AutoThresholdGlobal.hh>
 #include <cantag/algorithms/ConvexHull.hh>
 #include <cantag/algorithms/DrawTagCircle.hh>
 #include <cantag/algorithms/DrawTagCircleSVG.hh>
