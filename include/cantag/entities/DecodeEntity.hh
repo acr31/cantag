@@ -29,6 +29,7 @@
 
 #include <cantag/Config.hh>
 #include <cantag/CyclicBitSet.hh>
+#include <cantag/entities/Entity.hh>
 
 namespace Cantag {
 
