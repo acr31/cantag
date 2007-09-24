@@ -515,5 +515,10 @@ namespace Cantag {
     return r;
   }
 
+  std::ostream& operator<<(std::ostream& os, const Transform& x) { 
+    x.Print(os); 
+    return os; 
+  };
+
 
 }

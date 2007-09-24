@@ -157,6 +157,8 @@ namespace Cantag {
      */
     friend Transform operator*(const Transform &a, const Transform &b);
   };
+
+  std::ostream& operator<<(std::ostream& os, const Transform& x);
 }
 
 #else
