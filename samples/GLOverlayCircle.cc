@@ -64,7 +64,7 @@ int main(int argc,char* argv[]) {
 #endif
     case 1:
 #ifdef HAVE_DC1394_CONTROL_H_V1
-      source = new IEEE1394ImageSource("/dev/video1394/0",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );      
+      source = new IEEE1394ImageSource_V1("/dev/video1394/0",0,MODE_640x480_MONO, FRAMERATE_30,500,32 );      
       break;
 #else
       throw "Image source selection IEEE1394ImageSource_V1 is not available";
