@@ -28,24 +28,29 @@ namespace Cantag {
     const int var = mi.GetVariation();
     const int image_size_2 = mi.GetSize() >> 1;
   
-    const int add_step = 5;
+    const int add_step = 2;
 
     // we are happy with the threshold when the variation in the image
     // is within some percentage of 50% of the number of pixels in the
     // image.
     // this value is 100/desired percentage
-    const int steady_proportion = 5;
+    const int steady_proportion = 10;
     
-
+    bool result = true;
     if ((((var-image_size_2)*steady_proportion)/image_size_2) == 0) { 
       m_current_threshold += m_previous_variation < var ? -1 : 1;
-      return true;
+      if (m_current_threshold < 1) m_current_threshold = 1;
+      if (m_current_threshold > 254) m_current_threshold = 254;
+      return false;
     }
     else {
       m_current_threshold += ((var > image_size_2) ? -m_threshold_step : m_threshold_step);
+      if (m_current_threshold < 1) m_current_threshold = 1;
+      if (m_current_threshold > 254) m_current_threshold = 254;
+
       if ((m_previous_variation > image_size_2) ^
 	  (var > image_size_2)) {
-	m_threshold_step >>= 1;
+	m_threshold_step /= 2;
 	if (m_threshold_step == 0) m_threshold_step = 1;
       }
       else {
@@ -53,7 +58,8 @@ namespace Cantag {
       }
 
       m_previous_variation = var;	    
-      return false;
+      result =false;
     }
+    return result;
   }
 }
