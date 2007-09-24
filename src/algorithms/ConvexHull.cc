@@ -77,14 +77,14 @@ namespace Cantag {
 	float val=y/x;
 	if (abs(x) <= FLT_EPSILON) val=1e10f;
 	std::map<float,int >::const_iterator ci = quadrants[q].find(val);
-	if (ci==quadrants[q].end()) {quadrants[q][val]=i/2.f;}
+	if (ci==quadrants[q].end()) {quadrants[q][val]=i/2;}
 	else {
 	  int idx = ci->second;
 	  float x1=V[i]-ix;
 	  float y1=V[i+1]-iy;
 	  float x2=V[2*idx]-ix;
 	  float y2=V[2*idx+1]-iy;
-	  if ((x1*x1+y1*y1) > (x2*x2+y2*y2)) quadrants[q][val]=i/2.f;
+	  if ((x1*x1+y1*y1) > (x2*x2+y2*y2)) quadrants[q][val]=i/2;
 	}
       }
     }
