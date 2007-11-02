@@ -26,10 +26,7 @@
 #define ARRAY_GUARD
 
 #include <iostream>
-using std::cout;
-using std::endl;
 #include <string>
-using std::string;
 
 namespace Cantag {
 
@@ -39,7 +36,7 @@ namespace Cantag {
     int m_index;
   public:
     xOutOfRange(int index) : m_index(index) {}
-    const char* what() const throw() { cout << m_index << endl; return "Out of range"; }
+    const char* what() const throw() { std::cout << m_index << std::endl; return "Out of range"; }
   };
 
   template<class T, int n1> class CANTAG_EXPORT Array1
@@ -53,7 +50,7 @@ namespace Cantag {
     Array1(const T* array);
     T& operator[](int i) { if (InRange(i)) return m_vals[i]; else throw xOutOfRange(i); }
     const T& operator[](int i) const { if (InRange(i)) return m_vals[i]; else throw xOutOfRange(i); }
-    void Print(const string& separator1) const;
+    void Print(const std::string& separator1) const;
   };
 
   template<class T, int n1, int n2> class CANTAG_EXPORT Array2
@@ -66,7 +63,7 @@ namespace Cantag {
     Array2(const T* array);
     Array1<T, n1>& operator[](int i) { if (InRange(i)) return m_vals[i]; else throw xOutOfRange(i); }
     const Array1<T, n1>& operator[](int i) const { if (InRange(i)) return m_vals[i]; else throw xOutOfRange(i); }
-    void Print(const string& separator1, const string& separator2) const;
+    void Print(const std::string& separator1, const std::string& separator2) const;
   };
 
   template<class T, int n1> Array1<T, n1>::Array1(const T* array)
@@ -75,10 +72,10 @@ namespace Cantag {
       memcpy(m_vals, array, n1 * sizeof(T));
   }
 
-  template<class T, int n1> void Array1<T, n1>::Print(const string& separator1) const
+  template<class T, int n1> void Array1<T, n1>::Print(const std::string& separator1) const
   {
     for (int i = 0; i < n1; i++)
-      cout << m_vals[i] << separator1;
+      std::cout << m_vals[i] << separator1;
   }
 
   template<class T, int n1, int n2> Array2<T, n1, n2>::Array2(const T* array)
@@ -89,12 +86,12 @@ namespace Cantag {
 	  m_vals[i][j] = array[i * n1 + j];
   }
 
-  template<class T, int n1, int n2> void Array2<T, n1, n2>::Print(const string& separator1, const string& separator2) const
+  template<class T, int n1, int n2> void Array2<T, n1, n2>::Print(const std::string& separator1, const std::string& separator2) const
   {
     for (int i = 0; i < n2; i++)
     {
       m_vals[i].Print(separator1);
-      cout << separator2;
+      std::cout << separator2;
     }
   }
 

@@ -26,7 +26,6 @@
 #define POINT_GUARD
 
 #include <utility>
-using std::pair;
 
 namespace Cantag
 {
@@ -37,7 +36,7 @@ namespace Cantag
     int m_y;
   public:
     Point(int x, int y) : m_x(x), m_y(y) {}
-    Point(const pair<int, int>& p) : m_x(p.first), m_y(p.second) {}
+    Point(const std::pair<int, int>& p) : m_x(p.first), m_y(p.second) {}
     inline bool operator<(const Point& rhs) const;
     int x() const { return m_x; }
     int y() const { return m_y; }

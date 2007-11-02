@@ -26,7 +26,6 @@
 #define PIXEL_MAPPING_GUARD
 
 #include <map>
-using std::map;
 
 #include <cantag/Config.hh>
 #include <cantag/EntityTree.hh>
@@ -43,7 +42,7 @@ namespace Cantag
 						     TypeList<Image<size, layout> > >
   {
   private:
-    typedef map<unsigned char, unsigned char> PixelMap; // would like to replace unsigned chars with Pixel<layout>, but then I get compiler errors when declaring an iterator
+    typedef std::map<unsigned char, unsigned char> PixelMap; // would like to replace unsigned chars with Pixel<layout>, but then I get compiler errors when declaring an iterator
     PixelMap m_mapping;
   public:
     PixelMapping(const PixelMap& mapping) : m_mapping(mapping) {}

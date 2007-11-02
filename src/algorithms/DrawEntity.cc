@@ -25,14 +25,8 @@
 #include <cantag/algorithms/DrawEntity.hh>
 
 #include <algorithm>
-using std::max;
-using std::min;
 #include <iostream>
-using std::cout;
-using std::endl;
 #include <utility>
-using std::make_pair;
-using std::pair;
 
 namespace Cantag {
 
@@ -55,7 +49,7 @@ namespace Cantag {
   }
 
   bool DrawEntityHoughHPS::operator()(HoughEntity& hough_entity) const {
-    unsigned char pixval = (unsigned char) min(float(255), 256 * hough_entity.GetAccumulator() / max(float(1), m_normalisation_factor));
+    unsigned char pixval = (unsigned char) std::min(float(255), 256 * hough_entity.GetAccumulator() / std::max(float(1), m_normalisation_factor));
     m_image.DrawPoint(int(hough_entity.GetAngle() * 180 / DBL_PI + 360 - m_start_angle) % 360,
 		      int(hough_entity.GetPerpendicularDistance()),
 		      Pixel<Pix::Fmt::Grey8>(pixval),
@@ -68,10 +62,10 @@ namespace Cantag {
     m_image.GetPolarLineEndpoints(x0, y0, x1, y1, hough_entity.GetPerpendicularDistance(), hough_entity.GetAngle());
     float polar_line_length = sqrt(pow(x1 - x0, 2.0) + pow(y1 - y0, 2.0));
     float FUDGE_FACTOR = 200; // avoid divide by near-zeros
-    polar_line_length = max(FUDGE_FACTOR, polar_line_length);
+    polar_line_length = std::max(FUDGE_FACTOR, polar_line_length);
     float key = hough_entity.GetAccumulator() * m_image.GetDiagonalLength() / polar_line_length;
-    cout << "Adding to " << key << endl << "(acc = " << hough_entity.GetAccumulator() << ", pll = " << polar_line_length << ")" << endl;
-    m_acc_lines.insert(make_pair(key, hough_entity));
+    std::cout << "Adding to " << key << std::endl << "(acc = " << hough_entity.GetAccumulator() << ", pll = " << polar_line_length << ")" << std::endl;
+    m_acc_lines.insert(std::make_pair(key, hough_entity));
     return true;
   }
 

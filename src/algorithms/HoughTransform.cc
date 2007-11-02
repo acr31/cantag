@@ -27,15 +27,9 @@
 #include <cantag/SpeedMath.hh>
 
 #include <iostream>
-using std::cout;
-using std::endl;
 #include <map>
-using std::multimap;
 #include <utility>
-using std::make_pair;
-using std::pair;
 #include <vector>
-using std::vector;
 
 namespace Cantag
 {
@@ -45,17 +39,17 @@ namespace Cantag
 						TreeNode<HoughEntity>& result) const
   {
     // Make a note of all the points in our picture.
-    multimap<unsigned char, Point> points_by_value;
+    std::multimap<unsigned char, Point> points_by_value;
     for (unsigned int y = 0; y < source.GetHeight(); ++y)
     {
       for (unsigned int x = 0; x < source.GetWidth(); ++x)
       {
 	unsigned char pixval = source.Sample(x, y).intensity();
 	if (pixval)
-	  points_by_value.insert(make_pair(pixval, Point(x, y)));
+	  points_by_value.insert(std::make_pair(pixval, Point(x, y)));
       }
     }
-    cout << "There are " << points_by_value.size() << " points in the picture." << endl;
+    std::cout << "There are " << points_by_value.size() << " points in the picture." << std::endl;
     
     /* 
      * Construct a discrete Hough parameter space.
@@ -107,7 +101,7 @@ namespace Cantag
 	
 	if (acc > 0)
 	{
-	  cout << "Adding accumulator of " << acc << " for (" << r << ", " << theta << ")" << endl;
+	  std::cout << "Adding accumulator of " << acc << " for (" << r << ", " << theta << ")" << std::endl;
 	  tree_node->SetValid(true); // Forgetting this can cause hours of debugging. :-p
 	  HoughEntity* h = tree_node->GetNode();
 	  h->SetPerpendicularDistance(r); // N.B. we choose to record (r, theta) (and not, say, (r + R_STEP/2, theta + THETA_STEP/2))

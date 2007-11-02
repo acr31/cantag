@@ -40,7 +40,6 @@
 #include <cantag/ROI.hh>
 
 #include <map>
-using std::multimap;
 
 namespace Cantag {
 
@@ -83,7 +82,7 @@ namespace Cantag {
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& m_image;
     const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* m_original;
     //const ROI m_roi;
-    multimap<float, HoughEntity> m_acc_lines;
+    std::multimap<float, HoughEntity> m_acc_lines;
   public:
     //DrawEntityHoughCPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, ROI roi) : m_image(image), m_roi(roi) {};
     //DrawEntityHoughCPS(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image) : m_image(image), m_roi(0,image.GetWidth(),0,image.GetHeight()) {};

@@ -26,8 +26,6 @@
 #define INVERT_GREYS_GUARD
 
 #include <iostream>
-using std::cout;
-using std::endl;
 
 #include <cantag/Config.hh>
 #include <cantag/Function.hh>
