@@ -159,7 +159,6 @@ namespace Cantag {
 	    i.pixelColor(x,y,color);
 	  }
 	} 
-	i.write("tmp.ppm");
       }
       catch(Magick::Exception& e) {
 	throw e.what();
