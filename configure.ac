@@ -34,7 +34,7 @@ AC_ARG_ENABLE([text-debug],
 	
 AC_DEFUN([CANTAG_CHECK_HEADER],
          [AC_CHECK_HEADER([$1],
-                         [AC_DEFINE([$2],[],[Define this to 1 if you have the <$1> header file])
+                         [AC_DEFINE([$2],[1],[Define this to 1 if you have the <$1> header file])
                           $3=yes],
 			 [$3=no],[$4])
           AM_CONDITIONAL([$2], [test X@S|@$3 = Xyes])])
@@ -42,7 +42,7 @@ AC_DEFUN([CANTAG_CHECK_HEADER],
 AC_DEFUN([CANTAG_CHECK_LIB],
          [AC_CHECK_LIB([$1],[$2],
 	               [LIBS="-l$1 $LIBS"
-                        AC_DEFINE([$3],[],[Define this to 1 if you have the lib$1.so library file])
+                        AC_DEFINE([$3],[1],[Define this to 1 if you have the lib$1.so library file])
                         $4=yes],
                        [$4=no],[$5])
           AM_CONDITIONAL([$3], [test X@S|@$4 = Xyes])])
