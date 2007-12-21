@@ -149,27 +149,5 @@ namespace Cantag {
 		     
     return true;    
   }
-  
-  bool DrawEntitySampleAnalogue::operator()(const TransformEntity& transform, AnalogueEntity& analogue) const
-  {
-    for (int j = 0; j < 20; j++)
-    {
-        float pts[] = { 0 + 0.05 * j, -1.05 };
-        transform.GetPreferredTransform()->Apply(pts, 1);
-        m_camera.NPCFToImage(pts, 1);
-        std::cout << "Drawing this pixel: " << pts[0] << "," << pts[1] << std::endl;
-        m_image.DrawPixel(pts[0], pts[1], COLOUR_BLACK);
-        m_image.DrawPixel(3, 3, COLOUR_BLACK);
-    } 
-    return true;
-  }
-  
-/*  class DrawEntitySampleAnalogue : public Function<TL0, TL1(TransformEntity)> {
-  private:
-  public:
-    DrawEntitySampleAnalogue(Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>& image, const Camera& camera) : m_image(image), m_camera(camera) {}
-    bool operator()(TransformEntity& transform) const;
-  };
-  */
 }
 

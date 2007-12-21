@@ -1,22 +1,10 @@
-bin_PROGRAMS = DrawTagSVG
-bin_PROGRAMS += DrawTagImage
-bin_PROGRAMS += SimpleRecogniseCircle 
-bin_PROGRAMS += SimpleRecogniseSquare 
-bin_PROGRAMS += GLOverlayCircle 
-bin_PROGRAMS += GLOverlaySquare
-bin_PROGRAMS += SimpleRecogniseAnalogue
-bin_PROGRAMS += XOverlaySquare
-bin_PROGRAMS += DrawTagAnalogueImage
-
+bin_PROGRAMS  = DrawTagSVG DrawTagImage SimpleRecogniseCircle SimpleRecogniseSquare GLOverlayCircle GLOverlaySquare 
 DrawTagSVG_SOURCES  = DrawTagSVG.cc
 DrawTagImage_SOURCES = DrawTagImage.cc
-DrawTagAnalogueImage_SOURCES = DrawTagAnalogueImage.cc
 SimpleRecogniseCircle_SOURCES = SimpleRecogniseCircle.cc
 SimpleRecogniseSquare_SOURCES = SimpleRecogniseSquare.cc
-SimpleRecogniseAnalogue_SOURCES = SimpleRecogniseAnalogue.cc
 GLOverlayCircle_SOURCES = GLOverlayCircle.cc
 GLOverlaySquare_SOURCES = GLOverlaySquare.cc
-XOverlaySquare_SOURCES = XOverlaySquare.cc
 
 AM_CPPFLAGS=-I$(srcdir)/../include -I$(top_builddir)/include 
 AM_LDFLAGS=-L../src -lcantag

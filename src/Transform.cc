@@ -142,14 +142,6 @@ namespace Cantag {
     m_transform[14] = 0.0;
   }
 
-  void Transform::Apply(const FPoint& in, FPoint& out) const
-  {
-    float x, y;
-    Apply(in.x(), in.y(), 1.0, &x, &y);
-    out.x(x);
-    out.y(y);
-  }
-
   void Transform::Apply(float* points, int numpoints) const {
     for(int i=0;i<numpoints*2;i+=2) {
       Apply(points[i],points[i+1],points+i,points+i+1);

@@ -51,8 +51,6 @@ cantaginclude_HEADERS += InvertGreys.hh
 cantaginclude_HEADERS += Convolution.hh
 cantaginclude_HEADERS += ExtractGradients.hh
 cantaginclude_HEADERS += PixelMapping.hh
-cantaginclude_HEADERS += DecodeAnalogue.hh
-cantaginclude_HEADERS += DrawTagAnalogue.hh
 
 if HAVE_GSL_MULTIMIN_H
 if HAVELIB_GSLCBLAS

@@ -34,7 +34,6 @@
 #include <cantag/entities/ShapeEntity.hh>
 #include <cantag/entities/TransformEntity.hh>
 #include <cantag/entities/DecodeEntity.hh>
-#include <cantag/entities/AnalogueEntity.hh>
 #include <cantag/QuadTangle.hh>
 
 namespace Cantag {
@@ -78,14 +77,6 @@ namespace Cantag {
     bool operator()(TransformEntity& t) const;
   };
 
-  class CANTAG_EXPORT PrintEntityDecodeAnalogue : public Function<TL0,TL1(AnalogueEntity)> {
-  private:
-    std::ostream& m_output;
-  public:
-    PrintEntityDecodeAnalogue(std::ostream& output) : m_output(output) {};
-    bool operator()(AnalogueEntity& t) const;
-  };
-
   template<int PAYLOAD_SIZE>
   class PrintEntity3DPosition : public Function<TL1(TransformEntity), TL1(DecodeEntity<PAYLOAD_SIZE>)> {
   private:
@@ -123,9 +114,9 @@ namespace Cantag {
       t->GetLocation(m_camera,location,1);
 
       for(typename std::vector<typename DecodeEntity<PAYLOAD_SIZE>::Data*>::const_iterator i = de.GetPayloads().begin(); i != de.GetPayloads().end();++i) {
-    	m_output << (*i)->confidence << " " << (*i)->payload << " ";
-    	m_output << normal[0] << " " << normal[1] << " " << normal[2] << " ";
-    	m_output << location[0] << " " << location[1] << " " << location[2] << std::endl;
+	m_output << (*i)->confidence << " " << (*i)->payload << " ";
+	m_output << normal[0] << " " << normal[1] << " " << normal[2] << " ";
+	m_output << location[0] << " " << location[1] << " " << location[2] << std::endl;
       }
       return true;
   }

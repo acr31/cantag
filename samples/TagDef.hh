@@ -80,6 +80,6 @@ struct Square : public Cantag::TagSquare<SIZE>, public TestSquareCoder<SIZE>::Co
 
 typedef CircleInnerOpt<2,20> CircleTagType;
 typedef Square<6> SquareTagType;
-typedef SquareTagType TagType;
+typedef CircleTagType TagType;
 
 #endif//TAGDEF_GUARD
