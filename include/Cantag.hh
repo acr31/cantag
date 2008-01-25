@@ -183,6 +183,7 @@
 #ifdef HAVE_UEYE_H
 # include <cantag/UEyeImageSource.hh>
 #endif
+#include <cantag/GetImageSource.hh>
 //////////////////////
 // output mechanisms
 #include <cantag/Keypress.hh>
