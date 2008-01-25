@@ -86,7 +86,7 @@ namespace Cantag {
 
   public:
 
-    V4LImageSource(char* deviceName, int channel);
+    V4LImageSource(const char* deviceName, int channel);
     virtual ~V4LImageSource();
     virtual Image<size,layout>* Next();
     inline int GetWidth() const { return m_image_width; }
@@ -103,7 +103,7 @@ namespace Cantag {
    *
    * Added Colour support: Alastair R. Beresford.
    */
-  template<Pix::Sze::Bpp size,Pix::Fmt::Layout layout> V4LImageSource<size,layout>::V4LImageSource(char* device, int channel) : 
+  template<Pix::Sze::Bpp size,Pix::Fmt::Layout layout> V4LImageSource<size,layout>::V4LImageSource(const char* device, int channel) : 
     m_handle(-1), m_mmap((unsigned char*)MAP_FAILED,-1),
     m_slots(NULL),m_images(NULL)
   {
