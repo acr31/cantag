@@ -506,7 +506,7 @@ namespace Cantag {
      * Attempts to construct a new image, reading a file from disk
      * Throws exception if file doesn't exist, or format is not understandable
      */
-    Image(char* filename) {s::Load(filename); };
+    Image(const char* filename) {s::Load(filename); };
 
     /**
      * Constructs an image from a MonochromeImage
