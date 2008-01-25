@@ -56,14 +56,10 @@ int main(int argc,char* argv[]) {
     ApplyTree(tree,FitQuadTangleConvexHull());
     ApplyTree(tree,FitQuadTangleRegression());
     ApplyTree(tree,TransformQuadTangleProjective());
-    std::cout << "Printing transform entity..." << std::endl;
     ApplyTree(tree,PrintEntityTransform(std::cout));
-    std::cout << "Done." << std::endl;
     ApplyTree(tree,Bind(SampleTagSquare(tag,camera),m));
     ApplyTree(tree,Decode<SquareTagType>());
-    std::cout << "Printing decode entity..." << std::endl;
-    ApplyTree(tree,PrintEntityDecode<36>(std::cout)); // getting errors here? make sure template arg is PAYLOAD_SIZE * PAYLOAD_SIZE
-    std::cout << "Done." << std::endl;
+    ApplyTree(tree,PrintEntityDecode<SquareTagType::PayloadSize>(std::cout));
     ApplyTree(tree,DrawEntitySample(output,camera,tag));
     ApplyTree(tree,TransformRotateToPayload(tag));
     ApplyTree(tree,DrawEntityTransform(output,camera));

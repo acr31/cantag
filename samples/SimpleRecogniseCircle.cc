@@ -50,7 +50,7 @@ int main(int argc,char* argv[]) {
     Tree<ComposedEntity<TL4(ContourEntity,ShapeEntity<Ellipse>,TransformEntity,DecodeEntity<CircleTagType::PayloadSize>) > > tree;
     Apply(m,ContourFollowerClearImageBorder());
     Apply(m,tree,ContourFollowerTree(tag));
-    ApplyTree(tree,DrawEntityContour(output));
+    //    ApplyTree(tree,DrawEntityContour(output));
     ApplyTree(tree,DistortionCorrectionSimple(camera));
     ApplyTree(tree,FitEllipseLS());
     ApplyTree(tree,TransformEllipseFull(tag.GetBullseyeOuterEdge()));
@@ -58,9 +58,10 @@ int main(int argc,char* argv[]) {
     ApplyTree(tree,RemoveNonConcentricEllipse(tag));
     ApplyTree(tree,Bind(TransformEllipseRotate(tag,camera),m));
     ApplyTree(tree,Bind(SampleTagCircle(tag,camera),m));
+    ApplyTree(tree,DrawEntitySample(output,camera,tag));
+    ApplyTree(tree,DrawEntityTransform(output,camera));
     ApplyTree(tree,Decode<CircleTagType>());
     ApplyTree(tree,TransformRotateToPayload(tag));
-    ApplyTree(tree,DrawEntityTransform(output,camera));
     output.Save("output.pnm");
     ApplyTree(tree,PrintEntity3DPosition<CircleTagType::PayloadSize>(std::cout,camera));
   }

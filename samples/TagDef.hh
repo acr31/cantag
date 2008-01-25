@@ -34,7 +34,7 @@ struct TestCircleCoder {
   typedef typename Cantag::TripOriginalCoder<RINGS*SECTORS,RINGS,2> TripCoder;
 #endif
   typedef typename Cantag::SCCCoder<RINGS,SECTORS,5,1> SCCCoder;  /* try rings = 5, sectors = 31 */
-  typedef ParityCoder Coder;
+  typedef TripCoder Coder;
 };
 
 struct CircleInnerTrip : public Cantag::TagCircle<2,16>, public TestCircleCoder<2,16>::Coder {
@@ -78,8 +78,8 @@ template<int SIZE>
 struct Square : public Cantag::TagSquare<SIZE>, public TestSquareCoder<SIZE>::Coder {};
 
 
-typedef CircleInnerOpt<2,20> CircleTagType;
-typedef Square<6> SquareTagType;
+typedef CircleSplitOpt<6,88> CircleTagType;
+typedef Square<23> SquareTagType;
 typedef CircleTagType TagType;
 
 #endif//TAGDEF_GUARD

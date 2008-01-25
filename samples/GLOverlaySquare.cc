@@ -89,7 +89,8 @@ int main(int argc,char* argv[]) {
 
     Camera camera;
     camera.SetIntrinsic(source->GetWidth(),source->GetWidth(),source->GetWidth()/2,source->GetHeight()/2,0);
-    GLOutputMechanism<GlutRenderWindow> g(display_width,display_height,source->GetWidth(),source->GetHeight(),camera);
+    //GLOutputMechanism<GlutRenderWindow> g(display_width,display_height,source->GetWidth(),source->GetHeight(),camera);
+    XDisplay<Pix::Sze::Byte1,Pix::Fmt::Grey8> g(display_width,display_height);
 
     time_t current_time = time(NULL);
     int fcount = 0;
@@ -115,7 +116,7 @@ int main(int argc,char* argv[]) {
       ApplyTree(tree,Bind(SampleTagSquare(tag,camera),m));
       ApplyTree(tree,Decode<SquareTagType>());
       ApplyTree(tree,TransformRotateToPayload(tag));
-      g.Draw(output,true);
+      g.Output(output);
 
       ++fcount;
       time_t new_time = time(NULL);
@@ -125,12 +126,12 @@ int main(int argc,char* argv[]) {
 	current_time = new_time;
 	fcount = 0;
       }
-      g.DrawText(0.9,0.95,fps_buf);
+      //      g.DrawText(0.9,0.95,fps_buf);
 
-      ApplyTree(tree,DrawOverlay(g));
+      //      ApplyTree(tree,DrawOverlay(g));
       
-      g.Flush();
-
+      //      g.Flush();
+      /*
       for(std::vector<Key::Code>::const_iterator i = g.GetKeypresses().begin();i!=g.GetKeypresses().end();++i) {
 	switch(*i) {
 	case Key::ESC:
@@ -139,6 +140,7 @@ int main(int argc,char* argv[]) {
 	  break;
 	}
       }
+      */
     }
   }
   catch (const char* exception) {
