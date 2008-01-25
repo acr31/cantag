@@ -42,14 +42,14 @@ namespace Cantag {
     /**
      * Create the image source, displaying the file given (jpg or bmp)
      */ 
-    FileImageSource(char* filename);
+    FileImageSource(const char* filename);
     virtual ~FileImageSource();
     Image<B,L>* Next();
     int GetWidth() const;
     int GetHeight() const;
   };
 
-  template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> FileImageSource<B,L>::FileImageSource(char* filename) : m_original(new Image<B,L>(filename)), m_buffer(new Image<B,L>(filename)) {}    
+  template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> FileImageSource<B,L>::FileImageSource(const char* filename) : m_original(new Image<B,L>(filename)), m_buffer(new Image<B,L>(filename)) {}    
   
   template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> int FileImageSource<B,L>::GetWidth() const {
     return m_original->GetWidth();
