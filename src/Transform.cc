@@ -142,6 +142,26 @@ namespace Cantag {
     m_transform[14] = 0.0;
   }
 
+#ifdef INCLUDE_TOMS_TRANSFORM_WRONGNESS 
+  void Transform::Apply(const FPoint& in, FPoint& out) const
+  {
+    float x, y;
+    Apply(in.x(), in.y(), 1.0, &x, &y);
+    out.x(x);
+    out.y(y);
+  }
+#endif
+  
+#ifdef INCLUDE_TOMS_TRANSFORM_WRONGNESS 
+  void Transform::Apply3D_MaybeWrong(const FPoint& in, FPoint& out) const
+  {
+  	float x, y;
+  	Apply(in.x(), in.y(), &x, &y); // equivalent to Apply(in.x(), in.y(), 0.0, &x, &y), I think
+  	out.x(x);
+  	out.y(y);
+  }
+#endif
+
   void Transform::Apply(float* points, int numpoints) const {
     for(int i=0;i<numpoints*2;i+=2) {
       Apply(points[i],points[i+1],points+i,points+i+1);
@@ -159,6 +179,7 @@ namespace Cantag {
   }
 
   void Transform::Invert() {
+  	
     float a[16]={0.0}, b[16]={0.0};
     // The inversion separates the rotation from the translation
     // and inverts them separately, the multiplies them together

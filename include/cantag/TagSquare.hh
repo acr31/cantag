@@ -43,7 +43,6 @@ namespace Cantag {
     static const int EdgeLength = SIZE;
     typedef QuadTangle Shape;
   private:
-    const float m_cell_width;
     const float m_cell_width_2;
     float m_cells_corner[SIZE*SIZE*2];
     int m_cell_indices[SIZE*SIZE];  // a mapping from col + SIZE*row to the index number of that cell in the payload array
@@ -80,7 +79,6 @@ namespace Cantag {
     TagSpec<SIZE*SIZE - ((SIZE*SIZE)%2)>(4,PayloadSize/4),
     ContourRestrictions(1,1,1),
     ConvexHullRestrictions(100000),
-    m_cell_width(2.f/(SIZE+2)), 
     m_cell_width_2(1.f/(SIZE+2)) {
     /* we read the tag in triangles:
      *

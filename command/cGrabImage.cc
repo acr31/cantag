@@ -62,8 +62,17 @@ int main(int argc,char* argv[]) {
 #else
       throw "Image source selection UEyeImageSource is not available";
 #endif
+    case 4:
+    {
+      if (argc < 4)
+        throw "Not enough arguments. They should be:\n\t1: '4' to indicate network image source\n\t2: number of images to capture\n\t3: IP address of camera";
+      const std::string ip_address = argv[3];
+      const std::string AXIS_URL = "/jpg/image.jpg?date=1&clock=1";
+      source = new NetworkImageSource(80, ip_address, AXIS_URL);
+      break;
+    }
     default:
-      throw "Unrecognised image source. Valid options are 0 - V4LImageSource; 1 - IEEE1394ImageSource version 1; 2 - IEEE1394ImageSource version 2; 3 - UEyeImageSource";
+      throw "Unrecognised image source. Valid options are 0 - V4LImageSource; 1 - IEEE1394ImageSource version 1; 2 - IEEE1394ImageSource version 2; 3 - UEyeImageSource; 4 - Axis network camera";
     }
 
     Image<Pix::Sze::Byte1,Pix::Fmt::Grey8>* image = NULL;

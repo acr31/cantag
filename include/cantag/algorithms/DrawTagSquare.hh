@@ -35,7 +35,7 @@
 namespace Cantag {
   
   /**
-   * Algorithm for drawing a circular tag to an image. This is a
+   * Algorithm for drawing a square tag to an image. This is a
    * helper object which you can create using the inline template
    * function DrawTagSquare which will infer template parameters for
    * you.

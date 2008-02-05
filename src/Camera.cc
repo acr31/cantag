@@ -103,6 +103,24 @@ namespace Cantag {
     }
   }
 
+	void Camera::NPCFToImage(FPoint& point) const
+	{
+		float f[2] = { point.x(), point.y() };
+		NPCFToImage(f, 1);
+		point.x(f[0]);
+		point.y(f[1]);
+	}
+	
+	void Camera::ImageToNPCF(FPoint& point) const
+	{
+		std::vector<float> f;
+		f.push_back(point.x());
+		f.push_back(point.y());
+		ImageToNPCF(f);
+		point.x(f[0]);
+		point.y(f[1]);
+	}
+
   /**
    * \todo currently ignores tangential parameters and r^6 coeff.
    * since inversion of these quantities is not straightforward

@@ -7,10 +7,14 @@ libcantag_la_SOURCES += Camera.cc
 libcantag_la_SOURCES += gaussianelimination.cc
 libcantag_la_SOURCES += Image.cc
 libcantag_la_SOURCES += FileImageSource.cc
+libcantag_la_SOURCES += NetworkImageSource.cc
 libcantag_la_SOURCES += polysolve.cc
 libcantag_la_SOURCES += Transform.cc
+libcantag_la_SOURCES += FriendlyTransform.cc
 libcantag_la_SOURCES += MonochromeImage.cc
 libcantag_la_SOURCES += GF4Poly.cc
+libcantag_la_SOURCES += TagAnalogue.cc
+libcantag_la_SOURCES += MultipleBasisCoords.cc
 libcantag_la_SOURCES += entities/ContourEntity.cc
 libcantag_la_SOURCES += algorithms/FitEllipseSimple.cc
 libcantag_la_SOURCES += algorithms/FitEllipseLS.cc
@@ -34,8 +38,11 @@ libcantag_la_SOURCES += algorithms/PrintEntity.cc
 libcantag_la_SOURCES += algorithms/FitQuadTangleRegression.cc
 libcantag_la_SOURCES += algorithms/SimulateMinDistance.cc
 libcantag_la_SOURCES += algorithms/SignalStrengthContour.cc
+libcantag_la_SOURCES += algorithms/SampleTagAnalogue.cc
 libcantag_la_SOURCES += algorithms/HoughTransform.cc
+libcantag_la_SOURCES += algorithms/DrawTagAnalogue.cc
 libcantag_la_SOURCES += AutoThresholdGlobal.cc
+libcantag_la_SOURCES += Timer.cc
 
 if HAVE_SYS_SOCKET_H
 if HAVE_NETINET_IN_H

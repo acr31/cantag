@@ -2,13 +2,18 @@ bin_PROGRAMS = DrawTagSVG
 bin_PROGRAMS += DrawTagImage
 bin_PROGRAMS += SimpleRecogniseCircle 
 bin_PROGRAMS += SimpleRecogniseSquare 
-
+bin_PROGRAMS += GLOverlayCircle 
+bin_PROGRAMS += GLOverlaySquare
+bin_PROGRAMS += SimpleRecogniseAnalogue
+bin_PROGRAMS += XOverlaySquare
+bin_PROGRAMS += DrawTagAnalogueImage
 
 DrawTagSVG_SOURCES  = DrawTagSVG.cc
 DrawTagImage_SOURCES = DrawTagImage.cc
+DrawTagAnalogueImage_SOURCES = DrawTagAnalogueImage.cc
 SimpleRecogniseCircle_SOURCES = SimpleRecogniseCircle.cc
 SimpleRecogniseSquare_SOURCES = SimpleRecogniseSquare.cc
-
+SimpleRecogniseAnalogue_SOURCES = SimpleRecogniseAnalogue.cc
 
 if HAVE_GL_GL_H
 if HAVELIB_GL

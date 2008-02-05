@@ -46,8 +46,8 @@ namespace Cantag {
 
 
   template<int BIT_COUNT, int CRC_BITS, int GRANULARITY> int CRCSymbolChunkCoder<BIT_COUNT,CRC_BITS,GRANULARITY>::DecodePayload(CyclicBitSet<BIT_COUNT>& data) const {
-
-    // Check the CRC on each block
+  	
+  	// Check the CRC on each block
     for (int j=0; j<BIT_COUNT/GRANULARITY; j++) {
       std::bitset<GRANULARITY-CRC_BITS> pl;
       for (int i=0; i<GRANULARITY-CRC_BITS; i++) pl[i]=data[j*GRANULARITY+i];
@@ -64,7 +64,7 @@ namespace Cantag {
     // rotate the code by increments of GRANULARITY until the first bit is a 1
     int rotation = 0;
     while(!data[0] && rotation < BIT_COUNT) {
-      data.RotateLeft(GRANULARITY);
+      data.RotateRight(GRANULARITY);
       rotation+=GRANULARITY;
     }
 
