@@ -59,7 +59,7 @@ namespace Cantag {
       //      vcos = DCOS(8,angle);
       //      vsin = DSIN(8,angle);
       vcos = cos(angle);
-      vsin = sin(angle);
+      vsin = -sin(angle);
     }
 
     /**
