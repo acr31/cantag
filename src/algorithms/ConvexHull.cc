@@ -68,7 +68,7 @@ namespace Cantag {
 	float x = V[i]-ix;
 	float y = V[i+1]-iy;
 	
-	assert(x<=0.0);
+	assert(x<=FLT_EPSILON);
 
 	int q=0;
 	if (y>0) q=0;
