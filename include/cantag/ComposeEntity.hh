@@ -84,8 +84,8 @@ namespace Cantag {
     template<class Dummy>
     class Check<TypeListEOL,Dummy> {
     public:
-      inline static bool CheckValid(int index, const ComposedEntity& me) { return false; }
-      inline static void SetValid(bool value, int index, ComposedEntity& me) {}
+      inline static bool CheckValid(int index, const ComposedEntity& me) { (void) index; (void) me; return false; }
+      inline static void SetValid(bool value, int index, ComposedEntity& me) { (void) value; (void) index; (void) me; }
     };
 
   public:

@@ -106,7 +106,7 @@ namespace Cantag {
      */
     ImageBase(unsigned int width, unsigned int height, unsigned int width_step, 
 	      unsigned int bpp, unsigned char* contents, bool own) :
-      m_width(width), m_height(height), m_width_step(width_step), m_bpp(m_bpp),
+      m_width(width), m_height(height), m_width_step(width_step), m_bpp(bpp),
       m_contents(contents), m_free_contents(own),  m_binary(false) {
       SetValid(true);
     }
@@ -637,6 +637,7 @@ namespace Cantag {
      * \todo size is ignored
      */
     inline void DrawPoint(int x,int y, const Pixel<layout>& colour, unsigned int pointsize) {
+      (void) pointsize;
       DrawPixel(x,y,colour);
       DrawPixel(x+1,y,colour);
       DrawPixel(x,y+1,colour);

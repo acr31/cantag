@@ -87,7 +87,7 @@ namespace Cantag {
 	moving_average = pixel + moving_average - (moving_average >> m_window_size);
 	int current_thresh = (moving_average + previous_line[j])>>1;
 	previous_line[j] = moving_average;      
-	bool value = (pixel << m_window_size+8) < (current_thresh * useoffset);
+	bool value = (pixel << (m_window_size + 8)) < (current_thresh * useoffset);
 	if (value) ++setpixels;
 	dest.SetPixel(j,i,value);
       }
@@ -100,7 +100,7 @@ namespace Cantag {
 	moving_average = pixel + moving_average - (moving_average >> m_window_size);
 	int current_thresh = (moving_average + previous_line[j])>>1;
 	previous_line[j] = moving_average;
-	bool value =  (pixel << m_window_size+8) < (current_thresh * useoffset);
+	bool value =  (pixel << (m_window_size + 8)) < (current_thresh * useoffset);
 	if (value) ++setpixels;
 	dest.SetPixel(j,i, value);
       }

@@ -108,6 +108,8 @@ namespace Cantag {
   }
 
   template<int RING_COUNT,int SECTOR_COUNT,int READ_COUNT> float TransformSelectEllipseObj<RING_COUNT,SECTOR_COUNT,READ_COUNT>::normalVectorConfidence(float normal1[3], float normal2[3]) const {
+    (void) normal1;
+    (void) normal2;
   
     //    float cosangle = normal1[0]*normal2[0]+normal1[1]*normal2[1]+normal1[2]*normal2[2];
 

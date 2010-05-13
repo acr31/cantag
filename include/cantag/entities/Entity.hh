@@ -52,7 +52,7 @@ namespace Cantag {
     ~LocatedEntity() {};
 
   private:
-    LocatedEntity(const LocatedEntity& copyme) {}
+    LocatedEntity(const LocatedEntity& copyme) { (void) copyme; }
   };
 
 }

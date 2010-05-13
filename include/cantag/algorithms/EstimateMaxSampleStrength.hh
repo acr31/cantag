@@ -52,6 +52,7 @@ namespace Cantag {
   }
 
   static float FindDistance(const MonochromeImage& image, bool sought, int startx, int starty, float current) {
+    (void) current;
     int radius = 1;
     while(radius<50 && !CheckPoints(image,sought,startx,starty,radius)) ++radius;
     return radius;

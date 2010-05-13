@@ -92,7 +92,7 @@ namespace Cantag {
      */
     void DrawText(float x, float y, const char* s,int r = 0, int g = 0, int b = 0, bool blank_bg = false);
 
-      void DrawBar(float height=0.1, int r=255, int g=255, int b=255);
+    void DrawBar(float height=0.1, int r=255, int g=255, int b=255);
   };
 
   template<class C> GLOutputMechanism<C>::GLOutputMechanism(int window_width, int window_height, 
@@ -375,6 +375,7 @@ namespace Cantag {
   }
   
   template<class C> void GLOutputMechanism<C>::DrawText(float x, float y, const char* s,int r, int g, int b, bool blank_bg) {
+    (void) blank_bg;
     glDisable(GL_LIGHTING);
 
     float xrange = m_gl_maxx - m_gl_minx;

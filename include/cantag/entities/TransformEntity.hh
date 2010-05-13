@@ -76,22 +76,22 @@ namespace Cantag {
     
     void Print(std::ostream& os) const
     {
-    	std::cout << "Printing TransformEntity" << std::endl;
-    	std::cout << "m_radius_error = " << m_radius_error << std::endl;
+    	os << "Printing TransformEntity" << std::endl;
+    	os << "m_radius_error = " << m_radius_error << std::endl;
     	for (std::list<Transform*>::const_iterator iter = m_transforms.begin(); iter != m_transforms.end(); ++iter)
     	{
     		Transform* transform = *iter;
-    		std::cout << "m_transforms's next member:";
+    		os << "m_transforms's next member:";
     		if (transform == NULL)
-    			std::cout << "NULL";
+    			os << "NULL";
     		else
     			transform->Print();
     	}
-    	std::cout << "Finished printing TransformEntity" << std::endl;
+    	os << "Finished printing TransformEntity" << std::endl;
     }
     
   private:
-    TransformEntity(const TransformEntity& copyme) {}
+    TransformEntity(const TransformEntity& copyme);
   };
 }
 #endif//TRANSFORM_ENTITY_GUARD

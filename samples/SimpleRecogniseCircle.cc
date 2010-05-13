@@ -34,6 +34,7 @@
 using namespace Cantag;
 
 int main(int argc,char* argv[]) {
+  assert(argc >= 2);
 
   try {
     CircleTagType tag;

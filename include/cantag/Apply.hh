@@ -201,11 +201,13 @@ namespace Cantag {
       public:
 	inline bool operator()(Algorithm& algorithm, const ComposedEntity& me, ReturnType& result) const {
 	  PRINTFUNCTION();
+	  (void) me;
 	  return _Apply_Fn0<Algorithm>(result,algorithm);
 	}
 
 	inline bool operator()(Algorithm& algorithm, const Tree<ComposedEntity>& me, ReturnType& result) const {
 	  PRINTFUNCTION();
+	  (void) me;
 	  return _Apply_Fn0<Algorithm>(result,algorithm);
 	}
 

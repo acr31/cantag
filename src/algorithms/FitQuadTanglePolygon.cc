@@ -223,6 +223,7 @@ namespace Cantag {
   FitQuadTanglePolygon::DPSplit(std::list<std::pair<std::pair<float,float>,int> >& fulllist,
 			     std::list<std::pair<std::pair<float,float>,int> >::iterator start,
 			     std::list<std::pair<std::pair<float,float>,int> >::iterator end) const {
+    (void) fulllist;
 
 #ifdef POLYGON_DEBUG
     int start_index = -1;

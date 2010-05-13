@@ -204,6 +204,7 @@ namespace Cantag {
   }
 
   template<int BIT_COUNT> void CyclicBitSet<BIT_COUNT>::RotateRight(size_t count) {
+    // FIXME: m_rotation is unsigned, so the below doesn't make sense
     m_rotation -= count;
     while (m_rotation < 0) m_rotation+=m_size;
   }

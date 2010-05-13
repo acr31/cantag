@@ -44,6 +44,7 @@ namespace Cantag {
 						 unsigned int camera_id,
 						 int numBuffers)
     : mFrame(0), mCamera(0), mWidth(width), mHeight(height), mImage(0)  {
+    (void) dc1394_framerate;
 
     dc1394_t* d = dc1394_new();
     dc1394camera_list_t* pList = NULL;

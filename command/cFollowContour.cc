@@ -29,6 +29,9 @@
 using namespace Cantag;
 
 int main(int argc,char* argv[]) {
+  (void) argc;
+  (void) argv;
+
   try {
     std::cin.exceptions(std::ios_base::eofbit|std::ios_base::badbit|std::ios_base::failbit);
     while(true) {

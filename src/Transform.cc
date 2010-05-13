@@ -74,7 +74,7 @@ namespace Cantag {
 
   }
  
-  Transform::Transform(float xc, float yc, float zc, float nx, float ny, float nz, char* dummy) : m_confidence(1.f) {
+  Transform::Transform(float xc, float yc, float zc, float nx, float ny, float nz, char*) : m_confidence(1.f) {
 
     float z0 = nx;
     float z1 = ny;

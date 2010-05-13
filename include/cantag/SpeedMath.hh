@@ -108,18 +108,22 @@ namespace Cantag {
   */
 
   static inline double DCOS(const int accuracy, const double x) {
+    (void) accuracy;
     return cos(x);
   }
 
   static inline double DSIN(const int accuracy, const double x) {
+    (void) accuracy;
     return sin(x);
   }
 
   static inline float FCOS(const int accuracy, const float x) {
+    (void) accuracy;
     return cos(x);
   }
 
   static inline float FSIN(const int accuracy, const float x) {
+    (void) accuracy;
     return sin(x);
   }
   /*
