@@ -33,11 +33,11 @@
 #include <cantag/ComposeEntity.hh>
 
 namespace Cantag {    
-    template<class TypeList> class TreeHelper : public TreeNode<typename TypeList::Head>, public TreeHelper<typename TypeList::Tail> {};
+    template<class C> class TreeHelper : public TreeNode<typename ComposedEntity<C>::Typelist::Head>, public TreeHelper<typename ComposedEntity<C>::Typelist::Tail> {};
     template<> class TreeHelper<TypeListEOL> {};
 
     template<class C>
-    class Tree<ComposedEntity<C> > : public TreeHelper<typename ComposedEntity<C>::Typelist> {
+    class Tree<ComposedEntity<C> > : public TreeHelper<C> {
     private:
       ComposedEntity<C> m_node;
       std::vector<Tree<ComposedEntity<C> >* > m_children;
@@ -93,16 +93,11 @@ namespace Cantag {
 	m_node.SetValid(valid); 
       }
 
-	ComposedEntity<C>* GetNode() {
-	    return &m_node;
-	}
-	
-	const ComposedEntity<C>* GetNode() const {
-	    return &m_node;
-	}
-	
-	std::vector<Tree<ComposedEntity<C> >*>& GetChildren() { return m_children; }
-	const std::vector<Tree<ComposedEntity<C> >*>& GetChildren() const { return m_children; }
+      ComposedEntity<C>* GetNode() { return &m_node; }
+      const ComposedEntity<C>* GetNode() const { return &m_node; }
+
+      std::vector<Tree<ComposedEntity<C> >*>& GetChildren() { return m_children; }
+      const std::vector<Tree<ComposedEntity<C> >*>& GetChildren() const { return m_children; }
 
       void SetProgress(int progress) { m_node.SetProgress(progress); }
       int GetProgress() { return m_node.GetProgress(); }

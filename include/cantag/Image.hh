@@ -888,31 +888,6 @@ namespace Cantag {
     ellipse_polygon_approx(points,0, numsteps, xc, yc ,width, height, angle_radians, colour, thickness, 0);
   }
 
-  /*
-   Image(const Image& c) : s::m_width(c.s::m_width), s::m_height(c.s::m_height), m_contents(new unsigned char[c.s::m_width_step*c.s::m_height]), m_free_contents(true), s::m_width_step(c.s::m_width_step), s::m_binary(c.s::m_binary) {
-    memcpy(m_contents,c.m_contents,s::m_width_step*s::m_height);
-  };
-  */
-  /*
-  template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> Image<type,layout>::Image(const MonochromeImage& mono, const char blackval) : 
-    ImageSpecialise<type,layout>(mono.GetWidth(),mono.GetHeight()) {
-
-     * Sadly gcc4 is too stupid to infer that parent class variables & methods exist
-     * so we have to manually tell the compiler where to find the names; 
-     * typedef makes this manual defn easier (well, at least more succinct).
-
-    typedef ImageSpecialise<type,layout> s;
-
-    for(unsigned int i=0;i<s::m_height;++i) {
-      PixRow<Pix::Fmt::Runtime> row=test.GetRow(y);
-      for(PixRow<Pix::Fmt::Runtime>::iterator x=row.begin(); x!= row.end(); ++x) { 
-	*data_pointer = mono.GetPixel(j,i) ? blackval : 0;
-	  ++data_pointer;
-	}
-      }
-  */
-
-
   template<Pix::Sze::Bpp type, Pix::Fmt::Layout layout> 
   void Image<type,layout>::DrawEllipseArc(int xc, int yc, 
 					  int  width, int height, 

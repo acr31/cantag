@@ -64,6 +64,7 @@ private:
 public:
 
   Ellipse(float a, float b, float c, float d, float e, float f);
+  virtual ~Ellipse() {}
 
   /**
    * Construct an ellipse centred on x0,y0.  width is the major axis

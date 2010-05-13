@@ -64,7 +64,7 @@ namespace Cantag {
     // rotate the code by increments of GRANULARITY until the first bit is a 1
     int rotation = 0;
     while(!data[0] && rotation < BIT_COUNT) {
-      data.RotateRight(GRANULARITY);
+      data.RotateLeft(GRANULARITY);
       rotation+=GRANULARITY;
     }
 
