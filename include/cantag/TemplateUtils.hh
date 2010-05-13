@@ -43,13 +43,14 @@ namespace Cantag {
   };
 
 #define TL0 Cantag::TypeListEOL
-#define TL1(x1) Cantag::TypeList<x1,Cantag::TypeListEOL>
-#define TL2(x1,x2) Cantag::TypeList<x1,Cantag::TypeList<x2,Cantag::TypeListEOL> >
-#define TL3(x1,x2,x3) Cantag::TypeList<x1,Cantag::TypeList<x2,Cantag::TypeList<x3,Cantag::TypeListEOL> > >
-#define TL4(x1,x2,x3,x4) Cantag::TypeList<x1,Cantag::TypeList<x2,Cantag::TypeList<x3,Cantag::TypeList<x4, Cantag::TypeListEOL> > > >
-#define TL5(x1,x2,x3,x4,x5) Cantag::TypeList<x1,Cantag::TypeList<x2,Cantag::TypeList<x3,Cantag::TypeList<x4, Cantag::TypeList<x5, Cantag::TypeListEOL> > > > >
-#define TL6(x1,x2,x3,x4,x5,x6) Cantag::TypeList<x1,Cantag::TypeList<x2,Cantag::TypeList<x3,Cantag::TypeList<x4, Cantag::TypeList<x5, Cantag::TypeList<x6,Cantag::TypeListEOL> > > > > >
-#define TL7(x1,x2,x3,x4,x5,x6,x7) Cantag::TypeList<x1,Cantag::TypeList<x2,Cantag::TypeList<x3,Cantag::TypeList<x4, Cantag::TypeList<x5, Cantag::TypeList<x6,Cantag::TypeList<x7,Cantag::TypeListEOL> > > > > > >
+#define TL1(x1) Cantag::TypeList<x1, TL0>
+#define TL2(x1, x2) Cantag::TypeList<x1, TL1(x2)>
+#define TL3(x1, x2, x3) Cantag::TypeList<x1, TL2(x2, x3)>
+#define TL4(x1, x2, x3, x4) Cantag::TypeList<x1, TL3(x2, x3, x4)>
+#define TL5(x1, x2, x3, x4, x5) Cantag::TypeList<x1, TL4(x2, x3, x4, x5)>
+#define TL6(x1, x2, x3, x4, x5, x6) Cantag::TypeList<x1, TL5(x2, x3, x4, x5, x6)>
+#define TL7(x1, x2, x3, x4, x5, x6, x7) Cantag::TypeList<x1, TL6(x2, x3, x4, x5, x6, x7)>
+#define TL8(x1, x2, x3, x4, x5, x6, x7, x8) Cantag::TypeList<x1, TL7(x2, x3, x4, x5, x6, x7, x8)>
 
   /**
    * Select the last element from a list of entities

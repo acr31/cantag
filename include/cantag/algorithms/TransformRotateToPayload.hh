@@ -61,6 +61,7 @@ namespace Cantag {
     Transform* t = transform.GetPreferredTransform();
     if (t == NULL) return false;
 
+    // get our most preferred set of data
     DecodeData* preferred = NULL;
     float conf = -1e10;
     for(typename std::vector<DecodeData*>::const_iterator i = decode.GetPayloads().begin();i != decode.GetPayloads().end();++i) {

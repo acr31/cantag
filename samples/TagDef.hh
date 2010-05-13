@@ -78,8 +78,8 @@ template<int SIZE>
 struct Square : public Cantag::TagSquare<SIZE>, public TestSquareCoder<SIZE>::Coder {};
 
 
-typedef CircleSplitOpt<6,88> CircleTagType;
-typedef Square<23> SquareTagType;
+typedef CircleSplitOpt<2,20> CircleTagType;
+typedef Square<6> SquareTagType;
 typedef CircleTagType TagType;
 
 #endif//TAGDEF_GUARD

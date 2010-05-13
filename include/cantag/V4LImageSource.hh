@@ -138,7 +138,7 @@ namespace Cantag {
 #endif
   
     // check if this is a capture device
-    if (capability.type & (VID_TYPE_CAPTURE == 0)) {
+    if ((capability.type & VID_TYPE_CAPTURE) == 0) {
       throw "V4L: This device is not capable of video capture";
     }
 

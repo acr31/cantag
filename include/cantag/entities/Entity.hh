@@ -40,21 +40,6 @@ namespace Cantag {
     bool IsValid() const { return m_valid; }
   };
 
-  
-  class CANTAG_EXPORT LocatedEntity : public Entity {
-  protected:    
-    float normal[3];
-    float location[3];
-    float angle;
-
-  public:
-    LocatedEntity() {};
-    ~LocatedEntity() {};
-
-  private:
-    LocatedEntity(const LocatedEntity& copyme) { (void) copyme; }
-  };
-
 }
 
 #endif//ENTITY_GUARD

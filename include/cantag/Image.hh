@@ -462,7 +462,7 @@ namespace Cantag {
     void Save(const char* filename) const;
 
     /**
-     * Mutltiply every point in the image by scalefactor and add on the
+     * Multiply every pixel value in the image by scalefactor and add on the
      * offset.
      */
     void ConvertScale(float scalefactor, int offset);
@@ -508,12 +508,6 @@ namespace Cantag {
      * Throws exception if file doesn't exist, or format is not understandable
      */
     Image(const char* filename) {s::Load(filename); };
-
-    /**
-     * Constructs an image from a MonochromeImage
-     * This function is deprecated. Please remove as soon as dependancies are gone
-     */
-    Image(const MonochromeImage& mono, const char blackval); 
 
     /**
      * Returns whether the argument has the same dimensions as this image.
@@ -1165,7 +1159,7 @@ namespace Cantag {
 	else {
 	  ++currentx;
 	}
-	if (parity) {
+	if (parity && (*j)->intx != currentx) {
 	  DrawPixel(currentx,scanline,colour);
 	}
       }

@@ -33,6 +33,8 @@ namespace Cantag {
    */
   template<Pix::Sze::Bpp B, Pix::Fmt::Layout L> class ImageSource {
   public:
+    virtual ~ImageSource() {}
+
     typedef Image<B,L> ImageType;
     static const Pix::Sze::Bpp PixSze = B;
     static const Pix::Fmt::Layout PixFmt = L;

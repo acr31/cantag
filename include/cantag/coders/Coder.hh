@@ -34,6 +34,8 @@ namespace Cantag {
   class Coder {
   public:  
     enum { PayloadSize = PAYLOAD_SIZE };
+
+    virtual ~Coder() {}
   
     /**
      * Alters the passed payload inorder to encode it.

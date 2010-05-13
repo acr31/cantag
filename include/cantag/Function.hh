@@ -39,9 +39,6 @@ namespace Cantag {
       ArgumentArity = Length<ArgList>::value,
       ReturnArity = Length<ResultList>::value
     };
-    bool OnlyValid;
-
-    Function() : OnlyValid(true) {}
   };
 
 }

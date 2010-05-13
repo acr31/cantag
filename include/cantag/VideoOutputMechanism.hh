@@ -1,8 +1,6 @@
 #ifndef VIDEO_OUTPUT_MECHANISM_HH
 #define  VIDEO_OUTPUT_MECHANISM_HH
 
-#include <Cantag.hh>
-
 #include <ffmpeg/avcodec.h>
 #include <ffmpeg/avformat.h>
 #include <cstdio>

@@ -59,7 +59,7 @@ namespace Cantag {
       //      vcos = DCOS(8,angle);
       //      vsin = DSIN(8,angle);
       vcos = cos(angle);
-      vsin = -sin(angle);
+      vsin = -sin(angle); // we put a minus sign here because the y-axis on a tag points downwards and the z-axis points into the tag (so we still have right-handed axes)
     }
 
     /**
