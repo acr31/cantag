@@ -65,48 +65,6 @@ namespace Cantag {
     };
 
     /**
-     * Apply the algorithm to source storing the result in dest_current.
-     * If it succeeds then create a new child of current and recurse
-     * with current as the parent node on the first child.  If this
-     * recursion returns true then create another child and repeat on
-     * the second child.  If it fails, then pass the first new child
-     * once more.
-     * 
-     * If it fails then recurse using dest_current as the child and
-     * creating new nodes in dest_parent.
-     *
-     * Return true if we successfully applied or if one of our children
-     * did
-     */
-    template<class Algorithm, class TreeType> bool _Apply_Tree_Tree(const Tree<TreeType>& source, 
-								    TreeNode<typename Nth<typename Algorithm::Results,0>::value >& dest_parent, 
-								    TreeNode<typename Nth<typename Algorithm::Results,0>::value >& dest_current, 
-								    const Algorithm& algorithm) {
-      PRINTFUNCTION();
-      bool result = Apply(*(source.GetNode()), *(dest_current.GetNode()),algorithm);
-      TreeNode<typename Nth<typename Algorithm::Results,0>::value >* parent;
-      TreeNode<typename Nth<typename Algorithm::Results,0>::value >* child;
-      if (result) {
-	parent = &dest_current;
-	child = parent->AddChild();
-      }
-      else {
-	parent = &dest_parent;
-	child = &dest_current;
-      }
-      bool child_result = false;
-      for(typename std::vector<Tree<TreeType>*>::const_iterator i = source.GetChildren().begin(); 
-	  i != source.GetChildren().end(); 
-	  ++i) {      
-	if (child_result) child = parent->AddChild();
-	child_result = _Apply_Tree_Tree(*(*i),*parent,*child,algorithm);
-	result |= child_result;
-      }
-      return result;
-    }
-
-    
-    /**
      * Apply this 0-ary function to the entity.  0-ary functions are
      * deemed to be in-place mutators and so the result must be valid in
      * order for the algorithm to be run.  The validity of the result is
@@ -116,9 +74,9 @@ namespace Cantag {
       PRINTFUNCTION();
       bool r = false;
       bool valid = result.IsValid();
-      if (!algorithm.OnlyValid || valid) {
+      if (valid) {
 	r = algorithm(result);
-	if (valid) result.SetValid(r);
+	result.SetValid(r);
       }
       return r;
     }
@@ -131,9 +89,9 @@ namespace Cantag {
       PRINTFUNCTION();
       bool r = false;
       bool valid = arg1.IsValid();
-      if (!algorithm.OnlyValid || valid) {
+      if (valid) {
 	r = algorithm(arg1,result);
-	if (valid) result.SetValid(r);
+	result.SetValid(r);
       }
       return r;
     }
@@ -142,22 +100,22 @@ namespace Cantag {
      * Apply this 2-ary function to the arguments (if both are valid)
      * and store the result in result and set its validity
      */
-    template<class Algorithm> bool _Apply_Fn2(const typename Nth<typename Algorithm::Arguments,0>::value& arg1, const typename Nth<typename Algorithm::Arguments,1>::value& arg2, typename Nth<typename Algorithm::Results,0>::value& result, const Algorithm& algorithm) {
+    template<class Algorithm> bool _Apply_Fn2(const typename Nth<typename Algorithm::Arguments,0>::value& arg1, const typename Nth<typename Algorithm::Arguments,1>::value& arg2, typename Nth<typename Algorithm::Results,0>::value& result, Algorithm& algorithm) {
       PRINTFUNCTION();
       bool r = false;
       bool valid = arg1.IsValid() && arg2.IsValid();
-      if (!algorithm.OnlyValid || valid) {
+      if (valid) {
 	r = algorithm(arg1,arg2,result);
-	if (valid) result.SetValid(r);
+	result.SetValid(r);
       }
       return r;
     }
 
-    template<class Algorithm> bool _Apply_Fn2_0(const typename Nth<typename Algorithm::Arguments,0>::value& arg1, const typename Nth<typename Algorithm::Arguments,1>::value& arg2,const Algorithm& algorithm) {
+    template<class Algorithm> bool _Apply_Fn2_0(const typename Nth<typename Algorithm::Arguments,0>::value& arg1, const typename Nth<typename Algorithm::Arguments,1>::value& arg2, Algorithm& algorithm) {
       PRINTFUNCTION();
       bool r = false;
       bool valid = arg1.IsValid() && arg2.IsValid();
-      if (!algorithm.OnlyValid || valid) {
+      if (valid) {
 	r = algorithm(arg1,arg2);
       }
       return r;
@@ -170,9 +128,9 @@ namespace Cantag {
       PRINTFUNCTION();
       bool r = false;
       bool valid = arg1.IsValid() && arg2.IsValid() && arg3.IsValid();
-      if (!algorithm.OnlyValid || valid) {
+      if (valid) {
 	r = algorithm(arg1,arg2,arg3,result);
-	if (valid) result.SetValid(r);
+	result.SetValid(r);
       }
       return r;
     }    
@@ -184,9 +142,9 @@ namespace Cantag {
       PRINTFUNCTION();
       bool r = false;
       bool valid = arg1.IsValid() && arg2.IsValid() && arg3.IsValid() && arg4.IsValid();
-      if (!algorithm.OnlyValid || valid) {
+      if (valid) {
 	r = algorithm(arg1,arg2,arg3,arg4,result);
-	if (valid) result.SetValid(r);
+	result.SetValid(r);
       }
       return r;
     }    
@@ -291,7 +249,7 @@ namespace Cantag {
 
     template<class List, class Algorithm> bool _Apply_ComposedEntity(ComposedEntity<List>& entity, Algorithm& algorithm) {    
       PRINTFUNCTION();
-      if (!algorithm.OnlyValid || entity.IsPipelineValid()) {
+      if (entity.IsPipelineValid()) {
 	typename Internal::ApplyHelperOuter<ComposedEntity<List> >::template ApplyHelper<Algorithm,typename Algorithm::FunctionType> a;
 	bool result = a(algorithm,entity,entity);	
 	Alternate<Algorithm,List,Length<typename Algorithm::Results>::value>::exec(entity,result);
@@ -302,7 +260,7 @@ namespace Cantag {
 
     template<class List, class Algorithm> bool _Apply_ComposedEntityTree(Tree<ComposedEntity<List> >& entity, Algorithm& algorithm) {
       PRINTFUNCTION();
-      if (!algorithm.OnlyValid || entity.IsPipelineValid()) {
+      if (entity.IsPipelineValid()) {
 	typename Internal::ApplyHelperOuter<ComposedEntity<List> >::template ApplyHelper<Algorithm,typename Algorithm::FunctionType> a;
 	if (Position<typename Nth<typename Algorithm::Results,0>::value,List>::value > entity.GetProgress()) {
 	  entity.SetProgress(Position<typename Nth<typename Algorithm::Results,0>::value,List>::value);
@@ -312,7 +270,7 @@ namespace Cantag {
       }
       return false;
     }
-  }
+  } // end namespace Internal
 
 
   template<class C, class Algorithm> inline bool ApplyTree(Tree<C>& tree, Algorithm& algorithm) {
@@ -332,17 +290,12 @@ namespace Cantag {
     return Internal::_Apply_Tree<const Tree<C>,const Algorithm>(tree,algorithm);
   }
 
-  template<class Algorithm> inline bool ApplyTree(const Tree<typename Nth<typename Algorithm::Arguments,0>::value>& source, 
-						  TreeNode<typename Nth<typename Algorithm::Results,0>::value>& dest, 
-						  const Algorithm& algorithm) {
-    PRINTFUNCTION();
-    return Internal::_Apply_Tree_Tree(source, dest,dest,algorithm);
-  }
-
+#if 0 // TOM: never seems to be used
   template<class List, class Algorithm> inline bool Apply(ComposedEntity<List>& entity, Algorithm& algorithm) {    
     PRINTFUNCTION();
     return Internal::_Apply_ComposedEntity(entity,algorithm);
   }
+#endif
 
   
   template<class Algorithm> inline bool Apply(typename Nth<typename Algorithm::Results,0>::value& result, const Algorithm& algorithm) {
