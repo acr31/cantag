@@ -44,6 +44,7 @@
 
 #include <cmath>
 #include <cassert>
+#include <cstring>
 
 namespace Cantag {
 

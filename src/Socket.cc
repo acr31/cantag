@@ -29,6 +29,8 @@
 
 #include <cantag/Socket.hh>
 #include <cerrno>
+#include <cstdio>
+#include <cstring>
 
 extern "C" {
 #include <sys/types.h>

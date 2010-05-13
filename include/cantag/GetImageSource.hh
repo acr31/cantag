@@ -38,11 +38,11 @@
 # include <cantag/GLImageSource.hh>
 #endif
 
-#if defined(HAVELIB_DC1394_V1) and defined(HAVE_DC1394_CONTROL_H_V1)
+#if defined(HAVE_DC1394_CONTROL_H_V1)
 # include <cantag/IEEE1394ImageSource_V1.hh>
 #endif
 
-#if defined(HAVELIB_DC1394_V2) and defined(HAVE_DC1394_CONTROL_H_V2)
+#if defined(HAVE_DC1394_CONTROL_H_V2)
 # include <cantag/IEEE1394ImageSource_V2.hh>
 #endif
 

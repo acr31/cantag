@@ -22,6 +22,7 @@
  * $Header$
  */
 
+#include <cstring>
 #include <map>
 
 #include <cantag/algorithms/ContourFollowerTree.hh>

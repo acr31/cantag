@@ -121,7 +121,7 @@ CANTAG_CHECK_LIB(gslcblas,cblas_caxpy,HAVELIB_GSLCBLAS,havelib_gslcblas)
 CANTAG_CHECK_LIB(gsl,gsl_multimin_diff,HAVELIB_GSL,havelib_gsl)
 CANTAG_CHECK_LIB(raw1394,raw1394_iso_stop,HAVELIB_RAW1394,havelib_raw1394)
 CANTAG_CHECK_LIB(dc1394_control,dc1394_dma_setup_capture,HAVELIB_DC1394_V1,havelib_dc1394_v1)
-CANTAG_CHECK_LIB(dc1394, dc1394_find_cameras,HAVELIB_DC1394_V2,havelib_dc1394_v2)
+CANTAG_CHECK_LIB(dc1394,dc1394_camera_enumerate,HAVELIB_DC1394_V2,havelib_dc1394_v2)
 CANTAG_CHECK_LIB(avcodec, img_convertno,HAVELIB_AVCODEC,havelib_avcodec)
 CANTAG_CHECK_LIB(avformat,av_register_allno ,HAVELIB_AVFORMAT,havelib_avformat)
 CANTAG_CHECK_LIB(z,uncompress ,HAVELIB_Z,havelib_z)
@@ -175,7 +175,7 @@ fi
 if test "$havelib_dc1394_v2$have_dc1394_control_h_v2" = "yesyes"; then
    echo "+ Enabled IEEE1394 API version 2"
 else
-   echo "| Disabled IEEE1943 API version 2"
+   echo "| Disabled IEEE1394 API version 2"
 fi
 
 

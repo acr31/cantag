@@ -28,6 +28,7 @@
 #include <cantag/Config.hh>
 
 #include <cassert>
+#include <cstring>
 #include <bitset>
 
 namespace Cantag {

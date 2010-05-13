@@ -68,7 +68,7 @@ namespace Cantag {
       unsigned char* m_mmap_start;
       int m_size;
     public:
-      MMapHandle(unsigned char* mmap_start, int size);
+      MMapHandle(unsigned char* mmap_start, int mmap_size);
       ~MMapHandle();
       unsigned char* Get();
       MMapHandle& SetHandle(unsigned char*,int);
@@ -138,7 +138,7 @@ namespace Cantag {
 #endif
   
     // check if this is a capture device
-    if (capability.type & VID_TYPE_CAPTURE == 0) {
+    if (capability.type & (VID_TYPE_CAPTURE == 0)) {
       throw "V4L: This device is not capable of video capture";
     }
 
@@ -324,7 +324,7 @@ namespace Cantag {
     return m_f_handle; 
   }
 
-  template<Pix::Sze::Bpp _size,Pix::Fmt::Layout layout> V4LImageSource<_size,layout>::MMapHandle::MMapHandle(unsigned char* mmap_start,int size) : m_mmap_start(mmap_start),m_size(size) {};
+  template<Pix::Sze::Bpp _size,Pix::Fmt::Layout layout> V4LImageSource<_size,layout>::MMapHandle::MMapHandle(unsigned char* mmap_start,int mmap_size) : m_mmap_start(mmap_start),m_size(mmap_size) {};
   
 template<Pix::Sze::Bpp _size,Pix::Fmt::Layout layout> typename V4LImageSource<_size,layout>::MMapHandle& V4LImageSource<_size,layout>::MMapHandle::SetHandle(unsigned char* f_handle, int size) { m_mmap_start = f_handle; m_size=size; return *this; }
 

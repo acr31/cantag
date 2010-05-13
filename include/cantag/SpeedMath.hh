@@ -22,6 +22,7 @@
 #define SPEEDMATH_GUARD
 
 #include <cmath>
+#include <cstdlib>
 #include <cassert>
 #include <limits>
 #include <iostream>

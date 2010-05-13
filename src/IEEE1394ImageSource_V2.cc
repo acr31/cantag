@@ -44,14 +44,17 @@ namespace Cantag {
 						 unsigned int camera_id,
 						 int numBuffers)
     : mFrame(0), mCamera(0), mWidth(width), mHeight(height), mImage(0)  {
+
+    dc1394_t* d = dc1394_new();
+    dc1394camera_list_t* pList = NULL;
     
-    if (dc1394_find_cameras(&mCameras,&mNumCameras)!=DC1394_SUCCESS) {
+    if (dc1394_camera_enumerate(d, &pList) != DC1394_SUCCESS) {
       throw "Failed to find any firewire cameras on the bus";
     }
 
     // Reset as much as we can!
     for (unsigned int i=0; i<mNumCameras; i++) {
-      dc1394_reset_camera(mCameras[i]);
+      dc1394_camera_reset(mCameras[i]);
       dc1394_reset_bus(mCameras[i]);
       dc1394_video_set_transmission(mCameras[i], DC1394_OFF);
       dc1394_capture_stop(mCameras[i]);
@@ -99,7 +102,7 @@ namespace Cantag {
   bool IEEE1394ImageSource_V2::Initialise(unsigned int camera_id, int numBuffers) {
     if (mInit[camera_id]) throw "IEEE1394ImageSource: Attempt to set feature after initialisation";
     if (camera_id >= mNumCameras) throw "Illegal camera ID";
-    if (dc1394_capture_setup(mCameras[camera_id], numBuffers)) {
+    if (dc1394_capture_setup(mCameras[camera_id], numBuffers, 0)) {
       throw "Failed to setup capture transmission";
     };
 
