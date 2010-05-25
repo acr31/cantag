@@ -30,7 +30,7 @@
 #include <DSVL.h>
 
 #include <cantag/Image.hh>
-#include <cantag/ImageSource.hh>
+#include <cantag/imagesources/ImageSource.hh>
 
 namespace Cantag {
 	class CANTAG_EXPORT DSVLImageSource : public ImageSource<Pix::Sze::Byte3,Pix::Fmt::RGB24> {

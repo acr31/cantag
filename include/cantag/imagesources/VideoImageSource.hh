@@ -35,7 +35,7 @@ extern "C" {
 # include <ffmpeg/avcodec.h>
 # include <ffmpeg/avformat.h>
 }
-#include <cantag/ImageSource.hh>
+#include <cantag/imagesources/ImageSource.hh>
 
 namespace Cantag {
 

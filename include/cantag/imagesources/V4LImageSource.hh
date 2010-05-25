@@ -31,7 +31,7 @@
 #error This version has been configured without Video4Linux support
 #endif
 
-#include <cantag/ImageSource.hh>
+#include <cantag/imagesources/ImageSource.hh>
 
 extern "C" {
 #include <linux/videodev.h> // for Video4Linux

@@ -27,7 +27,7 @@
 
 #ifdef HAVE_UEYE_H
 
-#include <cantag/UEyeImageSource.hh>
+#include <cantag/imagesources/UEyeImageSource.hh>
 
 namespace Cantag {
 

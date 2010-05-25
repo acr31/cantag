@@ -1,0 +1,11 @@
+cantagincludedir = $(includedir)/cantag/imagesources
+cantaginclude_HEADERS = ImageSource.hh
+cantaginclude_HEADERS += GLImageSource.hh
+cantaginclude_HEADERS += FileImageSource.hh
+cantaginclude_HEADERS += V4LImageSource.hh
+cantaginclude_HEADERS += IEEE1394ImageSource_V1.hh
+cantaginclude_HEADERS += IEEE1394ImageSource_V2.hh
+cantaginclude_HEADERS += VideoImageSource.hh
+cantaginclude_HEADERS += UEyeImageSource.hh
+cantaginclude_HEADERS += DSVLImageSource.hh
+cantaginclude_HEADERS += VFWImageSource.hh

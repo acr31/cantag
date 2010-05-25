@@ -30,7 +30,7 @@
 #endif
 
 #include <cantag/Config.hh>
-#include <cantag/ImageSource.hh>
+#include <cantag/imagesources/ImageSource.hh>
 
 extern "C" {
   #include <libraw1394/raw1394.h>

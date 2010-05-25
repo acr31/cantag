@@ -32,7 +32,7 @@
 #include <vfw.h>
 
 #include <cantag/Image.hh>
-#include <cantag/ImageSource.hh>
+#include <cantag/imagesources/ImageSource.hh>
 
 namespace Cantag {
 	class CANTAG_EXPORT VFWImageSource : public ImageSource<Pix::Sze::Byte1,Pix::Fmt::Grey8> {

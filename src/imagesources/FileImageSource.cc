@@ -21,7 +21,7 @@
 /**
  * $Header$
  */
-#include <cantag/FileImageSource.hh>
+#include <cantag/imagesources/FileImageSource.hh>
 
 namespace Cantag {
 

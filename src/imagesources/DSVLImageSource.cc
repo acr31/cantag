@@ -22,7 +22,7 @@
 
 #ifdef WIN32
 
-#include <cantag/DSVLImageSource.hh>
+#include <cantag/imagesources/DSVLImageSource.hh>
 
 namespace Cantag {
 

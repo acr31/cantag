@@ -146,9 +146,9 @@
 
 //////////////////////
 // image sources
-#include <cantag/FileImageSource.hh>
+#include <cantag/imagesources/FileImageSource.hh>
 #ifdef HAVE_LINUX_VIDEODEV_H
-# include <cantag/V4LImageSource.hh>
+# include <cantag/imagesources/V4LImageSource.hh>
 #endif
 #ifdef HAVE_GL_GL_H
 #ifdef HAVE_GL_GLU_H
@@ -156,7 +156,7 @@
 #ifdef HAVELIB_GL
 #ifdef HAVELIB_OSMESA
 #ifdef HAVELIB_GLU
-# include <cantag/GLImageSource.hh>
+# include <cantag/imagesources/GLImageSource.hh>
 #endif
 #endif
 #endif
@@ -166,24 +166,24 @@
 
 #ifdef HAVELIB_DC1394_V1
 #ifdef HAVE_DC1394_CONTROL_H_V1
-# include <cantag/IEEE1394ImageSource_V1.hh>
+# include <cantag/imagesources/IEEE1394ImageSource_V1.hh>
 #endif
 #endif
 
 #ifdef HAVELIB_DC1394_V2
 #ifdef HAVE_DC1394_CONTROL_H_V2
-# include <cantag/IEEE1394ImageSource_V2.hh>
+# include <cantag/imagesources/IEEE1394ImageSource_V2.hh>
 #endif
 #endif
 
 #ifdef WIN32
-# include <cantag/VFWImageSource.hh>
-# include <cantag/DSVLImageSource.hh>
+# include <cantag/imagesources/VFWImageSource.hh>
+# include <cantag/imagesources/DSVLImageSource.hh>
 #endif
 #ifdef HAVE_UEYE_H
-# include <cantag/UEyeImageSource.hh>
+# include <cantag/imagesources/UEyeImageSource.hh>
 #endif
-#include <cantag/GetImageSource.hh>
+#include <cantag/imagesources/GetImageSource.hh>
 //////////////////////
 // output mechanisms
 #include <cantag/Keypress.hh>

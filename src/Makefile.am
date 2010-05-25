@@ -6,12 +6,10 @@ libcantag_la_SOURCES += QuadTangle.cc
 libcantag_la_SOURCES += Camera.cc
 libcantag_la_SOURCES += gaussianelimination.cc
 libcantag_la_SOURCES += Image.cc
-libcantag_la_SOURCES += FileImageSource.cc
 libcantag_la_SOURCES += polysolve.cc
 libcantag_la_SOURCES += Transform.cc
 libcantag_la_SOURCES += MonochromeImage.cc
 libcantag_la_SOURCES += GF4Poly.cc
-libcantag_la_SOURCES += GetImageSource.cc
 libcantag_la_SOURCES += entities/ContourEntity.cc
 libcantag_la_SOURCES += algorithms/FitEllipseSimple.cc
 libcantag_la_SOURCES += algorithms/FitEllipseLS.cc
@@ -37,6 +35,7 @@ libcantag_la_SOURCES += algorithms/SimulateMinDistance.cc
 libcantag_la_SOURCES += algorithms/SignalStrengthContour.cc
 libcantag_la_SOURCES += algorithms/HoughTransform.cc
 libcantag_la_SOURCES += AutoThresholdGlobal.cc
+libcantag_la_SOURCES += imagesources/GetImageSource.cc
 
 if HAVE_SYS_SOCKET_H
 if HAVE_NETINET_IN_H
@@ -82,7 +81,7 @@ if HAVE_GL_OSMESA_H
 if HAVELIB_OSMESA
 if HAVE_GL_GLU_H
 if HAVELIB_GLU
-libcantag_la_SOURCES += GLImageSource.cc
+libcantag_la_SOURCES += imagesources/GLImageSource.cc
 endif
 endif
 endif
@@ -96,7 +95,7 @@ if HAVELIB_AVFORMAT
 if HAVELIB_Z
 if HAVE_AVCODEC_H
 if HAVE_AVFORMAT_H
-libcantag_la_SOURCES += VideoImageSource.cc
+libcantag_la_SOURCES += imagesources/VideoImageSource.cc
 endif
 endif
 endif
@@ -105,19 +104,19 @@ endif
 
 if HAVE_DC1394_CONTROL_H_V1
 if HAVELIB_DC1394_V1
-libcantag_la_SOURCES += IEEE1394ImageSource_V1.cc
+libcantag_la_SOURCES += imagesources/IEEE1394ImageSource_V1.cc
 endif
 endif
 
 if HAVE_DC1394_CONTROL_H_V2
 if HAVELIB_DC1394_V2
-libcantag_la_SOURCES += IEEE1394ImageSource_V2.cc
+libcantag_la_SOURCES += imagesources/IEEE1394ImageSource_V2.cc
 endif
 endif
 
 if HAVE_UEYE_H
 if HAVELIB_UEYE_API
-libcantag_la_SOURCES += UEyeImageSource.cc
+libcantag_la_SOURCES += imagesources/UEyeImageSource.cc
 endif
 endif
 

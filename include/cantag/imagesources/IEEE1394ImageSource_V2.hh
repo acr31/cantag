@@ -30,7 +30,7 @@
 #endif
 
 #include <cantag/Config.hh>
-#include <cantag/ImageSource.hh>
+#include <cantag/imagesources/ImageSource.hh>
 
 extern "C" {
   #include <dc1394/control.h>

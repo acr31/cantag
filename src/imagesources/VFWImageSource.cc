@@ -23,7 +23,7 @@
 #ifdef WIN32
 
 
-#include <cantag/VFWImageSource.hh>
+#include <cantag/imagesources/VFWImageSource.hh>
 
 namespace Cantag {
 

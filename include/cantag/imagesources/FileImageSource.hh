@@ -27,7 +27,7 @@
 
 #include <cantag/Config.hh>
 #include <cantag/Image.hh>
-#include <cantag/ImageSource.hh>
+#include <cantag/imagesources/ImageSource.hh>
 
 namespace Cantag {
   /**

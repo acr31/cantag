@@ -27,7 +27,7 @@
 #ifdef HAVELIB_DC1394_V1
 
 #include <cerrno>
-#include <cantag/IEEE1394ImageSource_V1.hh>
+#include <cantag/imagesources/IEEE1394ImageSource_V1.hh>
 
 #undef IEEE1394_DEBUG
 

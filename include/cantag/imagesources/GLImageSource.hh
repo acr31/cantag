@@ -51,7 +51,7 @@
 #error "libGLU.so is required for this component"
 #endif
 
-#include <cantag/ImageSource.hh>
+#include <cantag/imagesources/ImageSource.hh>
 #include <cantag/Image.hh>
 #include <cantag/Camera.hh>
 

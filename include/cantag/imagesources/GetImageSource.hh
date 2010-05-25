@@ -27,32 +27,32 @@
 #include <ostream>
 
 #include <cantag/Config.hh>
-#include <cantag/ImageSource.hh>
-#include <cantag/FileImageSource.hh>
+#include <cantag/imagesources/ImageSource.hh>
+#include <cantag/imagesources/FileImageSource.hh>
 
 #ifdef HAVE_LINUX_VIDEODEV_H
-# include <cantag/V4LImageSource.hh>
+# include <cantag/imagesources/V4LImageSource.hh>
 #endif
 
 #if defined(HAVE_GL_GL_H) and defined(HAVE_GL_GLU_H) and defined(HAVE_GL_OSMESA_H) and defined(HAVELIB_GL) and defined(HAVELIB_OSMESA) and defined(HAVELIB_GLU)
-# include <cantag/GLImageSource.hh>
+# include <cantag/imagesources/GLImageSource.hh>
 #endif
 
 #if defined(HAVE_DC1394_CONTROL_H_V1)
-# include <cantag/IEEE1394ImageSource_V1.hh>
+# include <cantag/imagesources/IEEE1394ImageSource_V1.hh>
 #endif
 
 #if defined(HAVE_DC1394_CONTROL_H_V2)
-# include <cantag/IEEE1394ImageSource_V2.hh>
+# include <cantag/imagesources/IEEE1394ImageSource_V2.hh>
 #endif
 
 #ifdef WIN32
-# include <cantag/VFWImageSource.hh>
-# include <cantag/DSVLImageSource.hh>
+# include <cantag/imagesources/VFWImageSource.hh>
+# include <cantag/imagesources/DSVLImageSource.hh>
 #endif
 
 #ifdef HAVE_UEYE_H
-# include <cantag/UEyeImageSource.hh>
+# include <cantag/imagesources/UEyeImageSource.hh>
 #endif
 
 namespace Cantag {

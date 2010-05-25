@@ -85,14 +85,12 @@ CANTAG_CHECK_HEADER(GL/glu.h,HAVE_GL_GLU_H,have_gl_glu_h)
 CANTAG_CHECK_HEADER(GL/glut.h,HAVE_GL_GLUT_H,have_gl_glut_h)
 CANTAG_CHECK_HEADER(GL/freeglut.h,HAVE_GL_FREEGLUT_H,have_gl_freeglut_h)
 CANTAG_CHECK_HEADER(GL/osmesa.h,HAVE_GL_OSMESA_H,have_gl_osmesa_h)
-CANTAG_CHECK_HEADER(boost/random.hpp,HAVE_BOOST_RANDOM_H,have_boost_random_h)
-CANTAG_CHECK_HEADER(boost/test/unit_test.hpp,HAVE_BOOST_TEST_UNITTEST_H,have_boost_test_unittest_h)
 CANTAG_CHECK_HEADER(gmpxx.h,HAVE_GMPXX_H,have_gmpxx_h)
-CANTAG_CHECK_HEADER(asm/types.h,HAVE_ASM_TYPES_H,have_asm_types_h)
 CANTAG_CHECK_HEADER(linux/videodev.h,HAVE_LINUX_VIDEODEV_H,have_linux_videodev_h)
 CANTAG_CHECK_HEADER(gsl/gsl_multimin.h,HAVE_GSL_MULTIMIN_H,have_gsl_multimin_h)
 CANTAG_CHECK_HEADER(libdc1394/dc1394_control.h,HAVE_DC1394_CONTROL_H_V1,have_dc1394_control_h_v1)
 CANTAG_CHECK_HEADER(dc1394/control.h,HAVE_DC1394_CONTROL_H_V2,have_dc1394_control_h_v2)
+dnl CANTAG_CHECK_HEADER(libdv/dv.h,HAVE_LIBDV_DV_H,have_libdv_dv_h)
 CANTAG_CHECK_HEADER(X11/Xlib.h,HAVE_X11_XLIB_H,have_x11_xlib_h)
 CANTAG_CHECK_HEADER(X11/Xutil.h,HAVE_X11_XUTIL_H,have_x11_xutil_h)
 CANTAG_CHECK_HEADER(ffmpeg/avcodec.h,HAVE_AVCODEC_H,have_avcodec_h)
@@ -113,15 +111,16 @@ CANTAG_CHECK_LIB(Magick++,MagickPlusPlusDestroyMagick,HAVELIB_MAGICKXX,havelib_m
 CANTAG_CHECK_LIB(GL,glFinish,HAVELIB_GL,havelib_gl)
 CANTAG_CHECK_LIB(OSMesa,OSMesaGetCurrentContext,HAVELIB_OSMESA,havelib_osmesa)
 CANTAG_CHECK_LIB(GLU,gluNewTess,HAVELIB_GLU,havelib_glu)
-CANTAG_CHECK_LIB(glu32,gluNewTess,HAVELIB_GLU32,havelib_glu32)
+dnl CANTAG_CHECK_LIB(glu32,gluNewTess,HAVELIB_GLU32,havelib_glu32)
 CANTAG_CHECK_LIB(glut,glutSolidTeapot,HAVELIB_GLUT,havelib_glut)
 CANTAG_CHECK_LIB(gmp,__gmpz_init,HAVELIB_GMP,havelib_gmp)
 CANTAG_CHECK_LIB(gmpxx,__gmpz_set,HAVELIB_GMPXX,havelib_gmpxx)
 CANTAG_CHECK_LIB(gslcblas,cblas_caxpy,HAVELIB_GSLCBLAS,havelib_gslcblas)
 CANTAG_CHECK_LIB(gsl,gsl_multimin_diff,HAVELIB_GSL,havelib_gsl)
-CANTAG_CHECK_LIB(raw1394,raw1394_iso_stop,HAVELIB_RAW1394,havelib_raw1394)
+dnl CANTAG_CHECK_LIB(raw1394,raw1394_iso_stop,HAVELIB_RAW1394,havelib_raw1394)
 CANTAG_CHECK_LIB(dc1394_control,dc1394_dma_setup_capture,HAVELIB_DC1394_V1,havelib_dc1394_v1)
 CANTAG_CHECK_LIB(dc1394,dc1394_camera_enumerate,HAVELIB_DC1394_V2,havelib_dc1394_v2)
+dnl CANTAG_CHECK_LIB(dv,dv_init,HAVELIB_DV,havelib_dv)
 CANTAG_CHECK_LIB(avcodec, img_convertno,HAVELIB_AVCODEC,havelib_avcodec)
 CANTAG_CHECK_LIB(avformat,av_register_allno ,HAVELIB_AVFORMAT,havelib_avformat)
 CANTAG_CHECK_LIB(z,uncompress ,HAVELIB_Z,havelib_z)
@@ -164,6 +163,7 @@ include/cantag/Makefile
 include/cantag/algorithms/Makefile
 include/cantag/coders/Makefile
 include/cantag/entities/Makefile
+include/cantag/imagesources/Makefile
 ])
 
 if test "$havecxx_covariant_returns" = "yes"; then

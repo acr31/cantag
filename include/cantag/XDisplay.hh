@@ -75,7 +75,7 @@ namespace Cantag {
 	m_shmgot = true;
 	
 	void* addr = shmat(m_shminfo.shmid,0,0);
-	if ((size_t) addr == -1) throw "Failed to attach shared memory segment";
+	if (addr == (void*) -1) throw "Failed to attach shared memory segment";
 	m_shminfo.shmaddr = m_image->data = (char*)addr;
 	m_shmat = true;
 	m_shminfo.readOnly = False;

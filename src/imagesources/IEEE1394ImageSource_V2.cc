@@ -27,7 +27,7 @@
 #ifdef HAVELIB_DC1394_V2
 
 #include <cerrno>
-#include <cantag/IEEE1394ImageSource_V2.hh>
+#include <cantag/imagesources/IEEE1394ImageSource_V2.hh>
 
 #undef IEEE1394_DEBUG
 
@@ -64,14 +64,14 @@ namespace Cantag {
       dc1394_video_set_mode(mCameras[i], (dc1394video_mode_t)dc1394_video_mode);
       
       // TOM
-      SetDC1394Feature(i, DC1394_FEATURE_BRIGHTNESS, 304, false);
+      /*SetDC1394Feature(i, DC1394_FEATURE_BRIGHTNESS, 304, false);
       SetDC1394Feature(i, DC1394_FEATURE_EXPOSURE, 511, false);
       SetDC1394Feature(i, DC1394_FEATURE_SHARPNESS, 82, false);
       SetDC1394Feature(i, DC1394_FEATURE_SATURATION, 90, false);
       SetDC1394Feature(i, DC1394_FEATURE_GAMMA, 1, false);
       SetDC1394Feature(i, DC1394_FEATURE_SHUTTER, 6, false);
       SetDC1394Feature(i, DC1394_FEATURE_GAIN, 87, false);
-      dc1394_feature_whitebalance_set_value(mCameras[i], 95, 87);
+      dc1394_feature_whitebalance_set_value(mCameras[i], 95, 87);*/
     }
 
 

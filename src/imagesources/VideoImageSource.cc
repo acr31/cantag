@@ -22,7 +22,7 @@
 
 #ifdef HAVE_AVCODEC
 
-#include <cantag/VideoImageSource.hh>
+#include <cantag/imagesources/VideoImageSource.hh>
 
 #include <stdio.h>
 #include <sys/time.h>

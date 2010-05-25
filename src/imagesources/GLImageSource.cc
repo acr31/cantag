@@ -26,7 +26,7 @@
 
 #ifdef HAVE_GL_OSMESA_H
 
-#include <cantag/GLImageSource.hh>
+#include <cantag/imagesources/GLImageSource.hh>
 #include <cantag/SpeedMath.hh>
 
 namespace Cantag {

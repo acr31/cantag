@@ -18,7 +18,7 @@
   Email: acr31@cam.ac.uk
 */
 
-#include <cantag/GetImageSource.hh>
+#include <cantag/imagesources/GetImageSource.hh>
 
 namespace Cantag {
   void GetImageSourceHelp(std::ostream& ostream) {
