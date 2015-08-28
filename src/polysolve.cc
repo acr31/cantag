@@ -235,8 +235,8 @@ namespace Cantag {
       double minval=vectsacc[0];
       int minnum=0;
       for (int i=1;i<3;i++) {
-	if (abs(vectsacc[i]+1) <= DBL_EPSILON) { //i.e. vectsacc[i] doesn't represent a nan
-	  if (minval > vectsacc[i] || abs(minval+1) <= DBL_EPSILON) { //minval=-1 return if isnan=1
+	if (abs(vectsacc[i]+1) <= dbl_epsilon()) { //i.e. vectsacc[i] doesn't represent a nan
+	  if (minval > vectsacc[i] || abs(minval+1) <= dbl_epsilon()) { //minval=-1 return if isnan=1
 	    minval = vectsacc[i]; 
 	    minnum=i;
 	  }

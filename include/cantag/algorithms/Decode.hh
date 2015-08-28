@@ -48,7 +48,7 @@ namespace Cantag {
 	  i != destination.GetPayloads().end(); 
 	  ++i) {
 	DecodeData* data = *i;	
-	int rotation = DecodePayload(data->payload);
+	int rotation = Coder::DecodePayload(data->payload);
 	data->bits_rotation = rotation;
 	if (rotation >= 0) {
 	  data->confidence = 1.f;

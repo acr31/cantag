@@ -2,9 +2,6 @@ bin_PROGRAMS = DrawTagSVG
 bin_PROGRAMS += DrawTagImage
 bin_PROGRAMS += SimpleRecogniseCircle 
 bin_PROGRAMS += SimpleRecogniseSquare 
-bin_PROGRAMS += GLOverlayCircle 
-bin_PROGRAMS += GLOverlaySquare
-bin_PROGRAMS += XOverlaySquare
 
 DrawTagSVG_SOURCES  = DrawTagSVG.cc
 DrawTagImage_SOURCES = DrawTagImage.cc

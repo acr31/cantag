@@ -187,8 +187,8 @@ namespace Cantag {
 
 #ifdef DECOMPOSE_DEBUG
     PROGRESS("scale= " << scale_factor);
-    PROGRESS("dbl= " << DBL_EPSILON);
-    PROGRESS("flt= " << FLT_EPSILON);
+    PROGRESS("dbl= " << dbl_epsilon());
+    PROGRESS("flt= " << flt_epsilon());
 #endif
   
     m_width = scale_factor / sqrt(lambda1);
@@ -197,11 +197,11 @@ namespace Cantag {
     m_y0 = y0;
 
     
-    if (abs(m_width - m_height) <= DBL_EPSILON) {
+    if (abs(m_width - m_height) <= dbl_epsilon()) {
       // obviously the angle is undefined if we have a circle
       m_angle_radians = 0.0;
     }
-    else if (abs(b) > DBL_EPSILON) { 
+    else if (abs(b) > dbl_epsilon()) { 
 	m_angle_radians = atan2( 2.0*(lambda1-a), b ); // DATAN	
     }
     else {

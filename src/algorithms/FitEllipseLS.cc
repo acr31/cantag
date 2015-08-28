@@ -115,7 +115,7 @@ namespace Cantag {
     PROGRESS("Determinant of S3 " << determinant);
 #endif    
 
-    if (abs(determinant) <= DBL_EPSILON) { 
+    if (abs(determinant) <= dbl_epsilon()) { 
 #ifdef ELLIPSE_DEBUG
       PROGRESS("Determinant of S3 is zero - no fit");
 #endif

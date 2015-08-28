@@ -50,7 +50,7 @@ namespace Cantag {
 	  i != destination.GetPayloads().end(); 
 	  ++i) {
 	DecodeData* data = *i;
-	bool result = EncodePayload(data->payload);
+	bool result = Coder::EncodePayload(data->payload);
 
 	if (result) {
 	  data->bits_rotation = 0;

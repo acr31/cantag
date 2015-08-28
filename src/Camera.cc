@@ -364,7 +364,7 @@ namespace Cantag {
     const Image<Pix::Sze::Byte1,Pix::Fmt::Grey8> source(image);
     for(unsigned int i=0;i<image.GetHeight();i++) {
       for(unsigned int j=0;j<image.GetWidth();j++) {
-	float points[] = {i,j};
+	float points[] = {(float)i,(float)j};
 	points[0] -= m_intrinsic[2];
 	points[1] -= m_intrinsic[5];
 	points[0] /= m_intrinsic[0];

@@ -35,7 +35,9 @@
 namespace Cantag {
 
   namespace Internal {
+    template<class List, class Algorithm> bool _Apply_ComposedEntity(ComposedEntity<List>& entity, Algorithm& algorithm);
 
+    template<class List, class Algorithm> bool _Apply_ComposedEntityTree(Tree<ComposedEntity<List> >& entity, Algorithm& algorithm);
     template<class Tree, class Arg,class Alg> struct ApplyAlternation {
       static inline bool Choose(Tree& arg,Alg& alg) {
 	PRINTFUNCTION();

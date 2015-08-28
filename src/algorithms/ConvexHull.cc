@@ -49,7 +49,7 @@ namespace Cantag {
 	iy=V[i+1];
 	index=i;
       }
-      else if (abs(V[i]-ix) <= FLT_EPSILON && V[i+1]>iy) {
+      else if (abs(V[i]-ix) <= flt_epsilon() && V[i+1]>iy) {
 	ix=V[i];
 	iy=V[i+1];
 	index=i;
@@ -68,14 +68,14 @@ namespace Cantag {
 	float x = V[i]-ix;
 	float y = V[i+1]-iy;
 	
-	assert(x<=FLT_EPSILON);
+	assert(x<=flt_epsilon());
 
 	int q=0;
 	if (y>0) q=0;
 	if (y<=0) q=1;
 
 	float val=y/x;
-	if (abs(x) <= FLT_EPSILON) val=1e10f;
+	if (abs(x) <= flt_epsilon()) val=1e10f;
 	std::map<float,int >::const_iterator ci = quadrants[q].find(val);
 	if (ci==quadrants[q].end()) {quadrants[q][val]=i/2;}
 	else {

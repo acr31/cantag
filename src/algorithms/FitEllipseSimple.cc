@@ -46,7 +46,7 @@ namespace Cantag {
     float majory = -1.f;
     float majorlen = 0.f;
     
-    float minorlen = FLT_INFINITY;
+    float minorlen = flt_infinity();
 
     for(std::vector<float>::const_iterator i = points.begin(); i!= points.end(); ++i) {
       float x = *i;
@@ -66,7 +66,7 @@ namespace Cantag {
     
     // check that we've set the values
     assert(majorlen != 0);
-    assert(minorlen != FLT_INFINITY);
+    assert(minorlen != flt_infinity());
 
     majorlen = sqrt(majorlen);
     minorlen = sqrt(minorlen);

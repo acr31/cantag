@@ -31,37 +31,19 @@
 
 #include <cantag/Config.hh>
 
-#define FLT_INFINITY std::numeric_limits<float>::infinity()
-#define DBL_INFINITY std::numeric_limits<double>::infinity()
-
-#ifndef FLT_EPSILON
-#define FLT_EPSILON std::numeric_limits<float>::epsilon()
-#endif
-
-#ifndef DBL_EPSILON
-#define DBL_EPSILON std::numeric_limits<double>::epsilon()
-#endif
-
-#ifndef INT_MAX
-#define INT_MAX std::numeric_limits<int>::max()
-#endif
-
-#ifndef INT_MIN
-#define INT_MIN std::numeric_limits<int>::min()
-#endif
-
-#ifndef FLT_MAX
-#define FLT_MAX std::numeric_limits<float>::max()
-#endif
-
-#ifndef FLT_MIN
-#define FLT_MIN stdly::numeric_limits<float>::min()
-#endif
-
 #define FLT_PI 3.14159265358979323846F
 #define DBL_PI 3.14159265358979323846
 
 namespace Cantag {
+
+  inline float flt_infinity() { return std::numeric_limits<float>::infinity(); }
+  inline double dbl_infinity() { return std::numeric_limits<double>::infinity(); }
+  inline float flt_epsilon() { return std::numeric_limits<float>::epsilon(); }
+  inline double dbl_epsilon() { return std::numeric_limits<double>::epsilon(); }
+  inline int int_max() { return std::numeric_limits<int>::max(); }
+  inline int int_min() { return std::numeric_limits<int>::min(); }
+  inline float flt_max() { return std::numeric_limits<float>::max(); }
+  inline float flt_min() { return std::numeric_limits<float>::min(); }
 
   template<unsigned int N> inline int t_fact() {
     return N*t_fact<N-1>();
@@ -171,7 +153,7 @@ namespace Cantag {
   private:
     float m_minimum;
   public:
-    Minima() : m_minimum(FLT_MAX) {}
+    Minima() : m_minimum(flt_max()) {}
     void UpdateMinima(float newval) { if (newval < m_minimum) m_minimum = newval; }
     float GetMinima() const { return m_minimum; }
   };
@@ -192,7 +174,7 @@ namespace Cantag {
   private:
     float m_maximum;
   public:
-    Maxima() : m_maximum(-FLT_INFINITY) {}
+    Maxima() : m_maximum(-flt_infinity()) {}
     void UpdateMaxima(float newval) { if (newval > m_maximum) m_maximum = newval; }
     float GetMaxima() const { return m_maximum; }
   };

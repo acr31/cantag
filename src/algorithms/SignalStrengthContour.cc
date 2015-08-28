@@ -28,7 +28,7 @@ namespace Cantag {
    */
   bool SignalStrengthContour::operator()(const ContourEntity& ce, SignalStrengthEntity& se) const {
 
-    float min_distance = FLT_MAX;
+    float min_distance = flt_max();
     
     const float centralX = ce.GetCentralX();
     const float centralY = ce.GetCentralY();

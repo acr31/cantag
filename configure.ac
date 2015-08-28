@@ -3,7 +3,7 @@ AC_INIT(cantag,1.0)
 AC_CONFIG_HEADERS(include/cantag/CompilationOptions.h)
 AC_CONFIG_SRCDIR(src/Makefile.am)
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 AC_LANG([C++])
 
 dnl Checks for programs.
@@ -126,6 +126,8 @@ CANTAG_CHECK_LIB(avcodec, img_convertno,HAVELIB_AVCODEC,havelib_avcodec)
 CANTAG_CHECK_LIB(avformat,av_register_allno ,HAVELIB_AVFORMAT,havelib_avformat)
 CANTAG_CHECK_LIB(z,uncompress ,HAVELIB_Z,havelib_z)
 CANTAG_CHECK_LIB(ueye_api,is_InitCamera ,HAVELIB_UEYE_API,havelib_ueye_api)
+CANTAG_CHECK_LIB(X11,XBell,HAVELIB_X11,havelib_x11)
+CANTAG_CHECK_LIB(Xext,XShmAttach,HAVELIB_XEXT,havelib_xext)
 
 LIBSSAVEACR31="$LIBS"
 LIBS="-lboost_unit_test_framework-gcc-1_32 $LIBS"

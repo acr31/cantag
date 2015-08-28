@@ -269,11 +269,11 @@ namespace Cantag {
 
 
     if (xratio > 1.f)  n[0]=1.f;
-    else if (abs(xratio-1.f)<=DBL_EPSILON) n[0]=0.f;
+    else if (abs(xratio-1.f)<=dbl_epsilon()) n[0]=0.f;
     else n[1]=-1.f;
 
     if (yratio > 1.f) n[1]=1.f;
-    else if (abs(yratio-1.f)<=FLT_EPSILON) n[1]=0.f;
+    else if (abs(yratio-1.f)<=flt_epsilon()) n[1]=0.f;
     else n[1]=-1.f;
 
     n[2]=1.f;

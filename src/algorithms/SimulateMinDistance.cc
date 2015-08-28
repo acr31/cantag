@@ -65,7 +65,7 @@ namespace Cantag {
     }
     
     double ComputeAll(double xc, double yc, double* corners, int corner_count) {
-      double currentMin = DBL_INFINITY;
+      double currentMin = dbl_infinity();
       for(int i=0;i<corner_count;++i) {
 	double min = ComputeDistance(xc,yc,
 				     corners[2*i],corners[2*i+1],
