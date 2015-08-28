@@ -2,6 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(cantag,1.0)
 AC_CONFIG_HEADERS(include/cantag/CompilationOptions.h)
 AC_CONFIG_SRCDIR(src/Makefile.am)
+AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
 AC_LANG([C++])
 
@@ -49,8 +50,8 @@ AC_DEFUN([CANTAG_CHECK_LIB],
 
 dnl check for covariant returns
 
-AC_COMPILE_IFELSE(
-AC_LANG_SOURCE([[
+AC_COMPILE_IFELSE([
+AC_LANG_SOURCE([
 struct A {
     virtual A* Get() = 0;
     virtual ~A() {};
@@ -65,7 +66,7 @@ struct C : public A, public B {
     virtual C* Get() = 0;
     virtual ~C() {};
 };
-]]),
+])],
 [
 AC_DEFINE(HAVECXX_COVARIANT_RETURNS,[],[Define this to 1 if your compiler properly supports covariant return types])
 havecxx_covariant_returns="yes"],
@@ -128,8 +129,8 @@ CANTAG_CHECK_LIB(ueye_api,is_InitCamera ,HAVELIB_UEYE_API,havelib_ueye_api)
 
 LIBSSAVEACR31="$LIBS"
 LIBS="-lboost_unit_test_framework-gcc-1_32 $LIBS"
-AC_LINK_IFELSE(
-AC_LANG_SOURCE([[
+AC_LINK_IFELSE([
+AC_LANG_SOURCE([
 #ifdef __cplusplus
  extern "C"
 #endif
@@ -139,7 +140,7 @@ int init_unit_test_suite(int, char**) {
    ;
    return 0;
 }
-]]),
+])],
 [
 AC_DEFINE(HAVELIB_BOOST_UNITTEST,[],[Define this to 1 if you have the libboost_unit_testframework library file])
 havelib_boost_unittest="yes"],
