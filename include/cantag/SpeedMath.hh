@@ -75,7 +75,7 @@ namespace Cantag {
   template<unsigned int COUNT, typename T>
   struct taylor<9,COUNT,T> {
     static T sin(const T x, const T accum) {
-      char error = "taylor:fact(17) > sizeof(unsigned int); do not use with N>8";
+      char const *error = "taylor:fact(17) > sizeof(unsigned int); do not use with N>8";
       throw error;
       return error;
     }
