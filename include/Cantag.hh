@@ -127,6 +127,7 @@
 #include <cantag/algorithms/Convolution.hh>
 #include <cantag/algorithms/ExtractGradients.hh>
 #include <cantag/algorithms/PixelMapping.hh>
+#include <cantag/algorithms/ConvertToGreyscale.hh>
 
 ///////////////////////
 // coders
