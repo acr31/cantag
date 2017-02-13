@@ -408,6 +408,35 @@ namespace Cantag {
   /**
    * Functions whose body is specific to BGR images are placed in here.
    */
+  template<> class CANTAG_EXPORT ImageSpecialise<Pix::Sze::Byte4,Pix::Fmt::BGRA32>
+    : public ImageBase<Pix::Fmt::BGRA32> {
+  public:
+      enum { SIZE = Pix::Sze::Byte4,
+          FORMAT = Pix::Fmt::BGRA32 };
+  protected:
+      ImageSpecialise(int w,int h)
+      : ImageBase<Pix::Fmt::BGRA32>() {
+          unsigned char* contents = new unsigned char[4*w*h];
+          memset(contents,255,4*w*h);
+          NewImage(w,h,4*w,4,contents,true);
+      }
+      
+      ImageSpecialise(int w, int h, int w_step, unsigned char* c)
+      : ImageBase<Pix::Fmt::BGRA32>(w,h,w_step,4,c,false) {}
+      
+      ImageSpecialise(const ImageSpecialise<Pix::Sze::Byte4,Pix::Fmt::BGRA32>& image)
+      : ImageBase<Pix::Fmt::BGRA32>(image) {}
+      
+      ImageSpecialise() : ImageBase<Pix::Fmt::BGRA32>() {}
+      
+  public:
+      //void Load(const char* filename);
+      //void Save(const char* filename) const;
+  };
+
+  /**
+   * Functions whose body is specific to BGR images are placed in here.
+   */
   template<> class CANTAG_EXPORT ImageSpecialise<Pix::Sze::Byte3,Pix::Fmt::Runtime> 
     : public ImageBase<Pix::Fmt::Runtime> { 
   public:
