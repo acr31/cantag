@@ -34,6 +34,12 @@ samples/SimpleRecogniseSquare
 samples/XOverlaySquare
 
 
+### OS X
+
+*.DS_Store
+.AppleDouble
+.LSOverride
+
 ### Xcode
 
 ## Build generated
