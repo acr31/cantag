@@ -1,0 +1,826 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2B6232221E52016B00BB0E37 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B6232201E52016B00BB0E37 /* ViewController.swift */; };
+		2B6232231E52016B00BB0E37 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B6232211E52016B00BB0E37 /* AppDelegate.swift */; };
+		2B62332F1E520D6D00BB0E37 /* AutoThresholdGlobal.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B62331C1E520D6D00BB0E37 /* AutoThresholdGlobal.cc */; };
+		2B6233301E520D6D00BB0E37 /* BigInt.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B62331D1E520D6D00BB0E37 /* BigInt.cc */; };
+		2B6233311E520D6D00BB0E37 /* Camera.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B62331E1E520D6D00BB0E37 /* Camera.cc */; };
+		2B6233321E520D6D00BB0E37 /* Ellipse.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B62331F1E520D6D00BB0E37 /* Ellipse.cc */; };
+		2B6233331E520D6D00BB0E37 /* EstimateTransform.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233201E520D6D00BB0E37 /* EstimateTransform.cc */; };
+		2B6233341E520D6D00BB0E37 /* gaussianelimination.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233211E520D6D00BB0E37 /* gaussianelimination.cc */; };
+		2B6233361E520D6D00BB0E37 /* GF4Poly.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233231E520D6D00BB0E37 /* GF4Poly.cc */; };
+		2B6233391E520D6D00BB0E37 /* Image.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233261E520D6D00BB0E37 /* Image.cc */; };
+		2B62333A1E520D6D00BB0E37 /* MonochromeImage.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233271E520D6D00BB0E37 /* MonochromeImage.cc */; };
+		2B62333B1E520D6D00BB0E37 /* polysolve.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233281E520D6D00BB0E37 /* polysolve.cc */; };
+		2B62333C1E520D6D00BB0E37 /* QuadTangle.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233291E520D6D00BB0E37 /* QuadTangle.cc */; };
+		2B62333D1E520D6D00BB0E37 /* Socket.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B62332A1E520D6D00BB0E37 /* Socket.cc */; };
+		2B62333F1E520D6D00BB0E37 /* testsym.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B62332C1E520D6D00BB0E37 /* testsym.cc */; };
+		2B6233401E520D6D00BB0E37 /* Transform.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B62332D1E520D6D00BB0E37 /* Transform.cc */; };
+		2B62335C1E520D7E00BB0E37 /* ContourFollowerClearImageBorder.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233421E520D7E00BB0E37 /* ContourFollowerClearImageBorder.cc */; };
+		2B62335D1E520D7E00BB0E37 /* ContourFollowerTree.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233431E520D7E00BB0E37 /* ContourFollowerTree.cc */; };
+		2B62335E1E520D7E00BB0E37 /* ConvexHull.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233441E520D7E00BB0E37 /* ConvexHull.cc */; };
+		2B62335F1E520D7E00BB0E37 /* DistortionCorrectionIterative.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233451E520D7E00BB0E37 /* DistortionCorrectionIterative.cc */; };
+		2B6233601E520D7E00BB0E37 /* DistortionCorrectionNone.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233461E520D7E00BB0E37 /* DistortionCorrectionNone.cc */; };
+		2B6233611E520D7E00BB0E37 /* DistortionCorrectionSimple.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233471E520D7E00BB0E37 /* DistortionCorrectionSimple.cc */; };
+		2B6233621E520D7E00BB0E37 /* DrawEntity.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233481E520D7E00BB0E37 /* DrawEntity.cc */; };
+		2B6233631E520D7E00BB0E37 /* FitEllipseLS.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233491E520D7E00BB0E37 /* FitEllipseLS.cc */; };
+		2B6233641E520D7E00BB0E37 /* FitEllipseSimple.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B62334A1E520D7E00BB0E37 /* FitEllipseSimple.cc */; };
+		2B6233651E520D7E00BB0E37 /* FitQuadTangleConvexHull.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B62334B1E520D7E00BB0E37 /* FitQuadTangleConvexHull.cc */; };
+		2B6233661E520D7E00BB0E37 /* FitQuadTangleCorner.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B62334C1E520D7E00BB0E37 /* FitQuadTangleCorner.cc */; };
+		2B6233671E520D7E00BB0E37 /* FitQuadTanglePolygon.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B62334D1E520D7E00BB0E37 /* FitQuadTanglePolygon.cc */; };
+		2B6233681E520D7E00BB0E37 /* FitQuadTangleRegression.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B62334E1E520D7E00BB0E37 /* FitQuadTangleRegression.cc */; };
+		2B6233691E520D7E00BB0E37 /* HoughTransform.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B62334F1E520D7E00BB0E37 /* HoughTransform.cc */; };
+		2B62336A1E520D7E00BB0E37 /* PrintEntity.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233501E520D7E00BB0E37 /* PrintEntity.cc */; };
+		2B62336B1E520D7E00BB0E37 /* RemoveNonConcentricEllipse.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233511E520D7E00BB0E37 /* RemoveNonConcentricEllipse.cc */; };
+		2B62336C1E520D7E00BB0E37 /* SignalStrengthContour.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233521E520D7E00BB0E37 /* SignalStrengthContour.cc */; };
+		2B62336D1E520D7E00BB0E37 /* SimulateMinDistance.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233531E520D7E00BB0E37 /* SimulateMinDistance.cc */; };
+		2B62336E1E520D7E00BB0E37 /* ThresholdAdaptive.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233541E520D7E00BB0E37 /* ThresholdAdaptive.cc */; };
+		2B62336F1E520D7E00BB0E37 /* ThresholdGlobal.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233551E520D7E00BB0E37 /* ThresholdGlobal.cc */; };
+		2B6233701E520D7E00BB0E37 /* TransformEllipseFull.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233561E520D7E00BB0E37 /* TransformEllipseFull.cc */; };
+		2B6233711E520D7E00BB0E37 /* TransformEllipseLinear.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233571E520D7E00BB0E37 /* TransformEllipseLinear.cc */; };
+		2B6233721E520D7E00BB0E37 /* TransformQuadTangleCyberCode.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233581E520D7E00BB0E37 /* TransformQuadTangleCyberCode.cc */; };
+		2B6233731E520D7E00BB0E37 /* TransformQuadTangleProjective.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233591E520D7E00BB0E37 /* TransformQuadTangleProjective.cc */; };
+		2B6233741E520D7E00BB0E37 /* TransformQuadTangleReduced.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B62335A1E520D7E00BB0E37 /* TransformQuadTangleReduced.cc */; };
+		2B6233751E520D7E00BB0E37 /* TransformQuadTangleSpaceSearch.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B62335B1E520D7E00BB0E37 /* TransformQuadTangleSpaceSearch.cc */; };
+		2B6233771E520D8F00BB0E37 /* ContourEntity.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B6233761E520D8F00BB0E37 /* ContourEntity.cc */; };
+		2B7110E61E54AD38006AFDBC /* CantagWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2B7110E21E54AD38006AFDBC /* CantagWrapper.mm */; };
+		2B7110E71E54AD38006AFDBC /* CantagOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7110E41E54AD38006AFDBC /* CantagOutput.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		2B6232081E51FEBB00BB0E37 /* Cantag.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cantag.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2B6232201E52016B00BB0E37 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ViewController.swift; path = Source/ViewController.swift; sourceTree = "<group>"; };
+		2B6232211E52016B00BB0E37 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Source/AppDelegate.swift; sourceTree = "<group>"; };
+		2B6232241E52021500BB0E37 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Resources/Info.plist; sourceTree = "<group>"; };
+		2B6232251E52021500BB0E37 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Resources/Assets.xcassets; sourceTree = "<group>"; };
+		2B62331C1E520D6D00BB0E37 /* AutoThresholdGlobal.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AutoThresholdGlobal.cc; path = ../../src/AutoThresholdGlobal.cc; sourceTree = "<group>"; };
+		2B62331D1E520D6D00BB0E37 /* BigInt.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BigInt.cc; path = ../../src/BigInt.cc; sourceTree = "<group>"; };
+		2B62331E1E520D6D00BB0E37 /* Camera.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Camera.cc; path = ../../src/Camera.cc; sourceTree = "<group>"; };
+		2B62331F1E520D6D00BB0E37 /* Ellipse.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ellipse.cc; path = ../../src/Ellipse.cc; sourceTree = "<group>"; };
+		2B6233201E520D6D00BB0E37 /* EstimateTransform.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EstimateTransform.cc; path = ../../src/EstimateTransform.cc; sourceTree = "<group>"; };
+		2B6233211E520D6D00BB0E37 /* gaussianelimination.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gaussianelimination.cc; path = ../../src/gaussianelimination.cc; sourceTree = "<group>"; };
+		2B6233231E520D6D00BB0E37 /* GF4Poly.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GF4Poly.cc; path = ../../src/GF4Poly.cc; sourceTree = "<group>"; };
+		2B6233261E520D6D00BB0E37 /* Image.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Image.cc; path = ../../src/Image.cc; sourceTree = "<group>"; };
+		2B6233271E520D6D00BB0E37 /* MonochromeImage.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MonochromeImage.cc; path = ../../src/MonochromeImage.cc; sourceTree = "<group>"; };
+		2B6233281E520D6D00BB0E37 /* polysolve.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = polysolve.cc; path = ../../src/polysolve.cc; sourceTree = "<group>"; };
+		2B6233291E520D6D00BB0E37 /* QuadTangle.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = QuadTangle.cc; path = ../../src/QuadTangle.cc; sourceTree = "<group>"; };
+		2B62332A1E520D6D00BB0E37 /* Socket.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Socket.cc; path = ../../src/Socket.cc; sourceTree = "<group>"; };
+		2B62332C1E520D6D00BB0E37 /* testsym.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsym.cc; path = ../../src/testsym.cc; sourceTree = "<group>"; };
+		2B62332D1E520D6D00BB0E37 /* Transform.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Transform.cc; path = ../../src/Transform.cc; sourceTree = "<group>"; };
+		2B6233421E520D7E00BB0E37 /* ContourFollowerClearImageBorder.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContourFollowerClearImageBorder.cc; path = ../../src/algorithms/ContourFollowerClearImageBorder.cc; sourceTree = "<group>"; };
+		2B6233431E520D7E00BB0E37 /* ContourFollowerTree.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContourFollowerTree.cc; path = ../../src/algorithms/ContourFollowerTree.cc; sourceTree = "<group>"; };
+		2B6233441E520D7E00BB0E37 /* ConvexHull.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ConvexHull.cc; path = ../../src/algorithms/ConvexHull.cc; sourceTree = "<group>"; };
+		2B6233451E520D7E00BB0E37 /* DistortionCorrectionIterative.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DistortionCorrectionIterative.cc; path = ../../src/algorithms/DistortionCorrectionIterative.cc; sourceTree = "<group>"; };
+		2B6233461E520D7E00BB0E37 /* DistortionCorrectionNone.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DistortionCorrectionNone.cc; path = ../../src/algorithms/DistortionCorrectionNone.cc; sourceTree = "<group>"; };
+		2B6233471E520D7E00BB0E37 /* DistortionCorrectionSimple.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DistortionCorrectionSimple.cc; path = ../../src/algorithms/DistortionCorrectionSimple.cc; sourceTree = "<group>"; };
+		2B6233481E520D7E00BB0E37 /* DrawEntity.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DrawEntity.cc; path = ../../src/algorithms/DrawEntity.cc; sourceTree = "<group>"; };
+		2B6233491E520D7E00BB0E37 /* FitEllipseLS.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FitEllipseLS.cc; path = ../../src/algorithms/FitEllipseLS.cc; sourceTree = "<group>"; };
+		2B62334A1E520D7E00BB0E37 /* FitEllipseSimple.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FitEllipseSimple.cc; path = ../../src/algorithms/FitEllipseSimple.cc; sourceTree = "<group>"; };
+		2B62334B1E520D7E00BB0E37 /* FitQuadTangleConvexHull.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FitQuadTangleConvexHull.cc; path = ../../src/algorithms/FitQuadTangleConvexHull.cc; sourceTree = "<group>"; };
+		2B62334C1E520D7E00BB0E37 /* FitQuadTangleCorner.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FitQuadTangleCorner.cc; path = ../../src/algorithms/FitQuadTangleCorner.cc; sourceTree = "<group>"; };
+		2B62334D1E520D7E00BB0E37 /* FitQuadTanglePolygon.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FitQuadTanglePolygon.cc; path = ../../src/algorithms/FitQuadTanglePolygon.cc; sourceTree = "<group>"; };
+		2B62334E1E520D7E00BB0E37 /* FitQuadTangleRegression.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FitQuadTangleRegression.cc; path = ../../src/algorithms/FitQuadTangleRegression.cc; sourceTree = "<group>"; };
+		2B62334F1E520D7E00BB0E37 /* HoughTransform.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HoughTransform.cc; path = ../../src/algorithms/HoughTransform.cc; sourceTree = "<group>"; };
+		2B6233501E520D7E00BB0E37 /* PrintEntity.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PrintEntity.cc; path = ../../src/algorithms/PrintEntity.cc; sourceTree = "<group>"; };
+		2B6233511E520D7E00BB0E37 /* RemoveNonConcentricEllipse.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RemoveNonConcentricEllipse.cc; path = ../../src/algorithms/RemoveNonConcentricEllipse.cc; sourceTree = "<group>"; };
+		2B6233521E520D7E00BB0E37 /* SignalStrengthContour.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SignalStrengthContour.cc; path = ../../src/algorithms/SignalStrengthContour.cc; sourceTree = "<group>"; };
+		2B6233531E520D7E00BB0E37 /* SimulateMinDistance.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SimulateMinDistance.cc; path = ../../src/algorithms/SimulateMinDistance.cc; sourceTree = "<group>"; };
+		2B6233541E520D7E00BB0E37 /* ThresholdAdaptive.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThresholdAdaptive.cc; path = ../../src/algorithms/ThresholdAdaptive.cc; sourceTree = "<group>"; };
+		2B6233551E520D7E00BB0E37 /* ThresholdGlobal.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThresholdGlobal.cc; path = ../../src/algorithms/ThresholdGlobal.cc; sourceTree = "<group>"; };
+		2B6233561E520D7E00BB0E37 /* TransformEllipseFull.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TransformEllipseFull.cc; path = ../../src/algorithms/TransformEllipseFull.cc; sourceTree = "<group>"; };
+		2B6233571E520D7E00BB0E37 /* TransformEllipseLinear.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TransformEllipseLinear.cc; path = ../../src/algorithms/TransformEllipseLinear.cc; sourceTree = "<group>"; };
+		2B6233581E520D7E00BB0E37 /* TransformQuadTangleCyberCode.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TransformQuadTangleCyberCode.cc; path = ../../src/algorithms/TransformQuadTangleCyberCode.cc; sourceTree = "<group>"; };
+		2B6233591E520D7E00BB0E37 /* TransformQuadTangleProjective.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TransformQuadTangleProjective.cc; path = ../../src/algorithms/TransformQuadTangleProjective.cc; sourceTree = "<group>"; };
+		2B62335A1E520D7E00BB0E37 /* TransformQuadTangleReduced.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TransformQuadTangleReduced.cc; path = ../../src/algorithms/TransformQuadTangleReduced.cc; sourceTree = "<group>"; };
+		2B62335B1E520D7E00BB0E37 /* TransformQuadTangleSpaceSearch.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TransformQuadTangleSpaceSearch.cc; path = ../../src/algorithms/TransformQuadTangleSpaceSearch.cc; sourceTree = "<group>"; };
+		2B6233761E520D8F00BB0E37 /* ContourEntity.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ContourEntity.cc; path = ../../src/entities/ContourEntity.cc; sourceTree = "<group>"; };
+		2B6233781E520DA400BB0E37 /* Cantag.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Cantag.hh; path = ../../include/Cantag.hh; sourceTree = "<group>"; };
+		2B6233791E520DC600BB0E37 /* Aggregation.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Aggregation.hh; path = ../../include/cantag/Aggregation.hh; sourceTree = "<group>"; };
+		2B62337A1E520DC600BB0E37 /* Apply.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Apply.hh; path = ../../include/cantag/Apply.hh; sourceTree = "<group>"; };
+		2B62337B1E520DC600BB0E37 /* Array.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Array.hh; path = ../../include/cantag/Array.hh; sourceTree = "<group>"; };
+		2B62337C1E520DC600BB0E37 /* AutoThresholdGlobal.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = AutoThresholdGlobal.hh; path = ../../include/cantag/AutoThresholdGlobal.hh; sourceTree = "<group>"; };
+		2B62337D1E520DC600BB0E37 /* BigInt.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = BigInt.hh; path = ../../include/cantag/BigInt.hh; sourceTree = "<group>"; };
+		2B62337E1E520DC600BB0E37 /* Bind.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Bind.hh; path = ../../include/cantag/Bind.hh; sourceTree = "<group>"; };
+		2B62337F1E520DC600BB0E37 /* Camera.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Camera.hh; path = ../../include/cantag/Camera.hh; sourceTree = "<group>"; };
+		2B6233801E520DC600BB0E37 /* ComposeEntity.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ComposeEntity.hh; path = ../../include/cantag/ComposeEntity.hh; sourceTree = "<group>"; };
+		2B6233811E520DC600BB0E37 /* ComposeEntityTree.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ComposeEntityTree.hh; path = ../../include/cantag/ComposeEntityTree.hh; sourceTree = "<group>"; };
+		2B6233821E520DC600BB0E37 /* Config.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Config.hh; path = ../../include/cantag/Config.hh; sourceTree = "<group>"; };
+		2B6233831E520DC600BB0E37 /* ContourRestrictions.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ContourRestrictions.hh; path = ../../include/cantag/ContourRestrictions.hh; sourceTree = "<group>"; };
+		2B6233841E520DC600BB0E37 /* ConvexHullRestrictions.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ConvexHullRestrictions.hh; path = ../../include/cantag/ConvexHullRestrictions.hh; sourceTree = "<group>"; };
+		2B6233851E520DC600BB0E37 /* ConvolutionFilter.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ConvolutionFilter.hh; path = ../../include/cantag/ConvolutionFilter.hh; sourceTree = "<group>"; };
+		2B6233861E520DC600BB0E37 /* Correspondence.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Correspondence.hh; path = ../../include/cantag/Correspondence.hh; sourceTree = "<group>"; };
+		2B6233871E520DC600BB0E37 /* CyclicBitSet.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CyclicBitSet.hh; path = ../../include/cantag/CyclicBitSet.hh; sourceTree = "<group>"; };
+		2B6233881E520DC600BB0E37 /* Ellipse.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Ellipse.hh; path = ../../include/cantag/Ellipse.hh; sourceTree = "<group>"; };
+		2B6233891E520DC600BB0E37 /* EllipseRestrictions.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = EllipseRestrictions.hh; path = ../../include/cantag/EllipseRestrictions.hh; sourceTree = "<group>"; };
+		2B62338A1E520DC600BB0E37 /* EntityTree.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = EntityTree.hh; path = ../../include/cantag/EntityTree.hh; sourceTree = "<group>"; };
+		2B62338B1E520DC600BB0E37 /* EstimateTransform.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = EstimateTransform.hh; path = ../../include/cantag/EstimateTransform.hh; sourceTree = "<group>"; };
+		2B62338C1E520DC600BB0E37 /* Function.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Function.hh; path = ../../include/cantag/Function.hh; sourceTree = "<group>"; };
+		2B62338D1E520DC600BB0E37 /* gaussianelimination.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = gaussianelimination.hh; path = ../../include/cantag/gaussianelimination.hh; sourceTree = "<group>"; };
+		2B62338E1E520DC600BB0E37 /* GF4Poly.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = GF4Poly.hh; path = ../../include/cantag/GF4Poly.hh; sourceTree = "<group>"; };
+		2B6233921E520DC600BB0E37 /* Image.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Image.hh; path = ../../include/cantag/Image.hh; sourceTree = "<group>"; };
+		2B6233931E520DC600BB0E37 /* Keypress.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Keypress.hh; path = ../../include/cantag/Keypress.hh; sourceTree = "<group>"; };
+		2B6233941E520DC600BB0E37 /* LocatedObject.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = LocatedObject.hh; path = ../../include/cantag/LocatedObject.hh; sourceTree = "<group>"; };
+		2B6233951E520DC600BB0E37 /* MonochromeImage.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MonochromeImage.hh; path = ../../include/cantag/MonochromeImage.hh; sourceTree = "<group>"; };
+		2B6233961E520DC600BB0E37 /* Pixel.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Pixel.hh; path = ../../include/cantag/Pixel.hh; sourceTree = "<group>"; };
+		2B6233971E520DC600BB0E37 /* PixRow.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = PixRow.hh; path = ../../include/cantag/PixRow.hh; sourceTree = "<group>"; };
+		2B6233981E520DC600BB0E37 /* Point.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Point.hh; path = ../../include/cantag/Point.hh; sourceTree = "<group>"; };
+		2B6233991E520DC600BB0E37 /* polysolve.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = polysolve.hh; path = ../../include/cantag/polysolve.hh; sourceTree = "<group>"; };
+		2B62339A1E520DC600BB0E37 /* QuadTangle.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = QuadTangle.hh; path = ../../include/cantag/QuadTangle.hh; sourceTree = "<group>"; };
+		2B62339B1E520DC600BB0E37 /* ROI.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ROI.hh; path = ../../include/cantag/ROI.hh; sourceTree = "<group>"; };
+		2B62339C1E520DC600BB0E37 /* Socket.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Socket.hh; path = ../../include/cantag/Socket.hh; sourceTree = "<group>"; };
+		2B62339D1E520DC600BB0E37 /* SpeedMath.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SpeedMath.hh; path = ../../include/cantag/SpeedMath.hh; sourceTree = "<group>"; };
+		2B62339E1E520DC600BB0E37 /* TagCircle.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TagCircle.hh; path = ../../include/cantag/TagCircle.hh; sourceTree = "<group>"; };
+		2B62339F1E520DC600BB0E37 /* TagCircleInner.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TagCircleInner.hh; path = ../../include/cantag/TagCircleInner.hh; sourceTree = "<group>"; };
+		2B6233A01E520DC600BB0E37 /* TagCircleOuter.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TagCircleOuter.hh; path = ../../include/cantag/TagCircleOuter.hh; sourceTree = "<group>"; };
+		2B6233A11E520DC600BB0E37 /* TagCircleSplit.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TagCircleSplit.hh; path = ../../include/cantag/TagCircleSplit.hh; sourceTree = "<group>"; };
+		2B6233A21E520DC600BB0E37 /* TagDictionary.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TagDictionary.hh; path = ../../include/cantag/TagDictionary.hh; sourceTree = "<group>"; };
+		2B6233A31E520DC600BB0E37 /* TagSpec.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TagSpec.hh; path = ../../include/cantag/TagSpec.hh; sourceTree = "<group>"; };
+		2B6233A41E520DC600BB0E37 /* TagSquare.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TagSquare.hh; path = ../../include/cantag/TagSquare.hh; sourceTree = "<group>"; };
+		2B6233A51E520DC600BB0E37 /* Template.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Template.hh; path = ../../include/cantag/Template.hh; sourceTree = "<group>"; };
+		2B6233A61E520DC600BB0E37 /* TemplateUtils.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TemplateUtils.hh; path = ../../include/cantag/TemplateUtils.hh; sourceTree = "<group>"; };
+		2B6233A71E520DC600BB0E37 /* testsym.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsym.hh; path = ../../include/cantag/testsym.hh; sourceTree = "<group>"; };
+		2B6233A81E520DC600BB0E37 /* TextOutputMechanism.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TextOutputMechanism.hh; path = ../../include/cantag/TextOutputMechanism.hh; sourceTree = "<group>"; };
+		2B6233A91E520DC600BB0E37 /* Transform.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Transform.hh; path = ../../include/cantag/Transform.hh; sourceTree = "<group>"; };
+		2B6233AA1E520DC600BB0E37 /* VideoOutputMechanism.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = VideoOutputMechanism.hh; path = ../../include/cantag/VideoOutputMechanism.hh; sourceTree = "<group>"; };
+		2B6233AB1E520DC600BB0E37 /* XDisplay.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = XDisplay.hh; path = ../../include/cantag/XDisplay.hh; sourceTree = "<group>"; };
+		2B6233AD1E520DDD00BB0E37 /* DSVLImageSource.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = DSVLImageSource.hh; path = ../../include/cantag/imagesources/DSVLImageSource.hh; sourceTree = "<group>"; };
+		2B6233AE1E520DDD00BB0E37 /* FileImageSource.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FileImageSource.hh; path = ../../include/cantag/imagesources/FileImageSource.hh; sourceTree = "<group>"; };
+		2B6233AF1E520DDD00BB0E37 /* GetImageSource.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = GetImageSource.hh; path = ../../include/cantag/imagesources/GetImageSource.hh; sourceTree = "<group>"; };
+		2B6233B01E520DDD00BB0E37 /* GLImageSource.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = GLImageSource.hh; path = ../../include/cantag/imagesources/GLImageSource.hh; sourceTree = "<group>"; };
+		2B6233B11E520DDD00BB0E37 /* IEEE1394ImageSource_V1.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = IEEE1394ImageSource_V1.hh; path = ../../include/cantag/imagesources/IEEE1394ImageSource_V1.hh; sourceTree = "<group>"; };
+		2B6233B21E520DDD00BB0E37 /* IEEE1394ImageSource_V2.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = IEEE1394ImageSource_V2.hh; path = ../../include/cantag/imagesources/IEEE1394ImageSource_V2.hh; sourceTree = "<group>"; };
+		2B6233B31E520DDD00BB0E37 /* ImageSource.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ImageSource.hh; path = ../../include/cantag/imagesources/ImageSource.hh; sourceTree = "<group>"; };
+		2B6233B41E520DDD00BB0E37 /* UEyeImageSource.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = UEyeImageSource.hh; path = ../../include/cantag/imagesources/UEyeImageSource.hh; sourceTree = "<group>"; };
+		2B6233B51E520DDD00BB0E37 /* V4LImageSource.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = V4LImageSource.hh; path = ../../include/cantag/imagesources/V4LImageSource.hh; sourceTree = "<group>"; };
+		2B6233B61E520DDD00BB0E37 /* VFWImageSource.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = VFWImageSource.hh; path = ../../include/cantag/imagesources/VFWImageSource.hh; sourceTree = "<group>"; };
+		2B6233B71E520DDD00BB0E37 /* VideoImageSource.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = VideoImageSource.hh; path = ../../include/cantag/imagesources/VideoImageSource.hh; sourceTree = "<group>"; };
+		2B6233B81E520DF100BB0E37 /* Coder.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Coder.hh; path = ../../include/cantag/coders/Coder.hh; sourceTree = "<group>"; };
+		2B6233B91E520DF100BB0E37 /* CRC.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CRC.hh; path = ../../include/cantag/coders/CRC.hh; sourceTree = "<group>"; };
+		2B6233BA1E520DF100BB0E37 /* CRCCoder.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CRCCoder.hh; path = ../../include/cantag/coders/CRCCoder.hh; sourceTree = "<group>"; };
+		2B6233BB1E520DF100BB0E37 /* CRCSymbolChunkCoder.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CRCSymbolChunkCoder.hh; path = ../../include/cantag/coders/CRCSymbolChunkCoder.hh; sourceTree = "<group>"; };
+		2B6233BD1E520DF100BB0E37 /* ParityCoder.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ParityCoder.hh; path = ../../include/cantag/coders/ParityCoder.hh; sourceTree = "<group>"; };
+		2B6233BE1E520DF100BB0E37 /* RawCoder.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = RawCoder.hh; path = ../../include/cantag/coders/RawCoder.hh; sourceTree = "<group>"; };
+		2B6233BF1E520DF100BB0E37 /* SCCCoder.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SCCCoder.hh; path = ../../include/cantag/coders/SCCCoder.hh; sourceTree = "<group>"; };
+		2B6233C01E520DF100BB0E37 /* SymbolChunkCoder.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SymbolChunkCoder.hh; path = ../../include/cantag/coders/SymbolChunkCoder.hh; sourceTree = "<group>"; };
+		2B6233C11E520DF100BB0E37 /* TripOriginalCoder.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TripOriginalCoder.hh; path = ../../include/cantag/coders/TripOriginalCoder.hh; sourceTree = "<group>"; };
+		2B6233C21E520E0E00BB0E37 /* AccumulateCornerCorrespondences.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = AccumulateCornerCorrespondences.hh; path = ../../include/cantag/algorithms/AccumulateCornerCorrespondences.hh; sourceTree = "<group>"; };
+		2B6233C31E520E0E00BB0E37 /* AccumulateCorrespondences.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = AccumulateCorrespondences.hh; path = ../../include/cantag/algorithms/AccumulateCorrespondences.hh; sourceTree = "<group>"; };
+		2B6233C41E520E0E00BB0E37 /* CheckEllipseAlgebraic.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CheckEllipseAlgebraic.hh; path = ../../include/cantag/algorithms/CheckEllipseAlgebraic.hh; sourceTree = "<group>"; };
+		2B6233C51E520E0E00BB0E37 /* CheckEllipseGradient.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CheckEllipseGradient.hh; path = ../../include/cantag/algorithms/CheckEllipseGradient.hh; sourceTree = "<group>"; };
+		2B6233C61E520E0E00BB0E37 /* CheckEllipseNakagawa.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CheckEllipseNakagawa.hh; path = ../../include/cantag/algorithms/CheckEllipseNakagawa.hh; sourceTree = "<group>"; };
+		2B6233C71E520E0E00BB0E37 /* CheckEllipseSafaeeRad.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CheckEllipseSafaeeRad.hh; path = ../../include/cantag/algorithms/CheckEllipseSafaeeRad.hh; sourceTree = "<group>"; };
+		2B6233C81E520E0E00BB0E37 /* CheckEllipseSafaeeRad2.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CheckEllipseSafaeeRad2.hh; path = ../../include/cantag/algorithms/CheckEllipseSafaeeRad2.hh; sourceTree = "<group>"; };
+		2B6233C91E520E0E00BB0E37 /* CheckEllipseStricker.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CheckEllipseStricker.hh; path = ../../include/cantag/algorithms/CheckEllipseStricker.hh; sourceTree = "<group>"; };
+		2B6233CA1E520E0E00BB0E37 /* CompareBullseyeRadii.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = CompareBullseyeRadii.hh; path = ../../include/cantag/algorithms/CompareBullseyeRadii.hh; sourceTree = "<group>"; };
+		2B6233CB1E520E0E00BB0E37 /* ContourFollowerClearImageBorder.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ContourFollowerClearImageBorder.hh; path = ../../include/cantag/algorithms/ContourFollowerClearImageBorder.hh; sourceTree = "<group>"; };
+		2B6233CC1E520E0E00BB0E37 /* ContourFollowerTree.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ContourFollowerTree.hh; path = ../../include/cantag/algorithms/ContourFollowerTree.hh; sourceTree = "<group>"; };
+		2B6233CD1E520E0E00BB0E37 /* ConvexHull.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ConvexHull.hh; path = ../../include/cantag/algorithms/ConvexHull.hh; sourceTree = "<group>"; };
+		2B6233CE1E520E0E00BB0E37 /* Convolution.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Convolution.hh; path = ../../include/cantag/algorithms/Convolution.hh; sourceTree = "<group>"; };
+		2B6233CF1E520E0E00BB0E37 /* Decode.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Decode.hh; path = ../../include/cantag/algorithms/Decode.hh; sourceTree = "<group>"; };
+		2B6233D01E520E0E00BB0E37 /* DistortionCorrectionIterative.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = DistortionCorrectionIterative.hh; path = ../../include/cantag/algorithms/DistortionCorrectionIterative.hh; sourceTree = "<group>"; };
+		2B6233D11E520E0E00BB0E37 /* DistortionCorrectionNone.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = DistortionCorrectionNone.hh; path = ../../include/cantag/algorithms/DistortionCorrectionNone.hh; sourceTree = "<group>"; };
+		2B6233D21E520E0E00BB0E37 /* DistortionCorrectionSimple.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = DistortionCorrectionSimple.hh; path = ../../include/cantag/algorithms/DistortionCorrectionSimple.hh; sourceTree = "<group>"; };
+		2B6233D31E520E0E00BB0E37 /* DrawEntity.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = DrawEntity.hh; path = ../../include/cantag/algorithms/DrawEntity.hh; sourceTree = "<group>"; };
+		2B6233D41E520E0E00BB0E37 /* DrawTagCircle.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = DrawTagCircle.hh; path = ../../include/cantag/algorithms/DrawTagCircle.hh; sourceTree = "<group>"; };
+		2B6233D51E520E0E00BB0E37 /* DrawTagCircleSVG.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = DrawTagCircleSVG.hh; path = ../../include/cantag/algorithms/DrawTagCircleSVG.hh; sourceTree = "<group>"; };
+		2B6233D61E520E0E00BB0E37 /* DrawTagSquare.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = DrawTagSquare.hh; path = ../../include/cantag/algorithms/DrawTagSquare.hh; sourceTree = "<group>"; };
+		2B6233D71E520E0E00BB0E37 /* DrawTagSquareSVG.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = DrawTagSquareSVG.hh; path = ../../include/cantag/algorithms/DrawTagSquareSVG.hh; sourceTree = "<group>"; };
+		2B6233D81E520E0E00BB0E37 /* Encode.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Encode.hh; path = ../../include/cantag/algorithms/Encode.hh; sourceTree = "<group>"; };
+		2B6233D91E520E0E00BB0E37 /* EstimateMaxSampleStrength.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = EstimateMaxSampleStrength.hh; path = ../../include/cantag/algorithms/EstimateMaxSampleStrength.hh; sourceTree = "<group>"; };
+		2B6233DA1E520E0E00BB0E37 /* ExtractGradients.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ExtractGradients.hh; path = ../../include/cantag/algorithms/ExtractGradients.hh; sourceTree = "<group>"; };
+		2B6233DB1E520E0E00BB0E37 /* FitEllipseLS.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FitEllipseLS.hh; path = ../../include/cantag/algorithms/FitEllipseLS.hh; sourceTree = "<group>"; };
+		2B6233DC1E520E0E00BB0E37 /* FitEllipseSimple.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FitEllipseSimple.hh; path = ../../include/cantag/algorithms/FitEllipseSimple.hh; sourceTree = "<group>"; };
+		2B6233DD1E520E0E00BB0E37 /* FitQuadTangleConvexHull.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FitQuadTangleConvexHull.hh; path = ../../include/cantag/algorithms/FitQuadTangleConvexHull.hh; sourceTree = "<group>"; };
+		2B6233DE1E520E0E00BB0E37 /* FitQuadTangleCorner.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FitQuadTangleCorner.hh; path = ../../include/cantag/algorithms/FitQuadTangleCorner.hh; sourceTree = "<group>"; };
+		2B6233DF1E520E0E00BB0E37 /* FitQuadTanglePolygon.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FitQuadTanglePolygon.hh; path = ../../include/cantag/algorithms/FitQuadTanglePolygon.hh; sourceTree = "<group>"; };
+		2B6233E01E520E0E00BB0E37 /* FitQuadTangleRegression.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FitQuadTangleRegression.hh; path = ../../include/cantag/algorithms/FitQuadTangleRegression.hh; sourceTree = "<group>"; };
+		2B6233E11E520E0E00BB0E37 /* HoughTransform.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HoughTransform.hh; path = ../../include/cantag/algorithms/HoughTransform.hh; sourceTree = "<group>"; };
+		2B6233E21E520E0E00BB0E37 /* InvertGreys.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = InvertGreys.hh; path = ../../include/cantag/algorithms/InvertGreys.hh; sourceTree = "<group>"; };
+		2B6233E31E520E0E00BB0E37 /* PixelMapping.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = PixelMapping.hh; path = ../../include/cantag/algorithms/PixelMapping.hh; sourceTree = "<group>"; };
+		2B6233E41E520E0E00BB0E37 /* PrintEntity.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = PrintEntity.hh; path = ../../include/cantag/algorithms/PrintEntity.hh; sourceTree = "<group>"; };
+		2B6233E51E520E0E00BB0E37 /* RemoveNonConcentricEllipse.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = RemoveNonConcentricEllipse.hh; path = ../../include/cantag/algorithms/RemoveNonConcentricEllipse.hh; sourceTree = "<group>"; };
+		2B6233E61E520E0E00BB0E37 /* SampleTagCircle.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SampleTagCircle.hh; path = ../../include/cantag/algorithms/SampleTagCircle.hh; sourceTree = "<group>"; };
+		2B6233E71E520E0E00BB0E37 /* SampleTagSquare.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SampleTagSquare.hh; path = ../../include/cantag/algorithms/SampleTagSquare.hh; sourceTree = "<group>"; };
+		2B6233E81E520E0E00BB0E37 /* SignalStrengthContour.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SignalStrengthContour.hh; path = ../../include/cantag/algorithms/SignalStrengthContour.hh; sourceTree = "<group>"; };
+		2B6233E91E520E0E00BB0E37 /* SimulateContour.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SimulateContour.hh; path = ../../include/cantag/algorithms/SimulateContour.hh; sourceTree = "<group>"; };
+		2B6233EA1E520E0E00BB0E37 /* SimulateMaxSampleError.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SimulateMaxSampleError.hh; path = ../../include/cantag/algorithms/SimulateMaxSampleError.hh; sourceTree = "<group>"; };
+		2B6233EB1E520E0E00BB0E37 /* SimulateMinDistance.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SimulateMinDistance.hh; path = ../../include/cantag/algorithms/SimulateMinDistance.hh; sourceTree = "<group>"; };
+		2B6233EC1E520E0E00BB0E37 /* ThresholdAdaptive.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ThresholdAdaptive.hh; path = ../../include/cantag/algorithms/ThresholdAdaptive.hh; sourceTree = "<group>"; };
+		2B6233ED1E520E0E00BB0E37 /* ThresholdGlobal.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ThresholdGlobal.hh; path = ../../include/cantag/algorithms/ThresholdGlobal.hh; sourceTree = "<group>"; };
+		2B6233EE1E520E0E00BB0E37 /* TransformEllipseFull.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TransformEllipseFull.hh; path = ../../include/cantag/algorithms/TransformEllipseFull.hh; sourceTree = "<group>"; };
+		2B6233EF1E520E0E00BB0E37 /* TransformEllipseLinear.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TransformEllipseLinear.hh; path = ../../include/cantag/algorithms/TransformEllipseLinear.hh; sourceTree = "<group>"; };
+		2B6233F01E520E0E00BB0E37 /* TransformEllipseRotate.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TransformEllipseRotate.hh; path = ../../include/cantag/algorithms/TransformEllipseRotate.hh; sourceTree = "<group>"; };
+		2B6233F11E520E0E00BB0E37 /* TransformQuadTangleCyberCode.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TransformQuadTangleCyberCode.hh; path = ../../include/cantag/algorithms/TransformQuadTangleCyberCode.hh; sourceTree = "<group>"; };
+		2B6233F21E520E0E00BB0E37 /* TransformQuadTangleProjective.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TransformQuadTangleProjective.hh; path = ../../include/cantag/algorithms/TransformQuadTangleProjective.hh; sourceTree = "<group>"; };
+		2B6233F31E520E0E00BB0E37 /* TransformQuadTangleReduced.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TransformQuadTangleReduced.hh; path = ../../include/cantag/algorithms/TransformQuadTangleReduced.hh; sourceTree = "<group>"; };
+		2B6233F41E520E0E00BB0E37 /* TransformQuadTangleSpaceSearch.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TransformQuadTangleSpaceSearch.hh; path = ../../include/cantag/algorithms/TransformQuadTangleSpaceSearch.hh; sourceTree = "<group>"; };
+		2B6233F51E520E0E00BB0E37 /* TransformRotateToPayload.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TransformRotateToPayload.hh; path = ../../include/cantag/algorithms/TransformRotateToPayload.hh; sourceTree = "<group>"; };
+		2B6233F61E520E0E00BB0E37 /* TransformSelectEllipse.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TransformSelectEllipse.hh; path = ../../include/cantag/algorithms/TransformSelectEllipse.hh; sourceTree = "<group>"; };
+		2B6233F71E520E0E00BB0E37 /* TransformSelectEllipseErrorOfFit.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TransformSelectEllipseErrorOfFit.hh; path = ../../include/cantag/algorithms/TransformSelectEllipseErrorOfFit.hh; sourceTree = "<group>"; };
+		2B6233F81E520E3A00BB0E37 /* ContourEntity.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ContourEntity.hh; path = ../../include/cantag/entities/ContourEntity.hh; sourceTree = "<group>"; };
+		2B6233F91E520E3A00BB0E37 /* ConvexHullEntity.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ConvexHullEntity.hh; path = ../../include/cantag/entities/ConvexHullEntity.hh; sourceTree = "<group>"; };
+		2B6233FA1E520E3A00BB0E37 /* DecodeEntity.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = DecodeEntity.hh; path = ../../include/cantag/entities/DecodeEntity.hh; sourceTree = "<group>"; };
+		2B6233FB1E520E3A00BB0E37 /* Entity.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Entity.hh; path = ../../include/cantag/entities/Entity.hh; sourceTree = "<group>"; };
+		2B6233FC1E520E3A00BB0E37 /* HoughEntity.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HoughEntity.hh; path = ../../include/cantag/entities/HoughEntity.hh; sourceTree = "<group>"; };
+		2B6233FD1E520E3A00BB0E37 /* MaxSampleStrengthEntity.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MaxSampleStrengthEntity.hh; path = ../../include/cantag/entities/MaxSampleStrengthEntity.hh; sourceTree = "<group>"; };
+		2B6233FE1E520E3A00BB0E37 /* ShapeEntity.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ShapeEntity.hh; path = ../../include/cantag/entities/ShapeEntity.hh; sourceTree = "<group>"; };
+		2B6233FF1E520E3A00BB0E37 /* SignalStrengthEntity.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SignalStrengthEntity.hh; path = ../../include/cantag/entities/SignalStrengthEntity.hh; sourceTree = "<group>"; };
+		2B6234001E520E3A00BB0E37 /* TransformEntity.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TransformEntity.hh; path = ../../include/cantag/entities/TransformEntity.hh; sourceTree = "<group>"; };
+		2B6234031E5214F100BB0E37 /* CompilationOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CompilationOptions.h; path = cantag/CompilationOptions.h; sourceTree = "<group>"; };
+		2B6236171E52625E00BB0E37 /* ConvertToGreyscale.hh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ConvertToGreyscale.hh; path = ../../include/cantag/algorithms/ConvertToGreyscale.hh; sourceTree = "<group>"; };
+		2B7110E21E54AD38006AFDBC /* CantagWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = CantagWrapper.mm; path = Source/CantagWrapper.mm; sourceTree = "<group>"; };
+		2B7110E31E54AD38006AFDBC /* CantagWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CantagWrapper.h; path = Source/CantagWrapper.h; sourceTree = "<group>"; };
+		2B7110E41E54AD38006AFDBC /* CantagOutput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CantagOutput.swift; path = Source/CantagOutput.swift; sourceTree = "<group>"; };
+		2B7110E51E54AD38006AFDBC /* Cantag-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Cantag-Bridging-Header.h"; path = "Source/Cantag-Bridging-Header.h"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2B6232051E51FEBB00BB0E37 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2B6231FF1E51FEBB00BB0E37 = {
+			isa = PBXGroup;
+			children = (
+				2B62321E1E5200BF00BB0E37 /* Source */,
+				2B62321F1E5200C500BB0E37 /* Resources */,
+				2B62322A1E52078800BB0E37 /* Cantag */,
+				2B6232091E51FEBB00BB0E37 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2B6232091E51FEBB00BB0E37 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2B6232081E51FEBB00BB0E37 /* Cantag.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2B62321E1E5200BF00BB0E37 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				2B6232211E52016B00BB0E37 /* AppDelegate.swift */,
+				2B6232201E52016B00BB0E37 /* ViewController.swift */,
+				2B7110E41E54AD38006AFDBC /* CantagOutput.swift */,
+				2B7110E21E54AD38006AFDBC /* CantagWrapper.mm */,
+				2B7110E31E54AD38006AFDBC /* CantagWrapper.h */,
+				2B6234031E5214F100BB0E37 /* CompilationOptions.h */,
+				2B7110E51E54AD38006AFDBC /* Cantag-Bridging-Header.h */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		2B62321F1E5200C500BB0E37 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2B6232241E52021500BB0E37 /* Info.plist */,
+				2B6232251E52021500BB0E37 /* Assets.xcassets */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		2B62322A1E52078800BB0E37 /* Cantag */ = {
+			isa = PBXGroup;
+			children = (
+				2B62322B1E5207C100BB0E37 /* include */,
+				2B62322C1E5207FD00BB0E37 /* src */,
+			);
+			name = Cantag;
+			sourceTree = "<group>";
+		};
+		2B62322B1E5207C100BB0E37 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				2B6232361E520AED00BB0E37 /* cantag */,
+				2B6233781E520DA400BB0E37 /* Cantag.hh */,
+			);
+			name = include;
+			sourceTree = "<group>";
+		};
+		2B62322C1E5207FD00BB0E37 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				2B62322D1E52080F00BB0E37 /* algorithms */,
+				2B62322E1E52081A00BB0E37 /* entities */,
+				2B62331C1E520D6D00BB0E37 /* AutoThresholdGlobal.cc */,
+				2B62331D1E520D6D00BB0E37 /* BigInt.cc */,
+				2B62331E1E520D6D00BB0E37 /* Camera.cc */,
+				2B62331F1E520D6D00BB0E37 /* Ellipse.cc */,
+				2B6233201E520D6D00BB0E37 /* EstimateTransform.cc */,
+				2B6233211E520D6D00BB0E37 /* gaussianelimination.cc */,
+				2B6233231E520D6D00BB0E37 /* GF4Poly.cc */,
+				2B6233261E520D6D00BB0E37 /* Image.cc */,
+				2B6233271E520D6D00BB0E37 /* MonochromeImage.cc */,
+				2B6233281E520D6D00BB0E37 /* polysolve.cc */,
+				2B6233291E520D6D00BB0E37 /* QuadTangle.cc */,
+				2B62332A1E520D6D00BB0E37 /* Socket.cc */,
+				2B62332C1E520D6D00BB0E37 /* testsym.cc */,
+				2B62332D1E520D6D00BB0E37 /* Transform.cc */,
+			);
+			name = src;
+			sourceTree = "<group>";
+		};
+		2B62322D1E52080F00BB0E37 /* algorithms */ = {
+			isa = PBXGroup;
+			children = (
+				2B6233421E520D7E00BB0E37 /* ContourFollowerClearImageBorder.cc */,
+				2B6233431E520D7E00BB0E37 /* ContourFollowerTree.cc */,
+				2B6233441E520D7E00BB0E37 /* ConvexHull.cc */,
+				2B6233451E520D7E00BB0E37 /* DistortionCorrectionIterative.cc */,
+				2B6233461E520D7E00BB0E37 /* DistortionCorrectionNone.cc */,
+				2B6233471E520D7E00BB0E37 /* DistortionCorrectionSimple.cc */,
+				2B6233481E520D7E00BB0E37 /* DrawEntity.cc */,
+				2B6233491E520D7E00BB0E37 /* FitEllipseLS.cc */,
+				2B62334A1E520D7E00BB0E37 /* FitEllipseSimple.cc */,
+				2B62334B1E520D7E00BB0E37 /* FitQuadTangleConvexHull.cc */,
+				2B62334C1E520D7E00BB0E37 /* FitQuadTangleCorner.cc */,
+				2B62334D1E520D7E00BB0E37 /* FitQuadTanglePolygon.cc */,
+				2B62334E1E520D7E00BB0E37 /* FitQuadTangleRegression.cc */,
+				2B62334F1E520D7E00BB0E37 /* HoughTransform.cc */,
+				2B6233501E520D7E00BB0E37 /* PrintEntity.cc */,
+				2B6233511E520D7E00BB0E37 /* RemoveNonConcentricEllipse.cc */,
+				2B6233521E520D7E00BB0E37 /* SignalStrengthContour.cc */,
+				2B6233531E520D7E00BB0E37 /* SimulateMinDistance.cc */,
+				2B6233541E520D7E00BB0E37 /* ThresholdAdaptive.cc */,
+				2B6233551E520D7E00BB0E37 /* ThresholdGlobal.cc */,
+				2B6233561E520D7E00BB0E37 /* TransformEllipseFull.cc */,
+				2B6233571E520D7E00BB0E37 /* TransformEllipseLinear.cc */,
+				2B6233581E520D7E00BB0E37 /* TransformQuadTangleCyberCode.cc */,
+				2B6233591E520D7E00BB0E37 /* TransformQuadTangleProjective.cc */,
+				2B62335A1E520D7E00BB0E37 /* TransformQuadTangleReduced.cc */,
+				2B62335B1E520D7E00BB0E37 /* TransformQuadTangleSpaceSearch.cc */,
+			);
+			name = algorithms;
+			sourceTree = "<group>";
+		};
+		2B62322E1E52081A00BB0E37 /* entities */ = {
+			isa = PBXGroup;
+			children = (
+				2B6233761E520D8F00BB0E37 /* ContourEntity.cc */,
+			);
+			name = entities;
+			sourceTree = "<group>";
+		};
+		2B6232301E52084700BB0E37 /* coders */ = {
+			isa = PBXGroup;
+			children = (
+				2B6233B81E520DF100BB0E37 /* Coder.hh */,
+				2B6233B91E520DF100BB0E37 /* CRC.hh */,
+				2B6233BA1E520DF100BB0E37 /* CRCCoder.hh */,
+				2B6233BB1E520DF100BB0E37 /* CRCSymbolChunkCoder.hh */,
+				2B6233BD1E520DF100BB0E37 /* ParityCoder.hh */,
+				2B6233BE1E520DF100BB0E37 /* RawCoder.hh */,
+				2B6233BF1E520DF100BB0E37 /* SCCCoder.hh */,
+				2B6233C01E520DF100BB0E37 /* SymbolChunkCoder.hh */,
+				2B6233C11E520DF100BB0E37 /* TripOriginalCoder.hh */,
+			);
+			name = coders;
+			sourceTree = "<group>";
+		};
+		2B6232311E52085900BB0E37 /* imagesources */ = {
+			isa = PBXGroup;
+			children = (
+				2B6233AD1E520DDD00BB0E37 /* DSVLImageSource.hh */,
+				2B6233AE1E520DDD00BB0E37 /* FileImageSource.hh */,
+				2B6233AF1E520DDD00BB0E37 /* GetImageSource.hh */,
+				2B6233B01E520DDD00BB0E37 /* GLImageSource.hh */,
+				2B6233B11E520DDD00BB0E37 /* IEEE1394ImageSource_V1.hh */,
+				2B6233B21E520DDD00BB0E37 /* IEEE1394ImageSource_V2.hh */,
+				2B6233B31E520DDD00BB0E37 /* ImageSource.hh */,
+				2B6233B41E520DDD00BB0E37 /* UEyeImageSource.hh */,
+				2B6233B51E520DDD00BB0E37 /* V4LImageSource.hh */,
+				2B6233B61E520DDD00BB0E37 /* VFWImageSource.hh */,
+				2B6233B71E520DDD00BB0E37 /* VideoImageSource.hh */,
+			);
+			name = imagesources;
+			sourceTree = "<group>";
+		};
+		2B6232321E52086400BB0E37 /* algorithms */ = {
+			isa = PBXGroup;
+			children = (
+				2B6233C21E520E0E00BB0E37 /* AccumulateCornerCorrespondences.hh */,
+				2B6233C31E520E0E00BB0E37 /* AccumulateCorrespondences.hh */,
+				2B6233C41E520E0E00BB0E37 /* CheckEllipseAlgebraic.hh */,
+				2B6233C51E520E0E00BB0E37 /* CheckEllipseGradient.hh */,
+				2B6233C61E520E0E00BB0E37 /* CheckEllipseNakagawa.hh */,
+				2B6233C71E520E0E00BB0E37 /* CheckEllipseSafaeeRad.hh */,
+				2B6233C81E520E0E00BB0E37 /* CheckEllipseSafaeeRad2.hh */,
+				2B6233C91E520E0E00BB0E37 /* CheckEllipseStricker.hh */,
+				2B6233CA1E520E0E00BB0E37 /* CompareBullseyeRadii.hh */,
+				2B6233CB1E520E0E00BB0E37 /* ContourFollowerClearImageBorder.hh */,
+				2B6233CC1E520E0E00BB0E37 /* ContourFollowerTree.hh */,
+				2B6236171E52625E00BB0E37 /* ConvertToGreyscale.hh */,
+				2B6233CD1E520E0E00BB0E37 /* ConvexHull.hh */,
+				2B6233CE1E520E0E00BB0E37 /* Convolution.hh */,
+				2B6233CF1E520E0E00BB0E37 /* Decode.hh */,
+				2B6233D01E520E0E00BB0E37 /* DistortionCorrectionIterative.hh */,
+				2B6233D11E520E0E00BB0E37 /* DistortionCorrectionNone.hh */,
+				2B6233D21E520E0E00BB0E37 /* DistortionCorrectionSimple.hh */,
+				2B6233D31E520E0E00BB0E37 /* DrawEntity.hh */,
+				2B6233D41E520E0E00BB0E37 /* DrawTagCircle.hh */,
+				2B6233D51E520E0E00BB0E37 /* DrawTagCircleSVG.hh */,
+				2B6233D61E520E0E00BB0E37 /* DrawTagSquare.hh */,
+				2B6233D71E520E0E00BB0E37 /* DrawTagSquareSVG.hh */,
+				2B6233D81E520E0E00BB0E37 /* Encode.hh */,
+				2B6233D91E520E0E00BB0E37 /* EstimateMaxSampleStrength.hh */,
+				2B6233DA1E520E0E00BB0E37 /* ExtractGradients.hh */,
+				2B6233DB1E520E0E00BB0E37 /* FitEllipseLS.hh */,
+				2B6233DC1E520E0E00BB0E37 /* FitEllipseSimple.hh */,
+				2B6233DD1E520E0E00BB0E37 /* FitQuadTangleConvexHull.hh */,
+				2B6233DE1E520E0E00BB0E37 /* FitQuadTangleCorner.hh */,
+				2B6233DF1E520E0E00BB0E37 /* FitQuadTanglePolygon.hh */,
+				2B6233E01E520E0E00BB0E37 /* FitQuadTangleRegression.hh */,
+				2B6233E11E520E0E00BB0E37 /* HoughTransform.hh */,
+				2B6233E21E520E0E00BB0E37 /* InvertGreys.hh */,
+				2B6233E31E520E0E00BB0E37 /* PixelMapping.hh */,
+				2B6233E41E520E0E00BB0E37 /* PrintEntity.hh */,
+				2B6233E51E520E0E00BB0E37 /* RemoveNonConcentricEllipse.hh */,
+				2B6233E61E520E0E00BB0E37 /* SampleTagCircle.hh */,
+				2B6233E71E520E0E00BB0E37 /* SampleTagSquare.hh */,
+				2B6233E81E520E0E00BB0E37 /* SignalStrengthContour.hh */,
+				2B6233E91E520E0E00BB0E37 /* SimulateContour.hh */,
+				2B6233EA1E520E0E00BB0E37 /* SimulateMaxSampleError.hh */,
+				2B6233EB1E520E0E00BB0E37 /* SimulateMinDistance.hh */,
+				2B6233EC1E520E0E00BB0E37 /* ThresholdAdaptive.hh */,
+				2B6233ED1E520E0E00BB0E37 /* ThresholdGlobal.hh */,
+				2B6233EE1E520E0E00BB0E37 /* TransformEllipseFull.hh */,
+				2B6233EF1E520E0E00BB0E37 /* TransformEllipseLinear.hh */,
+				2B6233F01E520E0E00BB0E37 /* TransformEllipseRotate.hh */,
+				2B6233F11E520E0E00BB0E37 /* TransformQuadTangleCyberCode.hh */,
+				2B6233F21E520E0E00BB0E37 /* TransformQuadTangleProjective.hh */,
+				2B6233F31E520E0E00BB0E37 /* TransformQuadTangleReduced.hh */,
+				2B6233F41E520E0E00BB0E37 /* TransformQuadTangleSpaceSearch.hh */,
+				2B6233F51E520E0E00BB0E37 /* TransformRotateToPayload.hh */,
+				2B6233F61E520E0E00BB0E37 /* TransformSelectEllipse.hh */,
+				2B6233F71E520E0E00BB0E37 /* TransformSelectEllipseErrorOfFit.hh */,
+			);
+			name = algorithms;
+			sourceTree = "<group>";
+		};
+		2B6232331E52087000BB0E37 /* entities */ = {
+			isa = PBXGroup;
+			children = (
+				2B6233F81E520E3A00BB0E37 /* ContourEntity.hh */,
+				2B6233F91E520E3A00BB0E37 /* ConvexHullEntity.hh */,
+				2B6233FA1E520E3A00BB0E37 /* DecodeEntity.hh */,
+				2B6233FB1E520E3A00BB0E37 /* Entity.hh */,
+				2B6233FC1E520E3A00BB0E37 /* HoughEntity.hh */,
+				2B6233FD1E520E3A00BB0E37 /* MaxSampleStrengthEntity.hh */,
+				2B6233FE1E520E3A00BB0E37 /* ShapeEntity.hh */,
+				2B6233FF1E520E3A00BB0E37 /* SignalStrengthEntity.hh */,
+				2B6234001E520E3A00BB0E37 /* TransformEntity.hh */,
+			);
+			name = entities;
+			sourceTree = "<group>";
+		};
+		2B6232361E520AED00BB0E37 /* cantag */ = {
+			isa = PBXGroup;
+			children = (
+				2B6232311E52085900BB0E37 /* imagesources */,
+				2B6232301E52084700BB0E37 /* coders */,
+				2B6232321E52086400BB0E37 /* algorithms */,
+				2B6232331E52087000BB0E37 /* entities */,
+				2B6233791E520DC600BB0E37 /* Aggregation.hh */,
+				2B62337A1E520DC600BB0E37 /* Apply.hh */,
+				2B62337B1E520DC600BB0E37 /* Array.hh */,
+				2B62337C1E520DC600BB0E37 /* AutoThresholdGlobal.hh */,
+				2B62337D1E520DC600BB0E37 /* BigInt.hh */,
+				2B62337E1E520DC600BB0E37 /* Bind.hh */,
+				2B62337F1E520DC600BB0E37 /* Camera.hh */,
+				2B6233801E520DC600BB0E37 /* ComposeEntity.hh */,
+				2B6233811E520DC600BB0E37 /* ComposeEntityTree.hh */,
+				2B6233821E520DC600BB0E37 /* Config.hh */,
+				2B6233831E520DC600BB0E37 /* ContourRestrictions.hh */,
+				2B6233841E520DC600BB0E37 /* ConvexHullRestrictions.hh */,
+				2B6233851E520DC600BB0E37 /* ConvolutionFilter.hh */,
+				2B6233861E520DC600BB0E37 /* Correspondence.hh */,
+				2B6233871E520DC600BB0E37 /* CyclicBitSet.hh */,
+				2B6233881E520DC600BB0E37 /* Ellipse.hh */,
+				2B6233891E520DC600BB0E37 /* EllipseRestrictions.hh */,
+				2B62338A1E520DC600BB0E37 /* EntityTree.hh */,
+				2B62338B1E520DC600BB0E37 /* EstimateTransform.hh */,
+				2B62338C1E520DC600BB0E37 /* Function.hh */,
+				2B62338D1E520DC600BB0E37 /* gaussianelimination.hh */,
+				2B62338E1E520DC600BB0E37 /* GF4Poly.hh */,
+				2B6233921E520DC600BB0E37 /* Image.hh */,
+				2B6233931E520DC600BB0E37 /* Keypress.hh */,
+				2B6233941E520DC600BB0E37 /* LocatedObject.hh */,
+				2B6233951E520DC600BB0E37 /* MonochromeImage.hh */,
+				2B6233961E520DC600BB0E37 /* Pixel.hh */,
+				2B6233971E520DC600BB0E37 /* PixRow.hh */,
+				2B6233981E520DC600BB0E37 /* Point.hh */,
+				2B6233991E520DC600BB0E37 /* polysolve.hh */,
+				2B62339A1E520DC600BB0E37 /* QuadTangle.hh */,
+				2B62339B1E520DC600BB0E37 /* ROI.hh */,
+				2B62339C1E520DC600BB0E37 /* Socket.hh */,
+				2B62339D1E520DC600BB0E37 /* SpeedMath.hh */,
+				2B62339E1E520DC600BB0E37 /* TagCircle.hh */,
+				2B62339F1E520DC600BB0E37 /* TagCircleInner.hh */,
+				2B6233A01E520DC600BB0E37 /* TagCircleOuter.hh */,
+				2B6233A11E520DC600BB0E37 /* TagCircleSplit.hh */,
+				2B6233A21E520DC600BB0E37 /* TagDictionary.hh */,
+				2B6233A31E520DC600BB0E37 /* TagSpec.hh */,
+				2B6233A41E520DC600BB0E37 /* TagSquare.hh */,
+				2B6233A51E520DC600BB0E37 /* Template.hh */,
+				2B6233A61E520DC600BB0E37 /* TemplateUtils.hh */,
+				2B6233A71E520DC600BB0E37 /* testsym.hh */,
+				2B6233A81E520DC600BB0E37 /* TextOutputMechanism.hh */,
+				2B6233A91E520DC600BB0E37 /* Transform.hh */,
+				2B6233AA1E520DC600BB0E37 /* VideoOutputMechanism.hh */,
+				2B6233AB1E520DC600BB0E37 /* XDisplay.hh */,
+			);
+			name = cantag;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2B6232071E51FEBB00BB0E37 /* Cantag */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2B62321A1E51FEBB00BB0E37 /* Build configuration list for PBXNativeTarget "Cantag" */;
+			buildPhases = (
+				2B6232041E51FEBB00BB0E37 /* Sources */,
+				2B6232051E51FEBB00BB0E37 /* Frameworks */,
+				2B6232061E51FEBB00BB0E37 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Cantag;
+			productName = Cantag;
+			productReference = 2B6232081E51FEBB00BB0E37 /* Cantag.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2B6232001E51FEBB00BB0E37 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0820;
+				LastUpgradeCheck = 0820;
+				TargetAttributes = {
+					2B6232071E51FEBB00BB0E37 = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = VNB22LS4NC;
+						LastSwiftMigration = 0820;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 2B6232031E51FEBB00BB0E37 /* Build configuration list for PBXProject "Cantag" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 2B6231FF1E51FEBB00BB0E37;
+			productRefGroup = 2B6232091E51FEBB00BB0E37 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2B6232071E51FEBB00BB0E37 /* Cantag */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2B6232061E51FEBB00BB0E37 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2B6232041E51FEBB00BB0E37 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2B6233401E520D6D00BB0E37 /* Transform.cc in Sources */,
+				2B7110E71E54AD38006AFDBC /* CantagOutput.swift in Sources */,
+				2B62335E1E520D7E00BB0E37 /* ConvexHull.cc in Sources */,
+				2B6233641E520D7E00BB0E37 /* FitEllipseSimple.cc in Sources */,
+				2B6233711E520D7E00BB0E37 /* TransformEllipseLinear.cc in Sources */,
+				2B6232231E52016B00BB0E37 /* AppDelegate.swift in Sources */,
+				2B62336A1E520D7E00BB0E37 /* PrintEntity.cc in Sources */,
+				2B6233361E520D6D00BB0E37 /* GF4Poly.cc in Sources */,
+				2B7110E61E54AD38006AFDBC /* CantagWrapper.mm in Sources */,
+				2B62333A1E520D6D00BB0E37 /* MonochromeImage.cc in Sources */,
+				2B62336C1E520D7E00BB0E37 /* SignalStrengthContour.cc in Sources */,
+				2B6233331E520D6D00BB0E37 /* EstimateTransform.cc in Sources */,
+				2B6233671E520D7E00BB0E37 /* FitQuadTanglePolygon.cc in Sources */,
+				2B6233771E520D8F00BB0E37 /* ContourEntity.cc in Sources */,
+				2B62335D1E520D7E00BB0E37 /* ContourFollowerTree.cc in Sources */,
+				2B6233651E520D7E00BB0E37 /* FitQuadTangleConvexHull.cc in Sources */,
+				2B6233601E520D7E00BB0E37 /* DistortionCorrectionNone.cc in Sources */,
+				2B6233611E520D7E00BB0E37 /* DistortionCorrectionSimple.cc in Sources */,
+				2B6233621E520D7E00BB0E37 /* DrawEntity.cc in Sources */,
+				2B62336E1E520D7E00BB0E37 /* ThresholdAdaptive.cc in Sources */,
+				2B62333C1E520D6D00BB0E37 /* QuadTangle.cc in Sources */,
+				2B6233751E520D7E00BB0E37 /* TransformQuadTangleSpaceSearch.cc in Sources */,
+				2B62336B1E520D7E00BB0E37 /* RemoveNonConcentricEllipse.cc in Sources */,
+				2B62335C1E520D7E00BB0E37 /* ContourFollowerClearImageBorder.cc in Sources */,
+				2B62333B1E520D6D00BB0E37 /* polysolve.cc in Sources */,
+				2B6233721E520D7E00BB0E37 /* TransformQuadTangleCyberCode.cc in Sources */,
+				2B62336F1E520D7E00BB0E37 /* ThresholdGlobal.cc in Sources */,
+				2B6233631E520D7E00BB0E37 /* FitEllipseLS.cc in Sources */,
+				2B62332F1E520D6D00BB0E37 /* AutoThresholdGlobal.cc in Sources */,
+				2B6233681E520D7E00BB0E37 /* FitQuadTangleRegression.cc in Sources */,
+				2B6233701E520D7E00BB0E37 /* TransformEllipseFull.cc in Sources */,
+				2B6233741E520D7E00BB0E37 /* TransformQuadTangleReduced.cc in Sources */,
+				2B6233301E520D6D00BB0E37 /* BigInt.cc in Sources */,
+				2B6232221E52016B00BB0E37 /* ViewController.swift in Sources */,
+				2B62333D1E520D6D00BB0E37 /* Socket.cc in Sources */,
+				2B6233391E520D6D00BB0E37 /* Image.cc in Sources */,
+				2B6233691E520D7E00BB0E37 /* HoughTransform.cc in Sources */,
+				2B6233321E520D6D00BB0E37 /* Ellipse.cc in Sources */,
+				2B6233731E520D7E00BB0E37 /* TransformQuadTangleProjective.cc in Sources */,
+				2B6233341E520D6D00BB0E37 /* gaussianelimination.cc in Sources */,
+				2B62336D1E520D7E00BB0E37 /* SimulateMinDistance.cc in Sources */,
+				2B6233661E520D7E00BB0E37 /* FitQuadTangleCorner.cc in Sources */,
+				2B62333F1E520D6D00BB0E37 /* testsym.cc in Sources */,
+				2B6233311E520D6D00BB0E37 /* Camera.cc in Sources */,
+				2B62335F1E520D7E00BB0E37 /* DistortionCorrectionIterative.cc in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		2B6232181E51FEBB00BB0E37 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2B6232191E51FEBB00BB0E37 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		2B62321B1E51FEBB00BB0E37 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = VNB22LS4NC;
+				HEADER_SEARCH_PATHS = (
+					"$SRCROOT/../../include/**",
+					"$SRCROOT/**",
+				);
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.github.acr31.Cantag;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Source/Cantag-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		2B62321C1E51FEBB00BB0E37 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = VNB22LS4NC;
+				HEADER_SEARCH_PATHS = (
+					"$SRCROOT/../../include/**",
+					"$SRCROOT/**",
+				);
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.github.acr31.Cantag;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Source/Cantag-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2B6232031E51FEBB00BB0E37 /* Build configuration list for PBXProject "Cantag" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2B6232181E51FEBB00BB0E37 /* Debug */,
+				2B6232191E51FEBB00BB0E37 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2B62321A1E51FEBB00BB0E37 /* Build configuration list for PBXNativeTarget "Cantag" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2B62321B1E51FEBB00BB0E37 /* Debug */,
+				2B62321C1E51FEBB00BB0E37 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 2B6232001E51FEBB00BB0E37 /* Project object */;
+}

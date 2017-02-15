@@ -171,6 +171,27 @@ namespace Cantag {
     inline void b(unsigned char v) {self::m_current->v1=v;}
   };
 
+  template<class T>
+  class _PixelIterator<T*,Pix::Fmt::BGRA32>
+    : public _BaseIterator<T*,_PixelIterator<T*,Pix::Fmt::BGRA32> > {
+  private:
+      unsigned int* match;
+      typedef _BaseIterator<T*,_PixelIterator<T*,Pix::Fmt::BGRA32> > self;
+  public:
+      _PixelIterator(T* ptr, unsigned int* m)
+      : _BaseIterator<T*,_PixelIterator<T*,Pix::Fmt::BGRA32> >(ptr), match(m) {}
+      
+      inline unsigned char r() const {return self::m_current->v3;}
+      inline unsigned char g() const {return self::m_current->v2;}
+      inline unsigned char b() const {return self::m_current->v1;}
+      inline unsigned char a() const {return self::m_current->v4;}
+      
+      inline void r(unsigned char v) {self::m_current->v3=v;}
+      inline void g(unsigned char v) {self::m_current->v2=v;}
+      inline void b(unsigned char v) {self::m_current->v1=v;}
+      inline void a(unsigned char v) {self::m_current->v4=v;}
+  };
+
 
   template<class T> 
   class _PixelIterator<T*,Pix::Fmt::Grey8>
